@@ -21,7 +21,8 @@ key for learner authentication.
 The pre-existing `public.rls_auto_enable()` SECURITY DEFINER helper still powers its
 event trigger, but direct EXECUTE access from `PUBLIC`, `anon`, and `authenticated`
 has been revoked. Supabase's security advisor now reports only leaked-password
-protection being disabled.
+protection being disabled; that is intentionally left unchanged for the current
+disposable private pilot.
 
 The advisor-reported uncovered foreign keys are also fixed with covering indexes on
 `assistance(attempt_id, learner_id)`, `checkpoints(attempt_id, learner_id)`, and
@@ -32,28 +33,32 @@ observations on an empty pilot database; no indexes are being removed on that ba
 
 - Render deployment is live and serves `/`, static assets, `/api/config`, and
   `/api/health` successfully.
-- The hosted-pilot GitHub branch has green `Verify hosted pilot` CI, including build,
-  Python tests, disposable PostgreSQL application tests, Chromium installation, and
-  browser scenarios.
+- The current hosted-pilot GitHub branch has green `Verify hosted pilot` CI, including
+  build, Python tests, disposable PostgreSQL application tests, Chromium installation,
+  and browser scenarios.
 - PostgreSQL boundary checks passed learner isolation, composite ownership references,
   immutable submissions/history, reward deduplication, JSON lookup, and denial of
   unscoped reads.
 - Supabase password-reset delivery is verified: the application accepted the reset
-  request and the Supabase recovery email arrived at the pilot account with the live
-  Render origin as its redirect target.
-- A fresh Render deploy was triggered for the latest hosted-pilot branch after the
-  documentation/hardening pass so the running service can align to the latest branch
-  state without changing PostgreSQL data.
+  request and the recovery email arrived with the live Render origin as its redirect.
+- The recovery link was opened successfully and `/api/auth/reset-password` completed
+  with HTTP 200 on the live Render service. Supabase records the resulting Auth
+  session/password update.
+- Login and reset password fields now share the same reusable show/hide control with
+  keyboard operation and `aria-pressed` state. The hosted real-browser CI test covers
+  both password fields, including returning to hidden mode on submit.
+- The latest Render deploy containing those visibility controls is live and its CI run
+  passed.
 
 ## Remaining hosted acceptance
 
-A real password sign-in has not completed yet. The latest provider-classified login
-failure is `invalid_credentials`; the sole Supabase Auth account is confirmed but has
-no successful sign-in recorded. The recovery email has been delivered, so the next
-user-bound step is to open that email, choose a new password in VibeLearn, and sign in.
+Password recovery itself is complete. The reset flow deliberately clears VibeLearn's
+application cookies, so there is not yet a VibeLearn learner/app-session row in
+PostgreSQL. One fresh sign-in through the hosted login form is still required to create
+that application session.
 
-After first successful sign-in, run the hosted acceptance journey before declaring the
-pilot complete:
+After that sign-in, run the hosted acceptance journey before declaring the pilot
+complete:
 
 1. Open the workspace and start the Phase 1 episode.
 2. Save a real draft and reload; verify the same draft resumes from PostgreSQL.
@@ -80,7 +85,6 @@ outside this slice.
 
 ## Remaining cleanup before broader use
 
-- Enable Supabase leaked-password protection when appropriate for the pilot.
 - Align the actual Render service health-check path with `/api/health` from
   `render.yaml` if the service still uses the root path.
 
