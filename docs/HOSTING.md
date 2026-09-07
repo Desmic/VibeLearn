@@ -1,115 +1,121 @@
 # Private Render + Supabase pilot
 
-This increment makes the first episode deployable using Render Free and Supabase
-Free. It does not implement later course generation or collaborative code execution.
-The source starts from `26acf22d1ceceec4724b9c824065ecee05ea7cac`.
+This increment hosts the Phase 1 episode on Render Free + Supabase Free without
+introducing later course generation or collaborative code execution. The hosted
+branch starts from `26acf22d1ceceec4724b9c824065ecee05ea7cac`.
 
 ## Implementation
 
-- `app/hosted.py`: Flask WSGI app, served by Gunicorn. Requires PostgreSQL, TLS,
-  an exact HTTPS origin, and an email allowlist. There is no anonymous session
-  creation in hosted mode and no trust in arbitrary forwarded host headers.
+- `app/hosted.py`: Flask WSGI app served by Gunicorn. Hosted mode requires
+  PostgreSQL, TLS, the exact HTTPS application origin, and an email allowlist.
 - `app/auth.py`: Supabase password sign-in and server-side `get_user` verification
-  on each authenticated request, using a fresh non-persisting client. Anonymous
-  identities and unconfirmed email accounts are rejected. No service-role key.
-- Sessions: Secure, HttpOnly, SameSite=Strict cookies. Access lasts at most one
-  hour, then the learner signs in again; there is no refresh-token persistence.
-  Hashed application sessions revoke access immediately on logout, including
-  replayed cookie pairs. This is app logout, not global Supabase-device logout.
+  on authenticated requests, using a fresh non-persisting client. Anonymous and
+  unconfirmed identities are rejected. No service-role key is used by the app.
+- Password recovery: allowlisted learners can request a Supabase recovery email.
+  Recovery tokens arrive in the URL fragment, are removed from browser history,
+  remain in memory only, and are used to set a new password through Supabase Auth.
+- Sessions: Secure, HttpOnly, SameSite=Strict application cookies. Access lasts at
+  most one hour. App logout revokes the stored application session immediately.
 - `app/postgres.py`: one transaction per command, per-learner transaction advisory
-  locking, bounded query/lock timeouts, and prepared statements disabled for pooler
-  compatibility. Every transaction assumes the restricted `vibelearn_app` role.
+  locking, bounded statement/lock timeouts, and prepared statements disabled for
+  pooler compatibility. Transactions switch to restricted role `vibelearn_app`.
 - `db/hosted-schema.sql`: private `vibelearn` schema, forced RLS on learner tables,
-  ownership-preserving references, explicit insertion order, immutable history,
-  and command/reward deduplication. No anonymous or Data API table access.
-- The domain code stays in Python. SQLite local mode and its historical migrations
-  remain intact. Existing anonymous SQLite data is not automatically assigned to a
-  hosted account; any future transfer needs an explicit ownership mapping.
-- `render.yaml`: one free Python service in Singapore; no paid database, worker,
-  disk, cron service, or other paid resource is provisioned.
+  ownership-preserving references, immutable history, and command/reward deduplication.
+  `anon` and `authenticated` have no schema USAGE or application-table grants.
+- SQLite local mode remains intact. Existing local anonymous learner data is not
+  automatically assigned to hosted accounts.
+- `render.yaml`: one free Python service in Singapore; no paid Render database,
+  worker, disk, cron service, or other paid resource is provisioned.
 
-## Supabase state
+## Current Supabase state
 
-The existing Free project in `ap-south-1` now has migration
-`20260907073952_vibelearn_hosted_schema`. The SQL source is `db/hosted-schema.sql`.
-It was applied atomically through the connected Supabase migration tool. CLI
-bootstrap was unavailable in the editing environment; the migration identity above
-comes from Supabase's actual migration history, not an invented timestamp.
+The Free project in `ap-south-1` has migration
+`20260907073952_vibelearn_hosted_schema`. `vibelearn_app` is deliberately NOLOGIN.
+The deployment login `vibelearn_login` exists, can log in, inherits
+`vibelearn_app`, and is neither superuser nor BYPASSRLS.
 
-The `vibelearn_app` role is deliberately NOLOGIN. A deployment login still needs
-to be created and granted that role, with its password entered privately in Render.
-Do not reuse or reset an existing administrator password. An operator can create a
-dedicated `vibelearn_login` role, grant `vibelearn_app`, and set its password securely.
-No database password was created, retrieved, or committed during preparation.
+Live inspection confirms:
 
-The project had no application tables in `public`; this migration leaves it alone.
-The security advisor reports two existing execute-grant warnings on
-`public.rls_auto_enable()`, which is outside the new schema. These require inspection
-before a broader rollout; they were not silently altered as part of this migration:
-- https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
-- https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable
+- `anon` and `authenticated` have no USAGE on schema `vibelearn`.
+- `anon` and `authenticated` have no application-table grants in that schema.
+- Learner-facing tables have `learner_scope` RLS policies for `vibelearn_app`.
+- The running Render application can reach PostgreSQL successfully.
 
-## Render setup — pending connection and deployment
+The existing project-level security advisor still reports that
+`public.rls_auto_enable()` is a SECURITY DEFINER function executable by `anon` and
+`authenticated`. That helper is outside VibeLearn's private schema and should be
+inspected/revoked before broader use if those execute grants are unnecessary.
+Leaked-password protection is also currently disabled in Supabase Auth.
 
-1. Connect Render and select this repository/branch. Keep the service on `free`.
-2. Create the dedicated database login described above. Use Supabase's Connect
-   dialog to obtain the actual shared pooler hostname and session-pooling URL
-   (port 5432, IPv4 compatible). Require TLS with `sslmode=require` or stronger.
-3. Set `DATABASE_URL`, `APP_ORIGIN` (the exact assigned HTTPS origin),
-   `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `ALLOWED_EMAILS` privately in
-   Render. `.env.example` contains placeholders. Never paste passwords into chat.
-4. Set up a confirmed Supabase Auth account for the allowlisted email in the
-   Supabase dashboard. The app uses that user's password, not the project/database
-   password. Account creation/recovery is dashboard-managed for this private pilot;
-   no public signup or password-reset UI is implemented.
-5. Build with `pip install -r requirements.lock`; start with the Gunicorn command in
-   `render.yaml`. Apply migrations separately before startup: the runtime verifies
-   schema version but cannot create or alter tables.
-6. Confirm `/api/health`, sign in as the intended user, save an answer, reload,
-   restart the service, and verify the same draft. Check a second authorized
-   account cannot access the first account's attempt. Log out and verify access
-   is revoked. Inspect narrow-screen and keyboard behavior on the real deployment.
+## Current Render state
 
-The source checkout currently has no runtime database credential and no confirmed
-Render connection. The Supabase management connector does not automatically give
-the running Python process a database connection or an end-user Auth session.
+Render service `vibelearn` is live at:
+
+`https://vibelearn-4xws.onrender.com`
+
+It deploys from branch `deploy/render-supabase` on the Free plan in Singapore. The
+latest deployed commit matches the GitHub branch head used for the hosted pilot.
+The service builds with `pip install -r requirements.lock` and starts with:
+
+`gunicorn 'app.hosted:create_app()' --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 60`
+
+Observed live responses include successful `/`, static asset, `/api/config`, and
+`/api/health` requests. The checked-in `render.yaml` specifies `/api/health` as the
+health check; the actual Render service should be aligned to that path if it is still
+using the default root check.
+
+## Authentication state
+
+The single pilot Supabase Auth user is confirmed. A real password sign-in has not
+completed yet; the latest provider-classified rejection was `invalid_credentials`.
+The app's password-reset endpoint successfully requested recovery, and the Supabase
+recovery email was delivered with the live Render origin as its redirect target.
+
+The remaining user-bound step is to open that recovery email, choose a new password
+inside VibeLearn, and sign in once. Do not copy recovery tokens into documentation,
+logs, issues, or chat.
 
 ## Observed verification
 
-- `python manage.py build`: passed (Python compilation and JS syntax).
-- `python manage.py test`: 39 tests passed locally; six real PostgreSQL application
-  tests skipped because `TEST_DATABASE_URL` is unavailable. The eight new hosted
-  HTTP/session tests use an explicitly simulated Auth provider and real SQLite;
-  these are contract checks, not a live Supabase sign-in claim.
-- `db/verify-hosted-boundaries.sql` executed against the actual Supabase PostgreSQL
-  database with the restricted role: RLS read/write isolation, composite ownership
-  references, submitted-response immutability, denied history writes, reward
-  deduplication, JSON lookup, and denied unscoped reads passed. All fixtures rolled
-  back. This does not replace the Python/psycopg end-to-end suite.
-- `python manage.py browser`: blocked locally by the missing pinned Chromium
-  binary. The cloud browser also previously rejected localhost access. No new
-  browser scenarios or visual acceptance are claimed.
-- `.github/workflows/verify.yml` runs the real PostgreSQL application tests against
-  disposable PostgreSQL 17 and the existing ten-scenario browser suite. Workflow
-  results must be observed before claiming those gates passed.
-- GitHub publication was blocked by automatic approval review: explicit approval
-  was required to upload the changed code/deployment files and create repository
-  objects. The user subsequently approved publishing the deployment branch and a
-  draft pull request. CI results and Render activation must still be verified.
-- Direct Supabase host resolution is unavailable from this editing runtime.
-  Local PostgreSQL installation also failed due to environment permissions.
+- `python manage.py build`: passed.
+- Local Python/unit/integration checks passed during development.
+- `db/verify-hosted-boundaries.sql` passed against the actual Supabase PostgreSQL
+  database with the restricted role, including learner isolation, ownership
+  references, immutable history, reward deduplication, JSON lookup, and denial of
+  unscoped reads. Fixtures rolled back.
+- GitHub Actions `Verify hosted pilot` is green on the current hosted branch head.
+  The CI job successfully completed build, the Python test suite, disposable
+  PostgreSQL application tests, Chromium installation, and the browser suite.
+- Render's current deployment is live and successfully boots Gunicorn against the
+  configured PostgreSQL backend.
+- Password-reset email delivery is verified. A successful real-user password login
+  and hosted learner-session acceptance are still pending.
+
+## Hosted acceptance gate
+
+After the first successful login, complete these checks before calling the hosted
+pilot accepted:
+
+1. Open the Phase 1 workspace and start an episode.
+2. Save a real draft, reload the page, and verify the same draft resumes.
+3. Restart or redeploy Render without changing PostgreSQL and verify the same state
+   resumes after the service returns.
+4. Complete and submit the episode; verify assessment rows, checkpoints, evidence,
+   future review need, and the single-family practice-XP cap.
+5. Log out and verify the local application session is revoked.
+6. Before a broader multi-user pilot, authorize a second account and verify it cannot
+   access the first learner's attempts/evidence/rewards.
+7. Record actual learner feedback on challenge, feedback quality, workspace, and
+   restrained game elements. Human acceptance must not be synthesized from tests.
 
 ## Recovery and production limits
 
-Until hosted acceptance, keep the existing local application/data as the known
-baseline. The hosted schema is additive and independent of SQLite. If deployment
-fails, stop the new service and repair it; do not delete learner tables or roll back
-the database by deleting migrations. Restore code using a known-good Git revision
-only after checking schema compatibility. Back up PostgreSQL and any future stored
-artifact bytes and test restoration before relying on the pilot for valuable data.
+Keep the local SQLite mode as the known development baseline until hosted acceptance.
+The hosted schema is additive and independent of SQLite. If a deployment regresses,
+redeploy a known-compatible Git revision; do not delete learner tables or erase
+migration history as a rollback mechanism.
 
-The pilot is allowlisted. Full account lifecycle, self-service deletion/export,
-production monitoring, managed backup policy, and background jobs are not complete.
-Render Free sleeps on idle. No paid upgrade or claim of production readiness is
-part of this change. Keep provider-specific auth/storage at explicit boundaries so
-the Python app and PostgreSQL data can move to a cheaper host later.
+The pilot remains allowlisted. Full self-service account lifecycle, deletion/export,
+managed backup policy, production monitoring, background jobs, adaptive AI dialogue,
+and Phase 2+ systems are not complete. Render Free may sleep on idle. No production
+readiness claim or paid upgrade is implied by this pilot.
