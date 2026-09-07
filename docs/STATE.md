@@ -13,7 +13,7 @@ Supabase migrations applied:
 - `20260907102517_cover_hosted_foreign_keys`
 
 The runtime connects through the restricted `vibelearn_login` -> `vibelearn_app`
-role. Learner tables have forced learner-scoped RLS. `schema_migrations` is now also
+role. Learner tables have forced learner-scoped RLS. `schema_migrations` is also
 RLS-protected with an app-only read policy. `anon` and `authenticated` have no schema
 USAGE or table grants for `vibelearn`; the application does not use a service-role
 key for learner authentication.
@@ -27,54 +27,57 @@ disposable private pilot.
 The advisor-reported uncovered foreign keys are also fixed with covering indexes on
 `assistance(attempt_id, learner_id)`, `checkpoints(attempt_id, learner_id)`, and
 `evidence(attempt_id, learner_id)`. Remaining performance notices are only unused-index
-observations on an empty pilot database; no indexes are being removed on that basis.
+observations on the small pilot database; no indexes are being removed on that basis.
 
-## Verified hosted infrastructure
+## Verified hosted infrastructure and acceptance evidence
 
 - Render deployment is live and serves `/`, static assets, `/api/config`, and
   `/api/health` successfully.
-- The current hosted-pilot GitHub branch has green `Verify hosted pilot` CI, including
-  build, Python tests, disposable PostgreSQL application tests, Chromium installation,
-  and browser scenarios.
+- The hosted-pilot GitHub branch has green `Verify hosted pilot` CI, including build,
+  Python tests, disposable PostgreSQL application tests, Chromium installation, and
+  browser scenarios.
 - PostgreSQL boundary checks passed learner isolation, composite ownership references,
   immutable submissions/history, reward deduplication, JSON lookup, and denial of
   unscoped reads.
-- Supabase password-reset delivery is verified: the application accepted the reset
-  request and the recovery email arrived with the live Render origin as its redirect.
-- The recovery link was opened successfully and `/api/auth/reset-password` completed
-  with HTTP 200 on the live Render service. Supabase records the resulting Auth
-  session/password update.
-- Login and reset password fields now share the same reusable show/hide control with
-  keyboard operation and `aria-pressed` state. The hosted real-browser CI test covers
-  both password fields, including returning to hidden mode on submit.
-- The latest Render deploy containing those visibility controls is live and its CI run
-  passed.
+- Password recovery completed successfully and the live hosted login returned HTTP
+  200. PostgreSQL now contains one real learner and one active hosted application
+  session.
+- Two real hosted attempts were started and submitted. PostgreSQL contains two
+  submitted attempts, two evidence rows, one review need, and exactly one 10-XP reward;
+  the repeated attempt earned no second reward.
+- A real Render process replacement completed and the same mobile browser subsequently
+  received HTTP 200 from `/api/session` on the new instance, establishing live session
+  and learner-state survival across that deploy.
+- The automated hosted acceptance contract now covers login → start → save → hosted
+  app recreation → resume → hint/mode/source → submit → evidence/review/XP → logout
+  and replayed-cookie rejection in one continuous test.
+- A separate automated two-authorized-learner test verifies that one learner cannot
+  read or mutate the other's attempt. PostgreSQL RLS and service-level isolation tests
+  provide independent coverage of the same boundary.
+- Login and reset password fields share the reusable inline visibility control with
+  keyboard operation and `aria-pressed` state; the real-browser CI test covers both.
+- The premium/slightly-gameful UI direction is adopted in `docs/UI-UX-DIRECTION.md`.
+  The learner has reviewed the current live UI and considers it good enough to keep
+  refining incrementally as product work continues.
 
 ## Remaining hosted acceptance
 
-Password recovery itself is complete. The reset flow deliberately clears VibeLearn's
-application cookies, so there is not yet a VibeLearn learner/app-session row in
-PostgreSQL. One fresh sign-in through the hosted login form is still required to create
-that application session.
+The remaining live checks are now narrow:
 
-After that sign-in, run the hosted acceptance journey before declaring the pilot
-complete:
-
-1. Open the workspace and start the Phase 1 episode.
-2. Save a real draft and reload; verify the same draft resumes from PostgreSQL.
-3. Restart/redeploy the Render service without changing the database and verify the
-   same learner state resumes.
-4. Complete/submit the episode and verify evidence, checkpoints, review need, and the
-   one-time practice XP reward.
-5. Sign out and verify the application session is revoked.
-6. Verify a second authorized learner cannot access the first learner's state before
-   any broader multi-user pilot.
-7. Record real learner feedback; do not synthesize human product acceptance.
+1. Save a real draft before submission, reload the page, and verify the same draft
+   resumes from PostgreSQL. The equivalent automated hosted acceptance test passes.
+2. Sign out from the real hosted browser and verify the protected session is revoked.
+   Automated replayed-cookie rejection passes.
+3. Before broader multi-user activation, authorize a second real Supabase account and
+   verify it cannot access the first learner's state. Automated two-user isolation and
+   PostgreSQL RLS coverage pass.
+4. Record final learner feedback on challenge quality and feedback usefulness; UI
+   direction feedback is already positive.
 
 ## Earlier local Phase 1 checkpoint
 
-Phase 0, 1A, 1B and 1C are implemented and machine-verified. The detailed local
-completion evidence remains in `docs/PHASE-1.md`. The SQLite local mode remains a
+Phase 0, 1A, 1B and 1C are implemented and machine-verified. The detailed local and
+hosted completion evidence is in `docs/PHASE-1.md`. The SQLite local mode remains a
 known-good development baseline and is intentionally separate from hosted account data.
 
 The current product slice is still one original practice episode. Hints are prepared
@@ -88,5 +91,6 @@ outside this slice.
 - Align the actual Render service health-check path with `/api/health` from
   `render.yaml` if the service still uses the root path.
 
-Do not begin Phase 2 on the basis of machine checks alone. The next product gate is the
-real hosted learner trial and feedback on this same Phase 1 episode.
+Do not begin Phase 2 solely because infrastructure is live. Close the remaining hosted
+acceptance checks, then use the learner's actual experience of this same Phase 1 episode
+to choose the next product increment.
