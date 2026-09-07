@@ -115,7 +115,7 @@ def create_app(config=None, auth_provider=None):
 
     @app.get("/<asset>")
     def asset(asset):
-        if asset not in ("app.js", "style.css"):
+        if asset not in ("app.js", "style.css", "premium.css"):
             raise service.DomainError("NOT_FOUND", "Not found.", 404)
         return send_from_directory(ROOT / "web", asset)
 
