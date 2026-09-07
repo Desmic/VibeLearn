@@ -2,13 +2,16 @@
 import os
 import secrets
 import sqlite3
+import json
+import logging
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlsplit, parse_qs
 from uuid import UUID
 
 import psycopg
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, g
 from werkzeug.exceptions import HTTPException
 from app import service
 from app.auth import SupabaseAuth
@@ -64,6 +67,8 @@ def create_app(config=None, auth_provider=None):
 
     @app.before_request
     def boundary():
+        g.request_id = secrets.token_hex(8)
+        g.request_started = time.monotonic()
         # Trust the configured host/origin, never arbitrary forwarded headers.
         if request.host != parsed.netloc:
             raise service.DomainError("FORBIDDEN", "Unknown application host.", 403)
@@ -75,6 +80,14 @@ def create_app(config=None, auth_provider=None):
 
     @app.after_request
     def headers(response):
+        response.headers["X-Request-ID"] = g.request_id
+        # Fixed route names only: no URLs, query strings, request bodies or cookies.
+        if request.endpoint in {"login", "logout", "request_reset", "reset_password"} or response.status_code >= 500:
+            logging.getLogger("vibelearn.requests").warning(json.dumps({
+                "event": "request_completed", "request_id": g.request_id,
+                "endpoint": request.endpoint if request.endpoint in {"login", "logout", "request_reset", "reset_password", "health", "state", "command"} else "other",
+                "status": response.status_code,
+                "duration_ms": round((time.monotonic() - g.request_started) * 1000)}))
         response.headers.update({
             "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
             "Referrer-Policy": "no-referrer", "Strict-Transport-Security": "max-age=31536000",
@@ -84,13 +97,13 @@ def create_app(config=None, auth_provider=None):
 
     @app.errorhandler(service.DomainError)
     def domain_error(error):
-        return jsonify(error=error.code, message=error.message), error.status
+        return jsonify(error=error.code, message=error.message, request_id=g.request_id), error.status
 
     @app.errorhandler(psycopg.Error)
     @app.errorhandler(sqlite3.Error)
     def storage_error(error):
         # Database exception messages can contain connection credentials or learner data.
-        return jsonify(error="STORAGE_UNAVAILABLE", message="Storage is unavailable. Your visible answer is retained; retry shortly."), 503
+        return jsonify(error="STORAGE_UNAVAILABLE", message="Storage is unavailable. Your visible answer is retained; retry shortly.", request_id=g.request_id), 503
 
     @app.errorhandler(HTTPException)
     def http_error(error):
@@ -149,6 +162,29 @@ def create_app(config=None, auth_provider=None):
         learner = verified_user()
         with transaction(database, learner=learner) as db:
             db.execute("DELETE FROM hosted_sessions WHERE token_hash=? AND learner_id=?", (service.token_hash(request.cookies[COOKIE]), learner))
+        result = jsonify(ok=True)
+        for name in (COOKIE, ACCESS_COOKIE):
+            result.delete_cookie(name, secure=True, httponly=True, samesite="Strict", path="/")
+        return result
+
+    @app.post("/api/auth/request-reset")
+    def request_reset():
+        body = request.get_json()
+        if not isinstance(body, dict) or set(body) != {"email"} or not isinstance(body["email"], str) or not 1 <= len(body["email"]) <= 320:
+            raise service.DomainError("INVALID_REQUEST", "Enter your email.")
+        email = body["email"].strip().lower()
+        if email in allowed:
+            auth_provider.request_reset(email, origin)
+        return jsonify(ok=True, message="If this email has pilot access, a reset link will arrive shortly.")
+
+    @app.post("/api/auth/reset-password")
+    def reset_password():
+        body = request.get_json()
+        if not isinstance(body, dict) or set(body) != {"access_token", "refresh_token", "password"} or any(not isinstance(v, str) for v in body.values()) or not 6 <= len(body["password"]) <= 4096 or any(not 1 <= len(body[k]) <= 8192 for k in ("access_token", "refresh_token")):
+            raise service.DomainError("INVALID_REQUEST", "Use a valid reset link and a password of at least 6 characters.")
+        learner = str(UUID(auth_provider.reset_password(body["access_token"], body["refresh_token"], body["password"], allowed)))
+        with transaction(database, learner=learner) as db:
+            db.execute("DELETE FROM hosted_sessions WHERE learner_id=?", (learner,))
         result = jsonify(ok=True)
         for name in (COOKIE, ACCESS_COOKIE):
             result.delete_cookie(name, secure=True, httponly=True, samesite="Strict", path="/")

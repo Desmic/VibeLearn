@@ -25,7 +25,7 @@ async function api(path, body) {
   try {
     const result = await fetch(path, { method: body ? "POST" : "GET", headers: body ? { "Content-Type": "application/json", "X-Learning-Command": "1" } : {}, body: body ? JSON.stringify(body) : undefined, signal: controller.signal });
     const data = await result.json();
-    if (!result.ok) { const error = new Error(data.message || data.error); error.status = result.status; throw error; }
+    if (!result.ok) { const error = new Error(data.message || data.error); error.status = result.status; error.requestId = data.request_id; throw error; }
     return data;
   } finally { clearTimeout(timeout); }
 }
@@ -199,14 +199,25 @@ if (document.modelContext?.registerTool) {
     }, {signal: lifecycle.signal})).catch(() => {});
   } catch { /* Optional browser feature; normal UI remains available. */ }
 }
+function hidePassword() {
+  $("#login-password").type = "password";
+  $("#toggle-password").textContent = "Show password";
+  $("#toggle-password").setAttribute("aria-pressed", "false");
+}
+$("#toggle-password").addEventListener("click", () => {
+  const show = $("#login-password").type === "password";
+  $("#login-password").type = show ? "text" : "password";
+  $("#toggle-password").textContent = show ? "Hide password" : "Show password";
+  $("#toggle-password").setAttribute("aria-pressed", String(show));
+});
 $("#sign-in-form").addEventListener("submit", async event => {
   event.preventDefault();
-  const button = $("#sign-in-form button"); button.disabled = true; clearError();
+  const button = $('#sign-in-form button[type="submit"]'); button.disabled = true; clearError(); hidePassword();
   try {
     await api("/api/auth/login", {email: $("#login-email").value, password: $("#login-password").value});
     $("#login-password").value = "";
     await boot();
-  } catch (error) { showError(error.message || "Sign-in failed. Please retry."); }
+  } catch (error) { showError((error.message || "Sign-in failed. Please retry.") + (error.requestId ? ` Reference: ${error.requestId}` : "")); }
   finally { button.disabled = false; }
 });
 $("#sign-out").addEventListener("click", async () => {
@@ -221,4 +232,34 @@ $("#sign-out").addEventListener("click", async () => {
   $("#practice-label").textContent = "A little practice, well spent.";
   clearError(); showSignIn();
 });
-boot();
+// Supabase recovery tokens stay in memory only; remove them from the address bar.
+const recoveryFragment = new URLSearchParams(location.hash.slice(1));
+let recovery = recoveryFragment.get("type") === "recovery" ? {
+  access_token: recoveryFragment.get("access_token"), refresh_token: recoveryFragment.get("refresh_token")
+} : null;
+if (recoveryFragment.has("access_token") || recoveryFragment.has("error")) history.replaceState(null, "", location.pathname);
+recoveryFragment.delete("access_token"); recoveryFragment.delete("refresh_token");
+$("#request-reset").addEventListener("click", async () => {
+  if (!$("#login-email").reportValidity()) return;
+  const button = $("#request-reset"); button.disabled = true;
+  try {
+    const result = await api("/api/auth/request-reset", {email: $("#login-email").value});
+    showError(result.message);
+  } catch (error) { showError(error.message + (error.requestId ? ` Reference: ${error.requestId}` : "")); }
+  finally { button.disabled = false; }
+});
+$("#reset-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $('#reset-form button[type="submit"]'); button.disabled = true;
+  try {
+    if (!recovery?.access_token || !recovery?.refresh_token) throw new Error("Request a new reset link.");
+    await api("/api/auth/reset-password", {...recovery, password: $("#new-password").value});
+    recovery = null; $("#new-password").value = ""; $("#password-reset").hidden = true;
+    await boot(); showError("Password updated. Sign in with your new password.");
+  } catch (error) { $("#reset-status").textContent = error.message + (error.requestId ? ` Reference: ${error.requestId}` : ""); }
+  finally { button.disabled = false; }
+});
+if (recovery) $("#password-reset").hidden = false;
+else {
+  boot().then(() => { if (recoveryFragment.has("error")) showError("This reset link has expired or is invalid. Request a new link."); });
+}

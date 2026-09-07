@@ -14,6 +14,15 @@ from app.storage import migrate, transaction
 class AuthFixture:
     def __init__(self):
         self.identity = {"id": str(uuid4()), "email": "owner@example.test"}
+        self.reset_requests = []
+
+    def request_reset(self, email, origin):
+        self.reset_requests.append((email, origin))
+
+    def reset_password(self, access, refresh, password, allowed):
+        if access != "test-recovery" or refresh != "test-refresh" or self.identity["email"] not in allowed:
+            raise service.DomainError("RESET_FAILED", "Invalid reset link", 400)
+        return self.identity["id"]
 
     def login(self, email, password):
         if password != "test-password":
@@ -51,6 +60,85 @@ class HostedTests(unittest.TestCase):
         for change in ({"ALLOWED_EMAILS": ""}, {"APP_ORIGIN": "http://pilot.example.test"}, {"TESTING": False}):
             with self.assertRaises(RuntimeError):
                 create_app(self.config | change, self.auth)
+
+    def test_login_error_reference_matches_safe_request_log(self):
+        with self.assertLogs("vibelearn.requests") as logs:
+            response = self.post("/api/auth/login", {"email": "owner@example.test", "password": "private-wrong-password"})
+        reference = response.json["request_id"]
+        self.assertEqual(response.headers["X-Request-ID"], reference)
+        self.assertIn(reference, logs.output[0])
+        self.assertNotIn("private-wrong-password", logs.output[0])
+        self.assertNotIn("owner@example.test", logs.output[0])
+        self.assertEqual(response.status_code, 401)
+
+    def test_reset_scope_validation_and_session_revocation(self):
+        for email in ("stranger@example.test", "owner@example.test"):
+            response = self.post("/api/auth/request-reset", {"email": email})
+            self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.auth.reset_requests, [("owner@example.test", self.config["APP_ORIGIN"])])
+        self.login()
+        body = {"access_token": "invalid", "refresh_token": "test-refresh", "password": "new-password"}
+        self.assertEqual(self.post("/api/auth/reset-password", body).status_code, 400)
+        self.assertEqual(self.post("/api/session", {}).status_code, 200)
+        body["access_token"] = "test-recovery"
+        with self.assertLogs("vibelearn.requests") as logs:
+            self.assertEqual(self.post("/api/auth/reset-password", body).status_code, 200)
+        for secret in body.values():
+            self.assertNotIn(secret, str(logs.output))
+        self.assertEqual(self.post("/api/session", {}).status_code, 401)
+        with transaction(self.path) as db:
+            self.assertEqual(db.execute("SELECT count(*) FROM hosted_sessions").fetchone()[0], 0)
+
+    def test_password_toggle_in_real_browser(self):
+        # Real HTTPS/Flask/browser + disposable SQLite; AuthFixture is simulated.
+        import threading
+        from werkzeug.serving import make_server
+        from playwright.sync_api import sync_playwright, expect
+        server = make_server("127.0.0.1", 0, self.app, ssl_context="adhoc")
+        origin = f"https://127.0.0.1:{server.server_port}"
+        server.app = create_app(self.config | {"APP_ORIGIN": origin}, self.auth)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with sync_playwright() as playwright:
+                browser = playwright.chromium.launch()
+                try:
+                    page = browser.new_page(ignore_https_errors=True, viewport={"width": 390, "height": 844})
+                    page.goto(origin)
+                    password = page.locator("#login-password")
+                    page.locator("#login-email").fill("owner@example.test")
+                    password.fill("wrong-disposable-password")
+                    toggle = page.locator("#toggle-password")
+                    toggle.focus()
+                    page.keyboard.press("Enter")
+                    expect(password).to_have_attribute("type", "text")
+                    expect(toggle).to_have_attribute("aria-pressed", "true")
+                    expect(password).to_have_value("wrong-disposable-password")
+                    page.get_by_role("button", name="Hide password", exact=True).click()
+                    expect(password).to_have_attribute("type", "password")
+                    page.get_by_role("button", name="Show password", exact=True).click()
+                    page.get_by_role("button", name="Sign in", exact=True).click()
+                    expect(page.locator("#notice")).to_contain_text("Reference:")
+                    expect(password).to_have_attribute("type", "password")
+                    expect(password).to_have_value("wrong-disposable-password")
+                    expect(page.get_by_role("button", name="Sign in", exact=True)).to_be_enabled()
+                    self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), 390)
+                    page.get_by_role("button", name="Forgot password?", exact=True).click()
+                    expect(page.locator("#notice")).to_contain_text("reset link")
+                    page.goto("about:blank")
+                    page.goto(origin + "/#type=recovery&access_token=test-recovery&refresh_token=test-refresh")
+                    expect(page.locator("#password-reset")).to_be_visible()
+                    self.assertNotIn("access_token", page.url)
+                    page.locator("#new-password").fill("new-disposable-password")
+                    page.get_by_role("button", name="Save new password", exact=True).click()
+                    expect(page.locator("#notice")).to_contain_text("Password updated")
+                    expect(page.locator("#sign-in")).to_be_visible()
+                finally:
+                    browser.close()
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
+            server.server_close()
 
     def test_no_anonymous_session_or_cookie_forgery(self):
         self.assertEqual(self.post("/api/session", {}).status_code, 401)
