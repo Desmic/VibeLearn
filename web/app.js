@@ -1,5 +1,6 @@
 "use strict";
 const $ = (selector) => document.querySelector(selector);
+let hosted = false;
 let state = null;
 let attempt = null;
 let busy = false;
@@ -52,11 +53,12 @@ async function send(action, extra = {}) {
     if (action === "hint") $("#hints").lastElementChild?.scrollIntoView({block: "nearest"});
     if (action === "start") { $("#workspace").focus(); $("#workspace").scrollIntoView({block: "start"}); }
     if (action === "submit") { $("#recap").focus(); $("#recap").scrollIntoView({block: "start"}); }
-    $("#save-status").textContent = dirty ? "New edits retained · save again when ready" : attempt.status === "submitted" ? "Submission retained" : "Saved to local database";
+    $("#save-status").textContent = dirty ? "New edits retained · save again when ready" : attempt.status === "submitted" ? "Submission retained" : (hosted ? "Saved to your account" : "Saved to local database");
     return true;
   } catch (error) {
     if (error.status && error.status < 500) pending = null;
-    showError(`${error.message || "Connection failed"}. Your answer is still here. Retry when ready.`);
+    if (hosted && error.status === 401) showSignIn();
+    showError(`${error.message || "Connection failed"}. Your answer is retained on this device. Retry when ready.`);
     $("#save-status").textContent = "Not saved · answer retained";
     return false;
   } finally {
@@ -138,9 +140,18 @@ function renderAttempt() {
     $("#evidence-json").textContent = JSON.stringify({evidence: attempt.evidence, assessment: result, checkpoints: attempt.checkpoints}, null, 2);
   }
 }
+function showSignIn() {
+  $("#sign-in").hidden = false;
+  $("#entry").hidden = true; $("#episode").hidden = true; $("#recap").hidden = true;
+  $("#sign-out").hidden = true;
+}
 async function boot() {
   try {
+    const config = await api("/api/config"); hosted = config.hosted;
+    $("#hosting-label").textContent = hosted ? "PRIVATE PILOT" : "LOCAL · PRIVATE";
+    $("#space-label").textContent = hosted ? "Private learning space" : "Local learning space";
     state = await api("/api/session", {}); attempt = state.attempt;
+    $("#sign-in").hidden = true; $("#sign-out").hidden = !hosted;
     renderAttempt();
     $("#entry-mode-description").textContent = state.modes[$("#start-mode").value].description;
     if (attempt?.status === "draft") {
@@ -150,11 +161,14 @@ async function boot() {
         fillResponse(draft.response); dirty = true;
         showError("Recovered an unsaved answer from this device. Review it before saving; another tab may have a different version.");
         $("#save-status").textContent = "Recovered local draft";
-      } else $("#save-status").textContent = "Resumed from local database";
+      } else $("#save-status").textContent = (hosted ? "Resumed from your account" : "Resumed from local database");
     }
     const health = await api("/api/health");
     $("#build-label").textContent = `vibeLearn · ${health.version}`;
-  } catch (error) { showError(`Could not open the workspace: ${error.message}. Reload to retry.`); }
+  } catch (error) {
+    if (hosted && error.status === 401) { showSignIn(); return; }
+    showError(`Could not open the workspace: ${error.message}. Reload to retry.`);
+  }
 }
 $("#start").addEventListener("click", () => send("start", {mode: $("#start-mode").value}));
 $("#start-mode").addEventListener("change", () => { $("#entry-mode-description").textContent = state.modes[$("#start-mode").value].description; });
@@ -185,4 +199,26 @@ if (document.modelContext?.registerTool) {
     }, {signal: lifecycle.signal})).catch(() => {});
   } catch { /* Optional browser feature; normal UI remains available. */ }
 }
+$("#sign-in-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $("#sign-in-form button"); button.disabled = true; clearError();
+  try {
+    await api("/api/auth/login", {email: $("#login-email").value, password: $("#login-password").value});
+    $("#login-password").value = "";
+    await boot();
+  } catch (error) { showError(error.message || "Sign-in failed. Please retry."); }
+  finally { button.disabled = false; }
+});
+$("#sign-out").addEventListener("click", async () => {
+  if (busy) return;
+  if (dirty) { showError("Save your draft before signing out."); return; }
+  try {
+    await api("/api/auth/logout", {});
+  } catch (error) { if (error.status !== 401) { showError(error.message); return; } }
+  state = null; attempt = null; pending = null;
+  fillResponse({prediction: "", diagnosis: "", aid_declaration: "unknown"});
+  $("#evidence-json").textContent = ""; $("#checkpoint-list").replaceChildren();
+  $("#practice-label").textContent = "A little practice, well spent.";
+  clearError(); showSignIn();
+});
 boot();

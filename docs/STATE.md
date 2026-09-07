@@ -1,4 +1,13 @@
-# Current checkpoint — Phase 1 machine-verified, awaiting the learner
+# Current checkpoint — private hosted pilot preparation
+
+The user selected Render Free + Supabase Free and authorized use of the existing
+Supabase project. The `deploy/render-supabase` branch adds a PostgreSQL storage
+boundary, private schema/RLS, Supabase sign-in, and a Render Free configuration.
+See `HOSTING.md` for observed checks, blockers, account setup, and recovery.
+Supabase schema migration `20260907073952_vibelearn_hosted_schema` is applied.
+No Render deployment, live hosted sign-in, or user acceptance is claimed yet.
+
+## Earlier local Phase 1 checkpoint
 
 Phase 0, 1A, 1B and 1C are implemented and verified. Stop here for real user feedback.
 The running app is local-only at http://127.0.0.1:8000 while its server stays alive.

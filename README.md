@@ -3,6 +3,11 @@
 One local, persisted practice episode about reliable agent execution. Implemented
 in the order Phase 0 → 1A → 1B → 1C. The next step is real user feedback, not Phase 2.
 
+The private Render Free + Supabase Free deployment is being prepared on
+`deploy/render-supabase`. See [hosting setup and verification](docs/HOSTING.md).
+Install `requirements.lock` and `requirements-dev.txt` before running the complete
+test suite on this branch. The loopback command below still uses SQLite.
+
 ## Run locally
 
 Tested on Windows with Python 3.13.5 and SQLite 3.49.1. No runtime packages or API

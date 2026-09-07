@@ -84,6 +84,8 @@ def make_server(database, port=8000):
             if not self.allowed_host():
                 return self.send(403, {"error": "FORBIDDEN"})
             path = urlsplit(self.path).path
+            if path == "/api/config":
+                return self.send(200, {"hosted": False, "sign_in_required": False})
             if path == "/api/health":
                 return self.send(200, {"status": "ok", **running_manifest})
             if path == "/api/state":

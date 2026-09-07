@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from app.content import MODES, freeze, digest, presented
-from app.storage import transaction
+from app.storage import transaction, family_evidence
 from app.assessment import evaluate, parse_prediction, review_need
 
 EMPTY_RESPONSE = {"prediction": "", "diagnosis": "", "aid_declaration": "unknown"}
@@ -34,8 +34,8 @@ def create_session(path):
     token, learner = secrets.token_urlsafe(32), str(uuid4())
     profile = {"experience": "6+ years of engineering; roughly 2 years of independent work and agent development", "basis": "self-report, not measured mastery"}
     with transaction(path) as db:
-        db.execute("INSERT INTO learners VALUES (?, ?, ?)", (learner, encode(profile), now()))
-        db.execute("INSERT INTO sessions VALUES (?, ?)", (token_hash(token), learner))
+        db.execute("INSERT INTO learners (id, profile, created_at) VALUES (?, ?, ?)", (learner, encode(profile), now()))
+        db.execute("INSERT INTO sessions (token_hash, learner_id) VALUES (?, ?)", (token_hash(token), learner))
     return token, learner
 
 
@@ -63,13 +63,13 @@ def assistance_view(db, learner, attempt_id):
 
 def add_assistance(db, learner, attempt_id, kind, detail, stamp, affects=True):
     detail = detail | {"content_digest": digest(detail)}
-    db.execute("INSERT INTO assistance VALUES (?, ?, ?, ?, ?, ?, ?)", (str(uuid4()), learner, attempt_id, kind, encode(detail), int(affects), stamp))
+    db.execute("INSERT INTO assistance (id, learner_id, attempt_id, kind, detail, affects_independence, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)", (str(uuid4()), learner, attempt_id, kind, encode(detail), int(affects), stamp))
 
 
 def seal(db, row, response, kind, stamp):
     checkpoint_id = str(uuid4())
     history = assistance_view(db, row["learner_id"], row["id"])
-    db.execute("INSERT INTO checkpoints VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (checkpoint_id, row["learner_id"], row["id"], kind, encode(response), row["mode"], encode(history), row["snapshot_digest"], stamp))
+    db.execute("INSERT INTO checkpoints (id, learner_id, attempt_id, kind, response, mode, assistance, snapshot_digest, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (checkpoint_id, row["learner_id"], row["id"], kind, encode(response), row["mode"], encode(history), row["snapshot_digest"], stamp))
     return checkpoint_id, history
 
 
@@ -89,7 +89,7 @@ def attempt_view(db, row):
     result["evidence"] = {"id": evidence["id"], "checkpoint_id": evidence["checkpoint_id"], "capsule": json.loads(evidence["capsule"]), "created_at": evidence["created_at"]} if evidence else None
     result["checkpoints"] = []
     for cp in db.execute("SELECT * FROM checkpoints WHERE learner_id=? AND attempt_id=? ORDER BY rowid", (row["learner_id"], row["id"])):
-        checkpoint = dict(cp) | {"response": json.loads(cp["response"]), "assistance": [event if isinstance(event, dict) else {"kind": "legacy_assistance", "detail": {"text": event}, "affects_independence": True} for event in json.loads(cp["assistance"])]}
+        checkpoint = {key: cp[key] for key in cp.keys() if key != "rowid"} | {"response": json.loads(cp["response"]), "assistance": [event if isinstance(event, dict) else {"kind": "legacy_assistance", "detail": {"text": event}, "affects_independence": True} for event in json.loads(cp["assistance"])]}
         # Revealing an answer-key evaluation before submission would itself be aid.
         if row["status"] == "submitted":
             checkpoint["assessment"] = evaluate(snapshot, checkpoint["response"], [event for event in checkpoint["assistance"] if event["affects_independence"]])
@@ -103,7 +103,7 @@ def attempt_view(db, row):
 
 
 def state(path, learner):
-    with transaction(path) as db:
+    with transaction(path, learner=learner) as db:
         profile = db.execute("SELECT profile FROM learners WHERE id=?", (learner,)).fetchone()
         if not profile:
             raise DomainError("UNAUTHENTICATED", "Open a local learning session.", 401)
@@ -130,7 +130,7 @@ def command(path, learner, action, body):
     if "attempt_id" in body and not isinstance(body["attempt_id"], str):
         raise DomainError("INVALID_COMMAND", "Attempt ID must be text.")
     request_digest = digest({"action": action, "body": body})
-    with transaction(path) as db:
+    with transaction(path, learner=learner, lock=True) as db:
         if not db.execute("SELECT 1 FROM learners WHERE id=?", (learner,)).fetchone():
             raise DomainError("UNAUTHENTICATED", "Session is missing.", 401)
         receipt = db.execute("SELECT * FROM commands WHERE learner_id=? AND command_id=?", (learner, body["command_id"])).fetchone()
@@ -147,8 +147,8 @@ def command(path, learner, action, body):
                 raise DomainError("ACTIVE_ATTEMPT", "Resume your existing attempt first.", 409)
             attempt_id = str(uuid4())
             snapshot = freeze(body["mode"])
-            db.execute("INSERT INTO attempts VALUES (?, ?, 1, 'draft', ?, ?, ?, ?, ?, ?)", (attempt_id, learner, body["mode"], encode(EMPTY_RESPONSE), encode(snapshot), digest(snapshot), stamp, stamp))
-            prior = db.execute("SELECT id FROM evidence WHERE learner_id=? AND json_extract(capsule, '$.snapshot.family_id')=? LIMIT 1", (learner, snapshot["family_id"])).fetchone()
+            db.execute("INSERT INTO attempts (id, learner_id, revision, status, mode, response, snapshot, snapshot_digest, created_at, updated_at) VALUES (?, ?, 1, 'draft', ?, ?, ?, ?, ?, ?)", (attempt_id, learner, body["mode"], encode(EMPTY_RESPONSE), encode(snapshot), digest(snapshot), stamp, stamp))
+            prior = family_evidence(db, learner, snapshot["family_id"])
             if prior:
                 add_assistance(db, learner, attempt_id, "prior_family_exposure", {"evidence_id": prior[0], "text": "You have already seen feedback for this trace family."}, stamp)
             if body["mode"] == "BUILD":
@@ -196,13 +196,13 @@ def command(path, learner, action, body):
                 checkpoint_id, history = seal(db, row, response, "submission", stamp)
                 evidence_id = str(uuid4())
                 capsule = {"snapshot": snapshot, "snapshot_digest": row["snapshot_digest"], "response": response, "assistance": history, "mode_at_submission": row["mode"]}
-                db.execute("INSERT INTO evidence VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (evidence_id, learner, attempt_id, checkpoint_id, snapshot["frame"]["id"], snapshot["frame"]["revision"], encode(capsule), encode(assessment), stamp))
+                db.execute("INSERT INTO evidence (id, learner_id, attempt_id, checkpoint_id, frame_id, frame_revision, capsule, result, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (evidence_id, learner, attempt_id, checkpoint_id, snapshot["frame"]["id"], snapshot["frame"]["revision"], encode(capsule), encode(assessment), stamp))
                 intent = review_need(snapshot, assessment, stamp)
                 previous = db.execute("SELECT intent FROM reviews WHERE learner_id=? AND frame_id=? AND frame_revision=?", (learner, snapshot["frame"]["id"], snapshot["frame"]["revision"])).fetchone()
                 if previous:
                     intent["due_at"] = min(intent["due_at"], json.loads(previous[0])["due_at"])
-                db.execute("INSERT INTO reviews VALUES (?, ?, ?, ?, ?) ON CONFLICT(learner_id, frame_id, frame_revision) DO UPDATE SET evidence_id=excluded.evidence_id, intent=excluded.intent", (learner, snapshot["frame"]["id"], snapshot["frame"]["revision"], evidence_id, encode(intent)))
-                db.execute("INSERT OR IGNORE INTO rewards VALUES (?, ?, ?, 10, ?, ?)", (learner, snapshot["family_id"], attempt_id, snapshot["policies"]["reward"], stamp))
+                db.execute("INSERT INTO reviews (learner_id, frame_id, frame_revision, evidence_id, intent) VALUES (?, ?, ?, ?, ?) ON CONFLICT(learner_id, frame_id, frame_revision) DO UPDATE SET evidence_id=excluded.evidence_id, intent=excluded.intent", (learner, snapshot["frame"]["id"], snapshot["frame"]["revision"], evidence_id, encode(intent)))
+                db.execute("INSERT INTO rewards (learner_id, family_id, attempt_id, xp, policy, created_at) VALUES (?, ?, ?, 10, ?, ?) ON CONFLICT(learner_id, family_id) DO NOTHING", (learner, snapshot["family_id"], attempt_id, snapshot["policies"]["reward"], stamp))
                 db.execute("UPDATE attempts SET status='submitted', response=?, revision=revision+1, updated_at=? WHERE id=? AND learner_id=?", (encode(response), stamp, attempt_id, learner))
             # Source reading after submission must never rewrite the submitted response.
             if row["status"] == "submitted":
@@ -210,5 +210,5 @@ def command(path, learner, action, body):
             elif action != "submit":
                 db.execute("UPDATE attempts SET response=?, revision=revision+1, updated_at=? WHERE id=? AND learner_id=?", (encode(response), stamp, attempt_id, learner))
         result = attempt_view(db, db.execute("SELECT * FROM attempts WHERE id=? AND learner_id=?", (attempt_id, learner)).fetchone())
-        db.execute("INSERT INTO commands VALUES (?, ?, ?, ?)", (learner, body["command_id"], request_digest, encode(result)))
+        db.execute("INSERT INTO commands (learner_id, command_id, request_digest, result) VALUES (?, ?, ?, ?)", (learner, body["command_id"], request_digest, encode(result)))
         return result
