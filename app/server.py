@@ -96,7 +96,7 @@ def make_server(database, port=8000):
                     return self.send(200, service.state(database, learner))
                 except sqlite3.Error:
                     return self.send(503, {"error": "STORAGE_UNAVAILABLE", "message": "The database is unavailable. Retry shortly."})
-            assets = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"), "/style.css": ("style.css", "text/css")}
+            assets = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"), "/style.css": ("style.css", "text/css"), "/premium.css": ("premium.css", "text/css")}
             if path in assets:
                 name, mime = assets[path]
                 return self.send(200, (ROOT / "web" / name).read_bytes(), mime + "; charset=utf-8")
