@@ -1,0 +1,17 @@
+{
+  "record_kind": "SourceEdition",
+  "schema_version": "1.0.0",
+  "id": "e64b89c4-337e-5514-b682-a187f5935011",
+  "revision": 1,
+  "work_id": "f97a5306-d66d-58dd-8ee6-d18bee5884b3",
+  "title": "Exponential Backoff And Jitter",
+  "author_or_publisher": "Marc Brooker; AWS Architecture Blog",
+  "locator": "https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/",
+  "edition_label": "Source candidate; exact substantive section/edition must be locked during authoring review.",
+  "observed_on": "2026-09-06",
+  "snapshot_ref": null,
+  "content_sha256": null,
+  "retention_policy": "metadata_only",
+  "availability": "available",
+  "rights_note": "Metadata reference only. No copied source bytes or source-content digest are supplied."
+}

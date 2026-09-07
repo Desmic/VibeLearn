@@ -1,0 +1,68 @@
+{
+  "record_kind": "ActivityRevision",
+  "schema_version": "1.0.0",
+  "id": "447e2d10-75af-5a15-82f4-ccb960b43e8d",
+  "revision": 1,
+  "title": "A duplicated batch request",
+  "stimulus": "A document-export service accepts a client operation token and may crash between storing an export and acknowledging it. Design the token semantics for a retry with identical versus changed parameters, including concurrent duplicate requests.",
+  "response_modalities": [
+    "text"
+  ],
+  "required_capabilities": [
+    "response.text.v1"
+  ],
+  "family_id": "809cb509-ac15-5fa2-96e4-ef43656c0969",
+  "variant_of": null,
+  "context_tags": [
+    "idempotency",
+    "service_design"
+  ],
+  "structural_context": "Concurrent duplicate requests plus request-identity contract.",
+  "estimated_minutes": 20,
+  "declared_challenge": "advanced_diagnostic",
+  "rubric_ref": {
+    "id": "bf429c5b-eaea-5b09-b1dd-96ac5e9c0c19",
+    "revision": 1
+  },
+  "binding_ref": {
+    "id": "157081d7-f0b3-5573-b4bd-7f4613c36183",
+    "revision": 1
+  },
+  "resource_refs": [
+    {
+      "id": "e4457e5e-d75c-5a77-9eff-1ab1af2a2d77",
+      "revision": 1
+    }
+  ],
+  "claim_refs": [],
+  "hints": [
+    {
+      "level": 1,
+      "content": "Identify the precise assertion you need to justify before proposing a solution.",
+      "intended_criterion_ids": [
+        "model"
+      ],
+      "disclosure": "attention"
+    },
+    {
+      "level": 2,
+      "content": "Look for a change in assumptions that would make your proposed reasoning fail.",
+      "intended_criterion_ids": [
+        "limits"
+      ],
+      "disclosure": "concept"
+    }
+  ],
+  "origin": {
+    "kind": "model_generated",
+    "actor_label": "Architecture design fixture",
+    "model_run_id": null,
+    "source_refs": []
+  },
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

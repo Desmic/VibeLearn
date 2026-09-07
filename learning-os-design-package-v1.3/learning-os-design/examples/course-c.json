@@ -1,0 +1,88 @@
+{
+  "record_kind": "CoursePackage",
+  "schema_version": "1.0.0",
+  "course_id": "d08249f9-2762-50c3-9463-6b12aa684c61",
+  "course_version": "1.0.0",
+  "title": "Course C — Reading an argument critically",
+  "issuer": "learning-os-local-fixtures",
+  "description": "Synthetic design-only route; not validated for production assessment.",
+  "license_note": "New fixture prose; external works are referenced only. Check source rights before importing excerpts.",
+  "release_state": "draft",
+  "target_frame_refs": [
+    {
+      "id": "c6857fdb-8dab-5142-80d3-d08b0a31a648",
+      "revision": 1
+    }
+  ],
+  "required_capabilities": [
+    "response.text.v1"
+  ],
+  "locks": [
+    {
+      "kind": "ActivityRevision",
+      "ref": {
+        "id": "8c553c76-648a-58b1-8752-330c82cc4c92",
+        "revision": 1
+      },
+      "sha256": "92f75915154bcfd8af72c4434253285dd53460a8edd072a6165a725240a44e6b",
+      "relative_path": "catalog/activity-c-argument.json"
+    },
+    {
+      "kind": "BindingRevision",
+      "ref": {
+        "id": "39f84749-25cb-5bf3-93c2-70bc61708e3f",
+        "revision": 1
+      },
+      "sha256": "4b6d37a966eb6945d9e3cef3f32efbdf41291f09f3336da858ce9ae9c6aaceab",
+      "relative_path": "catalog/binding-c-argument.json"
+    },
+    {
+      "kind": "CompetencyRevision",
+      "ref": {
+        "id": "4d53f4b2-589c-5e77-909f-a89ae0454996",
+        "revision": 1
+      },
+      "sha256": "c9495824275b94be19982a9b60352e716fa02146fa7f7f7498f18af411d11348",
+      "relative_path": "catalog/competency-argument.json"
+    },
+    {
+      "kind": "AssessmentFrameRevision",
+      "ref": {
+        "id": "c6857fdb-8dab-5142-80d3-d08b0a31a648",
+        "revision": 1
+      },
+      "sha256": "0801f2c9b2a98e495da558c2908be23d90fa8293babfb017a3c83faba148fe5d",
+      "relative_path": "catalog/frame-argument.json"
+    },
+    {
+      "kind": "RubricRevision",
+      "ref": {
+        "id": "ea798665-8909-5187-8246-423f14dd4ede",
+        "revision": 1
+      },
+      "sha256": "863543dd91ba89b3e7dd2b6e751ee6f5eacf52e5b71b86214c8f613eaaafb87c",
+      "relative_path": "catalog/rubric-c-argument.json"
+    }
+  ],
+  "route_nodes": [
+    {
+      "local_id": "c-section-1",
+      "title": "Which conclusion follows?",
+      "target_frame_refs": [
+        {
+          "id": "c6857fdb-8dab-5142-80d3-d08b0a31a648",
+          "revision": 1
+        }
+      ],
+      "activity_refs": [
+        {
+          "id": "8c553c76-648a-58b1-8752-330c82cc4c92",
+          "revision": 1
+        }
+      ],
+      "resource_refs": [],
+      "suggested_predecessors": []
+    }
+  ],
+  "prerequisite_suggestions": []
+}

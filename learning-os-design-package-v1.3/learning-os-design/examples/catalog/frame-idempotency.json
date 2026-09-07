@@ -1,0 +1,31 @@
+{
+  "record_kind": "AssessmentFrameRevision",
+  "schema_version": "1.0.0",
+  "id": "cf414da7-726e-5a9c-8aeb-5a8a633f3c2e",
+  "revision": 1,
+  "competency_ref": {
+    "id": "ac5c04d6-18cc-5557-bf3b-35a0a578b091",
+    "revision": 1
+  },
+  "facet_key": "reason",
+  "scope_statement": "request identity, atomicity boundary, and externally visible effects",
+  "challenge_band": "advanced_diagnostic",
+  "allowed_aids": {
+    "documentation": true,
+    "notes": false,
+    "execution_tools": false,
+    "ai_assistance": false,
+    "collaboration": false
+  },
+  "expected_demonstration": [
+    "Design a repeat-safe externally visible effect under duplicated requests.",
+    "State assumptions and a relevant counterexample or limitation."
+  ],
+  "assessment_standard_ref": null,
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

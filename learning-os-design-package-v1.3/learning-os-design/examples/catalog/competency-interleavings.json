@@ -1,0 +1,19 @@
+{
+  "record_kind": "CompetencyRevision",
+  "schema_version": "1.0.0",
+  "id": "358b4d5f-a64c-5458-b1fb-5f7bdc59186d",
+  "revision": 1,
+  "slug": "concurrency.interleavings",
+  "statement": "Reason about interleavings and shared-state invariants.",
+  "scope": "reason about possible traces, not programming-language syntax",
+  "exclusions": [
+    "No competence in unassessed facets is implied."
+  ],
+  "facets": [
+    "reason"
+  ],
+  "status": "proposed",
+  "issuer": "learning-os-local-fixtures",
+  "external_identifiers": [],
+  "definition_source_refs": []
+}

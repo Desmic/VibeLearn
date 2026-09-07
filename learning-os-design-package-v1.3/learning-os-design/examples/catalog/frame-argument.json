@@ -1,0 +1,31 @@
+{
+  "record_kind": "AssessmentFrameRevision",
+  "schema_version": "1.0.0",
+  "id": "c6857fdb-8dab-5142-80d3-d08b0a31a648",
+  "revision": 1,
+  "competency_ref": {
+    "id": "4d53f4b2-589c-5e77-909f-a89ae0454996",
+    "revision": 1
+  },
+  "facet_key": "reason",
+  "scope_statement": "a short prose argument; no software or repository context",
+  "challenge_band": "argument_analysis",
+  "allowed_aids": {
+    "documentation": true,
+    "notes": false,
+    "execution_tools": false,
+    "ai_assistance": false,
+    "collaboration": false
+  },
+  "expected_demonstration": [
+    "Distinguish stated observations from unsupported causal inference.",
+    "State assumptions and a relevant counterexample or limitation."
+  ],
+  "assessment_standard_ref": null,
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

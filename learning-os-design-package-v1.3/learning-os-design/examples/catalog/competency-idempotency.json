@@ -1,0 +1,19 @@
+{
+  "record_kind": "CompetencyRevision",
+  "schema_version": "1.0.0",
+  "id": "ac5c04d6-18cc-5557-bf3b-35a0a578b091",
+  "revision": 1,
+  "slug": "execution.idempotent-effects",
+  "statement": "Design a repeat-safe externally visible effect under duplicated requests.",
+  "scope": "request identity, atomicity boundary, and externally visible effects",
+  "exclusions": [
+    "No competence in unassessed facets is implied."
+  ],
+  "facets": [
+    "reason"
+  ],
+  "status": "proposed",
+  "issuer": "learning-os-local-fixtures",
+  "external_identifiers": [],
+  "definition_source_refs": []
+}

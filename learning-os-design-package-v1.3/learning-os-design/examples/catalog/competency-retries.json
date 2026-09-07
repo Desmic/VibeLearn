@@ -1,0 +1,19 @@
+{
+  "record_kind": "CompetencyRevision",
+  "schema_version": "1.0.0",
+  "id": "b28b61b3-a973-5faa-a313-308e65c487a3",
+  "revision": 1,
+  "slug": "execution.retry-budget",
+  "statement": "Reason about bounded retries and backoff under failure and overload.",
+  "scope": "timeouts, retry budgets, correlated retries, and service load",
+  "exclusions": [
+    "No competence in unassessed facets is implied."
+  ],
+  "facets": [
+    "reason"
+  ],
+  "status": "proposed",
+  "issuer": "learning-os-local-fixtures",
+  "external_identifiers": [],
+  "definition_source_refs": []
+}

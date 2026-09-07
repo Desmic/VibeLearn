@@ -1,0 +1,254 @@
+{
+  "record_kind": "CoursePackage",
+  "schema_version": "1.0.0",
+  "course_id": "05579e5a-8a4d-5c11-8d83-41d681943ad0",
+  "course_version": "1.0.0",
+  "title": "Course A — Reliable agent workers",
+  "issuer": "learning-os-local-fixtures",
+  "description": "Synthetic design-only route; not validated for production assessment.",
+  "license_note": "New fixture prose; external works are referenced only. Check source rights before importing excerpts.",
+  "release_state": "draft",
+  "target_frame_refs": [
+    {
+      "id": "cf414da7-726e-5a9c-8aeb-5a8a633f3c2e",
+      "revision": 1
+    },
+    {
+      "id": "3685720a-9177-5a9d-99ea-e9dcbd72097b",
+      "revision": 1
+    },
+    {
+      "id": "fd7a4a09-0559-537a-adf6-d149074aa0a8",
+      "revision": 1
+    }
+  ],
+  "required_capabilities": [
+    "response.text.v1"
+  ],
+  "locks": [
+    {
+      "kind": "ActivityRevision",
+      "ref": {
+        "id": "bbd40210-33cc-56b3-9845-177673f770b7",
+        "revision": 1
+      },
+      "sha256": "ff00070cbf32a477f11e42979157d66b2e4859ca48a5e5c636f65277c06b004b",
+      "relative_path": "catalog/activity-a-backpressure.json"
+    },
+    {
+      "kind": "ActivityRevision",
+      "ref": {
+        "id": "692fbdfb-76ca-5e19-830b-5c146a8e84e5",
+        "revision": 1
+      },
+      "sha256": "0d02d2a5135e4a6bdabe0aebb8625582723299eafcfd09bd5597a0910ff39055",
+      "relative_path": "catalog/activity-a-idempotency.json"
+    },
+    {
+      "kind": "ActivityRevision",
+      "ref": {
+        "id": "2787c11e-2dbb-54c3-a450-a9c05492475f",
+        "revision": 1
+      },
+      "sha256": "8f352a7c0f7d5fce5301236edfada41c3a6b4a901f3625266910bcb77e7e779d",
+      "relative_path": "catalog/activity-a-leases.json"
+    },
+    {
+      "kind": "BindingRevision",
+      "ref": {
+        "id": "a143349f-447a-5504-b991-d217cd933d53",
+        "revision": 1
+      },
+      "sha256": "61db9040d6d6ab51c8df0103a92af28fe5777c42f3ab850c003cbdb043d11f3e",
+      "relative_path": "catalog/binding-a-backpressure.json"
+    },
+    {
+      "kind": "BindingRevision",
+      "ref": {
+        "id": "e621de9b-4e37-55ec-8c91-e14310aa3120",
+        "revision": 1
+      },
+      "sha256": "becb3503fcfb6f784ca4376854c2bf4131b0855e79d1efbcb9572dbd1b0c78c9",
+      "relative_path": "catalog/binding-a-idempotency.json"
+    },
+    {
+      "kind": "BindingRevision",
+      "ref": {
+        "id": "af151d40-5abd-5746-9680-48e8ff345fe7",
+        "revision": 1
+      },
+      "sha256": "7b6ce8ca74a2802e8245b916b0d9e33e6c77291f5a1724de07ff04af23fb5fcd",
+      "relative_path": "catalog/binding-a-leases.json"
+    },
+    {
+      "kind": "CompetencyRevision",
+      "ref": {
+        "id": "0a620c71-e79d-5b3e-b9d9-57d1f15197de",
+        "revision": 1
+      },
+      "sha256": "c2d6ca179e91e2a46fb4a51e8810b7171a646f76ebff7992c7a53a8c9af84a11",
+      "relative_path": "catalog/competency-backpressure.json"
+    },
+    {
+      "kind": "CompetencyRevision",
+      "ref": {
+        "id": "ac5c04d6-18cc-5557-bf3b-35a0a578b091",
+        "revision": 1
+      },
+      "sha256": "2e323169e4d666b95b12837ea49bf616d292e83b08416ccdb928f71e7d0f6f22",
+      "relative_path": "catalog/competency-idempotency.json"
+    },
+    {
+      "kind": "CompetencyRevision",
+      "ref": {
+        "id": "053ce9ab-9699-5d6a-9dd8-8bcfe2bfebb3",
+        "revision": 1
+      },
+      "sha256": "41f48d2bbdedf3ee42c518dc632c61c82a2ab0fdbcc2f0b2092cc2adfa6ea09a",
+      "relative_path": "catalog/competency-leases.json"
+    },
+    {
+      "kind": "AssessmentFrameRevision",
+      "ref": {
+        "id": "fd7a4a09-0559-537a-adf6-d149074aa0a8",
+        "revision": 1
+      },
+      "sha256": "99c2adcee839dfbe77cb1665d81232724512800af1725625e0b5a5906d70e70a",
+      "relative_path": "catalog/frame-backpressure.json"
+    },
+    {
+      "kind": "AssessmentFrameRevision",
+      "ref": {
+        "id": "cf414da7-726e-5a9c-8aeb-5a8a633f3c2e",
+        "revision": 1
+      },
+      "sha256": "0d8879cf4f3c52c1a6bbcec468beb7eb9d92a0c93b3146546df85612fe3f22ae",
+      "relative_path": "catalog/frame-idempotency.json"
+    },
+    {
+      "kind": "AssessmentFrameRevision",
+      "ref": {
+        "id": "3685720a-9177-5a9d-99ea-e9dcbd72097b",
+        "revision": 1
+      },
+      "sha256": "983eaf4a9baab295336df7050e0b7f50e81a7f9066c8798b663820f481af6843",
+      "relative_path": "catalog/frame-leases.json"
+    },
+    {
+      "kind": "RubricRevision",
+      "ref": {
+        "id": "1618cc47-ca0e-58ef-b291-130eb750b4fd",
+        "revision": 1
+      },
+      "sha256": "eab3bcc3cd27e13584acc8d3238d37d1c8c0fd4c7b41f58628d1f779d60ce14a",
+      "relative_path": "catalog/rubric-a-backpressure.json"
+    },
+    {
+      "kind": "RubricRevision",
+      "ref": {
+        "id": "7512d992-6060-57a7-b18a-cb9219fd569f",
+        "revision": 1
+      },
+      "sha256": "2cee3b153da430ab3530228d0533fd8255446c63d39cb7a15ba574bb3e1d92e6",
+      "relative_path": "catalog/rubric-a-idempotency.json"
+    },
+    {
+      "kind": "RubricRevision",
+      "ref": {
+        "id": "bf1c197b-60bd-5031-be26-1d1039a14cf2",
+        "revision": 1
+      },
+      "sha256": "abd788f5b1d1c16b2ad75f27114491d6838aa14c311f9bfcbd5ab58c246968e7",
+      "relative_path": "catalog/rubric-a-leases.json"
+    },
+    {
+      "kind": "SourceEdition",
+      "ref": {
+        "id": "e4457e5e-d75c-5a77-9eff-1ab1af2a2d77",
+        "revision": 1
+      },
+      "sha256": "3ec7fc3ad1fc914185ea2ed0deb3bb85b173b98d5f3fe4519a2a46fb3b8434f7",
+      "relative_path": "catalog/source-aws-idempotency.json"
+    },
+    {
+      "kind": "SourceEdition",
+      "ref": {
+        "id": "36f26e4e-215a-555d-a6b0-f5f191fdd1a4",
+        "revision": 1
+      },
+      "sha256": "5346afb46367881df3d4f5791f6b7b7217780fcc4586af0b2d7c37c03fbb6e08",
+      "relative_path": "catalog/source-chubby.json"
+    }
+  ],
+  "route_nodes": [
+    {
+      "local_id": "a-section-1",
+      "title": "Retry after a lost acknowledgement",
+      "target_frame_refs": [
+        {
+          "id": "cf414da7-726e-5a9c-8aeb-5a8a633f3c2e",
+          "revision": 1
+        }
+      ],
+      "activity_refs": [
+        {
+          "id": "692fbdfb-76ca-5e19-830b-5c146a8e84e5",
+          "revision": 1
+        }
+      ],
+      "resource_refs": [
+        {
+          "id": "e4457e5e-d75c-5a77-9eff-1ab1af2a2d77",
+          "revision": 1
+        }
+      ],
+      "suggested_predecessors": []
+    },
+    {
+      "local_id": "a-section-2",
+      "title": "The paused worker returns",
+      "target_frame_refs": [
+        {
+          "id": "3685720a-9177-5a9d-99ea-e9dcbd72097b",
+          "revision": 1
+        }
+      ],
+      "activity_refs": [
+        {
+          "id": "2787c11e-2dbb-54c3-a450-a9c05492475f",
+          "revision": 1
+        }
+      ],
+      "resource_refs": [
+        {
+          "id": "36f26e4e-215a-555d-a6b0-f5f191fdd1a4",
+          "revision": 1
+        }
+      ],
+      "suggested_predecessors": [
+        "a-section-1"
+      ]
+    },
+    {
+      "local_id": "a-section-3",
+      "title": "A queue that never drains",
+      "target_frame_refs": [
+        {
+          "id": "fd7a4a09-0559-537a-adf6-d149074aa0a8",
+          "revision": 1
+        }
+      ],
+      "activity_refs": [
+        {
+          "id": "bbd40210-33cc-56b3-9845-177673f770b7",
+          "revision": 1
+        }
+      ],
+      "resource_refs": [],
+      "suggested_predecessors": [
+        "a-section-2"
+      ]
+    }
+  ],
+  "prerequisite_suggestions": []
+}

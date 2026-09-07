@@ -1,0 +1,31 @@
+{
+  "record_kind": "AssessmentFrameRevision",
+  "schema_version": "1.0.0",
+  "id": "b7d9523b-5a13-59d0-870d-a716504674d8",
+  "revision": 1,
+  "competency_ref": {
+    "id": "2eb8943a-8c11-521e-9eef-113cffaba6af",
+    "revision": 1
+  },
+  "facet_key": "reason",
+  "scope_statement": "worker failure and uncertainty after a timeout",
+  "challenge_band": "advanced_diagnostic",
+  "allowed_aids": {
+    "documentation": true,
+    "notes": false,
+    "execution_tools": false,
+    "ai_assistance": false,
+    "collaboration": false
+  },
+  "expected_demonstration": [
+    "Distinguish delivery, execution, acknowledgement, and observable effects.",
+    "State assumptions and a relevant counterexample or limitation."
+  ],
+  "assessment_standard_ref": null,
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

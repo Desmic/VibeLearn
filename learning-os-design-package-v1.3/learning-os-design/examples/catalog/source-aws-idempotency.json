@@ -1,0 +1,17 @@
+{
+  "record_kind": "SourceEdition",
+  "schema_version": "1.0.0",
+  "id": "e4457e5e-d75c-5a77-9eff-1ab1af2a2d77",
+  "revision": 1,
+  "work_id": "2a27ef8e-c987-52a5-841d-1b534449c9b7",
+  "title": "Making retries safe with idempotent APIs",
+  "author_or_publisher": "Amazon Builders’ Library",
+  "locator": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/",
+  "edition_label": "Source candidate; exact substantive section/edition must be locked during authoring review.",
+  "observed_on": "2026-09-06",
+  "snapshot_ref": null,
+  "content_sha256": null,
+  "retention_policy": "metadata_only",
+  "availability": "available",
+  "rights_note": "Metadata reference only. No copied source bytes or source-content digest are supplied."
+}

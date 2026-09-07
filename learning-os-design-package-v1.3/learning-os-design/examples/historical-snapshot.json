@@ -1,0 +1,252 @@
+{
+  "record_kind": "ActivityInstanceSnapshot",
+  "schema_version": "1.0.0",
+  "id": "76d23826-e988-5491-a734-1a525634811f",
+  "created_at": "2026-09-06T07:30:00Z",
+  "activity": {
+    "record_kind": "ActivityRevision",
+    "schema_version": "1.0.0",
+    "id": "692fbdfb-76ca-5e19-830b-5c146a8e84e5",
+    "revision": 1,
+    "title": "Retry after a lost acknowledgement",
+    "stimulus": "A job sends a notification, then crashes before recording completion. A retry sends it again. State an externally visible invariant and design a repeat-safe protocol. Explain required cooperation from the notification service.",
+    "response_modalities": [
+      "text"
+    ],
+    "required_capabilities": [
+      "response.text.v1"
+    ],
+    "family_id": "d4f798bd-d55b-5fc2-99b2-7daca7a41b19",
+    "variant_of": null,
+    "context_tags": [
+      "idempotency",
+      "agent_orchestration"
+    ],
+    "structural_context": "Duplicate external effect with a lost acknowledgement.",
+    "estimated_minutes": 20,
+    "declared_challenge": "advanced_diagnostic",
+    "rubric_ref": {
+      "id": "7512d992-6060-57a7-b18a-cb9219fd569f",
+      "revision": 1
+    },
+    "binding_ref": {
+      "id": "e621de9b-4e37-55ec-8c91-e14310aa3120",
+      "revision": 1
+    },
+    "resource_refs": [
+      {
+        "id": "e4457e5e-d75c-5a77-9eff-1ab1af2a2d77",
+        "revision": 1
+      }
+    ],
+    "claim_refs": [],
+    "hints": [
+      {
+        "level": 1,
+        "content": "Identify the precise assertion you need to justify before proposing a solution.",
+        "intended_criterion_ids": [
+          "model"
+        ],
+        "disclosure": "attention"
+      },
+      {
+        "level": 2,
+        "content": "Look for a change in assumptions that would make your proposed reasoning fail.",
+        "intended_criterion_ids": [
+          "limits"
+        ],
+        "disclosure": "concept"
+      }
+    ],
+    "origin": {
+      "kind": "model_generated",
+      "actor_label": "Architecture design fixture",
+      "model_run_id": null,
+      "source_refs": []
+    },
+    "validation": {
+      "status": "draft",
+      "reviewer": null,
+      "report_ref": null,
+      "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+    }
+  },
+  "rubric": {
+    "record_kind": "RubricRevision",
+    "schema_version": "1.0.0",
+    "id": "7512d992-6060-57a7-b18a-cb9219fd569f",
+    "revision": 1,
+    "title": "Retry after a lost acknowledgement — draft criteria",
+    "criteria": [
+      {
+        "criterion_id": "model",
+        "statement": "Design a repeat-safe externally visible effect under duplicated requests.",
+        "score_anchors": {
+          "zero": "The core conclusion is incorrect or unsupported.",
+          "partial": "Partly correct but misses a material condition or failure case.",
+          "full": "Correctly states the central reasoning with explicit assumptions."
+        },
+        "critical": true,
+        "allowed_methods": [
+          "human",
+          "model"
+        ],
+        "claim_refs": []
+      },
+      {
+        "criterion_id": "limits",
+        "statement": "Identify a meaningful limitation or counterexample.",
+        "score_anchors": {
+          "zero": "No relevant limitation is identified.",
+          "partial": "A relevant concern is named without explaining its effect.",
+          "full": "A concrete counterexample or limitation is explained."
+        },
+        "critical": false,
+        "allowed_methods": [
+          "human",
+          "model"
+        ],
+        "claim_refs": []
+      }
+    ],
+    "validation": {
+      "status": "draft",
+      "reviewer": null,
+      "report_ref": null,
+      "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+    }
+  },
+  "binding": {
+    "record_kind": "BindingRevision",
+    "schema_version": "1.0.0",
+    "id": "e621de9b-4e37-55ec-8c91-e14310aa3120",
+    "revision": 1,
+    "activity_ref": {
+      "id": "692fbdfb-76ca-5e19-830b-5c146a8e84e5",
+      "revision": 1
+    },
+    "rubric_ref": {
+      "id": "7512d992-6060-57a7-b18a-cb9219fd569f",
+      "revision": 1
+    },
+    "bindings": [
+      {
+        "criterion_id": "model",
+        "frame_ref": {
+          "id": "cf414da7-726e-5a9c-8aeb-5a8a633f3c2e",
+          "revision": 1
+        },
+        "attribution_fraction": 1.0,
+        "scope_justification": "This criterion is intended to observe the named reasoning frame; mapping requires reviewer validation."
+      },
+      {
+        "criterion_id": "limits",
+        "frame_ref": {
+          "id": "cf414da7-726e-5a9c-8aeb-5a8a633f3c2e",
+          "revision": 1
+        },
+        "attribution_fraction": 1.0,
+        "scope_justification": "This criterion is intended to observe the named reasoning frame; mapping requires reviewer validation."
+      }
+    ],
+    "validation": {
+      "status": "draft",
+      "reviewer": null,
+      "report_ref": null,
+      "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+    }
+  },
+  "frames": [
+    {
+      "record_kind": "AssessmentFrameRevision",
+      "schema_version": "1.0.0",
+      "id": "cf414da7-726e-5a9c-8aeb-5a8a633f3c2e",
+      "revision": 1,
+      "competency_ref": {
+        "id": "ac5c04d6-18cc-5557-bf3b-35a0a578b091",
+        "revision": 1
+      },
+      "facet_key": "reason",
+      "scope_statement": "request identity, atomicity boundary, and externally visible effects",
+      "challenge_band": "advanced_diagnostic",
+      "allowed_aids": {
+        "documentation": true,
+        "notes": false,
+        "execution_tools": false,
+        "ai_assistance": false,
+        "collaboration": false
+      },
+      "expected_demonstration": [
+        "Design a repeat-safe externally visible effect under duplicated requests.",
+        "State assumptions and a relevant counterexample or limitation."
+      ],
+      "assessment_standard_ref": null,
+      "validation": {
+        "status": "draft",
+        "reviewer": null,
+        "report_ref": null,
+        "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+      }
+    }
+  ],
+  "competencies": [
+    {
+      "record_kind": "CompetencyRevision",
+      "schema_version": "1.0.0",
+      "id": "ac5c04d6-18cc-5557-bf3b-35a0a578b091",
+      "revision": 1,
+      "slug": "execution.idempotent-effects",
+      "statement": "Design a repeat-safe externally visible effect under duplicated requests.",
+      "scope": "request identity, atomicity boundary, and externally visible effects",
+      "exclusions": [
+        "No competence in unassessed facets is implied."
+      ],
+      "facets": [
+        "reason"
+      ],
+      "status": "proposed",
+      "issuer": "learning-os-local-fixtures",
+      "external_identifiers": [],
+      "definition_source_refs": []
+    }
+  ],
+  "source_editions": [
+    {
+      "record_kind": "SourceEdition",
+      "schema_version": "1.0.0",
+      "id": "e4457e5e-d75c-5a77-9eff-1ab1af2a2d77",
+      "revision": 1,
+      "work_id": "2a27ef8e-c987-52a5-841d-1b534449c9b7",
+      "title": "Making retries safe with idempotent APIs",
+      "author_or_publisher": "Amazon Builders’ Library",
+      "locator": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/",
+      "edition_label": "Source candidate; exact substantive section/edition must be locked during authoring review.",
+      "observed_on": "2026-09-06",
+      "snapshot_ref": null,
+      "content_sha256": null,
+      "retention_policy": "metadata_only",
+      "availability": "available",
+      "rights_note": "Metadata reference only. No copied source bytes or source-content digest are supplied."
+    }
+  ],
+  "claims": [],
+  "presented_stimulus": "A job sends a notification, then crashes before recording completion. A retry sends it again. State an externally visible invariant and design a repeat-safe protocol. Explain required cooperation from the notification service.",
+  "parameters": {
+    "description": "No randomized parameters in this synthetic snapshot.",
+    "seed": null
+  },
+  "environment_assumptions": [
+    "No execution environment is required.",
+    "The learner may consult documentation; AI-generated answers are outside this frame."
+  ],
+  "origin_labels": [
+    {
+      "kind": "course",
+      "identity_label": "05579e5a-8a4d-5c11-8d83-41d681943ad0",
+      "version_label": "1.0.0",
+      "node_label": "a-section-1",
+      "title_at_time": "Course A — Reliable agent workers"
+    }
+  ],
+  "replayability": "limited_source_material"
+}

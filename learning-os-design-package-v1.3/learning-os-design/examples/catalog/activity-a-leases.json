@@ -1,0 +1,68 @@
+{
+  "record_kind": "ActivityRevision",
+  "schema_version": "1.0.0",
+  "id": "2787c11e-2dbb-54c3-a450-a9c05492475f",
+  "revision": 1,
+  "title": "The paused worker returns",
+  "stimulus": "Worker W1 holds a lease and pauses. W2 acquires a new lease and writes output. W1 resumes and writes stale output. Explain what the lease does not prevent and where stale authority must be rejected.",
+  "response_modalities": [
+    "text"
+  ],
+  "required_capabilities": [
+    "response.text.v1"
+  ],
+  "family_id": "2252e913-04de-55ef-83db-6189fa789be4",
+  "variant_of": null,
+  "context_tags": [
+    "leases",
+    "agent_orchestration"
+  ],
+  "structural_context": "Stale actor after lease expiry.",
+  "estimated_minutes": 20,
+  "declared_challenge": "advanced_diagnostic",
+  "rubric_ref": {
+    "id": "bf1c197b-60bd-5031-be26-1d1039a14cf2",
+    "revision": 1
+  },
+  "binding_ref": {
+    "id": "af151d40-5abd-5746-9680-48e8ff345fe7",
+    "revision": 1
+  },
+  "resource_refs": [
+    {
+      "id": "36f26e4e-215a-555d-a6b0-f5f191fdd1a4",
+      "revision": 1
+    }
+  ],
+  "claim_refs": [],
+  "hints": [
+    {
+      "level": 1,
+      "content": "Identify the precise assertion you need to justify before proposing a solution.",
+      "intended_criterion_ids": [
+        "model"
+      ],
+      "disclosure": "attention"
+    },
+    {
+      "level": 2,
+      "content": "Look for a change in assumptions that would make your proposed reasoning fail.",
+      "intended_criterion_ids": [
+        "limits"
+      ],
+      "disclosure": "concept"
+    }
+  ],
+  "origin": {
+    "kind": "model_generated",
+    "actor_label": "Architecture design fixture",
+    "model_run_id": null,
+    "source_refs": []
+  },
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

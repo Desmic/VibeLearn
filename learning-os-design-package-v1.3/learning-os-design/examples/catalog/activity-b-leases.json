@@ -1,0 +1,68 @@
+{
+  "record_kind": "ActivityRevision",
+  "schema_version": "1.0.0",
+  "id": "53b4343b-a29c-53dc-a8a2-1985dfd40791",
+  "revision": 1,
+  "title": "Ownership outside the control plane",
+  "stimulus": "A thumbnail-generation controller elects a new owner after a pause, but the old owner still has credentials for a shared output store. Design an authority check at the write boundary and state which components must cooperate.",
+  "response_modalities": [
+    "text"
+  ],
+  "required_capabilities": [
+    "response.text.v1"
+  ],
+  "family_id": "b93fe1f5-6273-5f04-ba4f-fc9617b0bb9a",
+  "variant_of": null,
+  "context_tags": [
+    "leases",
+    "service_design"
+  ],
+  "structural_context": "Authority validation moved from coordinator to external write boundary.",
+  "estimated_minutes": 20,
+  "declared_challenge": "advanced_diagnostic",
+  "rubric_ref": {
+    "id": "b05bfdd9-7cb9-5655-95e4-3f67e2d20132",
+    "revision": 1
+  },
+  "binding_ref": {
+    "id": "5563d34f-e3b6-5ff2-95e8-089c4e83a404",
+    "revision": 1
+  },
+  "resource_refs": [
+    {
+      "id": "36f26e4e-215a-555d-a6b0-f5f191fdd1a4",
+      "revision": 1
+    }
+  ],
+  "claim_refs": [],
+  "hints": [
+    {
+      "level": 1,
+      "content": "Identify the precise assertion you need to justify before proposing a solution.",
+      "intended_criterion_ids": [
+        "model"
+      ],
+      "disclosure": "attention"
+    },
+    {
+      "level": 2,
+      "content": "Look for a change in assumptions that would make your proposed reasoning fail.",
+      "intended_criterion_ids": [
+        "limits"
+      ],
+      "disclosure": "concept"
+    }
+  ],
+  "origin": {
+    "kind": "model_generated",
+    "actor_label": "Architecture design fixture",
+    "model_run_id": null,
+    "source_refs": []
+  },
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

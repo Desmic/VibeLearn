@@ -1,0 +1,19 @@
+{
+  "record_kind": "CompetencyRevision",
+  "schema_version": "1.0.0",
+  "id": "4d53f4b2-589c-5e77-909f-a89ae0454996",
+  "revision": 1,
+  "slug": "reasoning.argument-support",
+  "statement": "Distinguish stated observations from unsupported causal inference.",
+  "scope": "a short prose argument; no software or repository context",
+  "exclusions": [
+    "No competence in unassessed facets is implied."
+  ],
+  "facets": [
+    "reason"
+  ],
+  "status": "proposed",
+  "issuer": "learning-os-local-fixtures",
+  "external_identifiers": [],
+  "definition_source_refs": []
+}

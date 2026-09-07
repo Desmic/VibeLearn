@@ -1,0 +1,31 @@
+{
+  "record_kind": "AssessmentFrameRevision",
+  "schema_version": "1.0.0",
+  "id": "fd7a4a09-0559-537a-adf6-d149074aa0a8",
+  "revision": 1,
+  "competency_ref": {
+    "id": "0a620c71-e79d-5b3e-b9d9-57d1f15197de",
+    "revision": 1
+  },
+  "facet_key": "reason",
+  "scope_statement": "bounded queues and admission/service-rate reasoning",
+  "challenge_band": "advanced_diagnostic",
+  "allowed_aids": {
+    "documentation": true,
+    "notes": false,
+    "execution_tools": false,
+    "ai_assistance": false,
+    "collaboration": false
+  },
+  "expected_demonstration": [
+    "Explain and constrain backlog growth and overload propagation.",
+    "State assumptions and a relevant counterexample or limitation."
+  ],
+  "assessment_standard_ref": null,
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

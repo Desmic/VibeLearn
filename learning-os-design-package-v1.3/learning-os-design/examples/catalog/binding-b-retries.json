@@ -1,0 +1,40 @@
+{
+  "record_kind": "BindingRevision",
+  "schema_version": "1.0.0",
+  "id": "40658023-8cbf-58fd-96e2-c43f3fa79337",
+  "revision": 1,
+  "activity_ref": {
+    "id": "9fe61f17-36a5-5f7f-beed-6843d6919955",
+    "revision": 1
+  },
+  "rubric_ref": {
+    "id": "db6e5e7a-dec4-5479-ac62-6cc182cd9f3a",
+    "revision": 1
+  },
+  "bindings": [
+    {
+      "criterion_id": "model",
+      "frame_ref": {
+        "id": "aed4fd7c-3cc8-5fc6-a35c-77ace0e7ac86",
+        "revision": 1
+      },
+      "attribution_fraction": 1.0,
+      "scope_justification": "This criterion is intended to observe the named reasoning frame; mapping requires reviewer validation."
+    },
+    {
+      "criterion_id": "limits",
+      "frame_ref": {
+        "id": "aed4fd7c-3cc8-5fc6-a35c-77ace0e7ac86",
+        "revision": 1
+      },
+      "attribution_fraction": 1.0,
+      "scope_justification": "This criterion is intended to observe the named reasoning frame; mapping requires reviewer validation."
+    }
+  ],
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

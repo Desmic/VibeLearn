@@ -1,0 +1,68 @@
+{
+  "record_kind": "ActivityRevision",
+  "schema_version": "1.0.0",
+  "id": "692fbdfb-76ca-5e19-830b-5c146a8e84e5",
+  "revision": 1,
+  "title": "Retry after a lost acknowledgement",
+  "stimulus": "A job sends a notification, then crashes before recording completion. A retry sends it again. State an externally visible invariant and design a repeat-safe protocol. Explain required cooperation from the notification service.",
+  "response_modalities": [
+    "text"
+  ],
+  "required_capabilities": [
+    "response.text.v1"
+  ],
+  "family_id": "d4f798bd-d55b-5fc2-99b2-7daca7a41b19",
+  "variant_of": null,
+  "context_tags": [
+    "idempotency",
+    "agent_orchestration"
+  ],
+  "structural_context": "Duplicate external effect with a lost acknowledgement.",
+  "estimated_minutes": 20,
+  "declared_challenge": "advanced_diagnostic",
+  "rubric_ref": {
+    "id": "7512d992-6060-57a7-b18a-cb9219fd569f",
+    "revision": 1
+  },
+  "binding_ref": {
+    "id": "e621de9b-4e37-55ec-8c91-e14310aa3120",
+    "revision": 1
+  },
+  "resource_refs": [
+    {
+      "id": "e4457e5e-d75c-5a77-9eff-1ab1af2a2d77",
+      "revision": 1
+    }
+  ],
+  "claim_refs": [],
+  "hints": [
+    {
+      "level": 1,
+      "content": "Identify the precise assertion you need to justify before proposing a solution.",
+      "intended_criterion_ids": [
+        "model"
+      ],
+      "disclosure": "attention"
+    },
+    {
+      "level": 2,
+      "content": "Look for a change in assumptions that would make your proposed reasoning fail.",
+      "intended_criterion_ids": [
+        "limits"
+      ],
+      "disclosure": "concept"
+    }
+  ],
+  "origin": {
+    "kind": "model_generated",
+    "actor_label": "Architecture design fixture",
+    "model_run_id": null,
+    "source_refs": []
+  },
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

@@ -1,0 +1,272 @@
+{
+  "record_kind": "CoursePackage",
+  "schema_version": "1.0.0",
+  "course_id": "b0c64435-ac97-5e1a-baf0-8e1d5cf92239",
+  "course_version": "1.0.0",
+  "title": "Course B — Reliable services in different contexts",
+  "issuer": "learning-os-local-fixtures",
+  "description": "Synthetic design-only route; not validated for production assessment.",
+  "license_note": "New fixture prose; external works are referenced only. Check source rights before importing excerpts.",
+  "release_state": "draft",
+  "target_frame_refs": [
+    {
+      "id": "3685720a-9177-5a9d-99ea-e9dcbd72097b",
+      "revision": 1
+    },
+    {
+      "id": "cf414da7-726e-5a9c-8aeb-5a8a633f3c2e",
+      "revision": 1
+    },
+    {
+      "id": "aed4fd7c-3cc8-5fc6-a35c-77ace0e7ac86",
+      "revision": 1
+    }
+  ],
+  "required_capabilities": [
+    "response.text.v1"
+  ],
+  "locks": [
+    {
+      "kind": "ActivityRevision",
+      "ref": {
+        "id": "447e2d10-75af-5a15-82f4-ccb960b43e8d",
+        "revision": 1
+      },
+      "sha256": "9d23f62b6d9c705dc3c2d0d505ab53009effba344d7b78886bf627c38b858d90",
+      "relative_path": "catalog/activity-b-idempotency.json"
+    },
+    {
+      "kind": "ActivityRevision",
+      "ref": {
+        "id": "53b4343b-a29c-53dc-a8a2-1985dfd40791",
+        "revision": 1
+      },
+      "sha256": "eb4bb194a4fb47271dd014752acf2a31041e6c77e0f857898c6bea52e6ddb149",
+      "relative_path": "catalog/activity-b-leases.json"
+    },
+    {
+      "kind": "ActivityRevision",
+      "ref": {
+        "id": "9fe61f17-36a5-5f7f-beed-6843d6919955",
+        "revision": 1
+      },
+      "sha256": "dae4bdb4177ed6c1e0642ee47057c3bd578fb67a1b1d0f453af130798423eb2a",
+      "relative_path": "catalog/activity-b-retries.json"
+    },
+    {
+      "kind": "BindingRevision",
+      "ref": {
+        "id": "157081d7-f0b3-5573-b4bd-7f4613c36183",
+        "revision": 1
+      },
+      "sha256": "df562d1fafaacd22983063f975ba3fcb31e6c72815838e222f5aa48258f0e00d",
+      "relative_path": "catalog/binding-b-idempotency.json"
+    },
+    {
+      "kind": "BindingRevision",
+      "ref": {
+        "id": "5563d34f-e3b6-5ff2-95e8-089c4e83a404",
+        "revision": 1
+      },
+      "sha256": "43152abb0d8154942ef4466ab76e3d9b8beb99a12fb0e0d447bcf0d8e79a5566",
+      "relative_path": "catalog/binding-b-leases.json"
+    },
+    {
+      "kind": "BindingRevision",
+      "ref": {
+        "id": "40658023-8cbf-58fd-96e2-c43f3fa79337",
+        "revision": 1
+      },
+      "sha256": "955b95fc55cdc05c38e233b216a21f071faebfa8672bb9e840654ef53e712a08",
+      "relative_path": "catalog/binding-b-retries.json"
+    },
+    {
+      "kind": "CompetencyRevision",
+      "ref": {
+        "id": "ac5c04d6-18cc-5557-bf3b-35a0a578b091",
+        "revision": 1
+      },
+      "sha256": "2e323169e4d666b95b12837ea49bf616d292e83b08416ccdb928f71e7d0f6f22",
+      "relative_path": "catalog/competency-idempotency.json"
+    },
+    {
+      "kind": "CompetencyRevision",
+      "ref": {
+        "id": "053ce9ab-9699-5d6a-9dd8-8bcfe2bfebb3",
+        "revision": 1
+      },
+      "sha256": "41f48d2bbdedf3ee42c518dc632c61c82a2ab0fdbcc2f0b2092cc2adfa6ea09a",
+      "relative_path": "catalog/competency-leases.json"
+    },
+    {
+      "kind": "CompetencyRevision",
+      "ref": {
+        "id": "b28b61b3-a973-5faa-a313-308e65c487a3",
+        "revision": 1
+      },
+      "sha256": "3363a5e8838384293d9e6c20345892d4ce4b73b316b4d5d91f23153eda0e3660",
+      "relative_path": "catalog/competency-retries.json"
+    },
+    {
+      "kind": "AssessmentFrameRevision",
+      "ref": {
+        "id": "cf414da7-726e-5a9c-8aeb-5a8a633f3c2e",
+        "revision": 1
+      },
+      "sha256": "0d8879cf4f3c52c1a6bbcec468beb7eb9d92a0c93b3146546df85612fe3f22ae",
+      "relative_path": "catalog/frame-idempotency.json"
+    },
+    {
+      "kind": "AssessmentFrameRevision",
+      "ref": {
+        "id": "3685720a-9177-5a9d-99ea-e9dcbd72097b",
+        "revision": 1
+      },
+      "sha256": "983eaf4a9baab295336df7050e0b7f50e81a7f9066c8798b663820f481af6843",
+      "relative_path": "catalog/frame-leases.json"
+    },
+    {
+      "kind": "AssessmentFrameRevision",
+      "ref": {
+        "id": "aed4fd7c-3cc8-5fc6-a35c-77ace0e7ac86",
+        "revision": 1
+      },
+      "sha256": "7c4e707d163304cc5bfa720eb69e5254e65e8f35e4d987daec44908a7d70bd6a",
+      "relative_path": "catalog/frame-retries.json"
+    },
+    {
+      "kind": "RubricRevision",
+      "ref": {
+        "id": "bf429c5b-eaea-5b09-b1dd-96ac5e9c0c19",
+        "revision": 1
+      },
+      "sha256": "9056bf897a628415e62a6c47e1bc85d83ea8927afa09ee66cd85a356b7d02249",
+      "relative_path": "catalog/rubric-b-idempotency.json"
+    },
+    {
+      "kind": "RubricRevision",
+      "ref": {
+        "id": "b05bfdd9-7cb9-5655-95e4-3f67e2d20132",
+        "revision": 1
+      },
+      "sha256": "5e915e01ac6803639ab63395f883c999a54e7f720e8f78d5ffde5fb38e088ebe",
+      "relative_path": "catalog/rubric-b-leases.json"
+    },
+    {
+      "kind": "RubricRevision",
+      "ref": {
+        "id": "db6e5e7a-dec4-5479-ac62-6cc182cd9f3a",
+        "revision": 1
+      },
+      "sha256": "1ddb31a5858922eae1cae4633d22c4f9c8b31ee7ae22c4a05b5290e5d8a54e3a",
+      "relative_path": "catalog/rubric-b-retries.json"
+    },
+    {
+      "kind": "SourceEdition",
+      "ref": {
+        "id": "e64b89c4-337e-5514-b682-a187f5935011",
+        "revision": 1
+      },
+      "sha256": "71d86f9c28a86e33bcc5496eb3fd7302fb86b3d5a3accc3a6420f7c1fc741f51",
+      "relative_path": "catalog/source-aws-backoff.json"
+    },
+    {
+      "kind": "SourceEdition",
+      "ref": {
+        "id": "e4457e5e-d75c-5a77-9eff-1ab1af2a2d77",
+        "revision": 1
+      },
+      "sha256": "3ec7fc3ad1fc914185ea2ed0deb3bb85b173b98d5f3fe4519a2a46fb3b8434f7",
+      "relative_path": "catalog/source-aws-idempotency.json"
+    },
+    {
+      "kind": "SourceEdition",
+      "ref": {
+        "id": "36f26e4e-215a-555d-a6b0-f5f191fdd1a4",
+        "revision": 1
+      },
+      "sha256": "5346afb46367881df3d4f5791f6b7b7217780fcc4586af0b2d7c37c03fbb6e08",
+      "relative_path": "catalog/source-chubby.json"
+    }
+  ],
+  "route_nodes": [
+    {
+      "local_id": "b-section-1",
+      "title": "Ownership outside the control plane",
+      "target_frame_refs": [
+        {
+          "id": "3685720a-9177-5a9d-99ea-e9dcbd72097b",
+          "revision": 1
+        }
+      ],
+      "activity_refs": [
+        {
+          "id": "53b4343b-a29c-53dc-a8a2-1985dfd40791",
+          "revision": 1
+        }
+      ],
+      "resource_refs": [
+        {
+          "id": "36f26e4e-215a-555d-a6b0-f5f191fdd1a4",
+          "revision": 1
+        }
+      ],
+      "suggested_predecessors": []
+    },
+    {
+      "local_id": "b-section-2",
+      "title": "A duplicated batch request",
+      "target_frame_refs": [
+        {
+          "id": "cf414da7-726e-5a9c-8aeb-5a8a633f3c2e",
+          "revision": 1
+        }
+      ],
+      "activity_refs": [
+        {
+          "id": "447e2d10-75af-5a15-82f4-ccb960b43e8d",
+          "revision": 1
+        }
+      ],
+      "resource_refs": [
+        {
+          "id": "e4457e5e-d75c-5a77-9eff-1ab1af2a2d77",
+          "revision": 1
+        }
+      ],
+      "suggested_predecessors": [
+        "b-section-1"
+      ]
+    },
+    {
+      "local_id": "b-section-3",
+      "title": "All clients retry together",
+      "target_frame_refs": [
+        {
+          "id": "aed4fd7c-3cc8-5fc6-a35c-77ace0e7ac86",
+          "revision": 1
+        }
+      ],
+      "activity_refs": [
+        {
+          "id": "9fe61f17-36a5-5f7f-beed-6843d6919955",
+          "revision": 1
+        }
+      ],
+      "resource_refs": [
+        {
+          "id": "e64b89c4-337e-5514-b682-a187f5935011",
+          "revision": 1
+        },
+        {
+          "id": "e4457e5e-d75c-5a77-9eff-1ab1af2a2d77",
+          "revision": 1
+        }
+      ],
+      "suggested_predecessors": [
+        "b-section-2"
+      ]
+    }
+  ],
+  "prerequisite_suggestions": []
+}

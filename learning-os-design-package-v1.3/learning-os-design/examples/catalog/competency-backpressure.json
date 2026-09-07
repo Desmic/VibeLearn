@@ -1,0 +1,19 @@
+{
+  "record_kind": "CompetencyRevision",
+  "schema_version": "1.0.0",
+  "id": "0a620c71-e79d-5b3e-b9d9-57d1f15197de",
+  "revision": 1,
+  "slug": "execution.bounded-work",
+  "statement": "Explain and constrain backlog growth and overload propagation.",
+  "scope": "bounded queues and admission/service-rate reasoning",
+  "exclusions": [
+    "No competence in unassessed facets is implied."
+  ],
+  "facets": [
+    "reason"
+  ],
+  "status": "proposed",
+  "issuer": "learning-os-local-fixtures",
+  "external_identifiers": [],
+  "definition_source_refs": []
+}

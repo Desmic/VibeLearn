@@ -1,0 +1,31 @@
+{
+  "record_kind": "AssessmentFrameRevision",
+  "schema_version": "1.0.0",
+  "id": "aed4fd7c-3cc8-5fc6-a35c-77ace0e7ac86",
+  "revision": 1,
+  "competency_ref": {
+    "id": "b28b61b3-a973-5faa-a313-308e65c487a3",
+    "revision": 1
+  },
+  "facet_key": "reason",
+  "scope_statement": "timeouts, retry budgets, correlated retries, and service load",
+  "challenge_band": "advanced_diagnostic",
+  "allowed_aids": {
+    "documentation": true,
+    "notes": false,
+    "execution_tools": false,
+    "ai_assistance": false,
+    "collaboration": false
+  },
+  "expected_demonstration": [
+    "Reason about bounded retries and backoff under failure and overload.",
+    "State assumptions and a relevant counterexample or limitation."
+  ],
+  "assessment_standard_ref": null,
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

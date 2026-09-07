@@ -1,0 +1,31 @@
+{
+  "record_kind": "AssessmentFrameRevision",
+  "schema_version": "1.0.0",
+  "id": "3685720a-9177-5a9d-99ea-e9dcbd72097b",
+  "revision": 1,
+  "competency_ref": {
+    "id": "053ce9ab-9699-5d6a-9dd8-8bcfe2bfebb3",
+    "revision": 1
+  },
+  "facet_key": "reason",
+  "scope_statement": "lease expiry, paused workers, and cooperating downstream authority",
+  "challenge_band": "advanced_diagnostic",
+  "allowed_aids": {
+    "documentation": true,
+    "notes": false,
+    "execution_tools": false,
+    "ai_assistance": false,
+    "collaboration": false
+  },
+  "expected_demonstration": [
+    "Identify stale lease holders and specify where authority is enforced.",
+    "State assumptions and a relevant counterexample or limitation."
+  ],
+  "assessment_standard_ref": null,
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

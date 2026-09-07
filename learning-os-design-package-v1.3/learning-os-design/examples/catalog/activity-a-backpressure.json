@@ -1,0 +1,63 @@
+{
+  "record_kind": "ActivityRevision",
+  "schema_version": "1.0.0",
+  "id": "bbd40210-33cc-56b3-9845-177673f770b7",
+  "revision": 1,
+  "title": "A queue that never drains",
+  "stimulus": "Tasks arrive faster than workers complete them. Describe the evidence you need to distinguish a burst from sustained overload, propose a bounded-work policy, and explain which demand it rejects or delays.",
+  "response_modalities": [
+    "text"
+  ],
+  "required_capabilities": [
+    "response.text.v1"
+  ],
+  "family_id": "ff7b81af-c687-5be0-a5cd-33d5ea64ad34",
+  "variant_of": null,
+  "context_tags": [
+    "backpressure",
+    "agent_orchestration"
+  ],
+  "structural_context": "Admission and backlog growth without assuming unlimited storage.",
+  "estimated_minutes": 20,
+  "declared_challenge": "advanced_diagnostic",
+  "rubric_ref": {
+    "id": "1618cc47-ca0e-58ef-b291-130eb750b4fd",
+    "revision": 1
+  },
+  "binding_ref": {
+    "id": "a143349f-447a-5504-b991-d217cd933d53",
+    "revision": 1
+  },
+  "resource_refs": [],
+  "claim_refs": [],
+  "hints": [
+    {
+      "level": 1,
+      "content": "Identify the precise assertion you need to justify before proposing a solution.",
+      "intended_criterion_ids": [
+        "model"
+      ],
+      "disclosure": "attention"
+    },
+    {
+      "level": 2,
+      "content": "Look for a change in assumptions that would make your proposed reasoning fail.",
+      "intended_criterion_ids": [
+        "limits"
+      ],
+      "disclosure": "concept"
+    }
+  ],
+  "origin": {
+    "kind": "model_generated",
+    "actor_label": "Architecture design fixture",
+    "model_run_id": null,
+    "source_refs": []
+  },
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

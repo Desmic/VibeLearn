@@ -1,0 +1,72 @@
+{
+  "record_kind": "ActivityRevision",
+  "schema_version": "1.0.0",
+  "id": "9fe61f17-36a5-5f7f-beed-6843d6919955",
+  "revision": 1,
+  "title": "All clients retry together",
+  "stimulus": "An internal service becomes slow. Thousands of clients simultaneously retry their timed-out calls. Propose a retry policy with a budget and explain the limits of backoff and jitter when the underlying work is not repeat-safe.",
+  "response_modalities": [
+    "text"
+  ],
+  "required_capabilities": [
+    "response.text.v1"
+  ],
+  "family_id": "7827226b-98d8-563e-a5eb-b211b14c71f1",
+  "variant_of": null,
+  "context_tags": [
+    "retries",
+    "service_design"
+  ],
+  "structural_context": "Correlated retries and independent overload/idempotency concerns.",
+  "estimated_minutes": 20,
+  "declared_challenge": "advanced_diagnostic",
+  "rubric_ref": {
+    "id": "db6e5e7a-dec4-5479-ac62-6cc182cd9f3a",
+    "revision": 1
+  },
+  "binding_ref": {
+    "id": "40658023-8cbf-58fd-96e2-c43f3fa79337",
+    "revision": 1
+  },
+  "resource_refs": [
+    {
+      "id": "e64b89c4-337e-5514-b682-a187f5935011",
+      "revision": 1
+    },
+    {
+      "id": "e4457e5e-d75c-5a77-9eff-1ab1af2a2d77",
+      "revision": 1
+    }
+  ],
+  "claim_refs": [],
+  "hints": [
+    {
+      "level": 1,
+      "content": "Identify the precise assertion you need to justify before proposing a solution.",
+      "intended_criterion_ids": [
+        "model"
+      ],
+      "disclosure": "attention"
+    },
+    {
+      "level": 2,
+      "content": "Look for a change in assumptions that would make your proposed reasoning fail.",
+      "intended_criterion_ids": [
+        "limits"
+      ],
+      "disclosure": "concept"
+    }
+  ],
+  "origin": {
+    "kind": "model_generated",
+    "actor_label": "Architecture design fixture",
+    "model_run_id": null,
+    "source_refs": []
+  },
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

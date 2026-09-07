@@ -1,0 +1,63 @@
+{
+  "record_kind": "ActivityRevision",
+  "schema_version": "1.0.0",
+  "id": "8c553c76-648a-58b1-8752-330c82cc4c92",
+  "revision": 1,
+  "title": "Which conclusion follows?",
+  "stimulus": "A community newsletter says: “The garden introduced a new watering schedule. The next harvest was larger, so the schedule caused the improvement.” Identify the observation, the causal inference, an alternative explanation, and additional evidence that would distinguish them.",
+  "response_modalities": [
+    "text"
+  ],
+  "required_capabilities": [
+    "response.text.v1"
+  ],
+  "family_id": "14251b03-3309-527f-98fe-d4771c9e845a",
+  "variant_of": null,
+  "context_tags": [
+    "argument",
+    "argumentation"
+  ],
+  "structural_context": "A causal argument in prose without computing tools.",
+  "estimated_minutes": 20,
+  "declared_challenge": "argument_analysis",
+  "rubric_ref": {
+    "id": "ea798665-8909-5187-8246-423f14dd4ede",
+    "revision": 1
+  },
+  "binding_ref": {
+    "id": "39f84749-25cb-5bf3-93c2-70bc61708e3f",
+    "revision": 1
+  },
+  "resource_refs": [],
+  "claim_refs": [],
+  "hints": [
+    {
+      "level": 1,
+      "content": "Identify the precise assertion you need to justify before proposing a solution.",
+      "intended_criterion_ids": [
+        "model"
+      ],
+      "disclosure": "attention"
+    },
+    {
+      "level": 2,
+      "content": "Look for a change in assumptions that would make your proposed reasoning fail.",
+      "intended_criterion_ids": [
+        "limits"
+      ],
+      "disclosure": "concept"
+    }
+  ],
+  "origin": {
+    "kind": "model_generated",
+    "actor_label": "Architecture design fixture",
+    "model_run_id": null,
+    "source_refs": []
+  },
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

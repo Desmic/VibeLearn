@@ -1,0 +1,45 @@
+{
+  "record_kind": "RubricRevision",
+  "schema_version": "1.0.0",
+  "id": "b05bfdd9-7cb9-5655-95e4-3f67e2d20132",
+  "revision": 1,
+  "title": "Ownership outside the control plane — draft criteria",
+  "criteria": [
+    {
+      "criterion_id": "model",
+      "statement": "Identify stale lease holders and specify where authority is enforced.",
+      "score_anchors": {
+        "zero": "The core conclusion is incorrect or unsupported.",
+        "partial": "Partly correct but misses a material condition or failure case.",
+        "full": "Correctly states the central reasoning with explicit assumptions."
+      },
+      "critical": true,
+      "allowed_methods": [
+        "human",
+        "model"
+      ],
+      "claim_refs": []
+    },
+    {
+      "criterion_id": "limits",
+      "statement": "Identify a meaningful limitation or counterexample.",
+      "score_anchors": {
+        "zero": "No relevant limitation is identified.",
+        "partial": "A relevant concern is named without explaining its effect.",
+        "full": "A concrete counterexample or limitation is explained."
+      },
+      "critical": false,
+      "allowed_methods": [
+        "human",
+        "model"
+      ],
+      "claim_refs": []
+    }
+  ],
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

@@ -1,0 +1,214 @@
+"""Learner-scoped transactional commands. Browser identity is resolved separately."""
+import json
+import secrets
+import hashlib
+from datetime import datetime, timezone
+from uuid import uuid4
+
+from app.content import MODES, freeze, digest, presented
+from app.storage import transaction
+from app.assessment import evaluate, parse_prediction, review_need
+
+EMPTY_RESPONSE = {"prediction": "", "diagnosis": "", "aid_declaration": "unknown"}
+
+
+class DomainError(Exception):
+    def __init__(self, code, message, status=400):
+        super().__init__(message)
+        self.code, self.message, self.status = code, message, status
+
+
+def now():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def encode(value):
+    return json.dumps(value, ensure_ascii=False, sort_keys=True)
+
+
+def token_hash(token):
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def create_session(path):
+    token, learner = secrets.token_urlsafe(32), str(uuid4())
+    profile = {"experience": "6+ years of engineering; roughly 2 years of independent work and agent development", "basis": "self-report, not measured mastery"}
+    with transaction(path) as db:
+        db.execute("INSERT INTO learners VALUES (?, ?, ?)", (learner, encode(profile), now()))
+        db.execute("INSERT INTO sessions VALUES (?, ?)", (token_hash(token), learner))
+    return token, learner
+
+
+def resolve_session(path, token):
+    with transaction(path) as db:
+        row = db.execute("SELECT learner_id FROM sessions WHERE token_hash=?", (token_hash(token),)).fetchone()
+        return row[0] if row else None
+
+
+def check_response(value):
+    if not isinstance(value, dict) or set(value) != set(EMPTY_RESPONSE):
+        raise DomainError("INVALID_RESPONSE", "The response has an invalid structure.")
+    if any(not isinstance(value[k], str) for k in value):
+        raise DomainError("INVALID_RESPONSE", "Answer fields must be text.")
+    if len(value["prediction"]) > 100 or len(value["diagnosis"]) > 12000:
+        raise DomainError("INVALID_RESPONSE", "Please keep the diagnosis under 12,000 characters.")
+    if value["aid_declaration"] not in ("unknown", "none", "external"):
+        raise DomainError("INVALID_RESPONSE", "Choose a valid aid declaration.")
+    return value
+
+
+def assistance_view(db, learner, attempt_id):
+    return [dict(event) | {"detail": json.loads(event["detail"]), "affects_independence": bool(event["affects_independence"])} for event in db.execute("SELECT * FROM assistance WHERE learner_id=? AND attempt_id=? ORDER BY rowid", (learner, attempt_id))]
+
+
+def add_assistance(db, learner, attempt_id, kind, detail, stamp, affects=True):
+    detail = detail | {"content_digest": digest(detail)}
+    db.execute("INSERT INTO assistance VALUES (?, ?, ?, ?, ?, ?, ?)", (str(uuid4()), learner, attempt_id, kind, encode(detail), int(affects), stamp))
+
+
+def seal(db, row, response, kind, stamp):
+    checkpoint_id = str(uuid4())
+    history = assistance_view(db, row["learner_id"], row["id"])
+    db.execute("INSERT INTO checkpoints VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (checkpoint_id, row["learner_id"], row["id"], kind, encode(response), row["mode"], encode(history), row["snapshot_digest"], stamp))
+    return checkpoint_id, history
+
+
+def attempt_view(db, row):
+    if row is None:
+        return None
+    snapshot = json.loads(row["snapshot"])
+    result = {"id": row["id"], "revision": row["revision"], "status": row["status"], "mode": row["mode"], "response": json.loads(row["response"]), "snapshot": presented(snapshot), "snapshot_digest": row["snapshot_digest"], "updated_at": row["updated_at"]}
+    history = assistance_view(db, row["learner_id"], row["id"])
+    result["assistance"] = history
+    result["hints"] = [event["detail"]["text"] for event in history if event["kind"] == "hint"]
+    result["worked_example"] = next((event["detail"]["text"] for event in history if event["kind"] == "worked_example"), None)
+    result["source"] = snapshot["source"] if any(event["kind"] == "source" for event in history) else None
+    result["source_allowed"] = row["status"] == "submitted" or snapshot["mode_contracts"][row["mode"]]["sources_before_submit"]
+    evidence = db.execute("SELECT * FROM evidence WHERE learner_id=? AND attempt_id=?", (row["learner_id"], row["id"])).fetchone()
+    result["assessment"] = json.loads(evidence["result"]) if evidence else {"outcome": "not_observed", "score": None, "mastery": "unknown"}
+    result["evidence"] = {"id": evidence["id"], "checkpoint_id": evidence["checkpoint_id"], "capsule": json.loads(evidence["capsule"]), "created_at": evidence["created_at"]} if evidence else None
+    result["checkpoints"] = []
+    for cp in db.execute("SELECT * FROM checkpoints WHERE learner_id=? AND attempt_id=? ORDER BY rowid", (row["learner_id"], row["id"])):
+        checkpoint = dict(cp) | {"response": json.loads(cp["response"]), "assistance": [event if isinstance(event, dict) else {"kind": "legacy_assistance", "detail": {"text": event}, "affects_independence": True} for event in json.loads(cp["assistance"])]}
+        # Revealing an answer-key evaluation before submission would itself be aid.
+        if row["status"] == "submitted":
+            checkpoint["assessment"] = evaluate(snapshot, checkpoint["response"], [event for event in checkpoint["assistance"] if event["affects_independence"]])
+        result["checkpoints"].append(checkpoint)
+    review = db.execute("SELECT intent FROM reviews WHERE learner_id=? AND frame_id=? AND frame_revision=?", (row["learner_id"], snapshot["frame"]["id"], snapshot["frame"]["revision"])).fetchone()
+    result["review"] = json.loads(review[0]) if review else None
+    result["practice_xp"] = db.execute("SELECT COALESCE(SUM(xp),0) FROM rewards WHERE learner_id=?", (row["learner_id"],)).fetchone()[0]
+    result["reward"] = db.execute("SELECT xp FROM rewards WHERE learner_id=? AND attempt_id=?", (row["learner_id"], row["id"])).fetchone()
+    result["reward"] = result["reward"][0] if result["reward"] else 0
+    return result
+
+
+def state(path, learner):
+    with transaction(path) as db:
+        profile = db.execute("SELECT profile FROM learners WHERE id=?", (learner,)).fetchone()
+        if not profile:
+            raise DomainError("UNAUTHENTICATED", "Open a local learning session.", 401)
+        row = db.execute("SELECT * FROM attempts WHERE learner_id=? ORDER BY rowid DESC LIMIT 1", (learner,)).fetchone()
+        return {"learner_id": learner, "profile": json.loads(profile[0]), "attempt": attempt_view(db, row), "course": {"title": "Reliable agent execution", "episode_count": 1}, "modes": MODES}
+
+
+def command(path, learner, action, body):
+    if not isinstance(body, dict):
+        raise DomainError("INVALID_COMMAND", "Command must be a JSON object.")
+    required = {"command_id", "expected_revision"}
+    if action == "start":
+        required |= {"mode"}
+    elif action in ("save", "submit", "hint", "source", "mode"):
+        required |= {"attempt_id", "response"}
+        if action == "mode":
+            required |= {"mode"}
+    else:
+        raise DomainError("NOT_FOUND", "Unknown command.", 404)
+    if set(body) != required or not isinstance(body.get("command_id"), str) or not 8 <= len(body["command_id"]) <= 100 or type(body.get("expected_revision")) is not int:
+        raise DomainError("INVALID_COMMAND", "Command fields or revision are invalid.")
+    if "mode" in body and (not isinstance(body["mode"], str) or body["mode"] not in MODES):
+        raise DomainError("INVALID_COMMAND", "Choose LEARN, PAIR or BUILD.")
+    if "attempt_id" in body and not isinstance(body["attempt_id"], str):
+        raise DomainError("INVALID_COMMAND", "Attempt ID must be text.")
+    request_digest = digest({"action": action, "body": body})
+    with transaction(path) as db:
+        if not db.execute("SELECT 1 FROM learners WHERE id=?", (learner,)).fetchone():
+            raise DomainError("UNAUTHENTICATED", "Session is missing.", 401)
+        receipt = db.execute("SELECT * FROM commands WHERE learner_id=? AND command_id=?", (learner, body["command_id"])).fetchone()
+        if receipt:
+            if receipt["request_digest"] != request_digest:
+                raise DomainError("IDEMPOTENCY_CONFLICT", "This command ID was already used for a different request.", 409)
+            return json.loads(receipt["result"])
+        stamp = now()
+        if action == "start":
+            if body["expected_revision"] != 0:
+                raise DomainError("INVALID_COMMAND", "New attempts start at revision zero.")
+            existing = db.execute("SELECT id FROM attempts WHERE learner_id=? AND status='draft'", (learner,)).fetchone()
+            if existing:
+                raise DomainError("ACTIVE_ATTEMPT", "Resume your existing attempt first.", 409)
+            attempt_id = str(uuid4())
+            snapshot = freeze(body["mode"])
+            db.execute("INSERT INTO attempts VALUES (?, ?, 1, 'draft', ?, ?, ?, ?, ?, ?)", (attempt_id, learner, body["mode"], encode(EMPTY_RESPONSE), encode(snapshot), digest(snapshot), stamp, stamp))
+            prior = db.execute("SELECT id FROM evidence WHERE learner_id=? AND json_extract(capsule, '$.snapshot.family_id')=? LIMIT 1", (learner, snapshot["family_id"])).fetchone()
+            if prior:
+                add_assistance(db, learner, attempt_id, "prior_family_exposure", {"evidence_id": prior[0], "text": "You have already seen feedback for this trace family."}, stamp)
+            if body["mode"] == "BUILD":
+                row = db.execute("SELECT * FROM attempts WHERE id=?", (attempt_id,)).fetchone()
+                seal(db, row, EMPTY_RESPONSE, "before_worked_example", stamp)
+                add_assistance(db, learner, attempt_id, "worked_example", {"text": snapshot["hints"][-1]}, stamp)
+        else:
+            attempt_id = body["attempt_id"]
+            row = db.execute("SELECT * FROM attempts WHERE id=? AND learner_id=?", (attempt_id, learner)).fetchone()
+            if not row:
+                raise DomainError("NOT_FOUND", "Attempt not found in this learner session.", 404)
+            if row["revision"] != body["expected_revision"]:
+                raise DomainError("STALE_REVISION", "This attempt changed in another tab. Your local answer is retained; reload before reconciling.", 409)
+            if row["status"] != "draft" and action != "source":
+                raise DomainError("ALREADY_SUBMITTED", "A submitted answer is immutable.", 409)
+            response = check_response(body["response"])
+            snapshot = json.loads(row["snapshot"])
+            history = assistance_view(db, learner, attempt_id)
+            if action == "source":
+                if row["status"] != "submitted" and not snapshot["mode_contracts"][row["mode"]]["sources_before_submit"]:
+                    raise DomainError("AID_RESTRICTED", "In LEARN, the source unlocks after submission. Switch to PAIR to use it now; that exposure will be recorded.", 403)
+                if not any(event["kind"] == "source" for event in history):
+                    if row["status"] == "draft":
+                        seal(db, row, response, "before_source", stamp)
+                    add_assistance(db, learner, attempt_id, "source", {"text": snapshot["source"]["summary"], "url": snapshot["source"]["url"], "scope": "trace_counts and diagnosis", "access": "source panel revealed; external page reading cannot be observed"}, stamp)
+            if action == "hint":
+                level = sum(event["kind"] == "hint" for event in history)
+                if level >= len(snapshot["hints"]):
+                    raise DomainError("NO_MORE_HINTS", "All prepared hints are already revealed.", 409)
+                seal(db, row, response, "before_hint", stamp)
+                add_assistance(db, learner, attempt_id, "hint", {"level": level + 1, "text": snapshot["hints"][level], "scope": "trace_counts and diagnosis"}, stamp)
+            if action == "mode":
+                seal(db, row, response, "before_mode_change", stamp)
+                add_assistance(db, learner, attempt_id, "mode_boundary", {"from": row["mode"], "to": body["mode"]}, stamp, affects=False)
+                if body["mode"] == "BUILD" and not any(event["kind"] == "worked_example" for event in history):
+                    add_assistance(db, learner, attempt_id, "worked_example", {"text": snapshot["hints"][-1]}, stamp)
+                db.execute("UPDATE attempts SET mode=? WHERE id=? AND learner_id=?", (body["mode"], attempt_id, learner))
+            if action == "submit":
+                if parse_prediction(response["prediction"]) is None or not response["diagnosis"].strip():
+                    raise DomainError("INVALID_ANSWER", "Enter three comma-separated whole numbers and a written diagnosis before submitting.")
+                try:
+                    assessment = evaluate(snapshot, response, [event for event in history if event["affects_independence"]])
+                except (ValueError, KeyError, TypeError):
+                    raise DomainError("EVALUATOR_UNAVAILABLE", "The pinned assessment cannot run. Your draft is preserved; no failed score was recorded.", 503)
+                checkpoint_id, history = seal(db, row, response, "submission", stamp)
+                evidence_id = str(uuid4())
+                capsule = {"snapshot": snapshot, "snapshot_digest": row["snapshot_digest"], "response": response, "assistance": history, "mode_at_submission": row["mode"]}
+                db.execute("INSERT INTO evidence VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (evidence_id, learner, attempt_id, checkpoint_id, snapshot["frame"]["id"], snapshot["frame"]["revision"], encode(capsule), encode(assessment), stamp))
+                intent = review_need(snapshot, assessment, stamp)
+                previous = db.execute("SELECT intent FROM reviews WHERE learner_id=? AND frame_id=? AND frame_revision=?", (learner, snapshot["frame"]["id"], snapshot["frame"]["revision"])).fetchone()
+                if previous:
+                    intent["due_at"] = min(intent["due_at"], json.loads(previous[0])["due_at"])
+                db.execute("INSERT INTO reviews VALUES (?, ?, ?, ?, ?) ON CONFLICT(learner_id, frame_id, frame_revision) DO UPDATE SET evidence_id=excluded.evidence_id, intent=excluded.intent", (learner, snapshot["frame"]["id"], snapshot["frame"]["revision"], evidence_id, encode(intent)))
+                db.execute("INSERT OR IGNORE INTO rewards VALUES (?, ?, ?, 10, ?, ?)", (learner, snapshot["family_id"], attempt_id, snapshot["policies"]["reward"], stamp))
+                db.execute("UPDATE attempts SET status='submitted', response=?, revision=revision+1, updated_at=? WHERE id=? AND learner_id=?", (encode(response), stamp, attempt_id, learner))
+            # Source reading after submission must never rewrite the submitted response.
+            if row["status"] == "submitted":
+                db.execute("UPDATE attempts SET revision=revision+1, updated_at=? WHERE id=? AND learner_id=?", (stamp, attempt_id, learner))
+            elif action != "submit":
+                db.execute("UPDATE attempts SET response=?, revision=revision+1, updated_at=? WHERE id=? AND learner_id=?", (encode(response), stamp, attempt_id, learner))
+        result = attempt_view(db, db.execute("SELECT * FROM attempts WHERE id=? AND learner_id=?", (attempt_id, learner)).fetchone())
+        db.execute("INSERT INTO commands VALUES (?, ?, ?, ?)", (learner, body["command_id"], request_digest, encode(result)))
+        return result

@@ -1,0 +1,45 @@
+{
+  "record_kind": "RubricRevision",
+  "schema_version": "1.0.0",
+  "id": "7512d992-6060-57a7-b18a-cb9219fd569f",
+  "revision": 1,
+  "title": "Retry after a lost acknowledgement — draft criteria",
+  "criteria": [
+    {
+      "criterion_id": "model",
+      "statement": "Design a repeat-safe externally visible effect under duplicated requests.",
+      "score_anchors": {
+        "zero": "The core conclusion is incorrect or unsupported.",
+        "partial": "Partly correct but misses a material condition or failure case.",
+        "full": "Correctly states the central reasoning with explicit assumptions."
+      },
+      "critical": true,
+      "allowed_methods": [
+        "human",
+        "model"
+      ],
+      "claim_refs": []
+    },
+    {
+      "criterion_id": "limits",
+      "statement": "Identify a meaningful limitation or counterexample.",
+      "score_anchors": {
+        "zero": "No relevant limitation is identified.",
+        "partial": "A relevant concern is named without explaining its effect.",
+        "full": "A concrete counterexample or limitation is explained."
+      },
+      "critical": false,
+      "allowed_methods": [
+        "human",
+        "model"
+      ],
+      "claim_refs": []
+    }
+  ],
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}

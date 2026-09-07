@@ -1,0 +1,31 @@
+{
+  "record_kind": "AssessmentFrameRevision",
+  "schema_version": "1.0.0",
+  "id": "b9b2ed5e-59b8-5784-8f43-6d487b1aa969",
+  "revision": 1,
+  "competency_ref": {
+    "id": "358b4d5f-a64c-5458-b1fb-5f7bdc59186d",
+    "revision": 1
+  },
+  "facet_key": "reason",
+  "scope_statement": "reason about possible traces, not programming-language syntax",
+  "challenge_band": "advanced_diagnostic",
+  "allowed_aids": {
+    "documentation": true,
+    "notes": false,
+    "execution_tools": false,
+    "ai_assistance": false,
+    "collaboration": false
+  },
+  "expected_demonstration": [
+    "Reason about interleavings and shared-state invariants.",
+    "State assumptions and a relevant counterexample or limitation."
+  ],
+  "assessment_standard_ref": null,
+  "validation": {
+    "status": "draft",
+    "reviewer": null,
+    "report_ref": null,
+    "reason": "Synthetic design fixture; requires answer-key and source review before real assessment use."
+  }
+}
