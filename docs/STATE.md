@@ -6,25 +6,44 @@ The active Render service is `https://vibelearn-4xws.onrender.com`, built from
 Auth, an explicit email allowlist, Secure/HttpOnly/SameSite=Strict cookies, and the
 private `vibelearn` PostgreSQL schema.
 
-Supabase migration `20260907073952_vibelearn_hosted_schema` is applied. The runtime
-connects through the restricted `vibelearn_login` -> `vibelearn_app` role. Learner
-tables have forced learner-scoped RLS. `anon` and `authenticated` have no schema
+Supabase migrations applied:
+
+- `20260907073952_vibelearn_hosted_schema`
+- `20260907102455_harden_hosted_schema_access`
+- `20260907102517_cover_hosted_foreign_keys`
+
+The runtime connects through the restricted `vibelearn_login` -> `vibelearn_app`
+role. Learner tables have forced learner-scoped RLS. `schema_migrations` is now also
+RLS-protected with an app-only read policy. `anon` and `authenticated` have no schema
 USAGE or table grants for `vibelearn`; the application does not use a service-role
 key for learner authentication.
+
+The pre-existing `public.rls_auto_enable()` SECURITY DEFINER helper still powers its
+event trigger, but direct EXECUTE access from `PUBLIC`, `anon`, and `authenticated`
+has been revoked. Supabase's security advisor now reports only leaked-password
+protection being disabled.
+
+The advisor-reported uncovered foreign keys are also fixed with covering indexes on
+`assistance(attempt_id, learner_id)`, `checkpoints(attempt_id, learner_id)`, and
+`evidence(attempt_id, learner_id)`. Remaining performance notices are only unused-index
+observations on an empty pilot database; no indexes are being removed on that basis.
 
 ## Verified hosted infrastructure
 
 - Render deployment is live and serves `/`, static assets, `/api/config`, and
   `/api/health` successfully.
-- The active Render deploy and GitHub branch point at the same hosted-pilot commit.
-- GitHub Actions `Verify hosted pilot` passes the build, Python test suite, disposable
-  PostgreSQL application tests, Chromium installation, and browser suite.
-- PostgreSQL boundary checks previously passed learner isolation, composite ownership
-  references, immutable submissions/history, reward deduplication, JSON lookup, and
-  denial of unscoped reads.
+- The hosted-pilot GitHub branch has green `Verify hosted pilot` CI, including build,
+  Python tests, disposable PostgreSQL application tests, Chromium installation, and
+  browser scenarios.
+- PostgreSQL boundary checks passed learner isolation, composite ownership references,
+  immutable submissions/history, reward deduplication, JSON lookup, and denial of
+  unscoped reads.
 - Supabase password-reset delivery is verified: the application accepted the reset
   request and the Supabase recovery email arrived at the pilot account with the live
   Render origin as its redirect target.
+- A fresh Render deploy was triggered for the latest hosted-pilot branch after the
+  documentation/hardening pass so the running service can align to the latest branch
+  state without changing PostgreSQL data.
 
 ## Remaining hosted acceptance
 
@@ -59,16 +78,11 @@ is retained but ungraded. Evidence is partial/provisional and XP never feeds mas
 Future review needs target frames, while fresh review generation/scheduling remains
 outside this slice.
 
-## Known cleanup before broader use
+## Remaining cleanup before broader use
 
-- Inspect/revoke unnecessary execution of the existing `public.rls_auto_enable()`
-  SECURITY DEFINER function for `anon`/`authenticated`.
 - Enable Supabase leaked-password protection when appropriate for the pilot.
-- Add the few covering foreign-key indexes reported by the Supabase performance
-  advisor after hosted acceptance; do not remove newly created indexes merely because
-  an empty database currently reports them unused.
 - Align the actual Render service health-check path with `/api/health` from
-  `render.yaml`.
+  `render.yaml` if the service still uses the root path.
 
 Do not begin Phase 2 on the basis of machine checks alone. The next product gate is the
 real hosted learner trial and feedback on this same Phase 1 episode.
