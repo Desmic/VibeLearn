@@ -112,51 +112,86 @@ default heading for every component.
 
 ## Current inconsistencies to remove
 
-- Password visibility rendered as a full secondary button beside a primary login CTA.
-- Forgot-password rendered with button weight instead of utility-link weight.
 - Too many white bordered cards in the main workspace.
 - Sidebar contrast stronger than the learning content.
 - Too many tiny uppercase labels and tags.
 - Mixed symbol vocabulary (`↗`, `◈`, `✦`, `◎`, `↻`, arrows, dots) rather than one
   icon language.
-- Inconsistent radii and surface treatments.
 - Informational/success/error messages sharing the same notice styling.
-- Right rail showing mode, help, source, and philosophy simultaneously instead of
-  progressively revealing context.
+- Right rail showing mode, help, source, and philosophy with similar visual weight.
 
-## Implementation sequence
+Resolved in the current refinement layer:
 
-### UI-1 — Auth and tokens
+- Password visibility is now a field utility rather than a full secondary button.
+- Forgot-password is now tertiary instead of competing with the primary CTA.
+- Radius, depth, focus and accent tokens are centralized in `web/premium.css`.
 
-- Establish premium palette, radius, shadow and action tokens without rewriting the
-  entire existing stylesheet.
-- Make authentication a focused state rather than a card inside the lesson shell.
-- Move password visibility to an icon utility inside the field.
-- Reduce forgot-password to a tertiary action.
-- Improve focus, hover, pressed and loading feel.
+## Implementation sequence and current state
 
-Acceptance: no horizontal overflow at 390px; keyboard controls remain usable; password
-visibility retains accessible Show/Hide naming; existing auth behavior is unchanged.
+### UI-1 — Auth and tokens — implemented
 
-### UI-2 — Workspace hierarchy
+- Premium palette, radius, shadow and action tokens are layered over the known-good
+  Phase 1 stylesheet.
+- Authentication is a focused product state rather than a lesson-shell card.
+- Password visibility uses an inline icon utility inside both password fields.
+- Forgot-password is tertiary.
+- Focus, hover and pressed states are more coherent.
 
-- Quiet the sidebar and top bar.
-- Reduce card count/border density.
-- Increase content width and breathing room for the actual problem.
-- Convert the right rail into a calmer contextual tool area.
-- Normalize typography and iconography.
+Acceptance: 390px browser overflow check, keyboard controls and both password-toggle
+flows pass in real Chromium CI.
 
-### UI-3 — Learning feedback
+### UI-2 — Hint + source rail — implemented
 
-- Create distinctive but restrained states for saved progress, hint exposure,
-  submission, correct/revisit feedback, review scheduling, and XP.
-- Add small motion only where it communicates state change.
+This was intentionally refined before the broader shell.
 
-### UI-4 — Progress and identity
+- Mode selection is visually demoted to a compact system control.
+- Hints use a lime learning-assistance language with progressive numbered reveals.
+- Hint actions are tactile but quieter than primary task actions.
+- Source/resource access uses violet as the secondary learning accent.
+- The source card has visibly different locked and available states.
+- Revealed source content gets its own compact reading panel instead of expanding as
+  unstructured card text.
+- Help/resources share a coherent rail language while remaining semantically distinct.
 
-After real learner feedback, explore a light journey/progress layer: episode progress,
-practice rhythm, retrieval readiness, and bounded XP. Do not let these signals affect
-mastery claims or evidence quality.
+### UI-3 — Submission + XP feedback — implemented
+
+- The recap becomes a deliberate completion surface rather than another white card.
+- Feedback rows are easier to scan and visually anchored without pretending that one
+  exercise establishes mastery.
+- The future-review surface uses the violet retrieval/progression language.
+- Practice XP gets a bounded celebratory surface with lime emphasis, but remains
+  explicitly separate from mastery/evidence.
+- Evidence/checkpoint details remain available and visually quieter than the learning
+  summary.
+
+### UI-4 — Workspace + sidebar — implemented first pass
+
+- Desktop sidebar width and visual contrast are reduced.
+- The current journey step gets a restrained highlighted path treatment.
+- Practice status in the sidebar is grouped as a quiet progress surface rather than
+  another navigation item.
+- Top bar is shorter and less visually dominant.
+- Main learning width increases; the problem and response columns receive more space.
+- The contextual rail is wider but quieter and becomes sticky on large screens.
+- Core task/response cards retain enough containment for dense technical material while
+  using lighter borders/shadows than before.
+
+This is intentionally a first shell pass. Icon normalization and removal of additional
+uppercase metadata should happen after the live visual trial so we do not churn the
+entire interface before seeing the new hierarchy in use.
+
+### UI-5 — Progress and identity — after learner feedback
+
+Explore a light journey/progress layer: episode progress, practice rhythm, retrieval
+readiness, and bounded XP. Do not let these signals affect mastery claims or evidence
+quality. Avoid streak-pressure mechanics until there is evidence they improve the
+learning experience rather than merely increasing engagement.
+
+## Current product rule
+
+**Progress and reward moments may use color and depth; utility and system controls
+should become quieter.** Gamefulness should increase the felt consequence of learning
+actions, not the number of decorative objects on screen.
 
 ## Non-goals for this pass
 
