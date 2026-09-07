@@ -199,20 +199,26 @@ if (document.modelContext?.registerTool) {
     }, {signal: lifecycle.signal})).catch(() => {});
   } catch { /* Optional browser feature; normal UI remains available. */ }
 }
-function hidePassword() {
-  $("#login-password").type = "password";
-  $("#toggle-password").textContent = "Show password";
-  $("#toggle-password").setAttribute("aria-pressed", "false");
+function setPasswordVisibility(button, visible) {
+  const input = document.getElementById(button.dataset.passwordToggle);
+  if (!input) return;
+  input.type = visible ? "text" : "password";
+  button.textContent = visible ? "Hide password" : "Show password";
+  button.setAttribute("aria-pressed", String(visible));
 }
-$("#toggle-password").addEventListener("click", () => {
-  const show = $("#login-password").type === "password";
-  $("#login-password").type = show ? "text" : "password";
-  $("#toggle-password").textContent = show ? "Hide password" : "Show password";
-  $("#toggle-password").setAttribute("aria-pressed", String(show));
+function hidePassword(inputId) {
+  const button = document.querySelector(`[data-password-toggle="${inputId}"]`);
+  if (button) setPasswordVisibility(button, false);
+}
+document.querySelectorAll("[data-password-toggle]").forEach(button => {
+  button.addEventListener("click", () => {
+    const input = document.getElementById(button.dataset.passwordToggle);
+    setPasswordVisibility(button, input?.type === "password");
+  });
 });
 $("#sign-in-form").addEventListener("submit", async event => {
   event.preventDefault();
-  const button = $('#sign-in-form button[type="submit"]'); button.disabled = true; clearError(); hidePassword();
+  const button = $('#sign-in-form button[type="submit"]'); button.disabled = true; clearError(); hidePassword("login-password");
   try {
     await api("/api/auth/login", {email: $("#login-email").value, password: $("#login-password").value});
     $("#login-password").value = "";
@@ -250,7 +256,7 @@ $("#request-reset").addEventListener("click", async () => {
 });
 $("#reset-form").addEventListener("submit", async event => {
   event.preventDefault();
-  const button = $('#reset-form button[type="submit"]'); button.disabled = true;
+  const button = $('#reset-form button[type="submit"]'); button.disabled = true; hidePassword("new-password");
   try {
     if (!recovery?.access_token || !recovery?.refresh_token) throw new Error("Request a new reset link.");
     await api("/api/auth/reset-password", {...recovery, password: $("#new-password").value});
