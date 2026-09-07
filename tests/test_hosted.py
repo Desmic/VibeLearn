@@ -51,10 +51,18 @@ class HostedTests(unittest.TestCase):
     def post(self, path, body, **kwargs):
         return self.client.post(path, json=body, base_url=self.config["APP_ORIGIN"], headers={"Origin": self.config["APP_ORIGIN"], "X-Learning-Command": "1"}, **kwargs)
 
+    def post_with(self, client, path, body, config=None, **kwargs):
+        settings = config or self.config
+        return client.post(path, json=body, base_url=settings["APP_ORIGIN"], headers={"Origin": settings["APP_ORIGIN"], "X-Learning-Command": "1"}, **kwargs)
+
     def login(self):
         response = self.post("/api/auth/login", {"email": "owner@example.test", "password": "test-password"})
         self.assertEqual(response.status_code, 200)
         return response
+
+    @staticmethod
+    def answer(prediction="2, 1, 2", diagnosis="Persist one business-intent idempotency key and bind it to the payload.", aid="none"):
+        return {"prediction": prediction, "diagnosis": diagnosis, "aid_declaration": aid}
 
     def test_hosted_configuration_fails_closed(self):
         for change in ({"ALLOWED_EMAILS": ""}, {"APP_ORIGIN": "http://pilot.example.test"}, {"TESTING": False}):
@@ -184,6 +192,116 @@ class HostedTests(unittest.TestCase):
         self.login()
         resumed = self.post("/api/session", {}).json["attempt"]
         self.assertEqual(resumed["response"], body["response"])
+
+    def test_phase1_hosted_acceptance_contract_survives_app_restart(self):
+        # Mirrors the machine-verifiable parts of docs/PHASE-1.md in one continuous flow.
+        self.login()
+        started = self.post("/api/commands/start", {"command_id": str(uuid4()), "expected_revision": 0, "mode": "LEARN"}).json
+        answer = self.answer("1, 1, 1")
+        saved = self.post("/api/commands/save", {
+            "command_id": str(uuid4()), "expected_revision": started["revision"],
+            "attempt_id": started["id"], "response": answer,
+        }).json
+        self.assertEqual(saved["status"], "draft")
+        self.assertEqual(saved["response"], answer)
+
+        # Simulate a Render process restart: recreate the hosted app against the same database,
+        # then replay the still-valid browser cookie pair into a fresh Flask client.
+        session_cookie = self.client.get_cookie(COOKIE, domain="pilot.example.test").value
+        access_cookie = self.client.get_cookie(ACCESS_COOKIE, domain="pilot.example.test").value
+        restarted_app = create_app(self.config, self.auth)
+        restarted = restarted_app.test_client()
+        restarted.set_cookie(COOKIE, session_cookie, domain="pilot.example.test")
+        restarted.set_cookie(ACCESS_COOKIE, access_cookie, domain="pilot.example.test")
+        resumed = self.post_with(restarted, "/api/session", {}).json["attempt"]
+        self.assertEqual(resumed["id"], started["id"])
+        self.assertEqual(resumed["response"], answer)
+
+        current = self.post_with(restarted, "/api/commands/hint", {
+            "command_id": str(uuid4()), "expected_revision": resumed["revision"],
+            "attempt_id": resumed["id"], "response": answer,
+        }).json
+        self.assertEqual(len(current["hints"]), 1)
+        self.assertEqual(current["checkpoints"][0]["response"], answer)
+
+        current = self.post_with(restarted, "/api/commands/mode", {
+            "command_id": str(uuid4()), "expected_revision": current["revision"],
+            "attempt_id": current["id"], "response": answer, "mode": "PAIR",
+        }).json
+        current = self.post_with(restarted, "/api/commands/source", {
+            "command_id": str(uuid4()), "expected_revision": current["revision"],
+            "attempt_id": current["id"], "response": answer,
+        }).json
+        self.assertTrue(current["source"]["url"].startswith("https://aws.amazon.com/"))
+
+        final_answer = self.answer()
+        submitted = self.post_with(restarted, "/api/commands/submit", {
+            "command_id": str(uuid4()), "expected_revision": current["revision"],
+            "attempt_id": current["id"], "response": final_answer,
+        }).json
+        self.assertEqual(submitted["status"], "submitted")
+        self.assertEqual(submitted["assessment"]["outcome"], "correct")
+        self.assertEqual(submitted["assessment"]["independence"], "assisted")
+        self.assertIsNotNone(submitted["evidence"])
+        self.assertIsNotNone(submitted["review"])
+        self.assertGreaterEqual(len(submitted["checkpoints"]), 2)
+        self.assertEqual(submitted["reward"], 10)
+        self.assertEqual(submitted["practice_xp"], 10)
+
+        replay_session = restarted.get_cookie(COOKIE, domain="pilot.example.test").value
+        replay_access = restarted.get_cookie(ACCESS_COOKIE, domain="pilot.example.test").value
+        self.assertEqual(self.post_with(restarted, "/api/auth/logout", {}).status_code, 200)
+        restarted.set_cookie(COOKIE, replay_session, domain="pilot.example.test")
+        restarted.set_cookie(ACCESS_COOKIE, replay_access, domain="pilot.example.test")
+        self.assertEqual(self.post_with(restarted, "/api/session", {}).status_code, 401)
+
+        with transaction(self.path) as db:
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM evidence").fetchone()[0], 1)
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM rewards").fetchone()[0], 1)
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM reviews").fetchone()[0], 1)
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM hosted_sessions").fetchone()[0], 0)
+
+    def test_two_authorized_learners_are_isolated(self):
+        class MultiUserAuth:
+            def __init__(self):
+                self.identities = {
+                    "owner@example.test": {"id": str(uuid4()), "email": "owner@example.test"},
+                    "peer@example.test": {"id": str(uuid4()), "email": "peer@example.test"},
+                }
+
+            def login(self, email, password):
+                if password != "test-password" or email not in self.identities:
+                    raise service.DomainError("UNAUTHENTICATED", "Invalid credentials", 401)
+                return f"access:{email}", 3600
+
+            def user(self, token):
+                email = token.removeprefix("access:") if token.startswith("access:") else None
+                if email not in self.identities:
+                    raise service.DomainError("UNAUTHENTICATED", "Invalid token", 401)
+                return self.identities[email]
+
+        auth = MultiUserAuth()
+        config = self.config | {"ALLOWED_EMAILS": "owner@example.test,peer@example.test"}
+        app = create_app(config, auth)
+        owner = app.test_client()
+        peer = app.test_client()
+        self.assertEqual(self.post_with(owner, "/api/auth/login", {"email": "owner@example.test", "password": "test-password"}, config).status_code, 200)
+        self.assertEqual(self.post_with(peer, "/api/auth/login", {"email": "peer@example.test", "password": "test-password"}, config).status_code, 200)
+
+        owner_attempt = self.post_with(owner, "/api/commands/start", {"command_id": str(uuid4()), "expected_revision": 0, "mode": "LEARN"}, config).json
+        owner_saved = self.post_with(owner, "/api/commands/save", {
+            "command_id": str(uuid4()), "expected_revision": owner_attempt["revision"],
+            "attempt_id": owner_attempt["id"], "response": self.answer(),
+        }, config).json
+        self.assertEqual(owner_saved["response"], self.answer())
+        self.assertIsNone(self.post_with(peer, "/api/session", {}, config).json["attempt"])
+
+        cross_write = self.post_with(peer, "/api/commands/save", {
+            "command_id": str(uuid4()), "expected_revision": owner_saved["revision"],
+            "attempt_id": owner_saved["id"], "response": self.answer("0, 0, 0"),
+        }, config)
+        self.assertEqual(cross_write.status_code, 404)
+        self.assertEqual(self.post_with(owner, "/api/session", {}, config).json["attempt"]["response"], self.answer())
 
     def test_logout_revokes_replayed_cookie_pair(self):
         self.login()
