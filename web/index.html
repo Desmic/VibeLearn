@@ -15,7 +15,7 @@
 <p>Your saved answers and feedback will be here when you return.</p>
 <form id="sign-in-form"><label for="login-email">Email</label><input id="login-email" type="email" autocomplete="username" maxlength="320" required>
 <label for="login-password">Password</label><input id="login-password" type="password" autocomplete="current-password" maxlength="4096" required>
-<button id="toggle-password" class="secondary" type="button" aria-controls="login-password" aria-pressed="false">Show password</button>
+<button id="toggle-password" class="secondary" type="button" aria-controls="login-password" aria-pressed="false" data-password-toggle="login-password">Show password</button>
 <button class="primary" type="submit">Sign in</button></form>
 <button id="request-reset" class="secondary" type="button">Forgot password?</button>
 <p class="muted">Use the confirmed account set up for this private pilot.</p>
@@ -23,6 +23,7 @@
 <section id="password-reset" class="card sign-in-card" hidden>
 <h2>Choose a new password</h2><p>Your saved work will stay with your account.</p>
 <form id="reset-form"><label for="new-password">New password</label><input id="new-password" type="password" autocomplete="new-password" minlength="6" maxlength="4096" required>
+<button id="toggle-reset-password" class="secondary" type="button" aria-controls="new-password" aria-pressed="false" data-password-toggle="new-password">Show password</button>
 <button class="primary" type="submit">Save new password</button></form>
 <p id="reset-status" role="status"></p></section>
 <section id="entry" class="entry card" hidden><div><p class="eyebrow">YOUR NEXT CHALLENGE</p><h2>Can you make the side effect happen just once?</h2><p>Read three execution traces. Predict their outcome, then explain what you would change in the agent's retry contract.</p><p class="muted">This is focused practice. Your engineering background helps set the starting point; it does not count as evidence of mastery.</p></div><div class="entry-controls"><label for="start-mode">How do you want to work?</label><select id="start-mode"><option>LEARN</option><option>PAIR</option><option>BUILD</option></select><p id="entry-mode-description" class="muted"></p><button id="start" class="primary">Begin investigation <span>↗</span></button></div></section>
