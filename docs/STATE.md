@@ -1,229 +1,61 @@
-# Current checkpoint — private hosted pilot + story-first game campaign
+# Current checkpoint — Phase 1 expedition refinement, not accepted
 
-## Latest product decision — 8 September 2026
+## Latest user instruction — 8 September 2026
 
-**Phase 1 is not accepted.** The user's current score is **6.5/10**: the
-experience does not feel sufficiently like a game. The later agent review scored
-**7.5/10**, also below 8. Earlier 8.8/9.1 reviews below are historical and do not
-approve the current experience.
+Continue research and implementation until a **genuinely separate game critic** rates the actual experience **>=9.0/10**, then return it to the user for final product review. The critic must judge it **as a game that even a kid or young adult would voluntarily engage with**, not as an educational website, engineering demo or checklist.
 
-For this stage, the user is the product critic and Codex is the agent critic.
-Refine privately before presenting to other testers. Acceptance requires both
-critics to score at least 8/10, with no critical blocker; an agent score cannot
-overrule user rejection.
+The controlling amendment is [GAME-ACCEPTANCE-9.md](GAME-ACCEPTANCE-9.md). It supersedes active-document references to 8/10, the earlier documentation-only stop and same-agent fallback acceptance. The eight rubric weights are unchanged. Both younger non-specialist and older teen/young-adult engagement lenses must pass; XP-hidden play, curiosity, agency, setbacks, meaningful consequences, an ending and genuine replay are mandatory observations. Do not invent age-group enjoyment evidence.
 
-The adopted direction and research are in the **Expedition adventure refinement**
-section of `GAME-UX-SYSTEM.md`. It extracts useful principles from Expedition 33,
-The Witcher 3 and Breath of the Wild: character investment, consequential
-decisions, curiosity, consistent interactive rules and satisfying feedback.
-The proposed missing-delivery expedition is a working reference concept, not an
-implemented replacement or a mandatory theme for all subjects.
+**Phase 1 is still not accepted.** Last established product judgments remain user **6.5/10** and later agent **7.5/10** for the older shopping campaign. Historical 8.8/9.1 reviews are not reusable. No score has been assigned to the new expedition by an independent agent, and the user has not reviewed it.
 
-Latest instruction: **update required documentation and stop**. This amendment
-does not implement, deploy or rescore a build, open Phase 2/3, or initiate testing
-with other people.
+## Current implementation branch
 
-VibeLearn is deployed as a private pilot on Render Free with Supabase Free. The active
-Render service is `https://vibelearn-4xws.onrender.com`, built from
-`deploy/render-supabase`. Hosted mode uses Flask/Gunicorn, PostgreSQL, Supabase Auth,
-an explicit email allowlist, Secure/HttpOnly/SameSite=Strict cookies, and the private
-`vibelearn` PostgreSQL schema.
+- Repository: `Desmic/VibeLearn`.
+- Isolated branch: `game/expedition-nine-gate`; draft PR **#2** targets `deploy/render-supabase`.
+- First complete expedition implementation commit: `a5c0361450cb365ecd024262f8f742f3f0c9a017`.
+- The live Render deployment branch is unchanged. No deployment or database migration is part of this candidate commit.
+- This is Phase 1 gameplay refinement, not Phase 2 reuse or Phase 3 course generation. No external testers or paid provisioning were initiated.
 
-Supabase migrations applied:
+The original shopping-agent activity and four-mission campaign retain their exact content and IDs. The new expedition has separate pinned activity/frame/family identities. Old clears do not certify new missions. Historical attempts remain readable, and the earlier UI is available at `/?legacy=1`.
 
-- `20260907073952_vibelearn_hosted_schema`
-- `20260907102455_harden_hosted_schema_access`
-- `20260907102517_cover_hosted_foreign_keys`
+## Implemented candidate — The Missing Delivery
 
-The runtime connects through restricted `vibelearn_login` -> `vibelearn_app`. Learner
-tables have forced learner-scoped RLS. `schema_migrations` is RLS-protected with an
-app-only read policy. `anon` and `authenticated` have no schema USAGE or application
-table grants. No service-role key is used for learner authentication.
+The player helps Pip, a small courier stranded beside a broken bridge, get exactly one repair gear through a storm. A central illustrated valley replaces the new campaign's trace-and-answer screen. Actions send an order, retry a ticket, restart Pip, recover the journal ticket, advance the memory clock, inspect the order register and collect the gear. A wrong retry can visibly create two gears; a rehearsal rewind preserves the run's earlier move/help history.
 
-The pre-existing `public.rls_auto_enable()` SECURITY DEFINER helper still powers its
-event trigger, but direct EXECUTE from `PUBLIC`, `anon`, and `authenticated` is
-revoked. Supabase's remaining security-advisor warning is leaked-password protection;
-that remains acceptable only for the current disposable private pilot.
+The five-stop curve is:
 
-## Verified hosted infrastructure and live evidence
+1. Send an order; lose the reply; safely retry the remembered ticket.
+2. Restart the courier; discover why a new worker ticket duplicates the order; recover durable intent.
+3. Outlast the workshop's retry memory; consult the separate durable order register instead of retrying blindly.
+4. Construct four courier rules and execute them against seven disruptions, including exact expiry, changed details and unavailable records. `Keep retrying forever` cannot clear this boss merely because old quiz counts were correct.
+5. A working detour changes retention to two hours and loses the original request rather than just its reply. Authoritative absence with no in-flight request changes the safe action.
 
-- Render serves `/`, static assets, `/api/config`, and `/api/health` successfully.
-- PostgreSQL boundary checks pass learner isolation, composite ownership references,
-  immutable submissions/history, reward deduplication, JSON lookup, and denial of
-  unscoped reads.
-- Password recovery and real hosted password login succeeded.
-- Real hosted attempts/submissions exist with evidence, a future review need, and the
-  bounded one-time Phase 1 practice reward.
-- A real Render process replacement was followed by HTTP 200 from `/api/session` in
-  the same learner browser, establishing hosted state/session survival across deploy.
-- Real hosted sign-out returned HTTP 200 and the learner observed the UI returning to
-  signed-out state. Automated replayed-cookie rejection independently verifies that a
-  revoked application session cannot be reused.
-- The consolidated hosted acceptance test covers login -> start -> save -> hosted app
-  recreation -> resume -> hint/mode/source -> submit -> evidence/review/XP ->
-  logout/replayed-cookie rejection.
-- Automated two-authorized-learner plus PostgreSQL RLS tests verify learner isolation.
+World truth (gears made) and the courier's knowledge are separately visible. Boss success repairs the bridge and opens the detour. Optional sound starts off; visible feedback and reduced-motion equivalents remain required. XP can be hidden without changing gameplay. All this is implemented candidate behavior, not a claim that the game is enjoyable enough for acceptance.
 
-## Product direction — game-first and story-first
+## Evidence and verification status
 
-The earlier premium/slightly-gameful pass was rejected as still feeling like a website.
-The first HUD campaign materially improved game identity but learner testing then found
-that **course comprehension and progression behavior were still not good enough**.
-The active direction is therefore:
+Local build succeeded. **54 non-hosted Python tests passed**, including 17 expedition tests: full routes, both failure mechanisms, all 16 complete policy combinations, unsafe indefinite retry, append-only saved moves, rehearsal recovery, real SQLite persistence, server locks, idempotent commands/rewards and learner isolation. Full hosted/PostgreSQL checks require dependencies provided by the project CI; local results alone do not establish that gate.
 
-**story/intuitive model -> direct play -> formal vocabulary -> harder reasoning**
+The candidate adds a real Chromium expedition journey alongside the unchanged legacy journey. It exercises saving/reload/actual process restart, a deliberate duplicate and rewind, unsafe/safe boss policies, the ending/detour, a dropped acknowledgement after a real commit, 320/390px touch sessions, actual 200% text enlargement, reduced motion and isolation. Its screenshots, trace and JSON report are CI artifacts. **At this documentation checkpoint, the first integrated CI/browser run is not yet claimed as passed.** Consult the subsequent verification record or the exact commit's run, not a historical green run.
 
-The target is a learning game whose interface and story teach serious concepts, not a
-website with game labels and not a shallow metaphor that replaces rigor.
+Local Chromium navigation was blocked by an administrator policy. That local run is not game evidence; no policy bypass was attempted. CI is the separate normal project verification environment.
 
-The current Retry Control chapter now uses a concrete Shopping Agent story as its
-reference teaching world: the learner asks an agent to buy one 5 kg dumbbell, the
-purchase succeeds, the receipt/acknowledgement disappears, and the agent may retry.
-Simple causal story beats establish what happened and what the learner must decide
-before the technical request IDs, retention window, and retry contract are introduced.
-The story is an activity revision; prior submitted snapshots/evidence remain immutable.
+## Independent-critic blocker
 
-The four-mission confidence curve remains server-enforced:
+A real `@codex` read-only game-critic request was posted to PR #2, explicitly requiring rendered gameplay, the two audience lenses, fixed weights, raw scores and honest refusal to certify from source alone.
 
-1. **Tutorial — The missing receipt:** one purchase, one retry, one outcome choice.
-2. **Easy — A new ticket, a second charge:** contrast business intent with a fresh
-   worker/request identity while keeping the interaction simple.
-3. **Medium — The store forgot:** introduce the retention boundary, two decisions,
-   first short explanation, PAIR and Intel.
-4. **Boss — Shopping Agent incident:** recombine identity, retention and contract
-   design after those mechanics have already been taught.
+The `chatgpt-codex-connector[bot]` replied that a **Codex cloud environment for this repository must be created** before it can run. See PR #2 comments `5588960891` (request) and `5588963309` (bot reply). No critic report was produced.
 
-Difficulty must rise through reasoning demand, not through unexplained jargon or larger
-forms. The campaign map still uses real server-side locks; only a correct pinned result
-clears the learning gate. XP is motivational feedback only and cannot establish mastery
-or unlock a competency gate by itself.
+Current acceptance state: **`independent_critic_pending`**. Independent score: **null**. Creating a Codex environment for `Desmic/VibeLearn` is the prerequisite for that integration. A same-agent QA pass or a green test suite cannot substitute for the requested separate critic. Do not claim the target has been reached, and do not deploy as accepted.
 
-## Learner-feedback defects fixed in the current candidate
+## Learning and infrastructure invariants
 
-### 1. Narrative and objective clarity
+Every command resolves the learner, uses a command ID and expected revision, and replays the pinned game model on the server. Saved moves cannot be rewritten. Simulated feedback is recorded as assistance before claiming a guided result; an empty pre-feedback checkpoint remains `not_observed`, not failed. Prose is ungraded. XP never determines correctness, mastery, freshness or competency unlocking. The policy boss validates only the declared bounded cases, not arbitrary real-world system safety.
 
-- Each mission exposes a plain-language objective in the campaign briefing/HUD.
-- Mission content carries explicit causal `story` beats rather than relying only on a
-  technical trace/table.
-- The playfield renders those beats sequentially so motion communicates cause/effect.
-- Reduced-motion preserves the same information without depending on animation.
-- Formal retry/idempotency vocabulary is layered on after the intuitive situation is
-  understandable.
+The pilot remains Render Free + Supabase Free, using the private `vibelearn` schema, restricted PostgreSQL roles, learner-scoped RLS, verified Supabase identity, HTTPS and an explicit email allowlist. No schema, Auth settings, allowlist or production learner data was changed for this refinement. Read [HOSTING.md](HOSTING.md) for operating boundaries.
 
-The generator contract now treats this as **narrative before abstraction** when a
-faithful scenario is feasible. Fantasy, real-life, simulation, investigation, repair,
-adventure, or other worlds may be used; the specific dumbbell story is only a reference.
+The exact prior checkpoint, infrastructure evidence, migration IDs, previous reviews and older phase decisions are preserved unchanged in [history/STATE-before-nine-20260908.md](history/STATE-before-nine-20260908.md). Its earlier acceptance thresholds and stop instruction are historical, not current.
 
-### 2. Assistance / independence semantics
+## Course-generation inheritance
 
-`Not declared` no longer collapses into `assisted`.
-
-Current evidence interpretation distinguishes:
-
-- `unknown`: the learner did not declare external-help status and no current observed
-  in-game aid was used;
-- `declared_independent`: the learner explicitly declared no external help and no
-  current observed aid was used;
-- `assisted`: a current-attempt hint/source/worked example was observed or external
-  help was explicitly declared;
-- `previously_exposed`: the learner has prior family feedback/exposure, without falsely
-  claiming that current-attempt help was used.
-
-Prior exposure still prevents an independent/fresh-evidence claim where appropriate,
-but it is no longer mislabeled as current assistance.
-
-### 3. Progression focus
-
-After a correct clear, returning to the campaign now automatically focuses/selects the
-**highest newly unlocked mission**. After a failed attempt, the current mission remains
-the expected retry target. When the chapter is fully cleared, the highest completed
-node remains selected. This behavior is covered by the real browser journey.
-
-## Verification, critic gate and deployment
-
-The story-first candidate passed GitHub Actions `Verify hosted pilot` run 148
-(`34222243777`):
-
-- build passed;
-- **59 Python/hosted/PostgreSQL tests** passed;
-- full Chromium campaign journey passed with no page errors;
-- browser coverage includes the shopping story/plain goal, story beats, server locks,
-  unknown/declaration/assisted semantics, next-level auto-focus, save -> reload resume,
-  actual process restart, source/help recording, boss lost-ack retry, 390px viewport,
-  200% text enlargement, learner isolation, and reduced motion.
-
-`docs/GAME-UX-REVIEW.md` now contains a narrative/comprehension pre-gate. The historical
-8.8/10 HUD-shell review is explicitly not reusable for this candidate. An earlier critic
-pass scored the story-first candidate **9.1/10**, with no critical blocker then observed.
-That historical assessment is superseded for product acceptance by the later
-7.5/10 agent review and 6.5/10 user assessment. Remaining debt includes residual card/table ancestry, limited
-sound/haptic payoff, and the need for real learner judgment of whether the story actually
-improves understanding.
-
-The documentation head `4f65fc8e20d847a2db294854f9baf5528cd1fbe2` passed
-`Verify hosted pilot` run 156 and was manually deployed to Render as
-`dep-dag0t2ad0e5s73ecfet0`. Render reports that deploy **live**. This head contains the
-same green story-first runtime plus the updated architecture/checkpoint documentation.
-
-## Architectural decision — generated courses are playable teaching systems
-
-`docs/COURSE-GENERATION-GAME-SYSTEM.md` is an authoritative amendment to the active
-root implementation plan for future Phase 3+ course generation.
-
-Course generation must produce one coherent versioned package containing:
-
-- source-grounded competency/frame coverage and assessment bindings;
-- a chapter/world premise and plain-language learner objective;
-- a story/intuitive-model plan when a faithful scenario can improve comprehension;
-- causal story/visual beats mapped to the assessed mechanism;
-- a real confidence/difficulty curve: teach -> easy success -> variation -> combine ->
-  boss -> release -> new mechanic;
-- mission interactions chosen to embody the learning operation rather than defaulting
-  to forms/textareas;
-- HUD/tool exposure and progressive interface disclosure;
-- assistance semantics that distinguish unknown, observed help and prior exposure;
-- predictable progression focus after clear/failure;
-- reward/unlock semantics separated from evidence/mastery;
-- state-driven motion/feedback plus reduced-motion/accessibility requirements;
-- persistence/resume and learner isolation;
-- generated executable invariants/test fixtures;
-- structural/learning, grounding/content, accessibility and game-UX critic reports.
-
-A generated course cannot self-certify. The game-UX/comprehension critic must score
-**>= 8.0/10 with no critical blocker**, in addition to the other pass/fail validators.
-Prefer a genuinely separate critic agent/model configuration where the harness supports
-it; otherwise use a separately prompted frozen-rubric pass and record that limitation.
-Automatic repair is bounded; a candidate that still fails remains `draft_needs_review`.
-
-The root `CODEX-IMPLEMENTATION-PLAN.md` Phase 3 section was amended so the original
-course-generation milestone itself now requires these story/game/progression/evidence
-properties. The checksummed `learning-os-design-package-v1.3/` remains historical input
-and is intentionally not rewritten in place.
-
-## Remaining product acceptance
-
-- Resume implementation only on a subsequent instruction; this increment is docs only.
-- Refine the Phase 1 experience using the implementation order in `GAME-UX-SYSTEM.md`.
-- Review changed builds with the user and Codex using `GAME-UX-REVIEW.md`; record
-  actual behavior, unresolved defects and separate scores.
-- Keep external testing deferred until the user judges the experience ready.
-- Before broader activation, retain the existing hosted isolation and operational
-  acceptance requirements. No additional account or external test is requested now.
-
-## Phase boundary
-
-The current campaign remains Phase 1 product refinement/scaffolding of the reliable-
-retry learning material. It is **not** implementation of Phase 2 knowledge reuse or
-Phase 3 adaptive course generation. The generation requirements above are architecture
-now and implementation later when that phase is explicitly opened. Historical Phase 1
-evidence remains valid and immutable.
-
-## Remaining cleanup before broader use
-
-- Align the actual Render service health-check path with `/api/health` if it still uses
-  the root path.
-- Enable stronger Supabase password protections before moving beyond disposable pilot
-  credentials.
-
-Keep PR #1 draft until the story-first live experience has learner feedback and the
-second real-account isolation acceptance is complete.
+Future generated courses must inherit the learning, story, direct-play, progression, assistance, persistence and accessibility contracts in [COURSE-GENERATION-GAME-SYSTEM.md](COURSE-GENERATION-GAME-SYSTEM.md), **with the newer youth-engagement and separate >=9.0 gate in GAME-ACCEPTANCE-9.md overriding older thresholds**. A generated manifest cannot certify its own rendered game. Failed bounded repairs remain drafts. The checksummed `learning-os-design-package-v1.3/` stays unchanged.

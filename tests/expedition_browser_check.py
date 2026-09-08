@@ -18,7 +18,8 @@ def main():
         context = browser.new_context(viewport={'width': 1440, 'height': 1000})
         context.tracing.start(screenshots=True, snapshots=True, sources=True)
         page = context.new_page(); page.on('pageerror', lambda e: errors.append(str(e)))
-        def shot(name): page.screenshot(path=str(artifacts / name), full_page=True)
+        def shot(name):
+            page.evaluate('window.scrollTo(0, 0)'); page.screenshot(path=str(artifacts / name), full_page=True)
         def move(action):
             page.locator(f'[data-action="{action}"]').click()
             expect(page.locator('#hud-save-value')).to_have_text('Synced')
@@ -109,8 +110,18 @@ def main():
                     before_text = mp.locator("#exp-feedback").evaluate("n => parseFloat(getComputedStyle(n).fontSize)")
                     mp.evaluate("document.documentElement.style.fontSize='200%'")
                     assert mp.locator("#exp-feedback").evaluate("n => parseFloat(getComputedStyle(n).fontSize)") >= before_text * 1.99
-                    assert mp.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                    mp.evaluate('window.scrollTo(0, 0)')
                     mp.screenshot(path=str(artifacts / 'expedition-text-200.png'), full_page=True)
+                    overflow = mp.evaluate("""() => [...document.querySelectorAll('body *')].map(n => {
+                        const r=n.getBoundingClientRect(); return {tag:n.tagName, id:n.id,
+                        className:n.getAttribute('class'), left:r.left, right:r.right, width:r.width};
+                    }).filter(n => n.width && (n.left < -1 || n.right > innerWidth + 1))""")
+                    (artifacts/'expedition-overflow-diagnostic.json').write_text(json.dumps(overflow, indent=2))
+                    assert mp.evaluate('document.documentElement.scrollWidth <= innerWidth'), overflow
+                    mp.locator('[data-action="retry"]').tap()
+                    expect(mp.locator('#exp-knowledge')).to_contain_text('Gear confirmed')
+                    mp.locator('[data-action="collect"]').tap()
+                    expect(mp.locator('#exp-submit')).to_be_enabled()
                 isolated = mp.evaluate("async () => (await fetch('/api/state')).json()")
                 assert isolated['learner_id'] != state['learner_id']
                 assert isolated['course']['expedition'][1]['status'] == 'locked'
