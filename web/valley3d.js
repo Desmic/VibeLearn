@@ -38,7 +38,6 @@ export function createValley() {
     if (resolve) { g.userData.resolve = resolve; objects.push(g); }
     return g;
   }
-  // Small authored diorama, not an expensive open world or an imported asset pack.
   for (const x of [-6,6]) {
     mesh(scene,box,colors.rock,x,-1.6,0,8,3,8);
     mesh(scene,box,colors.grass,x,0,0,8,.35,8);
@@ -48,7 +47,7 @@ export function createValley() {
     const x = (i-4)*3.4, z=-7-(i%3), height=3+(i%4);
     mesh(scene,cone,colors.rock,x,height/2-1,z,3,height,3);
   }
-  for (const [x,z] of [[-8,-2],[-7,2],[-9,0],[8,-3],[9,2],[5,-3]]) {
+  for (const [x,z] of [[-9,-3],[-8,-3],[-9,0],[8,-3],[9,-2],[5,-3]]) {
     mesh(scene,cylinder,colors.wood,x,.8,z,.12,1.6,.12);
     mesh(scene,cone,colors.grass,x,2,z,.9,2.5,.9);
   }
@@ -69,14 +68,14 @@ export function createValley() {
   const post=group('Send post',-3,.2,-1,s=>['send','retry'].find(a=>s.available?.includes(a)));
   mesh(post,box,colors.wood,0,.65,0,.2,1.3,.2);
   mesh(post,box,colors.paper,0,1.45,0,.85,.6,.2);
-  const journal=group('Journal',-7,.3,1.2,s=>s.available?.includes('restore')?'restore':null);
+  const journal=group('Journal',-6.7,.3,2.4,s=>s.available?.includes('restore')?'restore':null);
   mesh(journal,box,colors.wood,0,.08,0,1.2,.25,.85);
   mesh(journal,box,colors.paper,0,.23,0,1.08,.06,.75);
   const clock=group('Memory clock',-6,.3,-2,s=>s.available?.includes('wait')?'wait':null);
   const dial=mesh(clock,cylinder,colors.paper,0,.8,0,.6,.2,.6); dial.rotation.x=Math.PI/2;
   mesh(clock,box,colors.dark,0,.95,.15,.06,.35,.03);
   mesh(clock,box,colors.wood,0,.2,0,.2,.5,.2);
-  const register=group('Order register',8,.3,1,s=>s.available?.includes('inspect')?'inspect':null);
+  const register=group('Order register',7.7,.3,2.8,s=>s.available?.includes('inspect')?'inspect':null);
   mesh(register,box,colors.wood,0,.4,0,1,.8,.7);
   for (let i=0;i<3;i++)mesh(register,box,colors.paper,0,.3+i*.2,.36,.75,.07,.04);
   const ticket=group('New ticket press',-8,.3,-.4,s=>s.available?.includes('new_ticket')?'new_ticket':null);
@@ -162,9 +161,10 @@ export function createValley() {
     },
     setBusy(value){locked=value || lost;},
     stats(){return {revision:THREE.REVISION,drawCalls:renderer.info.render.calls,geometries:renderer.info.memory.geometries,pixelRatio:renderer.getPixelRatio(),contextLost:lost};},
-    // Project the actual object center for deterministic tests; never a model command API.
     screenPoint(name) {
       const g=objects.find(o=>o.name===name);if(!g)throw new Error('Unknown scene object');
+      draw();
+      scene.updateMatrixWorld(true);
       const p=g.getWorldPosition(new THREE.Vector3());p.y+=.6;p.project(camera);
       const r=canvas.getBoundingClientRect();return {x:r.left+(p.x+1)*r.width/2,y:r.top+(1-p.y)*r.height/2};
     },

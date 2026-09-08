@@ -23,6 +23,13 @@ def main():
         def action(name):
             page.locator(f'[data-action="{name}"]').click()
             expect(page.locator('#hud-save-value')).to_have_text('Synced')
+        def pick(name):
+            # A pointer cannot select a mesh behind the sticky HUD. Bring the
+            # scene into view exactly as a player would, then use its projection.
+            page.locator('.valley-canvas').evaluate("n => n.scrollIntoView({block:'center'})")
+            point=page.evaluate('(name) => window.Expedition.scenePoint(name)', name)
+            assert page.evaluate('(p) => document.elementFromPoint(p.x,p.y)?.classList.contains("valley-canvas")', point), point
+            page.mouse.click(point['x'],point['y'])
         def finish():
             page.locator('#exp-submit').click();expect(page.locator('.exp-resolution')).to_be_visible()
             page.locator('#exp-continue').click();page.locator('#exp-launch').click()
@@ -33,22 +40,19 @@ def main():
             initial=page.evaluate('window.Expedition.sceneStats()')
             assert initial['revision']=='180' and initial['drawCalls']>0
             shot('review-three-first.png')
-            # Use a actual projected 3D object and pointer raycast, not command mocks.
-            point=page.evaluate("window.Expedition.scenePoint('Send post')")
-            page.mouse.click(point['x'],point['y'])
+            # Actual projected 3D objects and pointer raycasts, not command mocks.
+            pick('Send post')
             expect(page.locator('#exp-parts')).to_have_text('1 gear made')
             expect(page.locator('#exp-knowledge')).to_contain_text('No confirmation')
             expect(page.locator('#hud-save-value')).to_have_text('Synced')
             shot('review-three-send.png')
             canvas_count=page.locator('canvas.valley-canvas').count();assert canvas_count==1
             checks.append('Pinned Three.js rendered; selecting the send-post mesh commits one real action; uncertain knowledge remains distinct.')
-            # The equivalent controls remain keyboard operable even after repaint.
             page.locator('[data-action="retry"]').focus();page.keyboard.press('Enter')
             expect(page.locator('#exp-knowledge')).to_contain_text('Gear confirmed')
             expect(page.locator('[data-action="collect"]')).to_be_focused()
             action('collect');finish()
-            action('send');action('restart')
-            point=page.evaluate("window.Expedition.scenePoint('Journal')");page.mouse.click(point['x'],point['y'])
+            action('send');action('restart');pick('Journal')
             expect(page.locator('#exp-ticket')).to_have_text('order-01')
             action('retry');action('collect');finish()
             action('send');action('wait');action('inspect');action('collect');finish()
@@ -71,7 +75,6 @@ def main():
             page.locator('summary',has_text='Inspect the completed storm engine').click()
             shot('review-three-ending.png')
             checks.append('Numbered boss rules stay ordered; unsaved choice survives map attempt/reload; ending precedes optional technical postmortem.')
-            # Real context-loss event; the regular semantic controls continue working.
             page.locator('#exp-continue').click();page.locator('#exp-launch').click()
             expect(page.locator('.has-three canvas')).to_be_visible()
             page.evaluate("document.querySelector('.valley-canvas').getContext('webgl2').getExtension('WEBGL_lose_context').loseContext()")
@@ -81,7 +84,6 @@ def main():
             checks.append('Actual WebGL context loss restores the illustrated scene; detour remains playable without 3D.')
             assert not [u for u in requests if not u.startswith(url)], requests
             checks.append('All learner-session network requests remain same-origin; no runtime CDN dependency.')
-            # A module-load failure is failure injection, not a successful API mock.
             fallback=browser.new_context(viewport={'width':390,'height':844},reduced_motion='reduce',has_touch=True)
             fp=fallback.new_page();fp.route('**/valley3d.js',lambda route:route.abort('failed'))
             fp.goto(url+'/?world=3d');fp.locator('#exp-launch').click()
