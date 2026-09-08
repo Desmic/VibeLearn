@@ -1,7 +1,7 @@
-# Current checkpoint — private hosted pilot
+# Current checkpoint — private hosted pilot + game-first campaign
 
-VibeLearn is deployed as a private pilot on Render Free with Supabase Free.
-The active Render service is `https://vibelearn-4xws.onrender.com`, built from
+VibeLearn is deployed as a private pilot on Render Free with Supabase Free. The active
+Render service is `https://vibelearn-4xws.onrender.com`, built from
 `deploy/render-supabase`. The hosted app uses Flask/Gunicorn, PostgreSQL, Supabase
 Auth, an explicit email allowlist, Secure/HttpOnly/SameSite=Strict cookies, and the
 private `vibelearn` PostgreSQL schema.
@@ -20,77 +20,109 @@ key for learner authentication.
 
 The pre-existing `public.rls_auto_enable()` SECURITY DEFINER helper still powers its
 event trigger, but direct EXECUTE access from `PUBLIC`, `anon`, and `authenticated`
-has been revoked. Supabase's security advisor now reports only leaked-password
-protection being disabled; that is intentionally left unchanged for the current
-disposable private pilot.
+has been revoked. Supabase's security advisor reports leaked-password protection being
+disabled; that remains acceptable only for the current disposable private pilot.
 
-The advisor-reported uncovered foreign keys are also fixed with covering indexes on
+The advisor-reported uncovered foreign keys are fixed with covering indexes on
 `assistance(attempt_id, learner_id)`, `checkpoints(attempt_id, learner_id)`, and
-`evidence(attempt_id, learner_id)`. Remaining performance notices are only unused-index
-observations on the small pilot database; no indexes are being removed on that basis.
+`evidence(attempt_id, learner_id)`.
 
-## Verified hosted infrastructure and acceptance evidence
+## Verified hosted infrastructure and live evidence
 
-- Render deployment is live and serves `/`, static assets, `/api/config`, and
-  `/api/health` successfully.
-- The hosted-pilot GitHub branch has green `Verify hosted pilot` CI, including build,
-  Python tests, disposable PostgreSQL application tests, Chromium installation, and
-  browser scenarios.
-- PostgreSQL boundary checks passed learner isolation, composite ownership references,
+- Render serves `/`, static assets, `/api/config`, and `/api/health` successfully.
+- PostgreSQL boundary checks pass learner isolation, composite ownership references,
   immutable submissions/history, reward deduplication, JSON lookup, and denial of
   unscoped reads.
-- Password recovery completed successfully and the live hosted login returned HTTP
-  200. PostgreSQL now contains one real learner and one active hosted application
-  session.
-- Two real hosted attempts were started and submitted. PostgreSQL contains two
-  submitted attempts, two evidence rows, one review need, and exactly one 10-XP reward;
-  the repeated attempt earned no second reward.
-- A real Render process replacement completed and the same mobile browser subsequently
-  received HTTP 200 from `/api/session` on the new instance, establishing live session
-  and learner-state survival across that deploy.
-- The automated hosted acceptance contract now covers login → start → save → hosted
-  app recreation → resume → hint/mode/source → submit → evidence/review/XP → logout
-  and replayed-cookie rejection in one continuous test.
-- A separate automated two-authorized-learner test verifies that one learner cannot
-  read or mutate the other's attempt. PostgreSQL RLS and service-level isolation tests
-  provide independent coverage of the same boundary.
-- Login and reset password fields share the reusable inline visibility control with
-  keyboard operation and `aria-pressed` state; the real-browser CI test covers both.
-- The premium/slightly-gameful UI direction is adopted in `docs/UI-UX-DIRECTION.md`.
-  The learner has reviewed the current live UI and considers it good enough to keep
-  refining incrementally as product work continues.
+- Password recovery and real hosted password login succeeded.
+- Real hosted attempts/submissions exist with evidence, a future review need, and the
+  bounded one-time Phase 1 practice reward.
+- A real Render process replacement was followed by HTTP 200 from `/api/session` in
+  the same learner browser, establishing hosted state/session survival across deploy.
+- Real hosted sign-out returned HTTP 200 and the learner observed the UI returning to
+  signed-out state. Automated replayed-cookie rejection independently verifies that a
+  revoked application session cannot be reused.
+- The consolidated automated hosted acceptance contract covers login -> start -> save
+  -> hosted app recreation -> resume -> hint/mode/source -> submit ->
+  evidence/review/XP -> logout/replayed-cookie rejection.
+- Automated two-authorized-learner plus PostgreSQL RLS tests verify learner isolation.
 
-## Remaining hosted acceptance
+## Game-first direction — reviewed candidate
 
-The remaining live checks are now narrow:
+The earlier premium/slightly-gameful pass was rejected as still feeling like a website.
+The active product direction is now documented in `docs/GAME-UX-SYSTEM.md`: **HUD-first,
+game-first technical learning**. `docs/UI-UX-DIRECTION.md` is historical context where
+it conflicts with the newer game UX docs.
 
-1. Save a real draft before submission, reload the page, and verify the same draft
-   resumes from PostgreSQL. The equivalent automated hosted acceptance test passes.
-2. Sign out from the real hosted browser and verify the protected session is revoked.
-   Automated replayed-cookie rejection passes.
+The retry topic is scaffolded into a four-mission chapter while preserving the original
+Phase 1 activity/evidence as immutable historical data:
+
+1. **Tutorial — Replay, don't repay:** one retained-key trace and one direct outcome
+   choice; LEARN only.
+2. **Easy — The key changed:** one changed-key trace and one direct outcome choice;
+   LEARN only.
+3. **Medium — The record expired:** two outcome choices plus a short explanation;
+   PAIR and Intel/source interaction are introduced here.
+4. **Boss — The retry that charged twice:** three traces plus the full retry-contract
+   diagnosis; all learned mechanics are recombined and BUILD becomes available.
+
+Progression is real and server-enforced. Only a correct pinned mission result clears a
+mission and unlocks the next one. XP is game/progression feedback only and cannot
+unlock missions or affect evidence/mastery. Campaign missions use new activity/family
+IDs so old evidence meaning is never rewritten.
+
+Gameplay chrome is HUD-first rather than website-first:
+
+- persistent top HUD for level/boss state, objective, chapter progress, XP and sync;
+- bottom dock for Hint, Intel, Play style and Save;
+- secondary tools open HUD drawers instead of living in permanent side rails;
+- direct `1 charge` / `2 charges` decisions replace comma-separated form entry for the
+  core trace mechanic;
+- diagnosis is introduced only when a mission needs it;
+- selection, trace causality, save sync, unlock/clear, result and reward transitions
+  provide state-driven game feedback; reduced-motion disables those effects.
+
+Candidate implementation commit `3bbdfe18d2a8f38ad531ecbe585d993ba6ef4eb9`
+passed `Verify hosted pilot` run 102: 57 Python/hosted/PostgreSQL tests and the complete
+real Chromium campaign journey passed with no page errors. Browser verification covers
+server-side mission locks, sequential difficulty/unlocks, HUD save -> reload resume,
+actual process restart persistence, help/source aid semantics, boss lost-ack retry,
+390px layout, 200% text enlargement, separate-browser learner isolation and reduced
+motion.
+
+`docs/GAME-UX-REVIEW.md` contains the locked critic rubric and recorded review. The
+candidate scored **8.8/10**, above the required 8.0 threshold, with no critical blocker.
+The pass means it is ready for a new learner trial; it is not treated as final game UX.
+
+## Remaining acceptance
+
+After the reviewed HUD/campaign head is deployed, remaining product acceptance is:
+
+1. Play the new live campaign and judge whether it actually feels like a game rather
+   than merely a themed web app. The previous build's learner feedback was explicitly
+   negative on this point and drove the overhaul.
+2. On the live hosted campaign, save progress during an unfinished mission, reload,
+   and confirm the exact unfinished decision/explanation resumes. The equivalent real
+   browser/database/process tests already pass automatically.
 3. Before broader multi-user activation, authorize a second real Supabase account and
-   verify it cannot access the first learner's state. Automated two-user isolation and
-   PostgreSQL RLS coverage pass.
-4. Record final learner feedback on challenge quality and feedback usefulness; UI
-   direction feedback is already positive.
+   verify it cannot access the first learner's state. Automated two-user and RLS
+   coverage already pass.
+4. Record learner feedback on difficulty pacing, clarity, game feel, reward feedback
+   and whether the Tutorial -> Easy -> Medium -> Boss curve builds confidence before
+   the combined challenge.
 
-## Earlier local Phase 1 checkpoint
+## Phase boundary
 
-Phase 0, 1A, 1B and 1C are implemented and machine-verified. The detailed local and
-hosted completion evidence is in `docs/PHASE-1.md`. The SQLite local mode remains a
-known-good development baseline and is intentionally separate from hosted account data.
-
-The current product slice is still one original practice episode. Hints are prepared
-static aids; only trace predictions receive deterministic grading; written reasoning
-is retained but ungraded. Evidence is partial/provisional and XP never feeds mastery.
-Future review needs target frames, while fresh review generation/scheduling remains
-outside this slice.
+The campaign is a refinement/scaffolding of the same reliable-retry learning material,
+not implementation of the planned Phase 2 knowledge-map, scheduler, adaptive course
+generation, or broader learning-OS subsystems. Historical Phase 1 evidence remains
+valid and immutable.
 
 ## Remaining cleanup before broader use
 
 - Align the actual Render service health-check path with `/api/health` from
   `render.yaml` if the service still uses the root path.
+- Enable stronger Supabase password protections before moving beyond disposable pilot
+  credentials.
 
-Do not begin Phase 2 solely because infrastructure is live. Close the remaining hosted
-acceptance checks, then use the learner's actual experience of this same Phase 1 episode
-to choose the next product increment.
+Keep PR #1 draft until the new live game experience has learner feedback and the second
+real-account isolation acceptance is complete.
