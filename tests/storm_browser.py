@@ -34,14 +34,14 @@ def main():
    expect(page.locator('[data-mission]')).to_have_count(8);expect(page.locator('[data-mission="storm-06"]')).to_be_disabled();shot('storm-map.png')
    page.locator('#launch').focus();page.keyboard.press('Enter');expect(page.locator('[data-act="send"]')).to_be_visible()
    box=page.locator('[data-act="send"]').bounding_box();assert box['y']+box['height']<=960
-   click_action('send');first=time.monotonic()-start
+   page.locator('[data-prop="send"]').click();expect(page.locator('#effects')).to_have_text('1 item');first=time.monotonic()-start
    expect(page.locator('#effects')).to_have_text('1 item');expect(page.locator('#knowledge')).to_contain_text('No confirmed outcome');shot('storm-first-action.png')
    click_action('fresh');click_action('send');expect(page.locator('#effects')).to_have_text('2 items');shot('storm-setback.png')
    click_action('rewind');click_action('send');click_action('send');expect(page.locator('#next')).to_be_visible()
    checks.append('First action visible without scrolling; lost reply distinguished; deliberate duplicate and rewind; result retains causal feedback.')
    next_stop(2)
    def lost(route):route.fetch();route.abort('failed')
-   page.route('**/api/commands/save',lost,times=1);page.locator('[data-act="original"]').click();expect(page.locator('#retry-save')).to_be_visible()
+   page.route('**/api/commands/save',lost,times=1);page.locator('[data-prop="original"]').click();expect(page.locator('#retry-save')).to_be_visible()
    page.reload();expect(page.locator('#ticket')).to_have_text('order-7');expect(page.locator('.recovery')).to_have_count(0)
    port=int(url.rsplit(':',1)[1]);stop_server(process);process,_=start_server(db,port)
    page.reload();expect(page.locator('#ticket')).to_have_text('order-7')
@@ -53,6 +53,9 @@ def main():
    checks.append('Lost acknowledgements after real commits, including a clearing move; reload, root-route resume and process restart recover without duplicated work. Changed payload and unknown records taught before boss.')
    next_stop(6)
    page.set_viewport_size({'width':390,'height':844});assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');shot('storm-engine-mobile.png')
+   wire({'quick':'same'});page.locator('#run-trials').click();expect(page.locator('#trial-verdict')).to_contain_text('1 / 6 trials passed')
+   page.locator('[data-trial="1"]').click();expect(page.locator('.storm-monitor')).to_contain_text('no tool yet');page.locator('#follow-wire').click()
+   expect(page.locator('[data-socket="late"]')).to_be_focused();shot('storm-partial-plan-mobile.png')
    wire({k:'same' for k in SAFE});page.locator('#run-trials').click();expect(page.locator('#trial-verdict')).to_contain_text('trials passed');expect(page.locator('#power')).to_be_disabled();shot('storm-engine-failed.png')
    wire(SAFE);page.set_viewport_size({'width':1440,'height':960})
    page.locator('#map').click();expect(page.locator('#notice')).to_contain_text('Save this move or plan');page.reload();expect(page.locator('[data-socket="late"]')).to_contain_text('Read order records')
@@ -61,7 +64,7 @@ def main():
    page.route('**/api/state',lambda route:route.abort('failed'),times=1)
    page.locator('#power').click();expect(page.locator('#refresh-route')).to_be_visible();expect(page.locator('#next')).to_be_disabled()
    page.locator('#refresh-route').click();expect(page.locator('#next')).to_be_enabled();expect(page.locator('#next')).to_contain_text('real world');shot('storm-harbour-restored.png')
-   checks.append('Built strategy: blind retries fail, repaired plan passes; mobile wiring, dirty navigation/reload, ordered sockets, and saved-result/failed-map-refresh recovery verified.')
+   checks.append('Native scene actions and partial-wiring experiments; follow-wire focus; blind retries fail, repaired plan passes; mobile wiring, dirty navigation/reload, ordered sockets, and saved-result/failed-map-refresh recovery verified.')
    next_stop(7);expect(page.locator('#guide')).to_be_disabled();incidents(ANSWERS|{'worker':'delivery'})
    page.locator('#save').click();expect(page.locator('#sync')).to_have_text('Saved')
    before=page.evaluate("async()=>await(await fetch('/api/state')).json()")
@@ -88,7 +91,7 @@ def main():
    page.goto(url+'/');expect(page.locator('#exp-launch')).to_be_visible()
    for width in (390,320):
     mobile=browser.new_context(viewport={'width':width,'height':844},has_touch=True,reduced_motion='reduce');mp=mobile.new_page();mp.on('pageerror',lambda e:errors.append(str(e)));mp.goto(url+'/storm');mp.locator('#launch').tap();expect(mp.locator('[data-act="send"]')).to_be_visible()
-    mp.locator('[data-act="send"]').tap();expect(mp.locator('#effects')).to_have_text('1 item');mp.evaluate('scrollTo(0,0)');mp.screenshot(path=str(artifacts/f'storm-mobile-{width}.png'),full_page=True)
+    mp.locator('[data-prop="send"]').tap();expect(mp.locator('#effects')).to_have_text('1 item');mp.evaluate('scrollTo(0,0)');mp.screenshot(path=str(artifacts/f'storm-mobile-{width}.png'),full_page=True)
     assert mp.evaluate('document.documentElement.scrollWidth<=innerWidth')
     if width==390:
      previous=mp.locator('#feedback').evaluate('n=>parseFloat(getComputedStyle(n).fontSize)');mp.evaluate("document.documentElement.style.fontSize='200%'")
