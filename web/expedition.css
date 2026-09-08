@@ -112,3 +112,12 @@ body.expedition-active .dock-button{height:auto;min-height:56px;grid-template-ro
 @media(min-width:701px){body.expedition-active .game-dock{left:auto;right:16px;transform:none}}
 .exp-avatar{line-height:1;width:3.0625rem;height:3.0625rem;border-bottom-width:.375rem}
 @media(max-width:700px){.exp-avatar{width:2.4375rem;height:2.6875rem}.exp-place{display:none}}
+
+/* Opt-in renderer: the same semantic HUD and actions remain available without WebGL. */
+.valley-canvas{display:block;width:100%;height:clamp(220px,53vw,460px);touch-action:pan-y}
+.exp-world.has-three>svg{display:none}
+.exp-world.has-three>.exp-place{display:none}
+.exp-world.has-three>.exp-world-state{position:relative;left:auto;right:auto;bottom:auto;margin:8px 12px}
+.valley-pick-label,.valley-fallback{position:relative;z-index:2;margin:12px;color:#f5e5bc;font-size:.8125rem;line-height:1.5}
+.exp-world.has-three:after{pointer-events:none}
+#expedition[aria-busy="true"] .valley-canvas{cursor:progress!important}

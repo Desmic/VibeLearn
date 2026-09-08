@@ -39,6 +39,7 @@ jobs:
           node-version: '22'
       - run: pip install -r requirements.lock -r requirements-dev.txt
       - run: python -m playwright install --with-deps chromium
+      - run: python manage.py vendor
       - run: python manage.py build
       - run: python manage.py test
       - run: python manage.py browser
@@ -51,4 +52,5 @@ jobs:
             artifacts/*.png
             artifacts/*.json
             artifacts/*trace.zip
+            web/vendor/*
           retention-days: 7

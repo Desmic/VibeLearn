@@ -2,6 +2,29 @@
 "use strict";
 window.Expedition = (() => {
   let game = {moves: [], policy: {}}, root, callbacks = {}, current = null, sound = false, audio;
+  const use3D = new URLSearchParams(location.search).get("world") === "3d";
+  let valley = null, modulePromise = null, renderEpoch = 0, threeFailed = false;
+  async function mountWorld(nextState) {
+    const epoch = ++renderEpoch;
+    if (!use3D || threeFailed) return;
+    const host = root.querySelector(".exp-world");
+    try {
+      modulePromise ||= import("/valley3d.js");
+      const module = await modulePromise;
+      if (epoch !== renderEpoch || !host.isConnected || root.hidden) return;
+      valley ||= module.createValley();
+      valley.mount(host, nextState, move);
+      valley.setBusy(Boolean(document.querySelector("#expedition[aria-busy='true']")));
+    } catch {
+      threeFailed = true;
+      valley?.dispose(); valley = null;
+      if (epoch === renderEpoch && host.isConnected) {
+        const notice = document.createElement("p"); notice.className = "valley-fallback";
+        notice.textContent = "3D is unavailable here. The illustrated scene and all game actions still work.";
+        host.append(notice);
+      }
+    }
+  }
   const labels = {send: "Send the order", retry: "Resend this ticket", restart: "Restart Pip", restore: "Use journal ticket", new_ticket: "Try a new ticket", wait: "Wait out the storm", inspect: "Check order register", collect: "Collect the gear", rewind: "Rewind rehearsal", test: "Run storm tests"};
   const icons = {send: "↗", retry: "↻", restart: "⏻", restore: "▤", new_ticket: "+", wait: "◷", inspect: "⌕", collect: "✦", rewind: "↶", test: "▷"};
   const knowledge = {not_sent: "Order not sent", unknown: "? No confirmation", confirmed: "✓ Gear confirmed", absent: "✓ Order proven absent", policy: "Rules under test"};
@@ -15,7 +38,11 @@ window.Expedition = (() => {
     root.hidden = false; document.body.classList.add("expedition-active");
     return root;
   }
-  function hide() { if (root) root.hidden = true; document.body.classList.remove("expedition-active"); }
+  function hide() {
+    ++renderEpoch; valley?.dispose(); valley = null;
+    if (root) root.hidden = true;
+    document.body.classList.remove("expedition-active");
+  }
   function setResponse(value) { game = structuredClone(value || {moves: [], policy: {}}); }
   function response() { return structuredClone(game); }
   function tone(success = false) {
@@ -83,7 +110,8 @@ window.Expedition = (() => {
      </div>`;
   }
   function renderMap(missions, attempt, handlers) {
-    ensure(); current = null; callbacks = handlers;
+    ensure(); ++renderEpoch; valley?.dispose(); valley = null;
+    current = null; callbacks = handlers;
     const ready = missions.find(m => m.status === "unlocked") || missions.at(-1);
     const completed = missions.filter(m => m.status === "cleared").length;
     const active = attempt?.status === "draft";
@@ -100,6 +128,8 @@ window.Expedition = (() => {
   }
   function render(attempt, handlers) {
     ensure(); current = attempt; callbacks = handlers;
+    const previousFocus = document.activeElement?.dataset?.action;
+    const focusedPolicy = document.activeElement?.dataset?.policyField;
     const s = attempt.game_state, meta = attempt.snapshot.mission, submitted = attempt.status === "submitted";
     const clear = submitted && attempt.assessment.outcome === "correct";
     const ending = clear && s.level === 4;
@@ -107,7 +137,7 @@ window.Expedition = (() => {
       <header class="exp-play-header"><p class="exp-kicker">THE MISSING DELIVERY</p><h1>${ending ? "You brought the valley back together." : esc(attempt.snapshot.title)}</h1><p>${esc(meta.plain_objective)}</p></header>
       ${world(s, ending || (clear && s.level === 5))}
       <div class="exp-dialogue" role="status" aria-live="polite"><span class="exp-avatar" aria-hidden="true">P</span><div><strong>${ending ? "PIP · BRIDGEKEEPER" : "PIP · EXPEDITION COURIER"}</strong><p id="exp-feedback">${esc(ending ? "You didn't just find a gear. You taught me when to try again—and when not to guess. Come on. There's a whole valley out there." : s.feedback)}</p></div></div>
-      ${s.level !== 4 ? `<div class="exp-inventory" aria-label="Courier state"><span>Ticket <strong id="exp-ticket">${esc(s.ticket)}</strong></span><span>Elapsed <strong>${s.hours}h</strong></span><span>Memory window <strong>${s.retention}h</strong></span><span>Rehearsal rewinds <strong>${s.rewinds}</strong></span></div>` : policyBoard(attempt)}
+      ${s.level !== 4 ? `<div class="exp-inventory" aria-label="Courier state"><span>Ticket <strong id="exp-ticket">${esc(s.ticket)}</strong></span><span>Elapsed <strong>${s.hours}h</strong></span><span>Memory window <strong>${s.retention}h</strong></span><span>Rehearsal rewinds <strong>${s.rewinds}</strong></span></div>` : submitted ? `<details class="exp-notes"><summary>Inspect the completed storm engine</summary>${policyBoard(attempt)}</details>` : policyBoard(attempt)}
       <div id="exp-actions" class="exp-actions" aria-label="Actions in the valley"></div>
       <p id="exp-pending" role="status" hidden>This move is retained on this device but not confirmed saved. Retry Save; do not repeat the move.</p><button type="button" id="exp-retry-save" class="exp-primary" hidden>Retry saving move</button>
       ${submitted ? `<section class="exp-resolution"><p class="exp-kicker">${clear ? "EXPEDITION CLEAR" : "KEEP EXPERIMENTING"}</p><h2>${clear ? s.level === 4 ? "Bridge repaired. New route discovered." : "One small courier. One real insight." : "A setback is a clue."}</h2><p>${esc(attempt.snapshot.expedition.lesson)}</p><button type="button" class="exp-primary" id="exp-continue">${clear ? s.level === 4 ? "Discover the lookout detour" : "Continue the expedition" : "Try this stop again"}<span aria-hidden="true">→</span></button><p class="exp-xp-copy">${attempt.reward ? `+${attempt.reward} practice XP` : "No duplicate XP"} · progress, not mastery</p></section>` : `<button type="button" class="exp-primary exp-lock" id="exp-submit" ${s.complete || s.moves >= 80 ? "" : "disabled"}>${s.moves >= 80 && !s.complete ? "Record attempt and restart" : s.level === 4 ? "Seal the storm rules" : "Save this expedition clear"} <span aria-hidden="true">✓</span></button>`}
@@ -136,13 +166,20 @@ window.Expedition = (() => {
       root.querySelector("#exp-submit").disabled = true;
       root.querySelector("#exp-feedback").textContent = "Rule changed. Run the storm tests to see what this version does.";
     };
+    mountWorld({...s, submitted});
+    if (previousFocus || focusedPolicy) {
+      const same = previousFocus && root.querySelector(`[data-action="${previousFocus}"]`);
+      const next = same || (focusedPolicy && root.querySelector(`[data-policy-field="${focusedPolicy}"][aria-pressed="true"]`)) || root.querySelector("[data-action]:not([data-action='rewind'])") || root.querySelector("#exp-submit:not(:disabled)");
+      next?.focus({preventScroll: true});
+    }
   }
   function policyBoard(attempt) {
     const fields = {identity: "1 · After Pip restarts", payload: "2 · If gear details change", expiry: "3 · After memory expires", unknown: "4 · If the register is unavailable"};
-    return `<section class="exp-policy" aria-label="Storm rule engine">${Object.entries(attempt.snapshot.expedition.policy_options).map(([key, values]) => `<fieldset><legend>${fields[key]}</legend>${Object.entries(values).map(([value, label]) => `<button type="button" data-policy-field="${key}" data-policy-value="${value}" aria-pressed="${game.policy[key] === value}" ${attempt.status === "submitted" ? "disabled" : ""}>${esc(label)}</button>`).join("")}</fieldset>`).join("")}</section><div class="exp-storm-results" aria-live="polite">${attempt.game_state.rows.map(row => `<section class="exp-test-case ${row.correct ? "passed" : "failed"}"><strong>${row.correct ? "✓" : "!"} ${esc(row.run)}</strong><span>${esc(row.actual)}</span><p>${esc(row.reason)}</p></section>`).join("")}</div>`;
+    return `<section class="exp-policy" aria-label="Storm rule engine">${Object.keys(fields).map(key => [key, attempt.snapshot.expedition.policy_options[key]]).map(([key, values]) => `<fieldset><legend>${fields[key]}</legend>${Object.entries(values).map(([value, label]) => `<button type="button" data-policy-field="${key}" data-policy-value="${value}" aria-pressed="${game.policy[key] === value}" ${attempt.status === "submitted" ? "disabled" : ""}>${esc(label)}</button>`).join("")}</fieldset>`).join("")}</section><div class="exp-storm-results" aria-live="polite">${attempt.game_state.rows.map(row => `<section class="exp-test-case ${row.correct ? "passed" : "failed"}"><strong>${row.correct ? "✓" : "!"} ${esc(row.run)}</strong><span>${esc(row.actual)}</span><p>${esc(row.reason)}</p></section>`).join("")}</div>`;
   }
   async function move(action) {
-    if (!current || current.status !== "draft") return;
+    if (!current || current.status !== "draft" || root.getAttribute("aria-busy") === "true") return;
+    if (!current.game_state.available.includes(action)) return;
     if (game.moves.length >= 80) { callbacks.error("This rehearsal is full. Record the current attempt before starting another."); return; }
     if (game.moves.length !== current.response.game.moves.length) { callbacks.error("Save the pending move before taking another action."); return; }
     game.moves.push(action === "test" ? {action: "test", policy: structuredClone(game.policy)} : action);
@@ -152,7 +189,9 @@ window.Expedition = (() => {
   }
   function sync(busy, attempt) {
     if (!root || root.hidden || !attempt?.snapshot?.expedition || !current) return;
+    root.setAttribute("aria-busy", String(busy));
     const pending = game.moves.length !== attempt.response.game.moves.length;
+    valley?.setBusy(busy || pending || attempt.status === "submitted");
     for (const button of root.querySelectorAll("[data-action], [data-policy-field]")) button.disabled = busy || pending || attempt.status === "submitted";
     const submit = root.querySelector("#exp-submit");
     if (submit) submit.disabled = busy || pending || (!attempt.game_state.complete && attempt.game_state.moves < 80) || JSON.stringify(game.policy) !== JSON.stringify(attempt.response.game.policy);
@@ -160,5 +199,5 @@ window.Expedition = (() => {
     root.querySelector("#exp-retry-save").hidden = !pending || busy;
     const save = root.querySelector("#exp-retry-save"); save.disabled = busy;
   }
-  return {render, renderMap, hide, response, setResponse, sync};
+  return {render, renderMap, hide, response, setResponse, sync, scenePoint: name => valley?.screenPoint(name), sceneStats: () => valley?.stats()};
 })();

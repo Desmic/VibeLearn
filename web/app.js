@@ -177,6 +177,11 @@ function renderCampaign() {
   updateHud();
 }
 function showCampaign() {
+  if (busy) return;
+  if (dirty && attempt?.status === "draft") {
+    showError("Save your current move or rule before opening the map. Your work is still here.");
+    return;
+  }
   campaignView = true;
   if (attempt?.status === "submitted" && attempt?.assessment?.outcome === "correct" && selectedMissionId === activeMissionMeta()?.id) selectedMissionId = null;
   closeDrawers();
@@ -241,11 +246,13 @@ function renderPredictionBoard(snapshot) {
 }
 async function send(action, extra = {}) {
   if (busy) return false;
+  const actionFocus = document.activeElement?.dataset?.action;
   busy = true;
   clearError();
   document.querySelectorAll("button").forEach(button => { button.disabled = true; });
   const body = { command_id: crypto.randomUUID(), expected_revision: action === "start" ? 0 : attempt?.revision || 0, ...extra };
   if (action !== "start") { body.attempt_id = attempt.id; body.response = response(); retainDraft(); }
+  Expedition.sync(true, attempt);
   const signature = JSON.stringify({action, ...body, command_id: undefined});
   if (pending?.signature === signature) body.command_id = pending.command_id;
   pending = {signature, command_id: body.command_id};
@@ -284,6 +291,10 @@ async function send(action, extra = {}) {
     for (const id of inputIds) $(`#${id}`).disabled = attempt?.status === "submitted";
     syncControls();
     renderCampaign();
+    if (actionFocus && attempt?.snapshot?.expedition && !campaignView) {
+      const target = document.querySelector(`[data-action="${actionFocus}"]:not(:disabled)`) || document.querySelector("#expedition [data-action]:not([data-action='rewind']):not(:disabled)") || document.querySelector("#exp-submit:not(:disabled)");
+      target?.focus({preventScroll: true});
+    }
   }
 }
 function syncControls() {
@@ -388,7 +399,7 @@ function renderAttempt() {
       $("#reward-message").textContent = attempt.reward ? `+${attempt.reward} XP · Level ${meta.number || "prototype"} clear` : "Replay clear · no duplicate XP";
       $("#repeat").textContent = "Continue campaign →";
     } else {
-      $("#reward-message").textContent = attempt.reward ? `+${attempt.reward} practice XP · attempt recorded · level not cleared` : "Attempt recorded · level not cleared";
+      $("#reward-message").textContent = attempt.reward ? `+${attempt.reward} practice XP` : "Replay · no duplicate XP";
       $("#repeat").textContent = "Retry mission →";
     }
     $("#checkpoint-list").replaceChildren(...attempt.checkpoints.map(checkpoint => {
@@ -429,6 +440,7 @@ async function boot() {
       catch { showError("Recovery storage is unavailable. Your database progress is still loaded."); }
       if (draft && JSON.stringify(draft.response) !== JSON.stringify(attempt.response)) {
         fillResponse(draft.response);
+        if (attempt.snapshot.expedition) Expedition.render(attempt, expeditionHandlers());
         dirty = true;
         showError("Recovered unsaved progress from this device. Review it before saving; another tab may have a different version.");
         setSaveState("Recovered local progress", "dirty");
