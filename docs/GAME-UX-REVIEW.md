@@ -125,10 +125,51 @@ Historical critical blockers under the then-current rubric: **none observed.**
 
 Historical verdict: **PASS >=8** for the HUD-shell candidate. **Not a pass for the later narrative/comprehension requirements.**
 
-## Current review requirement
+## Recorded critic review — story-first Shopping Agent candidate, 8 September 2026
 
-The story-first Shopping Agent candidate must receive a **fresh critic pass** after its full build/unit/PostgreSQL/Chromium gate succeeds. It cannot inherit the old 8.8 score. The fresh pass must clear the narrative/comprehension pre-gate, have no critical blockers, and score >=8.0 on the weighted rubric above.
+### Candidate
+
+Implementation/browser-gate commit: `79ef8e93adc108856cdd49fcc924a600b721e516`
+Reviewer pass date: `2026-09-08`
+Verification inputs: GitHub Actions `Verify hosted pilot` run 148 (`34222243777`), 59 Python/hosted/PostgreSQL tests, full Chromium browser campaign journey, a real temporary database, actual process restart, dropped-acknowledgement fault injection, server-forged locked-mission request, 390px viewport, 200% text enlargement and reduced-motion context.
+
+The critic is a separate review pass with the frozen rubric above. This chat harness did not expose a separate critic model/agent, so this is **not represented as an independent external model or human review**. It is a deliberately separate evaluation pass after implementation and machine verification. Learner playtesting remains a separate acceptance gate.
+
+### Narrative / comprehension pre-gate
+
+- **PASS — plain goal:** fresh campaign browser check requires the chapter to state the 5 kg dumbbell scenario and “one request from you never becomes two purchases or two charges.”
+- **PASS — actors/change/decision:** Level 1 pins five visible story beats: user request, agent order, successful charge, lost receipt, retry; the player then chooses one vs two charges.
+- **PASS — story maps to assessed mechanism:** campaign tests pin the story-first activity at revision 2 while retaining the `trace-counts-v1` deterministic assessment policy; purchase tickets map directly to retry keys and store memory maps to retention.
+- **PASS — reduced-motion equivalence:** story content is ordinary semantic DOM; reduced-motion disables transitions/animations rather than removing the story state.
+- **PASS — intuitive/formal bridge:** mission/debrief copy explains purchase tickets/store memory first and names the idempotent-retry/identity/retention concepts progressively.
+- **PASS — progression focus:** browser checks require Level 2 selected after Level 1 clear, Level 3 after Level 2, Boss after Level 3, and the highest completed node after chapter clear.
+- **PASS — assistance semantics:** unit/browser coverage distinguishes `unknown`, `declared_independent`, `assisted` and `previously_exposed`; prior exposure is excluded from current-help counts.
+
+Critical blockers: **none observed in the verified candidate.**
+
+| Area | Score | Evidence / criticism |
+|---|---:|---|
+| Game identity | 8.6/10 | HUD/dock/campaign/direct decisions remain game-first. Story beats now make the playfield more experiential, but the right-side response card and detailed trace table still carry some web/document ancestry. |
+| HUD | 8.8/10 | The HUD now uses the mission's plain-language objective instead of leading with formal frame language. Level/boss state, progress, XP and sync remain glanceable. Mobile still compresses secondary HUD detail. |
+| Core loop | 9.2/10 | The learner gets a human goal first (“buy one dumbbell once”), sees the causal failure, makes a direct consequence prediction, and only later meets formal retry terminology. Browser coverage proves the full interaction path rather than only inspecting static text. Live learner comprehension still needs re-testing. |
+| Progression | 9.5/10 | Tutorial -> Easy -> Medium -> Boss teaches same-ticket replay, changed identity, retention and then recombination. The previously surprising map behavior is fixed: a successful clear selects the newly unlocked next mission; failure stays on the current route. Server-side locks and XP/success separation remain enforced. |
+| Feedback / juice | 8.9/10 | Story beats reveal sequentially, selections lock tactically, save sync/unlock/results/rewards animate causally, and the motion remains optional. Richer scene-specific animation, sound or haptics could increase emotional payoff later. |
+| Theme | 9.0/10 | “Shopping Agent” gives the whole chapter one coherent world: dumbbell request, purchase ticket, store memory, missing receipt, safe retry. The theme bridges to technical vocabulary rather than existing only as labels. Future chapters must prove this generalizes without repetitive shopping metaphors. |
+| Learning integrity | 9.8/10 | Historical snapshots remain immutable; story-first activities use revision 2; assessment meaning remains pinned; correct evidence—not XP—unlocks progression. Unknown help declaration, explicit no-help, actual current help and prior exposure are now distinct evidence states. |
+| Accessibility | 9.0/10 | Semantic story text remains readable without motion; reduced motion, keyboard, 390px viewport and 200% text are regression-tested. Real-device touch pacing and animation comfort still warrant learner feedback. |
+
+Weighted total: **9.1 / 10** (`9.083` before rounding)
+
+Verdict: **PASS >=8**
+
+### Remaining design debt after the fresh pass
+
+- Replace more dense technical tables/cards with scene-specific interactive representations when the learning operation allows it.
+- Add richer visual simulation of state/memory/identity instead of relying mainly on icons and text story beats.
+- Consider optional sound/haptic cues only after the visual/semantic loop is proven comfortable.
+- Validate the story and objective with the learner; a critic pass cannot establish that the teaching explanation genuinely “clicked.”
+- Apply the same narrative-before-abstraction standard to other domains without forcing story where it would distort the concept.
 
 ## Current baseline observation
 
-The pre-HUD build was visually polished but structurally a website. The first HUD build improved game identity/progression but later learner testing showed that a good shell alone is insufficient: **course comprehension, narrative causality, honest assistance semantics and expected progression focus are now first-class game-quality requirements.**
+The pre-HUD build was visually polished but structurally a website. The first HUD build improved game identity/progression but later learner testing showed that a good shell alone is insufficient. The current standard therefore treats **course comprehension, narrative causality, honest assistance semantics and expected progression focus as first-class game-quality requirements**, alongside visual game identity.
