@@ -69,7 +69,6 @@ def create_app(config=None, auth_provider=None):
     def boundary():
         g.request_id = secrets.token_hex(8)
         g.request_started = time.monotonic()
-        # Trust the configured host/origin, never arbitrary forwarded headers.
         if request.host != parsed.netloc:
             raise service.DomainError("FORBIDDEN", "Unknown application host.", 403)
         if request.method not in ("GET", "HEAD", "OPTIONS"):
@@ -81,7 +80,6 @@ def create_app(config=None, auth_provider=None):
     @app.after_request
     def headers(response):
         response.headers["X-Request-ID"] = g.request_id
-        # Fixed route names only: no URLs, query strings, request bodies or cookies.
         if request.endpoint in {"login", "logout", "request_reset", "reset_password"} or response.status_code >= 500:
             logging.getLogger("vibelearn.requests").warning(json.dumps({
                 "event": "request_completed", "request_id": g.request_id,
@@ -102,7 +100,6 @@ def create_app(config=None, auth_provider=None):
     @app.errorhandler(psycopg.Error)
     @app.errorhandler(sqlite3.Error)
     def storage_error(error):
-        # Database exception messages can contain connection credentials or learner data.
         return jsonify(error="STORAGE_UNAVAILABLE", message="Storage is unavailable. Your visible answer is retained; retry shortly.", request_id=g.request_id), 503
 
     @app.errorhandler(HTTPException)
@@ -115,7 +112,7 @@ def create_app(config=None, auth_provider=None):
 
     @app.get("/<asset>")
     def asset(asset):
-        if asset not in ("app.js", "style.css", "premium.css"):
+        if asset not in ("app.js", "style.css", "premium.css", "game.css"):
             raise service.DomainError("NOT_FOUND", "Not found.", 404)
         return send_from_directory(ROOT / "web", asset)
 
@@ -158,7 +155,6 @@ def create_app(config=None, auth_provider=None):
 
     @app.post("/api/auth/logout")
     def logout():
-        # Revoke app access immediately, even while the Supabase JWT remains valid.
         learner = verified_user()
         with transaction(database, learner=learner) as db:
             db.execute("DELETE FROM hosted_sessions WHERE token_hash=? AND learner_id=?", (service.token_hash(request.cookies[COOKIE]), learner))
