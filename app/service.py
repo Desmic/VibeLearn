@@ -9,6 +9,7 @@ from app.content import MODES, freeze, digest, presented, campaign_catalog
 from app.storage import transaction, family_evidence
 from app.assessment import evaluate, parse_prediction, review_need
 from app.expedition import validate_game, empty_game, replay
+from app import storm
 
 EMPTY_RESPONSE = {"prediction": "", "diagnosis": "", "aid_declaration": "unknown"}
 
@@ -46,7 +47,7 @@ def resolve_session(path, token):
         return row[0] if row else None
 
 
-def check_response(value):
+def check_response(value, snapshot=None):
     if not isinstance(value, dict) or set(value) not in (set(EMPTY_RESPONSE), set(EMPTY_RESPONSE) | {"game"}):
         raise DomainError("INVALID_RESPONSE", "The response has an invalid structure.")
     if any(not isinstance(value[k], str) for k in EMPTY_RESPONSE):
@@ -57,7 +58,10 @@ def check_response(value):
         raise DomainError("INVALID_RESPONSE", "Choose a valid aid declaration.")
     if "game" in value:
         try:
-            validate_game(value["game"])
+            if snapshot and "storm" in snapshot:
+                storm.validate(value["game"], snapshot["storm"]["level"])
+            else:
+                validate_game(value["game"])
         except ValueError as error:
             raise DomainError("INVALID_RESPONSE", str(error))
     return value
@@ -104,6 +108,8 @@ def attempt_view(db, row):
         return None
     snapshot = json.loads(row["snapshot"])
     result = {"id": row["id"], "revision": row["revision"], "status": row["status"], "mode": row["mode"], "response": json.loads(row["response"]), "snapshot": presented(snapshot), "snapshot_digest": row["snapshot_digest"], "updated_at": row["updated_at"]}
+    if "storm" in snapshot:
+        result["game_state"] = storm.replay(snapshot, result["response"].get("game"), submitted=row["status"] == "submitted")
     if "expedition" in snapshot:
         result["game_state"] = replay(snapshot, result["response"].get("game"))
     history = assistance_view(db, row["learner_id"], row["id"])
@@ -140,7 +146,7 @@ def state(path, learner):
             "learner_id": learner,
             "profile": json.loads(profile[0]),
             "attempt": attempt_view(db, row),
-            "course": {"title": "Reliable agent execution", "episode_count": 4, "campaign": campaign_progress(db, learner), "expedition": campaign_progress(db, learner, True)},
+            "course": {"title": "Reliable agent execution", "episode_count": 4, "campaign": campaign_progress(db, learner), "expedition": campaign_progress(db, learner, True), "storm": campaign_progress(db, learner, "storm")},
             "modes": MODES,
         }
 
@@ -187,7 +193,7 @@ def command(path, learner, action, body):
                 raise DomainError("ACTIVE_ATTEMPT", "Resume your existing attempt first.", 409)
             mission_id = body.get("mission_id")
             if mission_id:
-                progress = {item["id"]: item for item in campaign_progress(db, learner) + campaign_progress(db, learner, True)}
+                progress = {item["id"]: item for item in campaign_progress(db, learner) + campaign_progress(db, learner, True) + campaign_progress(db, learner, "storm")}
                 if mission_id not in progress:
                     raise DomainError("NOT_FOUND", "Unknown mission.", 404)
                 if progress[mission_id]["status"] == "locked":
@@ -196,7 +202,7 @@ def command(path, learner, action, body):
                 snapshot = freeze(body["mode"], mission_id)
             except ValueError as error:
                 raise DomainError("MISSION_RULE", str(error), 400)
-            initial_response = EMPTY_RESPONSE | ({"game": empty_game()} if "expedition" in snapshot else {})
+            initial_response = EMPTY_RESPONSE | ({"game": empty_game()} if "expedition" in snapshot or "storm" in snapshot else {})
             attempt_id = str(uuid4())
             db.execute("INSERT INTO attempts (id, learner_id, revision, status, mode, response, snapshot, snapshot_digest, created_at, updated_at) VALUES (?, ?, 1, 'draft', ?, ?, ?, ?, ?, ?)", (attempt_id, learner, body["mode"], encode(initial_response), encode(snapshot), digest(snapshot), stamp, stamp))
             prior = family_evidence(db, learner, snapshot["family_id"])
@@ -215,16 +221,19 @@ def command(path, learner, action, body):
                 raise DomainError("STALE_REVISION", "This attempt changed in another tab. Your local answer is retained; reload before reconciling.", 409)
             if row["status"] != "draft" and action != "source":
                 raise DomainError("ALREADY_SUBMITTED", "A submitted answer is immutable.", 409)
-            response = check_response(body["response"])
             snapshot = json.loads(row["snapshot"])
-            if "expedition" in snapshot:
+            response = check_response(body["response"], snapshot)
+            if "expedition" in snapshot or "storm" in snapshot:
                 old_moves = json.loads(row["response"]).get("game", empty_game())["moves"]
                 game = response.get("game", empty_game())
                 new_moves = game["moves"]
                 if new_moves[:len(old_moves)] != old_moves or not len(old_moves) <= len(new_moves) <= len(old_moves) + 1:
                     raise DomainError("INVALID_RESPONSE", "Saved expedition history cannot be rewritten. Use Rewind for a fresh rehearsal.")
                 try:
-                    replay(snapshot, game)
+                    if "storm" in snapshot:
+                        storm.replay(snapshot, game)
+                    else:
+                        replay(snapshot, game)
                 except (ValueError, KeyError, TypeError) as error:
                     raise DomainError("INVALID_RESPONSE", str(error) if isinstance(error, ValueError) else "The expedition move could not be read.")
                 if new_moves and not any(event["kind"] == "simulation_feedback" for event in assistance_view(db, learner, attempt_id)):
@@ -261,7 +270,7 @@ def command(path, learner, action, body):
             if action == "submit":
                 count = len(snapshot["trace"])
                 diagnosis_required = mission.get("requires_diagnosis", True)
-                if ("expedition" not in snapshot and (parse_prediction(response["prediction"], count) is None or (diagnosis_required and not response["diagnosis"].strip()))) or ("expedition" in snapshot and not response.get("game", {}).get("moves")):
+                if ("expedition" not in snapshot and "storm" not in snapshot and (parse_prediction(response["prediction"], count) is None or (diagnosis_required and not response["diagnosis"].strip()))) or ("expedition" in snapshot and not response.get("game", {}).get("moves")) or ("storm" in snapshot and not (response.get("game", {}).get("policy") if snapshot["storm"]["level"] >= 7 else response.get("game", {}).get("moves"))):
                     unit = "number" if count == 1 else "comma-separated numbers"
                     suffix = " and a written diagnosis" if diagnosis_required else ""
                     raise DomainError("INVALID_ANSWER", f"Choose {count} valid {unit}{suffix} before locking in your answer.")

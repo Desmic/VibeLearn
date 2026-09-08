@@ -96,7 +96,9 @@ def make_server(database, port=8000):
                     return self.send(200, service.state(database, learner))
                 except sqlite3.Error:
                     return self.send(503, {"error": "STORAGE_UNAVAILABLE", "message": "The database is unavailable. Retry shortly."})
-            assets = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"), "/style.css": ("style.css", "text/css"), "/premium.css": ("premium.css", "text/css"), "/game.css": ("game.css", "text/css"), "/expedition.js": ("expedition.js", "text/javascript"), "/expedition.css": ("expedition.css", "text/css"), "/valley3d.js": ("valley3d.js", "text/javascript"), "/vendor/three.module.min.js": ("vendor/three.module.min.js", "text/javascript"), "/vendor/three.core.min.js": ("vendor/three.core.min.js", "text/javascript"), "/vendor/THREE-LICENSE.txt": ("vendor/THREE-LICENSE.txt", "text/plain")}
+            if path == "/storm":
+                return self.send(200, (ROOT / "web" / "storm.html").read_bytes(), "text/html; charset=utf-8")
+            assets = {"/storm.js": ("storm.js", "text/javascript"), "/storm.css": ("storm.css", "text/css"), "/retry-lab.py": ("retry-lab.py", "text/plain"), "/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"), "/style.css": ("style.css", "text/css"), "/premium.css": ("premium.css", "text/css"), "/game.css": ("game.css", "text/css"), "/expedition.js": ("expedition.js", "text/javascript"), "/expedition.css": ("expedition.css", "text/css"), "/valley3d.js": ("valley3d.js", "text/javascript"), "/vendor/three.module.min.js": ("vendor/three.module.min.js", "text/javascript"), "/vendor/three.core.min.js": ("vendor/three.core.min.js", "text/javascript"), "/vendor/THREE-LICENSE.txt": ("vendor/THREE-LICENSE.txt", "text/plain")}
             if path in assets:
                 name, mime = assets[path]
                 return self.send(200, (ROOT / "web" / name).read_bytes(), mime + "; charset=utf-8")

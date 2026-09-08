@@ -23,7 +23,7 @@ def main():
         print("Build passed: Python compiled; browser JavaScript syntax checked.")
         return 0
     if command == "browser":
-        for module in ["tests.browser_check", "tests.expedition_browser_check", "tests.game_review_browser"]:
+        for module in ["tests.browser_check", "tests.expedition_browser_check", "tests.game_review_browser", "tests.storm_browser"]:
             result = subprocess.call([sys.executable, "-m", module, *sys.argv[2:]], cwd=ROOT)
             if result:
                 return result

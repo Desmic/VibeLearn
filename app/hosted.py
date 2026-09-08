@@ -110,9 +110,13 @@ def create_app(config=None, auth_provider=None):
     def index():
         return send_from_directory(ROOT / "web", "index.html")
 
+    @app.get("/storm")
+    def storm_page():
+        return send_from_directory(ROOT / "web", "storm.html")
+
     @app.get("/<asset>")
     def asset(asset):
-        if asset not in ("app.js", "style.css", "premium.css", "game.css", "expedition.js", "expedition.css", "valley3d.js"):
+        if asset not in ("storm.js", "storm.css", "retry-lab.py", "app.js", "style.css", "premium.css", "game.css", "expedition.js", "expedition.css", "valley3d.js"):
             raise service.DomainError("NOT_FOUND", "Not found.", 404)
         return send_from_directory(ROOT / "web", asset)
 
