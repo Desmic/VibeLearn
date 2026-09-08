@@ -1,5 +1,28 @@
 # Current checkpoint — private hosted pilot + story-first game campaign
 
+## Latest product decision — 8 September 2026
+
+**Phase 1 is not accepted.** The user's current score is **6.5/10**: the
+experience does not feel sufficiently like a game. The later agent review scored
+**7.5/10**, also below 8. Earlier 8.8/9.1 reviews below are historical and do not
+approve the current experience.
+
+For this stage, the user is the product critic and Codex is the agent critic.
+Refine privately before presenting to other testers. Acceptance requires both
+critics to score at least 8/10, with no critical blocker; an agent score cannot
+overrule user rejection.
+
+The adopted direction and research are in the **Expedition adventure refinement**
+section of `GAME-UX-SYSTEM.md`. It extracts useful principles from Expedition 33,
+The Witcher 3 and Breath of the Wild: character investment, consequential
+decisions, curiosity, consistent interactive rules and satisfying feedback.
+The proposed missing-delivery expedition is a working reference concept, not an
+implemented replacement or a mandatory theme for all subjects.
+
+Latest instruction: **update required documentation and stop**. This amendment
+does not implement, deploy or rescore a build, open Phase 2/3, or initiate testing
+with other people.
+
 VibeLearn is deployed as a private pilot on Render Free with Supabase Free. The active
 Render service is `https://vibelearn-4xws.onrender.com`, built from
 `deploy/render-supabase`. Hosted mode uses Flask/Gunicorn, PostgreSQL, Supabase Auth,
@@ -130,9 +153,10 @@ The story-first candidate passed GitHub Actions `Verify hosted pilot` run 148
   200% text enlargement, learner isolation, and reduced motion.
 
 `docs/GAME-UX-REVIEW.md` now contains a narrative/comprehension pre-gate. The historical
-8.8/10 HUD-shell review is explicitly not reusable for this candidate. A fresh critic
-pass scored the story-first candidate **9.1/10**, above the required 8.0 threshold, with
-no critical blocker. Remaining debt includes residual card/table ancestry, limited
+8.8/10 HUD-shell review is explicitly not reusable for this candidate. An earlier critic
+pass scored the story-first candidate **9.1/10**, with no critical blocker then observed.
+That historical assessment is superseded for product acceptance by the later
+7.5/10 agent review and 6.5/10 user assessment. Remaining debt includes residual card/table ancestry, limited
 sound/haptic payoff, and the need for real learner judgment of whether the story actually
 improves understanding.
 
@@ -178,16 +202,13 @@ and is intentionally not rewritten in place.
 
 ## Remaining product acceptance
 
-1. Play the **live** story-first Shopping Agent build and judge whether the concrete
-   scenario/animation makes the learning objective materially easier to grasp.
-2. On the live hosted campaign, save an unfinished mission, reload, and confirm the
-   exact unfinished state resumes. Equivalent browser/database/process tests pass.
-3. Before broader multi-user activation, authorize a second real Supabase account and
-   verify it cannot access the first learner's state. Automated two-user/RLS coverage
-   already passes.
-4. Continue recording real feedback on clarity, difficulty pacing, story quality,
-   progression flow, game feel, and whether the intuitive model successfully bridges
-   into the technical concept.
+- Resume implementation only on a subsequent instruction; this increment is docs only.
+- Refine the Phase 1 experience using the implementation order in `GAME-UX-SYSTEM.md`.
+- Review changed builds with the user and Codex using `GAME-UX-REVIEW.md`; record
+  actual behavior, unresolved defects and separate scores.
+- Keep external testing deferred until the user judges the experience ready.
+- Before broader activation, retain the existing hosted isolation and operational
+  acceptance requirements. No additional account or external test is requested now.
 
 ## Phase boundary
 
