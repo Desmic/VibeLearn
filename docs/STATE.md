@@ -116,7 +116,7 @@ After a correct clear, returning to the campaign now automatically focuses/selec
 the expected retry target. When the chapter is fully cleared, the highest completed
 node remains selected. This behavior is covered by the real browser journey.
 
-## Verification and critic gate
+## Verification, critic gate and deployment
 
 The story-first candidate passed GitHub Actions `Verify hosted pilot` run 148
 (`34222243777`):
@@ -135,6 +135,11 @@ pass scored the story-first candidate **9.1/10**, above the required 8.0 thresho
 no critical blocker. Remaining debt includes residual card/table ancestry, limited
 sound/haptic payoff, and the need for real learner judgment of whether the story actually
 improves understanding.
+
+The documentation head `4f65fc8e20d847a2db294854f9baf5528cd1fbe2` passed
+`Verify hosted pilot` run 156 and was manually deployed to Render as
+`dep-dag0t2ad0e5s73ecfet0`. Render reports that deploy **live**. This head contains the
+same green story-first runtime plus the updated architecture/checkpoint documentation.
 
 ## Architectural decision — generated courses are playable teaching systems
 
@@ -173,8 +178,8 @@ and is intentionally not rewritten in place.
 
 ## Remaining product acceptance
 
-1. Deploy and play the story-first Shopping Agent candidate and judge whether the
-   concrete scenario/animation makes the learning objective materially easier to grasp.
+1. Play the **live** story-first Shopping Agent build and judge whether the concrete
+   scenario/animation makes the learning objective materially easier to grasp.
 2. On the live hosted campaign, save an unfinished mission, reload, and confirm the
    exact unfinished state resumes. Equivalent browser/database/process tests pass.
 3. Before broader multi-user activation, authorize a second real Supabase account and
