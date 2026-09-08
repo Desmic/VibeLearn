@@ -341,3 +341,32 @@ The first generated module must demonstrate, in a real browser:
 - learner inspection and actual feedback before calling the experience accepted.
 
 This is the minimum claim for **course generation** in VibeLearn.
+
+## 14. Inheritance from the September game-inspiration review
+
+Inherit the Expedition adventure refinement in `GAME-UX-SYSTEM.md` as design
+principles for future generation. This is documentation for a later phase, not
+authorization to implement generation during the Phase 1 checkpoint.
+
+Each generated experience should connect a meaningful goal to subject-specific
+player actions, consistent causal rules, consequential feedback, discovery,
+capability growth and an ending. Narrative courses should give characters
+motivations and acknowledge outcomes; dialogue may itself be meaningful play.
+A faithful non-narrative model remains valid where a story would distort the topic.
+
+Generate interactions that exercise the subject: investigating, constructing,
+transforming, negotiating or experimenting as appropriate. Do not force every
+subject into delivery tickets, combat, reflex tests or the same scene. The proposed
+Missing Delivery expedition is a Phase 1 reference concept, not an implemented or
+universally required template.
+
+Declare at least one opportunity for player-directed experimentation, an explicit
+payoff, and any replay variation actually supported. Difficulty should change
+reasoning demands. Validate that the simulated outcomes assess the claimed skill;
+a counts-only assessment cannot validate an arbitrary written policy.
+
+Preserve the separate generation/critic roles and validation layers above. For the
+current Phase 1 reference, the user and Codex are the review pair, both require
+>=8/10 with no critical blocker, and external testing is deferred until the user
+judges it ready. The current baseline remains user 6.5/10 and agent 7.5/10; the
+design amendment does not constitute a new acceptance result.
