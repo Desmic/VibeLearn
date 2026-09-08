@@ -3,6 +3,8 @@ on:
   pull_request:
   push:
     branches: [main, deploy/render-supabase]
+permissions:
+  contents: read
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -40,3 +42,13 @@ jobs:
       - run: python manage.py build
       - run: python manage.py test
       - run: python manage.py browser
+      - name: Preserve browser evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-review-evidence-${{ github.sha }}
+          path: |
+            artifacts/*.png
+            artifacts/*.json
+            artifacts/*trace.zip
+          retention-days: 7
