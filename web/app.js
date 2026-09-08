@@ -1,5 +1,6 @@
 "use strict";
 const $ = (selector) => document.querySelector(selector);
+const REQUEST_TIMEOUT_MS = 25000;
 let hosted = false;
 let state = null;
 let attempt = null;
@@ -16,17 +17,25 @@ function retainDraft() {
   dirty = true; editVersion += 1;
   if (!attempt || attempt.status !== "draft") return;
   try { localStorage.setItem(draftKey(), JSON.stringify({ response: response(), revision: attempt.revision })); }
-  catch { showError("Browser recovery storage is unavailable. Keep this tab open and use Save draft."); }
+  catch { showError("Browser recovery storage is unavailable. Keep this tab open and use Save progress."); }
   $("#save-status").textContent = "Unsaved changes · retained on this device";
 }
-async function api(path, body) {
+async function api(path, body, timeoutMs = REQUEST_TIMEOUT_MS) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const result = await fetch(path, { method: body ? "POST" : "GET", headers: body ? { "Content-Type": "application/json", "X-Learning-Command": "1" } : {}, body: body ? JSON.stringify(body) : undefined, signal: controller.signal });
     const data = await result.json();
     if (!result.ok) { const error = new Error(data.message || data.error); error.status = result.status; error.requestId = data.request_id; throw error; }
     return data;
+  } catch (error) {
+    const message = String(error?.message || "");
+    if (error?.name === "AbortError" || (/signal/i.test(message) && /abort/i.test(message))) {
+      const timeoutError = new Error("The connection took too long. Please try again.");
+      timeoutError.code = "REQUEST_TIMEOUT";
+      throw timeoutError;
+    }
+    throw error;
   } finally { clearTimeout(timeout); }
 }
 async function send(action, extra = {}) {
@@ -159,15 +168,19 @@ async function boot() {
       try { draft = JSON.parse(localStorage.getItem(draftKey()) || "null"); } catch { showError("Browser recovery storage is unavailable. Your database draft is still loaded."); }
       if (draft && Object.keys(attempt.response).some(key => draft.response[key] !== attempt.response[key])) {
         fillResponse(draft.response); dirty = true;
-        showError("Recovered an unsaved answer from this device. Review it before saving; another tab may have a different version.");
-        $("#save-status").textContent = "Recovered local draft";
+        showError("Recovered unsaved progress from this device. Review it before saving; another tab may have a different version.");
+        $("#save-status").textContent = "Recovered local progress";
       } else $("#save-status").textContent = (hosted ? "Resumed from your account" : "Resumed from local database");
     }
-    const health = await api("/api/health");
-    $("#build-label").textContent = `vibeLearn · ${health.version}`;
+    try {
+      const health = await api("/api/health", undefined, 12000);
+      $("#build-label").textContent = `vibeLearn · ${health.version}`;
+    } catch { $("#build-label").textContent = "vibeLearn · connected"; }
+    return true;
   } catch (error) {
-    if (hosted && error.status === 401) { showSignIn(); return; }
+    if (hosted && error.status === 401) { showSignIn(); return false; }
     showError(`Could not open the workspace: ${error.message}. Reload to retry.`);
+    return false;
   }
 }
 $("#start").addEventListener("click", () => send("start", {mode: $("#start-mode").value}));
@@ -187,13 +200,13 @@ if (document.modelContext?.registerTool) {
   window.addEventListener("pagehide", () => lifecycle.abort(), {once: true});
   try {
     Promise.resolve(document.modelContext.registerTool({
-      name: "save_current_learning_draft", title: "Save current learning draft",
-      description: "Save the text currently visible in the learner's draft. Does not submit, grade or reveal help.",
+      name: "save_current_learning_draft", title: "Save current learning progress",
+      description: "Save the text currently visible in the learner's active run. Does not submit, grade or reveal help.",
       inputSchema: {type: "object", properties: {}, additionalProperties: false},
       annotations: {readOnlyHint: false},
       async execute(input) {
-        if (!input || typeof input !== "object" || Array.isArray(input) || Object.keys(input).length || !attempt || attempt.status !== "draft" || busy) throw new Error("An active idle draft and empty input object are required.");
-        if (!await send("save")) throw new Error("Draft save failed. Visible answer retained.");
+        if (!input || typeof input !== "object" || Array.isArray(input) || Object.keys(input).length || !attempt || attempt.status !== "draft" || busy) throw new Error("An active idle run and empty input object are required.");
+        if (!await send("save")) throw new Error("Progress save failed. Visible answer retained.");
         return {attempt_id: attempt.id, revision: attempt.revision, status: "saved"};
       }
     }, {signal: lifecycle.signal})).catch(() => {});
@@ -223,12 +236,16 @@ $("#sign-in-form").addEventListener("submit", async event => {
     await api("/api/auth/login", {email: $("#login-email").value, password: $("#login-password").value});
     $("#login-password").value = "";
     await boot();
-  } catch (error) { showError((error.message || "Sign-in failed. Please retry.") + (error.requestId ? ` Reference: ${error.requestId}` : "")); }
-  finally { button.disabled = false; }
+  } catch (error) {
+    // A free-tier wakeup or dropped response can succeed server-side while the browser
+    // loses the acknowledgement. Try the authenticated session once before showing failure.
+    if (!error.status && await boot()) { clearError(); $("#login-password").value = ""; return; }
+    showError((error.message || "Sign-in failed. Please retry.") + (error.requestId ? ` Reference: ${error.requestId}` : ""));
+  } finally { button.disabled = false; }
 });
 $("#sign-out").addEventListener("click", async () => {
   if (busy) return;
-  if (dirty) { showError("Save your draft before signing out."); return; }
+  if (dirty) { showError("Save your progress before signing out."); return; }
   try {
     await api("/api/auth/logout", {});
   } catch (error) { if (error.status !== 401) { showError(error.message); return; } }
