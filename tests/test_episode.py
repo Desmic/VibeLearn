@@ -75,6 +75,7 @@ class EpisodeTests(unittest.TestCase):
         result = self.issue("submit", response=self.answer())
         self.assertEqual(result["assessment"]["outcome"], "correct")
         self.assertEqual(result["assessment"]["mastery"], "provisional")
+        self.assertEqual(result["assessment"]["independence"], "declared_independent")
         self.assertIsNone(result["assessment"]["reasoning"]["score"])
         self.assertEqual(result["evidence"]["capsule"]["response"], self.answer())
         self.assertEqual(result["review"]["frame"]["id"], self.attempt["snapshot"]["frame"]["id"])
@@ -110,6 +111,15 @@ class EpisodeTests(unittest.TestCase):
     def test_unknown_external_aids_do_not_claim_independence(self):
         result = self.issue("submit", response=self.answer(aid="unknown"))
         self.assertEqual(result["assessment"]["independence"], "unknown")
+
+    def test_explicit_external_help_is_assisted_without_relabeling_unknown(self):
+        _, learner = service.create_session(self.path)
+        started = service.command(self.path, learner, "start", {"command_id": str(uuid4()), "expected_revision": 0, "mode": "LEARN"})
+        result = service.command(self.path, learner, "submit", {
+            "command_id": str(uuid4()), "expected_revision": started["revision"], "attempt_id": started["id"],
+            "response": self.answer(aid="external"),
+        })
+        self.assertEqual(result["assessment"]["independence"], "assisted")
 
     def test_pre_hint_checkpoint_is_separate_from_assisted_submission(self):
         before = self.answer("1, 1, 1")
@@ -165,7 +175,7 @@ class EpisodeTests(unittest.TestCase):
         second = self.issue("submit", response=self.answer())
         self.assertEqual(second["practice_xp"], 10)
         self.assertEqual(second["reward"], 0)
-        self.assertEqual(second["assessment"]["independence"], "assisted")
+        self.assertEqual(second["assessment"]["independence"], "previously_exposed")
         self.assertEqual(second["review"]["due_at"], due)
         with transaction(self.path) as db:
             self.assertEqual(db.execute("SELECT COUNT(*) FROM evidence").fetchone()[0], 2)
