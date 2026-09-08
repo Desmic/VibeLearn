@@ -75,7 +75,15 @@ def seal(db, row, response, kind, stamp):
 
 def campaign_progress(db, learner):
     catalog = campaign_catalog()
-    cleared = {row[0] for row in db.execute("SELECT family_id FROM rewards WHERE learner_id=?", (learner,))}
+    cleared = set()
+    for row in db.execute("SELECT capsule, result FROM evidence WHERE learner_id=? ORDER BY created_at", (learner,)):
+        result = json.loads(row["result"])
+        if result.get("outcome") != "correct":
+            continue
+        capsule = json.loads(row["capsule"])
+        family_id = capsule.get("snapshot", {}).get("family_id")
+        if family_id:
+            cleared.add(family_id)
     result = []
     for index, mission in enumerate(catalog):
         is_cleared = mission["family_id"] in cleared
@@ -103,7 +111,6 @@ def attempt_view(db, row):
     result["checkpoints"] = []
     for cp in db.execute("SELECT * FROM checkpoints WHERE learner_id=? AND attempt_id=? ORDER BY rowid", (row["learner_id"], row["id"])):
         checkpoint = {key: cp[key] for key in cp.keys() if key != "rowid"} | {"response": json.loads(cp["response"]), "assistance": [event if isinstance(event, dict) else {"kind": "legacy_assistance", "detail": {"text": event}, "affects_independence": True} for event in json.loads(cp["assistance"])]}
-        # Revealing an answer-key evaluation before submission would itself be aid.
         if row["status"] == "submitted":
             checkpoint["assessment"] = evaluate(snapshot, checkpoint["response"], [event for event in checkpoint["assistance"] if event["affects_independence"]])
         result["checkpoints"].append(checkpoint)
@@ -250,7 +257,6 @@ def command(path, learner, action, body):
                 reward_xp = mission.get("reward_xp", 10)
                 db.execute("INSERT INTO rewards (learner_id, family_id, attempt_id, xp, policy, created_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(learner_id, family_id) DO NOTHING", (learner, snapshot["family_id"], attempt_id, reward_xp, snapshot["policies"]["reward"], stamp))
                 db.execute("UPDATE attempts SET status='submitted', response=?, revision=revision+1, updated_at=? WHERE id=? AND learner_id=?", (encode(response), stamp, attempt_id, learner))
-            # Source reading after submission must never rewrite the submitted response.
             if row["status"] == "submitted":
                 db.execute("UPDATE attempts SET revision=revision+1, updated_at=? WHERE id=? AND learner_id=?", (stamp, attempt_id, learner))
             elif action != "submit":
