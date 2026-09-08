@@ -1,61 +1,45 @@
-# Current checkpoint — Phase 1 expedition refinement, not accepted
+# Current checkpoint — playable expedition candidate; independent critic pending
 
-## Latest user instruction — 8 September 2026
+Updated 8 September 2026. **Phase 1 is not accepted. No >=9/10 verdict is claimed.**
 
-Continue research and implementation until a **genuinely separate game critic** rates the actual experience **>=9.0/10**, then return it to the user for final product review. The critic must judge it **as a game that even a kid or young adult would voluntarily engage with**, not as an educational website, engineering demo or checklist.
+## Active user decision
 
-The controlling amendment is [GAME-ACCEPTANCE-9.md](GAME-ACCEPTANCE-9.md). It supersedes active-document references to 8/10, the earlier documentation-only stop and same-agent fallback acceptance. The eight rubric weights are unchanged. Both younger non-specialist and older teen/young-adult engagement lenses must pass; XP-hidden play, curiosity, agency, setbacks, meaningful consequences, an ending and genuine replay are mandatory observations. Do not invent age-group enjoyment evidence.
+Continue research and implementation toward a **genuinely separate critic's unrounded >=9.0/10 game-experience score**, followed by the user's final product review. Judge the actual game as something **even a kid or young adult would voluntarily engage with**, not as an educational website or engineering checklist.
 
-**Phase 1 is still not accepted.** Last established product judgments remain user **6.5/10** and later agent **7.5/10** for the older shopping campaign. Historical 8.8/9.1 reviews are not reusable. No score has been assigned to the new expedition by an independent agent, and the user has not reviewed it.
+[GAME-ACCEPTANCE-9.md](GAME-ACCEPTANCE-9.md) is the controlling amendment. It supersedes older 8/10 thresholds, same-agent fallback acceptance and the earlier stop-after-documentation instruction. Preserve the eight rubric weights. Require younger non-specialist and older teen/young-adult engagement lenses, XP-hidden play, curiosity, meaningful agency, understandable setbacks/recovery, an earned ending and working replay. An agent's prediction is not evidence of actual child enjoyment.
 
-## Current implementation branch
+The established older-build judgments remain user **6.5/10** and later agent **7.5/10**. Historical 8.8/9.1 reviews are superseded. The new candidate's independent score is **null**, not an inferred improvement.
 
-- Repository: `Desmic/VibeLearn`.
-- Isolated branch: `game/expedition-nine-gate`; draft PR **#2** targets `deploy/render-supabase`.
-- First complete expedition implementation commit: `a5c0361450cb365ecd024262f8f742f3f0c9a017`.
-- The live Render deployment branch is unchanged. No deployment or database migration is part of this candidate commit.
-- This is Phase 1 gameplay refinement, not Phase 2 reuse or Phase 3 course generation. No external testers or paid provisioning were initiated.
+## Published candidate and verification
 
-The original shopping-agent activity and four-mission campaign retain their exact content and IDs. The new expedition has separate pinned activity/frame/family identities. Old clears do not certify new missions. Historical attempts remain readable, and the earlier UI is available at `/?legacy=1`.
+Repository `Desmic/VibeLearn`, branch `game/expedition-nine-gate`, **draft PR #2** into `deploy/render-supabase`.
 
-## Implemented candidate — The Missing Delivery
+Latest verified runtime commit: **`016f5252a9e050a6af53aa42472f62cbcd8e3a99`**. GitHub Actions **run 170 (`34258933808`) passed**: build, all 76 Python/hosted/PostgreSQL tests and both original-campaign and expedition Chromium journeys. Evidence was downloaded and inspected. Subsequent checkpoint-documentation changes do not change that runtime.
 
-The player helps Pip, a small courier stranded beside a broken bridge, get exactly one repair gear through a storm. A central illustrated valley replaces the new campaign's trace-and-answer screen. Actions send an order, retry a ticket, restart Pip, recover the journal ticket, advance the memory clock, inspect the order register and collect the gear. A wrong retry can visibly create two gears; a rehearsal rewind preserves the run's earlier move/help history.
+The first integrated expedition run found mobile horizontal overflow at 200% text. It was fixed through wrapping/content-sized layout, not clipping or weakened tests. Run 169 passed; screenshot review then found desktop tool-dock overlap, fixed and reverified in run 170. See [EXPEDITION-VERIFICATION.md](EXPEDITION-VERIFICATION.md) for exact evidence, coverage limits and outstanding game-design observations.
 
-The five-stop curve is:
+## Implemented reference — The Missing Delivery
 
-1. Send an order; lose the reply; safely retry the remembered ticket.
-2. Restart the courier; discover why a new worker ticket duplicates the order; recover durable intent.
-3. Outlast the workshop's retry memory; consult the separate durable order register instead of retrying blindly.
-4. Construct four courier rules and execute them against seven disruptions, including exact expiry, changed details and unavailable records. `Keep retrying forever` cannot clear this boss merely because old quiz counts were correct.
-5. A working detour changes retention to two hours and loses the original request rather than just its reply. Authoritative absence with no in-flight request changes the safe action.
+Pip needs one gear to repair a broken bridge. The player acts in an illustrated valley: send an order, retry a ticket, restart Pip, recover the journal ticket, wait beyond workshop memory, inspect the separate order register and collect the gear. A wrong retry can visibly produce two gears; rewind restarts the rehearsal without erasing earlier move/help history.
 
-World truth (gears made) and the courier's knowledge are separately visible. Boss success repairs the bridge and opens the detour. Optional sound starts off; visible feedback and reduced-motion equivalents remain required. XP can be hidden without changing gameplay. All this is implemented candidate behavior, not a claim that the game is enjoyable enough for acceptance.
+Five stops teach retained same-ticket retries, durable intent through restart, retention/reconciliation, a constructed four-rule boss executed against seven disruptions, and a real two-hour-memory detour where the original request never arrived. The safe boss result repairs the bridge. World truth and what Pip knows are separate. Optional sound starts off; XP can be hidden without affecting play.
 
-## Evidence and verification status
+The old activity and Shopping Agent campaign retain their IDs/content. The expedition has separate pinned activity/frame/family identities; old clears cannot certify new missions. Historical attempts remain readable through the original experience at `/?legacy=1`.
 
-Local build succeeded. **54 non-hosted Python tests passed**, including 17 expedition tests: full routes, both failure mechanisms, all 16 complete policy combinations, unsafe indefinite retry, append-only saved moves, rehearsal recovery, real SQLite persistence, server locks, idempotent commands/rewards and learner isolation. Full hosted/PostgreSQL checks require dependencies provided by the project CI; local results alone do not establish that gate.
+## Independent critic — actual blocker
 
-The candidate adds a real Chromium expedition journey alongside the unchanged legacy journey. It exercises saving/reload/actual process restart, a deliberate duplicate and rewind, unsafe/safe boss policies, the ending/detour, a dropped acknowledgement after a real commit, 320/390px touch sessions, actual 200% text enlargement, reduced motion and isolation. Its screenshots, trace and JSON report are CI artifacts. **At this documentation checkpoint, the first integrated CI/browser run is not yet claimed as passed.** Consult the subsequent verification record or the exact commit's run, not a historical green run.
+A real read-only `@codex` game-critic request was posted to PR #2. The `chatgpt-codex-connector[bot]` replied: **a Codex cloud environment for this repository must be created before it can run**. Request comment `5588960891`; bot reply `5588963309`.
 
-Local Chromium navigation was blocked by an administrator policy. That local run is not game evidence; no policy bypass was attempted. CI is the separate normal project verification environment.
+Status: **`independent_critic_pending`**. No report or independent score was produced. A green test suite and the builder's visual QA do not substitute. [CRITIC-HANDOFF.md](CRITIC-HANDOFF.md) provides the current-candidate brief; the earlier bot request referenced the historical baseline.
 
-## Independent-critic blocker
+The missing Codex environment is a review setup prerequisite, not a claim that the game would pass once it exists. Further gameplay revisions may be required by that critic. The user reviews the game only after the independent >=9 gate, and can still reject it.
 
-A real `@codex` read-only game-critic request was posted to PR #2, explicitly requiring rendered gameplay, the two audience lenses, fixed weights, raw scores and honest refusal to certify from source alone.
+## Boundaries
 
-The `chatgpt-codex-connector[bot]` replied that a **Codex cloud environment for this repository must be created** before it can run. See PR #2 comments `5588960891` (request) and `5588963309` (bot reply). No critic report was produced.
+The live Render branch/deployment and Supabase schema, Auth settings, allowlist and learner data were not changed. No paid resources, external testers, Phase 2 reuse, Phase 3 generator implementation or model integration were opened. The candidate remains draft and unmerged.
 
-Current acceptance state: **`independent_critic_pending`**. Independent score: **null**. Creating a Codex environment for `Desmic/VibeLearn` is the prerequisite for that integration. A same-agent QA pass or a green test suite cannot substitute for the requested separate critic. Do not claim the target has been reached, and do not deploy as accepted.
+Commands resolve the learner, command ID and expected revision; the server replays the pinned game. Saved moves are append-only, submitted evidence immutable, observed simulation feedback assisted and earlier missing evidence not failure. XP never determines correctness or mastery. The policy boss checks bounded declared cases, not arbitrary real-world safety; free prose remains ungraded.
 
-## Learning and infrastructure invariants
+Future generated courses inherit the detailed package contract in [COURSE-GENERATION-GAME-SYSTEM.md](COURSE-GENERATION-GAME-SYSTEM.md), with GAME-ACCEPTANCE-9.md overriding older thresholds and adding voluntary youth engagement plus genuine separate criticism. Failed bounded repairs remain drafts. The checksummed historical design package stays unchanged.
 
-Every command resolves the learner, uses a command ID and expected revision, and replays the pinned game model on the server. Saved moves cannot be rewritten. Simulated feedback is recorded as assistance before claiming a guided result; an empty pre-feedback checkpoint remains `not_observed`, not failed. Prose is ungraded. XP never determines correctness, mastery, freshness or competency unlocking. The policy boss validates only the declared bounded cases, not arbitrary real-world system safety.
-
-The pilot remains Render Free + Supabase Free, using the private `vibelearn` schema, restricted PostgreSQL roles, learner-scoped RLS, verified Supabase identity, HTTPS and an explicit email allowlist. No schema, Auth settings, allowlist or production learner data was changed for this refinement. Read [HOSTING.md](HOSTING.md) for operating boundaries.
-
-The exact prior checkpoint, infrastructure evidence, migration IDs, previous reviews and older phase decisions are preserved unchanged in [history/STATE-before-nine-20260908.md](history/STATE-before-nine-20260908.md). Its earlier acceptance thresholds and stop instruction are historical, not current.
-
-## Course-generation inheritance
-
-Future generated courses must inherit the learning, story, direct-play, progression, assistance, persistence and accessibility contracts in [COURSE-GENERATION-GAME-SYSTEM.md](COURSE-GENERATION-GAME-SYSTEM.md), **with the newer youth-engagement and separate >=9.0 gate in GAME-ACCEPTANCE-9.md overriding older thresholds**. A generated manifest cannot certify its own rendered game. Failed bounded repairs remain drafts. The checksummed `learning-os-design-package-v1.3/` stays unchanged.
+Original checkpoint, infrastructure evidence and earlier decisions are preserved verbatim in [history/STATE-before-nine-20260908.md](history/STATE-before-nine-20260908.md). Its old threshold and stop instruction are historical, not current. Read [HOSTING.md](HOSTING.md) before any deployment.
