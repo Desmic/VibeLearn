@@ -264,7 +264,7 @@ function syncControls() {
   $("#dock-source").hidden = !sourceEnabled;
   $("#source").disabled = !attempt.source_allowed;
   $("#source").hidden = !sourceEnabled || Boolean(attempt.source);
-  $("#dock-save").disabled = attempt.status === "submitted" || !dirty;
+  $("#dock-save").disabled = attempt.status === "submitted";
   configureModes(meta, attempt.mode);
   renderPredictionBoard(snapshot);
 }
