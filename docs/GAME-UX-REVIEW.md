@@ -54,34 +54,42 @@ Before scoring, inspect at least:
 12. boss mission after prerequisites;
 13. evidence/review details after clear.
 
-## Score record template
+## Recorded critic review — 8 September 2026
 
 ### Candidate
 
-Commit: `<sha>`
-Reviewer pass date: `<date>`
-Verification inputs: `<CI / browser / live / screenshots>`
+Commit: `3bbdfe18d2a8f38ad531ecbe585d993ba6ef4eb9`
+Reviewer pass date: `2026-09-08`
+Verification inputs: GitHub Actions `Verify hosted pilot` run 102 (`34215243233`), 57 Python/hosted/PostgreSQL tests, full real Chromium 138 browser campaign journey, real temporary database, actual process restart, dropped-acknowledgement fault injection, 390px viewport, 200% text enlargement and reduced-motion context. The browser run reported no page errors.
+
+The review is a separate critic pass using the rubric above; it is not represented as an independent external model or human review.
 
 | Area | Score | Evidence / criticism |
 |---|---:|---|
-| Game identity | /10 | |
-| HUD | /10 | |
-| Core loop | /10 | |
-| Progression | /10 | |
-| Feedback / juice | /10 | |
-| Theme | /10 | |
-| Learning integrity | /10 | |
-| Accessibility | /10 | |
+| Game identity | 8.5/10 | The old sidebar/topbar and permanent right rail are removed from play. A persistent game HUD, bottom tool dock, campaign path, locked nodes and direct outcome decisions now dominate the experience. Some central task/debrief geometry still inherits card/table structure, so it is not yet a fully bespoke game scene. |
+| HUD | 8.4/10 | Level/boss state, mission objective, chapter progress, XP and sync state are glanceable on desktop; Hint, Intel, Play style and Save are persistent HUD tools with one-action drawers. On smaller layouts one secondary sync statistic is hidden to preserve space, although Save remains available in the dock. |
+| Core loop | 8.8/10 | Campaign map -> launch -> direct 1/2-charge decision -> optional HUD tools -> lock answer -> debrief/reward -> continue is clear and test-covered. Early missions remove diagnosis/source/mode complexity until the player needs it. |
+| Progression | 9.4/10 | Tutorial -> Easy -> Medium -> Boss is a real server-enforced curve. Levels 1-2 teach one mechanic with one decision; Level 3 introduces two decisions, explanation and optional assisted tools; the boss recombines three traces plus full contract reasoning. Incorrect submissions may earn bounded practice XP but cannot unlock the next mission. |
+| Feedback / juice | 8.4/10 | Selection locks with tactile feedback; trace events reveal in causal order; sync flashes; newly available/cleared nodes animate; results enter as a dedicated screen and rewards pop. Motion is meaningful rather than ambient. There is still room for richer optional sound/haptics/scene-specific visual feedback later. |
+| Theme | 8.5/10 | Dark tactical systems-game shell, lime/cyan/violet state language, consistent HUD/dock vocabulary and campaign terminology feel coherent. Residual dense tables/details appropriately remain for technical content but still carry some web/document ancestry. |
+| Learning integrity | 9.7/10 | Historical Phase 1 snapshots remain immutable; campaign activities/families use new IDs; mission unlocks depend on correct pinned evidence rather than XP; XP does not affect mastery; help/source exposure, checkpoints, retries and evidence remain honest and inspectable. |
+| Accessibility | 8.8/10 | Browser gate covers keyboard flow, 390px layout, 200% text enlargement, separate learner context and reduced motion. No horizontal overflow or page errors were observed. Mobile HUD is intentionally denser and deserves continued real-device refinement. |
 
-Weighted total: **/10**
+Weighted total: **8.8 / 10** (`8.7975` before rounding)
 
-Critical blockers: `<none or list>`
+Critical blockers: **none observed in the verified candidate.**
 
-Verdict: `FAIL <8` / `PASS >=8`
+Verdict: **PASS >=8**
 
-Required fixes before next review:
+### Remaining design debt after the pass
 
-- ...
+Passing this gate does not mean the game UI is finished. Highest-value follow-ups are:
+
+- diversify future mission interactions beyond cards/tables and binary outcome choices (sequence building, diagram manipulation, debugging/repair interactions, etc.);
+- improve mobile HUD glanceability without increasing cognitive load;
+- add richer optional audiovisual/haptic payoff only where it communicates success, danger, unlock or causality;
+- expand progression beyond the four-mission retry chapter with fresh recall missions and new chapters while keeping difficulty tied to demonstrated understanding;
+- keep running this same critic rubric after substantial game-loop/UI changes. A future candidate below 8.0 must not be treated as a passing game experience merely because this version passed.
 
 ## Current baseline observation
 
