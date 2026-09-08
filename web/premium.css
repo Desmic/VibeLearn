@@ -574,8 +574,112 @@ body:has(#password-reset:not([hidden])) #notice{
 .context-column{position:sticky;top:18px}
 footer{opacity:.78}
 
+/* UI-6 — game-first mission layer. */
+.mission-entry{
+  position:relative;
+  overflow:hidden;
+  border:2px solid #e2e8d8;
+  background:
+    radial-gradient(circle at 7% 8%,rgba(189,242,109,.24),transparent 17rem),
+    radial-gradient(circle at 93% 82%,rgba(111,91,246,.13),transparent 18rem),
+    linear-gradient(145deg,#fff,#fbfdf7 60%,#faf8ff);
+  box-shadow:0 22px 60px rgba(52,63,43,.10),0 3px 0 rgba(122,156,82,.12);
+}
+.mission-entry::after{
+  content:"";
+  position:absolute;
+  width:180px;height:180px;border-radius:50%;right:-86px;top:-95px;
+  border:28px solid rgba(111,91,246,.05);
+  pointer-events:none;
+}
+.mission-kicker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.mission-chip,.mission-reward{
+  display:inline-flex;align-items:center;min-height:28px;padding:5px 10px;border-radius:999px;
+  font-size:.69rem;font-weight:800;letter-spacing:.08em;
+}
+.mission-chip{background:#dffc9a;color:#365320;border:1px solid #cde987}
+.mission-reward{background:#eeeaff;color:#5a4bc7;border:1px solid #ddd6ff}
+.mission-entry h2{font-size:clamp(1.85rem,3vw,2.55rem);margin-bottom:13px}
+.mission-brief{font-size:1rem;color:#536178;max-width:720px;line-height:1.7}
+.mission-goals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:22px 0 18px}
+.mission-goals span{
+  display:flex;align-items:center;gap:9px;min-height:50px;padding:10px 11px;border:1px solid #e5e9df;
+  border-radius:13px;background:rgba(255,255,255,.74);font-size:.81rem;font-weight:650;color:#435168;
+}
+.mission-goals b{
+  width:25px;height:25px;flex:0 0 25px;display:grid;place-items:center;border-radius:9px;
+  background:#edf8da;color:#51772c;font-size:.72rem;box-shadow:inset 0 -1px rgba(82,119,44,.10);
+}
+.mission-entry .entry-controls{
+  position:relative;z-index:1;background:linear-gradient(160deg,#1b2943,#263553);border-color:#31415f;color:#fff;
+  box-shadow:0 4px 0 #101a2b,0 16px 34px rgba(22,33,54,.18);
+}
+.mission-entry .entry-controls label{color:#f3f6fb}
+.mission-entry .entry-controls .muted{color:#b7c2d5}
+.mission-entry .entry-controls select{background:#fff;color:#26364c}
+.mission-entry .entry-controls .primary{background:linear-gradient(135deg,#bdf26d,#9adb44);color:#23371b;border-color:#9fd44f;box-shadow:0 3px 0 #6f9f2d,0 9px 18px rgba(146,214,62,.20)}
+.mission-entry .entry-controls .primary:hover{background:linear-gradient(135deg,#c9f784,#a8e250)}
+
+.mission-hud{
+  display:flex;align-items:center;justify-content:space-between;gap:22px;margin-bottom:18px;padding:15px 18px;
+  border:1px solid #31405f;border-radius:16px;color:#fff;
+  background:
+    radial-gradient(circle at 6% 50%,rgba(189,242,109,.15),transparent 13rem),
+    radial-gradient(circle at 94% 20%,rgba(111,91,246,.25),transparent 14rem),
+    linear-gradient(135deg,#19263d,#23324f);
+  box-shadow:0 4px 0 #111b2d,0 13px 30px rgba(20,31,50,.16);
+}
+.mission-hud>div:first-child{display:flex;align-items:center;gap:10px;min-width:0}
+.mission-hud .mission-chip{background:#c8f778;border-color:#b3e65f;color:#29431c;flex-shrink:0}
+.mission-hud strong{font-size:.92rem;letter-spacing:-.015em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mission-stage{min-width:240px;text-align:right;font-size:.71rem;font-weight:700;color:#cbd5e6}
+.stage-complete{display:none;color:#d7ff9d}
+.mission-progress{height:7px;margin-top:7px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
+.mission-progress span{display:block;width:50%;height:100%;border-radius:999px;background:linear-gradient(90deg,#bdf26d,#8dd937);transition:width .45s cubic-bezier(.2,.8,.2,1)}
+body:has(#recap:not([hidden])) .mission-progress span{width:100%}
+body:has(#recap:not([hidden])) .stage-active{display:none}
+body:has(#recap:not([hidden])) .stage-complete{display:inline}
+
+.objective-callout{
+  display:grid;gap:3px;margin:18px 0 20px;padding:14px 16px;border-radius:13px;
+  border:1px solid #dbe9c7;background:linear-gradient(135deg,#f5fbe9,#fbfdf7);
+}
+.objective-callout span{font-size:.64rem;font-weight:850;letter-spacing:.10em;color:#669336}
+.objective-callout strong{font-size:.91rem;color:#34482c;line-height:1.45}
+
+.save-progress-group{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.save-progress-group small{max-width:165px;color:#7d8798;font-size:.71rem;line-height:1.35}
+#save{border-color:#cfe3ad;background:linear-gradient(180deg,#f5fbe9,#edf7dc);color:#45652b;box-shadow:0 2px 0 #d3e4b7}
+#save:hover{background:#f3f9e7;border-color:#bdd79a}
+#submit{min-width:190px}
+
+#episode:not([hidden]) .mission-hud{animation:missionHudIn .38s cubic-bezier(.2,.8,.2,1) both}
+#episode:not([hidden]) .task-card{animation:missionCardIn .45s .05s cubic-bezier(.2,.8,.2,1) both}
+#episode:not([hidden]) .response-card{animation:missionCardIn .45s .10s cubic-bezier(.2,.8,.2,1) both}
+#episode:not([hidden]) .timeline>*{animation:traceReveal .38s both}
+#episode:not([hidden]) .timeline>*:nth-child(1){animation-delay:.14s}
+#episode:not([hidden]) .timeline>*:nth-child(2){animation-delay:.23s}
+#episode:not([hidden]) .timeline>*:nth-child(3){animation-delay:.32s}
+#episode:not([hidden]) .timeline>*:nth-child(4){animation-delay:.41s}
+#episode:not([hidden]) .timeline>*:nth-child(5){animation-delay:.50s}
+#recap:not([hidden]){animation:recapEnter .46s cubic-bezier(.16,.84,.32,1.18) both}
+#recap:not([hidden]) .reward-banner{animation:rewardPop .58s .18s cubic-bezier(.16,.84,.32,1.22) both}
+#recap:not([hidden]) .feedback-row{animation:feedbackRise .38s both}
+#recap:not([hidden]) .feedback-row:nth-child(1){animation-delay:.08s}
+#recap:not([hidden]) .feedback-row:nth-child(2){animation-delay:.14s}
+#recap:not([hidden]) .feedback-row:nth-child(3){animation-delay:.20s}
+
+@keyframes missionHudIn{from{opacity:0;transform:translateY(-9px) scale(.99)}to{opacity:1;transform:none}}
+@keyframes missionCardIn{from{opacity:0;transform:translateY(16px) scale(.992)}to{opacity:1;transform:none}}
+@keyframes traceReveal{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+@keyframes recapEnter{from{opacity:0;transform:translateY(20px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes rewardPop{from{opacity:0;transform:scale(.92) rotate(-.5deg)}to{opacity:1;transform:none}}
+@keyframes feedbackRise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+
 @media(max-width:980px){
   .context-column{position:static}
+  .mission-goals{grid-template-columns:1fr}
+  .mission-hud{align-items:flex-start}
 }
 
 @media(max-width:700px){
@@ -587,8 +691,19 @@ footer{opacity:.78}
   .reward-banner{align-items:flex-start;padding:18px}
   .context-column{gap:12px}
   .hint-card,.source-card,.mode-card{padding:18px}
+  .mission-entry{padding:24px 18px}
+  .mission-entry h2{font-size:1.8rem}
+  .mission-hud{display:block;padding:14px 15px}
+  .mission-hud>div:first-child{align-items:flex-start}
+  .mission-stage{min-width:0;text-align:left;margin-top:12px}
+  .save-progress-group{width:100%}
+  .save-progress-group #save{flex:1}
+  .save-progress-group small{max-width:none;flex:1 1 150px}
+  #submit{width:100%;min-width:0}
 }
 
 @media(prefers-reduced-motion:reduce){
-  button,input,textarea,select,.hint-card,.source-card{transition:none!important}
+  button,input,textarea,select,.hint-card,.source-card,.mission-progress span{transition:none!important}
+  #episode:not([hidden]) .mission-hud,#episode:not([hidden]) .task-card,#episode:not([hidden]) .response-card,
+  #episode:not([hidden]) .timeline>*,#recap:not([hidden]),#recap:not([hidden]) .reward-banner,#recap:not([hidden]) .feedback-row{animation:none!important}
 }
