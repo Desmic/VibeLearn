@@ -129,6 +129,7 @@ def main():
             expect(page.locator("#prediction-board .decision-row")).to_have_count(1)
             expect(page.locator("#dock-source")).to_be_hidden()
             expect(page.locator("#dock-mode")).to_be_disabled()
+            page.locator("#integrity-wrap summary").click()
             page.locator("#aid-declaration").select_option("none")
             select_outcome(page, "A", 2)
             page.get_by_role("button", name="Lock in answer", exact=True).click()
