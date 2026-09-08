@@ -1,61 +1,55 @@
-# VibeLearn game UX system — expedition refinement
+# VibeLearn game UX system — the game is the course
 
-Active user direction, 8 September 2026. Read [GAME-ACCEPTANCE-9.md](GAME-ACCEPTANCE-9.md) and [GAME-UX-REVIEW.md](GAME-UX-REVIEW.md) with this document.
+Active user amendment, 9 September 2026: [GAME-AS-COURSE.md](GAME-AS-COURSE.md). The earlier detailed game/story direction remains in [history/GAME-UX-SYSTEM-before-nine-20260908.md](history/GAME-UX-SYSTEM-before-nine-20260908.md), with the current thresholds, review method and scope below taking precedence.
 
-## North star and audience
+## Product and review standard
 
-VibeLearn is a **learning game whose mechanics teach serious ideas**, not a website with XP labels. A curious kid or young adult should have a reason to voluntarily keep playing. The critic must evaluate younger non-specialist and older teen/young-adult engagement separately. Approachability is not childishness; eventual rigor is not optional. Neither automated checks nor an agent's audience prediction establish actual child enjoyment.
+Build a game whose subject-relevant actions develop the intended course capabilities. The experience must earn voluntary play from a curious younger non-specialist and an older teen/young adult. Do not mistake a game-themed website, a beautiful scene, easy quizzes or XP accumulation for that product.
 
-A genuinely separate critic must score the frozen playable candidate **>=9.0/10 unrounded**, both audience lenses must pass and no critical blocker may remain before the user's final review. Older 8/10 gates and documentation-only stop instructions are superseded. No acceptance is claimed by this document.
+The user temporarily permits **internal tool-assisted review while Codex is unavailable**. Use the fixed rubric and actual rendered/behavioral evidence, disclose reviewer and environment limits, and never label the builder a separate critic agent. The target remains unrounded **>=9.0/10**, both audience lenses passing, no critical blocker and the user's final product judgment. Codex availability is no longer a reason to stop useful review. Consult STATE.md and the newest review report for the actual score; this document does not certify it.
 
-## Design principles
+## Experience and learning are separate gates
 
-**Story and intuition before abstraction.** Establish a clear goal, someone/something worth helping, a change and a meaningful action before specialist vocabulary. Narrative is useful only when it carries causality, motivation or clues. Do not replace formal truth with a comforting but inaccurate metaphor.
+The game must be enjoyable enough to choose voluntarily, and its declared learning outcomes must have defensible coverage/evidence. Do not average these requirements. A delightful but shallow game fails the course promise; a correct but tedious lesson fails the experience.
 
-**Learning embedded in play.** Let players send, inspect, manipulate, construct, test and recover where those operations embody the subject. Actions must visibly change relevant state. Reading, dialogue and explanation can support the loop; they should not become the loop by default.
+For each outcome, design the prerequisite, mechanic, meaningful decision, causal feedback, varied practice, fresh transfer challenge, delayed retrieval and limits of what is assessed. Authentic code/design work belongs in the game when it is part of the promised capability. A short guided retry slice is not a full-course replacement or proof of superior learning.
 
-**Confidence before complexity.** Teach -> easy success -> variation -> combine -> boss -> relief -> new possibility. Difficulty rises through interactions, uncertainty and tradeoffs, not larger forms. Do not introduce an untaught rule only when grading the boss.
+## Game design invariants
 
-**Earned agency and payoff.** Consistent rules should invite useful experiments. Mistakes expose consequences and suggest a new hypothesis. Recoverable setbacks preserve evidence. An ending changes the world and resolves the stated goal; replay changes the strategy or reasoning. Test whether this remains interesting with XP hidden. Avoid pressure-based retention, shame, streak anxiety and fake urgency.
+**Narrative before jargon, where faithful.** Establish who wants what, what changed and why the player's action matters. Story carries motivation, clues and causality rather than decorating another reading panel. Formal concepts name a model the player has begun to understand.
 
-## Current reference implementation
+**Subject thinking inside play.** Investigate, manipulate, compare, arrange, construct, diagnose and test when those actions embody the skill. Decisions produce distinct, legible world consequences. Dialogue/reference text appears when it helps a decision. Neither forms nor combat nor free walking is a universal definition of a game.
 
-The original four-mission Shopping Agent campaign remains historical practice. The separate candidate **The Missing Delivery** is implemented in `app/expedition.py`, `web/expedition.js` and `web/expedition.css`; its acceptance is pending.
+**Confidence before complexity.** Teach -> easy success -> variation -> combine -> boss/transfer -> earned resolution -> a new possibility. New tools increase what the player can do. Every required boss rule and interface operation needs preparation; a surprise unintroduced prerequisite is not a fair difficulty increase.
 
-Pip needs one gear to repair the bridge. The workshop receives an order, but the storm can lose its reply—or, in the detour, the order itself. The player acts in one illustrated valley, with Pip, journal, workshop, gear count and bridge. What actually happened and what Pip knows are separate states.
+**Curiosity without coercion.** Safe experiments and informative failures should suggest a new hypothesis. The reason to play survives hiding XP. Replays change reasoning, not merely colors or wording. Do not use shame, streak pressure, fake urgency or grinding to compensate for a weak core loop.
 
-| Stop | Direct interaction | Learning operation |
-|---|---|---|
-| A message in the storm | Send, observe missing reply, resend same ticket, collect | Distinguish failed acknowledgement from failed effect; retained idempotency |
-| Pip loses the ticket | Restart, try new identity, recover journal ticket, rewind a duplicate | Durable business intent versus process identity |
-| When the workshop forgets | Advance beyond retention, inspect durable order register | Bounded deduplication and explicit reconciliation |
-| The storm engine | Construct four rules; execute seven disruptions; revise | Combine identity, payload binding, expiry and uncertainty handling |
-| Detour | Two-hour window; order never arrived; authoritative absence permits a new attempt | Transfer to a materially different failure, not cosmetic replay |
+## Current reference and renderer experiment
 
-A safe boss policy repairs the bridge and opens the detour. `Retry forever` is tested against executable counterexamples, not accepted because the player also entered correct legacy counts. Passing proves only the bounded simulated cases, not general system safety or mastery.
+The Missing Delivery is an authored five-stop expedition. Pip needs one bridge gear, the workshop's reply can be lost, a courier restart can change the wrong identity, and the retry memory can expire. The player sends/retries, restores the journal ticket, manipulates time, checks a separately declared durable register, constructs a bounded policy and takes a different missing-request detour. Historical Shopping Agent attempts keep their original content and evidence.
 
-## Interface and feedback
+The optional **Three.js valley** at `?world=3d` tests selection of the actual post, courier, journal, clock, register, ticket press and gear. It is a presentation/input prototype, not a new assessment engine or a finished game. The default illustrated view remains. Follow [THREEJS-SPIKE.md](THREEJS-SPIKE.md) for pinned assets, local use, fallback and test boundaries. Do not force all generated subjects into 3D or a delivery theme.
 
-Keep the main playfield open. A persistent HUD carries the plain objective, progress and save state; secondary aid/source/evidence details are contextual. Show immediately relevant actions beside the game. Stable tap/keyboard targets are required; motion must not move a target while the player selects it.
+The renderer projects server-owned game state. Picking a 3D object must invoke the same legal command as its keyboard/touch equivalent. No renderer, animation, frame count or collision callback may silently create mastery/evidence. A WebGL or asset failure must preserve the learning operation and saved work.
 
-Use cause-driven transitions for orders, retries, collection and the restored bridge. Optional sound is off until chosen. Essential meaning remains in semantic text/state with motion reduced and sound off. Native buttons and textual world/knowledge labels are primary controls; SVG is not the sole accessible interface. Small-screen and enlarged-text verification must inspect actual computed sizes, not merely set a CSS value that leaves fixed-pixel text unchanged.
+## HUD, input and feedback
 
-Selecting a different boss rule invalidates the old test result until the new policy is executed. A pending save retains the move, blocks a duplicate next action and offers retry of the same command. Normal navigation must not erase a pending choice. Completed sequential missions point to the next unlocked stop; failed missions remain the retry target.
+Keep the main action and the important consequence together. The HUD carries the immediate plain goal, relevant world/knowledge state, useful contextual tools and save status. Repeated titles, giant briefings, persistent tool rails and postmortem tables must not push play below the fold. Optional explanations remain accessible without dominating the loop.
 
-## Learning and persistence contracts
+Every input receives acknowledgement, and state-changing actions receive meaningful causal feedback. Do not move precise click/tap targets while they are being selected. Preserve keyboard focus across redraws. New policy choices invalidate old results until tested. Pending saves retain the command and prevent accidental duplicate actions. Ordinary map navigation must not silently discard a rule choice.
 
-Game progression and learning evidence are different systems. XP, animation and clears are presentation/motivation, never mastery. Commands carry learner identity, command ID and expected revision; the server replays the pinned model, validates progression and preserves immutable submissions. New assessment meaning receives new activity/frame/family identities. Historical content remains unchanged.
+Required information survives reduced motion, sound off, narrow screens and actual text enlargement. Semantic equivalents accompany visual controls. Measure input latency, frame timing, asset load and recovery on the supported real devices before claiming performance; headless CI is not a phone benchmark.
 
-Feedback from experimentation is observed assistance, recorded before a guided result. An empty earlier checkpoint remains not observed. Unknown declaration, current assistance and prior exposure remain distinguishable. Rewind resets a rehearsal but never deletes prior move/help history. Free prose is not graded by keywords or a counts-only evaluator.
+## Learning integrity and continuity
 
-The durable order register is a separate explicit service from retry memory. At/after retention expiry, a matching old ticket alone does not guarantee deduplication. A confirmed committed order, authoritative absence with no in-flight request, and an unavailable register must yield different safe behaviors.
+World truth and what the courier knows remain distinct. Missing acknowledgement is uncertainty, not proof of failure. Retained identity has a finite window. Committed, authoritatively absent with no in-flight request, and unavailable register states require different behaviors. The extra durable register is an explicit scenario capability, not an infinitely retained retry cache. Rehearsal rewind does not imply real purchases can be undone.
 
-## Research and inheritance
+Commands resolve learner, command ID and expected revision. The server replays pinned rules and validates progression. Saved move history is append-only, submissions immutable, and new assessment meaning receives explicit new identities/revisions. XP never decides correctness, mastery or evidence strength.
 
-The new acceptance contract records continued primary-source research from Celia Hodent (onboarding), Zachtronics (iterative construction), Hempuli (rules embodied in play), Game Accessibility Guidelines and AWS Builders Library (retry semantics). These are design inputs; they do not promise youth engagement.
+Observed simulation feedback is guided assistance, not a fresh independent prediction. Unknown declaration, current help and prior exposure stay separate; missing evidence is not failure. Free prose is not graded by a counts-only or keyword evaluator. Preserve the user's historical evidence and course-independent review needs.
 
-The earlier Expedition 33, Witcher 3 and Breath of the Wild inspiration, detailed HUD/story principles, original campaign description and historical implementation order are preserved verbatim in [history/GAME-UX-SYSTEM-before-nine-20260908.md](history/GAME-UX-SYSTEM-before-nine-20260908.md). Its earlier threshold/stop status is historical.
+## Generation and scope
 
-Future course generation must produce a coherent playable teaching system—not only lesson prose. [COURSE-GENERATION-GAME-SYSTEM.md](COURSE-GENERATION-GAME-SYSTEM.md) remains the detailed package contract, amended by the newer **youth-engagement, genuine independent critic and >=9.0 gate** in GAME-ACCEPTANCE-9.md. Specify audience assumptions, first meaningful action, curiosity/experimentation, progression, feedback/recovery, ending/replay, assistance and validation evidence. Inherit these principles, not mandatory fantasy artwork, a fixed number of nodes or one universal mechanic.
+[COURSE-GENERATION-GAME-SYSTEM.md](COURSE-GENERATION-GAME-SYSTEM.md) carries the full generation contract and its preserved detailed predecessor. Generated content must be a coherent playable learning system with outcome coverage, interaction/progression, provenance, assistance, persistence, accessibility and critic evidence. A schema-valid manifest cannot certify its own rendered game. Failed bounded repairs remain drafts; the current supervised internal-review exception is not unrestricted future self-certification.
 
-The current work remains private Phase 1 refinement. Course-generation implementation, broader testers and paid infrastructure have not been opened. Consult STATE.md for executed checks and the independent-critic prerequisite.
+This is private Phase 1 refinement only. No new model integration, untrusted runner, Phase 2/3 implementation, external testers, paid provisioning or public rollout is authorized. User acceptance and existing hosted isolation/operational gates still control release.

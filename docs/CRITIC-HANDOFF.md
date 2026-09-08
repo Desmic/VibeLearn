@@ -1,31 +1,33 @@
-# Independent GAME critic handoff
+# Game-experience critic brief — available tools now, independent critic when available
 
-This brief is ready; **no independent review has run**. GitHub's Codex bot requires a cloud environment for `Desmic/VibeLearn`. Its earlier PR #2 request referenced the old baseline, so use this current brief when that environment is available.
+Updated 9 September 2026. The user explicitly permits review with available tools while Codex is blocked. **Do not require a Codex environment before continuing current Phase 1 review.** Read GAME-AS-COURSE.md, GAME-ACCEPTANCE-9.md, GAME-UX-REVIEW.md and the latest STATE/review report.
 
-## Candidate and role
+## Method and honesty
 
-Frozen runtime: `016f5252a9e050a6af53aa42472f62cbcd8e3a99`, branch `game/expedition-nine-gate`, draft PR #2. Read GAME-ACCEPTANCE-9.md, GAME-UX-REVIEW.md and EXPEDITION-VERIFICATION.md. Review read-only as a genuinely separate agent, not the builder and not a source-only code reviewer.
+Freeze the candidate and the eight rubric weights. Use real rendered interaction evidence, browser action/response traces, screenshots, failure cases, storage tests and source inspection. For a builder-operated review, label the method `internal_tool_assisted`; it is not a separate agent/model or a human/youth playtest. Clearly distinguish direct interactive exploration, scripted browser probes and screenshot/trace inspection. State unobserved conditions. A source-only pass cannot rate the full experience.
 
-Judge the actual experience as a **game a curious younger non-specialist and an older teen/young adult would voluntarily continue playing**. State audience assumptions. Do not give points merely for educational intent, engineering effort or passing tests. The threshold is >=9.0, but your job is to report your own honest score, not reach it. Preserve the frozen eight weights and all blocking gates. The user is the final reviewer after this gate.
+An independent critic remains useful when available, but the current review is no longer blocked on it. The original GitHub bot reply is historical setup information, not the active work prerequisite. An independent later reviewer must judge the current frozen candidate, not reuse historical scores.
 
-## Safe environment
+## What to judge
 
-Use a disposable checkout and database, never production learner data or credentials. Install the pinned requirements and Chromium using the existing project CI setup. `python manage.py build`, `python manage.py test`, and `python manage.py browser` reproduce the gates when PostgreSQL test prerequisites are supplied. For exploration, `python manage.py serve --db <temporary-path> --port 8000` runs the local game. Local loopback identity is not production authentication.
+Would a curious kid/younger non-specialist and an older teen/young adult voluntarily continue? Evaluate the two lenses separately with reading/prior-knowledge assumptions. Hide XP. Identify real hooks, useful discoveries, consequential alternatives, informative setbacks, reasons to retry, an earned ending and whether another run is worth choosing. Educational intentions and implementation effort are not substitutes for fun.
 
-Do not write source, deploy, change Supabase/Auth/allowlists, provision paid resources or recruit external testers. Do not bypass an administrator browser policy; report inability to play rather than certify from source.
+Inspect the actual first minute, not just the most polished screenshot. In the expedition, deliberately create a duplicate after a courier restart, recover with the journal/rewind, try an expired ticket, reconcile the order, test an unsafe boss policy, revise it and experience the ending and missing-request detour. Check whether payload binding and unavailable records were actually taught before the boss.
 
-## Required playthrough
+For the optional Three.js path, judge target discoverability, direct manipulation, causal feedback, fixed-camera readability, whole-screen hierarchy and whether the scene improves the action rather than simply adding 3D behind a form. Check keyboard equivalents, pointer/touch, motion reduction, resize, lifecycle and renderer failure. Do not infer real-device frame rates from a headless CI run.
 
-Use fresh learner state. Inspect the map and first meaningful action. Play the retained-ticket tutorial; deliberately make a duplicate after restarting Pip; recover through the journal and rehearsal rewind. Test a late blind retry and reconciliation. Construct an unsafe retry-forever boss policy before trying a safe one. Experience the bridge ending and the actual missing-request/two-hour detour.
+## Learning outcomes
 
-Explore outside the automated happy path. Hide XP. Inspect save/reload/resume, locks, missing-versus-assisted evidence, keyboard, touch, narrow screens, enlarged text and reduced motion. Collect screenshots/video/trace references and concrete action sequences. The test screenshots are useful inputs but not a substitute for experiencing the interaction loop.
+The product promise is a game that delivers the useful capabilities of its declared course. Use the outcome-to-mechanic-to-assessment ledger in GAME-AS-COURSE.md. The current guided reference does not establish a whole course's outcomes. Fresh transfer, delayed retrieval and authentic implementation/design assessments remain necessary where claimed. Do not rate participation, memorized button sequences or revealed feedback as mastery.
 
-Pay particular attention to the open design observations in EXPEDITION-VERIFICATION.md: rule-panel/quiz residue, serialized boss field order, ending pacing, preparation for changed details/unknown register, and whether constrained exploration earns replay.
+## Required output
 
-## Return format
+Record exact commit/build, reviewer method and independence status, environment, routes/actions, artifacts and limitations. Give each raw /10 score with evidence: identity 15%, HUD 15%, core loop 15%, progression 15%, feel 12%, cohesion 10%, integrity 10%, accessibility 8%. Calculate the unrounded weighted sum.
 
-Record exact candidate, your agent identity/configuration and independence, play environment and limitations. Return the eight raw /10 scores and unrounded weighted sum: identity 15%, HUD 15%, core loop 15%, progression 15%, feel 12%, cohesion 10%, integrity 10%, accessibility 8%.
+For each audience lens record compelling moments, boring/confusing moments, likely first abandonment point, a concrete reason to continue without XP and whether replay is earned. List blockers and prioritized interaction changes. Use `needs_revision` below9 or with any critical blocker. Use `ready_for_user_review` only for unrounded>=9.0, both lenses passing and no blocker. The user remains final reviewer and may reject any agent pass.
 
-For each audience lens, state compelling moments, boring/confusing moments, likely first quit point, why they would continue without XP, and whether another run is earned. List critical blockers and prioritized concrete fixes with evidence. Use `needs_revision` when the score or any blocking gate fails. Use `ready_for_user_review` only for unrounded >=9.0, both audience lenses passing and no critical blockers.
+A score is a reviewer judgment with stated confidence, not scientific proof of enjoyment or learning efficacy. Do not inflate it to reach the target or pretend that a different tool creates independent criticism.
 
-If you cannot inspect actual rendered interaction, leave the game score null and report `independent_critic_pending`. Do not reuse the historical 8.8/9.1 scores or treat an agent's audience hypothesis as actual youth testing.
+## Environment boundaries
+
+Use disposable checkout/database and the normal project verification setup. `python manage.py vendor` verifies the pinned Three.js files; `build`, `test` and `browser` provide executable gates. `serve --db <temporary-path> --port 8000` runs local play. Existing hosted/PostgreSQL tests need their declared prerequisites. Never use production credentials/learner data, bypass administrator policy, deploy, change Auth/RLS/allowlists, provision paid resources or recruit external testers merely to run the review.
