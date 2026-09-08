@@ -39,11 +39,21 @@ class CampaignTests(unittest.TestCase):
         self.assertFalse(progress[0]["requires_diagnosis"])
         self.assertFalse(progress[0]["source_enabled"])
         self.assertEqual(progress[0]["hint_count"], 1)
+        self.assertIn("dumbbell", progress[0]["plain_objective"])
 
         with self.assertRaises(service.DomainError) as error:
             self.start("retry-02-identity")
         self.assertEqual(error.exception.code, "MISSION_LOCKED")
         self.assertEqual(error.exception.status, 403)
+
+    def test_story_first_revision_maps_plain_scenario_to_same_assessed_mechanic(self):
+        level1 = self.start("retry-01-replay")
+        self.assertEqual(level1["snapshot"]["activity"]["revision"], 2)
+        self.assertEqual(level1["snapshot"]["title"], "The missing receipt")
+        self.assertIn("5 kg dumbbell", level1["snapshot"]["intro"])
+        self.assertEqual(len(level1["snapshot"]["story"]), 5)
+        self.assertIn("one charge", level1["snapshot"]["mission"]["plain_objective"])
+        self.assertEqual(level1["snapshot"]["policies"]["assessment"], "trace-counts-v1")
 
     def test_xp_does_not_unlock_a_level_until_the_mission_is_correct(self):
         attempt = self.start("retry-01-replay")
@@ -98,10 +108,12 @@ class CampaignTests(unittest.TestCase):
             "command_id": str(uuid4()), "expected_revision": 0, "mode": "LEARN",
         })
         self.assertNotIn("mission", historical["snapshot"])
+        self.assertEqual(historical["snapshot"]["activity"]["revision"], 1)
         historical_family = historical["snapshot"]["family_id"]
         self.submit(historical, "2,1,2", "Persist one business-intent key across retries and define retention.")
 
         campaign = self.start("retry-01-replay")
+        self.assertEqual(campaign["snapshot"]["activity"]["revision"], 2)
         self.assertNotEqual(campaign["snapshot"]["family_id"], historical_family)
         self.assertEqual(campaign["snapshot"]["mission"]["id"], "retry-01-replay")
         progress = self.state()["course"]["campaign"]
