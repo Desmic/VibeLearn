@@ -79,11 +79,11 @@ function updateHud(snapshot = attempt?.snapshot) {
   if (meta) {
     $("#hud-level").textContent = meta.boss ? "BOSS" : `LV ${meta.number}`;
     $("#hud-difficulty").textContent = meta.difficulty;
-    $("#hud-mission-title").textContent = snapshot.title;
+    $("#hud-mission-title").textContent = meta.plain_objective || meta.objective || snapshot.title;
   } else {
     $("#hud-level").textContent = "MAP";
     $("#hud-difficulty").textContent = "Campaign";
-    $("#hud-mission-title").textContent = "Reliable Agents · Retry Control";
+    $("#hud-mission-title").textContent = "One dumbbell. One charge.";
   }
 }
 function closeDrawers() {
@@ -119,15 +119,18 @@ function chooseMission(missionId) {
   $("#entry-level").textContent = mission.boss ? "BOSS MISSION" : `LEVEL ${mission.number}`;
   $("#entry-difficulty").textContent = mission.difficulty.toUpperCase();
   $("#entry-title").textContent = mission.title;
-  $("#entry-objective").textContent = mission.objective;
+  $("#entry-objective").textContent = mission.plain_objective || mission.objective;
   configureModes(mission, mission.available_modes?.[0] || "LEARN");
   $("#entry-mode-description").textContent = state.modes[$("#start-mode").value]?.description || "";
+}
+function recommendedMission(missions) {
+  return [...missions].reverse().find(item => item.status === "unlocked") || [...missions].reverse().find(item => item.status === "cleared") || missions[0];
 }
 function renderCampaign() {
   const missions = campaignMissions();
   if (!missions.length) return;
-  const activeId = activeMissionMeta()?.id;
-  const preferred = missions.find(item => item.id === activeId && item.status !== "locked") || missions.find(item => item.status === "unlocked") || missions[missions.length - 1];
+  const activeId = attempt?.status === "draft" ? activeMissionMeta()?.id : null;
+  const preferred = missions.find(item => item.id === activeId && item.status !== "locked") || recommendedMission(missions);
   if (!selectedMissionId || !missions.some(item => item.id === selectedMissionId && item.status !== "locked")) selectedMissionId = preferred.id;
   $("#campaign-track").replaceChildren(...missions.map(mission => {
     const button = document.createElement("button");
@@ -140,7 +143,7 @@ function renderCampaign() {
     button.disabled = mission.status === "locked";
     const difficulty = document.createElement("span"); difficulty.className = "mission-difficulty"; difficulty.textContent = mission.difficulty;
     const title = document.createElement("h3"); title.textContent = mission.title;
-    const objective = document.createElement("p"); objective.textContent = mission.objective;
+    const objective = document.createElement("p"); objective.textContent = mission.plain_objective || mission.objective;
     const status = document.createElement("span"); status.className = "mission-status"; status.textContent = mission.status === "cleared" ? "✓ Cleared" : mission.status === "locked" ? "Locked" : "Ready";
     button.append(difficulty, title, objective, status);
     button.addEventListener("click", () => chooseMission(mission.id));
@@ -154,6 +157,7 @@ function renderCampaign() {
 }
 function showCampaign() {
   campaignView = true;
+  if (attempt?.status === "submitted" && attempt?.assessment?.outcome === "correct" && selectedMissionId === activeMissionMeta()?.id) selectedMissionId = null;
   closeDrawers();
   clearError();
   $("#entry").hidden = false;
@@ -164,6 +168,24 @@ function showCampaign() {
   window.scrollTo({top: 0, behavior: "smooth"});
 }
 function showRun() { campaignView = false; renderAttempt(); }
+function renderStory(snapshot) {
+  const fallback = [
+    {icon: "🤖", title: "Agent acts", text: "A real-world action succeeds."},
+    {icon: "📡", title: "Message is lost", text: "The agent is unsure whether it worked."},
+    {icon: "🔁", title: "Agent retries", text: "Now the retry must be safe."},
+  ];
+  const beats = Array.isArray(snapshot?.story) && snapshot.story.length ? snapshot.story : fallback;
+  $("#storyboard").replaceChildren(...beats.map((beat, index) => {
+    const item = document.createElement("div");
+    item.className = "story-beat";
+    item.style.setProperty("--story-index", String(index));
+    const icon = document.createElement("span"); icon.className = "story-icon"; icon.setAttribute("aria-hidden", "true"); icon.textContent = beat.icon || "•";
+    const copy = document.createElement("div");
+    const title = document.createElement("strong"); title.textContent = beat.title || `Step ${index + 1}`;
+    const text = document.createElement("small"); text.textContent = beat.text || "";
+    copy.append(title, text); item.append(icon, copy); return item;
+  }));
+}
 function renderPredictionBoard(snapshot) {
   const board = $("#prediction-board");
   if (!board || !snapshot?.trace) return;
@@ -278,8 +300,9 @@ function renderAttempt() {
   const meta = snapshot.mission || {};
   for (const key of ["intro", "assumptions", "prompt"]) $(`#${key}`).textContent = snapshot[key];
   $("#scene-title").textContent = snapshot.title;
-  $("#objective-text").textContent = meta.objective || "Predict the outcome and explain the retry contract.";
-  $("#trace-caption").textContent = `${snapshot.trace.length} pinned run${snapshot.trace.length === 1 ? "" : "s"} · deterministic retry model`;
+  $("#objective-text").textContent = meta.plain_objective || meta.objective || "Predict the outcome and explain the retry contract.";
+  renderStory(snapshot);
+  $("#trace-caption").textContent = meta.id ? `${snapshot.trace.length} purchase case${snapshot.trace.length === 1 ? "" : "s"} · the tickets below are what the store can see` : `${snapshot.trace.length} pinned run${snapshot.trace.length === 1 ? "" : "s"} · deterministic retry model`;
   $("#traces").replaceChildren(...snapshot.trace.map(trace => {
     const tr = document.createElement("tr");
     for (const text of [`${trace.label} · ${trace.name}`, `${trace.first} → ${trace.retry}`, trace.elapsed_seconds < 3600 ? `${trace.elapsed_seconds} seconds` : `${Math.round(trace.elapsed_seconds / 3600)} hours`]) {
@@ -290,7 +313,9 @@ function renderAttempt() {
   $("#mode-label").textContent = attempt.mode;
   $("#mode-description").textContent = snapshot.mode_contracts[attempt.mode].description;
   fillResponse(attempt.response);
-  $("#assistance-status").textContent = attempt.assistance.some(event => event.affects_independence) ? "Assisted run · revealed help stays attached to this evidence." : "No in-game assistance revealed.";
+  const currentHelp = attempt.assistance.filter(event => event.affects_independence && event.kind !== "prior_family_exposure");
+  const priorExposure = attempt.assistance.some(event => event.kind === "prior_family_exposure");
+  $("#assistance-status").textContent = currentHelp.length ? "Help used in this run · that exposure stays attached to the evidence." : priorExposure ? "Previously exposed to this mission family · not counted as help used in this run." : "No in-game assistance revealed.";
   $("#hints").replaceChildren(...attempt.hints.map(text => { const li = document.createElement("li"); li.textContent = text; return li; }));
   $("#worked-example").hidden = !attempt.worked_example;
   $("#worked-example").textContent = attempt.worked_example ? `Worked example · ${attempt.worked_example}` : "";
@@ -304,7 +329,7 @@ function renderAttempt() {
   }
   $("#diagnosis-wrap").hidden = meta.requires_diagnosis === false;
   $("#reflection-title").textContent = meta.requires_diagnosis === false ? "Rule unlocked" : "Your reasoning stays yours";
-  $("#reflection-copy").textContent = meta.number === 1 ? "A retained matching key replays the stored result instead of charging again." : meta.number === 2 ? "A new worker key looks like a new intent, so the service charges again." : meta.number === 3 ? "Stable identity only helps while the deduplication record is retained." : "Reliable retry contracts need stable business intent, payload binding, an explicit retention window, and a plan for late uncertainty.";
+  $("#reflection-copy").textContent = meta.number === 1 ? "The store remembers the purchase ticket, so the retry returns the old result instead of charging again. Engineers call this idempotent retry behavior." : meta.number === 2 ? "The human intent stayed the same, but the ticket changed. The store therefore sees a new purchase and charges again." : meta.number === 3 ? "Keeping the same ticket helps only while the store still remembers it. A very late retry needs an explicit recovery rule." : "A safe shopping agent needs one stable ID for the human's purchase intent, rules for changed purchase details, a known memory window, and a safe way to resolve very late uncertainty.";
   updateHud(snapshot);
   syncControls();
   const submitted = attempt.status === "submitted";
@@ -340,9 +365,11 @@ function renderAttempt() {
     $("#checkpoint-list").replaceChildren(...attempt.checkpoints.map(checkpoint => {
       const section = document.createElement("section"); section.className = "checkpoint";
       const heading = document.createElement("h3"); heading.textContent = checkpoint.kind.replaceAll("_", " ");
-      const answer = document.createElement("p"); answer.textContent = `Prediction: ${checkpoint.response.prediction || "No answer yet"} · ${checkpoint.assessment.independence || "not observed"}`;
+      const answer = document.createElement("p"); answer.textContent = `Prediction: ${checkpoint.response.prediction || "No answer yet"} · ${(checkpoint.assessment.independence || "not observed").replaceAll("_", " ")}`;
       const diagnosis = document.createElement("p"); diagnosis.textContent = checkpoint.response.diagnosis || "No written diagnosis required.";
-      const condition = document.createElement("small"); condition.textContent = `${checkpoint.mode} · ${checkpoint.assistance.filter(event => event.affects_independence).length} recorded aids · ${checkpoint.assessment.outcome}`;
+      const helpCount = checkpoint.assistance.filter(event => event.affects_independence && event.kind !== "prior_family_exposure").length;
+      const exposed = checkpoint.assistance.some(event => event.kind === "prior_family_exposure");
+      const condition = document.createElement("small"); condition.textContent = `${checkpoint.mode} · ${helpCount} help event${helpCount === 1 ? "" : "s"}${exposed ? " · previously exposed" : ""} · ${checkpoint.assessment.outcome}`;
       section.append(heading, answer, diagnosis, condition); return section;
     }));
     $("#evidence-json").textContent = JSON.stringify({evidence: attempt.evidence, assessment: result, checkpoints: attempt.checkpoints}, null, 2);
