@@ -21,18 +21,24 @@ def main():
         def shot(name):
             page.evaluate('scrollTo(0,0)');page.screenshot(path=str(artifacts/name),full_page=True)
         def action(name):
-            page.locator(f'[data-action="{name}"]').click()
+            with page.expect_response(lambda r: r.url.endswith('/api/commands/save') and r.request.method == 'POST') as saved:
+                page.locator(f'[data-action="{name}"]').click()
+            assert saved.value.status == 200, saved.value.status
             expect(page.locator('#hud-save-value')).to_have_text('Synced')
         def pick(name):
-            # A pointer cannot select a mesh behind the sticky HUD. Bring the
-            # scene into view exactly as a player would, then use its projection.
+            # The physical pointer must hit the visible canvas, not a sticky HUD.
             page.locator('.valley-canvas').evaluate("n => n.scrollIntoView({block:'center'})")
             point=page.evaluate('(name) => window.Expedition.scenePoint(name)', name)
             assert page.evaluate('(p) => document.elementFromPoint(p.x,p.y)?.classList.contains("valley-canvas")', point), point
             page.mouse.click(point['x'],point['y'])
         def finish():
             page.locator('#exp-submit').click();expect(page.locator('.exp-resolution')).to_be_visible()
-            page.locator('#exp-continue').click();page.locator('#exp-launch').click()
+            page.locator('#exp-continue').click()
+            with page.expect_response(lambda r: r.url.endswith('/api/commands/start') and r.request.method == 'POST') as started:
+                page.locator('#exp-launch').click()
+            assert started.value.status == 200, started.value.status
+            expect(page.locator('#exp-launch')).to_have_count(0)
+            expect(page.locator('#exp-feedback')).to_be_visible()
         try:
             page.goto(url+'/?world=3d');page.locator('#exp-launch').click()
             expect(page.locator('.has-three canvas')).to_be_visible()
@@ -46,7 +52,7 @@ def main():
             expect(page.locator('#exp-knowledge')).to_contain_text('No confirmation')
             expect(page.locator('#hud-save-value')).to_have_text('Synced')
             shot('review-three-send.png')
-            canvas_count=page.locator('canvas.valley-canvas').count();assert canvas_count==1
+            assert page.locator('canvas.valley-canvas').count()==1
             checks.append('Pinned Three.js rendered; selecting the send-post mesh commits one real action; uncertain knowledge remains distinct.')
             page.locator('[data-action="retry"]').focus();page.keyboard.press('Enter')
             expect(page.locator('#exp-knowledge')).to_contain_text('Gear confirmed')
@@ -57,6 +63,9 @@ def main():
             action('retry');action('collect');finish()
             action('send');action('wait');action('inspect');action('collect');finish()
             checks.append('Journal object restores durable intent; keyboard focus follows the next meaningful action.')
+            # Wait for the actual boss UI. A click returning does not mean its
+            # asynchronous HTTP command and DOM render have completed.
+            expect(page.locator('.exp-policy legend')).to_have_count(4)
             legends=page.locator('.exp-policy legend').all_text_contents()
             assert [x.split(' ')[0] for x in legends]==['1','2','3','4'],legends
             page.locator('[data-policy-field="identity"][data-policy-value="remember"]').click()

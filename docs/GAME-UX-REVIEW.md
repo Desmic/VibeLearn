@@ -1,71 +1,61 @@
-# VibeLearn game critic — active 9/10 acceptance gate
+# VibeLearn game critic — active 9/10 gate
 
-Controlling user amendment: [GAME-ACCEPTANCE-9.md](GAME-ACCEPTANCE-9.md), 8 September 2026. The implementation agent and critic must be genuinely separate. The user performs the final review only after the independent agent gate; no agent verdict overrules user rejection.
+Latest authority: [GAME-AS-COURSE.md](GAME-AS-COURSE.md), 9 September 2026. The user permits the available-tool/internal critic method while Codex is unavailable. Record `internal_tool_assisted`; never misrepresent it as a separate model/agent or human playtest. Do not wait on Codex to inspect and improve the game.
 
-## Review it as a game
+## Review question
 
-**Would a curious kid/younger non-specialist or an older teen/young adult choose to keep playing without being assigned a lesson?** Review both lenses separately, state reading/prior-knowledge assumptions and identify the likely first quit point. Do not equate cute art, low difficulty, XP or engineering reliability with engagement. Preserve serious conceptual depth.
+Would a curious younger non-specialist or an older teen/young adult choose to keep playing without being assigned a lesson? Evaluate both lenses separately with stated reading/prior-knowledge assumptions. The learning ambition is course-level capability, but neither educational intent nor correctness earns engagement points.
 
-The critic must inspect real rendered interaction on a frozen candidate: fresh entry, first meaningful action, a discovery, a mistake/recovery, progressive missions, constructed-policy boss, ending and a working replay variation. Hide XP for a pass through the core loop. Record what causes curiosity, what decisions matter, what consequences are legible and what actually earns another attempt. Screenshots alone cannot establish the whole loop; the author's feature list cannot replace a playthrough.
+Inspect a frozen rendered candidate: fresh entry, meaningful first action, discovery, consequential choice, mistake/recovery, progression, boss, ending and replay. Hide XP. Collect actual browser actions, screenshots/traces and adverse-path results. State where automation or environment limits judgment. The author's description and a static screenshot do not establish the full loop.
 
-An agent's assessment of audience appeal is a hypothesis, not proof of child/young-adult enjoyment. No external audience test is authorized yet.
+## Pass rule
 
-## Non-negotiable pass rule
-
-- **Unrounded weighted total >=9.0/10**, with the unchanged weights below.
-- Both audience-lens engagement verdicts pass, with a concrete reason to continue without XP.
-- No critical blocker in engagement, comprehension, progression, learning integrity, accessibility, persistence or isolation.
-- Reviewer identity/configuration and genuine independence are recorded. A separately prompted pass by the builder does not fulfill this user's requirement.
-- Executable results and rendered evidence refer to this exact candidate, not an older successful version.
-
-If no separate agent can run, use `independent_critic_pending`, numeric score **null**. A source-only code review is not a game-experience pass. Never tune the rubric, round up a sub-9 score or hide failed journeys to rescue a build.
+Unrounded weighted **>=9.0/10**, both engagement lenses passing, no critical blocker, exact-build executable and rendered evidence, followed by the user's final review. The review method may now be internal/tool-assisted for this supervised refinement; the standard is unchanged. No rounded-up sub-9 passes, score inflation, hidden failures or recycled historical numbers.
 
 ## Frozen weighted rubric
 
 | Area | Weight | 10/10 means |
 |---|---:|---|
-| Game identity vs website residue | 15% | The primary experience is an engaging playable game, not ordinary cards/forms with game labels. |
-| HUD and information at a glance | 15% | Plain immediate objective, meaningful state, progress and useful tools are legible; secondary details are contextual. |
-| Core loop clarity and immediacy | 15% | A non-specialist understands the situation, acts directly, experiments and receives clear consequences. |
-| Progression and difficulty curve | 15% | Easy success precedes variation and combination; tools/mechanics are taught before an earned boss; next-route focus is predictable. |
-| Feedback, game feel and responsiveness | 12% | Meaningful inputs, causal transitions, setbacks, recovery and success have satisfying, understandable feedback. |
-| Theme and visual cohesion | 10% | World, character, story, typography, objects, vocabulary and motion belong together and serve the mechanics. |
-| Learning integrity | 10% | Rewards do not distort evidence or mastery; observed help, unknown declarations, prior exposure and limited assessment scope remain honest. |
-| Accessibility and responsiveness | 8% | Keyboard/touch, narrow screens, enlarged text, contrast and reduced motion remain usable; no essential audio/color/motion-only meaning. |
+| Game identity vs website residue | 15% | Primary interaction is an engaging game rather than ordinary cards/forms with game labels or a 3D background. |
+| HUD and information at a glance | 15% | Plain objective and meaningful state are legible; useful tools contextual; important controls do not fight the scene for attention. |
+| Core loop clarity and immediacy | 15% | Non-specialists understand, act, explore alternatives and receive clear consequences; the loop earns voluntary continuation. |
+| Progression and difficulty curve | 15% | Easy success precedes variation, taught mechanics recombine, new capabilities expand agency, and next-route focus is predictable. |
+| Feedback and game feel | 12% | Inputs, cause/effect, setbacks, recovery and success feel responsive and satisfying rather than like report submission. |
+| Theme and visual cohesion | 10% | World, character, dialogue, objects, typography, motion and vocabulary work together and support play. |
+| Learning integrity | 10% | Rules and assessment are faithful, claims bounded, assistance/exposure honest; rewards never substitute for learning evidence. |
+| Accessibility and responsiveness | 8% | Keyboard/touch, narrow screens, actual text enlargement, contrast and reduced motion remain usable; fallback preserves required operations. |
 
-Calculate `sum(area_score * weight) / 100` from the eight raw /10 values. Do not use the historical scores as a prior target.
+Calculate `sum(area_score * weight)/100`. For every score provide concrete evidence and criticism. No extra points simply for Three.js, test counts, code volume or hard implementation work.
 
-## Critical blockers and comprehension pre-gate
+## Critical blockers
 
-A plain objective must precede specialist jargon where a faithful intuitive model is feasible. The player must identify who wants what, what changed and why their action matters. The story's causal model must match the assessed mechanism and bridge into formal terminology rather than replace it with an inaccurate metaphor.
+Any of these blocks acceptance regardless of average:
 
-Any of these blocks acceptance regardless of the average:
+- A mostly read-card/answer-form loop when direct subject-relevant play is feasible; no convincing reason to continue with XP hidden.
+- No clear goal/actor/change/action before jargon where a faithful intuitive model is feasible; inaccurate metaphor or decorative story burden.
+- An untaught rule/interaction first becoming a boss requirement; challenge rising mainly through reading or arbitrary interface complexity.
+- No meaningful failure/recovery, earned resolution or working replay variation in the current expedition reference.
+- Unsafe constructed policies clearing because unrelated count answers happen to be correct.
+- Saved work lost through ordinary navigation/reload, forged unlocks, cross-learner access or mutable submitted evidence.
+- XP/self-report changing mastery, evidence strength or correctness-based unlocks.
+- Unknown declaration mislabeled assisted, prior exposure mislabeled current help, or revealed simulation feedback called fresh independent work.
+- Required actions inaccessible on keyboard/touch/narrow display; essential meaning only in color/audio/motion; blocked renderer stops all play.
+- Raw implementation/network errors replacing understandable recovery, or successful sequential clears focusing the wrong route.
 
-- A primarily read-card/answer-form loop when the subject supports direct play; no convincing reason to continue with XP hidden.
-- Required knowledge or interaction first appearing as an unexplained boss demand; difficulty rising mainly through reading burden.
-- No meaningful setback/recovery, world resolution or working replay variation for this expedition reference.
-- A mission clear for an unsafe constructed policy just because unrelated count answers are correct.
-- Lost saved work through normal navigation/reload; forged mission unlock; cross-learner access; mutable submitted evidence.
-- XP or self-report changing mastery, evidence strength or learning unlock correctness.
-- Unknown outside-help declaration labeled assisted without observed/declared help; prior exposure mislabeled current assistance; simulation feedback represented as fresh independent work.
-- Required actions unusable on keyboard/touch/narrow screen or meaning available only through motion, sound or color.
-- Unclear immediate goal, misleading story causality, uncontrolled early tool/jargon overload or raw network/implementation errors shown to the player.
-- Successful sequential clears focusing an earlier node rather than the intended newly available route; unpredictable retry focus after failure.
+Rehearsal rewind is not real-world reversibility. Missing acknowledgement means uncertainty, retained identity has a finite window, and authoritative reconciliation is a separately declared capability. Unknown is not absent.
 
-Reversible rehearsal is a game affordance, not a claim that real purchases are reversible. In the retry model, missing acknowledgements mean uncertainty; retained identity has a finite window; authoritative reconciliation is an additional explicit capability. Unknown must never be silently treated as absent.
+## Minimum evidence
 
-## Evidence required before scoring
+Inspect signed-out behavior, map/locks, early action/causal feedback, error/recovery, save/reload/process resume, assistance/exposure semantics, sequential progression, unsafe and safe boss policies, ending/detour, XP-hidden play, keyboard/touch, narrow screens and actual text enlargement, reduced motion and saved evidence scope. New rendering paths also need direct hit-testing, resize/lifecycle/failure tests and realistic device performance measurement before broad promotion.
 
-Inspect signed-out/login behavior; fresh map and locks; first meaningful action; causal feedback and reduced-motion equivalent; a wrong experiment and recovery; save/reload/process resume; the four assistance/exposure meanings where applicable; sequential focus and increasing reasoning demand; boss construction and unsafe counterexamples; ending and real detour; XP-hidden play; keyboard, touch, 320/390px layout and actual text enlargement; saved assessment scope and immutable history.
+For each audience lens record compelling and boring/confusing moments, likely abandonment, why to continue and whether replay is earned. These remain reviewer hypotheses without human playtesting.
 
-For each audience lens record compelling moments, boring/confusing moments, first likely abandonment point, reason to continue and whether another replay is earned. Cite specific actions/artifacts. Keep deficiencies visible even when other areas score highly.
+## Learning and experience remain separate
 
-## Current review status
+Read GAME-AS-COURSE.md. Every promised course capability needs purposeful practice and defensible evidence, including fresh transfer and later retrieval where claimed. The current guided retry slice does not prove full-course equivalence or superiority. Do not compensate for poor game appeal by scoring engineering integrity highly, or compensate for missing learning by scoring graphics highly.
 
-Baseline shopping campaign: user **6.5/10**, later agent **7.5/10**, not accepted. Historical **8.8** and **9.1** were superseded and are preserved unchanged in [history/GAME-UX-REVIEW-before-nine-20260908.md](history/GAME-UX-REVIEW-before-nine-20260908.md).
+## Current and historical reviews
 
-Expedition candidate: **no independent score yet**. The GitHub Codex integration replied that `Desmic/VibeLearn` needs a Codex cloud environment. Status is `independent_critic_pending`, not passed. Consult [STATE.md](STATE.md) for exact candidate and verification status.
+Consult STATE.md and the current review report for the newest candidate. Historical shopping-campaign judgments were user 6.5/10 and later agent 7.5/10; older 8.8/9.1 passes are preserved in history/GAME-UX-REVIEW-before-nine-20260908.md and are not current acceptance. The former Codex-environment prerequisite is superseded as a work blocker by the user's temporary review-method permission.
 
-## Generation and repair loop
-
-Future generated courses must also pass structural/learning, content/source and accessibility validators. Their separate game critic uses this gate and GAME-ACCEPTANCE-9.md on the rendered game. A generator cannot self-certify. Return evidence-backed defects to the author, revise the actual experience and re-review the frozen revision. Keep the configured bounded repair budget; an exhausted failing candidate remains `draft_needs_review`. The user's final decision still controls product acceptance.
+Future generated courses still require separate structural/learning, content, accessibility and game review gates, cannot self-certify from a manifest, and remain drafts when their bounded repair budget is exhausted.

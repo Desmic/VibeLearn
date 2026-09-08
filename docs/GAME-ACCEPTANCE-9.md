@@ -1,74 +1,47 @@
-# Game acceptance contract — 9/10, game-first, youth-engaging
+# Game acceptance contract — 9/10, youth-engaging, course-capable
 
-Status: active user amendment, 8 September 2026. Applies to the current Phase 1 refinement and to future generated courses. This is a product requirement, not a claim of acceptance or child playtesting.
+Updated by the user's 9 September 2026 instruction; see [GAME-AS-COURSE.md](GAME-AS-COURSE.md).
 
-## Authority and scope
+## Scope and current review method
 
-The user explicitly resumed implementation/research after the previous documentation-only checkpoint and raised the critic threshold from 8 to **9.0/10**. The critic must review VibeLearn **as a game that even a kid or young adult would voluntarily engage with**, not as an educational website, engineering demonstration or compliance checklist.
+Review VibeLearn as a game that even a kid/younger non-specialist or an older teen/young adult would voluntarily play, not as a course website or engineering demonstration. The user's latest instruction permits **available-tool/internal criticism while Codex is blocked**. This temporarily supersedes the earlier strict separate-agent prerequisite for current private Phase 1 refinement.
 
-This amendment supersedes conflicting 8/10 thresholds, same-agent fallback acceptance and the previous stop-after-docs instruction in active repository documents. It does not open Phase 2/3 implementation, permit paid infrastructure, authorize external testers or override the user's final product decision. The checksummed historical design bundle and prior learning evidence stay immutable.
+Use actual rendered evidence, a deliberately distinct critic pass and the unchanged rubric. Label the method `internal_tool_assisted` and disclose automation/observation limits. Do not call the builder an independent agent. Codex setup is no longer a work blocker. This does not permanently permit an unattended course generator to self-certify.
 
-Latest established baseline remains user **6.5/10**, later agent **7.5/10**. Historical 8.8/9.1 scores do not approve a new candidate. Do not reuse them or raise a score simply because the requested target increased.
+## Pass requirements
 
-## The review question
+The unrounded weighted score must be **>=9.0/10**; rounding 8.95 to 9 does not pass. Both audience-lens verdicts must pass, and no critical blocker may remain in engagement, comprehension, progression, learning integrity, accessibility, persistence or learner isolation. The user retains final product acceptance after the reviewer gate.
 
-Would a curious young player who was not assigned this lesson choose to keep playing? What in the actual game earns that choice?
+A green test suite, appealing screenshot or change of rendering library never constitutes this score. A source-only assessment cannot certify gameplay. Preserve failed journeys and unresolved findings. Do not tune the rubric to the target, reuse historical scores or award points for implementation effort. A low score means `needs_revision`, not a request for Codex setup.
 
-Do not assume that a child and a young adult have identical abilities or tastes. Use two explicit review lenses: a curious younger non-specialist and an older teen/young adult. State assumptions about reading and prior knowledge. No childlike art, patronizing dialogue, forced reflex tests or removal of eventual technical rigor is required. Approachability and substantive depth must coexist.
+The original user 6.5/10 and later agent 7.5/10 refer to the older shopping campaign. Historical 8.8/9.1 passes were superseded. None approves the current game.
 
-An agent's audience prediction is a **design hypothesis**, not evidence that children enjoyed the game. Actual age-specific validation remains unperformed until appropriately authorized human playtests occur. The user remains the final reviewer before broader testing.
+## What the critic must observe
 
-## Mandatory engagement observations
+The complete playable candidate must include an understandable hook, a first meaningful action, curiosity/discovery, a consequential decision, a mistake and recovery, rising challenge, a combine/boss encounter, an earned ending and a working replay variation. Hide XP/rank during a pass through the core loop. The reason to continue must survive.
 
-The critic must inspect an actual playable candidate, including a fresh start, a setback, the boss, the ending and a genuine replay variation. Record concrete actions, screenshots/video identifiers and likely abandonment points, not just the author's feature list.
+Early play should change the world or reveal useful information, not just advance slides or select quiz answers. Use approximately 30 seconds to a first meaningful action as a diagnostic target, not a made-up measured result or a punitive timer. Separate sign-in/hosting delays from authored onboarding.
 
-1. **Hook and motivation.** A plain goal and someone/something worth helping appear before specialist terminology. A player can say what they are trying to change and why it matters.
-2. **Play before reading.** The first meaningful action changes the scene; it is not merely Next, selecting a quiz answer or opening a text panel. Use 30 seconds to first meaningful action as a diagnostic design target, not a fabricated measured fact or a punitive countdown. Note unavoidable hosting/sign-in delays separately.
-3. **Agency and curiosity.** Inspecting, experimenting and choosing produce distinct, legible consequences. At least one useful discovery is available through play rather than compulsory exposition. A safe retry/rewind supports experimentation without erasing help/exposure history or pretending real purchases can be undone.
-4. **Earned progression.** One easy success precedes variation, combination and a boss. New tools expand what the player can do. Difficulty rises through reasoning and interaction, not longer forms or untaught vocabulary.
-5. **Feel and emotional payoff.** Inputs have immediate acknowledgement; motion explains causality. Character reactions are specific to what happened. A consequential ending changes the world and resolves the stated goal.
-6. **Voluntary replay.** There is one working variation that changes the reasoning or strategy, not just wording, colors, XP or an unavailable future quest.
-7. **XP-hidden test.** Hide XP/rank and reassess the core loop. The reason to play must survive. No streak anxiety, shame, fake urgency, loot-box mechanics or coercive retention substitutes for fun.
-8. **Accessible play.** Required interactions work with keyboard and touch, at a narrow viewport and enlarged text, with motion reduced and sound off. Explain unknown state honestly; do not make color, audio or animation the sole carrier of meaning.
+For each audience lens record reading/knowledge assumptions, compelling moments, boring/confusing moments, the likely first quit point, a concrete reason to continue and whether another run is earned. Approachability does not require childish copy or the removal of eventual rigor. No actual youth enjoyment claim without authorized human evidence.
 
-For each audience lens, the critic writes: compelling moments, boring/confusing moments, likely first quit point, reason to continue, and whether the replay earns another attempt. Engineering reliability is necessary but does not compensate for a weak game loop.
+Keyboard, touch, narrow layouts, enlarged text, sound-off and reduced-motion equivalents are required. Do not move precise targets while the player selects them. A failed renderer must not erase progress or make the learning operation inaccessible.
 
-## Numeric and blocking gates
+## Frozen weights
 
-Retain the existing weighted rubric: game identity 15%, HUD 15%, core loop 15%, progression 15%, feedback/game feel 12%, theme/cohesion 10%, learning integrity 10%, accessibility 8%.
+Game identity 15%; HUD/information at a glance 15%; core loop 15%; progression/difficulty 15%; feedback/game feel 12%; theme/cohesion 10%; learning integrity 10%; accessibility/responsiveness 8%.
 
-A candidate is eligible for the user's final review only when all of the following are true:
+Record each raw /10 score and compute `sum(score * weight) / 100`. Evidence quality and uncertainty must remain explicit even when a number is supplied. The detailed rubric and blockers are in [GAME-UX-REVIEW.md](GAME-UX-REVIEW.md).
 
-- A **genuinely separate critic agent** has evaluated the frozen candidate and supplied its own evidence-backed scores. A separately prompted pass by the implementation agent is useful internal QA, but cannot satisfy this user's independent-critic requirement.
-- The unrounded weighted total is **>=9.0/10**. A rounded 9 from 8.95 is not a pass.
-- Both younger-player and young-adult engagement lens verdicts pass, with a concrete reason to continue without XP. A primarily educational-form experience fails regardless of its weighted average.
-- No critical blocker remains in game engagement/comprehension, learning integrity, progression, persistence, isolation or accessibility. A boss that accepts an unsafe constructed policy because counts happen to be correct is a blocker.
-- The exact candidate has executable verification evidence. A previous commit's checks are not current-build checks. Tests and screenshots are not independent human enjoyment evidence.
+## Course-equivalent learning is a separate requirement
 
-If a separate agent cannot be invoked, record `independent_critic_pending`; do not invent an agent, self-award an independent score or claim >=9 completion. Continue useful implementation and QA while keeping acceptance blocked. A source-only code reviewer cannot certify the game experience.
+The intended game should deliver the useful outcomes of its declared course. Require an explicit outcome-to-mechanic-to-assessment ledger, varied practice, fresh transfer and delayed retrieval where those claims are made. No learning-equivalence claim from story completion or participation XP. A beautiful but shallow game fails; a rigorous but tedious lesson also fails. The current reference is guided retry practice, not a full-course replacement. See GAME-AS-COURSE.md for the coverage contract.
 
-The critic must be free to reject repeatedly. Do not prime it to produce a passing number, remove difficult criteria, hide failed playthroughs or stop at a cosmetic score increase. Revise the actual experience from its findings. Keep candidate-to-candidate defect and evidence history.
+## Review record and release status
 
-The user's final review happens **after** this agent gate; an agent pass is not user acceptance. Do not initiate outside testing while it is deferred.
+Record exact commit/build, reviewer identity and method, environment, actions/routes, artifacts, eight raw scores/calculation, both audience verdicts, blockers, uncertainty, changes since prior review and final status. Use null only when there is insufficient rendered evidence to score; do not invent an independent score.
 
-## Required review record
+Allowed current statuses include `needs_revision`, `review_pending`, `ready_for_user_review`, `user_rejected` and `user_accepted`. A reviewer pass is not user acceptance and does not authorize external testers. Preserve existing private hosting, learner isolation and immutable evidence contracts.
 
-Record candidate commit/build, reviewer identity/configuration and independence, play environment, routes/actions inspected, artifacts, the eight raw numeric scores and calculation, both audience-lens verdicts, blockers, uncertainty, changes since last review and final status (`needs_revision`, `independent_critic_pending`, `ready_for_user_review`, `user_rejected`, `user_accepted`). Do not fill an absent score with zero or nine: use null.
+## Future generation
 
-## Course-generation inheritance
-
-Every generated playable course must carry the same engagement contract in addition to the existing learning/source/accessibility contracts. Its package specifies target audience assumptions, first meaningful action, core learning mechanic, curiosity/agency opportunities, confidence curve, failure/recovery behavior, character/world payoff, replay variation and XP-hidden rationale. The independent critic evaluates the **rendered interaction**, not just the generated manifest. Reuse the principles, not a compulsory fantasy theme or fixed four-mission pattern.
-
-The existing bounded automatic-repair rule for future generation remains: a failing candidate stays `draft_needs_review` after its configured repair budget. Never lower the 9/10 gate to label a generated course validated.
-
-## Research continued for this refinement
-
-These are design inputs and inferences, not promises of engagement:
-
-- Celia Hodent, *The Gamer's Brain, Part 2: UX of Onboarding and Player Engagement*: teach actions in context, establish why the goal matters, limit early load, and avoid punishing players while introducing a mechanic. Applied here as direct scene interaction before explanation and a recoverable first setback. https://celiahodent.com/gamers-brain-ux-onboarding/
-- Zachtronics, *Zachademics*: the developer describes iterative problem solving and the design-feedback loop in its construction games. Applied here as build/test/revise, not a recommendation to copy their mature themes or complexity. https://zachtronics.com/zachademics/
-- Hempuli, *Baba Is You*: the creator describes changing the rules through objects in the playfield. Applied here as a small inspectable system whose rules can be tried, not another answer-selection screen. https://hempuli.com/baba/
-- Game Accessibility Guidelines: interactive tutorials, clear language, stable targets and redundant non-audio/non-motion information guide the interface. https://gameaccessibilityguidelines.com/full-list/
-- AWS Builders Library, *Making retries safe with idempotent APIs*: caller intent, retained identity, changed parameters and late arrivals constrain the retry model. A fantasy workshop must not imply infinite deduplication or that a missing acknowledgement proves failure. https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/
-
-All five sources were opened during this refinement on 8 September 2026. The expedition implementation and audience response still require their own verification and criticism.
+Generated courses inherit the youth-engagement and course-outcome requirements, with structural/learning, grounding/content, accessibility and game review gates. A manifest cannot self-certify its rendered experience. Keep a separate critic role and configured bounded repair budget; failed candidates remain `draft_needs_review`. The temporary review-method exception above applies only to this supervised product refinement. Never lower the 9/10 threshold to pass a generated candidate.

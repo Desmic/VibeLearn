@@ -1,90 +1,89 @@
 # vibeLearn
 
-Read `docs/STATE.md` first, then **`docs/GAME-ACCEPTANCE-9.md`**. The latter is the
-latest user amendment (8 September 2026): implementation/research of the Phase 1
-game experience is resumed; a genuinely separate critic must score the actual
-playable game >=9.0/10 before the user's final review. Judge it as a game that even
-a kid or young adult would voluntarily engage with, not an educational website.
-The amendment supersedes older 8/10 thresholds, same-agent fallback acceptance and
-the previous stop-after-documentation instruction. Historical scores are not current
-acceptance. A missing independent reviewer means `independent_critic_pending`, not
-an invented score. Do not weaken the rubric to hit the target.
+Read `docs/STATE.md`, then **`docs/GAME-AS-COURSE.md`**, the latest user amendment
+(9 September 2026). The product is a game whose meaningful play delivers the intended
+course outcomes, not a course website with game decoration. Experience is essential.
 
-The authoritative scope remains `CODEX-FIRST-SLICE.md`, the root v1.3 implementation
-plan and active repo amendments referenced by `STATE.md`. For future course generation,
-`docs/COURSE-GENERATION-GAME-SYSTEM.md` and the newer `docs/GAME-ACCEPTANCE-9.md` amend
-the Phase 3/4 expectations. The checksummed `learning-os-design-package-v1.3/` directory
-is preserved as historical design input. Stay at the Phase 1 human/product checkpoint
-unless the user explicitly opens the next phase.
+The user temporarily authorized **available-tool/internal review while Codex is
+unavailable**. Do not block this Phase 1 refinement on Codex setup. Use actual rendered
+journeys, screenshots/traces, adverse-path tests and a frozen-rubric critic pass; label
+the reviewer `internal_tool_assisted`, never an independent agent or human playtest.
+The unrounded >=9.0/10 target, younger-player and young-adult lenses, no-critical-blocker
+rule and the user's final acceptance remain. A lower score means `needs_revision`.
+Do not inflate a score or reuse historical 8.8/9.1 reviews. An attractive screenshot,
+a new renderer and passing tests do not prove fun or course-equivalent learning.
 
-The user authorized a private Render Free + Supabase Free pilot after Phase 1.
-Keep historical Phase 1 evidence and learning contracts immutable; do not silently
-advance into Phase 2+. The current retry material may be refined/scaffolded as a
-reference game experience while acceptance is active. No external testers until the
-user judges the experience ready.
+The authoritative build order remains `CODEX-FIRST-SLICE.md`, the root implementation
+plan and active amendments in STATE.md. `docs/COURSE-GENERATION-GAME-SYSTEM.md`,
+`docs/GAME-ACCEPTANCE-9.md` and `docs/GAME-AS-COURSE.md` amend future generation.
+Older 8/10 references are superseded. The temporary internal-review exception applies
+to this supervised refinement, not blanket self-certification by future generators.
+The checksummed `learning-os-design-package-v1.3/` remains historical input, unchanged.
 
-Use one Python modular monolith and semantic HTML/CSS/JavaScript. Local mode keeps
-SQLite and loopback binding. Hosted mode uses Flask/Gunicorn, PostgreSQL and
-Supabase Auth. Read `docs/HOSTING.md` for setup and verification limits. Install
-hosted/test dependencies from `requirements.lock` and `requirements-dev.txt`.
-Run `python manage.py build`, `python manage.py test` and
-`python manage.py browser` at integrated gates. Start with `python manage.py serve`.
-Browser tests use a separate temporary database, never the learner's real database.
+## Scope and verification
 
-Implement one behavior, verify it across storage and browser, then extend it.
-Keep executable acceptance tests and observed evidence in `docs/`.
-Do not replace tests with mocks to claim a live gate passed. Record missing test
-prerequisites honestly; engineering checks alone do not establish enjoyable play.
+Stay within private Phase 1 product refinement. Do not silently open Phase 2 reuse,
+Phase 3 generation, model integration, untrusted code execution, external testers,
+paid resources or public rollout. Preserve historical snapshots and evidence. Keep
+PR #2 draft until the current product gates and user acceptance actually close.
 
-## Game-first teaching invariant
+Use one Python modular monolith with semantic HTML/CSS/JavaScript. SQLite/loopback
+remain local; Flask/Gunicorn, PostgreSQL and Supabase Auth remain hosted. Read HOSTING.md
+before infrastructure work. No renderer may decide assessment, evidence or unlocks.
 
-Read `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md` and the superseding
-`docs/GAME-ACCEPTANCE-9.md` before learning UI, progression, mission or generation work.
-VibeLearn is a game-first learning system, not a generic course website with XP labels.
+The optional Three.js spike uses `?world=3d` and locally served, verified pinned assets.
+Read `docs/THREEJS-SPIKE.md`. Run `python manage.py vendor` to fetch/verify the declared
+build dependencies before 3D testing; no runtime CDN or relaxed CSP. Default illustrated
+play and equivalent keyboard/touch controls remain available. Keep the prototype opt-in
+until actual interaction, accessibility and device performance justify promotion.
 
-The shopping-agent campaign and proposed missing-delivery expedition are reference
-patterns, not mandatory stories, colors, four-node chapters or binary mechanics for
-all subjects. Preserve the principles: HUD-first hierarchy, direct play, progressive
-interface/vocabulary disclosure, teach -> easy success -> variation -> combine ->
-boss/release, consequential feedback and strict separation of progression from evidence.
+Install hosted/test dependencies from requirements.lock and requirements-dev.txt.
+Run `python manage.py build`, `python manage.py test`, and `python manage.py browser`
+at integrated gates. Use only disposable browser databases. Preserve screenshots,
+traces, exact commits and failures. No successful API mocks to claim live verification.
+Do not bypass administrator browser policy; identify which normal environment ran the
+tests and distinguish automated evidence from personal interactive/human play.
 
-**Voluntary youth engagement:** assess a younger non-specialist and an older teen/young
-adult lens separately. Require a compelling goal, early meaningful action, curiosity,
-experimentation, understandable consequences, recoverable setbacks, an earned ending
-and a working replay variation. Hide XP and ask why the player would continue. Do not
-substitute cute decoration, childish copy, coercive retention or easy quizzes for fun.
-Preserve eventual rigor; actual child engagement remains unvalidated until authorized
-human testing. The user's final product judgment cannot be overruled by agent scores.
+Implement a small complete behavior, verify it, inspect it, then extend it. Machine
+checks are not human acceptance, and a source-only code review is not a game review.
 
-**Narrative before abstraction:** where faithful, establish a concrete scenario and
-plain objective before specialist jargon. The player should understand who wants what,
-what changed and what decision/action matters. Motion teaches causality, then formal
-terms name the intuitive model. Story must not merely add decorative reading burden.
+## Game-first and course-outcome invariants
 
-Progression focus is part of the contract. After a successful sequential clear, focus
-the newly unlocked/recommended mission rather than silently returning to an earlier node.
-After failure, keep retry focus predictable unless a deliberate branch is declared.
+Read GAME-UX-SYSTEM.md, GAME-UX-REVIEW.md and GAME-AS-COURSE.md before substantial
+learning UI, mission, progression or generation work. Judge the game as something a
+curious kid or young adult would voluntarily continue playing with XP hidden. State
+reading/prior-knowledge assumptions; do not pretend an agent prediction is child testing.
 
-Assistance labels are evidence semantics: `unknown` is not `assisted`; observed/declared
-current help is `assisted`; prior family/result exposure is `previously_exposed`, not
-current help. Sandbox feedback and revealed solutions cannot masquerade as fresh
-independent assessment. Free prose cannot receive a correctness claim from a counts-only
-grader. Constructed policies must be tested against explicit pinned counterexamples.
+Use narrative/intuitive context before jargon where faithful: who wants what, what
+changed, and what action matters. Play must reveal causality. Do not add story as extra
+reading burden or force every subject into one fantasy, delivery, combat or quiz template.
+Prefer meaningful investigation, manipulation, construction and experimentation.
 
-When course generation is implemented in its authorized phase, it must generate the
-learning contract and narrative/intuitive model plus playable campaign/mission/HUD/tool/
-progression/feedback and youth-engagement contracts. Structural/learning, grounding and
-accessibility gates must pass alongside the genuinely separate game critic's unrounded
-score >=9.0/10, both audience-lens verdicts and no critical blocker. A generator cannot
-self-certify. Failed automatic repairs leave a draft; never weaken the threshold.
+Teach -> easy success -> variation -> combine -> boss/transfer -> resolution -> new
+possibility. Increase reasoning, not form length. Teach every required boss rule before
+its graded use. A useful new tool expands agency; a cosmetic badge is not a new mechanic.
+Successful sequential clears focus the intended next route. Failure keeps a predictable
+retry target. Required actions remain accessible, stable and usable without sound/motion.
 
-All learner commands require a resolved session, a command ID and expected revision.
-Content snapshots, checkpoints, assistance and evidence are immutable. Evidence/review
-belong to learners and frames, not installed courses. XP and self-reported experience
-never establish mastery. Missing evidence is not failure. Local identity is not production
-authentication. Hosted mode fails closed without verified Supabase identity, an email
-allowlist, HTTPS and a scoped PostgreSQL connection. No untrusted code runner, learning-
-model integration, Phase 2+, paid provisioning or broad public rollout in this increment.
+Experience and learning outcomes are separate gates; neither compensates for failure
+of the other. Map each outcome through mechanic, decision, feedback, varied practice,
+fresh transfer, delayed retrieval and evidence limits. Do not claim a full course's
+outcomes from a short guided slice. Free prose cannot be graded by counts or keywords.
 
-Preserve supplied design files and unrelated work. Record migrations, exact checks,
-known limitations and a recovery path. Machine checks are not human acceptance.
+## Evidence, privacy and persistence
+
+Every command resolves a learner session, command ID and expected revision. Server
+validation owns progression and replays pinned game rules. Saved moves cannot be erased;
+rehearsal rewind retains prior feedback/history. Submissions/checkpoints/evidence are
+immutable. New assessment meaning requires explicit new identities/revisions.
+
+`unknown` is not `assisted`; observed/declared current help is `assisted`; earlier family
+exposure is `previously_exposed`, not help used now. Interactive feedback is not a fresh
+independent prediction. Missing evidence is not failure. XP/self-report never establishes
+mastery, evidence strength or correctness-based unlocks. Evidence/reviews belong to
+learners/frames, not installed course packages.
+
+Hosted mode fails closed without verified Supabase identity, an email allowlist, HTTPS
+and a scoped PostgreSQL connection. Local identity is not production authentication.
+Keep auth, RLS, secrets and learner data unchanged for renderer-only work. Preserve
+unrelated work and supplied files, and record recovery paths and limitations.
