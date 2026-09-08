@@ -24,6 +24,24 @@ def parse_prediction(text, expected_count=3):
     return [int(part) for part in parts]
 
 
+def independence_label(response, assistance):
+    """Keep current help, prior exposure, and undeclared outside help distinct.
+
+    `assistance` contains only events that affect an independence claim. Prior exposure
+    means the learner has seen feedback for the same family before; it invalidates a
+    fresh-independent claim but must not be mislabeled as help used on this attempt.
+    """
+    kinds = [event.get("kind", "legacy_assistance") if isinstance(event, dict) else "legacy_assistance" for event in assistance]
+    current_help = [kind for kind in kinds if kind != "prior_family_exposure"]
+    if response["aid_declaration"] == "external" or current_help:
+        return "assisted"
+    if "prior_family_exposure" in kinds:
+        return "previously_exposed"
+    if response["aid_declaration"] == "unknown":
+        return "unknown"
+    return "declared_independent"
+
+
 def evaluate(snapshot, response, assistance):
     total = len(snapshot["trace"])
     values = parse_prediction(response["prediction"], total)
@@ -43,7 +61,7 @@ def evaluate(snapshot, response, assistance):
         )
         rows.append({"run": trace["label"], "actual": actual, "expected": expected, "correct": actual == expected, "reason": reason})
     count = sum(row["correct"] for row in rows)
-    independence = "assisted" if assistance or response["aid_declaration"] == "external" else "unknown" if response["aid_declaration"] == "unknown" else "declared_independent"
+    independence = independence_label(response, assistance)
     return {
         "outcome": "correct" if count == total else "incorrect" if count == 0 else "partially_correct",
         "score": count / total,
