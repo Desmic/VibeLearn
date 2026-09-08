@@ -125,11 +125,11 @@ class HostedTests(unittest.TestCase):
                     page.get_by_role("button", name="Hide password", exact=True).click()
                     expect(password).to_have_attribute("type", "password")
                     page.get_by_role("button", name="Show password", exact=True).click()
-                    page.get_by_role("button", name="Continue learning", exact=True).click()
+                    page.get_by_role("button", name="Enter campaign", exact=True).click()
                     expect(page.locator("#notice")).to_contain_text("Reference:")
                     expect(password).to_have_attribute("type", "password")
                     expect(password).to_have_value("wrong-disposable-password")
-                    expect(page.get_by_role("button", name="Continue learning", exact=True)).to_be_enabled()
+                    expect(page.get_by_role("button", name="Enter campaign", exact=True)).to_be_enabled()
                     self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), 390)
                     page.get_by_role("button", name="Forgot password?", exact=True).click()
                     expect(page.locator("#notice")).to_contain_text("reset link")
@@ -205,8 +205,6 @@ class HostedTests(unittest.TestCase):
         self.assertEqual(saved["status"], "draft")
         self.assertEqual(saved["response"], answer)
 
-        # Simulate a Render process restart: recreate the hosted app against the same database,
-        # then replay the still-valid browser cookie pair into a fresh Flask client.
         session_cookie = self.client.get_cookie(COOKIE, domain="pilot.example.test").value
         access_cookie = self.client.get_cookie(ACCESS_COOKIE, domain="pilot.example.test").value
         restarted_app = create_app(self.config, self.auth)
