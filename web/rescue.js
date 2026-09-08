@@ -1,6 +1,133 @@
+/* Render observed causal steps. This module never evaluates a policy or writes evidence. */
+'use strict';
+window.RescueStage = (() => {
+  const DESCRIPTIONS = {
+    remember: 'Load the durable ID of this job. A worker restart must not change it.',
+    match: 'Compare this request with the saved parameters. Stop on a mismatch.',
+    reconcile: 'Only after expiry: use the authoritative record. Return an existing result, permit a proven-absent retry, or pause if unknown.',
+    retry: 'Send the current ID and parameters. This ends the route, even when blocks remain.',
+    new: 'Replace the job ID with a different one. This does not authorize another effect.',
+    wait: 'Stop here with the job still pending. A known safe delivery would not be completed.'
+  };
+  const STATIONS = ['Footbridge', 'Courier dock', 'Sorting station', 'Old lookout', 'Signal tower', 'Storm engine', 'Field assignment'];
+  const propMarkup = {
+    2: '<g transform="translate(365 201)"><path d="M-27-24L3-31L28-19V19L0 30L-27 18Z" fill="#dfcb94" stroke="#4e6154" stroke-width="3"/><path d="M0-22V25M-17-12L-5-15M8-14L20-10M-17-1L-5-4M8-3L20 1" stroke="#947d50" stroke-width="3"/></g>',
+    3: '<g transform="translate(332 214)"><path d="M-33-32L-9-42L13-29V6L-10 16L-33 4Z" fill="#d5b378" stroke="#745e47" stroke-width="3"/><path d="M3-11L30-24L57-10V28L31 41L3 27Z" fill="#d88c72" stroke="#745e47" stroke-width="3"/><path d="M-24-20L-15-23M14 0L42 13M15 10L42 23" stroke="#f3e2b3" stroke-width="5"/></g>',
+    4: '<g transform="translate(180 149)"><circle r="28" fill="#e0c386" stroke="#5b665d" stroke-width="5"/><path d="M0-20V0L16 10" fill="none" stroke="#334953" stroke-width="4"/><path d="M-14 25L-20 53M14 25L20 53" stroke="#8c8065" stroke-width="5"/></g>',
+    5: '<g transform="translate(371 181)"><rect x="-28" y="-21" width="56" height="44" rx="7" fill="#bcc8a1" stroke="#40595c" stroke-width="4"/><rect x="-20" y="-13" width="40" height="23" rx="3" fill="#243e4b"/><text x="0" y="5" text-anchor="middle" fill="#f0d190" font-size="20">?</text><path d="M0-21V-37M-8-38L0-43L8-38" fill="none" stroke="#bdcdad" stroke-width="4"/></g>'
+  };
+  function attach(root, state, config, {look, sandbox, caseIndex = 0, autoPlay = false} = {}) {
+    const abort = new AbortController(), timers = [];
+    const listen = (n, type, fn) => n?.addEventListener(type, fn, {signal: abort.signal});
+    const world = root.querySelector('.rg-world'), svg = world?.querySelector('svg');
+    if (svg && propMarkup[config.level]) {
+      const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      group.innerHTML = propMarkup[config.level]; svg.append(group);
+    }
+    if (world && config.level < 6) {
+      world.dataset.station = String(config.level);
+      const caption = document.createElement('span'); caption.className = 'rg-station';
+      caption.textContent = STATIONS[config.level-1]; world.append(caption);
+      const wrap = document.createElement('div'); wrap.className = 'rg-world-targets';
+      for (const key of config.inspections) {
+        const button = document.createElement('button'); button.type = 'button';
+        button.className = `rg-world-target target-${key}`;
+        button.dataset.worldLook = key; button.textContent = key === 'workshop' ? 'Workshop' : key === 'parcel' ? 'Parcels' : key === 'book' ? 'Order book' : key === 'journal' ? 'Journal' : 'Ticket';
+        button.setAttribute('aria-label', `Inspect ${button.textContent.toLowerCase()} in the scene`);
+        button.disabled = state.complete || state.failed;
+        listen(button, 'click', () => look?.(key)); wrap.append(button);
+      }
+      world.append(wrap);
+    }
+    const bench = root.querySelector('.rg-workbench');
+    if (bench) {
+      const description = document.createElement('p'); description.className = 'rg-block-help';
+      description.id = 'rg-block-help'; description.setAttribute('role','status');
+      description.textContent = 'Choose any block to place it. Explore the behavior here before running your route.';
+      bench.insertBefore(description, bench.querySelector('.rg-bench-footer'));
+      for (const button of bench.querySelectorAll('[data-block]')) {
+        button.setAttribute('aria-describedby','rg-block-help');
+        const explain=()=>{description.textContent=DESCRIPTIONS[button.dataset.block];};
+        listen(button,'focus',explain);listen(button,'pointerenter',explain);listen(button,'click',explain);
+      }
+    }
+    if(config.level===6 && config.sandbox_enabled && bench){
+      const panel=document.createElement('details');panel.className='rg-sandbox';panel.open=Boolean(state.sandbox);
+      const title=document.createElement('summary');title.textContent='Make your own storm · optional playground';panel.append(title);
+      const intro=document.createElement('p');intro.textContent='Change the conditions and try your route. These experiments do not award a clear or replace the six required storm tests.';panel.append(intro);
+      const form=document.createElement('form');form.className='rg-storm-controls';
+      const settings=state.sandbox?.settings||{elapsed:25,retention:24,record:'committed',changed:false,worker:true};
+      for(const [key,label,min] of [['elapsed','Retry arrives after (hours)',0],['retention','Service remembers for (hours)',1]]){
+        const wrap=document.createElement('label');wrap.textContent=label;
+        const input=document.createElement('input');input.type='number';input.min=String(min);input.max='72';input.step='1';input.required=true;input.value=settings[key];input.name=key;input.id=`rg-storm-${key}`;
+        wrap.append(input);form.append(wrap);
+      }
+      const label=document.createElement('label');label.textContent='What the authoritative record can report';
+      const select=document.createElement('select');select.name='record';select.id='rg-storm-record';
+      for(const [value,text] of [['committed','Existing result confirmed'],['absent','Proven absent; no request in flight'],['unavailable','Unknown: record unreachable']]){const o=document.createElement('option');o.value=value;o.textContent=text;select.append(o);}
+      select.value=settings.record;label.append(select);form.append(label);
+      for(const [key,text] of [['changed','Request parameters changed'],['worker','Courier restarted with a different ID']]){
+        const wrap=document.createElement('label');wrap.className='rg-check';
+        const input=document.createElement('input');input.type='checkbox';input.name=key;input.id=`rg-storm-${key}`;input.checked=settings[key];
+        wrap.append(input,document.createTextNode(text));form.append(wrap);
+      }
+      const run=document.createElement('button');run.type='submit';run.className='rg-primary';run.id='rg-sandbox-run';run.textContent='Test my storm →';form.append(run);
+      listen(form,'submit',e=>{e.preventDefault();if(form.reportValidity())sandbox?.({elapsed:Number(form.elements.elapsed.value),retention:Number(form.elements.retention.value),record:form.elements.record.value,changed:form.elements.changed.checked,worker:form.elements.worker.checked});});
+      panel.append(form);
+      if(state.sandbox){
+        const result=document.createElement('div');result.className='rg-sandbox-result';result.setAttribute('role','status');
+        const heading=document.createElement('strong');heading.textContent=`${state.sandbox.correct?'Route holds':'Repair needed'} · ${state.sandbox.status} · ${state.sandbox.effects} effect(s)`;
+        result.append(heading);
+        for(const step of state.sandbox.trail){const line=document.createElement('p');line.textContent=step.text;result.append(line);}
+        const scope=document.createElement('p');scope.textContent='Playground observation, not an assessment. In the unknown-record scenario an earlier effect exists, but the worker cannot see it.';result.append(scope);
+        panel.append(result);
+      }
+      bench.after(panel);
+    }
+    const rows = state.rows || [];
+    if (rows.length) {
+      const row = rows[Math.min(caseIndex,rows.length-1)];
+      const area = document.createElement('section'); area.className = 'rg-live-route';
+      area.setAttribute('aria-label','Observed route execution');
+      const heading=document.createElement('strong');heading.textContent=`${state.stale?'Previously tested route · ':''}${row.name} · ${row.correct?'route holds':'repair needed'}`;
+      const lane=document.createElement('div');lane.className='rg-live-lane';
+      const steps=row.trail||[];
+      for(const step of steps){const n=document.createElement('span');n.className='rg-live-step';n.textContent=({remember:'Ticket',match:'Parcel',reconcile:'Record',retry:'Send',new:'New ID',wait:'Wait'})[step.block];n.setAttribute('aria-hidden','true');lane.append(n);}
+      const feedback=document.createElement('p');feedback.setAttribute('role','status');
+      const play=document.createElement('button');play.type='button';play.textContent='Watch this case';play.id='rg-replay-case';
+      const show=(i)=>{
+        lane.querySelectorAll('span').forEach((n,k)=>n.classList.toggle('active',k===i));
+        root.querySelectorAll('[data-slot]').forEach((n,k)=>n.classList.toggle('executing',k===i));
+        feedback.textContent=steps[i]?.text||row.reason;
+      };
+      const cancel=()=>{timers.splice(0).forEach(clearTimeout);};
+      const run=()=>{
+        cancel();show(0);
+        if(matchMedia('(prefers-reduced-motion: reduce)').matches){show(steps.length-1);return;}
+        steps.forEach((_,i)=>timers.push(setTimeout(()=>show(i),i*480)));
+      };
+      area.append(heading,lane,feedback,play);
+      if(bench)bench.before(area);else root.querySelector('.rg-case-detail')?.before(area);
+      listen(play,'click',run);
+      for(const button of root.querySelectorAll('[data-block],[data-slot],#rg-clear-route'))listen(button,'click',()=>{
+        cancel();root.querySelectorAll('.executing').forEach(n=>n.classList.remove('executing'));
+        heading.textContent='Observed result for the PREVIOUS route';feedback.textContent='Your route changed. Run it again to see this version’s behavior.';
+      });
+      if(config.level===6 && world){
+        world.querySelector('#rg-effects').textContent=`${row.effects} gear${row.effects===1?'':'s'} in this test`;
+        world.querySelector('#rg-knowledge').textContent=row.status==='paused'?'Unknown kept pending':row.status==='conflict'?'Changed request stopped':row.status==='confirmed'?'Result confirmed':'Route unfinished';
+      }
+      if(autoPlay)run();else show(steps.length-1);
+    }
+    return ()=>{abort.abort();timers.forEach(clearTimeout);};
+  }
+  return {attach};
+})();
+
 /* Relay Rescue: presentation only. Server replay owns rules, outcomes and history. */
 'use strict';
 window.RescueGame = (() => {
+  let disposeStage=()=>{}, previousRun='';
   let root, cb, attempt, log={moves:[],draft:[]}, program=[], selected=0, activeCase=0, xp=false, retrySubmit=false;
   const names={remember:'Recover the ticket',match:'Check the parcel',reconcile:'Resolve late orders',retry:'Send the request',new:'Print a new ticket',wait:'Wait without sending'};
   const icons={remember:'▤',match:'◇',reconcile:'⌕',retry:'↗',new:'+',wait:'◷'};
@@ -8,11 +135,11 @@ window.RescueGame = (() => {
   const looks={ticket:'Inspect ticket',workshop:'Look into workshop',journal:'Read saved job',parcel:'Compare parcel labels',book:'Inspect order book'};
   const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function setup(handlers){
-    cb=handlers;
+    disposeStage();cb=handlers;
     if(!root){root=document.createElement('section');root.id='rescue-game';root.tabIndex=-1;document.querySelector('#workspace').append(root);}
     root.hidden=false;document.body.classList.add('rescue-active');
   }
-  function hide(){if(root)root.hidden=true;document.body.classList.remove('rescue-active');}
+  function hide(){disposeStage();if(root)root.hidden=true;document.body.classList.remove('rescue-active');}
   function setResponse(value){log=structuredClone(value||{moves:[],draft:[]});program=[...(log.draft||[])];}
   function response(){return structuredClone(log);}
   function top(progress,mode){return `<header class="rg-top"><button type="button" id="rg-map" aria-label="Open rescue map">↗ <b>RELAY RESCUE</b></button><span>${esc(mode)}</span><div><span class="rg-progress">${progress} / 7 signals</span><button type="button" id="rg-options" aria-expanded="false">Menu</button></div></header><div id="rg-menu" hidden><button type="button" id="rg-xp">${xp?'Hide':'Show'} practice XP</button><button type="button" id="rg-save">Save current run</button><button type="button" id="rg-exit">Account / sign out</button><button type="button" id="rg-record">Record rehearsal and restart</button><a href="/?play=expedition">Earlier expedition & 3D prototype</a></div>`;}
@@ -47,7 +174,7 @@ window.RescueGame = (() => {
   }
   function map(missions,a,handlers){
     setup(handlers);attempt=a;const n=missions.filter(m=>m.status==='cleared').length;const next=missions.find(m=>m.status==='unlocked')||missions.at(-1);const active=a?.status==='draft';
-    root.innerHTML=top(n,'THE MISSING DELIVERY')+`<section class="rg-map"><div class="rg-map-brief"><span class="rg-eyebrow">A SYSTEMS ADVENTURE</span><h1>${n===7?'From the valley to the real world.':'One job.<br>One result.'}</h1><p>${n===7?'Your route is built. Now implement it against a simulated external service.':'Pip needs your help. Repair the valley’s delivery network by discovering what the storm broke.'}</p><button class="rg-primary" type="button" id="rg-launch">${active?'Resume your run':n===7?'Replay the field challenge':n?'Restore the next signal':'Help Pip restore the valley'} <span>→</span></button><p class="rg-xp" ${xp?'':'hidden'}>${a?.practice_xp||0} practice XP · not mastery</p></div>${world({},n>=6)}<nav class="rg-route" aria-label="Rescue route">${missions.map((m,i)=>`<button type="button" data-mission="${m.id}" data-status="${m.status}" ${m.status==='locked'?'disabled':''}><b>${m.status==='cleared'?'✓':i+1}</b><span>${esc(m.difficulty)}</span><small>${m.status==='locked'?'Not yet connected':m.status==='cleared'?'Signal restored':'Ready to explore'}</small></button>`).join('')}</nav><div class="rg-map-note"><b>${esc(next.title)}</b><span>${esc(next.plain_objective)}</span></div>${n===7?kit():''}${a?.snapshot?.rescue&&a.status==='submitted'?'<button type="button" id="rg-report">View last repair report</button>':''}</section>`;
+    root.innerHTML=top(n,'THE MISSING DELIVERY')+`<section class="rg-map"><div class="rg-map-brief"><span class="rg-eyebrow">A SYSTEMS ADVENTURE</span><h1>${n===7?'From the valley to the real world.':'One job.<br>One result.'}</h1><p>${n===7?'Your route is built. Now implement it against a simulated external service.':'Pip needs your help. Repair the valley’s delivery network by discovering what the storm broke.'}</p><button class="rg-primary" type="button" id="rg-launch">${active?'Resume your run':n===7?'Replay the field challenge':n?'Restore the next signal':'Help Pip restore the valley'} <span>→</span></button><p class="rg-xp" ${xp?'':'hidden'}>${a?.practice_xp||0} practice XP · not mastery</p></div>${world({},n>=6)}<nav class="rg-route" aria-label="Rescue route">${missions.map((m,i)=>`<button type="button" data-mission="${m.id}" data-status="${m.status}" ${m.status==='locked'?'disabled':''}><b>${m.status==='cleared'?'✓':i+1}</b><span>${esc(m.difficulty)}</span><small>${m.status==='locked'?'Not yet connected':m.status==='cleared'?'Replay available':'Ready to explore'}</small></button>`).join('')}</nav><div class="rg-map-note"><b>${esc(next.title)}</b><span>${esc(next.plain_objective)}</span></div>${n===7?kit():''}${a?.snapshot?.rescue&&a.status==='submitted'?'<button type="button" id="rg-report">View last repair report</button>':''}</section>`;
     bindTop();if(root.querySelector('#rg-report'))root.querySelector('#rg-report').onclick=()=>cb.resume();root.querySelector('#rg-launch').onclick=()=>active?cb.resume():cb.start(next.id);
     root.querySelectorAll('[data-mission]').forEach(b=>b.onclick=()=>active?cb.resume():cb.start(b.dataset.mission));
   }
@@ -61,20 +188,23 @@ window.RescueGame = (() => {
   }
   function render(a,missions,handlers){
     setup(handlers);attempt=a;const s=a.rescue_state,c=a.snapshot.rescue,n=missions.filter(m=>m.status==='cleared').length;
-    const submitted=a.status==='submitted',clear=submitted&&a.assessment.outcome==='correct',building=c.level>=6,transfer=c.level===7;
-    root.innerHTML=top(n,`${a.snapshot.mission.difficulty.toUpperCase()} · SIGNAL ${c.level}`)+`<section class="rg-encounter"><header class="rg-objective"><div><span class="rg-eyebrow">${esc(c.title)}</span><h1>${esc(c.goal)}</h1></div><span id="rg-sync" role="status">Saved</span></header><div class="rg-arena ${building?'rg-building':''}"><div class="rg-field">${transfer?`<section class="rg-incident"><span class="rg-eyebrow">ON CALL / INCIDENT EX-721</span><h2>One export. Two workers. No reply.</h2><p>Worker A requested an export and crashed. Worker B must recover it without creating another file.</p><div class="rg-real-flow"><b>Worker A <small>crashed</small></b><span>→</span><b>Export API <small>result uncertain</small></b><span>←</span><b>Worker B <small>your repair</small></b></div><dl><dt>Durable job ID</dt><dd>export-721</dd><dt>New worker ID</dt><dd>worker-B-44</dd><dt>Idempotency retention</dt><dd>6 hours, starting at commit</dd><dt>Status endpoint</dt><dd>Committed / definitively absent with no in-flight call / unavailable</dd></dl><p>Parameters may change. Retries may arrive before, at, or after expiry. Build the policy for all these conditions.</p></section>`:world(s,clear||s.complete)}${building&&!submitted?programPanel(transfer):''}${!building?`<div class="rg-observations" aria-label="Inspect the evidence">${c.inspections.map(k=>`<button type="button" data-look="${k}">${s.looked.includes(k)?'✓':'⌕'} ${looks[k]}</button>`).join('')}</div>`:''}</div><aside class="rg-console"><div class="rg-pip-message ${s.failed?'rg-warning':''}" role="status" aria-live="polite"><div class="rg-face" aria-hidden="true">••</div><div><strong>${transfer?'INCIDENT BRIEF':'PIP'}</strong><p id="rg-feedback">${esc(submitted?clear?c.reward:'The policy did not handle every incident safely. Inspect the report, then try a revised policy.':s.feedback)}</p></div></div>${!building?`<div class="rg-ticket"><small>CURRENT TICKET</small><b id="rg-ticket">${esc(s.ticket)}</b><span>${c.c.elapsed}h elapsed / ${c.c.retention}h remembered</span></div><div class="rg-tools" aria-label="Your actions">${s.available.map(k=>`<button type="button" data-tool="${k}" class="${k==='rewind'?'rg-primary':''}">${toolNames[k]}</button>`).join('')}</div>`:''}
+    const submitted=a.status==='submitted',unobserved=a.assessment.outcome==='not_observed',clear=submitted&&a.assessment.outcome==='correct',building=c.level>=6,transfer=c.level===7;
+    root.innerHTML=top(n,`${a.snapshot.mission.difficulty.toUpperCase()} · SIGNAL ${c.level}`)+`<section class="rg-encounter"><header class="rg-objective"><div><span class="rg-eyebrow">${esc(c.title)}</span><h1>${esc(c.goal)}</h1></div><span id="rg-sync" role="status">Saved</span></header><div class="rg-arena ${building?'rg-building':''}"><div class="rg-field">${transfer?`<section class="rg-incident"><span class="rg-eyebrow">ON CALL / INCIDENT EX-721</span><h2>One export. Two workers. No reply.</h2><p>Worker A requested an export and crashed. Worker B must recover it without creating another file.</p><div class="rg-real-flow"><b>Worker A <small>crashed</small></b><span>→</span><b>Export API <small>result uncertain</small></b><span>←</span><b>Worker B <small>your repair</small></b></div><dl><dt>Durable job ID</dt><dd>export-721</dd><dt>New worker ID</dt><dd>worker-B-44</dd><dt>Idempotency retention</dt><dd>6 hours, starting at commit</dd><dt>Status endpoint</dt><dd>Committed / definitively absent with no in-flight call / unavailable</dd></dl><p>Parameters may change. Retries may arrive before, at, or after expiry. Build the policy for all these conditions.</p></section>`:world(s,clear||s.complete)}${building&&!submitted?programPanel(transfer):''}${!building?`<div class="rg-observations" aria-label="Inspect the evidence">${c.inspections.map(k=>`<button type="button" data-look="${k}">${s.looked.includes(k)?'✓':'⌕'} ${looks[k]}</button>`).join('')}</div>`:''}</div><aside class="rg-console"><div class="rg-pip-message ${s.failed?'rg-warning':''}" role="status" aria-live="polite"><div class="rg-face" aria-hidden="true">••</div><div><strong>${transfer?'INCIDENT BRIEF':'PIP'}</strong><p id="rg-feedback">${esc(submitted?clear?c.reward:unobserved?'The edited route is saved, but has not been tested. Start another run to test your revision.':'The policy did not handle every incident safely. Inspect the report, then try a revised policy.':s.feedback)}</p></div></div>${!building?`<div class="rg-ticket"><small>CURRENT TICKET</small><b id="rg-ticket">${esc(s.ticket)}</b><span>${c.c.elapsed}h elapsed / ${c.c.retention}h remembered</span></div><div class="rg-tools" aria-label="Your actions">${s.available.map(k=>`<button type="button" data-tool="${k}" class="${k==='rewind'?'rg-primary':''}">${toolNames[k]}</button>`).join('')}</div>`:''}
     ${building&&!submitted?`<p class="rg-run-note">${transfer?'No practice run here. Commit your policy before any results are revealed.':'The storm tests your actual route, in order. A safe pause is not a completed delivery.'}</p>${transfer?'<label class="rg-help-label">Outside help for this challenge<select id="rg-aid"><option value="unknown">Not declared</option><option value="none">No outside help</option><option value="external">Yes, outside help</option></select></label>':''}<button type="button" class="rg-primary" id="rg-run" ${program.length?'':'disabled'}>${transfer?'Commit incident repair':'Run the storm'} →</button>`:''}
-    ${(s.complete&&!submitted)||submitted?`<section class="rg-clear"><span class="rg-eyebrow">${clear||s.complete?'SIGNAL RESTORED':'REPAIR REPORT'}</span><h2>${clear||s.complete?(c.level===7?'Ready to try real code.':'You changed what happens.'):'A counterexample found.'}</h2>${!transfer?`<p>${esc(c.rule)}</p>`:'<p>Your first policy and its help declaration are saved separately from later attempts. Passing these cases does not prove a production implementation.</p>'}<button type="button" class="rg-primary" id="rg-next">${!submitted?'Connect this signal':clear&&c.level===7?'View repair kit':clear?'Continue rescue':'Revise the policy'} →</button><p class="rg-xp" ${xp?'':'hidden'}>${a.practice_xp||0} practice XP · not mastery</p></section>`:''}
+    ${(s.complete&&!submitted)||submitted?`<section class="rg-clear"><span class="rg-eyebrow">${clear||s.complete?'SIGNAL RESTORED':'REPAIR REPORT'}</span><h2>${clear||s.complete?(c.level===7?'Ready to try real code.':'You changed what happens.'):unobserved?'An untested repair.':'A counterexample found.'}</h2>${!transfer?`<p>${esc(c.rule)}</p>`:'<p>Your first policy and its help declaration are saved separately from later attempts. Passing these cases does not prove a production implementation.</p>'}<button type="button" class="rg-primary" id="rg-next">${!submitted?'Connect this signal':clear&&c.level===7?'View repair kit':clear?'Continue rescue':'Revise the policy'} →</button><p class="rg-xp" ${xp?'':'hidden'}>${a.practice_xp||0} practice XP · not mastery</p></section>`:''}
     <div id="rg-save-recovery" hidden><p>Save not confirmed. Your move is retained here. Retry saving, not the action.</p><button type="button" id="rg-retry-save" class="rg-primary">Retry save</button></div>
     <details class="rg-journal"><summary>Field journal & real-world meaning</summary><p>${esc(transfer&&!submitted?(a.hints.join(' ')||'No clue revealed for this challenge. Requesting one records help.'):(a.hints.join(' ')||c.formal))}</p>${transfer&&!submitted?'':`<p>${esc(a.snapshot.assumptions)}</p>`}<button type="button" id="rg-hint">Ask for a clue (records help)</button></details></aside></div>${building?casePanel(submitted?a.assessment.rows:s.rows):''}${submitted&&transfer?kit():''}<details class="rg-evidence"><summary>Learning evidence · ${submitted?esc(a.assessment.independence.replaceAll('_',' ')):'practice in progress'}</summary><p>${esc(submitted?a.assessment.scope:'Guided consequences are recorded as help; a clear is not mastery.')}</p><pre id="rg-evidence-json"></pre></details></section>`;
     bindTop();root.querySelector('#rg-evidence-json').textContent=JSON.stringify({assessment:a.assessment,checkpoints:a.checkpoints,log},null,2);
     root.querySelectorAll('[data-look]').forEach(b=>b.onclick=()=>act({look:b.dataset.look}));
     root.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>act(b.dataset.tool));
-    root.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{activeCase=+b.dataset.case;render(a,missions,handlers);});
+    root.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{activeCase=+b.dataset.case;render(a,missions,handlers);sync(false,a);});
     if(root.querySelector('#rg-hint'))root.querySelector('#rg-hint').onclick=async()=>{if(await cb.hint())root.querySelector('.rg-journal').open=true;};
     root.querySelector('#rg-retry-save').onclick=()=>retrySubmit?cb.submit():cb.save();
     if(root.querySelector('#rg-aid')){root.querySelector('#rg-aid').value=a.response.aid_declaration;root.querySelector('#rg-aid').onchange=e=>{document.querySelector('#aid-declaration').value=e.target.value;cb.edit();};}
     if(building&&!submitted)bindProgram();
+    const runId=`${a.id}:${log.moves.length}`;
+    disposeStage=RescueStage.attach(root,{...s,stale:JSON.stringify(program)!==JSON.stringify(s.program),rows:submitted?a.assessment.rows:s.rows},c,{look:key=>act({look:key}),sandbox:conditions=>act({storm:{...conditions,program:[...program]}}),caseIndex:activeCase,autoPlay:building&&runId!==previousRun});
+    previousRun=runId;
     if(root.querySelector('#rg-next'))root.querySelector('#rg-next').onclick=async()=>{
       if(!submitted){if(await cb.submit())cb.campaign();}
       else if(!clear)cb.start(a.snapshot.mission.id);
@@ -105,6 +235,7 @@ window.RescueGame = (() => {
   async function act(move,submit=false){
     if(!attempt||attempt.status!=='draft')return;
     if(log.moves.length!==attempt.response.rescue.moves.length){cb.error('Save the pending move before acting again.');return;}
+    if(submit&&attempt.rescue_state.sealed){await cb.submit();return;}
     retrySubmit=submit;if(typeof move==='object'&&move.program)activeCase=0;log.draft=[...program];log.moves.push(move);root.querySelector('#rg-feedback').textContent=submit?'Committing your repair before revealing the results…':'Pip is trying your idea…';
     const ok=await(submit?cb.submit():cb.save());
     if(ok){const next=root.querySelector('[data-tool="rewind"], #rg-next, #rg-run, [data-tool]');next?.focus({preventScroll:true});}
@@ -112,11 +243,12 @@ window.RescueGame = (() => {
   function sync(busy,a){
     if(!root||root.hidden||!attempt||!a?.snapshot.rescue||!root.querySelector('#rg-sync'))return;
     const pending=log.moves.length!==a.response.rescue.moves.length;
-    root.querySelectorAll('[data-tool],[data-look],[data-block],[data-slot],#rg-run,#rg-clear-route,#rg-next').forEach(b=>b.disabled=busy||pending||a.status==='submitted'&&b.id!=='rg-next');
+    root.querySelectorAll('[data-tool],[data-look],[data-world-look],[data-block],[data-slot],#rg-run,#rg-sandbox-run,#rg-clear-route,#rg-next').forEach(b=>b.disabled=busy||pending||a.status==='submitted'&&b.id!=='rg-next');
     const hint=root.querySelector('#rg-hint');if(hint)hint.disabled=busy||a.status==='submitted'||a.hints.length>0;
     const run=root.querySelector('#rg-run');if(run)run.disabled=busy||pending||!program.length;
     const next=root.querySelector('#rg-next');if(next&&a.status==='draft'&&a.snapshot.rescue.level>=6)next.disabled=busy||pending||JSON.stringify(program)!==JSON.stringify(a.rescue_state.program);
-    root.querySelectorAll('[data-look]').forEach(b=>b.disabled=busy||pending||a.status==='submitted'||a.rescue_state.complete||a.rescue_state.failed);
+    root.querySelectorAll('[data-look],[data-world-look]').forEach(b=>b.disabled=busy||pending||a.status==='submitted'||a.rescue_state.complete||a.rescue_state.failed);
+    root.querySelectorAll('.rg-storm-controls input,.rg-storm-controls select').forEach(n=>n.disabled=busy||pending||a.status==='submitted');
     const aid=root.querySelector('#rg-aid');if(aid)aid.disabled=busy||a.status==='submitted';
     const save=root.querySelector('#rg-save');if(save)save.disabled=busy||a.status!=='draft';
     const record=root.querySelector('#rg-record');if(record)record.disabled=busy||pending||a.status!=='draft'||!log.moves.length;

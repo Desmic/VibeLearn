@@ -32,7 +32,7 @@ def main():
             expect(page.locator('#rg-feedback')).to_be_visible();shot('rescue-first.png')
             assert page.locator('[data-tool="retry"]').bounding_box()['y']<1000
             expect(page.locator('#rg-effects')).to_have_text('Not inspected')
-            page.locator('[data-look="workshop"]').click();expect(page.locator('#rg-effects')).to_have_text('1 gear')
+            page.locator('[data-world-look="workshop"]').click();expect(page.locator('#rg-effects')).to_have_text('1 gear')
             move('new');move('retry');expect(page.locator('[data-tool="rewind"]')).to_be_visible();shot('rescue-setback.png')
             move('rewind');move('retry');next_level()
             move('retry');expect(page.locator('#rg-effects')).to_have_text('2 gears')
@@ -55,6 +55,21 @@ def main():
             page.reload();expect(page.locator('[data-slot="0"]')).to_contain_text('Recover the ticket')
             expect(page.locator('[data-slot="3"]')).to_contain_text('Send the request')
             page.locator('#rg-run').click();expect(page.locator('#rg-next')).to_be_enabled();shot('rescue-route-success.png')
+            # Own a counterfactual: the same two-block route is safe before expiry,
+            # unsafe afterward. Playground experiments cannot clear the real boss.
+            page.locator('.rg-sandbox summary').click();build(['remember','retry'])
+            page.locator('#rg-storm-elapsed').fill('1')
+            page.locator('#rg-sandbox-run').click();expect(page.locator('.rg-sandbox-result')).to_contain_text('Route holds')
+            expect(page.locator('#rg-next')).to_be_disabled()
+            page.locator('#rg-storm-elapsed').fill('25')
+            page.locator('#rg-sandbox-run').click();expect(page.locator('.rg-sandbox-result')).to_contain_text('Repair needed')
+            shot('rescue-playground.png')
+            build(SAFE);page.locator('#rg-run').click();expect(page.locator('#rg-next')).to_be_enabled()
+            page.locator('#rg-replay-case').click();expect(page.locator('.rg-live-route')).to_be_visible()
+            # Changing a route and navigating an old result must not restore a stale clear.
+            build(['retry']);page.locator('[data-case="1"]').click();expect(page.locator('#rg-next')).to_be_disabled()
+            build(SAFE);page.locator('#rg-run').click();expect(page.locator('#rg-next')).to_be_enabled()
+            checks.append('Direct scene inspection; causal route playback; player-created quick/expired storms change the outcome without granting a boss clear; stale-result navigation remains invalidated')
             next_level();expect(page.locator('.rg-incident')).to_be_visible()
             expect(page.locator('.rg-results')).to_have_count(0)
             build(SAFE);page.locator('#rg-aid').select_option('none')

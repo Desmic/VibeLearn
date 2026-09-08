@@ -84,6 +84,10 @@ def build_campaign(template):
         item['validation']=dict(status='criterion_checked',scope='Original bounded retry-policy simulation',basis='Executable cases, not independently validated learning efficacy or production safety.')
         item['mission']=dict(id=f'rescue-{i+1:02}',number=i+1,difficulty=['Discover','Repair','Compare','Investigate','Resolve','Build','Apply'][i],boss=i>=5,objective=lesson['goal'],plain_objective=lesson['goal'],requires_diagnosis=False,available_modes=['LEARN'],source_enabled=True,hint_count=1,reward_xp=10)
         item['rescue']=dict(version=VERSION,level=i+1,**lesson)
+        if i == 5:
+            # Optional practice changes presentation/content, not the pass criterion.
+            item['activity']['revision'] = 2
+            item['rescue']['sandbox_enabled'] = True
         result.append(item)
     return result
 
@@ -99,11 +103,33 @@ def validate(value):
     for move in value['moves']:
         if isinstance(move,str) and move in {'retry','new','remember','match','inspect','pause','collect','rewind','hint'}:continue
         if isinstance(move,dict) and set(move)=={'look'} and isinstance(move['look'],str) and move['look'] in {'ticket','parcel','journal','book','workshop'}:continue
+        if isinstance(move,dict) and set(move)=={'storm'}:
+            validate_storm(move['storm']);continue
         if isinstance(move,dict) and set(move)=={'program'}:
             p=move['program']
             if isinstance(p,list) and len(p)<=4 and all(isinstance(b,str) and b in BLOCKS for b in p):continue
         raise ValueError('Choose a known rescue action or route block.')
     return value
+
+
+def validate_storm(storm):
+    keys={'program','elapsed','retention','record','changed','worker'}
+    if not isinstance(storm,dict) or set(storm)!=keys:
+        raise ValueError('The storm needs the known route and conditions.')
+    validate({'moves':[], 'draft':storm['program']})
+    if (type(storm['elapsed']) is not int or not 0 <= storm['elapsed'] <= 72 or
+        type(storm['retention']) is not int or not 1 <= storm['retention'] <= 72 or
+        not isinstance(storm['record'],str) or storm['record'] not in ('committed','absent','unavailable') or
+        type(storm['changed']) is not bool or type(storm['worker']) is not bool):
+        raise ValueError('Choose a 0–72 hour delay, a 1–72 hour memory and known storm conditions.')
+    return storm
+
+
+def sandbox_result(storm):
+    validate_storm(storm)
+    c=case('Your storm',committed=storm['record']!='absent',elapsed=storm['elapsed'],
+           retention=storm['retention'],changed=storm['changed'],register=storm['record'],worker=storm['worker'])
+    return execute(storm['program'],c) | {'settings':deepcopy(storm)}
 
 
 def execute(program,c):
@@ -152,11 +178,13 @@ def replay(snapshot,value=None,reveal=False):
     cfg=snapshot['rescue'];level=cfg['level'];data=validate(value or empty());moves=data['moves']
     if cfg['version']!=VERSION:raise ValueError('Unsupported pinned rescue version.')
     if level>=6:
-        if any(not isinstance(m,dict) or 'program' not in m for m in moves):raise ValueError('Use route blocks in this encounter.')
-        p=moves[-1]['program'] if moves else []
+        if any(not isinstance(m,dict) or not ('program' in m or 'storm' in m and level==6 and cfg.get('sandbox_enabled')) for m in moves):raise ValueError('Use route blocks in this encounter.')
+        runs=[m for m in moves if 'program' in m]
+        storms=[m for m in moves if 'storm' in m]
+        p=runs[-1]['program'] if runs else []
         if level==7 and (len(moves)>1 or moves and data['draft']!=p):raise ValueError('The transfer policy is sealed. Start a fresh attempt for another policy.')
-        rows=[execute(p,c) for c in program_cases(level==7)] if moves and (level==6 or reveal) else []
-        return dict(level=level,program=p,rows=rows,complete=bool(rows and p==data['draft'] and all(r['correct'] for r in rows)),
+        rows=[execute(p,c) for c in program_cases(level==7)] if runs and (level==6 or reveal) else []
+        return dict(level=level,program=p,rows=rows,sandbox=sandbox_result(storms[-1]['storm']) if storms else None,complete=bool(rows and p==data['draft'] and all(r['correct'] for r in rows)),
                     sealed=level==7 and bool(moves),effects=0,knowledge='Design a route',feedback=cfg['brief'],available=[],moves=len(moves),rewinds=0)
     def start():
         c=deepcopy(cfg['c'])
@@ -217,7 +245,10 @@ def replay(snapshot,value=None,reveal=False):
 
 def evaluate(snapshot,response,independence):
     s=replay(snapshot,response.get('rescue'),reveal=True)
-    if not s['moves']:return dict(outcome='not_observed',score=None,mastery='unknown',rows=[],independence=independence)
+    if not s['moves'] or s['level']==6 and (not s.get('rows') or response['rescue']['draft']!=s['program']):
+        return dict(outcome='not_observed',score=None,mastery='unknown',rows=[],independence=independence,
+                    scope='No tested result for the submitted route. Saved playground observations and earlier trials do not grade this untested revision.',
+                    reasoning=dict(outcome='not_observed',score=None,message='No current route result was observed.'),validation=snapshot['validation'])
     rows=s.get('rows') or [dict(name=snapshot['title'],correct=s['complete'],reason=s['feedback'])]
     for row in rows:row.update(run=row['name'],actual=row.get('status','resolved' if s['complete'] else 'unresolved'),expected=row.get('expected','safe resolved incident'))
     n=sum(r['correct'] for r in rows)
