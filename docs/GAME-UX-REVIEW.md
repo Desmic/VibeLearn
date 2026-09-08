@@ -6,11 +6,36 @@ This review is a deliberately separate pass from implementation. The critic eval
 
 This gate also applies to **course-generation candidates**. A generated course cannot be labeled playable/validated merely because its content schema, source grounding, or assessment checks pass. Its actual game experience must independently clear this rubric.
 
+## Current acceptance status — 8 September 2026
+
+**Not accepted: user 6.5/10; later agent review 7.5/10.** Historical 8.8 and 9.1
+scores retained below do not approve the current product. The user found the
+experience insufficiently game-like and wants interest accessible even to a kid.
+
+The current review pair is the user as product critic and Codex as agent critic.
+Refine privately before presenting to other testers. Record their scores
+separately. Internal acceptance requires >=8/10 from both and no critical blocker.
+The user determines readiness for external testing. The existing numeric weights
+remain unchanged; do not inflate scores for the proposed design.
+
+The later agent evaluation used a critic-directed computer-use journey operated
+by the parent agent on a disposable local instance because the critic could not
+access the shared authenticated browser. It was not a separate authenticated
+live-site playthrough. Deployed source reviewed:
+`4f65fc8e20d847a2db294854f9baf5528cd1fbe2`.
+
+Observed gaps:
+- Reading cards, traces and answer selection dominate; too little experimentation.
+- Correct boss counts with "Just retry forever." still produce mission clear.
+  Prose is explicitly ungraded, but the experience fails to correct that misconception.
+- Completion returns to the same campaign without a satisfying ending or fresh quest.
+- Persistence, progression and evidence safeguards are strengths, not proof of fun.
+
 ## Pass rule
 
 - Overall weighted score must be **>= 8.0 / 10**.
 - No critical blocker may remain in the core loop, narrative/intuitive comprehension, progression/unlock logic, accessibility, persistence, assistance semantics or evidence integrity.
-- A score >= 8 means the candidate is good enough to put in front of the learner again, not that it is final.
+- An agent score >=8 permits another private user review; it does not establish user acceptance or readiness for external testing.
 - For generated courses, this score is only the **game-UX/comprehension gate**. Separate grounding/content, structural/learning and accessibility validators in `docs/COURSE-GENERATION-GAME-SYSTEM.md` must also pass.
 
 ## Narrative / comprehension pre-gate
@@ -173,3 +198,21 @@ Verdict: **PASS >=8**
 ## Current baseline observation
 
 The pre-HUD build was visually polished but structurally a website. The first HUD build improved game identity/progression but later learner testing showed that a good shell alone is insufficient. The current standard therefore treats **course comprehension, narrative causality, honest assistance semantics and expected progression focus as first-class game-quality requirements**, alongside visual game identity.
+
+## Additional observations for the next Phase 1 review
+
+Collect these alongside the existing evidence and frozen numeric rubric:
+
+- Is the core interaction enjoyable with XP hidden?
+- Does the player have an immediate goal and a reason to care about its outcome?
+- Can the player try an unprompted experiment and understand the consequence?
+- Do later challenges combine earlier discoveries and tools?
+- Does failure suggest a useful next experiment, with quick recovery?
+- Do character, story, scene and feedback support a coherent experience?
+- Does the boss expose the unsafe retry-policy misconception?
+- Is there a complete story payoff and a meaningful working replay variation?
+- Does the interaction remain usable on mobile, keyboard and reduced motion?
+
+Record observed evidence and remaining limitations for each item. Proposed features,
+screenshots alone and passing automated checks cannot establish enjoyment.
+The latest documentation-only update supplies no new build or score.
