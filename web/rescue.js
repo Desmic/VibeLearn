@@ -51,6 +51,12 @@ window.RescueStage = (() => {
         listen(button,'focus',explain);listen(button,'pointerenter',explain);listen(button,'click',explain);
       }
     }
+    if(bench){
+      const controls=document.createElement('div');controls.className='rg-machine-controls';
+      const note=root.querySelector('.rg-run-note'),aid=root.querySelector('.rg-help-label'),run=root.querySelector('#rg-run');
+      if(note)controls.append(note);if(aid)controls.append(aid);if(run)controls.append(run);
+      bench.append(controls);
+    }
     if(config.level===6 && config.sandbox_enabled && bench){
       const panel=document.createElement('details');panel.className='rg-sandbox';panel.open=Boolean(state.sandbox);
       const title=document.createElement('summary');title.textContent='Make your own storm · optional playground';panel.append(title);
@@ -95,9 +101,11 @@ window.RescueStage = (() => {
       for(const step of steps){const n=document.createElement('span');n.className='rg-live-step';n.textContent=({remember:'Ticket',match:'Parcel',reconcile:'Record',retry:'Send',new:'New ID',wait:'Wait'})[step.block];n.setAttribute('aria-hidden','true');lane.append(n);}
       const feedback=document.createElement('p');feedback.setAttribute('role','status');
       const play=document.createElement('button');play.type='button';play.textContent='Watch this case';play.id='rg-replay-case';
+      let frameIndex=-1;
       const show=(i)=>{
+        frameIndex=i;
         lane.querySelectorAll('span').forEach((n,k)=>n.classList.toggle('active',k===i));
-        root.querySelectorAll('[data-slot]').forEach((n,k)=>n.classList.toggle('executing',k===i));
+        root.querySelectorAll('[data-slot]').forEach((n,k)=>n.classList.toggle('executing',k===i&&!state.stale));
         feedback.textContent=steps[i]?.text||row.reason;
       };
       const cancel=()=>{timers.splice(0).forEach(clearTimeout);};
@@ -106,10 +114,18 @@ window.RescueStage = (() => {
         if(matchMedia('(prefers-reduced-motion: reduce)').matches){show(steps.length-1);return;}
         steps.forEach((_,i)=>timers.push(setTimeout(()=>show(i),i*480)));
       };
-      area.append(heading,lane,feedback,play);
-      if(bench)bench.before(area);else root.querySelector('.rg-case-detail')?.before(area);
+      const step=document.createElement('button');step.type='button';step.textContent='Next step';step.id='rg-step-case';
+      listen(step,'click',()=>{cancel();show((frameIndex+1)%Math.max(steps.length,1));});
+      const playback=document.createElement('div');playback.className='rg-playback-controls';playback.append(play,step);
+      area.append(heading,lane,feedback,playback);
+      const tabs=root.querySelector('.rg-case-tabs');if(tabs)area.prepend(tabs);
+      if(bench)bench.append(area);else root.querySelector('.rg-case-detail')?.before(area);
+      const detail=root.querySelector('.rg-case-detail');
+      if(detail){const disclosure=document.createElement('details');disclosure.className='rg-postmortem';
+        const summary=document.createElement('summary');summary.textContent='Inspect the complete execution trace';
+        detail.before(disclosure);disclosure.append(summary,detail);}
       listen(play,'click',run);
-      for(const button of root.querySelectorAll('[data-block],[data-slot],#rg-clear-route'))listen(button,'click',()=>{
+      for(const button of root.querySelectorAll('[data-block],#rg-clear-route'))listen(button,'click',()=>{
         cancel();root.querySelectorAll('.executing').forEach(n=>n.classList.remove('executing'));
         heading.textContent='Observed result for the PREVIOUS route';feedback.textContent='Your route changed. Run it again to see this version’s behavior.';
       });
@@ -189,9 +205,12 @@ window.RescueGame = (() => {
   function render(a,missions,handlers){
     setup(handlers);attempt=a;const s=a.rescue_state,c=a.snapshot.rescue,n=missions.filter(m=>m.status==='cleared').length;
     const submitted=a.status==='submitted',unobserved=a.assessment.outcome==='not_observed',clear=submitted&&a.assessment.outcome==='correct',building=c.level>=6,transfer=c.level===7;
-    root.innerHTML=top(n,`${a.snapshot.mission.difficulty.toUpperCase()} · SIGNAL ${c.level}`)+`<section class="rg-encounter"><header class="rg-objective"><div><span class="rg-eyebrow">${esc(c.title)}</span><h1>${esc(c.goal)}</h1></div><span id="rg-sync" role="status">Saved</span></header><div class="rg-arena ${building?'rg-building':''}"><div class="rg-field">${transfer?`<section class="rg-incident"><span class="rg-eyebrow">ON CALL / INCIDENT EX-721</span><h2>One export. Two workers. No reply.</h2><p>Worker A requested an export and crashed. Worker B must recover it without creating another file.</p><div class="rg-real-flow"><b>Worker A <small>crashed</small></b><span>→</span><b>Export API <small>result uncertain</small></b><span>←</span><b>Worker B <small>your repair</small></b></div><dl><dt>Durable job ID</dt><dd>export-721</dd><dt>New worker ID</dt><dd>worker-B-44</dd><dt>Idempotency retention</dt><dd>6 hours, starting at commit</dd><dt>Status endpoint</dt><dd>Committed / definitively absent with no in-flight call / unavailable</dd></dl><p>Parameters may change. Retries may arrive before, at, or after expiry. Build the policy for all these conditions.</p></section>`:world(s,clear||s.complete)}${building&&!submitted?programPanel(transfer):''}${!building?`<div class="rg-observations" aria-label="Inspect the evidence">${c.inspections.map(k=>`<button type="button" data-look="${k}">${s.looked.includes(k)?'✓':'⌕'} ${looks[k]}</button>`).join('')}</div>`:''}</div><aside class="rg-console"><div class="rg-pip-message ${s.failed?'rg-warning':''}" role="status" aria-live="polite"><div class="rg-face" aria-hidden="true">••</div><div><strong>${transfer?'INCIDENT BRIEF':'PIP'}</strong><p id="rg-feedback">${esc(submitted?clear?c.reward:unobserved?'The edited route is saved, but has not been tested. Start another run to test your revision.':'The policy did not handle every incident safely. Inspect the report, then try a revised policy.':s.feedback)}</p></div></div>${!building?`<div class="rg-ticket"><small>CURRENT TICKET</small><b id="rg-ticket">${esc(s.ticket)}</b><span>${c.c.elapsed}h elapsed / ${c.c.retention}h remembered</span></div><div class="rg-tools" aria-label="Your actions">${s.available.map(k=>`<button type="button" data-tool="${k}" class="${k==='rewind'?'rg-primary':''}">${toolNames[k]}</button>`).join('')}</div>`:''}
+    const trialFeedback = building && !submitted && s.rows.length
+      ? `${s.rows.filter(r=>r.correct).length} of ${s.rows.length} required storms handled. ${s.complete?'Pip’s route is ready.':'Watch the failed case, change a block, then run the route again.'}`
+      : s.feedback;
+    root.innerHTML=top(n,`${a.snapshot.mission.difficulty.toUpperCase()} · SIGNAL ${c.level}`)+`<section class="rg-encounter"><header class="rg-objective"><div><span class="rg-eyebrow">${esc(c.title)}</span><h1>${esc(c.goal)}</h1></div><span id="rg-sync" role="status">Saved</span></header><div class="rg-arena ${building?'rg-building':''}"><div class="rg-field">${transfer?`<section class="rg-incident"><span class="rg-eyebrow">ON CALL / INCIDENT EX-721</span><h2>One export. Two workers. No reply.</h2><p>Worker A requested an export and crashed. Worker B must recover it without creating another file.</p><div class="rg-real-flow"><b>Worker A <small>crashed</small></b><span>→</span><b>Export API <small>result uncertain</small></b><span>←</span><b>Worker B <small>your repair</small></b></div><dl><dt>Durable job ID</dt><dd>export-721</dd><dt>New worker ID</dt><dd>worker-B-44</dd><dt>Idempotency retention</dt><dd>6 hours, starting at commit</dd><dt>Status endpoint</dt><dd>Committed / definitively absent with no in-flight call / unavailable</dd></dl><p>Parameters may change. Retries may arrive before, at, or after expiry. Build the policy for all these conditions.</p></section>`:world(s,clear||s.complete)}${building&&!submitted?programPanel(transfer):''}${!building?`<div class="rg-observations" aria-label="Inspect the evidence">${c.inspections.map(k=>`<button type="button" data-look="${k}">${s.looked.includes(k)?'✓':'⌕'} ${looks[k]}</button>`).join('')}</div>`:''}</div><aside class="rg-console"><div class="rg-pip-message ${s.failed?'rg-warning':''}" role="status" aria-live="polite"><div class="rg-face" aria-hidden="true">••</div><div><strong>${transfer?'INCIDENT BRIEF':'PIP'}</strong><p id="rg-feedback">${esc(submitted?clear?c.reward:unobserved?'The edited route is saved, but has not been tested. Start another run to test your revision.':'The policy did not handle every incident safely. Inspect the report, then try a revised policy.':trialFeedback)}</p></div></div>${!building?`<div class="rg-ticket"><small>CURRENT TICKET</small><b id="rg-ticket">${esc(s.ticket)}</b><span>${c.c.elapsed}h elapsed / ${c.c.retention}h remembered</span></div><div class="rg-tools" aria-label="Your actions">${s.available.map(k=>`<button type="button" data-tool="${k}" class="${k==='rewind'?'rg-primary':''}">${toolNames[k]}</button>`).join('')}</div>`:''}
     ${building&&!submitted?`<p class="rg-run-note">${transfer?'No practice run here. Commit your policy before any results are revealed.':'The storm tests your actual route, in order. A safe pause is not a completed delivery.'}</p>${transfer?'<label class="rg-help-label">Outside help for this challenge<select id="rg-aid"><option value="unknown">Not declared</option><option value="none">No outside help</option><option value="external">Yes, outside help</option></select></label>':''}<button type="button" class="rg-primary" id="rg-run" ${program.length?'':'disabled'}>${transfer?'Commit incident repair':'Run the storm'} →</button>`:''}
-    ${(s.complete&&!submitted)||submitted?`<section class="rg-clear"><span class="rg-eyebrow">${clear||s.complete?'SIGNAL RESTORED':'REPAIR REPORT'}</span><h2>${clear||s.complete?(c.level===7?'Ready to try real code.':'You changed what happens.'):unobserved?'An untested repair.':'A counterexample found.'}</h2>${!transfer?`<p>${esc(c.rule)}</p>`:'<p>Your first policy and its help declaration are saved separately from later attempts. Passing these cases does not prove a production implementation.</p>'}<button type="button" class="rg-primary" id="rg-next">${!submitted?'Connect this signal':clear&&c.level===7?'View repair kit':clear?'Continue rescue':'Revise the policy'} →</button><p class="rg-xp" ${xp?'':'hidden'}>${a.practice_xp||0} practice XP · not mastery</p></section>`:''}
+    ${(s.complete&&!submitted)||submitted?`<section class="rg-clear"><span class="rg-eyebrow">${clear||s.complete?'SIGNAL RESTORED':'REPAIR REPORT'}</span><h2>${clear||s.complete?(c.level===7?'Ready to try real code.':'You changed what happens.'):unobserved?'An untested repair.':'A counterexample found.'}</h2>${!transfer?`<p>${esc(c.rule)}</p>`:'<p>Your first policy and its help declaration are saved separately from later attempts. Passing these cases does not prove a production implementation.</p>'}<button type="button" class="rg-primary" id="rg-next">${!submitted?'Continue to the next signal':clear&&c.level===7?'View repair kit':clear?'Continue rescue':'Revise the policy'} →</button><p class="rg-xp" ${xp?'':'hidden'}>${a.practice_xp||0} practice XP · not mastery</p></section>`:''}
     <div id="rg-save-recovery" hidden><p>Save not confirmed. Your move is retained here. Retry saving, not the action.</p><button type="button" id="rg-retry-save" class="rg-primary">Retry save</button></div>
     <details class="rg-journal"><summary>Field journal & real-world meaning</summary><p>${esc(transfer&&!submitted?(a.hints.join(' ')||'No clue revealed for this challenge. Requesting one records help.'):(a.hints.join(' ')||c.formal))}</p>${transfer&&!submitted?'':`<p>${esc(a.snapshot.assumptions)}</p>`}<button type="button" id="rg-hint">Ask for a clue (records help)</button></details></aside></div>${building?casePanel(submitted?a.assessment.rows:s.rows):''}${submitted&&transfer?kit():''}<details class="rg-evidence"><summary>Learning evidence · ${submitted?esc(a.assessment.independence.replaceAll('_',' ')):'practice in progress'}</summary><p>${esc(submitted?a.assessment.scope:'Guided consequences are recorded as help; a clear is not mastery.')}</p><pre id="rg-evidence-json"></pre></details></section>`;
     bindTop();root.querySelector('#rg-evidence-json').textContent=JSON.stringify({assessment:a.assessment,checkpoints:a.checkpoints,log},null,2);
@@ -206,10 +225,10 @@ window.RescueGame = (() => {
     disposeStage=RescueStage.attach(root,{...s,stale:JSON.stringify(program)!==JSON.stringify(s.program),rows:submitted?a.assessment.rows:s.rows},c,{look:key=>act({look:key}),sandbox:conditions=>act({storm:{...conditions,program:[...program]}}),caseIndex:activeCase,autoPlay:building&&runId!==previousRun});
     previousRun=runId;
     if(root.querySelector('#rg-next'))root.querySelector('#rg-next').onclick=async()=>{
-      if(!submitted){if(await cb.submit())cb.campaign();}
+      if(!submitted){if(await cb.submit())await cb.start(`rescue-${String(c.level+1).padStart(2,'0')}`);}
       else if(!clear)cb.start(a.snapshot.mission.id);
       else if(transfer)root.querySelector('#rg-kit').scrollIntoView({block:'start'});
-      else cb.campaign();
+      else cb.start(`rescue-${String(c.level+1).padStart(2,'0')}`);
     };
   }
   function kit(){return `<section class="rg-kit" id="rg-kit"><span class="rg-eyebrow">TAKE IT INTO THE REAL WORLD</span><h2>Repair a retrying job worker.</h2><p>Your next task is code, not another quiz: preserve intent IDs, reject changed requests and handle expired or unknown outcomes against a simulated external service.</p><a class="rg-primary" href="/relay-repair-kit.zip" download>Open the Python repair kit ↗</a><p>Run the tests locally. No code is executed or graded by this app. Includes failure cases, an implementation checklist and a separate reference solution. Delayed retention and production readiness are still unmeasured.</p></section>`;}
@@ -228,8 +247,9 @@ window.RescueGame = (() => {
     root.querySelectorAll('[data-slot]').forEach((b,i)=>{b.classList.toggle('selected',i===selected);b.querySelector('b').textContent=program[i]?icons[program[i]]:'+';b.querySelector('span').textContent=names[program[i]]||'Empty slot';b.setAttribute('aria-label',`Route slot ${i+1}: ${names[program[i]]||'empty'}`);});
     root.querySelector('#rg-run').disabled=!program.length;
     root.querySelector('#rg-route-status').textContent=program.length+' / 4 blocks placed · not tested';
-    const next=root.querySelector('#rg-next');if(next)next.disabled=true;
-    log.draft=[...program];cb.edit();
+    const changed=JSON.stringify(log.draft)!==JSON.stringify(program);
+    const next=root.querySelector('#rg-next');if(next)next.disabled=JSON.stringify(program)!==JSON.stringify(attempt.rescue_state.program);
+    log.draft=[...program];if(changed)cb.edit();
   }
   function restorePlan(p){if(Array.isArray(p)&&p.length<=4&&p.every(b=>b in names)){program=[...p];if(root&&!root.hidden&&root.querySelector('#rg-run')){updateProgram();}}}
   async function act(move,submit=false){

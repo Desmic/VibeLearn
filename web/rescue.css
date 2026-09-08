@@ -84,3 +84,29 @@ body.rescue-active .notice{position:sticky;top:0;z-index:40;background:#563a2e;c
  .rg-live-route{padding:12px}.rg-live-route>p{font-size:.81rem}.rg-live-lane{gap:6px;flex-wrap:wrap}.rg-live-step{min-width:60px;font-size:.68rem}
  .rg-storm-controls{grid-template-columns:1fr}.rg-block-help{font-size:.76rem;min-height:0}.rg-sandbox{padding:13px!important}
 }
+/* The machine is the primary playfield, not a report below a decorative picture. */
+.rg-building .rg-field>.rg-world{display:none}
+.rg-building .rg-workbench{margin-top:0;border:1px solid #668b83;border-radius:15px;background:linear-gradient(145deg,#1c3945,#193137)}
+.rg-building .rg-slots{padding:26px 18px 20px;gap:15px}
+#rescue-game .rg-building .rg-slot{min-height:126px;grid-template-rows:18px 34px auto;padding:12px 8px;border-radius:14px;border:2px dashed #79958b;box-shadow:inset 0 -5px 0 #102e36}
+.rg-building .rg-slot b{font-size:1.8rem}.rg-building .rg-slot span{font-size:.85rem}.rg-building .rg-slot small{font-size:.72rem}
+.rg-building .rg-slots:before{top:88px;border-top:5px solid #b59b66}
+.rg-building .rg-palette{gap:10px;padding:6px 18px 12px}#rescue-game .rg-building .rg-palette button{font-size:.8rem;min-height:53px}
+.rg-machine-controls{padding:0 18px 18px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #52736f}
+.rg-machine-controls .rg-run-note{flex:1;margin:0;font-size:.82rem;min-width:170px}.rg-machine-controls .rg-help-label{flex-basis:100%;margin:0}
+#rescue-game .rg-machine-controls #rg-run{min-width:185px;min-height:53px}
+.rg-workbench>.rg-live-route{margin:0;border:0;border-radius:0;padding:17px 18px;background:#142e36}.rg-live-route .rg-case-tabs{margin-bottom:13px;gap:6px}
+.rg-postmortem{border:0!important;background:none!important;color:#b5cdcb;padding:0!important;font-size:.8rem;margin:0!important}.rg-postmortem summary{cursor:pointer;min-height:38px}
+.rg-building .rg-results{margin-top:12px;padding-top:8px}.rg-building .rg-console{position:sticky;top:12px}
+@media(max-width:800px){
+ .rg-building .rg-console{position:static}.rg-building .rg-slots{gap:8px;padding:18px 10px 10px}
+ #rescue-game .rg-building .rg-slot{min-height:114px;padding:9px 4px;grid-template-rows:16px 28px auto;border-radius:10px}
+ .rg-building .rg-slot span{font-size:.72rem}.rg-building .rg-slot b{font-size:1.55rem}.rg-building .rg-slots:before{top:75px}
+ .rg-building .rg-palette{padding:8px 10px 10px;gap:7px}#rescue-game .rg-building .rg-palette button{font-size:.73rem;min-height:48px}
+ .rg-machine-controls{padding:0 12px 14px;gap:12px}.rg-machine-controls .rg-run-note{font-size:.78rem}.rg-workbench>.rg-live-route{padding:14px 12px}
+}
+.rg-playback-controls{display:flex;gap:9px;flex-wrap:wrap}#rescue-game #rg-step-case{font-size:.75rem;min-height:42px;padding:7px 13px}
+.rg-slot,.rg-route span,.rg-route small{overflow-wrap:anywhere;max-width:100%}
+.rg-real-flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr)}
+.rg-real-flow b{min-width:0;overflow-wrap:anywhere}
+@media(max-width:480px){.rg-building .rg-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.rg-building .rg-slots:before{display:none}.rg-incident dl{grid-template-columns:1fr}.rg-incident dd{margin-bottom:6px}}

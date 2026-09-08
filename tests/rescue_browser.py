@@ -14,14 +14,16 @@ def main():
         proc,url=start_server(Path(tmp)/'rescue.db');b=p.chromium.launch()
         ctx=b.new_context(viewport=dict(width=1440,height=1000));ctx.tracing.start(screenshots=True,snapshots=True,sources=True)
         page=ctx.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
-        def shot(name):page.screenshot(path=str(out/name),full_page=True)
+        def shot(name):
+            page.evaluate('scrollTo(0,0)');page.screenshot(path=str(out/name),full_page=True)
         def move(action):
             page.locator(f'[data-tool="{action}"]').click()
             expect(page.locator('#rg-feedback')).not_to_have_text('Pip is trying your idea…')
             expect(page.locator('#rg-sync')).to_have_text('Saved')
         def next_level():
-            page.locator('#rg-next').click();expect(page.locator('#rg-launch')).to_be_visible()
-            page.locator('#rg-launch').click();expect(page.locator('#rg-feedback')).to_be_visible()
+            old=page.locator('.rg-top>span').inner_text()
+            page.locator('#rg-next').click();expect(page.locator('.rg-top>span')).not_to_have_text(old)
+            expect(page.locator('#rg-feedback')).to_be_visible()
         def build(program):
             page.locator('#rg-clear-route').click()
             for block in program:page.locator(f'[data-block="{block}"]').click()
@@ -60,11 +62,13 @@ def main():
             page.locator('.rg-sandbox summary').click();build(['remember','retry'])
             page.locator('#rg-storm-elapsed').fill('1')
             page.locator('#rg-sandbox-run').click();expect(page.locator('.rg-sandbox-result')).to_contain_text('Route holds')
-            expect(page.locator('#rg-next')).to_be_disabled()
+            expect(page.locator('#rg-next')).to_have_count(0)
             page.locator('#rg-storm-elapsed').fill('25')
             page.locator('#rg-sandbox-run').click();expect(page.locator('.rg-sandbox-result')).to_contain_text('Repair needed')
             shot('rescue-playground.png')
             build(SAFE);page.locator('#rg-run').click();expect(page.locator('#rg-next')).to_be_enabled()
+            page.locator('[data-slot="1"]').click();expect(page.locator('#rg-sync')).to_have_text('Saved')
+            expect(page.locator('#rg-next')).to_be_enabled()
             page.locator('#rg-replay-case').click();expect(page.locator('.rg-live-route')).to_be_visible()
             # Changing a route and navigating an old result must not restore a stale clear.
             build(['retry']);page.locator('[data-case="1"]').click();expect(page.locator('#rg-next')).to_be_disabled()
@@ -102,11 +106,35 @@ def main():
                 assert m.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 m.locator('[data-tool="retry"]').tap();expect(m.locator('#rg-next')).to_be_enabled()
                 m.screenshot(path=str(out/f'rescue-text-{width}.png'),full_page=True)
+                m.evaluate("document.documentElement.style.fontSize=''")
+                def advance_mobile():
+                    old=m.locator('.rg-top>span').inner_text()
+                    m.locator('#rg-next').tap();expect(m.locator('.rg-top>span')).not_to_have_text(old)
+                def mobile_move(action):
+                    m.locator(f'[data-tool="{action}"]').tap()
+                    expect(m.locator('#rg-feedback')).not_to_have_text('Pip is trying your idea…')
+                for route in [['remember','retry'],['match'],['inspect','collect'],['inspect','pause','inspect','retry']]:
+                    advance_mobile()
+                    for action in route:mobile_move(action)
+                advance_mobile();expect(m.locator('#rg-run')).to_be_visible()
+                for block in SAFE:m.locator(f'[data-block="{block}"]').tap()
+                m.locator('#rg-run').tap();expect(m.locator('#rg-next')).to_be_enabled()
+                m.evaluate("document.documentElement.style.fontSize='200%'")
+                assert m.evaluate('document.documentElement.scrollWidth<=innerWidth')
+                m.screenshot(path=str(out/f'rescue-machine-mobile-{width}.png'),full_page=True)
+                m.evaluate("document.documentElement.style.fontSize=''");advance_mobile()
+                expect(m.locator('.rg-incident')).to_be_visible()
+                m.locator('#rg-clear-route').tap()
+                for block in SAFE:m.locator(f'[data-block="{block}"]').tap()
+                m.locator('#rg-aid').select_option('none');m.locator('#rg-run').tap()
+                expect(m.locator('#rg-kit')).to_be_visible()
+                assert m.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 isolated=m.evaluate("async()=> (await fetch('/api/state')).json()")
                 assert isolated['learner_id']!=state['learner_id']
-                assert isolated['course']['rescue'][1]['status']=='locked'
+                assert all(mission['status']=='cleared' for mission in isolated['course']['rescue'])
+                assert isolated['attempt']['assessment']['independence']=='declared_independent'
                 mc.close()
-            checks.append('390/320px touch with first action inside viewport; actual 200% text; reduced motion; independent learner progression')
+            checks.append('Full seven-encounter 390/320px touch journeys; first action inside viewport; actual 200% text including construction workbench; reduced motion; isolated final transfer evidence')
             assert errors==[],errors
             (out/'rescue-browser-report.json').write_text(json.dumps(dict(result='passed',checks=checks,page_errors=errors,browser=b.version,review_method='internal_tool_assisted',audience_validation='not human tested',learning_scope='bounded transfer; no implementation/retention efficacy claim'),indent=2))
         finally:
