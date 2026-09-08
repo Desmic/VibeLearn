@@ -30,7 +30,7 @@ def main():
             page.locator('#exp-continue').click()
             expect(page.locator('#exp-launch')).to_be_visible()
         try:
-            page.goto(url)
+            page.goto(url + "/?play=expedition")
             expect(page.locator('#exp-launch')).to_have_text('Help Pip↗')
             expect(page.locator('[data-exp-mission]')).to_have_count(5)
             expect(page.locator('[data-exp-mission="expedition-04"]')).to_be_disabled()
@@ -47,7 +47,6 @@ def main():
             page.reload()
             expect(page.locator('#exp-parts')).to_have_text('1 gear made')
             expect(page.locator('#exp-knowledge')).to_contain_text('No confirmation')
-            # Real process replacement on the same database and port.
             port = int(url.rsplit(':', 1)[1]); stop_server(process)
             process, _ = start_server(Path(directory) / 'expedition.sqlite3', port)
             page.reload(); expect(page.locator('[data-action="retry"]')).to_be_visible()
@@ -78,7 +77,6 @@ def main():
             page.locator('#exp-launch').click(); move('send'); move('wait'); move('inspect')
             expect(page.locator('#exp-parts')).to_have_text('0 gears made')
             expect(page.locator('#exp-knowledge')).to_contain_text('Order proven absent')
-            # Drop one response after the real server has committed it.
             dropped = {'done': False}
             def lose_ack(route):
                 if not dropped['done']:
@@ -98,7 +96,7 @@ def main():
             assert state['attempt']['practice_xp'] == 50
             for width in [390, 320]:
                 mobile = browser.new_context(viewport={'width':width,'height':844}, reduced_motion='reduce', has_touch=True)
-                mp = mobile.new_page(); mp.on('pageerror', lambda e: errors.append(str(e))); mp.goto(url)
+                mp = mobile.new_page(); mp.on('pageerror', lambda e: errors.append(str(e))); mp.goto(url + "/?play=expedition")
                 expect(mp.locator('#exp-launch')).to_be_visible(); mp.locator('#exp-launch').click()
                 expect(mp.locator('[data-action="send"]')).to_be_visible()
                 mp.locator('[data-action="send"]').tap()

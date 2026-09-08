@@ -246,11 +246,13 @@ CAMPAIGN = [
 # Separate families/frames prevent old quiz clears from certifying the new game.
 from app.expedition import make_campaign
 EXPEDITION = make_campaign(CONTENT)
-MISSION_INDEX = {item["mission"]["id"]: item for item in CAMPAIGN + EXPEDITION}
+from app.rescue import build_campaign
+RESCUE = build_campaign(CONTENT)
+MISSION_INDEX = {item["mission"]["id"]: item for item in CAMPAIGN + EXPEDITION + RESCUE}
 
 
-def campaign_catalog(expedition=False):
-    return [deepcopy(item["mission"] | {"title": item["title"], "family_id": item["family_id"]}) for item in (EXPEDITION if expedition else CAMPAIGN)]
+def campaign_catalog(expedition=False, rescue=False):
+    return [deepcopy(item["mission"] | {"title": item["title"], "family_id": item["family_id"]}) for item in (RESCUE if rescue else EXPEDITION if expedition else CAMPAIGN)]
 
 
 def campaign_overview():

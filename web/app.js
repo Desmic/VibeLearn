@@ -11,6 +11,8 @@ let dirty = false;
 let selectedMissionId = null;
 let campaignView = false;
 const LEGACY_VIEW = new URLSearchParams(location.search).has("legacy");
+const RESCUE_VIEW = !LEGACY_VIEW && !new URLSearchParams(location.search).has("world") && new URLSearchParams(location.search).get("play") !== "expedition";
+function rescueHandlers() {return {...expeditionHandlers(),hint:()=>send("hint")};}
 function expeditionHandlers() {
   return {
     start: id => send("start", {mode: "LEARN", mission_id: id}),
@@ -25,6 +27,7 @@ function draftKey() { return `learning-draft:${state.learner_id}:${attempt.id}`;
 function response() {
   const value = {prediction: $("#prediction").value, diagnosis: $("#diagnosis").value, aid_declaration: $("#aid-declaration").value};
   if (attempt?.snapshot?.expedition) value.game = Expedition.response();
+  if (attempt?.snapshot?.rescue) value.rescue = RescueGame.response();
   return value;
 }
 function setSaveState(text, stateName = "saved") {
@@ -38,6 +41,7 @@ function predictionParts(count) {
 }
 function fillResponse(value) {
   if (attempt?.snapshot?.expedition) Expedition.setResponse(value.game);
+  if (attempt?.snapshot?.rescue) RescueGame.setResponse(value.rescue);
   $("#prediction").value = value.prediction || "";
   $("#diagnosis").value = value.diagnosis || "";
   $("#aid-declaration").value = value.aid_declaration || "unknown";
@@ -51,6 +55,7 @@ function retainDraft() {
   catch { showError("Recovery storage is unavailable. Keep this tab open and use the HUD Save control."); }
   setSaveState("Unsaved changes · retained on this device", "dirty");
   $("#dock-save").disabled = false;
+  if(attempt.snapshot.rescue && $("#rg-sync")) $("#rg-sync").textContent = "Unsaved edits";
 }
 async function api(path, body, timeoutMs = REQUEST_TIMEOUT_MS) {
   const controller = new AbortController();
@@ -140,6 +145,10 @@ function recommendedMission(missions) {
   return [...missions].reverse().find(item => item.status === "unlocked") || [...missions].reverse().find(item => item.status === "cleared") || missions[0];
 }
 function renderCampaign() {
+  if (RESCUE_VIEW && state?.course?.rescue && (campaignView || !attempt)) {
+    Expedition.hide();$("#entry").hidden=true;$("#episode").hidden=true;$("#recap").hidden=true;
+    RescueGame.map(state.course.rescue,attempt,rescueHandlers());return;
+  }
   if (!LEGACY_VIEW && state?.course?.expedition) {
     if (campaignView || !attempt) {
       $("#entry").hidden = true; $("#episode").hidden = true; $("#recap").hidden = true;
@@ -253,6 +262,7 @@ async function send(action, extra = {}) {
   const body = { command_id: crypto.randomUUID(), expected_revision: action === "start" ? 0 : attempt?.revision || 0, ...extra };
   if (action !== "start") { body.attempt_id = attempt.id; body.response = response(); retainDraft(); }
   Expedition.sync(true, attempt);
+  RescueGame.sync(true, attempt);
   const signature = JSON.stringify({action, ...body, command_id: undefined});
   if (pending?.signature === signature) body.command_id = pending.command_id;
   pending = {signature, command_id: body.command_id};
@@ -274,9 +284,9 @@ async function send(action, extra = {}) {
     campaignView = false;
     renderAttempt();
     if (newerResponse && attempt.status === "draft") { fillResponse(newerResponse); retainDraft(); }
-    if (action === "hint") { $("#hints").lastElementChild?.scrollIntoView({block: "nearest"}); $("#drawer-hint").hidden = false; }
+    if (action === "hint" && !attempt?.snapshot?.rescue) { $("#hints").lastElementChild?.scrollIntoView({block: "nearest"}); $("#drawer-hint").hidden = false; }
     if (action === "start") { $("#workspace").focus(); window.scrollTo({top: 0}); }
-    if (action === "submit") { const target = attempt?.snapshot?.expedition ? $("#expedition") : $("#recap"); target.focus(); target.scrollIntoView({block: "start"}); }
+    if (action === "submit") { const target = attempt?.snapshot?.rescue ? $("#rescue-game") : attempt?.snapshot?.expedition ? $("#expedition") : $("#recap"); target.focus(); target.scrollIntoView({block: "start"}); }
     setSaveState(dirty ? "New edits retained · save again when ready" : attempt.status === "submitted" ? "Mission result retained" : hosted ? "Progress saved to your account" : "Progress saved to local database", dirty ? "dirty" : "saved");
     return true;
   } catch (error) {
@@ -298,6 +308,7 @@ async function send(action, extra = {}) {
   }
 }
 function syncControls() {
+  RescueGame.sync(busy,attempt);
   Expedition.sync(busy, attempt);
   if (!attempt) {
     $("#dock-hint").disabled = true;
@@ -324,6 +335,11 @@ function syncControls() {
   renderPredictionBoard(snapshot);
 }
 function renderAttempt() {
+  if (!attempt?.snapshot?.rescue || campaignView) RescueGame.hide();
+  if (!campaignView && attempt?.snapshot?.rescue) {
+    Expedition.hide();$("#entry").hidden=true;$("#episode").hidden=true;$("#recap").hidden=true;
+    fillResponse(attempt.response);RescueGame.render(attempt,state.course.rescue,rescueHandlers());RescueGame.sync(busy,attempt);return;
+  }
   if (!attempt?.snapshot?.expedition) Expedition.hide();
   if (campaignView) { showCampaign(); return; }
   $("#entry").hidden = Boolean(attempt);
@@ -410,12 +426,13 @@ function renderAttempt() {
       const helpCount = checkpoint.assistance.filter(event => event.affects_independence && event.kind !== "prior_family_exposure").length;
       const exposed = checkpoint.assistance.some(event => event.kind === "prior_family_exposure");
       const condition = document.createElement("small"); condition.textContent = `${checkpoint.mode} · ${helpCount} help event${helpCount === 1 ? "" : "s"}${exposed ? " · previously exposed" : ""} · ${checkpoint.assessment.outcome}`;
-      section.append(heading, answer, diagnosis, condition); return section;
+      section.append(heading, answer,diagnosis,condition); return section;
     }));
     $("#evidence-json").textContent = JSON.stringify({evidence: attempt.evidence, assessment: result, checkpoints: attempt.checkpoints}, null, 2);
   }
 }
 function showSignIn() {
+  RescueGame.hide();
   Expedition.hide();
   campaignView = false;
   closeDrawers();
@@ -445,6 +462,7 @@ async function boot() {
         showError("Recovered unsaved progress from this device. Review it before saving; another tab may have a different version.");
         setSaveState("Recovered local progress", "dirty");
         $("#dock-save").disabled = false;
+        if(attempt.snapshot.rescue) {RescueGame.render(attempt,state.course.rescue,rescueHandlers());RescueGame.sync(busy,attempt);}
         Expedition.sync(busy, attempt);
       } else setSaveState(hosted ? "Resumed from your account" : "Resumed from local database", "saved");
     }
