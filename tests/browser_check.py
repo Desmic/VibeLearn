@@ -118,7 +118,7 @@ def main():
             page.locator("#repeat").click()
             expect(page.locator('[data-mission-id="retry-01-replay"]')).to_have_attribute("data-status", "cleared")
             expect(page.locator('[data-mission-id="retry-02-identity"]')).to_have_attribute("data-status", "unlocked")
-            expect(page.locator('[data-mission-id="retry-02-identity"]')).to_have_class(r".*selected.*")
+            expect(page.locator('[data-mission-id="retry-02-identity"]')).to_have_class("mission-node selected")
             expect(page.locator("#entry-title")).to_have_text("A new ticket, a second charge")
             expect(page.locator('[data-mission-id="retry-03-retention"]')).to_be_disabled()
             checks.append("easy clear gives immediate XP, keeps undeclared no-help state unknown, and focuses the newly unlocked next level")
@@ -137,7 +137,7 @@ def main():
             expect(page.locator("#hud-xp-value")).to_have_text("20")
             page.locator("#repeat").click()
             expect(page.locator('[data-mission-id="retry-03-retention"]')).to_have_attribute("data-status", "unlocked")
-            expect(page.locator('[data-mission-id="retry-03-retention"]')).to_have_class(r".*selected.*")
+            expect(page.locator('[data-mission-id="retry-03-retention"]')).to_have_class("mission-node selected")
             expect(page.locator("#entry-title")).to_have_text("The store forgot")
             expect(page.locator('[data-mission-id="retry-04-boss"]')).to_be_disabled()
             checks.append("Level 2 preserves declared no-help independence and automatically focuses Level 3")
@@ -186,7 +186,7 @@ def main():
             expect(page.locator("#evidence-condition")).to_have_text("assisted")
             page.locator("#repeat").click()
             expect(page.locator('[data-mission-id="retry-04-boss"]')).to_have_attribute("data-status", "unlocked")
-            expect(page.locator('[data-mission-id="retry-04-boss"]')).to_have_class(r".*selected.*")
+            expect(page.locator('[data-mission-id="retry-04-boss"]')).to_have_class("mission-node selected")
             expect(page.locator("#entry-title")).to_contain_text("Boss")
             checks.append("Level 3 combines prior rules, records actual source help as assisted, and focuses the boss")
 
@@ -234,7 +234,7 @@ def main():
             page.locator("#repeat").click()
             expect(page.locator("#campaign-clear-count")).to_have_text("4 / 4 cleared")
             expect(page.locator("#campaign-xp")).to_contain_text("40 XP")
-            expect(page.locator('[data-mission-id="retry-04-boss"]')).to_have_class(r".*selected.*")
+            expect(page.locator('[data-mission-id="retry-04-boss"]')).to_have_class("mission-node selected")
             checks.append("full chapter progression reaches four clears and leaves the highest completed node selected")
 
             # A separate browser remains a fresh learner and cannot mutate the first learner's state.
