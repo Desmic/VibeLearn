@@ -1,8 +1,10 @@
 # Learning OS — incremental implementation plan 1.3
 
-**6 September 2026 · Design handoff, not implemented software**
+**6 September 2026 · Design handoff, amended 8 September 2026**
 
-This is the authoritative build order for the next coding agent. It replaces milestone order and first-release definitions in the 1.0 architecture, 1.1 amendment, and 1.2 collaboration amendment. Their applicable domain invariants and acceptance requirements remain in force. This document does not authorize application implementation in the current design conversation.
+This is the authoritative build order for the next coding agent. It replaces milestone order and first-release definitions in the 1.0 architecture, 1.1 amendment, and 1.2 collaboration amendment. Their applicable domain invariants and acceptance requirements remain in force.
+
+**Active amendment:** future course-generation work must also satisfy `docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/GAME-UX-SYSTEM.md`, and `docs/GAME-UX-REVIEW.md`. Where this original plan says “generate a module,” it now means generate and validate a **playable, source-grounded learning game experience**: intuitive/narrative teaching model, campaign/difficulty progression, mission mechanics, HUD/tool exposure, assessment semantics, feedback/motion, accessibility and generated verification. The checksummed `learning-os-design-package-v1.3/` copy remains historical and is not rewritten in place.
 
 ## 1. Execution contract
 
@@ -28,9 +30,11 @@ Continue reversible engineering work without asking permission for every impleme
 
 Protect evidence identity, pinned assessment meaning, learner isolation, explicit assistance, immutable published content, provenance, source constraints, permission boundaries, and the difference between verification, user acceptance, and activation.
 
-Treat layout, wording, reward prominence, onboarding questions, initial route choices, heuristics, and component styling as revisable hypotheses. Use ordinary components and small typed configuration objects, not a universal page-builder language. Keep a modular monolith, one transactional database, and a simple artifact store. Reuse an existing sound stack rather than rewriting it to match example folder names.
+Treat layout, wording, reward prominence, onboarding questions, initial route choices, heuristics, story/theme choices and component styling as revisable hypotheses. Use ordinary components and small typed configuration objects, not a universal page-builder language. Keep a modular monolith, one transactional database, and a simple artifact store. Reuse an existing sound stack rather than rewriting it to match example folder names.
 
 One external model/provider and one generic permitted web-source path are enough initially. Provider-specific websites are source data, not branches in the learning engine. Leave richer integrations unsupported explicitly rather than constructing speculative adapters.
+
+Evidence semantics are not cosmetic. Keep `unknown`, `declared_independent`, current-attempt `assisted`, and `previously_exposed` distinct. Not declaring outside help is not evidence that help was used; prior family/result exposure is not the same event as using a hint/source in the current attempt.
 
 ## 3. The seven phases
 
@@ -58,9 +62,9 @@ Build the small hybrid UI immediately: journey entry, focused task workspace, so
 
 Suggested increments: (1) persist and resume an attempt in a real screen; (2) evaluate one valid criterion path and show evidence/review; (3) handle assistance, error/reload states, and the first reward without duplication. Each is integrated before the next.
 
-**Verification:** unit and real-database tests; duplicate submit; restart and reload; missing/invalid answer; pre-hint versus assisted checkpoints; source-panel aid restrictions; unknown versus failed assessment; no reward-to-mastery dependency; keyboard and narrow-layout browser interaction; preserved answer on failure. Verify the actual learner identity used by commands, not a global singleton.
+**Verification:** unit and real-database tests; duplicate submit; restart and reload; missing/invalid answer; pre-hint versus assisted checkpoints; source-panel aid restrictions; unknown versus failed assessment; no reward-to-mastery dependency; keyboard and narrow-layout browser interaction; preserved answer on failure. Verify the actual learner identity used by commands, not a global singleton. Verify that unknown outside-help declaration, observed current assistance and prior exposure are not collapsed into one label.
 
-**Human checkpoint:** try the first episode. Ask whether the task, feedback, workspace, and light game elements are useful and appealing. Repair the core interaction before building more screens.
+**Human checkpoint:** try the first episode. Ask whether the task, feedback, workspace and game experience are useful, clear and appealing. Repair the core interaction and teaching presentation before building more screens.
 
 **Do not build:** hundreds of lessons, a graph dashboard, universal activity types, a trained mastery model, or untrusted code execution.
 
@@ -80,33 +84,49 @@ Suggested increments: (1) replacement/deletion plus contradictory/regraded evide
 
 **Do not build:** all ontology migration types. Unsupported splits/merges return explicit diagnostic/review requirements.
 
-### Phase 3 — source-guided onboarding and one genuinely generated module
+### Phase 3 — source-guided onboarding and one genuinely generated playable module
 
-**Demonstration:** a learner describes a goal and suggested sources, or selects Surprise me; the system prepares one coherent, source-grounded module and starts a useful activity.
+**Demonstration:** a learner describes a goal and suggested sources, or selects Surprise me; the system prepares one coherent, source-grounded **learning-game chapter** and starts a useful playable activity.
 
 Add the small `SourceSelectionPolicy` value object specified in `SOURCE-STEERING.md` to the private course brief. Support named sites/URLs, preferred versus required/excluded sources, an explicit only-listed boundary, and role-specific choices. Show the interpreted constraints without requiring a form. A suggestion is not exclusive by default and does not become a permanent profile preference without an explicit save request.
 
-Use one model integration and one permitted web research path. Perform actual source inspection where allowed, record inaccessible/link-only sources, generate a scoped outline and first module, validate its tasks and grading basis, and publish immutable artifacts with honest readiness labels. Reuse the Phase 1 loop. Build bounded cancellation/retry and useful partial results into this first external workflow; do not add a distributed workflow platform.
+Use one model integration and one permitted web research path. Perform actual source inspection where allowed and record inaccessible/link-only sources. Then generate a scoped learning map **and an intuitive/narrative teaching model** before generating mission text. Where the domain permits it, frame the chapter around a compelling real-life, professional, scientific, historical, fantasy or simulated scenario whose actors/goals/consequences map directly to the learning mechanic.
 
-Suggested increments: (1) conversational brief and editable source constraints; (2) actual source discovery/inspection with an explainable source report; (3) generate, validate, publish, and experience one module. Do not widen curriculum before this path works with real tools.
+Before specialist jargon, the generated experience should make four things clear: who/what wants something, what success means, what went wrong/changed, and what action/decision the learner must make. Emit both plain-language objectives and formal competency/frame objectives. Aim for an intuitive presentation a motivated middle/high-school learner could follow when faithful to the domain; this simplifies presentation, **not the eventual rigor**. Bridge the intuitive model explicitly into the real terminology rather than leaving the learner inside a metaphor.
 
-**Verification:** actual provider and permitted source smoke/integration checks, separately from recorded fixtures; malformed structured output; timeout/rate-limit/cancel; missing required source; only-listed boundary; prompt injection; forbidden/private URL and redirect handling; no private profile in public queries; no source-snippet-as-full-reading claim; broken embed/link fallback; snapshot policy revision; cold-start Surprise me; provisional versus validated assessment status; goals/evidence unchanged by generation alone. Use `SS01`–`SS14` in `SOURCE-STEERING.md`.
+Generate a campaign/progression graph, not merely a lesson order. The default confidence curve is **teach -> easy success -> variation -> combine -> boss -> release -> new mechanic**. Early missions normally introduce one new rule/action at a time. Difficulty rises through actual reasoning complexity, transfer, uncertainty, trade-offs or reduced scaffolding—not by making prompts longer. Experienced learners may receive explicit bounded diagnostics/test-out routes; self-report alone cannot create mastery.
 
-**Human checkpoint:** inspect the first module and source-selection explanation. Does it reflect the requested goal, depth, and source guidance? Record actual revisions/acceptance. Automated checks alone do not establish course fit or correctness.
+Generate mission mechanics that embody the thinking where feasible: choosing, arranging, simulating, comparing, manipulating, debugging, constructing, tracing, classifying, sequencing or making trade-offs. Written responses are appropriate when explanation/design is itself the capability, not as the universal generated UI.
 
-**Exit:** first useful personalized learning release for local trials, not full collaborative product generation. A real browser and real grounded-generation path are required for this claim. Mocks-only delivery is a narrower architecture demo.
+Generate the HUD/tool exposure schedule and progression focus. The HUD should expose the plain immediate objective, level/chapter progress, game progression and persistence state. Hints/Intel/play-style/advanced vocabulary should be progressively introduced. After a successful clear, the intended newly unlocked/recommended mission should become the predictable default focus; after failure, the current mission should normally stay selected for retry unless an explicit branch says otherwise.
+
+Generate a causal feedback plan. Simple animation/story beats should explain state changes and cause/effect—e.g. actor -> action -> lost message -> retry -> consequence—rather than merely decorate the page. The same meaning must remain available under reduced motion. Generate sound/haptic intent only as optional reinforcement where supported.
+
+Preserve learning/evidence semantics through the generated game layer. XP/rewards never establish mastery or unlock competency progression solely through participation. `unknown`, `declared_independent`, current-attempt `assisted`, and `previously_exposed` remain distinct. Asking for help is not failure; prior exposure is not falsely described as help used on the current attempt.
+
+Validate task/rubric/source meaning and publish immutable candidate artifacts with honest readiness labels. Reuse the Phase 1 persistence/evidence loop. Build bounded cancellation/retry and useful partial results into this first external workflow; do not add a distributed workflow platform.
+
+The generator **cannot self-certify**. Run the review stack in `docs/COURSE-GENERATION-GAME-SYSTEM.md`: structural/learning pass/fail, grounding/content pass/fail, accessibility/interaction pass/fail, and a separately executed game-UX/comprehension critic using `docs/GAME-UX-REVIEW.md`. Prefer a distinct critic agent/model configuration when the harness supports it; otherwise record a separately prompted frozen-rubric pass. The game-UX/comprehension score must be **>= 8.0/10** with no critical blocker. Use an initial bounded automatic repair budget of three candidate revisions; a still-failing candidate becomes `draft_needs_review` instead of weakening the rubric or looping forever.
+
+Suggested increments: (1) conversational brief and editable source constraints; (2) actual source discovery/inspection with an explainable source report; (3) generated intuitive/narrative model + campaign graph + mission contract; (4) render one playable mission with persistence/evidence; (5) execute generated fixtures, critic/revision loop and learner preview. Do not widen curriculum before this path works with real tools.
+
+**Verification:** actual provider and permitted source smoke/integration checks, separately from recorded fixtures; malformed structured output; timeout/rate-limit/cancel; missing required source; only-listed boundary; prompt injection; forbidden/private URL and redirect handling; no private profile in public queries; no source-snippet-as-full-reading claim; broken embed/link fallback; snapshot policy revision; cold-start Surprise me; provisional versus validated assessment status; goals/evidence unchanged by generation alone; plain objective/story-to-mechanic mapping; boss prerequisites taught before boss; server-enforced mission locks; wrong-answer XP does not unlock; correct clear focuses intended next mission; save/reload/process restart; assistance labels distinguish unknown/current help/prior exposure; narrow viewport/text enlargement/reduced motion; critic score >=8 with no blocker. Use `SS01`–`SS14` in `SOURCE-STEERING.md` for source steering plus the generated-course verification contract in `docs/COURSE-GENERATION-GAME-SYSTEM.md`.
+
+**Human checkpoint:** play the first generated chapter, not just inspect its outline. Does the learner understand the objective and scenario before the jargon? Is the story/intuitive model compelling and faithful? Does difficulty build confidence? Are interactions fun enough to keep going? Does the source selection/depth match the request? Record actual revisions/acceptance. Automated checks alone do not establish course fit, comprehension, factual correctness or fun.
+
+**Exit:** first useful personalized **playable learning-game** release for local trials, not merely model-generated lesson text. A real browser, real grounded-generation path, executed persistence/evidence path, passing validators, game-UX/comprehension critic >=8 and actual learner feedback are required for this claim. Mocks-only or text-only delivery is a narrower architecture demo.
 
 ### Phase 4 — collaborate on the experience, in two independently verified slices
 
 **4A: supported personal UI change.** Capture feedback with the actual manifest and selected component; create a small configuration candidate; run browser checks; let the user try and revise it; receive explicit acceptance; activate the same artifact; confirm after reload; demonstrate another learner is unchanged; support undo.
 
-**4B: source-guided course expansion.** Reuse Phase 3 authoring with a revised brief and source policy. Show coverage, source, and workload changes. Add one useful section and task, not arbitrary word count. Preserve active and historical assessments. Get feedback and activate a new experience revision. Source changes arriving during generation cannot silently approve an outdated candidate.
+**4B: source-guided course expansion.** Reuse Phase 3 authoring with a revised brief and source policy. Show coverage, source, workload, narrative/intuitive-model and progression changes. Add one useful section/chapter/mission, not arbitrary word count. Preserve active and historical assessments. Get feedback and activate a new experience revision. Source changes arriving during generation cannot silently approve an outdated candidate.
 
 Implement the minimum durable change/review/check/activation records from revision 1.2. Share them between these two paths rather than building separate UI and content approval frameworks. Verification, user response, and activation status remain distinct.
 
 **Verification:** resume interrupted change; reject/adjust/defer; duplicate accept; stale dependency; learner isolation; actual served-manifest match; broken change preserves last accepted experience; rollback preserves subsequent learning; real solution exposure during preview is retained; synthetic verifier attempts do not contaminate learner evidence or XP. Expand the permanent suite as each path appears; do not defer failures until both are finished.
 
-**Human checkpoint:** one real revision cycle for the UI and one for content. A scripted `synthetic_user_acceptance` tests state transitions only.
+**Human checkpoint:** one real revision cycle for the UI and one for content/game experience. A scripted `synthetic_user_acceptance` tests state transitions only.
 
 **Exit:** useful course and presentation co-creation, without claiming arbitrary feature generation.
 
@@ -126,7 +146,7 @@ Suggested increments: (1) reproduce pinned source/UI and test isolated candidate
 
 ### Phase 6 — pilot and consolidate, not a delayed testing phase
 
-Use the already working loop with a small number of consenting users in the chosen permitted deployment. Review task quality, frustration, voluntary return, cost, change usefulness, hint dependence, and delayed/transfer outcomes separately. Revise the highest-impact weakness rather than widening subjects automatically.
+Use the already working loop with a small number of consenting users in the chosen permitted deployment. Review task quality, comprehension, frustration, voluntary return, cost, change usefulness, hint dependence, progression pacing and delayed/transfer outcomes separately. Revise the highest-impact weakness rather than widening subjects automatically.
 
 Run clean-checkout/start, migration from previous pilot data, backup/restore, restart/cancellation, accepted-manifest checks, and critical end-to-end journeys again on the candidate release. Keep earlier regression gates active. First validate new contracts on realistic prior data before creating broad consumers.
 
@@ -140,11 +160,14 @@ Before any hosted or externally accessible multi-user trial, implement and verif
 |---|---|---|
 | Wrong repository/build/tool assumptions | Phase 0 | Startup/resume and integration changes |
 | Lost answers, duplicate submissions, hint misattribution | Phase 1 | Every learning-path increment |
+| Unknown/prior-exposure/current-help label confusion | Phase 1 | Every assessment/evidence/UI change |
 | UI usability, focus, narrow layouts, resume | Phase 1 | Every affected UI candidate |
 | Course-dependent history or review debt | Phase 2 | Persistence, authoring, planner, and course changes |
 | Cross-learner leakage | Phase 1 scoped command tests; full Phase 2 fixture matrix | Every scoped command/cache/artifact path |
 | Migration/export/restore regressions | Phase 2, then every schema change | Every persistence release |
 | Invented grounding, ignored source constraints | First source probe in Phase 0; full Phase 3 | Every authoring/source change |
+| Confusing jargon-first generation / decorative story | Phase 3 | Every generated/expanded course candidate |
+| Broken difficulty or unexpected next-mission focus | Phase 1 reference campaign; full Phase 3 generation | Every campaign/progression change |
 | Fake acceptance, stale candidate, wrong activation | Phase 4 | Every collaborative change |
 | Arbitrary code/privilege leakage, false verifier reports | Before the first Phase 5 execution | Every runner/capability release |
 | Hosted identity and private data exposure | Before any external access | Every hosted deployment |
@@ -177,7 +200,7 @@ Do not write “all phases complete” after scaffolding. Do not claim the schem
 
 ## 7. Scope and sources
 
-No application code, database, browser, provider integration, sandbox, or runtime tests were created or executed for revision 1.3. The phase descriptions are requirements. Existing design schemas must be extended in the phase that first consumes a new contract; do not attempt to encode all future records before Phase 1.
+The original 6 September revision was design-only. The active repository may now contain implemented Phase 1/pilot behavior and later amendments; `docs/STATE.md` is the current factual checkpoint. Phase descriptions remain requirements for capabilities not yet implemented. Existing design schemas should be extended in the phase that first consumes a new contract; do not attempt to encode all future records prematurely.
 
 [R1] OpenAI, Custom instructions with AGENTS.md. https://developers.openai.com/codex/agent-configuration/agents-md — consulted 6 September 2026.
 
