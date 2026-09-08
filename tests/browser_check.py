@@ -58,8 +58,10 @@ def main():
             page.goto(url)
             expect(page).to_have_title("vibeLearn · Reliable agents")
 
-            # Fresh player sees a true progression path: tutorial only, then locked future missions.
+            # Fresh player sees a concrete story, clear goal, and true progression path.
             expect(page.locator("#entry")).to_be_visible()
+            expect(page.locator(".campaign-story-copy")).to_contain_text("5 kg dumbbell")
+            expect(page.locator(".campaign-goal")).to_contain_text("one request from you never becomes two purchases or two charges")
             expect(page.locator(".mission-node")).to_have_count(4)
             expect(page.locator('[data-mission-id="retry-01-replay"]')).to_have_attribute("data-status", "unlocked")
             for mission in ("retry-02-identity", "retry-03-retention", "retry-04-boss"):
@@ -67,7 +69,7 @@ def main():
             expect(page.locator("#campaign-clear-count")).to_have_text("0 / 4 cleared")
             expect(page.locator("#campaign-xp")).to_contain_text("0 XP")
             page.screenshot(path=str(artifacts / "game-campaign.png"), full_page=True)
-            checks.append("fresh campaign starts with one easy unlocked mission and visible future path")
+            checks.append("fresh campaign begins with a concrete shopping story, plain goal, one easy mission and visible future path")
 
             # Server-side lock, not merely a disabled map node.
             forged = page.evaluate("""async () => {
@@ -77,10 +79,14 @@ def main():
             assert forged["status"] == 403 and forged["body"]["error"] == "MISSION_LOCKED"
             checks.append("locked future missions are enforced on the server")
 
-            # Level 1: one mechanic, one decision, no source or play-style complexity.
+            # Level 1: one mechanic, one decision, story causality, no advanced tool complexity.
             launch(page, "retry-01-replay")
             expect(page.locator("#hud-level")).to_have_text("LV 1")
             expect(page.locator("#hud-difficulty")).to_have_text("Tutorial")
+            expect(page.locator("#hud-mission-title")).to_contain_text("one charge")
+            expect(page.locator("#storyboard .story-beat")).to_have_count(5)
+            expect(page.locator("#storyboard")).to_contain_text("Buy one 5 kg dumbbell")
+            expect(page.locator("#storyboard")).to_contain_text("Receipt vanishes")
             expect(page.locator("#prediction-board .decision-row")).to_have_count(1)
             expect(page.locator("#diagnosis-wrap")).to_be_hidden()
             expect(page.locator("#dock-source")).to_be_hidden()
@@ -106,13 +112,16 @@ def main():
             page.get_by_role("button", name="Lock in answer", exact=True).click()
             expect(page.locator("#recap-kicker")).to_have_text("MISSION CLEAR")
             expect(page.locator("#recap-title")).to_have_text("1 of 1 outcomes correct")
+            expect(page.locator("#evidence-condition")).to_have_text("unknown")
             expect(page.locator("#reward-message")).to_contain_text("+10 XP")
             expect(page.locator("#hud-xp-value")).to_have_text("10")
             page.locator("#repeat").click()
             expect(page.locator('[data-mission-id="retry-01-replay"]')).to_have_attribute("data-status", "cleared")
             expect(page.locator('[data-mission-id="retry-02-identity"]')).to_have_attribute("data-status", "unlocked")
+            expect(page.locator('[data-mission-id="retry-02-identity"]')).to_have_class(r".*selected.*")
+            expect(page.locator("#entry-title")).to_have_text("A new ticket, a second charge")
             expect(page.locator('[data-mission-id="retry-03-retention"]')).to_be_disabled()
-            checks.append("easy clear gives immediate XP and unlocks only the next mission")
+            checks.append("easy clear gives immediate XP, keeps undeclared no-help state unknown, and focuses the newly unlocked next level")
 
             # Level 2: contrasting identity failure, still one decision and LEARN-only.
             launch(page, "retry-02-identity")
@@ -120,14 +129,18 @@ def main():
             expect(page.locator("#prediction-board .decision-row")).to_have_count(1)
             expect(page.locator("#dock-source")).to_be_hidden()
             expect(page.locator("#dock-mode")).to_be_disabled()
+            page.locator("#aid-declaration").select_option("none")
             select_outcome(page, "A", 2)
             page.get_by_role("button", name="Lock in answer", exact=True).click()
             expect(page.locator("#recap-kicker")).to_have_text("MISSION CLEAR")
+            expect(page.locator("#evidence-condition")).to_have_text("declared independent")
             expect(page.locator("#hud-xp-value")).to_have_text("20")
             page.locator("#repeat").click()
             expect(page.locator('[data-mission-id="retry-03-retention"]')).to_have_attribute("data-status", "unlocked")
+            expect(page.locator('[data-mission-id="retry-03-retention"]')).to_have_class(r".*selected.*")
+            expect(page.locator("#entry-title")).to_have_text("The store forgot")
             expect(page.locator('[data-mission-id="retry-04-boss"]')).to_be_disabled()
-            checks.append("Level 2 adds a variation without increasing interface complexity")
+            checks.append("Level 2 preserves declared no-help independence and automatically focuses Level 3")
 
             # Level 3: two decisions + first short explanation + optional assisted tools.
             launch(page, "retry-03-retention")
@@ -138,7 +151,7 @@ def main():
             expect(page.locator("#dock-mode")).to_be_enabled()
             select_outcome(page, "A", 1)
             select_outcome(page, "B", 2)
-            page.locator("#diagnosis").fill("The same intent key protects the retry only while its stored result is still retained.")
+            page.locator("#diagnosis").fill("The same purchase ticket protects the retry only while the store still remembers it.")
 
             # Intel is present in HUD but gated in LEARN; PAIR unlocks it and records assistance.
             page.locator("#dock-source").click()
@@ -165,14 +178,17 @@ def main():
             expect(page.locator("#hud-level")).to_have_text("LV 3")
             expect(page.get_by_role("button", name="A: 1 total charge", exact=True)).to_have_attribute("aria-pressed", "true")
             expect(page.get_by_role("button", name="B: 2 total charges", exact=True)).to_have_attribute("aria-pressed", "true")
-            expect(page.locator("#diagnosis")).to_have_value("The same intent key protects the retry only while its stored result is still retained.")
+            expect(page.locator("#diagnosis")).to_have_value("The same purchase ticket protects the retry only while the store still remembers it.")
             checks.append("HUD decisions and diagnosis survive actual process restart")
 
             page.get_by_role("button", name="Lock in answer", exact=True).click()
             expect(page.locator("#recap-kicker")).to_have_text("MISSION CLEAR")
+            expect(page.locator("#evidence-condition")).to_have_text("assisted")
             page.locator("#repeat").click()
             expect(page.locator('[data-mission-id="retry-04-boss"]')).to_have_attribute("data-status", "unlocked")
-            checks.append("Level 3 combines prior rules and unlocks the boss")
+            expect(page.locator('[data-mission-id="retry-04-boss"]')).to_have_class(r".*selected.*")
+            expect(page.locator("#entry-title")).to_contain_text("Boss")
+            checks.append("Level 3 combines prior rules, records actual source help as assisted, and focuses the boss")
 
             # Boss recombines all mechanics and requires the full architecture diagnosis.
             launch(page, "retry-04-boss", "LEARN")
@@ -181,7 +197,7 @@ def main():
             select_outcome(page, "A", 2)
             select_outcome(page, "B", 1)
             select_outcome(page, "C", 2)
-            page.locator("#diagnosis").fill("Persist a business-intent key across retries, bind it to the payload, and reconcile uncertain late calls after the retention contract expires.")
+            page.locator("#diagnosis").fill("Persist one purchase-intent ID across retries, bind it to the item and quantity, and reconcile uncertain late retries after the store forgets the old ID.")
 
             # Keyboard, narrow mobile, 200% text, and reduced motion all remain viable.
             page.locator("#diagnosis").focus()
@@ -194,7 +210,7 @@ def main():
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
             page.evaluate("document.documentElement.style.fontSize=''")
             page.set_viewport_size({"width": 1440, "height": 1000})
-            checks.append("HUD game shell survives keyboard, 390px viewport and 200% text")
+            checks.append("HUD story/game shell survives keyboard, 390px viewport and 200% text")
 
             # Drop the submit acknowledgement after a real commit, then retry the same command.
             def lose_ack(route):
@@ -203,7 +219,7 @@ def main():
             page.route("**/api/commands/submit", lose_ack, times=1)
             page.get_by_role("button", name="Lock in answer", exact=True).click()
             expect(page.locator("#save-status")).to_have_text("Not saved · answer retained")
-            expect(page.locator("#diagnosis")).to_have_value("Persist a business-intent key across retries, bind it to the payload, and reconcile uncertain late calls after the retention contract expires.")
+            expect(page.locator("#diagnosis")).to_have_value("Persist one purchase-intent ID across retries, bind it to the item and quantity, and reconcile uncertain late retries after the store forgets the old ID.")
             page.get_by_role("button", name="Lock in answer", exact=True).click()
             expect(page.locator("#recap-title")).to_have_text("3 of 3 outcomes correct")
             expect(page.locator("#recap-kicker")).to_have_text("MISSION CLEAR")
@@ -218,7 +234,8 @@ def main():
             page.locator("#repeat").click()
             expect(page.locator("#campaign-clear-count")).to_have_text("4 / 4 cleared")
             expect(page.locator("#campaign-xp")).to_contain_text("40 XP")
-            checks.append("full chapter progression reaches four clears with visible macro progress")
+            expect(page.locator('[data-mission-id="retry-04-boss"]')).to_have_class(r".*selected.*")
+            checks.append("full chapter progression reaches four clears and leaves the highest completed node selected")
 
             # A separate browser remains a fresh learner and cannot mutate the first learner's state.
             first_state = page.evaluate("async () => await (await fetch('/api/state')).json()")
@@ -249,7 +266,7 @@ def main():
 
             assert page_errors == [], page_errors
             report = {
-                "phase": "game-hud-campaign-v1",
+                "phase": "game-story-campaign-v2",
                 "browser": browser.version,
                 "checks": checks,
                 "result": "passed",
