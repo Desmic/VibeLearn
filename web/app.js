@@ -31,11 +31,13 @@ function fillResponse(value) {
   if (attempt) renderPredictionBoard(attempt.snapshot);
 }
 function retainDraft() {
-  dirty = true; editVersion += 1;
+  dirty = true;
+  editVersion += 1;
   if (!attempt || attempt.status !== "draft") return;
   try { localStorage.setItem(draftKey(), JSON.stringify({ response: response(), revision: attempt.revision })); }
   catch { showError("Recovery storage is unavailable. Keep this tab open and use the HUD Save control."); }
   setSaveState("Unsaved changes · retained on this device", "dirty");
+  $("#dock-save").disabled = false;
 }
 async function api(path, body, timeoutMs = REQUEST_TIMEOUT_MS) {
   const controller = new AbortController();
@@ -57,10 +59,7 @@ async function api(path, body, timeoutMs = REQUEST_TIMEOUT_MS) {
 }
 function campaignMissions() { return state?.course?.campaign || []; }
 function activeMissionMeta() { return attempt?.snapshot?.mission || null; }
-function missionHintTotal(snapshot) {
-  const number = snapshot?.mission?.number;
-  return number === 1 || number === 2 ? 1 : number === 3 ? 2 : 3;
-}
+function missionHintTotal(snapshot) { return Number(snapshot?.mission?.hint_count ?? 3); }
 function xpValue() { return Number(attempt?.practice_xp || 0); }
 function playerRank(xp) { return Math.max(1, Math.floor(xp / 20) + 1); }
 function currentProgressPercent() {
@@ -95,7 +94,11 @@ function toggleDrawer(drawerId, button) {
   const drawer = document.getElementById(drawerId);
   const opening = drawer.hidden;
   closeDrawers();
-  if (opening) { drawer.hidden = false; button.setAttribute("aria-expanded", "true"); drawer.querySelector(".drawer-close")?.focus(); }
+  if (opening) {
+    drawer.hidden = false;
+    button.setAttribute("aria-expanded", "true");
+    drawer.querySelector(".drawer-close")?.focus();
+  }
 }
 function configureModes(meta, selected = "LEARN") {
   const available = meta?.available_modes || ["LEARN", "PAIR", "BUILD"];
@@ -128,7 +131,13 @@ function renderCampaign() {
   if (!selectedMissionId || !missions.some(item => item.id === selectedMissionId && item.status !== "locked")) selectedMissionId = preferred.id;
   $("#campaign-track").replaceChildren(...missions.map(mission => {
     const button = document.createElement("button");
-    button.type = "button"; button.className = "mission-node"; button.dataset.level = String(mission.number); button.dataset.status = mission.status; button.dataset.boss = String(Boolean(mission.boss)); button.dataset.missionId = mission.id; button.disabled = mission.status === "locked";
+    button.type = "button";
+    button.className = "mission-node";
+    button.dataset.level = String(mission.number);
+    button.dataset.status = mission.status;
+    button.dataset.boss = String(Boolean(mission.boss));
+    button.dataset.missionId = mission.id;
+    button.disabled = mission.status === "locked";
     const difficulty = document.createElement("span"); difficulty.className = "mission-difficulty"; difficulty.textContent = mission.difficulty;
     const title = document.createElement("h3"); title.textContent = mission.title;
     const objective = document.createElement("p"); objective.textContent = mission.objective;
@@ -144,10 +153,15 @@ function renderCampaign() {
   updateHud();
 }
 function showCampaign() {
-  campaignView = true; closeDrawers(); clearError();
-  $("#entry").hidden = false; $("#episode").hidden = true; $("#recap").hidden = true;
+  campaignView = true;
+  closeDrawers();
+  clearError();
+  $("#entry").hidden = false;
+  $("#episode").hidden = true;
+  $("#recap").hidden = true;
   renderCampaign();
-  $("#workspace").focus(); window.scrollTo({top:0, behavior:"smooth"});
+  $("#workspace").focus();
+  window.scrollTo({top: 0, behavior: "smooth"});
 }
 function showRun() { campaignView = false; renderAttempt(); }
 function renderPredictionBoard(snapshot) {
@@ -162,19 +176,30 @@ function renderPredictionBoard(snapshot) {
     head.append(title, keys);
     const options = document.createElement("div"); options.className = "decision-options";
     for (const value of [1, 2]) {
-      const button = document.createElement("button"); button.type = "button"; button.className = "decision-option"; button.textContent = `${value} charge${value === 1 ? "" : "s"}`; button.setAttribute("aria-pressed", String(values[index] === String(value))); button.setAttribute("aria-label", `${trace.label}: ${value} total charge${value === 1 ? "" : "s"}`);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "decision-option";
+      button.textContent = `${value} charge${value === 1 ? "" : "s"}`;
+      button.setAttribute("aria-pressed", String(values[index] === String(value)));
+      button.setAttribute("aria-label", `${trace.label}: ${value} total charge${value === 1 ? "" : "s"}`);
       button.disabled = attempt?.status === "submitted";
       button.addEventListener("click", () => {
-        const next = predictionParts(snapshot.trace.length); next[index] = String(value); $("#prediction").value = next.join(","); retainDraft(); renderPredictionBoard(snapshot);
+        const next = predictionParts(snapshot.trace.length);
+        next[index] = String(value);
+        $("#prediction").value = next.join(",");
+        retainDraft();
+        renderPredictionBoard(snapshot);
       });
       options.append(button);
     }
-    row.append(head, options); return row;
+    row.append(head, options);
+    return row;
   }));
 }
 async function send(action, extra = {}) {
   if (busy) return false;
-  busy = true; clearError();
+  busy = true;
+  clearError();
   document.querySelectorAll("button").forEach(button => { button.disabled = true; });
   const body = { command_id: crypto.randomUUID(), expected_revision: action === "start" ? 0 : attempt?.revision || 0, ...extra };
   if (action !== "start") { body.attempt_id = attempt.id; body.response = response(); retainDraft(); }
@@ -187,18 +212,21 @@ async function send(action, extra = {}) {
   try {
     const result = await api(`/api/commands/${action}`, body);
     const newerResponse = editVersion !== sentEditVersion && action !== "start" ? response() : null;
-    attempt = result; pending = null;
+    attempt = result;
+    pending = null;
     try { if (action !== "start") localStorage.removeItem(draftKey()); } catch { /* database save succeeded */ }
     dirty = false;
     if (action === "submit") {
       state = await api("/api/session", {});
       attempt = state.attempt;
+      closeDrawers();
     }
-    campaignView = false; renderAttempt();
+    campaignView = false;
+    renderAttempt();
     if (newerResponse && attempt.status === "draft") { fillResponse(newerResponse); retainDraft(); }
-    if (action === "hint") { $("#hints").lastElementChild?.scrollIntoView({block:"nearest"}); $("#drawer-hint").hidden = false; }
-    if (action === "start") { $("#workspace").focus(); window.scrollTo({top:0}); }
-    if (action === "submit") { $("#recap").focus(); $("#recap").scrollIntoView({block:"start"}); }
+    if (action === "hint") { $("#hints").lastElementChild?.scrollIntoView({block: "nearest"}); $("#drawer-hint").hidden = false; }
+    if (action === "start") { $("#workspace").focus(); window.scrollTo({top: 0}); }
+    if (action === "submit") { $("#recap").focus(); $("#recap").scrollIntoView({block: "start"}); }
     setSaveState(dirty ? "New edits retained · save again when ready" : attempt.status === "submitted" ? "Mission result retained" : hosted ? "Progress saved to your account" : "Progress saved to local database", dirty ? "dirty" : "saved");
     return true;
   } catch (error) {
@@ -211,12 +239,22 @@ async function send(action, extra = {}) {
     busy = false;
     document.querySelectorAll("button").forEach(button => { button.disabled = false; });
     for (const id of inputIds) $(`#${id}`).disabled = attempt?.status === "submitted";
-    syncControls(); renderCampaign();
+    syncControls();
+    renderCampaign();
   }
 }
 function syncControls() {
-  if (!attempt) { $("#dock-hint").disabled = true; $("#dock-source").disabled = true; $("#dock-mode").disabled = true; $("#dock-save").disabled = true; return; }
-  const snapshot = attempt.snapshot; const meta = snapshot.mission || {}; const hintTotal = missionHintTotal(snapshot); const used = attempt.hints.length;
+  if (!attempt) {
+    $("#dock-hint").disabled = true;
+    $("#dock-source").disabled = true;
+    $("#dock-mode").disabled = true;
+    $("#dock-save").disabled = true;
+    return;
+  }
+  const snapshot = attempt.snapshot;
+  const meta = snapshot.mission || {};
+  const hintTotal = missionHintTotal(snapshot);
+  const used = attempt.hints.length;
   $("#hint").hidden = attempt.status === "submitted" || used >= hintTotal;
   $("#hint-limit").hidden = used < hintTotal;
   $("#hint").textContent = used < hintTotal ? `Reveal hint ${used + 1} / ${hintTotal}` : "All hints revealed";
@@ -232,16 +270,21 @@ function syncControls() {
 }
 function renderAttempt() {
   if (campaignView) { showCampaign(); return; }
-  $("#entry").hidden = Boolean(attempt); $("#episode").hidden = !attempt || attempt.status === "submitted"; $("#recap").hidden = !attempt || attempt.status !== "submitted";
+  $("#entry").hidden = Boolean(attempt);
+  $("#episode").hidden = !attempt || attempt.status === "submitted";
+  $("#recap").hidden = !attempt || attempt.status !== "submitted";
   if (!attempt) { renderCampaign(); updateHud(); syncControls(); return; }
-  const snapshot = attempt.snapshot; const meta = snapshot.mission || {};
+  const snapshot = attempt.snapshot;
+  const meta = snapshot.mission || {};
   for (const key of ["intro", "assumptions", "prompt"]) $(`#${key}`).textContent = snapshot[key];
   $("#scene-title").textContent = snapshot.title;
   $("#objective-text").textContent = meta.objective || "Predict the outcome and explain the retry contract.";
   $("#trace-caption").textContent = `${snapshot.trace.length} pinned run${snapshot.trace.length === 1 ? "" : "s"} · deterministic retry model`;
   $("#traces").replaceChildren(...snapshot.trace.map(trace => {
     const tr = document.createElement("tr");
-    for (const text of [`${trace.label} · ${trace.name}`, `${trace.first} → ${trace.retry}`, trace.elapsed_seconds < 3600 ? `${trace.elapsed_seconds} seconds` : `${Math.round(trace.elapsed_seconds / 3600)} hours`]) { const td = document.createElement("td"); td.textContent = text; tr.append(td); }
+    for (const text of [`${trace.label} · ${trace.name}`, `${trace.first} → ${trace.retry}`, trace.elapsed_seconds < 3600 ? `${trace.elapsed_seconds} seconds` : `${Math.round(trace.elapsed_seconds / 3600)} hours`]) {
+      const td = document.createElement("td"); td.textContent = text; tr.append(td);
+    }
     return tr;
   }));
   $("#mode-label").textContent = attempt.mode;
@@ -254,30 +297,46 @@ function renderAttempt() {
   const sourceEnabled = meta.source_enabled ?? true;
   $("#source-gate").textContent = !sourceEnabled ? "Intel sources unlock in later levels." : attempt.source ? "Intel revealed. This exposure stays recorded with the run." : attempt.source_allowed ? "Reveal the source when you want more context; doing so records assistance." : "Intel unlocks after this clear in LEARN, or earlier in an assisted play style.";
   $("#source-panel").hidden = !attempt.source;
-  if (attempt.source) { $("#source-summary").textContent = attempt.source.summary; $("#source-link").href = attempt.source.url; $("#source-access").textContent = "External reading opens in a new tab; reading outside the game is not observed."; }
+  if (attempt.source) {
+    $("#source-summary").textContent = attempt.source.summary;
+    $("#source-link").href = attempt.source.url;
+    $("#source-access").textContent = "External reading opens in a new tab; reading outside the game is not observed.";
+  }
   $("#diagnosis-wrap").hidden = meta.requires_diagnosis === false;
   $("#reflection-title").textContent = meta.requires_diagnosis === false ? "Rule unlocked" : "Your reasoning stays yours";
   $("#reflection-copy").textContent = meta.number === 1 ? "A retained matching key replays the stored result instead of charging again." : meta.number === 2 ? "A new worker key looks like a new intent, so the service charges again." : meta.number === 3 ? "Stable identity only helps while the deduplication record is retained." : "Reliable retry contracts need stable business intent, payload binding, an explicit retention window, and a plan for late uncertainty.";
-  updateHud(snapshot); syncControls();
+  updateHud(snapshot);
+  syncControls();
   const submitted = attempt.status === "submitted";
-  $("#diagnosis").disabled = submitted; $("#aid-declaration").disabled = submitted;
-  $("#save").hidden = submitted; $("#submit").hidden = submitted;
+  $("#diagnosis").disabled = submitted;
+  $("#aid-declaration").disabled = submitted;
+  $("#save").hidden = submitted;
+  $("#submit").hidden = submitted;
   if (submitted) {
     const result = attempt.assessment;
+    const cleared = result.outcome === "correct";
     setSaveState("Mission result retained", "saved");
+    $("#recap-kicker").textContent = cleared ? "MISSION CLEAR" : "MISSION RETRY";
     $("#recap-title").textContent = `${result.correct_count} of ${result.total_count || snapshot.trace.length} outcomes correct`;
     $("#evidence-condition").textContent = result.independence.replaceAll("_", " ");
     $("#recap-scope").textContent = result.scope;
     $("#feedback-rows").replaceChildren(...result.rows.map(row => {
       const div = document.createElement("div"); div.className = "feedback-row";
       const heading = document.createElement("strong"); heading.textContent = `${row.run} · ${row.correct ? "CLEAR" : "RETRY"} · ${row.expected} total charge${row.expected === 1 ? "" : "s"}`;
-      const description = document.createElement("p"); description.textContent = `You chose ${row.actual}. ${row.reason}`; div.append(heading, description); return div;
+      const description = document.createElement("p"); description.textContent = `You chose ${row.actual}. ${row.reason}`;
+      div.append(heading, description); return div;
     }));
-    $("#reasoning-status").textContent = meta.requires_diagnosis === false ? "This tutorial clear checks only the pinned outcome choice." : result.reasoning.message;
+    $("#reasoning-status").textContent = meta.requires_diagnosis === false ? "This early level checks only the pinned outcome choice." : result.reasoning.message;
     $("#review-target").textContent = attempt.review.frame.name;
-    $("#review-due").textContent = `Recall quest after ${new Date(attempt.review.due_at).toLocaleString([], {dateStyle:"medium", timeStyle:"short"})}`;
+    $("#review-due").textContent = `Recall quest after ${new Date(attempt.review.due_at).toLocaleString([], {dateStyle: "medium", timeStyle: "short"})}`;
     $("#evidence-meta").textContent = `Partial practice · mastery provisional · ${snapshot.validation.basis}`;
-    $("#reward-message").textContent = attempt.reward ? `+${attempt.reward} XP · Level ${meta.number || "prototype"} clear` : "Replay clear · no duplicate XP";
+    if (cleared) {
+      $("#reward-message").textContent = attempt.reward ? `+${attempt.reward} XP · Level ${meta.number || "prototype"} clear` : "Replay clear · no duplicate XP";
+      $("#repeat").textContent = "Continue campaign →";
+    } else {
+      $("#reward-message").textContent = attempt.reward ? `+${attempt.reward} practice XP · attempt recorded · level not cleared` : "Attempt recorded · level not cleared";
+      $("#repeat").textContent = "Retry mission →";
+    }
     $("#checkpoint-list").replaceChildren(...attempt.checkpoints.map(checkpoint => {
       const section = document.createElement("section"); section.className = "checkpoint";
       const heading = document.createElement("h3"); heading.textContent = checkpoint.kind.replaceAll("_", " ");
@@ -290,30 +349,41 @@ function renderAttempt() {
   }
 }
 function showSignIn() {
-  campaignView = false; closeDrawers();
-  $("#sign-in").hidden = false; $("#entry").hidden = true; $("#episode").hidden = true; $("#recap").hidden = true; $("#sign-out").hidden = true;
+  campaignView = false;
+  closeDrawers();
+  $("#sign-in").hidden = false;
+  $("#entry").hidden = true;
+  $("#episode").hidden = true;
+  $("#recap").hidden = true;
+  $("#sign-out").hidden = true;
 }
 async function boot() {
   try {
     const config = await api("/api/config"); hosted = config.hosted;
     state = await api("/api/session", {}); attempt = state.attempt;
-    $("#sign-in").hidden = true; $("#sign-out").hidden = !hosted;
-    // Historical prototype clears should lead into the new campaign instead of trapping
-    // returning learners on an old debrief screen.
+    $("#sign-in").hidden = true;
+    $("#sign-out").hidden = !hosted;
     campaignView = !attempt || (attempt.status === "submitted" && !attempt.snapshot.mission);
-    renderCampaign(); renderAttempt();
+    renderCampaign();
+    renderAttempt();
     if (attempt?.status === "draft") {
       let draft = null;
-      try { draft = JSON.parse(localStorage.getItem(draftKey()) || "null"); } catch { showError("Recovery storage is unavailable. Your database progress is still loaded."); }
+      try { draft = JSON.parse(localStorage.getItem(draftKey()) || "null"); }
+      catch { showError("Recovery storage is unavailable. Your database progress is still loaded."); }
       if (draft && Object.keys(attempt.response).some(key => draft.response[key] !== attempt.response[key])) {
-        fillResponse(draft.response); dirty = true; showError("Recovered unsaved progress from this device. Review it before saving; another tab may have a different version."); setSaveState("Recovered local progress", "dirty");
+        fillResponse(draft.response);
+        dirty = true;
+        showError("Recovered unsaved progress from this device. Review it before saving; another tab may have a different version.");
+        setSaveState("Recovered local progress", "dirty");
+        $("#dock-save").disabled = false;
       } else setSaveState(hosted ? "Resumed from your account" : "Resumed from local database", "saved");
     }
     try { await api("/api/health", undefined, 12000); } catch { /* health is diagnostic only */ }
     return true;
   } catch (error) {
     if (hosted && error.status === 401) { showSignIn(); return false; }
-    showError(`Could not open the campaign: ${error.message}. Reload to retry.`); return false;
+    showError(`Could not open the campaign: ${error.message}. Reload to retry.`);
+    return false;
   }
 }
 
@@ -337,17 +407,85 @@ for (const id of ["diagnosis", "aid-declaration"]) $(`#${id}`).addEventListener(
 window.addEventListener("beforeunload", event => { if (busy) { event.preventDefault(); event.returnValue = ""; } });
 
 if (document.modelContext?.registerTool) {
-  const lifecycle = new AbortController(); window.addEventListener("pagehide", () => lifecycle.abort(), {once:true});
-  try { Promise.resolve(document.modelContext.registerTool({name:"save_current_learning_draft",title:"Save current mission progress",description:"Save the answer currently visible in the active mission. Does not submit, grade or reveal help.",inputSchema:{type:"object",properties:{},additionalProperties:false},annotations:{readOnlyHint:false},async execute(input){if(!input||typeof input!=="object"||Array.isArray(input)||Object.keys(input).length||!attempt||attempt.status!=="draft"||busy)throw new Error("An active idle mission and empty input object are required.");if(!await send("save"))throw new Error("Progress save failed. Visible answer retained.");return{attempt_id:attempt.id,revision:attempt.revision,status:"saved"};}},{signal:lifecycle.signal})).catch(()=>{}); } catch { /* optional */ }
+  const lifecycle = new AbortController();
+  window.addEventListener("pagehide", () => lifecycle.abort(), {once: true});
+  try {
+    Promise.resolve(document.modelContext.registerTool({
+      name: "save_current_learning_draft",
+      title: "Save current mission progress",
+      description: "Save the answer currently visible in the active mission. Does not submit, grade or reveal help.",
+      inputSchema: {type: "object", properties: {}, additionalProperties: false},
+      annotations: {readOnlyHint: false},
+      async execute(input) {
+        if (!input || typeof input !== "object" || Array.isArray(input) || Object.keys(input).length || !attempt || attempt.status !== "draft" || busy) throw new Error("An active idle mission and empty input object are required.");
+        if (!await send("save")) throw new Error("Progress save failed. Visible answer retained.");
+        return {attempt_id: attempt.id, revision: attempt.revision, status: "saved"};
+      }
+    }, {signal: lifecycle.signal})).catch(() => {});
+  } catch { /* optional browser feature */ }
 }
-function setPasswordVisibility(button, visible) { const input = document.getElementById(button.dataset.passwordToggle); if (!input) return; input.type = visible ? "text" : "password"; button.textContent = visible ? "Hide password" : "Show password"; button.setAttribute("aria-pressed", String(visible)); }
-function hidePassword(inputId) { const button = document.querySelector(`[data-password-toggle="${inputId}"]`); if (button) setPasswordVisibility(button, false); }
-document.querySelectorAll("[data-password-toggle]").forEach(button => button.addEventListener("click", () => { const input = document.getElementById(button.dataset.passwordToggle); setPasswordVisibility(button, input?.type === "password"); }));
-$("#sign-in-form").addEventListener("submit", async event => { event.preventDefault(); const button = $('#sign-in-form button[type="submit"]'); button.disabled = true; clearError(); hidePassword("login-password"); try { await api("/api/auth/login", {email:$("#login-email").value,password:$("#login-password").value}); $("#login-password").value=""; await boot(); } catch(error) { if(!error.status && await boot()){clearError();$("#login-password").value="";return;} showError((error.message||"Sign-in failed. Please retry.")+(error.requestId?` Reference: ${error.requestId}`:"")); } finally { button.disabled=false; } });
-$("#sign-out").addEventListener("click", async () => { if(busy)return;if(dirty){showError("Save your mission progress before signing out.");return;}try{await api("/api/auth/logout",{});}catch(error){if(error.status!==401){showError(error.message);return;}}state=null;attempt=null;pending=null;selectedMissionId=null;$("#evidence-json").textContent="";$("#checkpoint-list").replaceChildren();clearError();showSignIn(); });
+function setPasswordVisibility(button, visible) {
+  const input = document.getElementById(button.dataset.passwordToggle);
+  if (!input) return;
+  input.type = visible ? "text" : "password";
+  button.textContent = visible ? "Hide password" : "Show password";
+  button.setAttribute("aria-pressed", String(visible));
+}
+function hidePassword(inputId) {
+  const button = document.querySelector(`[data-password-toggle="${inputId}"]`);
+  if (button) setPasswordVisibility(button, false);
+}
+document.querySelectorAll("[data-password-toggle]").forEach(button => button.addEventListener("click", () => {
+  const input = document.getElementById(button.dataset.passwordToggle);
+  setPasswordVisibility(button, input?.type === "password");
+}));
+$("#sign-in-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $('#sign-in-form button[type="submit"]');
+  button.disabled = true;
+  clearError();
+  hidePassword("login-password");
+  try {
+    await api("/api/auth/login", {email: $("#login-email").value, password: $("#login-password").value});
+    $("#login-password").value = "";
+    await boot();
+  } catch (error) {
+    if (!error.status && await boot()) { clearError(); $("#login-password").value = ""; return; }
+    showError((error.message || "Sign-in failed. Please retry.") + (error.requestId ? ` Reference: ${error.requestId}` : ""));
+  } finally { button.disabled = false; }
+});
+$("#sign-out").addEventListener("click", async () => {
+  if (busy) return;
+  if (dirty) { showError("Save your mission progress before signing out."); return; }
+  try { await api("/api/auth/logout", {}); }
+  catch (error) { if (error.status !== 401) { showError(error.message); return; } }
+  state = null; attempt = null; pending = null; selectedMissionId = null;
+  $("#evidence-json").textContent = "";
+  $("#checkpoint-list").replaceChildren();
+  clearError();
+  showSignIn();
+});
 const recoveryFragment = new URLSearchParams(location.hash.slice(1));
-let recovery = recoveryFragment.get("type") === "recovery" ? {access_token:recoveryFragment.get("access_token"),refresh_token:recoveryFragment.get("refresh_token")} : null;
-if(recoveryFragment.has("access_token")||recoveryFragment.has("error"))history.replaceState(null,"",location.pathname);recoveryFragment.delete("access_token");recoveryFragment.delete("refresh_token");
-$("#request-reset").addEventListener("click",async()=>{if(!$("#login-email").reportValidity())return;const button=$("#request-reset");button.disabled=true;try{const result=await api("/api/auth/request-reset",{email:$("#login-email").value});showError(result.message);}catch(error){showError(error.message+(error.requestId?` Reference: ${error.requestId}`:""));}finally{button.disabled=false;}});
-$("#reset-form").addEventListener("submit",async event=>{event.preventDefault();const button=$('#reset-form button[type="submit"]');button.disabled=true;hidePassword("new-password");try{if(!recovery?.access_token||!recovery?.refresh_token)throw new Error("Request a new reset link.");await api("/api/auth/reset-password",{...recovery,password:$("#new-password").value});recovery=null;$("#new-password").value="";$("#password-reset").hidden=true;await boot();showError("Password updated. Sign in with your new password.");}catch(error){$("#reset-status").textContent=error.message+(error.requestId?` Reference: ${error.requestId}`:"");}finally{button.disabled=false;}});
-if(recovery)$("#password-reset").hidden=false;else boot().then(()=>{if(recoveryFragment.has("error"))showError("This reset link has expired or is invalid. Request a new link.");});
+let recovery = recoveryFragment.get("type") === "recovery" ? {access_token: recoveryFragment.get("access_token"), refresh_token: recoveryFragment.get("refresh_token")} : null;
+if (recoveryFragment.has("access_token") || recoveryFragment.has("error")) history.replaceState(null, "", location.pathname);
+recoveryFragment.delete("access_token"); recoveryFragment.delete("refresh_token");
+$("#request-reset").addEventListener("click", async () => {
+  if (!$("#login-email").reportValidity()) return;
+  const button = $("#request-reset"); button.disabled = true;
+  try { const result = await api("/api/auth/request-reset", {email: $("#login-email").value}); showError(result.message); }
+  catch (error) { showError(error.message + (error.requestId ? ` Reference: ${error.requestId}` : "")); }
+  finally { button.disabled = false; }
+});
+$("#reset-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $('#reset-form button[type="submit"]'); button.disabled = true; hidePassword("new-password");
+  try {
+    if (!recovery?.access_token || !recovery?.refresh_token) throw new Error("Request a new reset link.");
+    await api("/api/auth/reset-password", {...recovery, password: $("#new-password").value});
+    recovery = null; $("#new-password").value = ""; $("#password-reset").hidden = true;
+    await boot(); showError("Password updated. Sign in with your new password.");
+  } catch (error) { $("#reset-status").textContent = error.message + (error.requestId ? ` Reference: ${error.requestId}` : ""); }
+  finally { button.disabled = false; }
+});
+if (recovery) $("#password-reset").hidden = false;
+else boot().then(() => { if (recoveryFragment.has("error")) showError("This reset link has expired or is invalid. Request a new link."); });
