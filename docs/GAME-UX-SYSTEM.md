@@ -8,6 +8,8 @@ VibeLearn should feel like a **learning game whose mechanics happen to teach ser
 
 The learning model stays rigorous underneath. Game progression, XP, animation, mission clears and unlocks are motivational/presentation systems; they must never silently become evidence or mastery claims.
 
+This is not only a UI rule for the current retry chapter. It is a **course-generation invariant**. Generated courses must satisfy the contract in `docs/COURSE-GENERATION-GAME-SYSTEM.md`; the retry campaign is the first reference implementation, not a one-off skin.
+
 ## Research basis
 
 The current direction is grounded in game-UX references rather than SaaS UI references:
@@ -72,11 +74,15 @@ Persistent bottom tool dock:
 
 Tools open compact HUD drawers. They do not occupy a permanent right-hand website rail.
 
+Generated courses may rename or theme these surfaces, but important player state must remain glanceable and secondary detail should stay contextual rather than becoming permanent website chrome.
+
 ### 2. Playfield is the centre
 
 The central screen is where the player reads the incident, observes the trace and makes decisions.
 
 Core predictions are direct game choices (`1 charge` / `2 charges`) rather than comma-separated form entry. Written explanations only appear when the mission is meant to exercise explanation/design.
+
+For generated courses, prefer interactions that embody the target thinking: choose, arrange, simulate, compare, manipulate, debug, construct, trace, classify, sequence or make trade-offs. Do not default every generated competency to a textarea merely because forms are easy to render.
 
 ### 3. Campaign map is macro progression
 
@@ -92,6 +98,8 @@ The first chapter is **Reliable Agents — Retry Control**.
 Unlocks are sequential and enforced server-side. A player cannot start a locked mission simply by forging a client request.
 
 The historical Phase-1 three-trace episode remains immutable as old evidence. The campaign uses new activity/family IDs.
+
+A generated chapter does not have to contain exactly four nodes, but it must express a deliberate confidence/difficulty curve, explicit unlock meaning, and a combine/boss or equivalent transfer checkpoint when appropriate.
 
 ### 4. Micro progression inside a mission
 
@@ -109,6 +117,8 @@ Feedback hierarchy:
 8. later recall quest.
 
 Each meaningful action should receive perceptible visual feedback. Motion should communicate causality/state change, not merely decorate the screen.
+
+Generated courses must also plan **interface progression**. Early levels should not expose the entire assistance/tool surface. New controls appear when their learning purpose becomes relevant; the course specification records when and why they unlock.
 
 ### 5. Game progression vs learning evidence
 
@@ -131,6 +141,8 @@ Keep these systems separate:
 
 XP never changes mastery, evidence strength, review scheduling or a skip decision.
 
+A generated course must not use participation XP as the success signal for competency progression. A wrong answer may receive bounded practice recognition while the learning gate remains locked.
+
 ## Difficulty / confidence curve
 
 The player should repeatedly cycle through:
@@ -150,6 +162,8 @@ For later chapters, do not simply make prompts longer. Increase difficulty throu
 
 A harder mission should feel like increased mastery demand, not increased reading burden.
 
+For experienced learners, generated campaigns may offer a diagnostic/test-out path. This may change routing/scaffolding, but self-report alone does not create mastery evidence and bypasses must remain explicit.
+
 ## Motion / game feel budget
 
 Use animation for:
@@ -164,6 +178,32 @@ Use animation for:
 - boss reveal.
 
 Do not animate precise click targets while they are being selected. Respect `prefers-reduced-motion`; later add an explicit motion setting if animation density increases.
+
+Generated course manifests should include motion/feedback intent for meaningful state changes. Optional sound/haptics may enrich supported platforms, but visible and accessible feedback remains required.
+
+## Course-generation inheritance
+
+The course generator must produce more than lesson text. It is responsible for a coherent package containing:
+
+- source-grounded learning targets and assessment bindings;
+- campaign/progression graph;
+- mission mechanics and interaction types;
+- HUD/tool exposure schedule;
+- hint/intel/assistance semantics;
+- reward/unlock semantics;
+- feedback/motion plan;
+- persistence/resume requirements;
+- accessibility requirements;
+- generated verification fixtures;
+- critic reports and readiness state.
+
+The complete contract is `docs/COURSE-GENERATION-GAME-SYSTEM.md`.
+
+The authoring/generation loop is:
+
+**brief → research → learning map → campaign design → mission design → validation → independent critic passes → preview → learner feedback → immutable release**.
+
+A generator cannot self-certify the experience merely because its schema validates.
 
 ## Next progression layers
 
@@ -180,6 +220,8 @@ Avoid streak pressure, currencies, shops, leaderboards or social competition unt
 
 ## Ship gate
 
-Any major game-UX pass must be reviewed against `docs/GAME-UX-REVIEW.md`.
+Any major game-UX pass **and every generated course candidate presented as playable/validated** must be reviewed against `docs/GAME-UX-REVIEW.md` or a versioned successor.
 
-**Do not ship/pass the design if the critic score is below 8.0 / 10.**
+**Do not ship/pass the design if the game-UX critic score is below 8.0 / 10.**
+
+This numeric game-UX gate does not replace factual, source-grounding, assessment-integrity or accessibility pass/fail gates. A beautiful 9/10 game with invalid learning content still fails release.
