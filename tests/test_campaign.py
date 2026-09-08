@@ -66,6 +66,7 @@ class CampaignTests(unittest.TestCase):
         retry = self.start("retry-01-replay")
         correct = self.submit(retry, "1")
         self.assertEqual(correct["assessment"]["outcome"], "correct")
+        self.assertEqual(correct["assessment"]["independence"], "previously_exposed")
         self.assertEqual(correct["reward"], 0)  # Family reward was already consumed by the first attempt.
         progress = self.state()["course"]["campaign"]
         self.assertEqual([m["status"] for m in progress], ["cleared", "unlocked", "locked", "locked"])
