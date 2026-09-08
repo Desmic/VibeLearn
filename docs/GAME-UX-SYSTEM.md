@@ -259,3 +259,91 @@ Any major game-UX pass **and every generated course candidate presented as playa
 **Do not ship/pass the design if the game-UX/comprehension critic score is below 8.0 / 10.**
 
 This numeric game-UX gate does not replace factual, source-grounding, assessment-integrity or accessibility pass/fail gates. A beautiful 9/10 game with invalid learning content still fails release.
+
+## Expedition adventure refinement — 8 September 2026
+
+This amendment follows the user's 6.5/10 rejection for insufficient game feel.
+It governs the next Phase 1 refinement; the shopping campaign described above
+remains the implemented baseline. No new implementation or acceptance is claimed.
+
+### Research and useful principles
+
+- **Expedition 33:** Sandfall describes early reactive-combat prototypes, careful
+  feedback timing, polished battle presentation, and lighter character moments
+  between serious scenes. Apply responsive, consequential decisions, distinctive
+  characters and an emotional rhythm. Reflex challenges are appropriate only
+  when they exercise the target skill.
+  [Developer interview](https://www.unrealengine.com/developer-interviews/inside-the-development-journey-of-clair-obscur-expedition-33)
+- **The Witcher 3:** quest designer Patrick Mills describes complete small quest
+  arcs, character motivations, and compelling dialogue as gameplay. Give each
+  mission someone worth helping, a complication, a decision and a visible
+  resolution. Conversations earn space through clues, relationships or decisions.
+  [Developer interview](https://www.pcgamesn.com/the-witcher-3-wild-hunt/the-witcher-quest-design-cd-projekt-masterclass)
+- **Breath of the Wild:** Aonuma describes enjoyable direct control, visual
+  legibility and trusting players to guide themselves. Apply inspectable objects,
+  optional experiments, consistent rules and discoveries that create new options
+  within a small authored space.
+  [Aonuma interview](https://time.com/4369527/zelda-breath-wild-open-world/)
+- **Learning embedded in play:** Habgood and Ainsworth's Zombie Division studies
+  support integrating the subject into the core mechanic. In a small free-choice
+  study of 16 children, the integrated version received roughly seven times as
+  much play time. This supports a design hypothesis, not a promised result for
+  VibeLearn.
+  [Study](https://shura.shu.ac.uk/3556/1/Habgood_Ainsworth_final.pdf)
+
+These applications are design inferences. Copying a reference game's scale,
+mature themes or surface appearance is not required. The kid-interest ambition
+means approachable goals, curiosity and agency with room for serious depth;
+child appeal has not been established by actual child testing.
+
+### Proposed chapter — The Missing Delivery
+
+A small expedition is stranded beside a broken bridge. Its courier has ordered
+one replacement part, but the workshop's confirmation disappeared in a storm.
+Help the companion obtain exactly one part and get the expedition moving.
+
+Use one central scene for observing and acting. Let the player inspect tickets,
+resend an order, change identity, restart the courier and advance the workshop's
+memory clock. Make consequences visible beside affected objects. Introduce
+status inspection/reconciliation when uncertainty makes it useful. Unlock
+capabilities that expand possible strategies.
+
+The learning model must stay faithful: lost acknowledgement does not establish
+operation failure; preserved business intent, payload meaning and retention
+boundaries matter. Distinguish what the scene shows from what the courier knows.
+A reversible experiment is a game affordance, not a claim that real purchases can
+be undone. New scenarios and assessment meaning require new pinned revisions.
+
+The boss should execute a constructed policy against fresh disruptions and expose
+unsafe strategies such as indefinite retries. Free prose cannot silently receive
+a correctness claim from a counts-only grader. Preserve honest provisional and
+assistance/exposure semantics.
+
+The ending repairs the bridge, elicits a specific companion response and reveals
+a destination. Provide one working replay variation that changes the reasoning
+challenge. An unavailable future quest is not a replay payoff.
+
+### Game feel and implementation order
+
+1. Make one send -> lost confirmation -> inspect/retry interaction satisfying.
+2. Add consistent inspectable state and reversible experiments.
+3. Add the companion's motivation, specific reactions and story resolution.
+4. Extend the same system through restart, retention and a constructed boss policy.
+5. Complete the ending and one meaningful replay variation.
+6. Polish the visual language, purposeful animation, optional sound, small-screen
+   layout, keyboard/tap controls and reduced-motion behavior; verify persistence
+   and learning integrity.
+
+The emotional rhythm is curiosity -> experiment -> setback -> insight -> earned
+success -> relief -> a new possibility. Quiet discovery and engaging dialogue
+can carry this rhythm; constant action is not a requirement.
+
+Judge whether the core interaction remains interesting with XP hidden. Keep the
+problem and action together on small screens. Introduce vocabulary and tools when
+they help a decision. A cohesive scene, character, sound and feedback language
+must support the subject's causal model.
+
+The user and Codex are the current critics. Both must score >=8/10 with no critical
+blocker before internal acceptance. External testing waits for the user's readiness
+decision. See `GAME-UX-REVIEW.md` for the unchanged weighted rubric and additional
+observations. The current instruction is documentation only; stop after this update.
