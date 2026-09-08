@@ -146,6 +146,9 @@ footer{display:none}
 .campaign-hero{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin:6px 0 26px}
 .campaign-hero p{margin:0;color:#91a4bf}
 .campaign-hero h1{margin:5px 0 8px;color:var(--game-text);font-size:clamp(2.2rem,5vw,4.4rem);letter-spacing:-.065em}
+.campaign-story-copy{max-width:760px;font-size:1.02rem;line-height:1.6}
+.campaign-goal{max-width:760px;margin-top:10px!important;padding-left:12px;border-left:2px solid rgba(189,246,108,.45);color:#cbd9eb!important}
+.campaign-goal strong{color:var(--game-lime)}
 .campaign-rank{text-align:right}
 .campaign-rank span{display:block;color:#7e92b0;font-size:.65rem;letter-spacing:.10em;text-transform:uppercase}
 .campaign-rank strong{display:block;color:var(--game-lime);font-size:1.35rem}
@@ -216,6 +219,11 @@ footer{display:none}
 .objective-callout{border:1px solid rgba(189,246,108,.22)!important;background:rgba(189,246,108,.055)!important;border-radius:14px!important}
 .objective-callout span{color:#7fa74b!important}
 .objective-callout strong{color:#dffdb8!important}
+.storyboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:18px 0;padding:12px;border:1px solid var(--game-line);border-radius:16px;background:rgba(3,10,20,.48)}
+.story-beat{min-width:0;display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid rgba(174,203,255,.10);border-radius:13px;background:rgba(14,29,52,.66);animation:story-beat-in .34s ease-out backwards;animation-delay:calc(var(--story-index) * .18s)}
+.story-icon{flex:0 0 auto;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:rgba(101,217,255,.08);font-size:1.2rem;box-shadow:inset 0 1px rgba(255,255,255,.05)}
+.story-beat strong{display:block;font-size:.78rem;color:#e7f2ff!important}
+.story-beat small{display:block;margin-top:3px;color:#93a8c4;font-size:.69rem;line-height:1.45}
 .timeline{background:rgba(3,10,20,.48)!important;border-color:var(--game-line)!important}
 .timeline>div{animation:trace-step .28s ease-out backwards}
 .timeline>div:nth-of-type(1){animation-delay:.04s}
@@ -320,6 +328,7 @@ body:has(#sign-in:not([hidden])) main,body:has(#password-reset:not([hidden])) ma
 
 @keyframes drawer-in{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes mission-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes story-beat-in{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes clear-pulse{0%{box-shadow:0 0 0 0 rgba(189,246,108,.38)}55%{box-shadow:0 0 0 14px rgba(189,246,108,.16)}100%{box-shadow:0 0 0 24px rgba(189,246,108,0)}}
 @keyframes decision-lock{0%{transform:scale(.96)}70%{transform:scale(1.035)}100%{transform:scale(1)}}
 @keyframes trace-step{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
@@ -341,7 +350,7 @@ body:has(#sign-in:not([hidden])) main,body:has(#password-reset:not([hidden])) ma
   .game-dock{bottom:8px;height:var(--dock-h);width:calc(100vw - 16px);justify-content:space-around;border-radius:16px;padding:6px}.dock-button{min-width:0;flex:1;height:56px;padding:6px;font-size:.60rem}.dock-button .dock-icon{font-size:1.05rem}
   .campaign-hero{display:block}.campaign-rank{text-align:left;margin-top:13px}.campaign-track{grid-template-columns:1fr;gap:12px}.mission-node{min-height:140px;padding:18px 18px 18px 82px}.mission-node::before{left:17px;top:50%;transform:translateY(-50%)}.mission-node[data-boss="true"]::after{display:none}
   .mission-briefing{grid-template-columns:1fr;padding:18px}.campaign-hero h1{font-size:2.4rem}
-  .task-card,.response-card{padding:18px!important;border-radius:17px!important}.timeline{flex-direction:column!important}.decision-row-head{display:block}.decision-row-head small{display:block;margin-top:4px}.recap{padding:20px 16px!important}
+  .task-card,.response-card{padding:18px!important;border-radius:17px!important}.timeline{flex-direction:column!important}.storyboard{grid-template-columns:1fr}.decision-row-head{display:block}.decision-row-head small{display:block;margin-top:4px}.recap{padding:20px 16px!important}
   .hud-drawer{left:8px;right:8px;bottom:calc(var(--dock-h) + 20px);width:auto}
   .campaign-overlay{padding:calc(var(--hud-h) + 24px) 14px 20px}.campaign-overlay-close{right:12px;top:13px}
 }
