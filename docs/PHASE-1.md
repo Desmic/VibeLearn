@@ -52,7 +52,7 @@ Raw local records: `artifacts/build.log`, `artifacts/tests.log`,
 `artifacts/phase1b-recap.png`, `artifacts/phase1-workspace.png`,
 `artifacts/phase1-mobile.png`, `artifacts/phase1-recap.png`.
 
-## Hosted Phase 1 extension — 7 September 2026
+## Hosted Phase 1 extension — 7–8 September 2026
 
 The hosted pilot preserves the Phase 1 learning behavior while replacing local-only
 identity/storage boundaries with Supabase Auth and restricted PostgreSQL persistence.
@@ -72,66 +72,83 @@ Machine-verified hosted state:
 - Render Free is live at `https://vibelearn-4xws.onrender.com` and successfully
   serves the application, configuration, static assets, and `/api/health` while
   connected to PostgreSQL.
-- GitHub Actions `Verify hosted pilot` passes build, Python tests, disposable
+- GitHub Actions `Verify hosted pilot` covers build, Python tests, disposable
   PostgreSQL application tests, Chromium installation, and browser scenarios on the
   hosted branch.
-- A consolidated hosted acceptance-contract test now walks login → start → save →
+- A consolidated hosted acceptance-contract test walks login → start → save →
   recreated hosted app → resume → hint/mode/source → submit → evidence/review/XP →
   logout/replayed-cookie rejection in one continuous test. A separate two-authorized-
   learner test verifies cross-learner reads/writes are rejected.
 
 Observed live learner evidence:
 
-- Password recovery completed successfully and a real hosted password login returned
-  HTTP 200 on 7 September 2026.
-- PostgreSQL currently records one real hosted learner and one active hosted
-  application session.
+- Password recovery completed successfully and real hosted password logins returned
+  HTTP 200 on both 7 and 8 September 2026.
+- PostgreSQL records the real hosted learner/application session and retained learning
+  history.
 - Two real hosted attempts were started and submitted successfully; PostgreSQL records
   two submitted attempts, two evidence rows, one review need, and exactly one reward
   row worth 10 practice XP. The repeated attempt earned no second reward.
-- A real Render process replacement completed at approximately 14:11 UTC. The same
-  mobile browser loaded the new instance immediately afterward and `POST /api/session`
-  returned HTTP 200 with the retained learner state. This establishes live
-  application-session/state survival across that deploy.
+- A real Render process replacement completed at approximately 14:11 UTC on 7
+  September. The same mobile browser loaded the new instance immediately afterward
+  and `POST /api/session` returned HTTP 200 with retained learner state. This
+  establishes live application-session/state survival across that deploy.
+- On 8 September the learner used the real Sign out control and Render recorded
+  `POST /api/auth/logout` HTTP 200. The learner confirmed that the UI returned to the
+  signed-out state. Automated hosted coverage separately proves that replaying the
+  pre-logout application cookie pair is rejected.
+- Subsequent login requests on 8 September returned HTTP 200 server-side. A browser
+  screenshot nevertheless surfaced the raw client message `signal is aborted without
+  reason`. This is a client transport/timeout presentation bug, not invalid
+  credentials. The hosted branch now normalizes AbortSignal errors to a friendly retry
+  message, uses a larger request budget for free-tier wakeups, and checks whether the
+  authenticated session actually succeeded before reporting transport failure.
 
 Not yet claimed live:
 
-- an explicit Save draft → page reload → PostgreSQL resume before submission;
-- hosted logout/revocation acceptance from the real learner browser;
-- second-authorized-account isolation acceptance using a second real Supabase account;
-- complete human product feedback on challenge and feedback quality, beyond the
-  learner's positive acceptance of the current UI direction.
+- an explicit **Save progress → page reload → PostgreSQL resume** while a run is still
+  unsubmitted;
+- second-authorized-account isolation acceptance using a second real Supabase account.
 
-The authentication blocker described in earlier revisions is resolved. The remaining
-work is acceptance evidence, not an unresolved backend exception. Recovery tokens and
-credentials must not be copied into source, docs, logs, or issues.
+The learner has now supplied substantive human feedback rather than merely aesthetic
+approval: the challenge needs clearer presentation and more purposeful animation, the
+goal is to make learning as fun as possible, and VibeLearn should feel like a game
+rather than another website. That feedback is recorded as a Phase 1 outcome and has
+changed the adopted UI/UX direction in `docs/UI-UX-DIRECTION.md` to game-first premium
+learning. The current branch begins that response with mission framing, explicit goals,
+a mission HUD/progress bar, staged incident animation, `Save progress`, `Lock in
+answer`, power-up-style hints, and stronger completion/reward motion.
 
 ## Phase 1 completion gate
 
-Phase 1 machine verification is complete for both the original local slice and the
-hosted implementation. Current status of the real hosted journey:
+Phase 1 machine verification is complete for the original local slice and the hosted
+behavioral contracts. Current status of the real hosted journey:
 
 1. **Complete live:** password recovery and successful hosted sign-in.
 2. **Complete live:** start the existing Phase 1 episode.
-3. **Pending live:** save a real draft, reload, and verify the same draft resumes from
-   PostgreSQL. The equivalent hosted acceptance-contract test passes automatically.
+3. **Pending live:** start/play another unsubmitted run, use **Save progress**, reload,
+   and verify the same answers resume from PostgreSQL. The equivalent automated hosted
+   and real-browser persistence paths pass.
 4. **Complete live:** restart/redeploy Render without changing PostgreSQL and verify
    the same learner session/state resumes on the new process.
 5. **Complete live:** submit the episode and verify trace feedback persistence,
    evidence, future review need, and the bounded first-family practice XP reward.
    Two real submissions exist and only the first earned 10 XP.
-6. **Pending live:** sign out and verify protected state is no longer accessible with
-   the revoked local application session. Automated replayed-cookie coverage passes.
+6. **Complete live at the learner/UI boundary:** the learner signed out successfully
+   and Render recorded logout HTTP 200. Automated replayed-cookie coverage verifies
+   backend revocation; a separate live replay request was not captured before the
+   learner signed back in.
 7. **Pending live before broader multi-user use:** authorize a second real account and
    verify it cannot read or mutate the first learner's state. Automated two-authorized-
-   learner isolation and PostgreSQL RLS coverage pass.
-8. **Partially complete:** the learner has accepted the current refined UI direction.
-   Record actual feedback on challenge quality and learning feedback after the final
-   acceptance pass; do not substitute automated tests for this judgment.
+   learner isolation and PostgreSQL RLS coverage pass. The learner explicitly chose to
+   defer this until the current experience issues are resolved.
+8. **Complete as feedback collection:** real learner feedback is recorded. It is not a
+   positive acceptance claim: challenge clarity, animation and game feel need further
+   improvement, and the product direction has been revised in response.
 
-Only after the remaining live checks are closed should this hosted-pilot PR leave draft
-and the project consider the next product increment. The next increment should first
-respond to learner feedback on this same episode; Phase 2 remains deliberately gated.
+Only after the remaining live checks are closed should this hosted-pilot PR leave draft.
+Product refinement should respond to the learner feedback before treating the slice as
+an experience baseline; Phase 2 remains deliberately gated.
 
 ## Assessment, capability and product limits
 
@@ -190,13 +207,15 @@ data backups.
 
 ## Separate gates
 
-Machine verification: passed for the implemented Phase 1 local and hosted code paths,
-including the consolidated hosted acceptance-contract and two-authorized-learner
-isolation tests.
-Human product acceptance: UI direction accepted; final challenge/feedback-quality
-feedback awaits the remaining live acceptance pass.
+Machine verification: passed for the implemented Phase 1 local and hosted behavioral
+contracts, including the consolidated hosted acceptance-contract and two-authorized-
+learner isolation tests. The current game-first UI change must keep its real-browser CI
+gate green before deployment.
+Human product feedback: collected; it identifies challenge clarity, purposeful motion,
+fun and game feel as the next experience priorities rather than declaring the current
+experience complete.
 Activation: private hosted pilot is live; broader/public multi-user activation is not claimed.
 
-Single next product increment after acceptance: use the learner's feedback to refine
-this same episode's challenge, feedback, workspace or light practice recognition.
-Do not implement Phase 2 merely because infrastructure is live.
+Single next product increment after acceptance: continue responding to this learner
+feedback while expanding the learning system. Do not implement Phase 2 merely because
+infrastructure is live.
