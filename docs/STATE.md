@@ -93,9 +93,55 @@ motion.
 candidate scored **8.8/10**, above the required 8.0 threshold, with no critical blocker.
 The pass means it is ready for a new learner trial; it is not treated as final game UX.
 
+## Architectural decision — generated courses are game systems
+
+The learner explicitly required the lessons from the current redesign to become part of
+the product itself rather than remain hand-authored UI knowledge. That requirement is
+now formalized in `docs/COURSE-GENERATION-GAME-SYSTEM.md`.
+
+When Phase 3 course generation is opened, “course generation” means generating a
+coherent playable system, not only lesson prose/questions. A generated course candidate
+must include, as one versioned package:
+
+- source-grounded competency/frame coverage and assessment bindings;
+- a real campaign/difficulty curve with early confidence-building missions, variation,
+  combination/boss work and appropriate test-out paths for experienced learners;
+- mission interaction mechanics chosen to embody the learning operation rather than
+  defaulting everything to forms/textareas;
+- HUD and contextual-tool exposure rules, including progressive disclosure of Hint,
+  Intel/source, play styles and other assistance;
+- game reward/unlock semantics that stay separate from evidence/mastery;
+- state-driven feedback/motion intent plus reduced-motion/accessibility requirements;
+- persistence/resume and learner-isolation behavior;
+- generated test fixtures/invariants that run through the real application harness;
+- immutable critic/validator reports and release readiness.
+
+The authoring pipeline is now defined as:
+
+**brief -> research/source inspection -> learning map -> campaign design -> mission and
+assessment design -> validation -> separate critic passes -> preview -> real learner
+feedback -> immutable release**.
+
+A generated candidate cannot self-certify. Structural/learning, grounding/content and
+accessibility checks are pass/fail. The game-UX critic uses the frozen rubric in
+`docs/GAME-UX-REVIEW.md`; a playable/validated candidate requires **>= 8.0/10** and no
+critical blocker. Prefer a genuinely separate critic agent/model configuration when the
+harness supports it; otherwise use a separately prompted critic pass and record that
+limitation. Automatic repair is bounded (initial target: three revisions), after which
+a failing course stays `draft_needs_review` rather than lowering the bar or looping
+forever.
+
+The current Reliable Agents retry chapter is the first reference implementation of this
+contract. Future courses reuse the principles, not its exact four-node structure, dark
+visual theme, or binary interaction.
+
+The checksummed `learning-os-design-package-v1.3/` bundle remains historical and is not
+rewritten in place. Active implementation guidance is the root plan plus the amendments
+referenced by `AGENTS.md` and this checkpoint.
+
 ## Remaining acceptance
 
-After the reviewed HUD/campaign head is deployed, remaining product acceptance is:
+Remaining product acceptance for the current Phase 1/game-refinement track is:
 
 1. Play the new live campaign and judge whether it actually feels like a game rather
    than merely a themed web app. The previous build's learner feedback was explicitly
@@ -114,8 +160,9 @@ After the reviewed HUD/campaign head is deployed, remaining product acceptance i
 
 The campaign is a refinement/scaffolding of the same reliable-retry learning material,
 not implementation of the planned Phase 2 knowledge-map, scheduler, adaptive course
-generation, or broader learning-OS subsystems. Historical Phase 1 evidence remains
-valid and immutable.
+generation, or broader learning-OS subsystems. The course-generation contract above is
+**design/architecture now, implementation later** when its phase is explicitly opened.
+Historical Phase 1 evidence remains valid and immutable.
 
 ## Remaining cleanup before broader use
 
