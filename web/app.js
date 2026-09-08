@@ -73,7 +73,7 @@ async function api(path, body, timeoutMs = REQUEST_TIMEOUT_MS) {
 function campaignMissions() { return (LEGACY_VIEW || (!campaignView && attempt && !attempt.snapshot.expedition) ? state?.course?.campaign : state?.course?.expedition) || []; }
 function activeMissionMeta() { return attempt?.snapshot?.mission || null; }
 function missionHintTotal(snapshot) { return Number(snapshot?.mission?.hint_count ?? 3); }
-function xpValue() { return Number(attempt?.practice_xp || 0); }
+function xpValue() { return Number(attempt?.practice_xp || state?.attempt?.practice_xp || 0); }
 function playerRank(xp) { return Math.max(1, Math.floor(xp / 20) + 1); }
 function currentProgressPercent() {
   const missions = campaignMissions();
@@ -399,7 +399,7 @@ function renderAttempt() {
       $("#reward-message").textContent = attempt.reward ? `+${attempt.reward} XP · Level ${meta.number || "prototype"} clear` : "Replay clear · no duplicate XP";
       $("#repeat").textContent = "Continue campaign →";
     } else {
-      $("#reward-message").textContent = attempt.reward ? `+${attempt.reward} practice XP` : "Replay · no duplicate XP";
+      $("#reward-message").textContent = attempt.reward ? `+${attempt.reward} practice XP · attempt recorded · level not cleared` : "Attempt recorded · level not cleared";
       $("#repeat").textContent = "Retry mission →";
     }
     $("#checkpoint-list").replaceChildren(...attempt.checkpoints.map(checkpoint => {
@@ -429,6 +429,10 @@ async function boot() {
   try {
     const config = await api("/api/config"); hosted = config.hosted;
     state = await api("/api/session", {}); attempt = state.attempt;
+    if (attempt?.snapshot?.storm) {
+      if (attempt.status === "draft") { location.replace("/storm"); return true; }
+      attempt = null;
+    }
     $("#sign-in").hidden = true;
     $("#sign-out").hidden = !hosted;
     campaignView = !attempt || (attempt.status === "submitted" && (!LEGACY_VIEW || !attempt.snapshot.mission));
@@ -440,8 +444,8 @@ async function boot() {
       catch { showError("Recovery storage is unavailable. Your database progress is still loaded."); }
       if (draft && JSON.stringify(draft.response) !== JSON.stringify(attempt.response)) {
         fillResponse(draft.response);
-        if (attempt.snapshot.expedition) Expedition.render(attempt, expeditionHandlers());
         dirty = true;
+        if (attempt?.snapshot?.expedition) Expedition.render(attempt, expeditionHandlers());
         showError("Recovered unsaved progress from this device. Review it before saving; another tab may have a different version.");
         setSaveState("Recovered local progress", "dirty");
         $("#dock-save").disabled = false;
