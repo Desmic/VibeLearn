@@ -1,5 +1,6 @@
 """Real browser + real HTTP process + real temporary DB. Never uses learner data."""
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -55,7 +56,7 @@ def main():
             page = context.new_page()
             page_errors = []
             page.on("pageerror", lambda error: page_errors.append(str(error)))
-            page.goto(url)
+            page.goto(url + "/?legacy=1")
             expect(page).to_have_title("vibeLearn · Reliable agents")
 
             # Fresh player sees a concrete story, clear goal, and true progression path.
@@ -242,7 +243,7 @@ def main():
             first_state = page.evaluate("async () => await (await fetch('/api/state')).json()")
             other = browser.new_context(viewport={"width": 390, "height": 844})
             other_page = other.new_page()
-            other_page.goto(url)
+            other_page.goto(url + "/?legacy=1")
             expect(other_page.locator("#campaign-clear-count")).to_have_text("0 / 4 cleared")
             expect(other_page.locator('[data-mission-id="retry-02-identity"]')).to_be_disabled()
             other_state = other_page.evaluate("async () => await (await fetch('/api/state')).json()")
@@ -258,7 +259,7 @@ def main():
 
             reduced = browser.new_context(viewport={"width": 390, "height": 844}, reduced_motion="reduce")
             reduced_page = reduced.new_page()
-            reduced_page.goto(url)
+            reduced_page.goto(url + "/?legacy=1")
             assert reduced_page.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches")
             transition = reduced_page.locator(".mission-node").first.evaluate("node => getComputedStyle(node).transitionDuration")
             assert transition in ("0s", "0ms")

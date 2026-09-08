@@ -243,11 +243,16 @@ CAMPAIGN = [
     ),
 ]
 
-MISSION_INDEX = {item["mission"]["id"]: item for item in CAMPAIGN}
+# Separate families/frames prevent old quiz clears from certifying the new game.
+from app.expedition import make_campaign
+EXPEDITION = make_campaign(CONTENT)
+from app.storm import campaign as storm_campaign
+STORM = storm_campaign(CONTENT)
+MISSION_INDEX = {item["mission"]["id"]: item for item in CAMPAIGN + EXPEDITION + STORM}
 
 
-def campaign_catalog():
-    return [deepcopy(item["mission"] | {"title": item["title"], "family_id": item["family_id"]}) for item in CAMPAIGN]
+def campaign_catalog(expedition=False):
+    return [deepcopy(item["mission"] | {"title": item["title"], "family_id": item["family_id"]}) for item in (STORM if expedition == "storm" else EXPEDITION if expedition else CAMPAIGN)]
 
 
 def campaign_overview():
@@ -270,6 +275,9 @@ def freeze(mode, mission_id=None):
 def presented(snapshot):
     result = deepcopy(snapshot)
     result.pop("hints", None)
+    for incident in result.get("storm", {}).get("incidents", []):
+        incident.pop("answer", None)
+        incident.pop("why", None)
     result["source"].pop("url", None)
     result["source"].pop("summary", None)
     return result

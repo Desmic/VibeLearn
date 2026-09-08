@@ -10,11 +10,23 @@ let editVersion = 0;
 let dirty = false;
 let selectedMissionId = null;
 let campaignView = false;
+const LEGACY_VIEW = new URLSearchParams(location.search).has("legacy");
+function expeditionHandlers() {
+  return {
+    start: id => send("start", {mode: "LEARN", mission_id: id}),
+    resume: showRun, campaign: showCampaign, save: () => send("save"),
+    submit: () => send("submit"), edit: retainDraft, error: showError,
+  };
+}
 
 function showError(message) { $("#notice").textContent = message; $("#notice").hidden = false; }
 function clearError() { $("#notice").hidden = true; }
 function draftKey() { return `learning-draft:${state.learner_id}:${attempt.id}`; }
-function response() { return { prediction: $("#prediction").value, diagnosis: $("#diagnosis").value, aid_declaration: $("#aid-declaration").value }; }
+function response() {
+  const value = {prediction: $("#prediction").value, diagnosis: $("#diagnosis").value, aid_declaration: $("#aid-declaration").value};
+  if (attempt?.snapshot?.expedition) value.game = Expedition.response();
+  return value;
+}
 function setSaveState(text, stateName = "saved") {
   $("#save-status").textContent = text;
   $("#hud-save-value").textContent = stateName === "dirty" ? "Unsaved" : stateName === "error" ? "Retry" : "Synced";
@@ -25,6 +37,7 @@ function predictionParts(count) {
   return Array.from({length: count}, (_, index) => raw[index]?.trim() || "");
 }
 function fillResponse(value) {
+  if (attempt?.snapshot?.expedition) Expedition.setResponse(value.game);
   $("#prediction").value = value.prediction || "";
   $("#diagnosis").value = value.diagnosis || "";
   $("#aid-declaration").value = value.aid_declaration || "unknown";
@@ -57,10 +70,10 @@ async function api(path, body, timeoutMs = REQUEST_TIMEOUT_MS) {
     throw error;
   } finally { clearTimeout(timeout); }
 }
-function campaignMissions() { return state?.course?.campaign || []; }
+function campaignMissions() { return (LEGACY_VIEW || (!campaignView && attempt && !attempt.snapshot.expedition) ? state?.course?.campaign : state?.course?.expedition) || []; }
 function activeMissionMeta() { return attempt?.snapshot?.mission || null; }
 function missionHintTotal(snapshot) { return Number(snapshot?.mission?.hint_count ?? 3); }
-function xpValue() { return Number(attempt?.practice_xp || 0); }
+function xpValue() { return Number(attempt?.practice_xp || state?.attempt?.practice_xp || 0); }
 function playerRank(xp) { return Math.max(1, Math.floor(xp / 20) + 1); }
 function currentProgressPercent() {
   const missions = campaignMissions();
@@ -83,7 +96,7 @@ function updateHud(snapshot = attempt?.snapshot) {
   } else {
     $("#hud-level").textContent = "MAP";
     $("#hud-difficulty").textContent = "Campaign";
-    $("#hud-mission-title").textContent = "One dumbbell. One charge.";
+    $("#hud-mission-title").textContent = LEGACY_VIEW ? "One dumbbell. One charge." : "Help Pip reopen the valley.";
   }
 }
 function closeDrawers() {
@@ -127,6 +140,14 @@ function recommendedMission(missions) {
   return [...missions].reverse().find(item => item.status === "unlocked") || [...missions].reverse().find(item => item.status === "cleared") || missions[0];
 }
 function renderCampaign() {
+  if (!LEGACY_VIEW && state?.course?.expedition) {
+    if (campaignView || !attempt) {
+      $("#entry").hidden = true; $("#episode").hidden = true; $("#recap").hidden = true;
+      Expedition.renderMap(state.course.expedition, attempt, expeditionHandlers());
+    }
+    updateHud(campaignView ? null : attempt?.snapshot);
+    return;
+  }
   const missions = campaignMissions();
   if (!missions.length) return;
   const activeId = attempt?.status === "draft" ? activeMissionMeta()?.id : null;
@@ -156,6 +177,11 @@ function renderCampaign() {
   updateHud();
 }
 function showCampaign() {
+  if (busy) return;
+  if (dirty && attempt?.status === "draft") {
+    showError("Save your current move or rule before opening the map. Your work is still here.");
+    return;
+  }
   campaignView = true;
   if (attempt?.status === "submitted" && attempt?.assessment?.outcome === "correct" && selectedMissionId === activeMissionMeta()?.id) selectedMissionId = null;
   closeDrawers();
@@ -220,11 +246,13 @@ function renderPredictionBoard(snapshot) {
 }
 async function send(action, extra = {}) {
   if (busy) return false;
+  const actionFocus = document.activeElement?.dataset?.action;
   busy = true;
   clearError();
   document.querySelectorAll("button").forEach(button => { button.disabled = true; });
   const body = { command_id: crypto.randomUUID(), expected_revision: action === "start" ? 0 : attempt?.revision || 0, ...extra };
   if (action !== "start") { body.attempt_id = attempt.id; body.response = response(); retainDraft(); }
+  Expedition.sync(true, attempt);
   const signature = JSON.stringify({action, ...body, command_id: undefined});
   if (pending?.signature === signature) body.command_id = pending.command_id;
   pending = {signature, command_id: body.command_id};
@@ -248,13 +276,13 @@ async function send(action, extra = {}) {
     if (newerResponse && attempt.status === "draft") { fillResponse(newerResponse); retainDraft(); }
     if (action === "hint") { $("#hints").lastElementChild?.scrollIntoView({block: "nearest"}); $("#drawer-hint").hidden = false; }
     if (action === "start") { $("#workspace").focus(); window.scrollTo({top: 0}); }
-    if (action === "submit") { $("#recap").focus(); $("#recap").scrollIntoView({block: "start"}); }
+    if (action === "submit") { const target = attempt?.snapshot?.expedition ? $("#expedition") : $("#recap"); target.focus(); target.scrollIntoView({block: "start"}); }
     setSaveState(dirty ? "New edits retained · save again when ready" : attempt.status === "submitted" ? "Mission result retained" : hosted ? "Progress saved to your account" : "Progress saved to local database", dirty ? "dirty" : "saved");
     return true;
   } catch (error) {
     if (error.status && error.status < 500) pending = null;
     if (hosted && error.status === 401) showSignIn();
-    showError(`${error.message || "Connection failed"}. Your visible answer is retained. Retry when ready.`);
+    showError(`${error.status ? error.message : "The connection was interrupted before saving could be confirmed"}. Your visible answer is retained. Retry when ready.`);
     setSaveState("Not saved · answer retained", "error");
     return false;
   } finally {
@@ -263,9 +291,14 @@ async function send(action, extra = {}) {
     for (const id of inputIds) $(`#${id}`).disabled = attempt?.status === "submitted";
     syncControls();
     renderCampaign();
+    if (actionFocus && attempt?.snapshot?.expedition && !campaignView) {
+      const target = document.querySelector(`[data-action="${actionFocus}"]:not(:disabled)`) || document.querySelector("#expedition [data-action]:not([data-action='rewind']):not(:disabled)") || document.querySelector("#exp-submit:not(:disabled)");
+      target?.focus({preventScroll: true});
+    }
   }
 }
 function syncControls() {
+  Expedition.sync(busy, attempt);
   if (!attempt) {
     $("#dock-hint").disabled = true;
     $("#dock-source").disabled = true;
@@ -291,6 +324,7 @@ function syncControls() {
   renderPredictionBoard(snapshot);
 }
 function renderAttempt() {
+  if (!attempt?.snapshot?.expedition) Expedition.hide();
   if (campaignView) { showCampaign(); return; }
   $("#entry").hidden = Boolean(attempt);
   $("#episode").hidden = !attempt || attempt.status === "submitted";
@@ -337,6 +371,12 @@ function renderAttempt() {
   $("#aid-declaration").disabled = submitted;
   $("#save").hidden = submitted;
   $("#submit").hidden = submitted;
+  if (snapshot.expedition) {
+    $("#episode").hidden = true; $("#recap").hidden = true;
+    Expedition.render(attempt, expeditionHandlers());
+    Expedition.sync(busy, attempt);
+    return;
+  }
   if (submitted) {
     const result = attempt.assessment;
     const cleared = result.outcome === "correct";
@@ -376,6 +416,7 @@ function renderAttempt() {
   }
 }
 function showSignIn() {
+  Expedition.hide();
   campaignView = false;
   closeDrawers();
   $("#sign-in").hidden = false;
@@ -388,21 +429,27 @@ async function boot() {
   try {
     const config = await api("/api/config"); hosted = config.hosted;
     state = await api("/api/session", {}); attempt = state.attempt;
+    if (attempt?.snapshot?.storm) {
+      if (attempt.status === "draft") { location.replace("/storm"); return true; }
+      attempt = null;
+    }
     $("#sign-in").hidden = true;
     $("#sign-out").hidden = !hosted;
-    campaignView = !attempt || (attempt.status === "submitted" && !attempt.snapshot.mission);
+    campaignView = !attempt || (attempt.status === "submitted" && (!LEGACY_VIEW || !attempt.snapshot.mission));
     renderCampaign();
     renderAttempt();
     if (attempt?.status === "draft") {
       let draft = null;
       try { draft = JSON.parse(localStorage.getItem(draftKey()) || "null"); }
       catch { showError("Recovery storage is unavailable. Your database progress is still loaded."); }
-      if (draft && Object.keys(attempt.response).some(key => draft.response[key] !== attempt.response[key])) {
+      if (draft && JSON.stringify(draft.response) !== JSON.stringify(attempt.response)) {
         fillResponse(draft.response);
         dirty = true;
+        if (attempt?.snapshot?.expedition) Expedition.render(attempt, expeditionHandlers());
         showError("Recovered unsaved progress from this device. Review it before saving; another tab may have a different version.");
         setSaveState("Recovered local progress", "dirty");
         $("#dock-save").disabled = false;
+        Expedition.sync(busy, attempt);
       } else setSaveState(hosted ? "Resumed from your account" : "Resumed from local database", "saved");
     }
     try { await api("/api/health", undefined, 12000); } catch { /* health is diagnostic only */ }

@@ -1,0 +1,46 @@
+{
+  "candidate": "039bf542b213fd172fab3d91103ebb135a0da3d4",
+  "review_method": "internal_tool_assisted",
+  "reviewer": "implementation agent; frozen-candidate critique pass",
+  "separate_agent": false,
+  "human_playtest": false,
+  "scores": {
+    "game_identity": {"weight_percent": 15, "score": 8.2},
+    "hud_clarity": {"weight_percent": 15, "score": 9.0},
+    "core_loop": {"weight_percent": 15, "score": 8.5},
+    "progression": {"weight_percent": 15, "score": 8.7},
+    "feedback_game_feel": {"weight_percent": 12, "score": 8.1},
+    "theme_cohesion": {"weight_percent": 10, "score": 8.5},
+    "learning_integrity": {"weight_percent": 10, "score": 9.2},
+    "accessibility": {"weight_percent": 8, "score": 8.4}
+  },
+  "weighted_score": 8.574,
+  "threshold": 9.0,
+  "status": "needs_revision",
+  "independent_critic_score": null,
+  "younger_player_verdict": "needs_revision",
+  "young_adult_verdict": "needs_revision",
+  "verification": {
+    "run_id": 34275884154,
+    "run_number": 180,
+    "status": "success",
+    "python_tests": 93,
+    "browser_modules": 4,
+    "source_artifact_id": 10075673597,
+    "evidence_artifact_id": 10075739281,
+    "synthetic_merge": "6e130ad1a9f4c3bbe964a684ecdf1c5ec2dc7643"
+  },
+  "blockers": [
+    "Later construction remains too close to condition/tool matching",
+    "Incident transfer returns to an answer-selection interface",
+    "Voluntary replay beyond the authored cases is insufficiently compelling"
+  ],
+  "unverified": [
+    "Actual child or young-adult enjoyment",
+    "Learner implementation skill",
+    "Delayed retention",
+    "Course equivalence",
+    "Physical-device and full assistive-technology behavior"
+  ],
+  "deployment": "unchanged"
+}
