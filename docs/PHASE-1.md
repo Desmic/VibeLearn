@@ -2,220 +2,272 @@
 
 ## Outcome and stopping point
 
-Phase 0 → 1A → 1B → 1C implemented in verified increments. One usable original
-practice episode: start in LEARN/PAIR/BUILD, predict a payment retry trace, write a
-diagnosis, save/resume, request progressive hints, submit, inspect evidence and
-pre-help checkpoints, see a future frame review need and bounded practice XP.
-Stop at the Phase 1 human checkpoint; no Phase 2+ subsystem was implemented.
+Phase 0 → 1A → 1B → 1C implemented in verified increments. The original first slice
+was one persisted reliable-agent practice episode with LEARN/PAIR/BUILD, deterministic
+trace prediction, written diagnosis, save/resume, progressive hints, submission,
+evidence/checkpoints, a future review need, and bounded practice XP.
 
-The original local Phase 1 checkpoint remains historically valid. Since that report,
-a private hosted pilot has also been implemented on Render Free + Supabase Free from
-`deploy/render-supabase`. Hosted infrastructure and CI are now machine-verified; the
-remaining Phase 1 product gate is the last set of real hosted learner acceptance
-checks, not more subsystem implementation.
+The original local Phase 1 checkpoint remains historically valid. Since then a private
+Render Free + Supabase Free pilot and several learner-driven product refinements have
+been added without implementing Phase 2+ subsystems.
 
-The current directory originally contained only the design handoff. No Git repository,
-base commit or candidate commit existed at that time; none was invented. Supplied
-design files remain in place. Version 0.1.0, local schema 5. Candidate/source SHA-256
-for the historical local checkpoint:
+Version 0.1.0, local schema 5. Historical local checkpoint source SHA-256:
 
 `3d17fdd657ca522f38fd8a733a56a7ddca382513b39e04b3266a39e9afb56786`
 
-`artifacts/build-manifest.json` and `artifacts/served-manifest.json` matched at the
-local checkpoint. A source-only checkpoint was retained as
-`artifacts/phase1-source-checkpoint.zip`, with its archive SHA-256 in
-`artifacts/phase1-source-checkpoint.sha256`.
+The supplied checksummed design package remains preserved as historical input.
 
 ## Observed local verification
 
-Environment: Windows PowerShell; Python 3.13.5; SQLite 3.49.1; Node 22.17.0;
-Playwright 1.53.0; Chromium 138.0.7204.23. All commands ran in the selected project.
+Historical local environment: Windows PowerShell; Python 3.13.5; SQLite 3.49.1;
+Node 22.17.0; Playwright 1.53.0; Chromium 138.0.7204.23.
 
-| Gate | Actual command / interaction | Observed result |
-|---|---|---|
-| Reproducible build | `python manage.py build` | Passed Python compilation and JS syntax; build manifest retained |
-| Core suite | `python manage.py test` | 31 unit/integration tests passed, none skipped at the original checkpoint |
-| Browser suite | `python manage.py browser` | 10 real browser scenarios passed; no page errors |
-| Actual local serving | `python manage.py serve`; GET `/api/health` and all three UI assets | Responding on 127.0.0.1:8000; source/served hashes agree |
-| Database baseline | Real committed SQLite write/read, reconnect and rollback | Passed before Phase 1A |
-| Migration | Schema 1 fixture and populated Phase 1B schema 3 history → schema 5 | Data, evidence, aid meaning and review retained; no fabricated reward |
-| Restart | Browser reload and actual HTTP subprocess termination/restart on same DB/port | Drafts, evidence, rewards and review retained |
-| Concurrency/retry | Duplicate save/hint/submit; concurrent identical submissions; real commit with dropped HTTP response | One committed result; no duplicate evidence or reward |
-| Failure recovery | Actual stopped server; typing during in-flight save; injected evaluator and transactional storage failures | Visible/newer answer retained; unknown not zero; atomic rollback |
-| Learning boundaries | Invalid/missing predictions, pre-help versus assisted checkpoints, source gates, mode changes, repeated family | Passed; independent declaration never restored by mode switch |
-| Identity | Distinct browser contexts; scoped HTTP and application commands; host/origin restrictions | Cross-learner commands rejected; no shared evidence/XP |
-| UI | Keyboard Tab/Enter; 390px viewport; 200% text enlargement; desktop/mobile screenshot inspection | Passed; no document horizontal overflow |
+| Gate | Observed result |
+|---|---|
+| Reproducible build | Python compilation + JavaScript syntax passed |
+| Core suite | 31 unit/integration tests passed at the original checkpoint |
+| Browser suite | 10 real browser scenarios passed; no page errors |
+| Persistence | committed write/read, reconnect, rollback, save/reload/restart passed |
+| Concurrency/retry | duplicate and concurrent operations did not duplicate evidence/reward |
+| Failure recovery | stopped server/evaluator/storage failure retained honest state |
+| Learning boundaries | unknown != failure; pre-help checkpoints distinct from assisted submission |
+| Identity | scoped commands and separate browser contexts prevented cross-learner access |
+| UI | keyboard, 390px viewport and 200% text enlargement passed |
 
-Raw local records: `artifacts/build.log`, `artifacts/tests.log`,
-`artifacts/browser-report.json`. Screenshots: `artifacts/phase0-browser.png`,
-`artifacts/phase1a-browser.png`, `artifacts/phase1a-mobile.png`,
-`artifacts/phase1b-recap.png`, `artifacts/phase1-workspace.png`,
-`artifacts/phase1-mobile.png`, `artifacts/phase1-recap.png`.
+Historical artifacts include build/test/browser reports and screenshots under
+`artifacts/`.
 
 ## Hosted Phase 1 extension — 7–8 September 2026
 
-The hosted pilot preserves the Phase 1 learning behavior while replacing local-only
-identity/storage boundaries with Supabase Auth and restricted PostgreSQL persistence.
-This extension does not add Phase 2 capabilities.
+The hosted pilot keeps the Phase 1 learning contracts while replacing local-only
+identity/storage with Supabase Auth and restricted PostgreSQL persistence.
 
 Machine-verified hosted state:
 
-- Supabase migration `20260907073952_vibelearn_hosted_schema` is applied, followed by
-  the hosted hardening/index migrations documented in `db/hosted-hardening.sql`.
-- `vibelearn` is a private PostgreSQL schema; `anon` and `authenticated` have no
-  schema USAGE or application-table grants.
-- The runtime uses `vibelearn_login` and switches transactions to restricted
-  `vibelearn_app`; learner tables have forced learner-scoped RLS.
+- Supabase migrations documented in `db/hosted-hardening.sql` are applied.
+- `vibelearn` is a private PostgreSQL schema; `anon` and `authenticated` have no schema
+  USAGE or application-table grants.
+- Runtime uses `vibelearn_login` -> `vibelearn_app`; learner tables use forced RLS.
 - Live SQL boundary verification passed learner isolation, composite ownership,
   immutable submissions/history, reward deduplication, JSON lookup, and denied
   unscoped reads.
-- Render Free is live at `https://vibelearn-4xws.onrender.com` and successfully
-  serves the application, configuration, static assets, and `/api/health` while
-  connected to PostgreSQL.
+- Render serves the application and health/config/static paths successfully.
 - GitHub Actions `Verify hosted pilot` covers build, Python tests, disposable
-  PostgreSQL application tests, Chromium installation, and browser scenarios on the
-  hosted branch.
-- A consolidated hosted acceptance-contract test walks login → start → save →
-  recreated hosted app → resume → hint/mode/source → submit → evidence/review/XP →
-  logout/replayed-cookie rejection in one continuous test. A separate two-authorized-
-  learner test verifies cross-learner reads/writes are rejected.
+  PostgreSQL application tests, Chromium install and the browser journey.
+- A consolidated hosted acceptance test walks login -> start -> save -> recreated app
+  -> resume -> hint/mode/source -> submit -> evidence/review/XP -> logout/replayed-
+  cookie rejection. A separate two-authorized-learner test covers isolation.
 
 Observed live learner evidence:
 
-- Password recovery completed successfully and real hosted password logins returned
-  HTTP 200 on both 7 and 8 September 2026.
-- PostgreSQL records the real hosted learner/application session and retained learning
-  history.
-- Two real hosted attempts were started and submitted successfully; PostgreSQL records
-  two submitted attempts, two evidence rows, one review need, and exactly one reward
-  row worth 10 practice XP. The repeated attempt earned no second reward.
-- A real Render process replacement completed at approximately 14:11 UTC on 7
-  September. The same mobile browser loaded the new instance immediately afterward
-  and `POST /api/session` returned HTTP 200 with retained learner state. This
-  establishes live application-session/state survival across that deploy.
-- On 8 September the learner used the real Sign out control and Render recorded
-  `POST /api/auth/logout` HTTP 200. The learner confirmed that the UI returned to the
-  signed-out state. Automated hosted coverage separately proves that replaying the
-  pre-logout application cookie pair is rejected.
-- Subsequent login requests on 8 September returned HTTP 200 server-side. A browser
-  screenshot nevertheless surfaced the raw client message `signal is aborted without
-  reason`. This is a client transport/timeout presentation bug, not invalid
-  credentials. The hosted branch now normalizes AbortSignal errors to a friendly retry
-  message, uses a larger request budget for free-tier wakeups, and checks whether the
-  authenticated session actually succeeded before reporting transport failure.
+- password recovery and real hosted login succeeded;
+- real hosted learner/session rows and submitted attempts exist;
+- two real submitted attempts produced two evidence rows, one review need and exactly
+  one 10-XP family reward;
+- a real Render process replacement was followed by the same browser successfully
+  reopening its hosted application session;
+- real sign-out returned HTTP 200 and the learner observed the signed-out UI;
+- the earlier raw `signal is aborted without reason` login message was traced to a
+  client transport/timeout presentation issue, not credential failure, and was fixed.
 
-Not yet claimed live:
+Still not claimed live:
 
-- an explicit **Save progress → page reload → PostgreSQL resume** while a run is still
-  unsubmitted;
-- second-authorized-account isolation acceptance using a second real Supabase account.
+- explicit unfinished **Save progress -> page reload -> PostgreSQL resume** on the
+  hosted site;
+- second-authorized-account isolation using a second real Supabase account.
 
-The learner has now supplied substantive human feedback rather than merely aesthetic
-approval: the challenge needs clearer presentation and more purposeful animation, the
-goal is to make learning as fun as possible, and VibeLearn should feel like a game
-rather than another website. That feedback is recorded as a Phase 1 outcome and has
-changed the adopted UI/UX direction in `docs/UI-UX-DIRECTION.md` to game-first premium
-learning. The current branch begins that response with mission framing, explicit goals,
-a mission HUD/progress bar, staged incident animation, `Save progress`, `Lock in
-answer`, power-up-style hints, and stronger completion/reward motion.
+## Learner-driven game refinement — 8 September 2026
+
+The learner first rejected a polished website-like experience and asked for a genuine
+game feel. The resulting HUD-first campaign replaced permanent website rails with a
+top HUD, bottom mission-tool dock, direct outcome decisions, real sequential mission
+locks, XP/progression separation, state-driven animation and a Tutorial -> Easy ->
+Medium -> Boss curve.
+
+That HUD-shell candidate passed its then-current critic at 8.8/10, but later learner
+playtesting found three important product defects. The old 8.8 score is therefore
+historical and is **not** treated as acceptance of the later course-comprehension
+requirements.
+
+### Feedback defect 1 — the course objective/material was not clear enough
+
+The learner requested campaigns built around compelling fantasy or real-life scenarios,
+with simple causal animation, so that even a middle/high-school learner can understand
+what is happening before decoding specialist language.
+
+The current retry campaign is now a story-first activity revision. It uses a concrete
+Shopping Agent premise: the learner asks an agent to buy one 5 kg dumbbell; the purchase
+succeeds; the receipt/acknowledgement disappears; the agent may retry. Each mission has
+a plain-language objective plus explicit causal story beats before the technical request
+IDs/retention details are exposed.
+
+The four-level structure now teaches the same pinned retry mechanism through:
+
+1. **Tutorial — The missing receipt:** can the retry still leave exactly one charge?
+2. **Easy — A new ticket, a second charge:** why can a fresh request identity look like
+   a new purchase even when the human intent is unchanged?
+3. **Medium — The store forgot:** what happens when the same purchase identity arrives
+   after the store's memory/retention window expires?
+4. **Boss — Shopping Agent incident:** combine identity, payload binding, retention and
+   late uncertainty into the full retry contract.
+
+Campaign activities were revised rather than mutating old submitted snapshots; the
+underlying deterministic trace policy stays pinned and historical evidence keeps its
+original activity meaning.
+
+### Feedback defect 2 — help status was semantically wrong
+
+The learner observed that `Not declared` and/or prior exposure could appear as
+`assisted`, which incorrectly claimed current help use.
+
+The evidence interpretation now distinguishes:
+
+- `unknown`: no external-help declaration and no current observed in-game aid;
+- `declared_independent`: explicit no-external-help declaration with no current aid;
+- `assisted`: current hint/source/worked-example use or explicit external-help
+  declaration;
+- `previously_exposed`: prior family feedback/exposure without claiming current help.
+
+Prior exposure can still limit an independence/freshness claim, but it is no longer
+mislabeled as current-attempt assistance. Tests explicitly cover unknown, declared
+independent, actual assisted and replay exposure semantics.
+
+### Feedback defect 3 — campaign selection after a clear was unexpected
+
+After clearing a level, the campaign used to retain the previously selected mission,
+which could make Level 1/old content look selected even though a new level had unlocked.
+
+The current rule is:
+
+- correct clear -> focus/select the **highest newly unlocked mission**;
+- failed clear -> keep the current mission as the predictable retry target;
+- fully cleared chapter -> keep the highest completed node selected.
+
+The real Chromium journey asserts this behavior after Level 1, Level 2, Level 3 and the
+boss.
+
+## Current verification and critic gate
+
+The story-first candidate passed GitHub Actions `Verify hosted pilot` run 148
+(`34222243777`). The gate includes:
+
+- build success;
+- **59 Python/hosted/PostgreSQL tests passed**;
+- full Chromium campaign journey passed with no page errors;
+- concrete shopping story + plain chapter objective;
+- causal story beats and reduced-motion equivalent;
+- server-enforced mission locks;
+- unknown / declared-independent / assisted evidence semantics;
+- automatic next-level focus;
+- HUD save -> reload resume;
+- actual process restart persistence;
+- Level 3 source/help recording;
+- boss lost-acknowledgement retry without duplicate evidence/XP;
+- keyboard use, 390px viewport, 200% text enlargement, separate learner context and
+  reduced motion.
+
+`docs/GAME-UX-REVIEW.md` now has a narrative/comprehension pre-gate in addition to the
+numeric rubric. A fresh separate critic pass on this exact story-first candidate scored
+**9.1/10**, with no critical blocker and above the required 8.0 threshold. It is ready
+for another learner trial; the score is not educational validation or final acceptance.
+
+Remaining critic debt: some playfield/table ancestry remains, audiovisual/haptic payoff
+is limited, and only the learner's real playtest can tell us whether the story materially
+improves comprehension and motivation.
+
+## Course-generation implications
+
+This feedback is now part of the system design, not a one-off lesson note.
+
+`docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/GAME-UX-SYSTEM.md`,
+`docs/GAME-UX-REVIEW.md`, `AGENTS.md`, and the **root** `CODEX-IMPLEMENTATION-PLAN.md`
+were amended. When Phase 3 is opened, generated modules must produce a playable teaching
+system rather than lesson prose poured into a generic UI.
+
+Generation now requires, where appropriate:
+
+- a compelling real-life/fantasy/simulation premise tied faithfully to the concept;
+- a plain-language chapter goal understandable before specialist jargon;
+- causal story/visual beats whose motion explains the mechanism rather than decorating
+  it;
+- an explicit bridge from intuitive model to formal terminology;
+- a confidence curve with early wins and genuine later reasoning difficulty;
+- direct subject-appropriate interaction mechanics;
+- HUD/tool progression and predictable route focus;
+- honest help/prior-exposure semantics;
+- game rewards separated from evidence/mastery;
+- generated browser/storage/integrity invariants;
+- structural/learning, grounding/content, accessibility and game-UX/comprehension
+  review gates;
+- game-UX score >=8.0 with no critical blocker before a candidate can be called
+  playable/validated.
+
+The checksummed `learning-os-design-package-v1.3/` is preserved as historical input;
+the active root implementation plan carries the amendment rather than silently
+rewriting the archived package.
 
 ## Phase 1 completion gate
 
-Phase 1 machine verification is complete for the original local slice and the hosted
-behavioral contracts. Current status of the real hosted journey:
+Phase 1 implementation and machine verification are complete for the original slice,
+hosted behavior, and the current story-first refinement. Real hosted/product acceptance
+status is:
 
 1. **Complete live:** password recovery and successful hosted sign-in.
-2. **Complete live:** start the existing Phase 1 episode.
-3. **Pending live:** start/play another unsubmitted run, use **Save progress**, reload,
-   and verify the same answers resume from PostgreSQL. The equivalent automated hosted
-   and real-browser persistence paths pass.
-4. **Complete live:** restart/redeploy Render without changing PostgreSQL and verify
-   the same learner session/state resumes on the new process.
-5. **Complete live:** submit the episode and verify trace feedback persistence,
-   evidence, future review need, and the bounded first-family practice XP reward.
-   Two real submissions exist and only the first earned 10 XP.
-6. **Complete live at the learner/UI boundary:** the learner signed out successfully
-   and Render recorded logout HTTP 200. Automated replayed-cookie coverage verifies
-   backend revocation; a separate live replay request was not captured before the
-   learner signed back in.
-7. **Pending live before broader multi-user use:** authorize a second real account and
-   verify it cannot read or mutate the first learner's state. Automated two-authorized-
-   learner isolation and PostgreSQL RLS coverage pass. The learner explicitly chose to
-   defer this until the current experience issues are resolved.
-8. **Complete as feedback collection:** real learner feedback is recorded. It is not a
-   positive acceptance claim: challenge clarity, animation and game feel need further
-   improvement, and the product direction has been revised in response.
+2. **Complete live:** start and submit the hosted learning episode; real evidence,
+   review and bounded reward exist.
+3. **Pending live:** unfinished **Save progress -> reload -> exact PostgreSQL resume**.
+   Equivalent hosted/real-browser/process tests pass.
+4. **Complete live:** Render process replacement preserved learner session/state.
+5. **Complete live:** real sign-out returned HTTP 200 and the UI signed out; automated
+   replayed-cookie rejection covers backend revocation.
+6. **Pending live before broader multi-user use:** second real authorized Supabase
+   account isolation. Automated two-user/RLS coverage passes.
+7. **Product feedback collected, acceptance still active:** learner rejected the prior
+   course clarity/progression semantics; the story-first candidate is the current
+   response and now needs direct learner playtesting.
 
-Only after the remaining live checks are closed should this hosted-pilot PR leave draft.
-Product refinement should respond to the learner feedback before treating the slice as
-an experience baseline; Phase 2 remains deliberately gated.
+Only after the remaining live checks and learner acceptance are closed should PR #1
+leave draft. Phase 2 remains deliberately gated.
 
 ## Assessment, capability and product limits
 
-The content is original static practice with a prepared rubric, exact activity/frame/
-binding/rubric revisions, explicit assumptions and an executable trace model.
-Implementation-agent inspection and criterion checks are recorded honestly;
-independent human content review and educational validation are still pending.
-Only trace counts receive a deterministic score. Written diagnosis is retained and
-explicitly ungraded. Missing/invalid/evaluator-unavailable outcomes are distinct from
-incorrect predictions. Partial evidence stays provisional; it cannot establish
-mastery or skipping. Self-reported experience is private learner data, not evidence.
+Only pinned trace outcomes receive deterministic scoring. Written architecture reasoning
+is retained and remains ungraded unless a later validated assessment path is introduced.
+Missing/invalid/evaluator-unavailable remains distinct from incorrect. Partial evidence
+is provisional and cannot establish mastery/skip eligibility.
 
-Each checkpoint pins its response, mode and then-observed help. Later hints and source
-exposure do not rewrite earlier evidence. Source reading after submission cannot
-change the submitted answer. Returning from BUILD/PAIR to LEARN does not erase help.
-Repeated family practice is familiar/assisted and earns no extra XP. The first valid
-submission earns 10 practice XP regardless of prediction correctness, with a durable
-per-learner/family cap. Assessment and scheduling never consume XP.
+Help semantics are evidence semantics, not game punishment. Later hints/source exposure
+do not rewrite earlier checkpoints. Switching play style cannot erase observed help.
+Prior feedback exposure is recorded separately from current-attempt help. XP is bounded
+practice/game progression only and is never consumed by assessment, mastery or review
+scheduling.
 
-Retrieval needs reference the canonical frame/competency and retain due time, policy
-and evidence basis independently of courses. The UI explicitly says a fresh activity
-is needed. There is no scheduler notification, review exercise generator, full
-knowledge-map UI or course replacement/export system in this slice.
-
-Capability register: `CAPABILITIES.md`. Public AWS article text was actually inspected
-through the available research tool, without private learner queries. The app retains
-original task content and source link metadata, not a copied article or a generic
-retriever. External model unavailable (no configured key); no provider response was
-fabricated. Product code-agent adapter and verified untrusted execution isolation
-unavailable. Static help is not adaptive dialogue.
-
-Optional WebMCP save support is feature-detected. Its optional live browser-tool path
-is not required for the Phase 1 completion claim; normal browser controls are the
-verified interaction path.
+Retrieval targets the canonical frame/competency and still requires a fresh activity.
+There is no scheduler notification, full knowledge-map UI, course replacement/export,
+adaptive course generator or untrusted-code runner in Phase 1.
 
 ## Persistence, restart and recovery
 
-Local SQLite schema migrations run in a short transaction, guarded by
-`PRAGMA user_version`. Tables separate learner/session, attempt/command receipt,
-immutable checkpoints, evidence capsules, frame reviews, assistance events and reward
-ledger. Published snapshots, submitted answers, checkpoints, evidence and aid rows are
-guarded against updates.
+Local SQLite migrations remain forward-only and transactional. Hosted PostgreSQL uses
+the private `vibelearn` schema, restricted roles, forced RLS, ownership-preserving
+foreign keys and immutable-history triggers. Device-local browser recovery remains
+supplementary; hosted state is attached to the verified Supabase/application session.
 
-Hosted PostgreSQL uses the separate private `vibelearn` schema, explicit restricted
-roles, forced learner RLS, ownership-preserving composite foreign keys, immutable
-history triggers, and application-session rows. Local anonymous SQLite data is not
-automatically assigned to hosted identities.
-
-Device recovery remains supplementary browser storage. For local mode, the HttpOnly
-cookie resolves a local learner. For hosted mode, Supabase Auth verifies the account
-and the application keeps a separate hashed, revocable session record.
-
-Schema changes are forward-only. Do not use destructive table deletion or migration
-history deletion as rollback. Keep known-compatible code revisions and independent
-data backups.
+Do not use destructive migration-history deletion or learner-table deletion as rollback.
+Keep known-compatible code revisions and independent backups.
 
 ## Separate gates
 
-Machine verification: passed for the implemented Phase 1 local and hosted behavioral
-contracts, including the consolidated hosted acceptance-contract and two-authorized-
-learner isolation tests. The current game-first UI change must keep its real-browser CI
-gate green before deployment.
-Human product feedback: collected; it identifies challenge clarity, purposeful motion,
-fun and game feel as the next experience priorities rather than declaring the current
-experience complete.
-Activation: private hosted pilot is live; broader/public multi-user activation is not claimed.
+**Machine verification:** current story-first candidate green: run 148, 59 tests + full
+Chromium journey.
 
-Single next product increment after acceptance: continue responding to this learner
-feedback while expanding the learning system. Do not implement Phase 2 merely because
-infrastructure is live.
+**Critic:** fresh story/comprehension-aware review 9.1/10, no critical blocker.
+
+**Human product acceptance:** pending direct playtest of the revised story/course flow.
+
+**Activation:** private hosted pilot only; broader/public multi-user activation is not
+claimed.
+
+Single next product increment: evaluate the story-first live experience, fix the
+highest-impact comprehension/gameplay issue found, then close the remaining Phase 1
+hosted acceptance gates before opening Phase 2.
