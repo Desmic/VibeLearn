@@ -4,11 +4,14 @@ Purpose: prevent a polished website from being mistaken for a good learning game
 
 This review is a deliberately separate pass from implementation. The critic evaluates the shipped candidate against fixed criteria and records evidence before assigning a score. Do not change the rubric to rescue a weak build.
 
+This gate also applies to **course-generation candidates**. A generated course cannot be labeled playable/validated merely because its content schema, source grounding, or assessment checks pass. Its actual game experience must independently clear this rubric.
+
 ## Pass rule
 
 - Overall weighted score must be **>= 8.0 / 10**.
 - No critical blocker may remain in the core loop, progression/unlock logic, accessibility, persistence or evidence integrity.
 - A score >= 8 means the candidate is good enough to put in front of the learner again, not that it is final.
+- For generated courses, this score is only the **game-UX gate**. Separate grounding/content, structural/learning and accessibility validators in `docs/COURSE-GENERATION-GAME-SYSTEM.md` must also pass.
 
 ## Rubric
 
@@ -36,6 +39,13 @@ Any one of these blocks a pass regardless of numeric score:
 - important state exists only in long body text when it should be in HUD/feedback;
 - the current mission is substantially harder than the mechanics the player has been taught.
 
+For generated courses, also treat these as game-UX blockers even when other validators catch them too:
+
+- the boss/combine mission requires an unexplained interaction mechanic or untaught learning rule;
+- the generated interface exposes most advanced tools in the tutorial without a clear need;
+- the generated “game” is primarily a sequence of ordinary forms/cards with game vocabulary pasted on top when a more direct interaction is feasible;
+- progression is driven by participation rewards rather than the declared mission success condition.
+
 ## Review evidence to collect
 
 Before scoring, inspect at least:
@@ -48,11 +58,21 @@ Before scoring, inspect at least:
 6. hint reveal;
 7. Level 1 clear + XP;
 8. Level 2 unlock;
-9. locked Level 3/4 behavior before prerequisites;
+9. locked later-mission behavior before prerequisites;
 10. mobile/narrow viewport;
 11. reduced-motion behavior;
-12. boss mission after prerequisites;
+12. boss/combine mission after prerequisites;
 13. evidence/review details after clear.
+
+For a generated course, additionally inspect whether the generated interaction actually expresses the target learning operation and whether interface/tool complexity rises deliberately with the campaign.
+
+## Generated-course critic execution
+
+The generator and critic are separate roles. Prefer a distinct critic agent/model configuration when the harness supports it. Otherwise run a separately prompted pass with this frozen rubric and record that limitation explicitly.
+
+The critic receives the candidate manifest plus real rendered/browser evidence where available. It must not rely only on the generator's prose description of the experience.
+
+A failing score returns structured findings to the generation/authoring loop. The generator may revise and resubmit, but the rubric/threshold cannot be weakened between attempts. The initial automatic repair budget is three candidate revisions; after that the course remains `draft_needs_review` rather than looping indefinitely.
 
 ## Recorded critic review — 8 September 2026
 
