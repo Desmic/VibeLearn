@@ -1,33 +1,15 @@
-# Game-experience critic brief — available tools now, independent critic when available
+# Current game critic handoff — Stormworks candidate, not accepted
 
-Updated 9 September 2026. The user explicitly permits review with available tools while Codex is blocked. **Do not require a Codex environment before continuing current Phase 1 review.** Read GAME-AS-COURSE.md, GAME-ACCEPTANCE-9.md, GAME-UX-REVIEW.md and the latest STATE/review report.
+Read STATE.md, STORMWORKS-CLARITY-TRANSFER.md, STORMWORKS-REVIEW-20260909.md, GAME-AS-COURSE.md and GAME-UX-REVIEW.md. Current frozen runtime: **039bf542b213fd172fab3d91103ebb135a0da3d4**, branch game/stormworks-clarity-transfer, draft PR #3, route /storm. Review the actual candidate, not an earlier 7.02 expedition or concurrent Relay Rescue on PR #2.
 
-## Method and honesty
+The user permits internal_tool_assisted criticism while Codex is blocked. Do not require Codex setup or pretend the builder's review is independent. Current score is **8.574/10**, needs_revision. The target remains unrounded >=9, both audience lenses passing, no critical blockers, then the user's final decision.
 
-Freeze the candidate and the eight rubric weights. Use real rendered interaction evidence, browser action/response traces, screenshots, failure cases, storage tests and source inspection. For a builder-operated review, label the method `internal_tool_assisted`; it is not a separate agent/model or a human/youth playtest. Clearly distinguish direct interactive exploration, scripted browser probes and screenshot/trace inspection. State unobserved conditions. A source-only pass cannot rate the full experience.
+Use a disposable checkout/database. Never use production learner data, change hosted security, deploy, recruit external testers or provision paid resources. Respect administrator browser policies. Existing CI provides reproducible rendered evidence, but automated scripts and screenshots are not human enjoyment evidence.
 
-An independent critic remains useful when available, but the current review is no longer blocked on it. The original GitHub bot reply is historical setup information, not the active work prerequisite. An independent later reviewer must judge the current frozen candidate, not reuse historical scores.
+Play the lost receipt, deliberately duplicate an order and recover it, try both changed-request resolutions, and distinguish unavailable records from final absence. Build a partial policy before a complete one; test hold-all and retry-all strategies; follow a failing execution back to its socket. Inspect the harbour payoff, then commit a wrong incident plan before a correct replay. Verify withheld feedback, prior exposure, the different night shift, local code lab and honest runbook export. Inspect keyboard, touch, reduced motion, enlarged text, failed saves and root-route continuity.
 
-## What to judge
+Prioritize the actual remaining game problems: conditional-panel residue, the interruption from game to answer-selection desk, insufficient voluntary replay, and any unclear scope/knowledge/retention state. Preserve rigor while improving play. Downloading a lab or clicking correct incident responses must not become a claim of implementation competence.
 
-Would a curious kid/younger non-specialist and an older teen/young adult voluntarily continue? Evaluate the two lenses separately with reading/prior-knowledge assumptions. Hide XP. Identify real hooks, useful discoveries, consequential alternatives, informative setbacks, reasons to retry, an earned ending and whether another run is worth choosing. Educational intentions and implementation effort are not substitutes for fun.
+Record exact candidate, environment, method, observed journeys, artifacts, eight raw scores and weighted calculation: identity15, HUD15, core15, progression15, feel12, cohesion10, integrity10, accessibility8. Separately describe younger-player and young-adult appeal, confusion, first likely quit point and reason to replay with XP hidden. Mark missing observation explicitly. Do not round a sub-9 score into a pass.
 
-Inspect the actual first minute, not just the most polished screenshot. In the expedition, deliberately create a duplicate after a courier restart, recover with the journal/rewind, try an expired ticket, reconcile the order, test an unsafe boss policy, revise it and experience the ending and missing-request detour. Check whether payload binding and unavailable records were actually taught before the boss.
-
-For the optional Three.js path, judge target discoverability, direct manipulation, causal feedback, fixed-camera readability, whole-screen hierarchy and whether the scene improves the action rather than simply adding 3D behind a form. Check keyboard equivalents, pointer/touch, motion reduction, resize, lifecycle and renderer failure. Do not infer real-device frame rates from a headless CI run.
-
-## Learning outcomes
-
-The product promise is a game that delivers the useful capabilities of its declared course. Use the outcome-to-mechanic-to-assessment ledger in GAME-AS-COURSE.md. The current guided reference does not establish a whole course's outcomes. Fresh transfer, delayed retrieval and authentic implementation/design assessments remain necessary where claimed. Do not rate participation, memorized button sequences or revealed feedback as mastery.
-
-## Required output
-
-Record exact commit/build, reviewer method and independence status, environment, routes/actions, artifacts and limitations. Give each raw /10 score with evidence: identity 15%, HUD 15%, core loop 15%, progression 15%, feel 12%, cohesion 10%, integrity 10%, accessibility 8%. Calculate the unrounded weighted sum.
-
-For each audience lens record compelling moments, boring/confusing moments, likely first abandonment point, a concrete reason to continue without XP and whether replay is earned. List blockers and prioritized interaction changes. Use `needs_revision` below9 or with any critical blocker. Use `ready_for_user_review` only for unrounded>=9.0, both lenses passing and no blocker. The user remains final reviewer and may reject any agent pass.
-
-A score is a reviewer judgment with stated confidence, not scientific proof of enjoyment or learning efficacy. Do not inflate it to reach the target or pretend that a different tool creates independent criticism.
-
-## Environment boundaries
-
-Use disposable checkout/database and the normal project verification setup. `python manage.py vendor` verifies the pinned Three.js files; `build`, `test` and `browser` provide executable gates. `serve --db <temporary-path> --port 8000` runs local play. Existing hosted/PostgreSQL tests need their declared prerequisites. Never use production credentials/learner data, bypass administrator policy, deploy, change Auth/RLS/allowlists, provision paid resources or recruit external testers merely to run the review.
+No review in this checkpoint covers concurrent Relay Rescue commit e0ecc682ca47728e373c688772e7f69aee95ed11. Preserve it. Consolidation requires comparing the actual branches and learning contracts rather than force-updating one over the other.

@@ -1,89 +1,112 @@
 # vibeLearn
 
-Read `docs/STATE.md`, then **`docs/GAME-AS-COURSE.md`**, the latest user amendment
-(9 September 2026). The product is a game whose meaningful play delivers the intended
-course outcomes, not a course website with game decoration. Experience is essential.
+Read `docs/STATE.md` first, then **`docs/GAME-AS-COURSE.md`** and
+**`docs/STORMWORKS-CLARITY-TRANSFER.md`**. The user's latest clarification on
+9 September 2026 requires high clarity and an endpoint that enables applying the
+knowledge to real problems. The game is the course, not a course interrupted by
+minigames or an educational page with a 3D background.
 
 The user temporarily authorized **available-tool/internal review while Codex is
-unavailable**. Do not block this Phase 1 refinement on Codex setup. Use actual rendered
-journeys, screenshots/traces, adverse-path tests and a frozen-rubric critic pass; label
-the reviewer `internal_tool_assisted`, never an independent agent or human playtest.
-The unrounded >=9.0/10 target, younger-player and young-adult lenses, no-critical-blocker
-rule and the user's final acceptance remain. A lower score means `needs_revision`.
-Do not inflate a score or reuse historical 8.8/9.1 reviews. An attractive screenshot,
-a new renderer and passing tests do not prove fun or course-equivalent learning.
+blocked**. Use a frozen-candidate critique informed by actual rendered journeys,
+screenshots/traces and adverse-path tests. Label it `internal_tool_assisted`, never
+an independent agent/model or youth playtest. Codex setup is not a work prerequisite.
+The unrounded **>=9.0/10** target, two audience lenses, no-critical-blocker rule and
+user's final judgment remain unchanged. Do not inflate a score or reuse historical
+8.8/9.1 verdicts. Current Stormworks review is 8.574/10: needs_revision, not accepted.
 
-The authoritative build order remains `CODEX-FIRST-SLICE.md`, the root implementation
-plan and active amendments in STATE.md. `docs/COURSE-GENERATION-GAME-SYSTEM.md`,
-`docs/GAME-ACCEPTANCE-9.md` and `docs/GAME-AS-COURSE.md` amend future generation.
-Older 8/10 references are superseded. The temporary internal-review exception applies
-to this supervised refinement, not blanket self-certification by future generators.
-The checksummed `learning-os-design-package-v1.3/` remains historical input, unchanged.
+## Preserve concurrent work
 
-## Scope and verification
+This branch's candidate is `game/stormworks-clarity-transfer`, draft PR #3, route
+`/storm`. It was isolated when concurrent Relay Rescue work appeared on PR #2's
+`game/expedition-nine-gate`. Do not overwrite that branch or blindly merge two game
+engines. Inspect the current heads before writing. Our Stormworks review does not
+certify the concurrent candidate. Keep review PRs draft and unmerged until the
+relevant acceptance decisions are actually made; no live deployment was performed.
 
-Stay within private Phase 1 product refinement. Do not silently open Phase 2 reuse,
-Phase 3 generation, model integration, untrusted code execution, external testers,
-paid resources or public rollout. Preserve historical snapshots and evidence. Keep
-PR #2 draft until the current product gates and user acceptance actually close.
+## Scope and source of truth
 
-Use one Python modular monolith with semantic HTML/CSS/JavaScript. SQLite/loopback
-remain local; Flask/Gunicorn, PostgreSQL and Supabase Auth remain hosted. Read HOSTING.md
-before infrastructure work. No renderer may decide assessment, evidence or unlocks.
+The authoritative scope remains `CODEX-FIRST-SLICE.md`, the root v1.3 implementation
+plan and active amendments referenced by STATE.md. Stay at the private Phase 1
+human/product checkpoint unless the user explicitly opens another phase. Do not
+open Phase 2 reuse, Phase 3 generation, a learning-model integration, untrusted
+server-side code runner, external testers, paid resources or public rollout.
 
-The optional Three.js spike uses `?world=3d` and locally served, verified pinned assets.
-Read `docs/THREEJS-SPIKE.md`. Run `python manage.py vendor` to fetch/verify the declared
-build dependencies before 3D testing; no runtime CDN or relaxed CSP. Default illustrated
-play and equivalent keyboard/touch controls remain available. Keep the prototype opt-in
-until actual interaction, accessibility and device performance justify promotion.
+Preserve the checksummed `learning-os-design-package-v1.3/` as historical input.
+Preserve original activity/campaign snapshots and evidence. New assessment meaning
+must receive new identities/revisions rather than rewriting earlier claims. A
+bounded retry game is not a complete distributed-systems course.
 
-Install hosted/test dependencies from requirements.lock and requirements-dev.txt.
-Run `python manage.py build`, `python manage.py test`, and `python manage.py browser`
-at integrated gates. Use only disposable browser databases. Preserve screenshots,
-traces, exact commits and failures. No successful API mocks to claim live verification.
-Do not bypass administrator browser policy; identify which normal environment ran the
-tests and distinguish automated evidence from personal interactive/human play.
+## Runtime and verification
 
-Implement a small complete behavior, verify it, inspect it, then extend it. Machine
-checks are not human acceptance, and a source-only code review is not a game review.
+Use one Python modular monolith. Local mode uses SQLite and loopback identity;
+hosted mode uses Flask/Gunicorn, PostgreSQL and Supabase Auth. Read HOSTING.md before
+any deployment work. Install pinned requirements from requirements.lock and
+requirements-dev.txt. Use `python manage.py build`, `python manage.py test` and
+`python manage.py browser` at integrated gates. Tests use disposable databases,
+never the learner's real data. Start with `python manage.py serve`.
 
-## Game-first and course-outcome invariants
+Semantic HTML controls remain first-class. The renderer projects domain state; it
+never awards evidence or bypasses legal commands. Stormworks currently uses HTML
+and SVG. The earlier opt-in Three.js prototype is preserved, not silently promoted
+as the accepted game. Its pinned dependency is installed by `python manage.py vendor`
+and served from the app origin with license/provenance retained. No runtime CDN,
+new API key or relaxed CSP is needed. Physical phone GPU performance is unvalidated.
 
-Read GAME-UX-SYSTEM.md, GAME-UX-REVIEW.md and GAME-AS-COURSE.md before substantial
-learning UI, mission, progression or generation work. Judge the game as something a
-curious kid or young adult would voluntarily continue playing with XP hidden. State
-reading/prior-knowledge assumptions; do not pretend an agent prediction is child testing.
+Implement one behavior, verify storage and browser, then extend it. Record the exact
+candidate and executed results. Do not use an older green run as current verification.
+Successful API mocks cannot establish a live gate. Browser tests are not fun tests.
+Report an administrator browser restriction rather than bypassing it.
 
-Use narrative/intuitive context before jargon where faithful: who wants what, what
-changed, and what action matters. Play must reveal causality. Do not add story as extra
-reading burden or force every subject into one fantasy, delivery, combat or quiz template.
-Prefer meaningful investigation, manipulation, construction and experimentation.
+The local Python repair lab is a read-only downloadable teaching artifact. Its demo
+uses a temporary SQLite database and its starter intentionally fails tests. The app
+must not execute learner-supplied code, infer competence from downloading the lab,
+or claim production readiness from these bounded tests.
 
-Teach -> easy success -> variation -> combine -> boss/transfer -> resolution -> new
-possibility. Increase reasoning, not form length. Teach every required boss rule before
-its graded use. A useful new tool expands agency; a cosmetic badge is not a new mechanic.
-Successful sequential clears focus the intended next route. Failure keeps a predictable
-retry target. Required actions remain accessible, stable and usable without sound/motion.
+## Game-first teaching invariant
 
-Experience and learning outcomes are separate gates; neither compensates for failure
-of the other. Map each outcome through mechanic, decision, feedback, varied practice,
-fresh transfer, delayed retrieval and evidence limits. Do not claim a full course's
-outcomes from a short guided slice. Free prose cannot be graded by counts or keywords.
+Read GAME-UX-SYSTEM.md, GAME-UX-REVIEW.md, GAME-ACCEPTANCE-9.md and the newer amendments
+before modifying missions, UI, progression or future generation. Review as a game a
+curious younger non-specialist and an older teen/young adult would voluntarily keep
+playing. Do not equate childish decoration, XP, long forms or easy questions with fun.
 
-## Evidence, privacy and persistence
+The player must understand the goal, relevant facts, meaningful actions and last
+consequence. Put action and feedback together. Teach through experimentation,
+investigation, construction and recovery where faithful. Story carries causality,
+not extra reading burden. Formal terms name the intuitive model. Difficulty rises
+through recombination and fading support, not untaught demands or longer forms.
 
-Every command resolves a learner session, command ID and expected revision. Server
-validation owns progression and replays pinned game rules. Saved moves cannot be erased;
-rehearsal rewind retains prior feedback/history. Submissions/checkpoints/evidence are
-immutable. New assessment meaning requires explicit new identities/revisions.
+Use teach -> easy success -> variation -> combine -> unfamiliar challenge -> relief
+and a real new possibility. After a clear, point to the newly intended route; after
+failure, preserve predictable retry focus. Mistakes expose causes and invite a new
+hypothesis. Test replay with XP hidden. No shame, fake urgency, coercive streaks or
+excessive grinding. Themes, node counts and renderers are replaceable patterns.
 
-`unknown` is not `assisted`; observed/declared current help is `assisted`; earlier family
-exposure is `previously_exposed`, not help used now. Interactive feedback is not a fresh
-independent prediction. Missing evidence is not failure. XP/self-report never establishes
-mastery, evidence strength or correctness-based unlocks. Evidence/reviews belong to
-learners/frames, not installed course packages.
+**Two hard gates:** game experience and defensible learning outcomes. Neither may
+compensate for failure of the other. Every course package must map outcomes through
+mechanics, decisions, causal feedback, varied practice, transfer assessment,
+authentic application and later retrieval, with missing evidence explicit. Future
+unattended generation still needs separate validation; the temporary current-review
+exception does not let every generator self-certify.
 
-Hosted mode fails closed without verified Supabase identity, an email allowlist, HTTPS
-and a scoped PostgreSQL connection. Local identity is not production authentication.
-Keep auth, RLS, secrets and learner data unchanged for renderer-only work. Preserve
-unrelated work and supplied files, and record recovery paths and limitations.
+## Evidence, identity and safety
+
+Commands resolve a verified learner, command ID and expected revision. The server
+validates and replays pinned activity meaning. Saved moves/checkpoints, assistance
+and submitted evidence are immutable; rehearsal rewinds do not erase history.
+Progress/XP never strengthen evidence, establish mastery or substitute for correctness.
+Unknown outside help, current assistance and prior exposure remain different labels.
+Interactive simulation feedback is assistance, not a fresh independent prediction.
+Unobserved earlier work is not a failure. Prose is not graded by keywords or counts.
+
+Keep actual effects separate from what an actor knows. A missing reply is not a
+failed effect. A retry key has finite retention; a durable authoritative record is a
+separate capability. Final absence in these fixtures includes no in-flight request;
+an ordinary not-found result does not automatically establish that. A local database
+cannot make a remote provider side effect atomic. A lucky unsafe retry must not
+certify a safe policy. Check liveness as well as duplicate prevention.
+
+Hosted mode fails closed without verified Supabase identity, allowlist, HTTPS and
+scoped PostgreSQL/RLS. Never expose credentials or mutate production learner data
+for review. Record failures, migrations, limitations and recovery paths honestly.
+Equivalent/superior course effectiveness, actual youth enjoyment, independent learner
+implementation and delayed retention remain unvalidated until observed appropriately.
