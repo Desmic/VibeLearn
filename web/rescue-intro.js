@@ -44,7 +44,13 @@
     root.append(overlay);
     let step = 0, timer = 0, closed = false;
     const clear = () => { if (timer) clearTimeout(timer); timer = 0; };
-    const close = (focusLaunch=true) => { if (closed) return; closed = true; clear(); remember(); overlay.remove(); if (focusLaunch) launch?.focus({preventScroll:true}); };
+    const close = (focusLaunch=true, persistSeen=true) => {
+      if (closed) return;
+      closed = true; clear();
+      if (persistSeen) remember();
+      overlay.remove();
+      if (focusLaunch) launch?.focus({preventScroll:true});
+    };
     const update = () => {
       clear(); overlay.dataset.step = String(step);
       overlay.querySelector('.rgi-kicker').textContent = scenes[step].kicker;
@@ -55,10 +61,11 @@
       overlay.querySelector('#rgi-next').textContent = step===scenes.length-1 ? 'Take control · restore Signal 1 →' : 'Next →';
       if (step < scenes.length-1 && !reduced()) timer = setTimeout(()=>{step+=1;update();},3750);
     };
-    overlay.querySelector('#rgi-next').addEventListener('click',()=>{ if(step===scenes.length-1){close(false);launch?.click();} else {step+=1;update();} });
-    overlay.querySelector('#rgi-skip').addEventListener('click',()=>close(true));
-    overlay.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close(true);}});
-    activeCleanup = () => close(false); update(); overlay.focus({preventScroll:true});
+    overlay.querySelector('#rgi-next').addEventListener('click',()=>{ if(step===scenes.length-1){close(false,true);launch?.click();} else {step+=1;update();} });
+    overlay.querySelector('#rgi-skip').addEventListener('click',()=>close(true,true));
+    overlay.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close(true,true);}});
+    activeCleanup = () => close(false,false);
+    update(); overlay.focus({preventScroll:true});
   }
 
   function enhanceMap(missions, attempt) {
