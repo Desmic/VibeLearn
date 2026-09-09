@@ -112,7 +112,7 @@ def create_app(config=None, auth_provider=None):
 
     @app.get("/<asset>")
     def asset(asset):
-        if asset not in ("rescue.js", "rescue.css", "relay-repair-kit.zip", "app.js", "style.css", "premium.css", "game.css", "expedition.js", "expedition.css", "valley3d.js"):
+        if asset not in ("rescue.js", "rescue.css", "rescue-intro.js", "rescue-intro.css", "relay-repair-kit.zip", "app.js", "style.css", "premium.css", "game.css", "expedition.js", "expedition.css", "valley3d.js"):
             raise service.DomainError("NOT_FOUND", "Not found.", 404)
         return send_from_directory(ROOT / "web", asset)
 
