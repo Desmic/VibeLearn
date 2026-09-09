@@ -1,6 +1,34 @@
 /* Signal 1 onboarding: teach the world, stakes and vocabulary through simple causal animation. */
 'use strict';
 (() => {
+  const game = window.RescueGame;
+  if (!game) return;
+
+  // Preserve a newer local builder route across presentation redraws. app.js owns
+  // the recovery envelope in localStorage; server moves/results remain authoritative.
+  // RescueGame.render refreshes its presentation cache from server state, so on the
+  // SAME attempt restore only a locally newer route plan after that redraw.
+  if (!game.__draftRecoveryGuard) {
+    const originalRender = game.render.bind(game);
+    let lastAttemptId = null;
+    game.render = (attempt, missions, handlers) => {
+      const sameAttempt = Boolean(lastAttemptId && attempt?.id === lastAttemptId);
+      const before = sameAttempt ? game.response() : null;
+      const server = attempt?.response?.rescue || null;
+      const hasNewerLocalRoute = Boolean(
+        before && Array.isArray(before.draft) &&
+        JSON.stringify(before) !== JSON.stringify(server)
+      );
+      const result = originalRender(attempt, missions, handlers);
+      lastAttemptId = attempt?.id || null;
+      if (hasNewerLocalRoute && attempt?.status === 'draft' && attempt?.snapshot?.rescue?.level >= 6) {
+        game.restorePlan(before.draft);
+      }
+      return result;
+    };
+    game.__draftRecoveryGuard = true;
+  }
+
   const GUIDE_KEY = 'vibelearn.relay-rescue.signal1-guide.v1';
   const steps = [
     {kicker:'MEET THE VALLEY',title:'Pip needs the footbridge working.',body:'Pip is the courier. The workshop makes repair parts. The broken footbridge needs one gear before Pip can reopen the route.',facts:['Pip = courier','Workshop = makes parts','Gear = repairs the bridge']},
@@ -79,8 +107,6 @@
     addWorldKey(root);
     addMemory(root);
     addRecap(root);
-    // Only an interactive draft has player action controls. Submitted/review states
-    // keep the world key and recap but never reopen the tutorial.
     if (!seen() && root.querySelector('[data-tool]')) openGuide(root);
   }
 
