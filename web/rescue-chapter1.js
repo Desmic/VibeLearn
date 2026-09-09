@@ -79,10 +79,28 @@
 
   function addMemory(root) {
     const console = root.querySelector('.rg-console');
-    if (!console || console.querySelector('.rgc1-memory')) return;
+    if (!console || console.querySelector('.rgc1-memory') || root.querySelector('.rgc1-memory')) return;
     const note=document.createElement('div'); note.className='rgc1-memory';
-    note.innerHTML='<strong>What the storm changed:</strong> Pip lost the reply, not necessarily the gear. The workshop may know more than Pip does.';
+    note.innerHTML='<strong>Storm clue:</strong> Pip lost the reply, not necessarily the gear. The workshop may know more than Pip does.';
     console.prepend(note);
+  }
+
+  function buildPlayDock(root) {
+    const field=root.querySelector('.rg-field'), world=root.querySelector('.rg-world');
+    if (!field || !world) return;
+    let dock=field.querySelector('.rgc1-dock');
+    if (!dock) {
+      dock=document.createElement('section'); dock.className='rgc1-dock'; dock.setAttribute('aria-label','Signal 1 action dock');
+      world.after(dock);
+    }
+    // Move the real controls instead of cloning them: handlers, save semantics and
+    // accessibility all remain authoritative while the first mission reads as a game HUD.
+    const memory=root.querySelector('.rgc1-memory');
+    const ticket=root.querySelector('.rg-ticket');
+    const tools=root.querySelector('.rg-tools');
+    if (memory && memory.parentElement!==dock) dock.append(memory);
+    if (ticket && ticket.parentElement!==dock) dock.append(ticket);
+    if (tools && tools.parentElement!==dock) dock.append(tools);
   }
 
   function addRecap(root) {
@@ -96,7 +114,7 @@
 
   function updateGuidance(root) {
     if (!isSignalOne(root) || isHistorical(root)) return;
-    addWorldKey(root); addMemory(root); addRecap(root);
+    addWorldKey(root); addMemory(root); buildPlayDock(root); addRecap(root);
     const coach=ensureCoach(root); if(!coach) return;
     const failed=Boolean(root.querySelector('.rg-world-failed,[data-tool="rewind"]'));
     const cleared=Boolean(root.querySelector('.rg-clear'));
@@ -123,11 +141,11 @@
       enableOnly(root,'ticket'); return;
     }
     if (step===2) {
-      coach.querySelector('span').textContent='NOW YOU HAVE THE WHOLE STORY'; coach.querySelector('strong').textContent='The workshop may already have made the gear.'; coach.querySelector('small').textContent='Choose Pip’s move. Reuse what belongs to this order—or print a brand-new ticket and see what changes.';
+      coach.querySelector('span').textContent='NOW CHOOSE PIP’S MOVE'; coach.querySelector('strong').textContent='The workshop may already have made the gear.'; coach.querySelector('small').textContent='Reuse order-01, or print a brand-new ticket and watch what the workshop does.';
       enableChoices(root); setHighlight(root,'[data-tool="retry"]'); return;
     }
     if (step===3) {
-      coach.querySelector('span').textContent='A NEW TICKET CHANGED THE MEANING'; coach.querySelector('strong').textContent='The workshop can mistake it for another job.'; coach.querySelector('small').textContent='Send it to see the consequence, or rewind before you do.';
+      coach.querySelector('span').textContent='A NEW TICKET CHANGED THE MEANING'; coach.querySelector('strong').textContent='The workshop can mistake it for another job.'; coach.querySelector('small').textContent='Send it to see the consequence, or choose the safe remembered ticket next time.';
       enableChoices(root); setHighlight(root,'[data-tool="retry"]'); return;
     }
     enableChoices(root);
