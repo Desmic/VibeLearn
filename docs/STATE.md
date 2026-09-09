@@ -1,6 +1,6 @@
 # Current checkpoint — attention-first onboarding + progressive Signal 1
 
-Updated 9 September 2026. **Status: `needs_revision` until the current user plays and accepts the latest candidate.** Critic/machine scores are pre-gates only; the current user's explicit verdict is authoritative.
+Updated 9 September 2026. **Status: `ready_for_user_review` after the internal pre-gate; not `user_accepted`.** The current user's explicit verdict remains authoritative and is still **5/10 game, 5/10 learning** until they personally review this changed build.
 
 ## Latest user direction
 
@@ -47,6 +47,8 @@ Current acceptance flow:
 
 `needs_revision -> machine/browser verification -> critic >=9 on game + learning/no blocker -> ready_for_user_review -> explicit user acceptance -> user_accepted`
 
+The internal-tool-assisted frozen review of runtime candidate `416a463b07015b98fd8915f2c890c56f9e74900b` recorded **9.196/10 game experience** and **9.35/10 learning/real-world transfer for the bounded retry-safety slice**, with no frozen critical blocker. See `CURRENT-GAME-CRITIC.md`. This is a pre-gate only; it is not an independent agent or human playtest and does not change the user's 5/10 + 5/10 verdict.
+
 A critic >=9 does not mean accepted. No external users/testers or broader rollout are authorized before the user's acceptance and later explicit authorization.
 
 ## First-chapter comprehension gate
@@ -71,4 +73,6 @@ This remains private Phase 1 refinement. No Phase 2/3 generation implementation,
 
 ## Verification status
 
-The onboarding/runtime candidate is currently being verified on GitHub Actions. Do not claim this exact runtime candidate is live until the latest build/browser journey is green and a manual Render deployment reaches `live`. Update this section after that deploy; passing machine checks still do not replace the user's play review.
+Runtime candidate `416a463b07015b98fd8915f2c890c56f9e74900b` passed GitHub Actions run `34376435686`, including unit tests and the complete browser suite. Frozen evidence artifact: `game-review-evidence-416a463b07015b98fd8915f2c890c56f9e74900b`, SHA-256 `d34cc9978c93b3af5d6761ef60bde80a86bc26e862ca5c7a66607a5d68e6ba50`.
+
+The later commits that add the critic report and this checkpoint are documentation-only. Run the final branch-head CI and then manually deploy Render because auto-deploy is disabled. Do not claim the new candidate is live until Render reports that deployment as `live`. Passing machine checks still do not replace the user's play review.
