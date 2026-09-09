@@ -1,20 +1,38 @@
 # The game is the course
 
-Active user amendment — 9 September 2026. Read this before interpreting older acceptance blockers. The user authorized reviewing with available tools while Codex is unavailable and clarified the product: a game whose completion delivers the intended course outcomes, ideally better, with the experience treated as essential.
+Active user amendment — 9 September 2026. Read this with [COMMERCIAL-GAME-BAR.md](COMMERCIAL-GAME-BAR.md), which records the newest user authority and commercial-game quality bar.
 
-## Review method override
+## Product authority
 
-For the current private Phase 1 refinement, Codex availability is **not a blocker to useful review or iteration**. Use a deliberately separated, frozen-rubric internal critic pass informed by actual rendered browser journeys, screenshots, traces, adverse-path tests and code. State exactly what the reviewer could observe. Label that method `internal_tool_assisted`, never a separate agent, independent model or human playtest. A source-only review is still insufficient for a game score.
+The user is currently the only real product user/reviewer. **Their explicit product judgment overrides all agent, critic, automated and historical review scores for acceptance.** A critic pass is only a pre-gate: >=9.0 with no critical blocker and both audience lenses passing may produce `ready_for_user_review`, never `user_accepted`. Explicit user rejection always returns the candidate to revision. Only explicit user acceptance closes the product checkpoint.
 
-The target remains **>=9.0/10 before rounding**, both younger-player and young-adult engagement lenses passing, no critical blocker, and the user's final judgment. This temporary method exception changes who can review, not the quality standard or the evidence required. No automatic passing number follows from the tool constraint. Use `needs_revision` for a rejected candidate; do not keep requiring Codex setup from the user. Genuine independent review remains desirable when available. Future unattended course generation does not receive blanket permission to self-certify.
+Do not open the product to other learners as a substitute for fixing the current experience. External-user testing requires later explicit authorization after the current user accepts the experience.
 
-This section supersedes the earlier no-same-agent-fallback wording in AGENTS.md, STATE.md, GAME-ACCEPTANCE-9.md, GAME-UX-REVIEW.md and CRITIC-HANDOFF.md for this current refinement only. Other learning, privacy, phase and infrastructure boundaries are unchanged.
+## Review method
+
+For the current private Phase 1 refinement, unavailable Codex/separate-agent access is **not a blocker to useful iteration**. Use a deliberately separated, frozen-rubric internal critic pass informed by actual rendered browser journeys, screenshots, traces, adverse-path tests and code. State exactly what the reviewer could observe. Label that method `internal_tool_assisted`, never a separate agent, independent model or human playtest.
+
+The target remains **>=9.0/10 before rounding**, both younger-player and young-adult engagement lenses passing, no critical blocker, and then the user's final judgment. No automatic passing number follows from the tool constraint. Use `needs_revision` for a rejected candidate. Genuine independent review remains desirable when available; future unattended course generation does not receive blanket permission to self-certify.
 
 ## Product promise and honest limits
 
-The intended product is **a game that teaches through what the player does**, not an ordinary course interrupted by minigames, and not a lesson interface with a 3D background. Gameplay, world responses, puzzles, construction, investigation and decisions carry the target thinking. Explanations, dialogue and references support those experiences at the point of need. A serious game may be quiet, strategic, conversational or investigative; combat, reflex challenges and free walking are not mandatory.
+The intended product is **a game that teaches through what the player does**, not an ordinary course interrupted by minigames, and not a lesson interface with a 3D background. Gameplay, world responses, puzzles, construction, investigation and decisions carry the target thinking. Explanations, dialogue and references support those experiences at the point of need.
+
+The learner-facing experience must cross the bar from **gamified website** to **credible commercial game**—the kind of interaction, onboarding, pacing, feedback, cohesion and polish a user could reasonably expect from a Play Store or Steam title. This does not require AAA assets, combat, free walking, 3D or one genre. A quiet systems puzzle, strategy game, investigation, simulation or construction game can qualify if the primary experience is genuinely game-like.
 
 The desired learning endpoint is the same useful knowledge and capabilities that a well-specified course promises. Matching a syllabus's words is not matching its outcomes. A five-stop retry rehearsal is a small reference slice, **not a replacement for a full distributed-systems or reliability course**. Equivalent or superior learning effectiveness remains unvalidated until appropriately designed learner evaluation exists. Engagement predictions are likewise hypotheses, not child-testing evidence.
+
+## First-minute comprehension is a game and learning gate
+
+The player must quickly understand the situation before being asked to reason about abstractions. Where faithful to the subject, establish:
+
+- where/what the world or problem space is;
+- who or what the player represents;
+- what changed, failed, appeared or became possible;
+- what success means and why it matters;
+- what first action the player can take.
+
+The current Missing Delivery reference failed this gate in user review: Pip, the valley/workshop, the already-sent order, the storm-lost reply, duplicate-delivery risk and the player's role were not immediately clear. The active fix is an approximately 15–20 second skippable/replayable story sequence plus a concise static/reduced-motion equivalent, followed quickly by meaningful play. The exact story/duration is not a universal generator template; the comprehension contract is.
 
 ## Two independent product gates
 
@@ -49,9 +67,11 @@ The current reference implements guided pieces of this map; it does not yet sati
 
 ## Experience assurance in practice
 
-Use one small playable slice as the acceptance unit. Freeze the build and rubric, observe a fresh start, an error, recovery, a harder encounter, the ending and a genuine replay. Record likely abandonment points for younger non-specialists and older teens/young adults separately. Improve the actual interaction before increasing art scope. Re-run persistence, isolation and accessibility checks after game changes.
+Use one small playable slice as the acceptance unit. Freeze the build and rubric, observe a fresh start, an error, recovery, a harder encounter, the ending and a genuine replay. Record likely abandonment points for younger non-specialists and older teens/young adults separately. Improve the actual interaction before increasing art scope.
 
-Design targets, not fabricated measurements: meaningful first action within about 30 seconds of entering play; stable input acknowledgement; no forced timer for untimed reasoning; no repeated confirmation forms between every trivial action; familiar rules recombined before new ones appear. On the supported device set, measure frame timing, input delay, load/recovery behavior and text/control legibility. Headless desktop rendering does not establish phone GPU performance.
+Review against credible commercial-game expectations, not merely against the previous VibeLearn build or educational-web products. Ask whether the complete journey feels like something a player would recognize as a game rather than a polished learning site.
+
+Design targets, not fabricated measurements: meaningful first action shortly after the opening context; stable input acknowledgement; no forced timer for untimed reasoning; no repeated confirmation forms between trivial actions; familiar rules recombined before new ones appear. On supported devices, measure frame timing, input delay, load/recovery behavior and text/control legibility. Headless desktop rendering does not establish phone GPU performance.
 
 Human final review is essential. No process can guarantee that every person finds a game enjoyable; what the team can enforce is a demanding evidence-backed acceptance standard and refuse to ship obvious friction as 'polish later'. Do not substitute streak pressure, shame, fake urgency, excessive grinding or compulsory rewards for curiosity and earned competence.
 
@@ -59,17 +79,7 @@ Human final review is essential. No process can guarantee that every person find
 
 Explore an authored, stylized 2.5D/3D scene when direct object manipulation, spatial relationships or visible system behavior improve the learning action. Three.js is a renderer/scene library, not a replacement for game rules, input design, progression or assessment. The renderer projects authoritative state; it never awards learning evidence.
 
-The opt-in valley prototype is a technical probe, not proof that the game is now good. Promote it only after meaningful interactions, clear targets, mobile behavior and visual quality beat the existing presentation. Keep equivalent keyboard/touch semantics and a usable fallback. Do not force all generated subjects into 3D or one fantasy template. See THREEJS-SPIKE.md for implementation and verification.
-
-## Source-grounded design inputs
-
-- Three.js official *Making a Game* distinguishes rendering from the other game systems developers must supply: https://threejs.org/manual/en/game.html . Its picking, responsive rendering and cleanup manuals inform the prototype, not a claim of audience engagement.
-- Habgood and Ainsworth's study *Motivating children to learn effectively: exploring the value of intrinsic integration in educational games* examines integrating learning into the core mechanic: https://shura.shu.ac.uk/3556/ . Application here is a design hypothesis; the study does not validate VibeLearn or every topic/audience.
-- Roediger and Karpicke, *Test-Enhanced Learning*, examines delayed retention after retrieval practice: https://www.psychologicalscience.org/journals/psychological-science/j.1467-9280.2006.01693.x/ . This motivates checking later retrieval instead of equating immediate successful play with durable knowledge.
-- Celia Hodent, onboarding and engagement: https://celiahodent.com/gamers-brain-ux-onboarding/ . Apply contextual teaching and controlled early load rather than an exposition wall.
-- AWS Builders Library, retry semantics: https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/ . The workshop metaphor must preserve caller intent, changed parameters and bounded/late uncertainty.
-
-These are primary author/developer/research sources inspected during this refinement. They inform the design; they do not establish course equivalence, superiority or youth enjoyment.
+The opt-in valley prototype is a technical probe, not proof that the game is now good. Promote it only after meaningful interactions, clear targets, mobile behavior and visual quality beat the existing presentation. Keep equivalent keyboard/touch semantics and a usable fallback. Do not force all generated subjects into 3D or one fantasy template.
 
 ## Scope
 
