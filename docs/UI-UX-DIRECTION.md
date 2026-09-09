@@ -1,163 +1,104 @@
-# VibeLearn UI/UX direction — game-first, premium learning
+# VibeLearn UI/UX direction — commercial game first, serious learning underneath
 
-Status: adopted direction after live learner feedback on 8 September 2026.
+Status: active direction after user review on 9 September 2026. Read [COMMERCIAL-GAME-BAR.md](COMMERCIAL-GAME-BAR.md) first.
 
 ## Product feeling
 
-VibeLearn should feel like **a learning game for serious technical skills**, not a
-premium SaaS website that happens to contain XP.
+VibeLearn should feel like **a real learning game for serious technical skills**, with a learner-facing experience credible against the interaction/onboarding/pacing/polish expectations of Play Store or Steam games. It must not feel like a premium SaaS/course website that happens to contain XP, missions, cards or a 3D scene.
 
-The evidence model, persistence, provenance and assessment rules remain rigorous under
-the surface. The learner-facing experience should be playful, energetic, visual and
-motivating enough that doing difficult practice feels intrinsically fun.
+This is not a requirement for AAA visuals, combat, free-roaming 3D or one genre. It is a requirement that the primary experience is game-like: coherent world/context, clear player role, direct actions, visible consequences, responsive feedback, growing agency, recoverable failure, progression, satisfying resolution and coherent game menus.
 
-The working blend is:
+The evidence model, persistence, provenance and assessment rules remain rigorous under the surface. Those systems should not dominate the learner-facing presentation with implementation/admin language.
 
-- Brilliant-like learning by doing and rapid feedback;
-- Duolingo-like mission/progression craft, tactile interactions and moments of delight;
-- technical depth that never gets simplified merely to make the screen look playful.
+## User authority
 
-Reference principles, not assets:
+The user is currently the only real product user/reviewer. Their latest explicit judgment overrides all agent/critic/automated scores for product acceptance. A critic >=9.0 can only make a candidate ready for user review; explicit user acceptance is required for acceptance. Do not open to other users before acceptance and later explicit authorization.
 
-- https://blog.duolingo.com/core-tabs-redesign/
-- https://brilliant.org/
+Latest user verdict on the current experience: **5/10 game experience and 5/10 learning experience**. The largest immediate problem is lack of clarity about what the game is, who Pip is, what happened, why retrying may create duplicates and what the player's goal is.
 
-## Learner feedback that changed the direction
+## First-minute direction
 
-The first premium refinement was accepted aesthetically, but the live learner trial
-surfaced three stronger product issues:
+The first minute must make the player understand the world/problem before jargon. For the current Missing Delivery reference, add an approximately **15–20 second skippable/replayable story sequence**:
 
-1. the challenge itself could be presented more clearly;
-2. the experience needs more purposeful animation and visual causality;
-3. the interface still felt more like a polished website than a game.
+1. Pip is the valley courier; the workshop supplies needed parts.
+2. Pip has already sent an order for one bridge gear.
+3. A storm swallows the reply, making the result uncertain.
+4. Sending again blindly may produce two gears when only one is wanted.
+5. The player is asked to help Pip discover the truth, restore the signals/network and make one intent lead safely to one result.
+6. At the right moment, bridge the intuitive story to the same retry/uncertainty problem in real software.
 
-The learner also could not discover the old `Save draft` behavior. That is treated as
-a UX failure even though the backend persistence feature worked: implementation
-terminology should never be required to understand the learning flow.
+The reduced-motion/skip path must preserve the same causal explanation. The intro is replayable from a game menu/help surface. After the opening, move into meaningful interaction quickly instead of another briefing wall.
+
+Generated courses inherit this **opening comprehension contract**, not the exact Pip/storm story or duration.
 
 ## Design principles
 
-### 1. The learner is on a mission
+### 1. Playfield first
 
-Practice activities should have an objective, stakes, stages and a clear finish. Use
-language such as mission, run, stage, challenge, power-up and debrief where it improves
-clarity. Do not gamify database/evidence terminology.
+The main surface should feel like the game world/playfield. HUD and contextual controls support the action. Avoid giant web-page headings, dense cards, dashboards, forms, tables and persistent utility chrome dominating the view.
 
-### 2. Clarity before decoration
+### 2. The player has a role, not merely a lesson task
 
-Animation should explain what happened or what changed:
+Each chapter establishes who/what the player is in relation to the situation, what matters, what changed and what success means. The role may be investigator, operator, builder, scientist, strategist, debugger, designer or another domain-appropriate identity. Do not force one fantasy template.
 
-- reveal the causal sequence of an incident;
-- show mission progression;
-- make a saved state visibly settle;
-- make hints feel like optional assistance;
-- make submission feel like committing a decision;
-- make completion/reward feel earned.
+### 3. Clarity before decoration
 
-Purely decorative motion is lower priority.
+Motion and visual staging should communicate causality:
 
-### 3. Gamefulness should be present throughout the learning loop
+- show what happened and why;
+- show state transitions and consequences;
+- make saves/resume settle visibly;
+- make hints feel optional, not required paperwork;
+- make committing a decision feel consequential;
+- make failure readable and recoverable;
+- make completion feel earned.
 
-The earlier rule restricted strong visual treatment mostly to rewards. That was too
-conservative. The new rule is:
+Pure decorative motion is lower priority.
 
-**The core learning loop may feel gameful at every stage, while system/admin controls
-remain quiet.**
+### 4. Gamefulness is continuous
 
-The problem, prediction, hints, source discovery, submission and debrief can all use
-color, motion, staging and tactile feedback.
+Do not concentrate all game feel in the intro, map or reward screen. The core loop itself must remain game-like:
 
-### 4. Serious learning remains underneath the game
+`understand -> act -> see consequence -> update hypothesis -> gain/use capability -> face variation -> recover/adjust -> resolve`
 
-XP does not determine mastery. Assistance remains recorded. Evidence remains
-inspectable and immutable. Repeated familiar practice does not become independent
-mastery merely because the game celebrates it.
+### 5. Agency grows with progression
 
-### 5. Saving must be understandable without implementation vocabulary
+New missions should unlock new interactions, tools, viewpoints or strategic options. Merely adding more text, more fields or more answer choices is not meaningful progression.
 
-Learner-facing copy uses **Save progress**, not `Save draft`. A learner should
-immediately understand that saving lets them pause an active run and resume it later.
-Submitted runs do not show a save action; starting another run creates a new savable
-state.
+### 6. Menus are part of the game
 
-### 6. Motion is accessible
+Pause, resume, replay intro, controls, accessibility, help and save state should feel like coherent game menus. Avoid learner-facing terms such as draft revision, backend mode, evidence schema or database state unless genuinely necessary and translated into player language.
 
-All animation must respect `prefers-reduced-motion`, keyboard operation, touch targets,
-contrast, zoom and narrow screens.
+### 7. Serious learning remains underneath the game
 
-## Visual/game language
+XP does not determine mastery. Assistance remains recorded. Evidence remains inspectable and immutable. Repeated familiar practice does not become independent mastery because the game celebrates it.
 
-### Core accents
+### 8. Saving must be obvious
 
-- electric lime — progress, assistance, success, mission energy;
-- violet — exploration, resources, depth, future progression;
-- deep navy — mission HUD, committed actions, technical seriousness;
-- amber — genuine warning/uncertainty only.
+Use player language such as **Save progress**, **Resume run** and **Continue mission**. A learner should immediately understand that progress persists. Submitted/finished runs should not expose irrelevant save controls.
 
-### Interaction hierarchy
+### 9. Motion and interaction are accessible
 
-- mission action — tactile, high-energy primary control;
-- secondary learning action — visible but clearly subordinate;
-- power-up/help — playful but optional;
-- utility/system action — visually quiet.
+All animation must respect `prefers-reduced-motion`; essential meaning must also work with sound off. Preserve keyboard operation, touch targets, contrast, text enlargement, narrow layouts and renderer fallbacks.
 
-## Current implementation state
+## Interaction hierarchy
 
-### Auth
+- **primary game action** — tactile, obvious, high-energy where appropriate;
+- **context action/tool** — visible near the affected object/state;
+- **optional help/intel** — discoverable but subordinate;
+- **game menu/system utility** — quiet and consistent;
+- **evidence/admin detail** — normally hidden from the primary game loop unless requested.
 
-- focused login state;
-- inline password visibility controls;
-- tertiary password recovery;
-- raw browser AbortSignal/timeout messages are normalized to a learner-facing retry
-  message;
-- client timeout budget is increased for free-tier wakeups;
-- after a transport failure during login, the client checks whether the authenticated
-  session actually succeeded server-side before reporting failure.
+## Current implementation interpretation
 
-### Mission entry
+The current illustrated/Three.js Missing Delivery candidate is still a prototype. A map, renderer and animated scene do not prove the commercial-game bar. The next product work should prioritize first-minute comprehension, playfield hierarchy, meaningful alternative actions, causal world response, growing agency and satisfying failure/recovery before adding more scenery.
 
-- the episode is framed as `MISSION 01`;
-- objective is `Defuse the duplicate charge`;
-- the learner sees three explicit goals before starting;
-- first-clear XP is visible without implying mastery;
-- LEARN/PAIR/BUILD is framed as a play style rather than a backend mode selector.
+## Explicit non-goals
 
-### Active mission
-
-- mission HUD shows stage/progress;
-- incident objective is explicit;
-- timeline elements reveal sequentially to reinforce causal order;
-- `Save progress` includes the explanation `Pause here and resume this run later`;
-- submission is framed as `Lock in answer`;
-- hints are framed as optional power-ups;
-- source access remains optional exploration.
-
-### Completion
-
-- completion advances the mission bar to 100%;
-- feedback rows stage in after submission;
-- reward surface gets a stronger completion animation;
-- replay is framed as `Play another run` while keeping familiar-practice evidence rules.
-
-## Next refinements as the product grows
-
-Refine game feel alongside product features rather than doing another isolated polish
-cycle. Candidate directions:
-
-- richer animated system traces and state transitions;
-- interactive diagrams/simulations instead of static tables when useful;
-- clearer challenge maps and progression between activities;
-- retrieval/review missions;
-- stronger moment-to-moment feedback while solving;
-- sound/haptics only if platform support and learner preference justify them;
-- identity/progression systems that celebrate practice without corrupting mastery
-  signals.
-
-## Explicit non-goals for now
-
-- copying Duolingo/Brilliant artwork or layouts;
-- manipulative streak loss or punishment mechanics;
-- leaderboards before we know they help learning;
-- currencies/shops merely to increase engagement;
-- hiding evidence or uncertainty behind celebratory UI;
-- making technical material easier than it should be just to preserve flow.
+- copying commercial game assets/UI verbatim;
+- adding 3D just to appear game-like;
+- manipulative streak loss, shame or fake urgency;
+- grind, currencies, shops or leaderboards used to mask a weak loop;
+- hiding uncertainty/evidence problems under celebration;
+- simplifying technical rigor merely to maintain flow;
+- opening to additional users before the current user accepts the experience.
