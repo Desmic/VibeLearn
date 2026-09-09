@@ -21,6 +21,7 @@
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const seen = () => { try { return localStorage.getItem(SEEN_KEY) === 'seen'; } catch (_) { return false; } };
   const remember = () => { try { localStorage.setItem(SEEN_KEY, 'seen'); } catch (_) {} };
+  const setLaunchReady = launch => { if (launch) launch.innerHTML='Start Signal 1 <span>→</span>'; };
 
   function makeStatic(root) {
     if (root.querySelector('#rgi-static')) return;
@@ -71,6 +72,7 @@
     const close = (start=false, persist=true) => {
       if (closed) return; closed = true; clearTimer();
       if (persist) remember(); overlay.remove();
+      setLaunchReady(launch);
       if (start) launch?.click(); else launch?.focus({preventScroll:true});
     };
     overlay.querySelector('#rgi-next').onclick = () => step === scenes.length-1 ? close(true,true) : (step += 1, update());
@@ -96,7 +98,9 @@
       const replay = document.createElement('button'); replay.type='button'; replay.id='rg-replay-story'; replay.textContent='Replay opening story'; replay.onclick=()=>open(root,launch,{replay:true}); menu.prepend(replay);
     }
     if (cleared===0 && !active && launch && !seen()) {
-      if (reduced()) makeStatic(root); else open(root,launch);
+      if (reduced()) { makeStatic(root); setLaunchReady(launch); } else open(root,launch);
+    } else if (cleared===0 && !active && launch) {
+      setLaunchReady(launch);
     }
   }
 
