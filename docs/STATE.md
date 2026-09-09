@@ -25,6 +25,9 @@ The current candidate adds:
 - a Signal 1 tutorial that initially exposes only one obvious action: inspect the workshop;
 - progressive disclosure: workshop -> ticket -> first decision -> visible duplicate failure/recovery -> success;
 - child-readable in-world labels explaining Pip / Workshop / Gear / Ticket / Reply;
+- a playfield-first Signal 1 presentation: the website-like side console, field journal and evidence disclosure are suppressed during the guided concrete interaction, then normal secondary systems return after the lesson resolves;
+- a compact game action dock that reuses the real ticket and action controls only after the player has gathered the required clues, instead of showing a vertical stack of forms/panels from the start;
+- tutorial progression derived from server-confirmed rescue state rather than optimistic click events, so saving/pending states cannot accidentally unlock a second move;
 - a Signal 1 completion recap that names `idempotent retry` only after the player has experienced the concrete rule;
 - dedicated rendered browser verification for normal-motion onboarding, reduced-motion equivalent, progressive interaction, visible wrong-action consequence and recovery.
 
