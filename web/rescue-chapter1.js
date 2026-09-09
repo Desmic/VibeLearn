@@ -140,7 +140,9 @@
   const game=window.RescueGame;
   if (game && !game.__signalOneGuideV2) {
     const previousRender=game.render.bind(game);
+    const previousSync=game.sync.bind(game);
     game.render=(...args)=>{ const result=previousRender(...args); enhanceNow(); return result; };
+    game.sync=(...args)=>{ const result=previousSync(...args); enhanceNow(); return result; };
     game.__signalOneGuideV2=true;
   }
 
@@ -155,8 +157,9 @@
     queueMicrotask(enhanceNow);
   },true);
 
-  let queued=false;
-  const schedule=()=>{ if(queued) return; queued=true; queueMicrotask(()=>{queued=false;enhanceNow();}); };
-  new MutationObserver(schedule).observe(workspace,{childList:true,subtree:true});
-  schedule();
+  // Render/sync wrappers are the authoritative lifecycle hooks. Avoid a subtree
+  // MutationObserver here: tutorial text updates themselves mutate child nodes and
+  // can create an infinite observer loop. A single queued pass covers the initial
+  // frame; subsequent renders, syncs and player actions call enhanceNow directly.
+  queueMicrotask(enhanceNow);
 })();
