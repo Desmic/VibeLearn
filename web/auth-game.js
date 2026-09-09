@@ -22,6 +22,8 @@
     lock.className = 'auth-lockline';
     lock.textContent = reset ? 'Secure recovery · existing campaign state preserved' : 'Private pilot access · progress stays scoped to your account';
     panel.append(lock);
+    const submit = panel.querySelector('button[type="submit"]');
+    if (submit) submit.setAttribute('aria-label', reset ? 'Save new password' : 'Enter campaign');
     screen.append(makeStage(reset), panel);
   }
 
