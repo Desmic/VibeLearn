@@ -28,8 +28,8 @@
   function addWorldKey(root) {
     const world = root.querySelector('.rg-world');
     if (!world) return;
-    // Signal 1 has direct scene-owned inspection targets. Hide the older duplicate
-    // observation tray so the first interaction grammar is one obvious surface.
+    // Signal 1 has direct scene-owned inspection targets. Remove the older duplicate
+    // observation tray so the tutorial teaches one clear interaction surface.
     root.querySelector('.rg-observations')?.remove();
     if (world.querySelector('.rgc1-world-key')) return;
     const key = document.createElement('div'); key.className='rgc1-world-key';
@@ -128,6 +128,22 @@
     menu.prepend(button);
   }
 
+  function enhanceNow() {
+    const root=rootEl();
+    if (!isSignalOne(root)) return;
+    decorateMenu(root); updateGuidance(root);
+  }
+
+  // Attach to the actual game render lifecycle rather than relying only on DOM
+  // timing. This guarantees the guide exists before a rendered Signal 1 frame is
+  // handed back to app.js/Playwright/the player.
+  const game=window.RescueGame;
+  if (game && !game.__signalOneGuideV2) {
+    const previousRender=game.render.bind(game);
+    game.render=(...args)=>{ const result=previousRender(...args); enhanceNow(); return result; };
+    game.__signalOneGuideV2=true;
+  }
+
   const workspace=document.querySelector('#workspace'); if(!workspace) return;
   workspace.addEventListener('click',event=>{
     const target=event.target.closest('[data-world-look],[data-tool]'); if(!target) return;
@@ -136,11 +152,11 @@
     else if(target.dataset.worldLook==='ticket' && readStep()===1) writeStep(2);
     else if(target.dataset.tool==='new' && readStep()>=2) writeStep(3);
     else if(target.dataset.tool==='rewind') writeStep(2);
-    queueMicrotask(()=>updateGuidance(rootEl()));
+    queueMicrotask(enhanceNow);
   },true);
 
   let queued=false;
-  const schedule=()=>{ if(queued) return; queued=true; queueMicrotask(()=>{queued=false; const root=rootEl(); if(isSignalOne(root)){decorateMenu(root);updateGuidance(root);}}); };
+  const schedule=()=>{ if(queued) return; queued=true; queueMicrotask(()=>{queued=false;enhanceNow();}); };
   new MutationObserver(schedule).observe(workspace,{childList:true,subtree:true});
-  schedule(); setTimeout(schedule,50); setTimeout(schedule,250);
+  schedule();
 })();
