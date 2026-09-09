@@ -1,4 +1,4 @@
-"""WSGI deployment entry point. Hosted mode always requires Supabase authentication."""
+"""WSGI deployment entry point. Hosted mode always requires authenticated access."""
 import os
 import secrets
 import sqlite3
@@ -15,6 +15,7 @@ from flask import Flask, jsonify, request, send_from_directory, g
 from werkzeug.exceptions import HTTPException
 from app import service
 from app.auth import SupabaseAuth
+from app.pilot_auth import PilotAuth
 from app.manifest import manifest
 from app.storage import is_postgres, migrate, transaction
 
@@ -45,6 +46,9 @@ def create_app(config=None, auth_provider=None):
         if auth_parts.scheme != "https" or not auth_parts.hostname or auth_parts.path not in ("", "/") or not key:
             raise RuntimeError("Configure SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY")
         auth_provider = SupabaseAuth(auth_url.rstrip("/"), key)
+    auth_provider, test_name = PilotAuth.configure(auth_provider, settings)
+    if test_name:
+        allowed.add(test_name)
     migrate(database)
     app = Flask(__name__, static_folder=None)
     app.config.update(TESTING=testing, MAX_CONTENT_LENGTH=65536)
@@ -80,10 +84,11 @@ def create_app(config=None, auth_provider=None):
     @app.after_request
     def headers(response):
         response.headers["X-Request-ID"] = g.request_id
-        if request.endpoint in {"login", "logout", "request_reset", "reset_password"} or response.status_code >= 500:
+        tracked = {"login", "logout", "request_reset", "reset_password", "reset_progress"}
+        if request.endpoint in tracked or response.status_code >= 500:
             logging.getLogger("vibelearn.requests").warning(json.dumps({
                 "event": "request_completed", "request_id": g.request_id,
-                "endpoint": request.endpoint if request.endpoint in {"login", "logout", "request_reset", "reset_password", "health", "state", "command"} else "other",
+                "endpoint": request.endpoint if request.endpoint in tracked | {"health", "state", "command", "rescue_history"} else "other",
                 "status": response.status_code,
                 "duration_ms": round((time.monotonic() - g.request_started) * 1000)}))
         response.headers.update({
@@ -114,6 +119,7 @@ def create_app(config=None, auth_provider=None):
     def asset(asset):
         if asset not in (
             "rescue.js", "rescue.css", "auth-game.js", "auth-game.css",
+            "progress-controls.js", "progress-controls.css",
             "relay-repair-kit.zip", "app.js", "style.css", "premium.css", "game.css",
             "expedition.js", "expedition.css", "valley3d.js"
         ):
@@ -139,14 +145,14 @@ def create_app(config=None, auth_provider=None):
     @app.post("/api/auth/login")
     def login():
         body = request.get_json()
-        if not isinstance(body, dict) or set(body) != {"email", "password"} or any(not isinstance(v, str) for v in body.values()) or len(body["email"]) > 320 or not 1 <= len(body["password"]) <= 4096:
-            raise service.DomainError("INVALID_REQUEST", "Enter your email and password.")
-        email = body["email"].strip().lower()
-        if email not in allowed:
+        if not isinstance(body, dict) or set(body) != {"email", "password"} or any(not isinstance(v, str) for v in body.values()) or not 1 <= len(body["email"]) <= 320 or not 1 <= len(body["password"]) <= 4096:
+            raise service.DomainError("INVALID_REQUEST", "Enter your email or player name and password.")
+        identifier = body["email"].strip().lower()
+        if identifier not in allowed:
             raise service.DomainError("UNAUTHENTICATED", "Check your sign-in details and pilot access.", 401)
-        access, ttl = auth_provider.login(email, body["password"])
+        access, ttl = auth_provider.login(identifier, body["password"])
         user = auth_provider.user(access)
-        if user["email"] != email:
+        if user["email"] != identifier:
             raise service.DomainError("FORBIDDEN", "The signed-in account does not match.", 403)
         learner = str(UUID(user["id"]))
         local_token = secrets.token_urlsafe(32)
@@ -177,11 +183,11 @@ def create_app(config=None, auth_provider=None):
     def request_reset():
         body = request.get_json()
         if not isinstance(body, dict) or set(body) != {"email"} or not isinstance(body["email"], str) or not 1 <= len(body["email"]) <= 320:
-            raise service.DomainError("INVALID_REQUEST", "Enter your email.")
-        email = body["email"].strip().lower()
-        if email in allowed:
-            auth_provider.request_reset(email, origin)
-        return jsonify(ok=True, message="If this email has pilot access, a reset link will arrive shortly.")
+            raise service.DomainError("INVALID_REQUEST", "Enter your email or player name.")
+        identifier = body["email"].strip().lower()
+        if identifier in allowed:
+            auth_provider.request_reset(identifier, origin)
+        return jsonify(ok=True, message="If this account supports password recovery, a reset link will arrive shortly.")
 
     @app.post("/api/auth/reset-password")
     def reset_password():
@@ -195,6 +201,31 @@ def create_app(config=None, auth_provider=None):
         for name in (COOKIE, ACCESS_COOKIE):
             result.delete_cookie(name, secure=True, httponly=True, samesite="Strict", path="/")
         return result
+
+    @app.get("/api/history/rescue/<mission_id>")
+    def rescue_history(mission_id):
+        learner = verified_user()
+        with transaction(database, learner=learner) as db:
+            rows = db.execute("SELECT * FROM attempts WHERE learner_id=? AND status='submitted' ORDER BY rowid DESC", (learner,)).fetchall()
+            for row in rows:
+                snapshot = json.loads(row["snapshot"])
+                if "rescue" in snapshot and snapshot.get("mission", {}).get("id") == mission_id:
+                    return jsonify(service.attempt_view(db, row))
+        raise service.DomainError("NOT_FOUND", "No completed run exists for that signal.", 404)
+
+    @app.post("/api/progress/reset")
+    def reset_progress():
+        body = request.get_json()
+        if body != {"confirmation": "RESET_PROGRESS"}:
+            raise service.DomainError("CONFIRMATION_REQUIRED", "Confirm the full progress reset in the game first.", 400)
+        learner = verified_user()
+        with transaction(database, learner=learner, lock=True) as db:
+            if is_postgres(database):
+                db.execute("SELECT vibelearn.reset_current_learner_progress()").fetchone()
+            else:
+                for table in ("reviews", "rewards", "evidence", "assistance", "checkpoints", "commands", "attempts"):
+                    db.execute(f"DELETE FROM {table} WHERE learner_id=?", (learner,))
+        return jsonify(service.state(database, learner))
 
     @app.route("/api/session", methods=["POST"])
     @app.route("/api/state", methods=["GET"])
