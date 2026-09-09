@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="A game-first practice campaign for reliable agent execution.">
 <title>vibeLearn · Reliable agents</title>
-<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/premium.css"><link rel="stylesheet" href="/game.css"><link rel="stylesheet" href="/expedition.css"><link rel="stylesheet" href="/rescue.css"><link rel="icon" href="data:,">
+<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/premium.css"><link rel="stylesheet" href="/game.css"><link rel="stylesheet" href="/expedition.css"><link rel="stylesheet" href="/rescue.css"><link rel="stylesheet" href="/rescue-targets.css"><link rel="stylesheet" href="/auth-game.css"><link rel="stylesheet" href="/rescue-chapter1.css"><link rel="icon" href="data:,">
 </head>
 <body>
 <a class="skip-link" href="#workspace">Skip to mission</a>
@@ -29,18 +29,18 @@
 <div id="notice" class="notice" role="alert" hidden></div>
 
 <section id="sign-in" class="card sign-in-card" hidden>
-<div class="auth-brand"><span class="auth-mark" aria-hidden="true">v↗</span><span>vibeLearn<small>Reliable Agents campaign</small></span></div>
-<p class="eyebrow">CONTINUE CAMPAIGN</p><h2>Return to your run.</h2><p>Your mission clears, XP, evidence and saved progress stay with your account.</p>
+<div class="auth-brand"><span class="auth-mark" aria-hidden="true">v↗</span><span>vibeLearn<small>Relay Rescue campaign</small></span></div>
+<p class="eyebrow">RECONNECT TO THE VALLEY</p><h2>Return to Relay Rescue.</h2><p>Your signals, mission clears and saved run stay with your account.</p>
 <form id="sign-in-form"><label for="login-email">Email</label><input id="login-email" type="email" autocomplete="username" maxlength="320" required>
 <label for="login-password">Password</label><div class="password-field"><input id="login-password" type="password" autocomplete="current-password" maxlength="4096" required><button id="toggle-password" class="password-utility" type="button" aria-controls="login-password" aria-pressed="false" data-password-toggle="login-password">Show password</button></div>
-<button id="request-reset" type="button">Forgot password?</button><button class="primary" type="submit">Enter campaign <span aria-hidden="true">→</span></button></form>
+<button id="request-reset" type="button">Forgot password?</button><button class="primary" type="submit">Enter Relay Rescue <span aria-hidden="true">→</span></button></form>
 <p class="muted">Private pilot · learning data stays scoped to your account.</p></section>
 
 <section id="password-reset" class="card sign-in-card" hidden>
-<div class="auth-brand"><span class="auth-mark" aria-hidden="true">v↗</span><span>vibeLearn<small>Reliable Agents campaign</small></span></div>
-<p class="eyebrow">ACCOUNT RECOVERY</p><h2>Set a new password.</h2><p>Your campaign progress stays intact.</p>
+<div class="auth-brand"><span class="auth-mark" aria-hidden="true">v↗</span><span>vibeLearn<small>Relay Rescue campaign</small></span></div>
+<p class="eyebrow">RECOVERY BEACON</p><h2>Reconnect your run.</h2><p>Set a new password. Your rescued signals and saved campaign state stay intact.</p>
 <form id="reset-form"><label for="new-password">New password</label><div class="password-field"><input id="new-password" type="password" autocomplete="new-password" minlength="6" maxlength="4096" required><button id="toggle-reset-password" class="password-utility" type="button" aria-controls="new-password" aria-pressed="false" data-password-toggle="new-password">Show password</button></div>
-<button class="primary" type="submit">Save new password <span aria-hidden="true">→</span></button></form><p id="reset-status" role="status"></p></section>
+<button class="primary" type="submit">Restore access <span aria-hidden="true">→</span></button></form><p id="reset-status" role="status"></p></section>
 
 <section id="entry" class="campaign-screen" hidden>
   <div class="campaign-hero"><div><p class="eyebrow">CHAPTER 01 · THE SHOPPING AGENT</p><h1>One dumbbell. One charge.</h1><p class="campaign-story-copy">You ask your AI agent to buy one 5 kg dumbbell. The store takes the payment, but the confirmation disappears. What should the agent do next?</p><p class="campaign-goal"><strong>Chapter goal:</strong> make retries safe so one request from you never becomes two purchases or two charges.</p></div><div class="campaign-rank"><span>Player progress</span><strong id="campaign-xp">0 XP</strong><small id="campaign-clear-count" class="muted">0 / 4 cleared</small></div></div>
@@ -59,5 +59,8 @@
 </main></div>
 <script src="/expedition.js"></script>
 <script src="/rescue.js"></script>
+<script src="/rescue-intro.js"></script>
+<script src="/auth-game.js"></script>
+<script src="/rescue-chapter1.js"></script>
 <script src="/app.js"></script>
 </body></html>

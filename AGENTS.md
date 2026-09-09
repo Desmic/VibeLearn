@@ -1,26 +1,76 @@
 # vibeLearn
 
-Read `docs/STATE.md`, then **`docs/GAME-AS-COURSE.md`**, the latest user amendment
-(9 September 2026). The product is a game whose meaningful play delivers the intended
-course outcomes, not a course website with game decoration. Experience is essential.
+Read `docs/STATE.md`, then **`docs/COMMERCIAL-GAME-BAR.md`** and
+`docs/GAME-AS-COURSE.md`. The product is a game whose meaningful play delivers the
+intended course outcomes, not a course website with game decoration. Experience is
+essential.
 
-The user temporarily authorized **available-tool/internal review while Codex is
-unavailable**. Do not block this Phase 1 refinement on Codex setup. Use actual rendered
-journeys, screenshots/traces, adverse-path tests and a frozen-rubric critic pass; label
-the reviewer `internal_tool_assisted`, never an independent agent or human playtest.
-The unrounded >=9.0/10 target, younger-player and young-adult lenses, no-critical-blocker
-rule and the user's final acceptance remain. A lower score means `needs_revision`.
-Do not inflate a score or reuse historical 8.8/9.1 reviews. An attractive screenshot,
-a new renderer and passing tests do not prove fun or course-equivalent learning.
+## Product authority
+
+The user is currently the only real product user/reviewer. **Their latest explicit
+judgment overrides every agent, critic, automated score and historical review for
+product acceptance.** Never average the user's score with a critic score, use a higher
+critic score to overrule a rejection, or call a candidate accepted because tests pass.
+
+The critic gate remains useful but is only a pre-gate:
+
+- unrounded <9.0/10 or any critical blocker => `needs_revision`;
+- >=9.0 with both audience lenses passing and no blocker => at most
+  `ready_for_user_review`;
+- explicit user rejection => `user_rejected` / `needs_revision` regardless of critic;
+- only explicit user acceptance => `user_accepted`.
+
+No silence, lack of response, deployment, screenshot, test pass or historical review
+counts as acceptance. Do not open the experience to other users until the current user
+explicitly accepts it and separately authorizes broader testing.
+
+The user temporarily authorized available-tool/internal review while a genuinely
+separate critic agent is unavailable. Use actual rendered journeys, screenshots/traces,
+adverse-path tests and the frozen rubric; label that reviewer `internal_tool_assisted`,
+never an independent agent or human playtest. This exception changes reviewer method,
+not the >=9 standard or user authority.
+
+## Commercial game bar
+
+The learner-facing experience must feel like **a real game someone could credibly
+expect from the Play Store or Steam**, not a gamified website, dashboard, card stack,
+course page or quiz. This is a bar for onboarding, interaction, pacing, feedback,
+cohesion and polish; it does not require AAA scope, combat, free-roaming 3D or one
+genre.
+
+Read `docs/COMMERCIAL-GAME-BAR.md` before substantial product work. A renderer,
+animated background, campaign map, XP or badges cannot by themselves satisfy the bar.
+The primary surface should be playfield-first, actions should visibly change state and
+create consequences, controls should feel responsive, progression should increase
+agency, failure should be recoverable, success should feel earned, and menus/save/pause/
+settings should feel like parts of the game rather than admin forms.
+
+## First-minute invariant
+
+Before specialist jargon where faithful, the player must understand the setting/context,
+who or what they are, what changed/went wrong, what success means, why it matters and
+what first action they can take.
+
+For the current Missing Delivery reference, the user requires an approximately 15–20
+second skippable/replayable story sequence establishing Pip, the valley/workshop,
+the already-sent bridge-gear order, the storm-lost reply, duplicate-delivery risk and
+the player's role in discovering the truth/restoring signals. Reduced motion and skip
+must preserve the same essential causal meaning. After that sequence, move quickly into
+meaningful play instead of another exposition wall.
+
+Future generated courses inherit the **opening comprehension contract**, not the exact
+Pip/storm theme or duration. Choose an appropriate cold-open, playable incident,
+dialogue, simulation, mystery, construction/scientific failure or other game-quality
+onboarding form.
+
+## Scope and verification
 
 The authoritative build order remains `CODEX-FIRST-SLICE.md`, the root implementation
 plan and active amendments in STATE.md. `docs/COURSE-GENERATION-GAME-SYSTEM.md`,
-`docs/GAME-ACCEPTANCE-9.md` and `docs/GAME-AS-COURSE.md` amend future generation.
-Older 8/10 references are superseded. The temporary internal-review exception applies
-to this supervised refinement, not blanket self-certification by future generators.
-The checksummed `learning-os-design-package-v1.3/` remains historical input, unchanged.
-
-## Scope and verification
+`docs/GAME-ACCEPTANCE-9.md`, `docs/GAME-AS-COURSE.md` and
+`docs/COMMERCIAL-GAME-BAR.md` amend future generation. Where older plan text says an
+8/10 game critic can pass, the active **>=9.0 pre-gate + explicit user acceptance** rule
+supersedes it.
 
 Stay within private Phase 1 product refinement. Do not silently open Phase 2 reuse,
 Phase 3 generation, model integration, untrusted code execution, external testers,
@@ -49,10 +99,11 @@ checks are not human acceptance, and a source-only code review is not a game rev
 
 ## Game-first and course-outcome invariants
 
-Read GAME-UX-SYSTEM.md, GAME-UX-REVIEW.md and GAME-AS-COURSE.md before substantial
-learning UI, mission, progression or generation work. Judge the game as something a
-curious kid or young adult would voluntarily continue playing with XP hidden. State
-reading/prior-knowledge assumptions; do not pretend an agent prediction is child testing.
+Read GAME-UX-SYSTEM.md, GAME-UX-REVIEW.md, GAME-AS-COURSE.md and
+COMMERCIAL-GAME-BAR.md before substantial learning UI, mission, progression or
+generation work. Judge the game as something a curious kid or young adult would
+voluntarily continue playing with XP hidden. State reading/prior-knowledge assumptions;
+do not pretend an agent prediction is child testing.
 
 Use narrative/intuitive context before jargon where faithful: who wants what, what
 changed, and what action matters. Play must reveal causality. Do not add story as extra

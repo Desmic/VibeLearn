@@ -1,0 +1,8 @@
+/* Keep every scene inspection target physically distinct; tests use real pointer hit-testing. */
+.rg-world[data-station="1"] .target-ticket{left:10%;top:31%}.rg-world[data-station="1"] .target-workshop{right:10%;top:31%}
+.rg-world[data-station="2"] .target-ticket{left:10%;top:31%}.rg-world[data-station="2"] .target-journal{left:38%;top:19%}
+.rg-world[data-station="3"] .target-journal{left:25%;top:18%}.rg-world[data-station="3"] .target-parcel{left:47%;top:38%}
+.rg-world[data-station="4"] .target-ticket{left:10%;top:31%}.rg-world[data-station="4"] .target-book{right:9%;top:27%}
+.rg-world[data-station="5"] .target-ticket{left:11%;top:34%}.rg-world[data-station="5"] .target-book{right:9%;top:24%}
+@media(max-width:800px){.rg-world[data-station="2"] .target-journal{left:38%;top:15%}.rg-world[data-station="3"] .target-journal{left:22%;top:14%}.rg-world[data-station="3"] .target-parcel{left:auto;right:17%;top:37%}}
+@media(max-width:430px){#rescue-game .rg-world-target{font-size:.61rem;padding:5px 8px;max-width:88px}.rg-world[data-station="3"] .target-journal{left:15%;top:14%}.rg-world[data-station="3"] .target-parcel{right:10%;top:39%}}
