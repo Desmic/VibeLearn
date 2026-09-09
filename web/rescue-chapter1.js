@@ -11,7 +11,19 @@
   const markDone = () => { try { localStorage.setItem(DONE_KEY,'yes'); } catch (_) {} };
 
   function isSignalOne(root) {
-    return Boolean(root && !root.hidden && /SIGNAL\s+1\b/.test(root.querySelector('.rg-top>span')?.textContent || ''));
+    if (!root || root.hidden) return false;
+    const header = root.querySelector('.rg-top>span')?.textContent || '';
+    if (/SIGNAL\s*1\b/i.test(header)) return true;
+    // The presentation header is allowed to change with story polish. Detect the
+    // pinned Signal-1 interaction grammar as a stable fallback instead of tying
+    // tutorial behavior to copy such as "Signal 1".
+    return Boolean(
+      root.querySelector('[data-world-look="workshop"]') &&
+      root.querySelector('[data-world-look="ticket"]') &&
+      root.querySelector('[data-tool="new"]') &&
+      root.querySelector('[data-tool="retry"]') &&
+      !root.querySelector('#rg-run')
+    );
   }
 
   function isHistorical(root) { return Boolean(root?.querySelector('.rg-review-banner')); }
@@ -129,5 +141,7 @@
   let queued=false;
   const schedule=()=>{ if(queued) return; queued=true; queueMicrotask(()=>{queued=false; const root=rootEl(); if(isSignalOne(root)){decorateMenu(root);updateGuidance(root);}}); };
   new MutationObserver(schedule).observe(workspace,{childList:true,subtree:true});
-  schedule();
+  // Render and server-state hydration can complete in adjacent tasks. These
+  // bounded retries make the guide robust without polling indefinitely.
+  schedule(); setTimeout(schedule,50); setTimeout(schedule,250);
 })();
