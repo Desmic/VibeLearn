@@ -76,18 +76,19 @@
     const failed=Boolean(root.querySelector('.rg-world-failed,[data-tool="rewind"]'));
     const cleared=Boolean(root.querySelector('.rg-clear'));
     if (cleared) {
-      root.classList.remove('rgc1-guided'); enableChoices(root); coach.hidden=true; return;
+      root.classList.remove('rgc1-guided'); delete root.dataset.tutorialStage; enableChoices(root); coach.hidden=true; return;
     }
-    if (done()) { root.classList.remove('rgc1-guided'); enableChoices(root); coach.hidden=true; return; }
+    if (done()) { root.classList.remove('rgc1-guided'); delete root.dataset.tutorialStage; enableChoices(root); coach.hidden=true; return; }
     root.classList.add('rgc1-guided'); coach.hidden=false;
     if (failed) {
+      root.dataset.tutorialStage='failed';
       coach.querySelector('span').textContent='LOOK WHAT HAPPENED';
       coach.querySelector('strong').textContent='Two gears. The new ticket looked like a new job.';
       coach.querySelector('small').textContent='Rewind, keep order-01, and try again.';
       root.querySelectorAll('[data-world-look],[data-tool]').forEach(button=>button.disabled=button.dataset.tool!=='rewind');
       setHighlight(root,'[data-tool="rewind"]'); return;
     }
-    const step=readStep();
+    const step=readStep(); root.dataset.tutorialStage=String(step);
     if (step<=0) {
       coach.querySelector('span').textContent='FIRST: FIND THE PART'; coach.querySelector('strong').textContent='Where would the bridge gear come from?'; coach.querySelector('small').textContent='Tap WORKSHOP. Nothing else matters yet.';
       enableOnly(root,'workshop'); return;
