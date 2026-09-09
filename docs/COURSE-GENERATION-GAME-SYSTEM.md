@@ -24,6 +24,21 @@ This does not require every course to use Pip, a valley, a cinematic, or 3D. It 
 
 Animation must teach causality or object/function relationships, not merely decorate the screen. Required meaning must survive reduced-motion mode.
 
+### Tutorial focus-mode contract
+
+Generated first chapters must treat visible UI complexity as a limited budget. The generator must explicitly decide which surfaces are **visible now**, **deferred**, and **introduced later**.
+
+Default behavior:
+
+- first action lives on the dominant playfield, not underneath application chrome;
+- evidence panels, learning metadata, analytics, journals, settings, helper drawers, postmortems, long tool rails and secondary actions stay hidden/deferred unless needed for the current decision;
+- when the learner has enough context, introduce the smallest useful HUD/action dock for the next decision;
+- progressively reintroduce secondary systems as the learner gains agency and vocabulary;
+- the underlying save/evidence/accessibility semantics remain active even when their explanatory surfaces are visually deferred;
+- focused presentation must reuse real controls/state behavior rather than decorative clones that can diverge from persistence or evidence semantics.
+
+A generated course fails this contract if mission one technically contains the right mechanic but visually resembles a dense dashboard/course page because every system is exposed at once.
+
 ## First-chapter world-model gate
 
 Before the first/tutorial chapter completes, a fresh novice should be able to answer in plain language:
@@ -45,10 +60,10 @@ For technical subjects, delay formal names until the learner has a concrete ment
 
 Difficulty growth must increase reasoning and agency, not just text length. Generated progression should usually follow:
 
-- **Orient:** one obvious action, low vocabulary, highly legible consequence.
+- **Orient:** one obvious action, low vocabulary, highly legible consequence, tutorial focus mode active.
 - **Confirm:** one easy success or recoverable error that teaches the local rule.
-- **Vary:** change one dimension while preserving the interaction grammar.
-- **Combine:** require two or more previously learned rules together.
+- **Vary:** change one dimension while preserving the interaction grammar and reveal only the new UI/tool needed for that variation.
+- **Combine:** require two or more previously learned rules together and allow a broader HUD because the learner has earned it.
 - **Transfer:** move to a meaningfully different context with reduced scaffolding.
 - **Retrieve later:** revisit the capability after delay where retention is claimed.
 
@@ -62,6 +77,7 @@ The original CourseBrief/full-package contracts remain. Extend them with:
 - a course-outcome coverage ledger mapping `outcome -> prerequisite -> mechanic -> decision -> feedback -> varied practice -> fresh transfer -> delayed retrieval -> evidence limits`;
 - the opening hook and reason a player would voluntarily continue with XP hidden;
 - a first-chapter world-model description containing actors, objects/resources, function, stakes, causal event and first action;
+- a **first-minute visibility budget** listing primary playfield, visible HUD/actions, deferred surfaces, and the exact progression points at which secondary controls/metadata become visible;
 - cognitive-load stages and explicit vocabulary/tool disclosure points;
 - meaningful alternatives, failure/recovery rules, earned ending and a reasoning-changing replay variation;
 - renderer-neutral gameplay contracts and accessibility/fallback behavior;
@@ -73,7 +89,7 @@ The original provenance, learning/assessment bindings, competency identity/migra
 
 Structural/learning, source-grounding, assessment-integrity and accessibility validators pass independently of the game score. Review actual rendered interaction, not only package JSON.
 
-The rendered critic must explicitly test the first minute and first chapter. It should be able to answer the eight world-model questions above and judge whether the opening feels like a credible game rather than a gamified website. If the reviewer must infer core story/object function from docs instead of the rendered experience, the candidate fails.
+The rendered critic must explicitly test the first minute and first chapter. It should be able to answer the eight world-model questions above and judge whether the opening feels like a credible game rather than a gamified website. It must also inspect the **visible UI complexity**: count/identify what a fresh player is asked to parse before the first action, and reject candidates that expose unrelated evidence/admin/course machinery too early. If the reviewer must infer core story/object function from docs instead of the rendered experience, the candidate fails.
 
 Keep the bounded repair budget. Failed candidates remain `draft_needs_review`; never lower thresholds or relabel schema-valid output as a validated game. The user retains final product judgment.
 
