@@ -29,6 +29,27 @@ def main():
             for block in program:page.locator(f'[data-block="{block}"]').click()
         try:
             page.goto(url);expect(page.locator('#rg-launch')).to_be_visible()
+            expect(page.locator('#rgi-intro')).to_be_visible()
+            expect(page.locator('#rgi-title')).to_have_text('Pip keeps the valley moving.')
+            expect(page.locator('#rgi-body')).to_contain_text('bridge repair')
+            shot('rescue-intro-01.png')
+            for expected in [
+                'The order was sent. The reply vanished.',
+                'Retrying blindly can make two.',
+                'Recover the truth. Restore seven signals.',
+                'Software faces the same missing-reply problem.',
+            ]:
+                page.locator('#rgi-next').click();expect(page.locator('#rgi-title')).to_have_text(expected)
+            expect(page.locator('#rgi-body')).to_contain_text('one intent lead to one safe result')
+            shot('rescue-intro-05.png')
+            page.locator('#rgi-next').click();expect(page.locator('#rg-feedback')).to_be_visible()
+            checks.append('Five-beat opening establishes Pip, valley, lost reply, duplicate risk, player mission and real-software transfer before Signal 1')
+            page.locator('#rg-map').click();expect(page.locator('#rg-launch')).to_be_visible()
+            page.locator('#rg-options').click();expect(page.locator('#rg-replay-story')).to_be_visible()
+            page.locator('#rg-replay-story').click();expect(page.locator('#rgi-intro')).to_be_visible()
+            page.locator('#rgi-skip').click();expect(page.locator('#rgi-intro')).to_have_count(0)
+            expect(page.locator('#rg-launch')).to_be_focused()
+            checks.append('Opening is replayable from the game menu and skippable without losing access to Signal 1')
             expect(page.locator('[data-mission="rescue-07"]')).to_be_disabled();shot('rescue-map.png')
             page.locator('#rg-launch').focus();page.keyboard.press('Enter')
             expect(page.locator('#rg-feedback')).to_be_visible();shot('rescue-first.png')
@@ -96,6 +117,10 @@ def main():
             for width in (390,320):
                 mc=b.new_context(viewport=dict(width=width,height=844),has_touch=True,reduced_motion='reduce')
                 m=mc.new_page();m.on('pageerror',lambda e:errors.append(str(e)));m.goto(url)
+                expect(m.locator('#rgi-static')).to_be_visible()
+                expect(m.locator('#rgi-static')).to_contain_text('Pip keeps the valley moving.')
+                expect(m.locator('#rgi-static')).to_contain_text('Retrying blindly can make two.')
+                assert m.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 m.locator('#rg-launch').tap();expect(m.locator('[data-tool="retry"]')).to_be_visible()
                 assert m.locator('[data-tool="retry"]').bounding_box()['y']<844
                 assert m.evaluate('document.documentElement.scrollWidth<=innerWidth')
@@ -134,7 +159,7 @@ def main():
                 assert all(mission['status']=='cleared' for mission in isolated['course']['rescue'])
                 assert isolated['attempt']['assessment']['independence']=='declared_independent'
                 mc.close()
-            checks.append('Full seven-encounter 390/320px touch journeys; first action inside viewport; actual 200% text including construction workbench; reduced motion; isolated final transfer evidence')
+            checks.append('Reduced-motion opening preserves all five causal beats; full seven-encounter 390/320px touch journeys; first action inside viewport; actual 200% text including construction workbench; isolated final transfer evidence')
             assert errors==[],errors
             (out/'rescue-browser-report.json').write_text(json.dumps(dict(result='passed',checks=checks,page_errors=errors,browser=b.version,review_method='internal_tool_assisted',audience_validation='not human tested',learning_scope='bounded transfer; no implementation/retention efficacy claim'),indent=2))
         finally:
