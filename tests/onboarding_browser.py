@@ -38,6 +38,7 @@ def main():
             coach = page.locator('.rgc1-coach')
             expect(coach).to_be_visible()
             expect(coach).to_contain_text('Where would the bridge gear come from?')
+            expect(page.locator('.rg-observations')).to_have_count(0)
             expect(page.locator('[data-world-look="workshop"]')).to_be_enabled()
             expect(page.locator('[data-world-look="ticket"]')).to_be_disabled()
             expect(page.locator('[data-tool="retry"]')).to_be_disabled()
@@ -51,7 +52,7 @@ def main():
             expect(coach).to_contain_text('The workshop may already have made the gear.')
             expect(page.locator('[data-tool="retry"]')).to_be_enabled()
             expect(page.locator('[data-tool="new"]')).to_be_enabled()
-            checks.append('Signal 1 reveals one obvious inspection at a time before exposing the first decision')
+            checks.append('Signal 1 uses one scene-owned control surface and reveals one obvious inspection at a time before exposing the first decision')
 
             page.locator('[data-tool="new"]').click()
             expect(coach).to_contain_text('new ticket')
