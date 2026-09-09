@@ -34,6 +34,20 @@ def main():
             expect(page.locator('#rgi-fact')).to_have_text('First action: inspect.')
             page.screenshot(path=str(out/'onboarding-beat-final.png'), full_page=True)
             page.locator('#rgi-next').click()
+            page.wait_for_timeout(700)
+            diagnostic = page.evaluate("""async()=>{
+              const state=await (await fetch('/api/state')).json();
+              return {
+                top:[...document.querySelectorAll('.rg-top>span')].map(n=>n.textContent),
+                launch:[...document.querySelectorAll('#rg-launch')].map(n=>({text:n.textContent,disabled:n.disabled})),
+                coach:document.querySelectorAll('.rgc1-coach').length,
+                worldLooks:[...document.querySelectorAll('[data-world-look]')].map(n=>n.dataset.worldLook),
+                tools:[...document.querySelectorAll('[data-tool]')].map(n=>n.dataset.tool),
+                intro:document.querySelectorAll('#rgi-intro').length,
+                attempt:state.attempt?{status:state.attempt.status,mission:state.attempt.snapshot?.mission?.id,level:state.attempt.snapshot?.rescue?.level}:null
+              };
+            }""")
+            print('ONBOARDING_LAUNCH_DIAGNOSTIC '+json.dumps(diagnostic,sort_keys=True), flush=True)
 
             coach = page.locator('.rgc1-coach')
             expect(coach).to_be_visible()
