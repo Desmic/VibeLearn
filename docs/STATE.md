@@ -1,66 +1,75 @@
-# Current checkpoint — user rejected at 5/10; commercial game bar now authoritative
+# Current checkpoint — direction improved; still needs revision and user acceptance
 
-Updated 9 September 2026. **Status: `user_rejected` / `needs_revision`. The >=9.0 critic gate and user acceptance are not met.**
+Updated 9 September 2026. **Status: `needs_revision`. The user says the new story/progression/UI direction is "way better", but has not accepted the product or assigned a new passing score. The >=9.0 critic gate and explicit user acceptance remain unmet.**
 
 ## Latest user decision — authoritative
 
-The user is currently the only real product user/reviewer. **Their latest judgment overrides every agent, critic, automated score and historical review for product acceptance.** Do not average reviews, use a higher critic score to overrule a rejection, or call a candidate accepted because tests/automation pass.
+The user is currently the only real product user/reviewer. **Their judgment overrides every agent, critic, automated score and historical review for product acceptance.** Do not average reviews, use a higher critic score to overrule a rejection, or call a candidate accepted because tests/automation pass.
 
-Latest explicit user review of the current experience:
+The prior explicit 5/10 game and 5/10 learning scores remain historical evidence for the rejected build. The newest feedback is a positive directional update, not acceptance:
 
-- **game experience: 5/10**;
-- **learning experience: 5/10**;
-- primary failure: the player does not immediately understand what the game is about, who Pip is, what happened, why duplicate delivery is dangerous, or what the player is supposed to accomplish;
-- required direction: explain this with a simple, compelling opening animation/story sequence and then get the player into meaningful play quickly;
-- product bar: the learner-facing experience must feel like a **real game someone could credibly expect from the Play Store or Steam**, not a gamified website/course page.
+- the new opening story, progression and UI direction is **"way better"** and should be continued;
+- the login/recovery experience must now look and feel like part of the same game rather than a generic website/auth form;
+- **Signal/Chapter 1 is a comprehension gate**: by its end, the player should understand the story and scenario, who Pip is and what help Pip needs, the important world objects (for example the workshop, footbridge, gear, ticket and reply), what each one does, why the outcome matters, and why a duplicate is harmful;
+- prefer **simple causal animation and interaction** over explanatory text walls for teaching those relationships;
+- keep the commercial bar: this should feel like a credible Play Store/Steam learning game, not a course page with game decoration.
 
-Read **[COMMERCIAL-GAME-BAR.md](COMMERCIAL-GAME-BAR.md)** first for the controlling acceptance semantics and onboarding requirement. It amends GAME-AS-COURSE.md, GAME-ACCEPTANCE-9.md, GAME-UX-SYSTEM.md, GAME-UX-REVIEW.md, COURSE-GENERATION-GAME-SYSTEM.md and AGENTS.md wherever older wording conflicts.
-
-The critic remains a pre-gate only: unrounded >=9.0/10, both audience lenses passing and no critical blocker can advance a candidate to `ready_for_user_review`; **only explicit user acceptance may set `user_accepted`.** User rejection always returns the candidate to revision regardless of critic score.
+Read **[COMMERCIAL-GAME-BAR.md](COMMERCIAL-GAME-BAR.md)** first for controlling acceptance semantics. The critic remains a pre-gate only: unrounded >=9.0/10, both audience lenses passing and no critical blocker can advance a candidate to `ready_for_user_review`; **only explicit user acceptance may set `user_accepted`.**
 
 ## External-user boundary
 
-Do **not** open this product to other users yet. The current user wants VibeLearn brought to an acceptable state before any broader learner testing. External testing, invitations or rollout require a later explicit authorization after user acceptance; other users must not be used to substitute for fixing a product the sole current user has rejected.
+Do **not** open this product to other users yet. External testing, invitations or rollout require later explicit authorization after user acceptance. Other users must not be used to substitute for fixing a product the sole current user has not yet accepted.
 
-## Current required product fix
+## Current product work
 
-The first-minute experience is now a hard acceptance item. For the Missing Delivery reference, add an approximately **15–20 second skippable/replayable story sequence** that makes these points visually clear before normal play:
+The first-minute animated opening is now implemented on draft PR #4 and establishes Pip, the valley, the sent order, lost reply, duplicate risk, seven-signal goal and real-software bridge. The opening is skippable/replayable and reduced-motion has an equivalent causal presentation. The map copy now states the missing-reply problem directly.
 
-1. Pip is the valley courier and the workshop supplies needed parts.
-2. Pip already sent one order for a bridge gear.
-3. The storm swallowed the reply, so the outcome is uncertain.
-4. Blindly sending again can create a duplicate delivery when only one gear was wanted.
-5. The player's role is to help Pip discover what happened, restore the signals/network and learn how one intent can safely lead to one result.
-6. Bridge the intuitive situation into the equivalent real-software retry problem at the appropriate moment.
+The current iteration extends that direction in two places:
 
-Reduced-motion mode must preserve the same causal sequence. Skipping the animation must still show a concise static equivalent, and the intro must be replayable. After the intro, do not present another exposition wall; move rapidly into a meaningful action.
+1. **Game-native hosted auth.** Sign-in/recovery is staged as entering or reconnecting to Relay Rescue, using the same valley, Pip, workshop, signals, colors and motion language. Authentication/security behavior remains unchanged underneath.
+2. **Signal 1 world tutorial.** Before the first consequential retry decision, a short animated sequence teaches: Pip is the courier; the workshop makes repair parts; one gear repairs the footbridge; the job needs exactly one gear; `order-01` is the job identity; the workshop can finish the gear while the reply is lost; therefore no reply means uncertainty rather than failure; the player should inspect what happened before choosing Pip's move. A small persistent world key remains after the tutorial.
 
-This opening is necessary but not sufficient. The full loop must also cross the commercial-game bar: playfield-first hierarchy, responsive controls, visible consequences, meaningful alternatives, recoverable failure, growing agency/tools, fair difficulty, satisfying resolution, coherent menus/save/pause/settings and replay variation. Three.js/animation/XP alone do not satisfy this.
+This is necessary but not sufficient. The full loop must remain playfield-first with responsive controls, visible consequences, meaningful alternatives, recoverable failure, growing agency/tools, fair difficulty, satisfying resolution and replay variation. Animation/3D/XP alone do not satisfy the commercial-game bar.
 
 ## Current implementation and verification history
 
-Repository: `Desmic/VibeLearn`. Working branch: **`game/expedition-nine-gate`**. **Draft PR #2** into `deploy/render-supabase`. Do not merge or expose to new users merely because machine verification passes.
+Repository: `Desmic/VibeLearn`.
 
-The previously frozen candidate `620036808c6c558a4a0811e7be2cf9e0a8e74043` passed run174 with the 76-test suite and browser/3D probes. That verification remains useful engineering evidence, but the later user 5/10 review supersedes the internal 7.02/10 and all older 8.8/9.1/other scores for product acceptance. See GAME-REVIEW-20260909.md for the historical internal review; it is not the current verdict.
+Active refinement branch: **`game/first-minute-story`**, draft **PR #4** into `game/expedition-nine-gate`. Do not merge or expose to new users merely because machine verification passes.
 
-The five-stop Missing Delivery reference remains a bounded retry-learning prototype with retained ticket, courier restart, finite memory/reconciliation, policy construction and replay/detour behavior. The optional Three.js valley remains a renderer/input experiment. Neither is accepted as the finished product direction simply because it exists or passes tests.
+Run191 was the last fully green rendered candidate before the playfield-control refactor. Later run194 correctly failed a real pointer test because the Signal 3 journal and parcel inspection targets overlapped; the journal intercepted the parcel. That is treated as a product/input defect, not a flaky test. The current branch separates those hit targets and adds explicit real-pointer coverage for both.
+
+The earlier internal 7.02/10 and older 8.8/9.1/other scores are historical only. The user’s newest positive directional feedback does not convert them into current acceptance or a >=9 result.
+
+The current Missing Delivery / Relay Rescue reference remains a bounded retry-learning prototype with retained ticket identity, courier restart, payload mismatch, retention/reconciliation, unknown-state handling, policy construction and a fresh worker transfer. The optional Three.js valley remains an experiment, not the definition of the game.
 
 ## Product and learning promise
 
-VibeLearn is **a game whose meaningful play delivers the intended course outcomes**. Experience and learning are separate gates: a delightful shallow game fails the learning promise; a rigorous but website-like lesson fails the product. The target is not merely to outperform the previous build or educational web apps aesthetically; the learner-facing experience should meet credible commercial-game expectations for onboarding, interaction, pacing, feedback, cohesion and polish.
+VibeLearn is **a game whose meaningful play delivers the intended course outcomes**. Experience and learning are separate gates. A delightful shallow game fails learning; a rigorous but website-like lesson fails the product.
 
-Future course generation must inherit this standard. Generated courses need an audience-appropriate game-quality onboarding contract establishing world/context, player role, meaningful objective, stakes/change and first actionable problem before abstraction where faithful. The exact Pip/storm animation is a reference implementation, not a universal theme.
+A first chapter must do more than state an objective. Before expecting later reasoning, the learner should be able to answer, in plain language:
+
+- Where am I / what system or world am I in?
+- Who needs help, and what do they need?
+- What are the important objects/actors and what does each do?
+- What changed or went wrong?
+- Why does the outcome matter?
+- What can I do right now, and what consequence should I watch for?
+
+The game should teach these through causal play, animation, scene changes and interaction where useful, with concise text as support. This requirement generalizes to generated courses; the exact Pip/gear/storm theme does not.
 
 ## Review method and boundaries
 
-While a genuinely separate critic agent/model is unavailable, a deliberately separated frozen-rubric internal/tool-assisted review may still guide iteration, but must be labeled honestly. It cannot self-accept the product. The user remains final authority.
+While a genuinely separate critic agent/model is unavailable, a deliberately separated frozen-rubric internal/tool-assisted review may guide iteration but must be labeled honestly. It cannot self-accept the product. The user remains final authority.
 
-No Phase 2/3 implementation, public rollout, new external testers, paid resources, untrusted runner or new model integration is opened by this update. Preserve historical evidence, learner isolation, auth/RLS boundaries, immutable submissions and the checksummed design package.
+No Phase 2/3 implementation, public rollout, new external testers, paid resources, untrusted runner or new model integration is opened by this iteration. Preserve historical evidence, learner isolation, auth/RLS boundaries, immutable submissions and the checksummed design package.
 
 ## Next acceptance loop
 
-1. Fix first-minute story/comprehension and commercial-game presentation.
-2. Verify the actual rendered build and adverse paths.
-3. Run the frozen critic; below 9.0 or any blocker => continue revision.
-4. If critic >=9.0 with no blocker, mark only `ready_for_user_review`.
-5. The user plays it. Rejection overrides the critic and restarts revision; only explicit acceptance closes this checkpoint.
+1. Finish and verify game-native login plus Signal 1 comprehension/tutorial changes.
+2. Repair any browser/input/accessibility regressions without weakening the tests.
+3. Inspect actual rendered evidence across desktop/mobile/reduced-motion.
+4. Continue improving the complete game journey; do not stop because one chapter is clearer.
+5. Run the frozen critic only on a fully verified candidate; below 9.0 or any blocker => continue revision.
+6. If critic >=9.0 with no blocker, mark only `ready_for_user_review`.
+7. The user plays it. Rejection overrides the critic; only explicit acceptance closes this checkpoint.
