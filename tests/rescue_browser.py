@@ -7,12 +7,13 @@ from tests.browser_check import start_server,stop_server
 
 ROOT=Path(__file__).resolve().parents[1]
 SAFE=['remember','match','reconcile','retry']
+ONBOARDING_DONE="localStorage.setItem('vibelearn.relay-rescue.intro.v2','seen');localStorage.setItem('vibelearn.relay-rescue.signal1-guide.done.v2','yes');"
 
 def main():
     out=ROOT/'artifacts';out.mkdir(exist_ok=True);errors=[];checks=[]
     with tempfile.TemporaryDirectory() as tmp,sync_playwright() as p:
         proc,url=start_server(Path(tmp)/'rescue.db');b=p.chromium.launch()
-        ctx=b.new_context(viewport=dict(width=1440,height=1000));ctx.tracing.start(screenshots=True,snapshots=True,sources=True)
+        ctx=b.new_context(viewport=dict(width=1440,height=1000));ctx.add_init_script(ONBOARDING_DONE);ctx.tracing.start(screenshots=True,snapshots=True,sources=True)
         page=ctx.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
         def shot(name):
             page.evaluate('scrollTo(0,0)');page.screenshot(path=str(out/name),full_page=True)
@@ -94,7 +95,7 @@ def main():
             checks.append('Constructed route rejects send-first program; draft recovery; sealed new export context; dropped submit acknowledgement retried exactly once; lab archive downloads')
             page.locator('#rg-map').click();expect(page.locator('#rg-launch')).to_be_visible()
             for width in (390,320):
-                mc=b.new_context(viewport=dict(width=width,height=844),has_touch=True,reduced_motion='reduce')
+                mc=b.new_context(viewport=dict(width=width,height=844),has_touch=True,reduced_motion='reduce');mc.add_init_script(ONBOARDING_DONE)
                 m=mc.new_page();m.on('pageerror',lambda e:errors.append(str(e)));m.goto(url)
                 m.locator('#rg-launch').tap();expect(m.locator('[data-tool="retry"]')).to_be_visible()
                 assert m.locator('[data-tool="retry"]').bounding_box()['y']<844
