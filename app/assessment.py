@@ -43,6 +43,12 @@ def independence_label(response, assistance):
 
 
 def evaluate(snapshot, response, assistance):
+    if snapshot["policies"]["assessment"] == "rescue-v1":
+        from app.rescue import evaluate as evaluate_rescue
+        return evaluate_rescue(snapshot, response, independence_label(response, assistance))
+    if snapshot["policies"]["assessment"] == "expedition-v1":
+        from app.expedition import evaluate_game
+        return evaluate_game(snapshot, response, independence_label(response, assistance))
     total = len(snapshot["trace"])
     values = parse_prediction(response["prediction"], total)
     if values is None:
