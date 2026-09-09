@@ -22,6 +22,9 @@ For the first/tutorial chapter:
 - make important objects visually distinct and show what each object does through animation or direct manipulation where possible;
 - show the inciting event causally: what happened first, what changed, what information was lost, and what remains true in the world;
 - give the player **one obvious action at a time** until they understand the interaction grammar;
+- use a **tutorial focus mode**: the playfield is dominant and nonessential evidence panels, journals, analytics, settings, helper drawers, repeated briefings and secondary controls are deferred until they become useful;
+- progressively reintroduce HUD/system information as the player earns enough context to use it, rather than showing the full application chrome on mission one;
+- keep the real underlying controls/state semantics when presenting a focused HUD; do not create decorative duplicates that diverge from save, accessibility, or evidence behavior;
 - use informative failure to show why a wrong action matters, then make recovery easy;
 - only after concrete success attach formal language such as `idempotent retry`, `intent identity`, `retention`, etc.;
 - keep essential meaning available with reduced motion and without sound.
@@ -52,11 +55,15 @@ Relay Rescue teaches missing-reply/retry safety through Pip, a valley courier, a
 
 Signal 1 is the tutorial/world-model chapter. It should not expose the entire systems problem at once. The player first inspects the workshop, then the ticket, then chooses a move. Wrong identity should visibly create a duplicate and lead to an easy rewind. Only after the player restores Signal 1 should the UI name the formal concept and connect it to software retries.
 
+The reference implementation uses tutorial focus mode deliberately: the first interaction is scene + coach only; the compact action dock appears only after the player has gathered the necessary clues; website-like console/journal/evidence surfaces remain out of the way during concrete play. Those secondary systems still capture state/evidence underneath and can return after the interaction grammar is understood. This is a design rule, not a Relay-Rescue-specific skin.
+
 Progression after Signal 1 may raise cognitive load: restart identity, changed payload, retention/expiry, unknown vs absent, route construction, and novel transfer. Each step must reuse prior understanding while adding one meaningful new burden.
 
 ## HUD, input and feedback
 
 Keep the main action and important consequence together. The HUD carries the immediate plain goal, relevant world/knowledge state, useful contextual tools and save status. Repeated titles, giant briefings, persistent tool rails and postmortem tables must not push play below the fold.
+
+Treat **visible UI complexity as a budget**. Onboarding should expose only the information/actions required for the current mental model. Evidence capture, telemetry, learning metadata and save integrity may remain fully active in the system without all of their controls or explanations occupying the primary play surface. Reintroduce secondary surfaces when they help a decision, recovery, reflection, or player-requested inspection.
 
 Every input receives acknowledgement, and state-changing actions receive meaningful causal feedback. Do not move precise click/tap targets while selected. Preserve keyboard focus across redraws. Pending saves prevent accidental duplicate actions. Ordinary map navigation must not silently discard work.
 
