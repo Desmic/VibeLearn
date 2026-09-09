@@ -99,6 +99,7 @@ def make_server(database, port=8000):
             assets = {
                 "/rescue.js": ("rescue.js", "text/javascript"),
                 "/rescue.css": ("rescue.css", "text/css"),
+                "/rescue-targets.css": ("rescue-targets.css", "text/css"),
                 "/rescue-intro.js": ("rescue-intro.js", "text/javascript"),
                 "/rescue-intro.css": ("rescue-intro.css", "text/css"),
                 "/auth-game.js": ("auth-game.js", "text/javascript"),
