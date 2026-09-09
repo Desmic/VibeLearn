@@ -3,6 +3,9 @@
 (() => {
   const game = window.RescueGame;
   if (!game || game.__firstMinuteStory) return;
+  if (!document.querySelector('link[href="/rescue-intro.css"]')) {
+    const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = '/rescue-intro.css'; document.head.append(css);
+  }
 
   const SEEN_KEY = 'vibelearn.relay-rescue.intro.v1';
   const scenes = [
