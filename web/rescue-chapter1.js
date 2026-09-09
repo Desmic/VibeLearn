@@ -14,9 +14,6 @@
     if (!root || root.hidden) return false;
     const header = root.querySelector('.rg-top>span')?.textContent || '';
     if (/SIGNAL\s*1\b/i.test(header)) return true;
-    // The presentation header is allowed to change with story polish. Detect the
-    // pinned Signal-1 interaction grammar as a stable fallback instead of tying
-    // tutorial behavior to copy such as "Signal 1".
     return Boolean(
       root.querySelector('[data-world-look="workshop"]') &&
       root.querySelector('[data-world-look="ticket"]') &&
@@ -30,7 +27,11 @@
 
   function addWorldKey(root) {
     const world = root.querySelector('.rg-world');
-    if (!world || world.querySelector('.rgc1-world-key')) return;
+    if (!world) return;
+    // Signal 1 has direct scene-owned inspection targets. Hide the older duplicate
+    // observation tray so the first interaction grammar is one obvious surface.
+    root.querySelector('.rg-observations')?.remove();
+    if (world.querySelector('.rgc1-world-key')) return;
     const key = document.createElement('div'); key.className='rgc1-world-key';
     key.innerHTML = `<span><b>Pip</b><small>needs the bridge</small></span><span><b>Workshop</b><small>builds the gear</small></span><span><b>Gear</b><small>makes the bridge move</small></span><span class="later"><b>Ticket</b><small>labels this order</small></span><span class="later"><b>Reply</b><small>tells Pip what happened</small></span>`;
     world.append(key);
@@ -141,7 +142,5 @@
   let queued=false;
   const schedule=()=>{ if(queued) return; queued=true; queueMicrotask(()=>{queued=false; const root=rootEl(); if(isSignalOne(root)){decorateMenu(root);updateGuidance(root);}}); };
   new MutationObserver(schedule).observe(workspace,{childList:true,subtree:true});
-  // Render and server-state hydration can complete in adjacent tasks. These
-  // bounded retries make the guide robust without polling indefinitely.
   schedule(); setTimeout(schedule,50); setTimeout(schedule,250);
 })();
