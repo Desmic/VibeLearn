@@ -86,6 +86,10 @@
   }
 
   function buildPlayDock(root) {
+    // The compact dock is onboarding-only. Experienced/replay sessions must keep
+    // the ordinary controls in their normal console rather than moving them into
+    // a hidden tutorial container.
+    if (done()) return;
     const field=root.querySelector('.rg-field'), world=root.querySelector('.rg-world');
     if (!field || !world) return;
     let dock=field.querySelector('.rgc1-dock');
