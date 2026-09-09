@@ -52,7 +52,28 @@ def main():
             checks.append('Opening is replayable from the game menu and skippable without losing access to Signal 1')
             expect(page.locator('[data-mission="rescue-07"]')).to_be_disabled();shot('rescue-map.png')
             page.locator('#rg-launch').focus();page.keyboard.press('Enter')
+            expect(page.locator('#rgc1-guide')).to_be_visible()
+            expect(page.locator('#rgc1-title')).to_have_text('Pip needs the footbridge working.')
+            expect(page.locator('#rgc1-body')).to_contain_text('workshop makes repair parts')
+            expect(page.locator('#rgc1-facts')).to_contain_text('Gear = repairs the bridge')
+            shot('rescue-chapter1-01.png')
+            for expected in [
+                'One gear restores the bridge.',
+                'The ticket is the job’s identity.',
+                'The gear may exist even when the reply is gone.',
+                'Help Pip learn what happened before acting.',
+            ]:
+                page.locator('#rgc1-next').click();expect(page.locator('#rgc1-title')).to_have_text(expected)
+            expect(page.locator('#rgc1-facts')).to_contain_text('One intent → one safe result')
+            shot('rescue-chapter1-05.png')
+            page.locator('#rgc1-next').click();expect(page.locator('#rgc1-guide')).to_have_count(0)
             expect(page.locator('#rg-feedback')).to_be_visible()
+            expect(page.locator('.rgc1-world-key')).to_contain_text('Workshop')
+            expect(page.locator('.rgc1-world-key')).to_contain_text('Gear')
+            expect(page.locator('.rgc1-world-key')).to_contain_text('Ticket')
+            expect(page.locator('.rgc1-world-key')).to_contain_text('Reply')
+            expect(page.locator('.rgc1-memory')).to_contain_text('do not treat silence as failure')
+            checks.append('Signal 1 teaches Pip, workshop, bridge gear, ticket identity, reply uncertainty, duplicate cost and the player role before the first decision')
             expect(page.locator('.rg-world-actions')).to_be_visible()
             expect(page.locator('.rg-observations')).to_have_count(0)
             assert page.locator('[data-tool="retry"]').evaluate("n=>Boolean(n.closest('.rg-world'))")
@@ -64,6 +85,8 @@ def main():
             move('rewind');move('retry');next_level()
             move('retry');expect(page.locator('#rg-effects')).to_have_text('2 gears')
             move('rewind');move('remember');move('retry');next_level()
+            # Real pointer hit testing for both adjacent scene objects: neither may intercept the other.
+            page.locator('[data-world-look="journal"]').click();expect(page.locator('#rg-feedback')).to_contain_text('Saved job')
             page.locator('[data-world-look="parcel"]').click();expect(page.locator('#rg-feedback')).to_contain_text('three large gears')
             move('match');next_level()
             move('remember');move('retry');expect(page.locator('#rg-effects')).to_have_text('2 gears')
@@ -73,7 +96,7 @@ def main():
             move('inspect');expect(page.locator('#rg-knowledge')).to_contain_text('Absent')
             move('retry');next_level()
             expect(page.locator('#rg-run')).to_be_visible()
-            checks.append('Five real field encounters use scene-owned action controls plus direct object inspection; duplicates, rewind, changed payload, expiry and unknown-to-authorized-absence recovery remain intact')
+            checks.append('Five real field encounters use scene-owned action controls plus direct, non-overlapping object inspection; duplicates, rewind, changed payload, expiry and unknown-to-authorized-absence recovery remain intact')
             build(['retry','remember','match','reconcile'])
             page.locator('#rg-run').click();expect(page.locator('.rg-case-tabs button')).to_have_count(6)
             expect(page.locator('#rg-next')).to_have_count(0);shot('rescue-route-failure.png')
@@ -82,8 +105,6 @@ def main():
             page.reload();expect(page.locator('[data-slot="0"]')).to_contain_text('Recover the ticket')
             expect(page.locator('[data-slot="3"]')).to_contain_text('Send the request')
             page.locator('#rg-run').click();expect(page.locator('#rg-next')).to_be_enabled();shot('rescue-route-success.png')
-            # Own a counterfactual: the same two-block route is safe before expiry,
-            # unsafe afterward. Playground experiments cannot clear the real boss.
             page.locator('.rg-sandbox summary').click();build(['remember','retry'])
             page.locator('#rg-storm-elapsed').fill('1')
             page.locator('#rg-sandbox-run').click();expect(page.locator('.rg-sandbox-result')).to_contain_text('Route holds')
@@ -95,7 +116,6 @@ def main():
             page.locator('[data-slot="1"]').click();expect(page.locator('#rg-sync')).to_have_text('Saved')
             expect(page.locator('#rg-next')).to_be_enabled()
             page.locator('#rg-replay-case').click();expect(page.locator('.rg-live-route')).to_be_visible()
-            # Changing a route and navigating an old result must not restore a stale clear.
             build(['retry']);page.locator('[data-case="1"]').click();expect(page.locator('#rg-next')).to_be_disabled()
             build(SAFE);page.locator('#rg-run').click();expect(page.locator('#rg-next')).to_be_enabled()
             checks.append('Direct scene inspection; causal route playback; player-created quick/expired storms change the outcome without granting a boss clear; stale-result navigation remains invalidated')
@@ -103,7 +123,6 @@ def main():
             expect(page.locator('.rg-results')).to_have_count(0)
             build(SAFE);page.locator('#rg-aid').select_option('none')
             shot('rescue-transfer-before.png')
-            # Commit at the real service, lose its response, retry SAME submission.
             def lose_ack(route):route.fetch();route.abort('failed')
             page.route('**/api/commands/submit',lose_ack,times=1)
             page.locator('#rg-run').click();expect(page.locator('#rg-retry-save')).to_be_visible()
@@ -125,7 +144,10 @@ def main():
                 expect(m.locator('#rgi-static')).to_contain_text('Pip keeps the valley moving.')
                 expect(m.locator('#rgi-static')).to_contain_text('Retrying blindly can make two.')
                 assert m.evaluate('document.documentElement.scrollWidth<=innerWidth')
-                m.locator('#rg-launch').tap();expect(m.locator('[data-tool="retry"]')).to_be_visible()
+                m.locator('#rg-launch').tap();expect(m.locator('#rgc1-guide')).to_be_visible()
+                expect(m.locator('#rgc1-body')).to_contain_text('workshop makes repair parts')
+                m.locator('#rgc1-skip').tap();expect(m.locator('#rgc1-guide')).to_have_count(0)
+                expect(m.locator('[data-tool="retry"]')).to_be_visible()
                 expect(m.locator('.rg-world-actions')).to_be_visible()
                 assert m.locator('[data-tool="retry"]').evaluate("n=>Boolean(n.closest('.rg-world'))")
                 assert m.locator('[data-tool="retry"]').bounding_box()['y']<844
@@ -165,7 +187,7 @@ def main():
                 assert all(mission['status']=='cleared' for mission in isolated['course']['rescue'])
                 assert isolated['attempt']['assessment']['independence']=='declared_independent'
                 mc.close()
-            checks.append('Reduced-motion opening preserves all five causal beats; full seven-encounter 390/320px touch journeys; first action inside viewport; actual 200% text including construction workbench; isolated final transfer evidence')
+            checks.append('Reduced-motion opening and Signal 1 tutorial preserve causal meaning; full seven-encounter 390/320px touch journeys; 200% text; isolated final transfer evidence')
             assert errors==[],errors
             (out/'rescue-browser-report.json').write_text(json.dumps(dict(result='passed',checks=checks,page_errors=errors,browser=b.version,review_method='internal_tool_assisted',audience_validation='not human tested',learning_scope='bounded transfer; no implementation/retention efficacy claim'),indent=2))
         finally:
