@@ -1,51 +1,66 @@
-# Current checkpoint — internal review 7.02/10; Three.js prototype verified, game not accepted
+# Current checkpoint — user rejected at 5/10; commercial game bar now authoritative
 
-Updated 9 September 2026. **Status: `needs_revision`. The >=9.0 game gate and user acceptance are not met.**
+Updated 9 September 2026. **Status: `user_rejected` / `needs_revision`. The >=9.0 critic gate and user acceptance are not met.**
 
-## Latest user decision
+## Latest user decision — authoritative
 
-The user permits review with whatever tools are available while Codex is blocked. **Do not block further review or iteration on Codex setup.** Use a frozen-rubric internal/tool-assisted critique informed by real rendered evidence and disclose that it is not a separate agent or human/youth playtest. The numeric target, both audience lenses, no-critical-blocker rule and the user's final judgment remain unchanged.
+The user is currently the only real product user/reviewer. **Their latest judgment overrides every agent, critic, automated score and historical review for product acceptance.** Do not average reviews, use a higher critic score to overrule a rejection, or call a candidate accepted because tests/automation pass.
 
-The product is **a game whose meaningful play delivers the intended course outcomes**, hopefully better than an ordinary course, with the experience essential rather than optional polish. Equal/superior learning effectiveness is an ambition, not a verified result. Experience and outcome evidence are separate gates; neither compensates for failure of the other.
+Latest explicit user review of the current experience:
 
-[GAME-AS-COURSE.md](GAME-AS-COURSE.md) is the newest controlling amendment. Read it with GAME-ACCEPTANCE-9.md, GAME-UX-REVIEW.md, GAME-UX-SYSTEM.md and COURSE-GENERATION-GAME-SYSTEM.md. Older Codex-only acceptance prerequisites and 8/10 references are superseded for this supervised refinement. The temporary internal-review exception does not give future unattended course generation unrestricted self-certification.
+- **game experience: 5/10**;
+- **learning experience: 5/10**;
+- primary failure: the player does not immediately understand what the game is about, who Pip is, what happened, why duplicate delivery is dangerous, or what the player is supposed to accomplish;
+- required direction: explain this with a simple, compelling opening animation/story sequence and then get the player into meaningful play quickly;
+- product bar: the learner-facing experience must feel like a **real game someone could credibly expect from the Play Store or Steam**, not a gamified website/course page.
 
-## Current implementation and exact verification
+Read **[COMMERCIAL-GAME-BAR.md](COMMERCIAL-GAME-BAR.md)** first for the controlling acceptance semantics and onboarding requirement. It amends GAME-AS-COURSE.md, GAME-ACCEPTANCE-9.md, GAME-UX-SYSTEM.md, GAME-UX-REVIEW.md, COURSE-GENERATION-GAME-SYSTEM.md and AGENTS.md wherever older wording conflicts.
 
-Repository: `Desmic/VibeLearn`. Branch: **`game/expedition-nine-gate`**. **Draft PR #2** into `deploy/render-supabase`. No merge or live deployment has occurred.
+The critic remains a pre-gate only: unrounded >=9.0/10, both audience lenses passing and no critical blocker can advance a candidate to `ready_for_user_review`; **only explicit user acceptance may set `user_accepted`.** User rejection always returns the candidate to revision regardless of critic score.
 
-Latest frozen reviewed candidate: **`620036808c6c558a4a0811e7be2cf9e0a8e74043`**. GitHub Actions **run174 / `34265834379` passed**: pinned Three.js asset verification, build, the **76-test Python/hosted/PostgreSQL suite**, original campaign browser journey, default expedition journey and the new actual-3D/failure-path browser probes. Chromium138.0.7204.23 reported no page errors in these browser reports.
+## External-user boundary
 
-Source artifact **10071768936** and rendered evidence artifact **10071821518** were downloaded and inspected. Their synthetic merge SHA is `fdf6ecb54bacd16fb2aae692fe72b1929266a5fd`. See [GAME-REVIEW-20260909.md](GAME-REVIEW-20260909.md) for precise observations, score, failures and limitations. Later review/checkpoint documentation does not itself alter the frozen game runtime.
+Do **not** open this product to other users yet. The current user wants VibeLearn brought to an acceptable state before any broader learner testing. External testing, invitations or rollout require a later explicit authorization after user acceptance; other users must not be used to substitute for fixing a product the sole current user has rejected.
 
-Run172 rendered the 3D scene but its journal click probe targeted behind the sticky HUD after scrolling. The probe now verifies a physically visible canvas hit, and foreground objects were spaced more clearly. Run173 passed journal selection but queried the boss legends before its asynchronous response/render; the trace/final screenshot demonstrated the actual ordered boss. Run174 waits for actual command/DOM completion and passes without removing the behavioral assertions. Earlier failing runs remain evidence, not hidden successes.
+## Current required product fix
 
-## Implemented changes
+The first-minute experience is now a hard acceptance item. For the Missing Delivery reference, add an approximately **15–20 second skippable/replayable story sequence** that makes these points visually clear before normal play:
 
-The five-stop Missing Delivery reference remains a bounded guided retry game: retained ticket, courier restart, finite memory/reconciliation, executable four-rule policy boss and a different two-hour/missing-request detour. It preserves world truth versus courier knowledge, server-owned progression, append-only rehearsal history and honest feedback-as-assistance semantics. Historical shopping content and learner evidence are unchanged.
+1. Pip is the valley courier and the workshop supplies needed parts.
+2. Pip already sent one order for a bridge gear.
+3. The storm swallowed the reply, so the outcome is uncertain.
+4. Blindly sending again can create a duplicate delivery when only one gear was wanted.
+5. The player's role is to help Pip discover what happened, restore the signals/network and learn how one intent can safely lead to one result.
+6. Bridge the intuitive situation into the equivalent real-software retry problem at the appropriate moment.
 
-An **opt-in Three.js valley at `?world=3d`** now renders actual selectable objects: the post, Pip, journal, clock, order register, ticket press and gear. Real pointer selection invokes the existing legal command; it does not invent a new evidence engine. The default illustrated path remains. Assets are pinned/verified and served locally; no runtime CDN, relaxed CSP or new production secrets. See [THREEJS-SPIKE.md](THREEJS-SPIKE.md) for build setup and limits.
+Reduced-motion mode must preserve the same causal sequence. Skipping the animation must still show a concise static equivalent, and the intro must be replayable. After the intro, do not present another exposition wall; move rapidly into a meaningful action.
 
-The same iteration fixes numbered boss rule order, puts completed tests behind an optional postmortem, preserves visibly recovered rule choices, blocks navigation that would discard unsaved work, and restores keyboard focus to relevant actions. Actual WebGL context loss and module-load failure preserve playable fallback controls. These are verified behaviors, not proof of game appeal or phone performance.
+This opening is necessary but not sufficient. The full loop must also cross the commercial-game bar: playfield-first hierarchy, responsive controls, visible consequences, meaningful alternatives, recoverable failure, growing agency/tools, fair difficulty, satisfying resolution, coherent menus/save/pause/settings and replay variation. Three.js/animation/XP alone do not satisfy this.
 
-## Actual game review
+## Current implementation and verification history
 
-[GAME-REVIEW-20260909.md](GAME-REVIEW-20260909.md) records an **internal tool-assisted 7.02/10**, displayed7.0. Both younger non-specialist and young-adult engagement lenses remain **needs_revision**. The full eight raw scores, weights and calculation are also in `game-review-20260909.json`.
+Repository: `Desmic/VibeLearn`. Working branch: **`game/expedition-nine-gate`**. **Draft PR #2** into `deploy/render-supabase`. Do not merge or expose to new users merely because machine verification passes.
 
-The principal problems are prescribed rather than owned discovery, a rule-panel boss with insufficient hands-on payload/unknown-state preparation, and a page-first hierarchy around the scene. Adding Three.js alone does not fix these. The current slice also lacks the fresh transfer, delayed retrieval and authentic implementation/design evidence needed for the broader course promise.
+The previously frozen candidate `620036808c6c558a4a0811e7be2cf9e0a8e74043` passed run174 with the 76-test suite and browser/3D probes. That verification remains useful engineering evidence, but the later user 5/10 review supersedes the internal 7.02/10 and all older 8.8/9.1/other scores for product acceptance. See GAME-REVIEW-20260909.md for the historical internal review; it is not the current verdict.
 
-The next unit of acceptance is one playfield-first investigation/construction encounter with meaningful alternative actions, visible consequences, recoverable error, a discovered rule, and a constructed solution tested under a fresh disruption. Fix the experience before adding scenery or claiming course completion. The user is not being asked to accept a sub9 build as the final review candidate.
+The five-stop Missing Delivery reference remains a bounded retry-learning prototype with retained ticket, courier restart, finite memory/reconciliation, policy construction and replay/detour behavior. The optional Three.js valley remains a renderer/input experiment. Neither is accepted as the finished product direction simply because it exists or passes tests.
 
-## Review / evidence limits
+## Product and learning promise
 
-This review used builder-authored browser probes and subsequent source, screenshot, report and trace inspection. It was not an independent model/agent, unrestricted personal live-site playthrough or human audience study. Local Chromium navigation was administrator-blocked and not bypassed; normal project CI supplied the rendered evidence.
+VibeLearn is **a game whose meaningful play delivers the intended course outcomes**. Experience and learning are separate gates: a delightful shallow game fails the learning promise; a rigorous but website-like lesson fails the product. The target is not merely to outperform the previous build or educational web apps aesthetically; the learner-facing experience should meet credible commercial-game expectations for onboarding, interaction, pacing, feedback, cohesion and polish.
 
-Headless 3D rendering is not a real-phone frame-rate/battery benchmark. No claim of child enjoyment, general mastery, equivalent course learning or superior efficacy is established. Some earlier machine reports retain an `independent_critic_pending` metadata field; that historical field is not the active product status after the user's method exception. The current review record above is authoritative.
+Future course generation must inherit this standard. Generated courses need an audience-appropriate game-quality onboarding contract establishing world/context, player role, meaningful objective, stakes/change and first actionable problem before abstraction where faithful. The exact Pip/storm animation is a reference implementation, not a universal theme.
 
-## Boundaries and continuity
+## Review method and boundaries
 
-The live Render branch/deployment and Supabase schema, Auth, allowlist and learner data remain unchanged. No paid resources, external testers, Phase2/3 implementation, new model integration or public rollout were initiated. The checksummed historical design package remains untouched. Keep PR #2 draft until actual product and user acceptance.
+While a genuinely separate critic agent/model is unavailable, a deliberately separated frozen-rubric internal/tool-assisted review may still guide iteration, but must be labeled honestly. It cannot self-accept the product. The user remains final authority.
 
-Future course generation inherits the full preserved package specification plus the game-as-course outcome ledger, youth-engagement criteria and unchanged9/10 gate. Failed bounded repairs remain drafts. See COURSE-GENERATION-GAME-SYSTEM.md, which preserves its detailed predecessor as normative except for explicit newer amendments.
+No Phase 2/3 implementation, public rollout, new external testers, paid resources, untrusted runner or new model integration is opened by this update. Preserve historical evidence, learner isolation, auth/RLS boundaries, immutable submissions and the checksummed design package.
 
-Prior infrastructure/phase decisions are in `history/STATE-before-nine-20260908.md`; earlier verification through run170 is in EXPEDITION-VERIFICATION.md. Those historical documents' old scores, stop instructions and Codex prerequisites do not override this checkpoint. Read HOSTING.md before any deployment; a later deployment of the3D option must explicitly include verified vendor assets in its build.
+## Next acceptance loop
+
+1. Fix first-minute story/comprehension and commercial-game presentation.
+2. Verify the actual rendered build and adverse paths.
+3. Run the frozen critic; below 9.0 or any blocker => continue revision.
+4. If critic >=9.0 with no blocker, mark only `ready_for_user_review`.
+5. The user plays it. Rejection overrides the critic and restarts revision; only explicit acceptance closes this checkpoint.
