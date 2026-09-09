@@ -71,8 +71,10 @@ If the rendered game cannot answer these questions through visual causality/play
 
 This remains private Phase 1 refinement. No Phase 2/3 generation implementation, untrusted runner, new model integration, external testers, paid provisioning or public rollout is authorized. Hosted Auth, RLS, learner isolation and evidence-integrity boundaries remain in force. Reduced motion, keyboard/touch and mobile layout remain required.
 
-## Verification status
+## Verification and deployment status
 
 Runtime candidate `416a463b07015b98fd8915f2c890c56f9e74900b` passed GitHub Actions run `34376435686`, including unit tests and the complete browser suite. Frozen evidence artifact: `game-review-evidence-416a463b07015b98fd8915f2c890c56f9e74900b`, SHA-256 `d34cc9978c93b3af5d6761ef60bde80a86bc26e862ca5c7a66607a5d68e6ba50`.
 
-The later commits that add the critic report and this checkpoint are documentation-only. Run the final branch-head CI and then manually deploy Render because auto-deploy is disabled. Do not claim the new candidate is live until Render reports that deployment as `live`. Passing machine checks still do not replace the user's play review.
+The documentation-only checkpoint head `69519b7d8a4407c90b950231a7fcdf80e3739cbd` also passed GitHub Actions run `34377665036`. Render deploy `dep-dagomm9594qs73eqtc60` for that exact head reached **`live`** on 9 September 2026. Private review URL: `https://vibelearn-4xws.onrender.com`.
+
+Any later checkpoint commit that only records documentation does not change the reviewed runtime behavior. Passing machine checks and a live deployment still do not replace the user's play review.
