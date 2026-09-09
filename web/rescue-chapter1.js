@@ -1,9 +1,6 @@
 /* Signal 1 onboarding: teach the world, stakes and vocabulary through simple causal animation. */
 'use strict';
 (() => {
-  const game = window.RescueGame;
-  if (!game || game.__chapterOneGuide) return;
-
   const GUIDE_KEY = 'vibelearn.relay-rescue.signal1-guide.v1';
   const steps = [
     {kicker:'MEET THE VALLEY',title:'Pip needs the footbridge working.',body:'Pip is the courier. The workshop makes repair parts. The broken footbridge needs one gear before Pip can reopen the route.',facts:['Pip = courier','Workshop = makes parts','Gear = repairs the bridge']},
@@ -15,7 +12,11 @@
 
   const seen = () => { try { return localStorage.getItem(GUIDE_KEY) === 'seen'; } catch (_) { return false; } };
   const remember = () => { try { localStorage.setItem(GUIDE_KEY,'seen'); } catch (_) {} };
-  const originalRender = game.render.bind(game);
+
+  function isSignalOne(root) {
+    if (!root || root.hidden) return false;
+    return /SIGNAL\s+1\b/.test(root.querySelector('.rg-top>span')?.textContent || '');
+  }
 
   function addWorldKey(root) {
     const world = root.querySelector('.rg-world');
@@ -25,6 +26,25 @@
     key.setAttribute('aria-label','Signal 1 world key');
     key.innerHTML = '<span><strong>Pip</strong> courier</span><span><strong>Workshop</strong> makes the gear</span><span><strong>Gear</strong> repairs the bridge</span><span><strong>Ticket</strong> identifies the job</span><span><strong>Reply</strong> tells Pip what happened</span>';
     world.append(key);
+  }
+
+  function addMemory(root) {
+    const console = root.querySelector('.rg-console');
+    if (!console || console.querySelector('.rgc1-memory')) return;
+    const note = document.createElement('div');
+    note.className = 'rgc1-memory';
+    note.innerHTML = '<strong>Signal 1 rule of the world:</strong> the workshop may have completed the gear even when Pip never received the reply. Inspect first; do not treat silence as failure.';
+    console.prepend(note);
+  }
+
+  function addRecap(root) {
+    const clear = root.querySelector('.rg-clear');
+    if (!clear || clear.querySelector('.rgc1-recap')) return;
+    const recap = document.createElement('div');
+    recap.className = 'rgc1-memory rgc1-recap';
+    recap.innerHTML = '<strong>What you now know:</strong> Pip is the courier. The workshop makes the bridge gear. One gear repairs this footbridge. <code>order-01</code> identifies this job. The storm can lose the reply after the workshop already acted, so silence means uncertainty—not failure. Reusing the same job identity lets Pip recover the same result instead of creating another delivery. Pip can reach the next island.';
+    const next = clear.querySelector('#rg-next');
+    if (next) clear.insertBefore(recap, next); else clear.append(recap);
   }
 
   function openGuide(root) {
@@ -46,27 +66,33 @@
       guide.querySelectorAll('.rgc1-progress i').forEach((n,i)=>n.classList.toggle('on',i<=step));
       guide.querySelector('#rgc1-next').textContent = step === steps.length-1 ? 'Take control →' : 'Next →';
     };
-    const close = () => { remember(); guide.remove(); world.focus?.({preventScroll:true}); };
+    const close = () => { remember(); guide.remove(); root.querySelector('[data-world-look], [data-tool]')?.focus({preventScroll:true}); };
     guide.querySelector('#rgc1-next').onclick = () => { if (step === steps.length-1) close(); else { step += 1; update(); } };
     guide.querySelector('#rgc1-skip').onclick = close;
     guide.addEventListener('keydown',e=>{ if(e.key==='Escape'){e.preventDefault();close();} });
     update(); guide.focus({preventScroll:true});
   }
 
-  game.render = (attempt, missions, handlers) => {
-    const result = originalRender(attempt, missions, handlers);
-    if (attempt?.snapshot?.rescue?.level === 1 && attempt.status === 'draft') {
-      const root = document.querySelector('#rescue-game');
-      addWorldKey(root);
-      const console = root?.querySelector('.rg-console');
-      if (console && !console.querySelector('.rgc1-memory')) {
-        const note = document.createElement('div'); note.className='rgc1-memory';
-        note.innerHTML='<strong>Signal 1 rule of the world:</strong> the workshop may have completed the gear even when Pip never received the reply. Inspect first; do not treat silence as failure.';
-        console.prepend(note);
-      }
-      if (!seen()) openGuide(root);
-    }
-    return result;
+  function enhance() {
+    const root = document.querySelector('#rescue-game');
+    if (!isSignalOne(root)) return;
+    addWorldKey(root);
+    addMemory(root);
+    addRecap(root);
+    // Only an interactive draft has player action controls. Submitted/review states
+    // keep the world key and recap but never reopen the tutorial.
+    if (!seen() && root.querySelector('[data-tool]')) openGuide(root);
+  }
+
+  const workspace = document.querySelector('#workspace');
+  if (!workspace) return;
+  let queued = false;
+  const schedule = () => {
+    if (queued) return;
+    queued = true;
+    queueMicrotask(() => { queued = false; enhance(); });
   };
-  game.__chapterOneGuide = true;
+  const observer = new MutationObserver(schedule);
+  observer.observe(workspace, {childList:true, subtree:true});
+  schedule();
 })();
