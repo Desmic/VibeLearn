@@ -42,6 +42,7 @@ def main():
             expect(page.locator('[data-world-look="workshop"]')).to_be_enabled()
             expect(page.locator('[data-world-look="ticket"]')).to_be_disabled()
             expect(page.locator('[data-tool="retry"]')).to_be_disabled()
+            expect(page.locator('.rg-console')).to_be_hidden()
             page.screenshot(path=str(out/'signal1-first-action.png'), full_page=True)
 
             page.locator('[data-world-look="workshop"]').click()
@@ -52,7 +53,13 @@ def main():
             expect(coach).to_contain_text('The workshop may already have made the gear.')
             expect(page.locator('[data-tool="retry"]')).to_be_enabled()
             expect(page.locator('[data-tool="new"]')).to_be_enabled()
-            checks.append('Signal 1 uses one scene-owned control surface and reveals one obvious inspection at a time before exposing the first decision')
+            expect(page.locator('.rgc1-dock')).to_be_visible()
+            expect(page.locator('.rgc1-dock .rg-ticket')).to_be_visible()
+            expect(page.locator('.rgc1-dock .rg-tools')).to_be_visible()
+            expect(page.locator('.rg-console')).to_be_hidden()
+            expect(page.locator('.rg-evidence')).to_be_hidden()
+            page.screenshot(path=str(out/'signal1-first-choice.png'), full_page=True)
+            checks.append('Signal 1 uses one scene-owned control surface, reveals one obvious inspection at a time, then exposes the first decision in a compact playfield action dock rather than a website panel stack')
 
             page.locator('[data-tool="new"]').click()
             expect(coach).to_contain_text('A NEW TICKET')
