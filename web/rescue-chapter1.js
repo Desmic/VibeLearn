@@ -25,6 +25,18 @@
 
   function isHistorical(root) { return Boolean(root?.querySelector('.rg-review-banner')); }
 
+  function syncStepFromAttempt(a) {
+    if (done() || a?.snapshot?.rescue?.level !== 1 || !a?.rescue_state) return;
+    const s=a.rescue_state, looked=new Set(s.looked || []);
+    // Derive tutorial progress from the server-confirmed world, not from raw clicks.
+    // That keeps guidance from ever re-enabling controls while a move is saving.
+    if (s.rewinds > 0 && !s.failed) writeStep(2);
+    else if (s.ticket && s.ticket !== 'order-01') writeStep(3);
+    else if (looked.has('ticket')) writeStep(2);
+    else if (looked.has('workshop')) writeStep(1);
+    else writeStep(0);
+  }
+
   function addWorldKey(root) {
     const world = root.querySelector('.rg-world');
     if (!world) return;
@@ -134,32 +146,23 @@
     decorateMenu(root); updateGuidance(root);
   }
 
-  // Attach to the actual game render lifecycle rather than relying only on DOM
-  // timing. This guarantees the guide exists before a rendered Signal 1 frame is
-  // handed back to app.js/Playwright/the player.
+  // Attach to the actual game lifecycle. Tutorial state comes from the confirmed
+  // rescue attempt; a saving or failed-save frame keeps RescueGame's own locks.
   const game=window.RescueGame;
   if (game && !game.__signalOneGuideV2) {
     const previousRender=game.render.bind(game);
     const previousSync=game.sync.bind(game);
-    game.render=(...args)=>{ const result=previousRender(...args); enhanceNow(); return result; };
-    game.sync=(...args)=>{ const result=previousSync(...args); enhanceNow(); return result; };
+    game.render=(a,...rest)=>{ const result=previousRender(a,...rest); syncStepFromAttempt(a); enhanceNow(); return result; };
+    game.sync=(busy,a,...rest)=>{
+      const result=previousSync(busy,a,...rest);
+      const status=rootEl()?.querySelector('#rg-sync')?.textContent;
+      if (!busy && status==='Saved') { syncStepFromAttempt(a); enhanceNow(); }
+      return result;
+    };
     game.__signalOneGuideV2=true;
   }
 
-  const workspace=document.querySelector('#workspace'); if(!workspace) return;
-  workspace.addEventListener('click',event=>{
-    const target=event.target.closest('[data-world-look],[data-tool]'); if(!target) return;
-    const root=rootEl(); if(!isSignalOne(root) || done() || isHistorical(root)) return;
-    if(target.dataset.worldLook==='workshop' && readStep()===0) writeStep(1);
-    else if(target.dataset.worldLook==='ticket' && readStep()===1) writeStep(2);
-    else if(target.dataset.tool==='new' && readStep()>=2) writeStep(3);
-    else if(target.dataset.tool==='rewind') writeStep(2);
-    queueMicrotask(enhanceNow);
-  },true);
-
-  // Render/sync wrappers are the authoritative lifecycle hooks. Avoid a subtree
-  // MutationObserver here: tutorial text updates themselves mutate child nodes and
-  // can create an infinite observer loop. A single queued pass covers the initial
-  // frame; subsequent renders, syncs and player actions call enhanceNow directly.
+  // No raw-click progression here. A click may still be in flight; advancing the
+  // tutorial before the server confirms it can accidentally unlock a second move.
   queueMicrotask(enhanceNow);
 })();
