@@ -1,15 +1,16 @@
-/* Phone-first overrides for Echo Forge first touch and Signal 1. Portrait is the primary review surface. */
+/* Phone-first overrides for Echo Forge first touch and Signal 1.
+   One responsive portrait range targets ordinary Android and iPhone screens; desktop polish comes later. */
 @media(max-width:820px){
   .rgi-overlay{padding:calc(5px + env(safe-area-inset-top)) 5px calc(5px + env(safe-area-inset-bottom));overscroll-behavior:contain}
   .rgi-shell{position:relative;min-height:calc(100svh - 10px - env(safe-area-inset-top) - env(safe-area-inset-bottom));grid-template-rows:minmax(0,1fr) auto auto;gap:6px}
   .rgi-storybar{position:absolute;z-index:10;left:9px;right:9px;top:8px;min-height:30px;padding:0 8px;border:1px solid #5a777c88;border-radius:999px;background:#071b27c9;backdrop-filter:blur(7px);pointer-events:none}
   .rgi-storybar>span{font-size:.53rem}.rgi-storybar>b{display:block;font-size:.53rem}.rgi-storybar>small{font-size:.52rem}
-  .rgi-visual{grid-row:1;min-height:0;height:calc(100svh - 154px - env(safe-area-inset-top) - env(safe-area-inset-bottom));max-height:none;border-radius:17px;border-color:#45666f;box-shadow:0 18px 54px #000a}
+  .rgi-visual{grid-row:1;min-height:0;height:calc(100svh - 158px - env(safe-area-inset-top) - env(safe-area-inset-bottom));max-height:none;border-radius:17px;border-color:#45666f;box-shadow:0 18px 54px #000a}
   .rgi-scene-caption{left:0;right:0;bottom:0;width:auto;max-width:none;max-height:52%;overflow:auto;padding:68px 14px 13px;border:0;border-radius:0;background:linear-gradient(180deg,transparent 0,#071923d4 25%,#071923f4 55%,#071923 100%);box-shadow:none;backdrop-filter:none;scrollbar-width:thin}
   .rgi-kicker{font-size:.54rem}.rgi-scene-caption h2{margin:5px 0 6px;font-size:clamp(1.5rem,6.5vw,2rem);line-height:1.02}.rgi-scene-caption p{display:block!important;font-size:.78rem;line-height:1.38;max-width:46ch}.rgi-scene-caption blockquote{margin-top:7px;padding:6px 8px;background:#15323dbd;font-size:.71rem;line-height:1.35}.rgi-fact{display:inline-flex!important;margin-top:6px;font-size:.6rem}
   .rgi-progress{grid-row:2;gap:4px;padding:1px 2px 0}.rgi-progress i{height:4px}.rgi-progress i span{display:none}
   .rgi-controls{grid-row:3;display:grid;grid-template-rows:auto auto;gap:3px;align-items:stretch;padding:0 1px}.rgi-nav{display:grid;grid-template-columns:minmax(92px,.72fr) minmax(0,1.45fr);gap:6px;width:100%}.rgi-nav button{width:100%;min-height:50px;font-size:.78rem}.rgi-controls .rg-primary{min-width:0}
-  .rgi-utilities{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;width:100%}.rgi-utilities button{min-height:42px;padding:4px 2px;border:0;background:transparent;font-size:.64rem;color:#8eafae}
+  .rgi-utilities{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;width:100%}.rgi-utilities button{min-height:44px;padding:4px 2px;border:0;background:transparent;font-size:.64rem;color:#8eafae}
   .rgi-marker{font-size:.47rem;padding:4px 6px}.rgi-markers .rgi-marker:nth-child(n+3){display:none}
 
   .rgc1-guided .rg-encounter{padding:8px 6px calc(10px + env(safe-area-inset-bottom))}
@@ -24,16 +25,11 @@
   .rgc1-dock .rgc1-memory{font-size:.62rem;line-height:1.35;padding:7px 8px}.rgc1-dock .rg-ticket{padding:7px 8px}.rgc1-dock .rg-tools{gap:6px}.rgc1-dock .rg-tools button{min-height:52px;padding:8px 6px;font-size:.72rem}
 }
 @media(max-width:430px){
-  .rgi-visual{height:calc(100svh - 154px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
   .rgi-storybar>b{display:none}.rgi-scene-caption{max-height:55%;padding:62px 12px 11px}.rgi-scene-caption h2{font-size:1.55rem}.rgi-scene-caption p{font-size:.74rem}.rgi-scene-caption blockquote{font-size:.67rem}.rgi-fact{font-size:.57rem}
   .rgi-markers .rgi-marker:nth-child(n+2){display:none}.rgi-marker{font-size:.45rem;letter-spacing:.04em}.rgi-marker::after{display:none}
-  .rgi-nav button{min-height:52px}.rgi-utilities button{min-height:40px}.rgi-fallback-pip{scale:.78;transform-origin:bottom left}.rgi-fallback-forge{scale:.78;transform-origin:bottom right}
+  .rgi-nav button{min-height:52px}.rgi-fallback-pip{scale:.78;transform-origin:bottom left}.rgi-fallback-forge{scale:.78;transform-origin:bottom right}
   .rgc1-guided .rg-world.rgc1-three-ready{min-height:52svh}
 }
-@media(max-width:360px){
-  .rgi-scene-caption{max-height:58%;padding-inline:10px}.rgi-scene-caption h2{font-size:1.42rem}.rgi-scene-caption p{font-size:.71rem}.rgi-nav{grid-template-columns:88px 1fr}.rgi-nav button{font-size:.72rem;padding-inline:7px}.rgi-utilities button{font-size:.59rem}
-  .rgc1-guided .rg-world.rgc1-three-ready{min-height:49svh}.rgc1-coach strong{font-size:.83rem}.rgc1-coach small{font-size:.58rem}.rgc1-guided .rg-world.rgc1-three-ready .target-workshop,.rgc1-guided .rg-world.rgc1-three-ready .target-ticket{min-width:96px;font-size:.63rem}
-}
 @media(max-height:700px) and (max-width:820px){
-  .rgi-visual{height:calc(100svh - 145px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:420px}.rgi-scene-caption{max-height:61%;padding-top:52px}.rgi-scene-caption p{display:block!important}.rgi-fact{display:inline-flex!important}.rgi-utilities button{min-height:38px}
+  .rgi-visual{height:calc(100svh - 154px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:410px}.rgi-scene-caption{max-height:61%;padding-top:52px}.rgi-scene-caption p{display:block!important}.rgi-fact{display:inline-flex!important}
 }
