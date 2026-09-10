@@ -17,12 +17,19 @@ def main():
         package_repair()
         if not compileall.compile_dir(ROOT / "app", quiet=1):
             return 1
+        # Browser code now includes real ES modules. Node's default `--check` can
+        # parse classic .js without selecting ESM semantics, which previously let
+        # a malformed imported Three.js scene pass build and fail only in-browser.
+        # Parse every browser script as an ES module; the classic scripts are
+        # already strict-mode compatible and this catches both forms reliably.
         for script in sorted((ROOT / "web").glob("*.js")):
-            subprocess.run(["node", "--check", str(script)], check=True)
+            subprocess.run([
+                "node", "--experimental-default-type=module", "--check", str(script)
+            ], check=True)
         from app.manifest import manifest
         (ROOT / "artifacts").mkdir(exist_ok=True)
         (ROOT / "artifacts" / "build-manifest.json").write_text(json.dumps(manifest(), indent=2), encoding="utf-8")
-        print("Build passed: Python compiled; browser JavaScript syntax checked.")
+        print("Build passed: Python compiled; browser JavaScript parsed with ESM semantics.")
         return 0
     if command == "browser":
         for module in ["tests.browser_check", "tests.expedition_browser_check", "tests.game_review_browser", "tests.onboarding_browser", "tests.rescue_browser"]:
