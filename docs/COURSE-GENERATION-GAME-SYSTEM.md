@@ -1,190 +1,221 @@
 # Course generation produces playable teaching systems
 
-Current authority — updated 10 September 2026. This amends the root implementation plan for future Phase 3/4; it does not open those phases. Read [GAME-AS-COURSE.md](GAME-AS-COURSE.md), [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md), [GAME-UX-SYSTEM.md](GAME-UX-SYSTEM.md), [GAME-ACCEPTANCE-9.md](GAME-ACCEPTANCE-9.md), and [STATE.md](STATE.md).
+Current authority — updated 10 September 2026. This is the future Phase 3/4 generation contract and does **not** authorize those phases today. Read the root `CODEX-IMPLEMENTATION-PLAN.md`, [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md), [GAME-AS-COURSE.md](GAME-AS-COURSE.md), [GAME-UX-SYSTEM.md](GAME-UX-SYSTEM.md), [GAME-UX-REVIEW.md](GAME-UX-REVIEW.md), and [STATE.md](STATE.md).
 
-## Contract continuity and precedence
+## North star
 
-The detailed pre-existing generation specification remains preserved at [history/COURSE-GENERATION-before-game-as-course.md](history/COURSE-GENERATION-before-game-as-course.md). Its brief, package, schema, versioning, assistance, validation, and repair requirements remain normative except where explicitly superseded here.
+VibeLearn is a **general system for turning subjects/courses into effective learning games**. Relay Rescue is one authored reference, not a template every course must resemble.
 
-Current quality target: unrounded **>=9.0/10** for each applicable story, game-experience, and learning/real-world-transfer critic gate, no critical blocker, then explicit user acceptance. The current user's verdict overrides machine/critic scores.
+The generator's job is not “write lessons with a theme.” It must connect source-grounded learning outcomes to a story/world, translate those relationships into meaningful game mechanics and progression, and preserve defensible evidence of what the learner actually demonstrated.
 
-## Generation order is now story-first
+## Generated package model
 
-Do **not** generate a lesson/game mechanic first and attach generic narrative afterward. For every course/subject, the generation pipeline begins by creating a compelling story/fantasy/world premise that can naturally carry the target learning.
+A generated experience should have four explicit, versioned packages.
 
-Required order:
+### 1. LearningSpec
 
-`course topic/outcomes -> story/fantasy candidate -> story critic >=9 -> gameplay/world realization -> game critic >=9 -> learning/transfer validation -> release candidate -> current user review`
+Contains canonical competency IDs, prerequisites, intended outcomes, source/provenance constraints, misconceptions, assessment criteria, transfer/retrieval requirements and allowed assistance.
 
-The story critic must pass before expensive gameplay realization is treated as the current candidate. A game critic cannot retroactively rescue a weak story.
+LearningSpec is the durable identity layer. It cannot depend on Pip, a fantasy name, a particular renderer, or an exercise URL.
 
-## Story input today; learner preference later
+### 2. StoryWorldSpec
 
-**Current implementation contract:** generate the story/fantasy/world from the course topic, intended outcomes, prerequisite causal structure, and a fixed broad-audience quality target. Learner creative preferences are **not** an input today. Do not infer a preferred genre, tone, world, character style, or visual style from unrelated profile/history data.
+Contains premise, characters, world rules, emotional arc, important objects/resources and their functions, stakes, chapter progression, discoveries/reversals/payoffs, player role and explicit mappings from story elements to LearningSpec concepts/relationships.
 
-**Future capability:** an explicit learner-controlled `StoryPreferenceProfile` may shape creative presentation after it is deliberately implemented and authorized. Candidate fields include genre/world type, realism vs fantasy/sci-fi, emotional tone, character/relationship style, visual style, humor/darkness, exploration/action/mystery/construction balance, pace, narrative density, branching preference, and disliked themes/presentation styles.
+A story object must have an understandable in-world function before it becomes a metaphor for a subject concept. Metaphor never replaces the real definition.
 
-Unknown/unspecified future preferences must fall back to the strongest topic-faithful broad-audience story rather than fabricated personalization. Preference data changes presentation/story choices only; it must not weaken competency definitions, source grounding, assessment semantics, evidence boundaries, or safety/accessibility requirements.
+### 3. GameExperienceSpec
 
-## Required StoryPackage artifact
+Contains mission/campaign graph, mechanics, action vocabulary, difficulty/progression curve, HUD and visibility schedule, feedback/consequence plan, failure/recovery, rewards, story-to-play mapping, 2D/2.5D/3D realization choice, phone/accessibility contract and replay/forward-pull plan.
 
-Before generating the playable course package, produce and version a `StoryPackage` (name illustrative; exact schema may evolve) containing at minimum:
+### 4. AssessmentEvidenceSpec
 
-- story ID/version and course/version binding;
-- audience assumptions; current `story_preference_input` must be `none/not_supported` until explicit preference support exists;
-- genre/tone/world premise;
-- protagonist/focal actor and readable desire;
-- player role and why the player belongs in the story;
-- world rules important to the opening;
-- inciting incident;
-- causal chain of pre-player events;
-- stakes and central question/mystery/conflict;
-- chapter/mission story progression and escalation;
-- planned discoveries, reversals, consequences, recovery beats, and payoff;
-- how target concepts become world rules, tools, puzzles, powers, conflicts, systems, or decisions rather than renamed vocabulary;
-- first-touch realization options (2D / 2.5D / Three.js 3D) and rationale;
-- accessibility/reduced-motion storytelling equivalent;
-- story critic result and unresolved weaknesses.
+Contains what observable actions/results justify which learning claim, scoring/evaluation boundaries, fresh-transfer and delayed-retrieval requirements, assistance/exposure semantics, evidence identity and what stays `unknown`.
 
-The story artifact must be inspectable independently from gameplay code.
+Story/game packages may be replaced while legitimate evidence remains attached to canonical learning identity. Story changes must never fabricate learning progress.
 
-## Separate story critic gate
+## Inputs: current vs future
 
-A story critic evaluates **exactly one frozen story candidate at a time**. It rates the story itself, not the implementation around it. Use [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md) as the authoritative rubric.
+### Current generation
 
-The critic must judge at least: hook, clarity/causality, character attachment, world/fantasy appeal, storytelling quality, pacing/progression, stakes, payoff/forward pull, and cross-age engagement.
+Story and game generation currently use:
 
-The critic does **not** award points for:
+- course/subject intent;
+- intended learning outcomes and prerequisites;
+- source-grounded causal/conceptual structure;
+- learner level only where explicitly known and allowed;
+- a broad quality target that should remain understandable/appealing from bright children through teens/young adults when the subject permits it.
 
-- course usefulness;
-- learning evidence or assessment correctness;
-- code/test quality;
-- browser reliability;
-- Three.js or rendering sophistication;
-- number of animations/assets;
-- implementation effort.
+**Creative learner preference is not currently implemented.** Do not infer genre, tone, fantasy type, visual style or narrative preference from unrelated personal/profile data.
 
-A story below 9.0 or with a story blocker remains `story_needs_revision`. Iterate the same single story or intentionally replace it with a new version; preserve which candidate was scored. Do not average multiple stories into one rating.
+### Future story personalization
 
-The current user's explicit story verdict overrides the critic. The present Relay Rescue opening is user-rated **3/10** and therefore fails regardless of prior game-critic results.
+Add an explicit, learner-controlled, versioned `StoryPreferenceProfile` (or equivalent) that may include genre, fantasy/realism, tone, character style, visual style, humor/darkness, pace, exploration/action balance and narrative density.
 
-## The game is the course
+Preferences are optional creative constraints. They are editable, separate from mastery/evidence, and the generator must still work well with no preference profile. Preference changes may regenerate/re-skin StoryWorldSpec/GameExperienceSpec while preserving learning requirements and legitimate learner history.
 
-After story approval, generate an experience in which meaningful investigation, manipulation, construction, decisions, and consequences exercise the intended capability. Do not generate an ordinary lesson page, add XP, and call it a game.
+## Authoring pipeline
 
-The generated gameplay must integrate with the story rather than interrupt it with unrelated lesson screens. Explanations and coding tasks are legitimate when they develop/demonstrate the promised skill, but should enter through the player's role/world whenever feasible.
+Use this order:
 
-## Attention-first onboarding contract
+`goal/course -> source research -> competency graph/LearningSpec -> StoryWorldSpec -> story critic -> GameExperienceSpec -> realization -> first-touch critic -> whole-chapter game critic -> learning/transfer gate -> learner preview/review -> publish/activate`
 
-Generated courses inherit this early progression:
+The generator cannot self-certify any stage.
 
-`story hook / wonder -> character + world desire -> immediate need -> one obvious action -> visible consequence -> easy success/recovery -> formal concept -> variation -> combination -> transfer`
+### Source grounding
 
-The first playable minute should create interest with a well-told story/world and minimize unnecessary terminology. Core context should be dramatized, not dumped as exposition slides.
+Use authoritative/public sources appropriate to the subject. Preserve URLs/provenance, access limitations, confidence and what was actually inspected. Learner-suggested sources are constraints/input, not automatically truth. Required/excluded/only-listed boundaries must be explicit.
 
-Suitable opening forms include interactive cinematic, explorable 3D/2.5D scene, character encounter, playable incident, mystery, simulation failure, visual construction, scientific event, professional scenario, or another form faithful to the topic and chosen story.
+Do not expose private learner profile data in public research queries unless necessary and authorized. Prompt injection/source text cannot change system permissions, evidence rules or generation gates.
 
-## First-touch story-player contract
+### Competency graph before fantasy
 
-Generated openings must not behave like rushed slide decks.
+Define what the learner should be able to understand/do before inventing story details. Story can creatively embody the relationships but cannot silently change them.
 
-- Back/previous beat is mandatory.
-- First-run progression is user-paced by default.
-- Next/continue, pause/resume when animation runs, skip, replay, and visible progress/chapter position are required where applicable.
-- Autoplay, if offered, is optional and must give each beat enough time to land; any inspection/interaction pauses it.
-- Back/forward restores coherent visual/narrative state.
-- Reduced-motion preserves the complete causal story and the same navigation controls.
-- Resume/checkpoints avoid forcing long rewatching.
+Map prerequisites and decide where transfer, retrieval, diagnosis, construction, prediction, comparison, debugging or explanation are required.
 
-A generated opening fails first-touch validation if the player must race the interface to read or understand it.
+## Story generation and story gate
 
-## Tutorial focus-mode contract
+Generate **one frozen story candidate at a time** following [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md).
 
-Generated first chapters treat visible UI complexity as a limited budget. The generator explicitly labels surfaces as **visible now**, **deferred**, and **introduced later**.
+A story should provide:
 
-Default behavior:
+- an immediate hook;
+- a focal character/system with a readable desire/need;
+- a distinctive world and understandable rules;
+- an inciting event and causal chain;
+- stakes/reason to care;
+- a meaningful player role;
+- chapter escalation/discovery/reversal/payoff;
+- natural places where course concepts become tools, conflicts, resources, puzzles, powers, systems or choices.
 
-- the first meaningful interaction lives in the playfield/world;
-- evidence panels, analytics, learning metadata, journals, settings, helper drawers, long tool rails, and postmortems remain deferred unless needed for the current decision;
-- introduce the smallest useful HUD/action dock as context grows;
-- underlying save/evidence/accessibility semantics remain active even when explanatory surfaces are hidden;
-- focused presentation reuses real controls/state behavior rather than decorative clones.
+Story-only critic score must be unrounded **>=9.0/10 with no story blocker** before gameplay realization.
 
-Mission one fails if it visually resembles a dense dashboard/course page even when the mechanic is correct.
+A failed story is revised as story. Do not hide weak writing under animation, Three.js, XP or lesson correctness.
 
-## First-chapter world-model gate
+## First chapter contract
 
-Before the tutorial chapter completes, a fresh novice should be able to answer in plain language:
+The first chapter must build the learner's world model while keeping cognitive load low.
 
-1. Who/what matters and why should I care?
-2. What do they want to happen?
-3. What are the important actors/objects/resources and what do they do?
-4. What happened before I arrived?
-5. What changed or became uncertain?
-6. Why does it matter?
-7. What can I do in this world?
-8. Why is my first action useful?
-9. What makes me want to discover the next beat/mission?
+By its end, a non-specialist should know:
 
-The StoryPackage and rendered game must demonstrate these answers through story/play with modest reading demand. A glossary, long briefing, or repository documentation does not satisfy the gate.
+- who/what matters and who needs help;
+- what the important objects/resources/entities are;
+- what each one does;
+- what happened before the player arrived;
+- what changed/went wrong;
+- why it matters;
+- what the player can do about it;
+- what success looks like;
+- how the in-world behavior maps to the real subject concept.
 
-## Progressive cognitive-load contract
+Prefer action, simple animation, environmental storytelling, direct manipulation and visible consequence to glossaries/exposition cards. Introduce formal terminology only after the concrete model exists.
 
-Difficulty growth increases reasoning and agency, not merely text length:
+First-run story progression is user-paced by default. Back/previous, Continue, Skip, Replay and visible progress are required where applicable; Pause/Resume is required while motion runs. Reduced-motion mode preserves meaning and navigation.
 
-- **Orient:** strong story/world hook, one obvious action, low vocabulary, highly legible consequence.
-- **Confirm:** easy success or recoverable error that teaches the local rule.
-- **Vary:** change one meaningful dimension while preserving interaction grammar.
-- **Combine:** require previously learned rules together and expand available agency.
-- **Transfer:** move to a meaningfully different context with reduced scaffolding.
-- **Retrieve later:** revisit the capability after delay where retention is claimed.
+## Game generation and progression
 
-Every boss rule and UI operation must be taught or intentionally reserved for a justified transfer challenge. Do not introduce new controls, vocabulary, and domain rules simultaneously without reason.
+Generate a **campaign/progression graph**, not just a lesson order.
 
-## 2D / 2.5D / Three.js decision
+A useful default curve is:
 
-For each StoryPackage, explicitly evaluate three realization families:
+`hook/world -> tiny obvious action -> easy success -> one variation -> meaningful consequence/recovery -> combine ideas -> harder transfer/boss -> resolution -> next possibility`
 
-1. authored 2D/illustrated animation;
-2. 2.5D/parallax/layered interactive scenes;
-3. interactive Three.js 3D.
+Difficulty increases through reasoning complexity, transfer, uncertainty, trade-offs, interacting rules, reduced scaffolding and greater agency—not longer prompts or denser dashboards.
 
-Three.js should be seriously considered for the kid/teen/young-adult audience because immersion, character presence, spatial storytelling, atmosphere, world exploration, and direct interaction can materially increase attention even when the underlying learning concept is not inherently 3D.
+Early missions should normally teach one new rule/action at a time. Later missions recombine them. Experienced learners may earn bounded diagnostics/test-out routes, but self-report cannot create mastery.
 
-Do not default every course to 3D. **Today choose based on the topic, story needs, broad target audience, mobile/device budget, and quality advantage demonstrated by the prototype.** Once explicit story preferences exist, those may also influence the medium. A beautiful renderer never compensates for weak story or gameplay.
+When possible generate mechanics that embody the thinking: manipulate, choose, arrange, simulate, compare, construct, trace, classify, debug, sequence or trade off. Written answers are appropriate when explanation/design itself is the capability, not as the universal mechanic.
 
-If 3D is chosen, require pinned/local assets, same-origin runtime, keyboard/touch equivalence, reduced-motion behavior, usable fallback, and realistic mobile performance checks. Renderer output never establishes learning evidence.
+## HUD / visibility generation
 
-## Additional required generated contracts
+Every GameExperienceSpec needs a visibility schedule answering:
 
-The original CourseBrief/full-package contracts remain. Extend them with:
+- What must the learner see now?
+- What is intentionally hidden/deferred?
+- What becomes available after the next success/discovery?
 
-- audience/story assumptions and current `story_preference_input` (`none/not_supported` until that capability exists);
-- versioned StoryPackage + story critic record;
-- opening hook and reason to continue with XP hidden;
-- first-touch navigation/timing policy;
-- first-chapter world model;
-- first-minute visibility budget;
-- cognitive-load stages and vocabulary/tool disclosure points;
-- outcome coverage ledger mapping `outcome -> prerequisite -> mechanic -> decision -> feedback -> varied practice -> fresh transfer -> delayed retrieval -> evidence limits`;
-- meaningful alternatives, failure/recovery, earned ending, and reasoning-changing replay variation;
-- renderer/fallback behavior;
-- exact candidate/version, executable fixtures, rendered evidence, raw critic scores, method, limitations, and open blockers.
+The opening should avoid course-site/dashboard density. Show the immediate objective and relevant action first. Introduce hints, Intel, formal vocabulary, evidence details and advanced controls progressively.
 
-The original provenance, learning/assessment bindings, competency identity/migration, course-independent evidence, assistance distinctions, reward separation, immutable release, persistence/resume, and learner-isolation requirements remain intact.
+## Rendering choice: 2D, 2.5D, Three.js
 
-## Validation and repair
+For important story candidates compare authored 2D animation, 2.5D/parallax and interactive Three.js 3D.
 
-Story validation occurs before game validation. Structural/learning, grounding/content, assessment-integrity, accessibility, game-experience, and learning/transfer validators remain separate.
+Choose the medium based on story/world presence, attention, subject mechanics, direct interaction, accessibility and device budget. Three.js is a serious option for the kid/teen/young-adult audience, but gets no automatic quality points.
 
-The rendered game critic must verify the story survives realization; it cannot simply trust the StoryPackage. It should also inspect first-touch navigation, pacing, visible UI complexity, actual first action, consequences, progression, and whether the result feels like a credible commercial game rather than a gamified website.
+If 3D is used: self-host/pin runtime assets, keep same-origin behavior, preserve touch/keyboard/reduced-motion/fallback, and make camera/hit targets work on mainstream phones.
 
-Keep bounded repair budgets. Failed candidates remain explicit failures (`story_needs_revision`, `draft_needs_review`, etc.); never lower thresholds or relabel schema-valid output as validated.
+## Dual game-experience gate
+
+Do not blend the opening and full chapter into one score.
+
+### First-touch magic >=9
+
+Judge the fresh first 60–90 seconds for beauty/creative hook, curiosity/wonder, character/world attachment, causal clarity, low initial cognitive load, pacing/navigation control, obvious first action and story-to-play transition.
+
+### Whole-chapter game experience >=9
+
+Judge the complete chapter for story-to-play continuity, agency, progressive cognitive load, challenge curve, feedback/consequence/recovery, payoff, replay/forward pull, commercial-game cohesion and continued learning relevance.
+
+Both must independently reach an unrounded **>=9.0/10 with no blocker**. A high chapter score cannot average away a bad first touch, and beautiful first touch cannot excuse a weak chapter.
+
+Use [GAME-UX-REVIEW.md](GAME-UX-REVIEW.md). Prefer a truly separate critic when the harness supports one. Otherwise record `internal_tool_assisted`; do not fake independence.
+
+## Learning / transfer gate
+
+After game gates pass, independently ask whether meaningful play actually teaches/assesses the intended LearningSpec.
+
+Check purposeful practice coverage, misconceptions, unassisted success, hint dependence, explanation/reasoning when required, implementation/decision quality, fresh transfer and delayed retrieval where claimed.
+
+Do not infer full-course effectiveness from one guided mission. Do not call an immediately repeated problem durable retention.
+
+Applicable learning/transfer score must be **>=9.0/10** before learner review when using the current 9/10 acceptance process.
+
+## Evidence invariants
+
+Generated games must preserve:
+
+- canonical competency identity independent of course/story;
+- pinned assessment meaning and content versions;
+- `unknown` distinct from failed;
+- `declared_independent` distinct from observed assistance;
+- current-attempt help distinct from `previously_exposed`;
+- rewards/XP distinct from mastery;
+- submitted evidence immutability;
+- learner isolation;
+- course replacement without losing legitimate history.
+
+A game's fiction may say “signal restored”; the evidence layer must still state exactly what was observed and what was not.
+
+## Mainstream phone target
+
+For the current reference and initial generated games, first optimize important first-touch/Chapter 1 flows for mainstream modern Android/iPhone portrait use: representative viewports around **360–430 CSS px**, tall-phone aspect ratios, touch input, safe areas, text enlargement and reduced motion.
+
+Do not produce device-specific experiences unless actual evidence requires it. Desktop polish can follow after the phone path is strong.
+
+## Validation / repair loop
+
+Keep validators separate:
+
+1. schema/structural coverage;
+2. source/grounding/content correctness;
+3. story-only quality;
+4. first-touch game quality;
+5. whole-chapter game quality;
+6. accessibility/device interaction;
+7. assessment/evidence integrity;
+8. learning/transfer.
+
+Use bounded repair budgets. Failed candidates remain explicit (`story_needs_revision`, `game_needs_revision`, `draft_needs_review`). Never lower a rubric or delete a failing test to advance.
 
 ## Documentation feedback loop
 
-If user feedback changes story, onboarding, progression, rendering strategy, UI direction, acceptance, or generation requirements, update affected repository docs in the same implementation unit. Future generation must inherit current product direction rather than stale assumptions.
+If direct user feedback changes story, onboarding, progression, rendering strategy, UI direction, device priority, critic semantics, acceptance or generation requirements, update the root implementation plan and affected docs **before or in the same bounded implementation unit as the code**.
+
+The current user is the sole real product reviewer during private refinement. Their explicit verdict overrides every critic/automation result.
 
 ## Current implementation boundary
 
-This documents the future adaptive course-generation system; it does **not** authorize Phase 2+, new model integration, public rollout, external testers, untrusted execution, or paid infrastructure. Current work remains private Phase 1 product refinement.
+This file specifies the future general generator. Current work remains **private Phase 1 reference refinement** using Relay Rescue/Echo Forge to prove what a high-quality generated target should look like.
+
+It does **not** authorize Phase 2+, new model/provider integrations, external testers, public rollout, untrusted execution or paid infrastructure expansion.
