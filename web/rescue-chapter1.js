@@ -5,6 +5,9 @@
   const STEP_KEY = 'vibelearn.relay-rescue.signal1-guide.v2';
   const DONE_KEY = 'vibelearn.relay-rescue.signal1-guide.done.v2';
   const rootEl = () => document.querySelector(ROOT_ID);
+  const storyWorldModule=import('/rescue-story3d.js').catch(()=>null);
+  let missionWorld=null, missionHost=null;
+  const disposeMissionWorld=()=>{missionWorld?.dispose?.();missionWorld=null;missionHost=null;};
   const readStep = () => { try { return Number(localStorage.getItem(STEP_KEY) || 0); } catch (_) { return 0; } };
   const writeStep = value => { try { localStorage.setItem(STEP_KEY,String(value)); } catch (_) {} };
   const done = () => { try { return localStorage.getItem(DONE_KEY)==='yes'; } catch (_) { return false; } };
@@ -45,7 +48,7 @@
     root.querySelector('.rg-observations')?.remove();
     if (world.querySelector('.rgc1-world-key')) return;
     const key = document.createElement('div'); key.className='rgc1-world-key';
-    key.innerHTML = `<span><b>Pip</b><small>needs the bridge</small></span><span><b>Workshop</b><small>builds the gear</small></span><span><b>Gear</b><small>makes the bridge move</small></span><span class="later"><b>Ticket</b><small>labels this order</small></span><span class="later"><b>Reply</b><small>tells Pip what happened</small></span>`;
+    key.innerHTML = `<span><b>Pip</b><small>needs the bridge</small></span><span><b>Echo Forge</b><small>shapes one gear per order seal</small></span><span><b>Gear</b><small>makes the bridge move</small></span><span class="later"><b>Ticket</b><small>labels this order</small></span><span class="later"><b>Reply</b><small>tells Pip what happened</small></span>`;
     world.append(key);
   }
 
@@ -81,7 +84,7 @@
     const console = root.querySelector('.rg-console');
     if (!console || console.querySelector('.rgc1-memory') || root.querySelector('.rgc1-memory')) return;
     const note=document.createElement('div'); note.className='rgc1-memory';
-    note.innerHTML='<strong>Storm clue:</strong> Pip lost the reply, not necessarily the gear. The workshop may know more than Pip does.';
+    note.innerHTML='<strong>Storm clue:</strong> Pip lost the reply, not necessarily the gear. The Echo Forge may know more than Pip does.';
     console.prepend(note);
   }
 
@@ -107,11 +110,25 @@
     if (tools && tools.parentElement!==dock) dock.append(tools);
   }
 
+  function mountMissionWorld(root,a) {
+    if (!isSignalOne(root) || isHistorical(root)) { disposeMissionWorld(); return; }
+    const host=root.querySelector('.rg-world'); if(!host) return;
+    if(missionHost!==host){
+      disposeMissionWorld(); missionHost=host;
+      storyWorldModule.then(module=>{
+        if(missionHost!==host || !host.isConnected || !module?.createStoryWorld) return;
+        missionWorld=module.createStoryWorld(host,{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,mode:'mission'});
+        if(missionWorld?.available){host.classList.add('rgc1-three-ready');missionWorld.setMissionState(a?.rescue_state||{});}
+        else host.classList.add('rgc1-three-failed');
+      });
+    } else missionWorld?.setMissionState?.(a?.rescue_state||{});
+  }
+
   function addRecap(root) {
     const clear=root.querySelector('.rg-clear');
     if (!clear || clear.querySelector('.rgc1-recap')) return;
     const recap=document.createElement('section'); recap.className='rgc1-recap';
-    recap.innerHTML=`<span>YOU RESTORED SIGNAL 1</span><h3>One order. One gear. One safe result.</h3><div class="rgc1-recap-grid"><p><b>Pip</b> is the courier who needs the bridge.</p><p><b>The workshop</b> makes the gear.</p><p><b>The gear</b> makes the bridge mechanism move.</p><p><b>order-01</b> tells the workshop “this is the same job.”</p><p><b>The missing reply</b> created uncertainty, not proof of failure.</p><p><b>Why it matters</b>: a brand-new order could make a duplicate.</p></div><div class="rgc1-formal"><small>NOW NAME THE IDEA</small><strong>Idempotent retry</strong><p>When the same intent is retried safely, it should still produce one effect.</p></div>`;
+    recap.innerHTML=`<span>YOU RESTORED SIGNAL 1</span><h3>One order. One gear. One safe result.</h3><div class="rgc1-recap-grid"><p><b>Pip</b> is the courier who needs the bridge.</p><p><b>The Echo Forge</b> shapes the replacement gear.</p><p><b>The gear</b> makes the bridge mechanism move.</p><p><b>order-01</b> tells the Echo Forge “this is the same job.”</p><p><b>The missing reply</b> created uncertainty, not proof of failure.</p><p><b>Why it matters</b>: a brand-new order could make a duplicate.</p></div><div class="rgc1-formal"><small>NOW NAME THE IDEA</small><strong>Idempotent retry</strong><p>When the same intent is retried safely, it should still produce one effect.</p></div>`;
     const next=clear.querySelector('#rg-next'); if(next) clear.insertBefore(recap,next); else clear.append(recap);
     markDone(); writeStep(4);
   }
@@ -137,7 +154,7 @@
     }
     const step=readStep(); root.dataset.tutorialStage=String(step);
     if (step<=0) {
-      coach.querySelector('span').textContent='FIRST: FIND THE PART'; coach.querySelector('strong').textContent='Where would the bridge gear come from?'; coach.querySelector('small').textContent='Tap WORKSHOP. Nothing else matters yet.';
+      coach.querySelector('span').textContent='FIRST: FIND THE PART'; coach.querySelector('strong').textContent='Where would the bridge gear have been made?'; coach.querySelector('small').textContent='Tap ECHO FORGE. Nothing else matters yet.';
       enableOnly(root,'workshop'); return;
     }
     if (step===1) {
@@ -145,11 +162,11 @@
       enableOnly(root,'ticket'); return;
     }
     if (step===2) {
-      coach.querySelector('span').textContent='NOW CHOOSE PIP’S MOVE'; coach.querySelector('strong').textContent='The workshop may already have made the gear.'; coach.querySelector('small').textContent='Reuse order-01, or print a brand-new ticket and watch what the workshop does.';
+      coach.querySelector('span').textContent='NOW CHOOSE PIP’S MOVE'; coach.querySelector('strong').textContent='The Echo Forge may already have made the gear.'; coach.querySelector('small').textContent='Reuse order-01, or print a brand-new ticket and watch what the workshop does.';
       enableChoices(root); setHighlight(root,'[data-tool="retry"]'); return;
     }
     if (step===3) {
-      coach.querySelector('span').textContent='A NEW TICKET CHANGED THE MEANING'; coach.querySelector('strong').textContent='The workshop can mistake it for another job.'; coach.querySelector('small').textContent='Send it to see the consequence, or choose the safe remembered ticket next time.';
+      coach.querySelector('span').textContent='A NEW TICKET CHANGED THE MEANING'; coach.querySelector('strong').textContent='The Echo Forge reads a new seal as another job.'; coach.querySelector('small').textContent='Send it to see the consequence, or choose the safe remembered ticket next time.';
       enableChoices(root); setHighlight(root,'[data-tool="retry"]'); return;
     }
     enableChoices(root);
@@ -174,13 +191,15 @@
   if (game && !game.__signalOneGuideV2) {
     const previousRender=game.render.bind(game);
     const previousSync=game.sync.bind(game);
-    game.render=(a,...rest)=>{ const result=previousRender(a,...rest); syncStepFromAttempt(a); enhanceNow(); return result; };
+    const previousHide=game.hide.bind(game);
+    game.render=(a,...rest)=>{ disposeMissionWorld(); const result=previousRender(a,...rest); syncStepFromAttempt(a); enhanceNow(); mountMissionWorld(rootEl(),a); return result; };
     game.sync=(busy,a,...rest)=>{
       const result=previousSync(busy,a,...rest);
       const status=rootEl()?.querySelector('#rg-sync')?.textContent;
-      if (!busy && status==='Saved') { syncStepFromAttempt(a); enhanceNow(); }
+      if (!busy && status==='Saved') { syncStepFromAttempt(a); enhanceNow(); missionWorld?.setMissionState?.(a?.rescue_state||{}); }
       return result;
     };
+    game.hide=(...args)=>{disposeMissionWorld();return previousHide(...args);};
     game.__signalOneGuideV2=true;
   }
 
