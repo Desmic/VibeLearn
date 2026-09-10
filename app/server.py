@@ -97,6 +97,7 @@ def make_server(database, port=8000):
                 except sqlite3.Error:
                     return self.send(503, {"error": "STORAGE_UNAVAILABLE", "message": "The database is unavailable. Retry shortly."})
             assets = {
+                "/rescue-game.js": ("rescue-game.js", "text/javascript"),
                 "/rescue.js": ("rescue.js", "text/javascript"),
                 "/rescue.css": ("rescue.css", "text/css"),
                 "/rescue-intro.js": ("rescue-intro.js", "text/javascript"),
@@ -108,6 +109,7 @@ def make_server(database, port=8000):
                 "/auth-game.css": ("auth-game.css", "text/css"),
                 "/progress-controls.js": ("progress-controls.js", "text/javascript"),
                 "/progress-controls.css": ("progress-controls.css", "text/css"),
+                "/phone-first.css": ("phone-first.css", "text/css"),
                 "/relay-repair-kit.zip": ("relay-repair-kit.zip", "application/zip"),
                 "/": ("index.html", "text/html"),
                 "/app.js": ("app.js", "text/javascript"),
