@@ -67,8 +67,12 @@ def main():
             page.locator('#rgi-back').click()
             expect(page.locator('#rgi-title')).to_have_text('Pip is almost home.')
             page.locator('#rgi-next').click()
-            page.locator('#rgi-pause').click(); expect(page.locator('#rgi-pause')).to_have_text('Resume motion')
-            page.locator('#rgi-pause').click(); expect(page.locator('#rgi-pause')).to_have_text('Pause motion')
+            page.locator('#rgi-pause').click()
+            expect(page.locator('#rgi-pause')).to_have_text('Resume')
+            expect(page.locator('#rgi-pause')).to_have_attribute('aria-label', 'Resume story motion')
+            page.locator('#rgi-pause').click()
+            expect(page.locator('#rgi-pause')).to_have_text('Pause')
+            expect(page.locator('#rgi-pause')).to_have_attribute('aria-label', 'Pause story motion')
 
             titles = [
                 'Pip sends one promise.',
