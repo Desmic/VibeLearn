@@ -101,6 +101,8 @@ For important story/game candidates, explicitly compare:
 
 Today choose based on the topic, story, broad target audience, device budget, and whether the medium meaningfully increases world presence and voluntary engagement. Once an explicit StoryPreferenceProfile exists, learner preference may also influence the medium; do not infer it today. A technically impressive 3D scene with weak story still fails. Keep pinned local assets, same-origin runtime, keyboard/touch semantics, reduced-motion behavior, readable fallback, and realistic mobile performance targets. Renderer state never decides assessment/evidence.
 
+When Three.js is selected, use [THREE-STORY-FRAMEWORK.md](THREE-STORY-FRAMEWORK.md). The shared runtime owns WebGL lifecycle, resize, resource disposal, frame scheduling, pause/reduced motion, context-loss recovery and phone renderer policy. A story adapter owns only its world assets/geometry, camera compositions, beat states and authoritative-game-state visualization. A second fantasy should be integrated by replacing a world adapter/package, not by cloning renderer lifecycle code.
+
 ## Learning integrity and continuity
 
 World truth and player knowledge remain distinct. Missing acknowledgement is uncertainty, not proof of failure. Retained identity has a finite window. Committed, authoritatively absent with no in-flight request, and unavailable states require different behaviors. Rehearsal rewind does not imply real-world rollback.
