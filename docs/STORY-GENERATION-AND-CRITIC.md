@@ -30,11 +30,13 @@ Before gameplay realization, generate and version a single story candidate with:
 
 The story should be understandable to a bright child while still emotionally and aesthetically credible to a teen/young adult. “Accessible” must not mean childish, generic, or patronizing.
 
-## Personalization direction
+## Present input vs future personalization
 
-The long-term course generator should generate story/fantasy based on user preference. Story preferences can include genre, tone, favorite kinds of worlds, realism vs fantasy, character style, visual style, humor, darkness, pace, exploration vs action, and narrative density.
+**Current implementation/generation rule:** the story is generated from the **course topic, intended outcomes and their causal structure only**, plus a fixed broad-audience quality target. There is no learner story-preference input yet. Do not infer a personal genre/tone/world preference from unrelated profile data and do not pretend personalization exists.
 
-Until preference infrastructure exists, use a strong broad-audience default and keep the story package renderer-neutral. Do not hard-code all courses to Pip, valleys, fantasy, or one visual grammar. Personalization changes the story/world; it must not weaken learning integrity or assessment semantics.
+**Future direction:** add an explicit learner-controlled `StoryPreferenceProfile` (or equivalent) that can influence genre, tone, favorite kinds of worlds, realism vs fantasy, character style, visual style, humor, darkness, pace, exploration vs action, and narrative density. These preferences are optional creative constraints, not evidence of mastery and not permanent unless the learner explicitly saves them.
+
+Until that capability is built and authorized, choose the strongest story/fantasy that grows naturally from the topic itself. Keep the story package renderer-neutral and do not hard-code all courses to Pip, valleys, fantasy, or one visual grammar. Future personalization may change the story/world and presentation, but it must not weaken learning integrity or assessment semantics.
 
 ## Separate story critic
 
@@ -98,7 +100,9 @@ For each generated story, explicitly consider at least these realization options
 
 The pipeline is intentionally separated:
 
-`course intent/outcomes -> user/audience preferences -> story/fantasy candidate -> story critic >=9 -> gameplay/world realization -> game critic >=9 -> learning/transfer gate >=9 where claimed -> current user review -> user acceptance`
+`course topic/outcomes -> story/fantasy candidate -> story critic >=9 -> gameplay/world realization -> game critic >=9 -> learning/transfer gate >=9 where claimed -> current user review -> user acceptance`
+
+Future, once explicit preference support exists, `StoryPreferenceProfile` becomes an optional input between course topic/outcomes and story generation; it is **not** part of the current implementation.
 
 Passing the story critic does not prove the game is fun. Passing the game critic does not prove course-level learning. Passing all machine/critic gates does not override the current user.
 

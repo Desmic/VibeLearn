@@ -22,13 +22,15 @@ At minimum inspect `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs
 
 For any course/subject, **generate the story/fantasy/world premise before gameplay realization**. Do not start with lesson cards/mechanics and add narrative afterward.
 
-Required conceptual pipeline:
+Required conceptual pipeline **today**:
 
-`course intent/outcomes -> learner/audience preferences -> story/fantasy candidate -> story critic >=9 -> gameplay/world realization -> game critic >=9 -> learning/transfer gate -> user review`
+`course topic/outcomes -> story/fantasy candidate -> story critic >=9 -> gameplay/world realization -> game critic >=9 -> learning/transfer gate -> user review`
+
+There is no learner creative-preference input in the current implementation. Do not infer one from unrelated profile data. Future explicit `StoryPreferenceProfile` support may insert learner-chosen genre/tone/world constraints between topic/outcomes and story generation.
 
 The story critic evaluates **one frozen story at a time**, solely on story quality: hook, clarity/causality, character attachment, world/fantasy appeal, storytelling quality, pacing/progression, stakes, payoff/forward pull, and cross-age engagement. It must not award story points for code, tests, curriculum value, Three.js, asset count, or engineering effort.
 
-Long term, story generation should use learner preferences such as genre, tone, world type, realism/fantasy balance, character/relationship style, visual style, pace, humor/darkness, exploration/action preference, and narrative density. Unknown preferences use a strong broad-audience default. Do not equate “kid-accessible” with childish writing.
+Long term, story generation should support explicit learner preferences such as genre, tone, world type, realism/fantasy balance, character/relationship style, visual style, pace, humor/darkness, exploration/action preference, and narrative density. **Today those inputs do not exist:** story choice is driven by the topic/outcomes plus a fixed broad-audience quality target. Do not equate “kid-accessible” with childish writing.
 
 ## First-touch story UX is a hard requirement
 

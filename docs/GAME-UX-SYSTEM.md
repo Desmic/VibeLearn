@@ -14,7 +14,7 @@ For every course/subject, generate a compelling **story/fantasy/world premise be
 
 A story candidate must first survive its own story critic. The story critic evaluates one frozen story at a time and does not award points for implementation, curriculum correctness, tests, rendering technology, or learning evidence. See [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md).
 
-Long term, story/world generation should follow user preference: genre, tone, realism/fantasy balance, character style, visual style, pace, humor/darkness, exploration/action, and narrative density. Until personalization exists, design for broad kid + teen/young-adult appeal without becoming childish.
+Current story/world selection is driven by the topic/outcomes plus broad cross-age quality constraints. Learner creative preferences are **not** an input yet. Long term, an explicit preference profile may influence genre, tone, realism/fantasy balance, character style, visual style, pace, humor/darkness, exploration/action, and narrative density.
 
 ## Attention first, cognition second
 
@@ -99,7 +99,7 @@ For important story/game candidates, explicitly compare:
 2. 2.5D/parallax or layered interactive scenes;
 3. interactive Three.js 3D.
 
-Choose based on story, user preference, device budget, and whether the medium meaningfully increases world presence and voluntary engagement. A technically impressive 3D scene with weak story still fails. Keep pinned local assets, same-origin runtime, keyboard/touch semantics, reduced-motion behavior, readable fallback, and realistic mobile performance targets. Renderer state never decides assessment/evidence.
+Today choose based on the topic, story, broad target audience, device budget, and whether the medium meaningfully increases world presence and voluntary engagement. Once an explicit StoryPreferenceProfile exists, learner preference may also influence the medium; do not infer it today. A technically impressive 3D scene with weak story still fails. Keep pinned local assets, same-origin runtime, keyboard/touch semantics, reduced-motion behavior, readable fallback, and realistic mobile performance targets. Renderer state never decides assessment/evidence.
 
 ## Learning integrity and continuity
 

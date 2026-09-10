@@ -10,11 +10,11 @@ The current Relay Rescue opening was explicitly rejected by the user at **3/10 f
 
 The target pipeline is:
 
-`course intent/outcomes -> user/audience preferences -> story/fantasy -> story critic >=9 -> gameplay/world realization -> game critic >=9 -> learning/transfer gate -> user review`
+`course topic/outcomes -> story/fantasy -> story critic >=9 -> gameplay/world realization -> game critic >=9 -> learning/transfer gate -> user review`
 
 The story critic evaluates exactly one frozen story at a time and judges the story itself: hook, causality, character attachment, world appeal, storytelling quality, pacing/progression, stakes, payoff, and cross-age engagement. It does not get to compensate with code quality, curriculum value, Three.js, tests, or implementation effort.
 
-Long term, story/fantasy generation should adapt to user preference: genre, tone, realism/fantasy balance, world type, character style, visual style, pace, humor/darkness, exploration/action preference, and narrative density.
+**Current story generation is topic-driven.** The story/fantasy is chosen from the course topic/outcomes and their natural causal structure; learner creative preferences are not an input yet. Long term, an explicit learner-controlled preference profile should be able to influence genre, tone, realism/fantasy balance, world type, character style, visual style, pace, humor/darkness, exploration/action preference, and narrative density without changing learning integrity.
 
 ## Earn attention before demanding cognition
 

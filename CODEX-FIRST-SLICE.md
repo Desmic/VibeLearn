@@ -1,5 +1,15 @@
 # Codex task: implement and present the first Learning OS slice
 
+## Current product amendment — story is a gated subsystem
+
+This file preserves the original Phase 0/1 implementation handoff, but later user feedback materially changes how any current/future learner-facing course is realized. Read `docs/STATE.md` and `docs/STORY-GENERATION-AND-CRITIC.md` before using the older presentation guidance below.
+
+For any course/subject, current story generation is driven by the **topic/outcomes**, not by learner creative preferences. Generate a versioned story/fantasy/world treatment first, run the story-only critic on that one story, and require unrounded **>=9.0/10 with no story blocker** before gameplay realization. Future explicit story-preference support may personalize genre/tone/world/visual style; do not infer or claim that capability today.
+
+First-touch story UX is user-paced by default with Back/previous, Continue, Skip, replay, visible progress, and pause/resume when motion is active. A rushed explanatory slide sequence is a failure even if its facts are correct. Consider 2D, 2.5D, and Three.js 3D as realization options after the story passes, with 3D allowed to improve attention, immersion, character/world attachment, and spatial causality while never deciding assessment/evidence.
+
+Story critic, game critic, learning/transfer gate, and user acceptance are distinct. The current user remains the authoritative reviewer.
+
 ## Authorization and stopping point
 
 The user now authorizes implementation of Phase 0 and Phase 1 ONLY. This task supersedes earlier design-only wording for this bounded scope. Implement, run, verify, and present a usable first learning episode; do not stop after planning or scaffolding. Do not advance into Phase 2 or later before the user tries the first episode and provides feedback. Preserve the architectural invariants required for those later phases without implementing their full subsystems.

@@ -14,35 +14,24 @@ Do **not** generate a lesson/game mechanic first and attach generic narrative af
 
 Required order:
 
-`course intent/outcomes -> learner/audience preferences -> story/fantasy candidate -> story critic -> gameplay/world realization -> game critic -> learning/transfer validation -> release candidate -> current user review`
+`course topic/outcomes -> story/fantasy candidate -> story critic >=9 -> gameplay/world realization -> game critic >=9 -> learning/transfer validation -> release candidate -> current user review`
 
 The story critic must pass before expensive gameplay realization is treated as the current candidate. A game critic cannot retroactively rescue a weak story.
 
-## Learner-preference input for story generation
+## Story input today; learner preference later
 
-The eventual generator should use available learner preferences to shape the narrative world. Story preferences may include:
+**Current implementation contract:** generate the story/fantasy/world from the course topic, intended outcomes, prerequisite causal structure, and a fixed broad-audience quality target. Learner creative preferences are **not** an input today. Do not infer a preferred genre, tone, world, character style, or visual style from unrelated profile/history data.
 
-- genre and world type;
-- realism vs fantasy/sci-fi;
-- emotional tone;
-- character style and relationship focus;
-- visual style;
-- humor/darkness;
-- exploration vs action vs mystery vs construction;
-- pace and narrative density;
-- preferred degree of choice/branching;
-- disliked themes or presentation styles.
+**Future capability:** an explicit learner-controlled `StoryPreferenceProfile` may shape creative presentation after it is deliberately implemented and authorized. Candidate fields include genre/world type, realism vs fantasy/sci-fi, emotional tone, character/relationship style, visual style, humor/darkness, exploration/action/mystery/construction balance, pace, narrative density, branching preference, and disliked themes/presentation styles.
 
-If preferences are unknown, generate a strong broad-audience default suitable for a bright child and still credible to a teen/young adult. Do not make “young audience” synonymous with childish writing.
-
-Preference data changes presentation/story choices; it must not weaken competency definitions, source grounding, assessment semantics, evidence boundaries, or safety/accessibility requirements.
+Unknown/unspecified future preferences must fall back to the strongest topic-faithful broad-audience story rather than fabricated personalization. Preference data changes presentation/story choices only; it must not weaken competency definitions, source grounding, assessment semantics, evidence boundaries, or safety/accessibility requirements.
 
 ## Required StoryPackage artifact
 
 Before generating the playable course package, produce and version a `StoryPackage` (name illustrative; exact schema may evolve) containing at minimum:
 
 - story ID/version and course/version binding;
-- audience assumptions and preference inputs actually used;
+- audience assumptions; current `story_preference_input` must be `none/not_supported` until explicit preference support exists;
 - genre/tone/world premise;
 - protagonist/focal actor and readable desire;
 - player role and why the player belongs in the story;
@@ -162,7 +151,7 @@ For each StoryPackage, explicitly evaluate three realization families:
 
 Three.js should be seriously considered for the kid/teen/young-adult audience because immersion, character presence, spatial storytelling, atmosphere, world exploration, and direct interaction can materially increase attention even when the underlying learning concept is not inherently 3D.
 
-Do not default every course to 3D. Choose based on learner preference, story needs, subject, mobile/device budget, and the quality advantage demonstrated by the prototype. A beautiful renderer never compensates for weak story or gameplay.
+Do not default every course to 3D. **Today choose based on the topic, story needs, broad target audience, mobile/device budget, and quality advantage demonstrated by the prototype.** Once explicit story preferences exist, those may also influence the medium. A beautiful renderer never compensates for weak story or gameplay.
 
 If 3D is chosen, require pinned/local assets, same-origin runtime, keyboard/touch equivalence, reduced-motion behavior, usable fallback, and realistic mobile performance checks. Renderer output never establishes learning evidence.
 
@@ -170,7 +159,7 @@ If 3D is chosen, require pinned/local assets, same-origin runtime, keyboard/touc
 
 The original CourseBrief/full-package contracts remain. Extend them with:
 
-- learner/audience story preferences and assumptions;
+- audience/story assumptions and current `story_preference_input` (`none/not_supported` until that capability exists);
 - versioned StoryPackage + story critic record;
 - opening hook and reason to continue with XP hidden;
 - first-touch navigation/timing policy;

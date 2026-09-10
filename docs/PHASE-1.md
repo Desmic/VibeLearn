@@ -1,5 +1,22 @@
 # First slice completion report — 6 September 2026
 
+
+## 10 September 2026 current refinement — story is now its own product gate
+
+The sections below preserve Phase 1 implementation history, including the older Shopping Agent campaign and its historical critic scores. They are **not the current acceptance state**. Read `STATE.md` first.
+
+The current user rejected the previous Relay Rescue first-touch/story at **3/10** despite an earlier internal game critic pass. The direct feedback is authoritative: the sequence had no Back control, advanced too quickly, told the story lazily/unclearly, and did not create enough attachment or forward pull for kids/young adults. This changes the design architecture rather than merely the animation timing.
+
+The active refinement therefore separates the gates: `course topic/outcomes -> story/fantasy -> story critic >=9 -> gameplay realization -> game critic >=9 -> learning/transfer gate -> user review`. Today the story is generated from the topic/outcomes only; learner creative preferences are not implemented. A future explicit `StoryPreferenceProfile` may influence genre/tone/world/visual direction without changing learning/evidence semantics.
+
+The replacement story candidate is **Relay Rescue: The Echo Forge**. It treats the opening as one continuous world: Pip's bridge breaks; exactly one gear is needed; Pip sends sealed `order-01` to the Echo Forge; the Forge spends a scarce emergency ember and makes the gear; lightning destroys only the reply; Pip is tempted to send a fresh seal that the Forge could treat as another job; the player awakens as Signal Keeper and is asked to discover the truth before another ember is wasted. Formal retry terminology remains deferred until the concrete model exists.
+
+First-touch UX is now a hard gate: user-paced progression by default, Back/previous, Continue, Pause/Resume for active motion, Skip, replay, visible story position, coherent backward/forward world state, and the same causal meaning under reduced motion. A slower slide deck is still a failure. Important candidates explicitly compare 2D, 2.5D and Three.js 3D realization; 3D may earn its cost through immersion/world attachment/environmental storytelling, never by technology alone.
+
+A story-only critic evaluates exactly one frozen story and ignores code/tests/rendering/curriculum value. `docs/STORY-GENERATION-AND-CRITIC.md` contains the rubric and blockers. The current Echo Forge treatment has a separate internal-tool-assisted story pre-gate record in `docs/CURRENT-STORY-CRITIC.md`; that score does not override the user's 3/10 verdict on the deployed predecessor and does not by itself certify the rendered game.
+
+The current implementation work realizes Echo Forge as a reversible, user-paced story player with a locally pinned Three.js scene plus semantic/CSS fallback, then carries the same vocabulary into Signal 1. Exact runtime CI/deployment evidence belongs in `STATE.md` after the candidate is verified and manually deployed.
+
 ## Outcome and stopping point
 
 Phase 0 → 1A → 1B → 1C implemented in verified increments. The original first slice
@@ -95,13 +112,13 @@ The learner requested campaigns built around compelling fantasy or real-life sce
 with simple causal animation, so that even a middle/high-school learner can understand
 what is happening before decoding specialist language.
 
-The current retry campaign is now a story-first activity revision. It uses a concrete
+The then-current retry campaign became a story-first activity revision using a concrete
 Shopping Agent premise: the learner asks an agent to buy one 5 kg dumbbell; the purchase
-succeeds; the receipt/acknowledgement disappears; the agent may retry. Each mission has
+succeeds; the receipt/acknowledgement disappears; the agent may retry. Each mission had
 a plain-language objective plus explicit causal story beats before the technical request
-IDs/retention details are exposed.
+IDs/retention details were exposed. This is retained as history, not the current story.
 
-The four-level structure now teaches the same pinned retry mechanism through:
+The four-level structure taught the same pinned retry mechanism through:
 
 1. **Tutorial — The missing receipt:** can the retry still leave exactly one charge?
 2. **Easy — A new ticket, a second charge:** why can a fresh request identity look like
@@ -146,10 +163,10 @@ The current rule is:
 The real Chromium journey asserts this behavior after Level 1, Level 2, Level 3 and the
 boss.
 
-## Current verification and critic gate
+## Historical 8 September shopping-story verification and critic gate
 
-The story-first candidate passed GitHub Actions `Verify hosted pilot` run 148
-(`34222243777`). The gate includes:
+The then-current shopping-story candidate passed GitHub Actions `Verify hosted pilot` run 148
+(`34222243777`). The gate included:
 
 - build success;
 - **59 Python/hosted/PostgreSQL tests passed**;
@@ -166,30 +183,23 @@ The story-first candidate passed GitHub Actions `Verify hosted pilot` run 148
 - keyboard use, 390px viewport, 200% text enlargement, separate learner context and
   reduced motion.
 
-`docs/GAME-UX-REVIEW.md` now has a narrative/comprehension pre-gate in addition to the
-numeric rubric. A fresh separate critic pass on this exact story-first candidate scored
-**9.1/10**, with no critical blocker and above the required 8.0 threshold. It is ready
-for another learner trial; the score is not educational validation or final acceptance.
-
-Remaining critic debt: some playfield/table ancestry remains, audiovisual/haptic payoff
-is limited, and only the learner's real playtest can tell us whether the story materially
-improves comprehension and motivation.
+A story/comprehension-aware review on that historical candidate scored **9.1/10** under the then-active 8.0 threshold. This result was later superseded by stricter >=9 story/game gates and direct user rejection; it is not a current readiness signal.
 
 ## Course-generation implications
 
 This feedback is now part of the system design, not a one-off lesson note.
 
-`docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/GAME-UX-SYSTEM.md`,
-`docs/GAME-UX-REVIEW.md`, `AGENTS.md`, and the **root** `CODEX-IMPLEMENTATION-PLAN.md`
-were amended. When Phase 3 is opened, generated modules must produce a playable teaching
-system rather than lesson prose poured into a generic UI.
+`docs/STORY-GENERATION-AND-CRITIC.md`, `docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, `AGENTS.md`, and the **root** `CODEX-IMPLEMENTATION-PLAN.md` carry the current requirements. When Phase 3 is opened, generated modules must produce a playable teaching system rather than lesson prose poured into a generic UI.
 
-Generation now requires, where appropriate:
+Generation now requires:
 
-- a compelling real-life/fantasy/simulation premise tied faithfully to the concept;
+- a versioned story/fantasy/world treatment generated from topic/outcomes today;
+- a separate single-story critic >=9.0 before gameplay realization;
+- future learner story preferences only through an explicit later capability, never inferred today;
+- first-touch Back/Continue/Pause/Skip/Replay/progress and coherent reversible story state;
+- a deliberate 2D vs 2.5D vs Three.js 3D realization decision;
 - a plain-language chapter goal understandable before specialist jargon;
-- causal story/visual beats whose motion explains the mechanism rather than decorating
-  it;
+- causal story/visual beats whose motion explains the mechanism rather than decorating it;
 - an explicit bridge from intuitive model to formal terminology;
 - a confidence curve with early wins and genuine later reasoning difficulty;
 - direct subject-appropriate interaction mechanics;
@@ -197,10 +207,8 @@ Generation now requires, where appropriate:
 - honest help/prior-exposure semantics;
 - game rewards separated from evidence/mastery;
 - generated browser/storage/integrity invariants;
-- structural/learning, grounding/content, accessibility and game-UX/comprehension
-  review gates;
-- game-UX score >=8.0 with no critical blocker before a candidate can be called
-  playable/validated.
+- structural/learning, grounding/content, accessibility and game-experience review gates;
+- game critic >=9.0 with no blocker, plus the applicable learning/transfer gate, before a candidate can be called ready for user review. The user still decides acceptance.
 
 The checksummed `learning-os-design-package-v1.3/` is preserved as historical input;
 the active root implementation plan carries the amendment rather than silently
@@ -208,26 +216,9 @@ rewriting the archived package.
 
 ## Phase 1 completion gate
 
-Phase 1 implementation and machine verification are complete for the original slice,
-hosted behavior, and the current story-first refinement. Real hosted/product acceptance
-status is:
+Phase 1 implementation history above includes the original slice and older hosted refinements. The current Echo Forge refinement is governed by the 10 September checkpoint and by `STATE.md`; do not infer current acceptance from the older completion language.
 
-1. **Complete live:** password recovery and successful hosted sign-in.
-2. **Complete live:** start and submit the hosted learning episode; real evidence,
-   review and bounded reward exist.
-3. **Pending live:** unfinished **Save progress -> reload -> exact PostgreSQL resume**.
-   Equivalent hosted/real-browser/process tests pass.
-4. **Complete live:** Render process replacement preserved learner session/state.
-5. **Complete live:** real sign-out returned HTTP 200 and the UI signed out; automated
-   replayed-cookie rejection covers backend revocation.
-6. **Pending live before broader multi-user use:** second real authorized Supabase
-   account isolation. Automated two-user/RLS coverage passes.
-7. **Product feedback collected, acceptance still active:** learner rejected the prior
-   course clarity/progression semantics; the story-first candidate is the current
-   response and now needs direct learner playtesting.
-
-Only after the remaining live checks and learner acceptance are closed should PR #1
-leave draft. Phase 2 remains deliberately gated.
+Real hosted/product acceptance status still distinguishes machine verification, critic gates, human product acceptance, and activation. Only after the remaining hosted checks and explicit user acceptance are closed should PR #1 leave draft. Phase 2 remains deliberately gated.
 
 ## Assessment, capability and product limits
 
@@ -258,16 +249,12 @@ Keep known-compatible code revisions and independent backups.
 
 ## Separate gates
 
-**Machine verification:** current story-first candidate green: run 148, 59 tests + full
-Chromium journey.
+**Historical machine verification:** run 148 / 59 tests + its Chromium journey belonged to the older shopping-story candidate.
 
-**Critic:** fresh story/comprehension-aware review 9.1/10, no critical blocker.
+**Historical critic:** 9.1/10 under the former rubric; superseded.
 
-**Human product acceptance:** pending direct playtest of the revised story/course flow.
+**Current story verdict:** user 3/10 on the predecessor opening; `needs_revision` until the new story/game candidate passes its separate gates and the user reviews it.
 
-**Activation:** private hosted pilot only; broader/public multi-user activation is not
-claimed.
+**Activation:** private hosted pilot only; broader/public multi-user activation is not claimed.
 
-Single next product increment: evaluate the story-first live experience, fix the
-highest-impact comprehension/gameplay issue found, then close the remaining Phase 1
-hosted acceptance gates before opening Phase 2.
+Current next product increment: verify and deploy the Echo Forge story/game realization, run the story/game gates on exact evidence, then return it to the user only if the critic pre-gates pass. Phase 2 remains closed.

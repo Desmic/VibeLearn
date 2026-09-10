@@ -12,7 +12,7 @@ The current user is the sole real product reviewer during private refinement. Th
 
 For every course/subject, begin with a compelling story/fantasy/world premise before deciding the final mission UI. The interface should feel native to the player role and world.
 
-Long term, story/world/visual direction should adapt to learner preferences: genre, tone, realism vs fantasy, character style, visual style, pace, humor/darkness, exploration/action, and narrative density.
+**Today, story/world/visual direction is chosen from the topic/outcomes and a broad cross-age quality target; learner creative preferences are not an input.** Long term, an explicit learner-controlled story preference profile should be able to shape genre, tone, realism vs fantasy, character style, visual style, pace, humor/darkness, exploration/action, and narrative density. Do not infer those preferences from unrelated learner data.
 
 The story has its own single-story critic gate before game realization. A visually polished UI cannot compensate for weak storytelling.
 
@@ -57,7 +57,7 @@ For important story/game candidates compare:
 2. 2.5D/parallax/layered scenes;
 3. interactive Three.js 3D.
 
-Choose the medium that best serves the story, learner preferences, subject, and mobile/device budget. Do not treat Three.js itself as quality. Weak story in 3D remains weak.
+Choose the medium that best serves the story, subject, broad target audience, and mobile/device budget today; once explicit story preferences exist, those may also influence the choice. Do not treat Three.js itself as quality. Weak story in 3D remains weak.
 
 If 3D is chosen, keep local pinned assets, same-origin runtime, keyboard/touch equivalence, reduced-motion behavior, readable fallback, stable hit targets, and realistic mobile performance.
 
