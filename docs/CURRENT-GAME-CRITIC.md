@@ -1,54 +1,46 @@
-# Current game critic — Relay Rescue first-minute candidate
+# Superseded game critic — historical Relay Rescue review
 
-Reviewed 9 September 2026 using the frozen rubric in [GAME-UX-REVIEW.md](GAME-UX-REVIEW.md).
+**Status: SUPERSEDED BY USER REVIEW — DO NOT USE AS AN ACCEPTANCE SIGNAL.**
 
-**Review method:** `internal_tool_assisted`. This is a deliberately separated critic pass over frozen rendered/browser evidence. It is **not** an independent model/agent and **not** a human or child playtest.
+The current user reviewed the resulting first-touch/story experience on 10 September 2026 and rated it **3/10**. They found no back navigation in the animation/slides, pacing too fast, storytelling lazy/unclear, and the story insufficiently engaging for kids/young adults. Per product authority, that direct verdict overrides this entire critic result and returns the candidate to `user_rejected` / `needs_revision`.
 
-**Runtime candidate reviewed:** `416a463b07015b98fd8915f2c890c56f9e74900b` on `deploy/render-supabase`.
+Read [STATE.md](STATE.md) and [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md) before new review work.
 
-**Verification:** GitHub Actions run `34376435686` passed the complete unit/browser journey, including onboarding, Signal 1, seven-signal progression, mobile 320/390px, 200% text, reduced motion, save/recovery, transfer, learner isolation and adverse paths. Evidence artifact: `game-review-evidence-416a463b07015b98fd8915f2c890c56f9e74900b`, SHA-256 `d34cc9978c93b3af5d6761ef60bde80a86bc26e862ca5c7a66607a5d68e6ba50`.
+## What this historical review was
 
-## Game-experience critic
+Reviewed 9 September 2026 using the then-current frozen rubric in GAME-UX-REVIEW.md.
 
-| Frozen rubric area | Weight | Score | Evidence / criticism |
-|---|---:|---:|---|
-| Game identity vs website residue | 15% | 9.0 | Fresh play now begins with a visual causal story, then scene-owned inspection and a focused action dock. Signal 1 hides course/evidence/journal residue during concrete play. Build/Apply still become deliberately workbench-like later. |
-| HUD and information at a glance | 15% | 9.2 | First action shows goal, scene, essential state and one highlighted target without a dashboard stack. Later stages add information as the player earns context. Some dense transfer metadata remains necessary at Signal 7. |
-| Core loop clarity and immediacy | 15% | 9.4 | Pip, bridge, workshop, one gear, sent order, lost reply and duplicate danger are established before the first decision. Workshop -> ticket -> choice -> consequence is immediately legible. |
-| Progression and difficulty curve | 15% | 9.4 | Cognitive load rises from one inspection through identity, payload mismatch, expiry, uncertainty, route construction and a fresh worker-transfer context. Controls and concepts are introduced before combination. |
-| Feedback and game feel | 12% | 8.8 | Wrong identity visibly produces two gears and recovery is immediate; selected actions and route tests have causal feedback. Remaining weakness: limited audio/haptic richness and some later feedback is still text-forward. |
-| Theme and visual cohesion | 10% | 8.5 | Pip/valley/workshop/bridge/ticket language and visuals now form one coherent world. Art is clean and readable but remains simpler/less expressive than a standout polished commercial indie presentation. |
-| Learning integrity | 10% | 9.8 | World truth vs player knowledge, unknown vs absent, finite retention, identity/payload binding, help/exposure and evidence scope remain explicit and server-authoritative. XP never determines correctness. |
-| Accessibility and responsiveness | 8% | 9.5 | Required flow passes keyboard/touch, 320/390px, 200% text, reduced motion and renderer fallback checks. No human assistive-technology study has been performed. |
+**Review method:** `internal_tool_assisted`. It was a deliberately separated critic pass over frozen rendered/browser evidence. It was **not** an independent model/agent and **not** a human/child playtest.
 
-Weighted score: **9.196/10**. No frozen critical blocker was found in the exact candidate.
+**Runtime candidate:** `416a463b07015b98fd8915f2c890c56f9e74900b` on `deploy/render-supabase`.
 
-Audience hypotheses, pending the user's real review: a younger non-specialist now has a plausible low-load path through the opening and Signal 1; the main abandonment risk is later Build/Apply density. An older teen/young adult has a stronger reason to continue because the systems puzzle develops into route construction and an authentic worker incident.
+**Verification:** GitHub Actions run `34376435686` passed the unit/browser journey. Evidence artifact: `game-review-evidence-416a463b07015b98fd8915f2c890c56f9e74900b`, SHA-256 `d34cc9978c93b3af5d6761ef60bde80a86bc26e862ca5c7a66607a5d68e6ba50`.
 
-## First-minute comprehension check
+Historical internal scores were **9.196/10 game experience** and **9.35/10 learning/real-world transfer for the bounded retry-safety slice**.
 
-The rendered candidate answers the required questions without relying on repository documentation:
+## Why this critic is no longer sufficient
 
-1. Pip is the valley courier.
-2. Pip needs the bridge moving.
-3. The workshop builds the gear.
-4. The bridge needs exactly one gear.
-5. `order-01` is the already-sent order/ticket identity.
-6. The storm/lightning swallowed the reply.
-7. A missing reply does not prove the workshop failed; the gear may already exist.
-8. A brand-new order can look like a new job and create a second gear.
-9. The first useful action is to inspect the workshop.
+The user's real first-touch review exposed a blind spot in the old review process: machine/browser evidence could verify that information existed and controls worked without proving that the story was **well told**, emotionally engaging, paced comfortably, or loved by the target audience.
 
-## Learning / real-world-transfer gate
+The previous critic treated the animated opening as a component inside the game score and over-rewarded causal completeness. It did not adequately penalize:
 
-Scoped to the **current retry-safety slice**, not a full distributed-systems course, the critic rates learning/transfer **9.35/10**.
+- slide-like storytelling;
+- lack of player-controlled previous/back navigation;
+- forced/too-fast timing;
+- weak emotional/character/world pull;
+- a story that is technically decipherable but lazily staged;
+- the difference between “the facts are present” and “the audience wants to see what happens next.”
 
-Reasons for the pass: the player forms the concrete uncertainty/identity model before jargon; practices restart identity, changed payload, expiry, unknown/absent and reconciliation as distinct cases; constructs a multi-rule route; then transfers the same reasoning to a new export-worker incident. The assessment keeps revealed practice separate from fresh transfer and keeps assistance/exposure honest.
+That failure is now addressed by a separate mandatory **single-story critic gate** before game realization.
 
-Deductions: the app does not yet grade an actual production implementation, and delayed-retention effectiveness is not established by the current session. Therefore this score is **not** evidence that VibeLearn has already matched or beaten a full conventional course, and it is not a claim of measured learning efficacy.
+## New review rule
 
-## Gate result
+Never reuse the historical 9.196/9.35 scores for a later candidate. The next candidate must:
 
-Internal pre-gate: **PASS** (`game 9.196`, `learning/transfer slice 9.35`, no critical blocker).
+1. produce/version a substantially better story/fantasy/world premise;
+2. pass the separate story critic under STORY-GENERATION-AND-CRITIC.md;
+3. implement player-paced story navigation including mandatory Back/previous;
+4. then undergo a fresh game critic on the exact rendered build;
+5. then return to the current user for final judgment.
 
-Product status becomes **`ready_for_user_review`**, not `user_accepted`. The current user's existing verdict remains **5/10 game, 5/10 learning** until they personally play this changed build. Their next explicit verdict overrides this critic completely.
+The user's score remains authoritative even if every later critic reports >=9.
