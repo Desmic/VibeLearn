@@ -19,3 +19,20 @@
 .rgc1-guided .rg-world.rgc1-three-ready .rg-world-target{background:#0c2b36df;border-color:#e1bd78;box-shadow:0 8px 28px #0008,0 0 18px #e3bd7730;backdrop-filter:blur(5px)}
 @media(max-width:700px){.rgc1-guided .rg-world.rgc1-three-ready{min-height:300px}.rgc1-guided .rg-world.rgc1-three-ready .target-workshop{right:5%;top:39%}.rgc1-guided .rg-world.rgc1-three-ready .target-ticket{left:5%;top:51%}}
 @media(max-width:430px){.rgc1-guided .rg-world.rgc1-three-ready{min-height:285px}}
+
+/* Phone-first Signal 1: preserve the continuous 3D world and expose only the next useful action. */
+@media(max-width:700px){
+  .rgc1-guided .rg-encounter{padding:8px 6px calc(10px + env(safe-area-inset-bottom))}
+  .rgc1-guided .rg-objective{padding:5px 5px 7px}.rgc1-guided .rg-objective .rg-eyebrow{font-size:.52rem}.rgc1-guided .rg-objective h1{font-size:1.32rem;line-height:1.05}
+  .rgc1-guided .rg-world.rgc1-three-ready{min-height:52svh;border-radius:15px;overflow:hidden}
+  .rgc1-coach{left:8px;right:8px;top:8px;width:auto;padding:9px 10px;border-radius:12px;background:#0b2632e8}.rgc1-coach strong{font-size:.9rem}.rgc1-coach small{font-size:.62rem}
+  .rgc1-guided[data-tutorial-stage='0'] .rgc1-world-key,.rgc1-guided[data-tutorial-stage='1'] .rgc1-world-key{display:none}
+  .rgc1-guided[data-tutorial-stage='2'] .rgc1-world-key,.rgc1-guided[data-tutorial-stage='3'] .rgc1-world-key{bottom:58px;gap:3px}.rgc1-world-key span{padding:3px 5px;background:#0a2530e0}.rgc1-world-key small{display:none}
+  .rgc1-guided .rg-world.rgc1-three-ready .target-workshop,.rgc1-guided .rg-world.rgc1-three-ready .target-ticket{min-width:108px;min-height:48px;border-width:2px;font-size:.69rem}
+  .rgc1-guided .rg-world.rgc1-three-ready .target-workshop{right:4%;top:43%}.rgc1-guided .rg-world.rgc1-three-ready .target-ticket{left:4%;top:49%}
+  .rgc1-guided[data-tutorial-stage='2'] .rgc1-dock,.rgc1-guided[data-tutorial-stage='3'] .rgc1-dock,.rgc1-guided[data-tutorial-stage='failed'] .rgc1-dock{gap:6px;margin-top:6px;padding:7px;border-radius:13px}
+  .rgc1-dock .rgc1-memory{font-size:.62rem;line-height:1.35;padding:7px 8px}.rgc1-dock .rg-ticket{padding:7px 8px}.rgc1-dock .rg-tools{gap:6px}.rgc1-dock .rg-tools button{min-height:52px;padding:8px 6px;font-size:.72rem}
+}
+@media(max-width:360px){
+  .rgc1-guided .rg-world.rgc1-three-ready{min-height:49svh}.rgc1-coach strong{font-size:.83rem}.rgc1-coach small{font-size:.58rem}.rgc1-guided .rg-world.rgc1-three-ready .target-workshop,.rgc1-guided .rg-world.rgc1-three-ready .target-ticket{min-width:96px;font-size:.63rem}
+}
