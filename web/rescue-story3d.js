@@ -1,42 +1,39 @@
 /* Relay Rescue: The Echo Forge — shared 3D story/Signal-1 world.
    Presentation only: the server remains authoritative for progress/evidence. */
-import * as THREE from './vendor/three.module.min.js';
+import {THREE,createThreeStoryRuntime} from './story3d-runtime.js';
 
 export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
-  const canvas=document.createElement('canvas');
-  canvas.className=`rgi-three-canvas${mode==='mission'?' rgc1-mission-canvas':''}`;
-  canvas.setAttribute('aria-hidden','true');
-  let renderer;
-  try{
-    renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'low-power'});
-  }catch(error){
-    return {available:false,setBeat(){},setMissionState(){},setPaused(){},replay(){},dispose(){},stats(){return{available:false,error:String(error)}}};
+  const storyOverlay=host?.closest?.('.rgi-overlay');
+  const runtime=createThreeStoryRuntime(host,{
+    canvasClass:`rgi-three-canvas${mode==='mission'?' rgc1-mission-canvas':''}`,
+    reducedMotion,clearColor:0x06131e,exposure:1.1,pixelRatioCap:1.5,
+    onContextLost(){
+      if(mode==='mission'){host.classList.remove('rgc1-three-ready');host.classList.add('rgc1-three-failed');}
+      else{storyOverlay?.classList.remove('rgi-three-ready');storyOverlay?.classList.add('rgi-three-failed');}
+    },
+    onContextRestored(){
+      if(mode==='mission'){host.classList.remove('rgc1-three-failed');host.classList.add('rgc1-three-ready');}
+      else{storyOverlay?.classList.remove('rgi-three-failed');storyOverlay?.classList.add('rgi-three-ready');}
+    }
+  });
+  if(!runtime.available){
+    return {available:false,setBeat(){},setMissionState(){},setPaused(){},replay(){},dispose(){},stats(){return runtime.stats();}};
   }
-  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
-  renderer.setClearColor(0x06131e);renderer.outputColorSpace=THREE.SRGBColorSpace;
-  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
-
-  const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x071521,.026);
-  const camera=new THREE.PerspectiveCamera(45,1,.1,120);
+  const {scene,camera}=runtime;scene.fog=new THREE.FogExp2(0x071521,.026);
   scene.add(new THREE.HemisphereLight(0xa8e9e7,0x08131d,1.55));
   const moonLight=new THREE.DirectionalLight(0xffd9a6,2.35);moonLight.position.set(-8,13,9);scene.add(moonLight);
   const stormLight=new THREE.PointLight(0xc7eaff,0,28);stormLight.position.set(0,8,1);scene.add(stormLight);
   const forgeLight=new THREE.PointLight(0xffa957,2.2,10);forgeLight.position.set(5.1,1.7,1.3);scene.add(forgeLight);
 
-  const geometries=new Set(),materials=new Set();
-  const geo=g=>(geometries.add(g),g);
-  const mat=(color,opts={})=>{const m=new THREE.MeshStandardMaterial({color,roughness:.78,metalness:.07,...opts});materials.add(m);return m;};
-  const emissive=(color,intensity=1,opts={})=>{const m=new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:intensity,roughness:.5,...opts});materials.add(m);return m;};
+  const geo=runtime.trackGeometry,mat=runtime.material,emissive=runtime.emissive,mesh=runtime.mesh,group=runtime.group;
   const box=geo(new THREE.BoxGeometry(1,1,1)),sphere=geo(new THREE.SphereGeometry(1,16,12)),cone=geo(new THREE.ConeGeometry(1,1,7)),cyl=geo(new THREE.CylinderGeometry(1,1,1,16)),torus=geo(new THREE.TorusGeometry(1,.22,10,24)),plane=geo(new THREE.PlaneGeometry(1,1));
-  function mesh(parent,g,m,pos,scale=[1,1,1]){const o=new THREE.Mesh(g,m);o.position.set(...pos);o.scale.set(...scale);parent.add(o);return o;}
-  function group(parent=scene){const g=new THREE.Group();parent.add(g);return g;}
 
   const c={rock:mat(0x203b4b),grass:mat(0x527f6f),grass2:mat(0x6d9b7e),wood:mat(0x9d704e),gold:emissive(0xe8bf68,.3),paper:mat(0xf4d99a),dark:mat(0x122a36),pip:mat(0xe0a159,{metalness:.16}),red:mat(0xc65449),glass:emissive(0x72dcc9,.78),forge:mat(0xa68266,{metalness:.18}),storm:emissive(0xc8eaff,2.4),danger:emissive(0xff745f,.9,{transparent:true,opacity:.8}),ember:emissive(0xffa852,1.75),water:mat(0x0c4057,{transparent:true,opacity:.62,roughness:.32})};
 
   const moon=mesh(scene,sphere,emissive(0xffe5b1,1.8),[-10,13,-24],[2.2,2.2,2.2]);
   const water=mesh(scene,plane,c.water,[0,-3.25,-7],[48,48,1]);water.rotation.x=-Math.PI/2;
   const starGeom=geo(new THREE.BufferGeometry()),starPos=[];for(let i=0;i<175;i++)starPos.push((Math.random()-.5)*74,5+Math.random()*27,-12-Math.random()*45);starGeom.setAttribute('position',new THREE.Float32BufferAttribute(starPos,3));
-  const starMat=new THREE.PointsMaterial({color:0xd6f3f2,size:.105,sizeAttenuation:true,transparent:true,opacity:.82});materials.add(starMat);scene.add(new THREE.Points(starGeom,starMat));
+  const starMat=new THREE.PointsMaterial({color:0xd6f3f2,size:.105,sizeAttenuation:true,transparent:true,opacity:.82});runtime.trackMaterial(starMat);scene.add(new THREE.Points(starGeom,starMat));
   const cloudMat=mat(0x9fc9c5,{transparent:true,opacity:.09,roughness:1});
   for(const [x,y,z,s] of [[-8,5,-8,2.4],[9,6,-12,3],[0,3.2,-18,4],[-14,2,-15,3]]){const g=group();g.position.set(x,y,z);for(let i=0;i<4;i++)mesh(g,sphere,cloudMat,[i*.9,Math.sin(i*1.7)*.2,0],[1.4*s/3,.55*s/3,.75*s/3]);}
 
@@ -74,7 +71,7 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
   const order=mesh(scene,box,c.paper,[-4.1,1.7,.1],[.72,.46,.055]);order.visible=false;
   const reply=mesh(scene,sphere,c.glass,[4.2,2.2,.4],[.22,.22,.22]);reply.visible=false;
   const bolt=group();bolt.position.set(0,4.5,.3);const boltA=mesh(bolt,box,c.storm,[0,0,0],[.08,2.6,.08]);boltA.rotation.z=.26;const boltB=mesh(bolt,box,c.storm,[.48,-1.75,0],[.08,1.3,.08]);boltB.rotation.z=-.3;bolt.visible=false;
-  const lineMat=new THREE.LineBasicMaterial({color:0x74dbc9,transparent:true,opacity:.62});materials.add(lineMat);
+  const lineMat=new THREE.LineBasicMaterial({color:0x74dbc9,transparent:true,opacity:.62});runtime.trackMaterial(lineMat);
   const lineGeo=geo(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-4.2,2.2,.2),new THREE.Vector3(4.3,2.2,.2)]));const signalLine=new THREE.Line(lineGeo,lineMat);scene.add(signalLine);signalLine.visible=false;
   const echoGeo=geo(new THREE.TorusGeometry(1,.025,6,36));const echoRing=mesh(scene,echoGeo,emissive(0x72dcc9,.75,{transparent:true,opacity:.55}),[-6.95,2.4,2],[.2,.2,.2]);echoRing.rotation.x=Math.PI/2;echoRing.visible=false;
 
@@ -96,7 +93,7 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
   ];
   const cameraFor=(index,aspect)=>aspect<.72?portraitTargets[index]:cameraTargets[index];
   const missionCamera=(complete,aspect)=>complete?(aspect<.72?{p:[0,7.2,23],t:[0,.8,.7]}:{p:[0,5.2,13.2],t:[0,.8,.8]}):cameraFor(5,aspect);
-  let beat=mode==='mission'?5:0,paused=false,frame=0,disposed=false,beatStart=performance.now(),last=performance.now(),missionState=null;
+  let beat=mode==='mission'?5:0,beatStart=performance.now(),missionState=null;
   const initialAspect=Math.max(.2,(host.clientWidth||390)/(host.clientHeight||650));
   const initialTarget=cameraFor(beat,initialAspect);
   const currentCam=new THREE.Vector3(...initialTarget.p),currentLook=new THREE.Vector3(...initialTarget.t);camera.position.copy(currentCam);camera.lookAt(currentLook);
@@ -126,12 +123,11 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
     const aspect=Math.max(.2,(host.clientWidth||390)/(host.clientHeight||650)),target=missionCamera(complete,aspect);currentCam.set(...target.p);currentLook.set(...target.t);camera.position.copy(currentCam);camera.lookAt(currentLook);requestDraw();
   }
 
-  function render(time){
-    frame=0;if(disposed||!host.isConnected)return;const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);if(canvas.width!==Math.round(w*renderer.getPixelRatio())||canvas.height!==Math.round(h*renderer.getPixelRatio()))renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
-    const dt=Math.min(.04,(time-last)/1000);last=time,aspect=w/h,target=missionState?missionCamera(Boolean(missionState.complete),aspect):cameraFor(beat,aspect);
+  runtime.setDraw(({time,dt,aspect,animate})=>{
+    const target=missionState?missionCamera(Boolean(missionState.complete),aspect):cameraFor(beat,aspect);
     if(reducedMotion){currentCam.set(...target.p);currentLook.set(...target.t);camera.position.copy(currentCam);camera.lookAt(currentLook);}
     else {const ease=1-Math.pow(.001,dt);currentCam.lerp(new THREE.Vector3(...target.p),ease);currentLook.lerp(new THREE.Vector3(...target.t),ease);camera.position.copy(currentCam);camera.lookAt(currentLook);}
-    if(!paused&&!reducedMotion){
+    if(animate){
       const t=(time-beatStart)/1000;pip.position.y=.35+Math.sin(time/700)*.035;scarf.rotation.z=Math.sin(time/360)*.07;moon.rotation.y+=dt*.015;newGear.rotation.z+=dt*.75;duplicateGear.rotation.z-=dt*.55;
       furnace.scale.setScalar(1+Math.sin(time/210)*.05);
       if(!missionState&&beat===0){pip.position.x=-5.2+Math.min(1,t/2.4)*.55;}
@@ -142,18 +138,17 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
       if(beat===5){echoRing.visible=true;const pulse=.35+(Math.sin(time/420)+1)*.18;echoRing.scale.setScalar(pulse);echoRing.material.opacity=.25+(Math.sin(time/420)+1)*.13;}
       if(missionState?.complete){beacons[1].lamp.scale.setScalar(1+Math.sin(time/300)*.12);}
     }
-    renderer.render(scene,camera);if(!paused&&!reducedMotion)frame=requestAnimationFrame(render);
-  }
-  function requestDraw(){if(!frame&&!disposed)frame=requestAnimationFrame(render);}
-  const resize=new ResizeObserver(requestDraw);resize.observe(canvas);host.prepend(canvas);host.classList.add('rgi-has-three');
+  });
+  function requestDraw(){runtime.requestDraw();}
+  host.classList.add('rgi-has-three');
   if(mode==='mission')applyMissionState({});else applyBeat(0);
   return{
     available:true,
     setBeat(index){applyBeat(index);},
     setMissionState(state){applyMissionState(state);},
     replay(){beatStart=performance.now();missionState?applyMissionState(missionState):applyBeat(beat);},
-    setPaused(value){paused=Boolean(value);requestDraw();},
-    stats(){return{available:true,revision:THREE.REVISION,beat,mode,drawCalls:renderer.info.render.calls,pixelRatio:renderer.getPixelRatio()};},
-    dispose(){disposed=true;cancelAnimationFrame(frame);resize.disconnect();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();canvas.remove();host.classList.remove('rgi-has-three');}
+    setPaused(value){runtime.setPaused(value);},
+    stats(){return{...runtime.stats(),beat,mode};},
+    dispose(){runtime.dispose();host.classList.remove('rgi-has-three','rgc1-three-ready','rgc1-three-failed');storyOverlay?.classList.remove('rgi-three-ready','rgi-three-failed');}
   };
 }
