@@ -1,97 +1,161 @@
-# VibeLearn game critic — active 9/10 gate
+# VibeLearn game critic — active dual 9/10 gate
 
-Latest authority: [GAME-AS-COURSE.md](GAME-AS-COURSE.md), [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md), and [STATE.md](STATE.md), updated 10 September 2026.
+Latest authority: root `CODEX-IMPLEMENTATION-PLAN.md`, [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md), [GAME-AS-COURSE.md](GAME-AS-COURSE.md), and [STATE.md](STATE.md), updated 10 September 2026.
 
-The current user permits available-tool/internal criticism while a genuinely separate agent is unavailable. Record `internal_tool_assisted`; never misrepresent it as an independent model/agent or human playtest.
+The current user permits available-tool/internal criticism while a genuinely separate critic agent is unavailable. Record `internal_tool_assisted`; never misrepresent it as an independent model/agent or human/youth playtest.
 
-## Story critic is a prerequisite, not part of this score
+## Product context
 
-Before running the game critic, the exact story/fantasy candidate should have its own **single-story critic** result under [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md). Story quality cannot be hidden inside the game average.
+VibeLearn is a **general learning-game generation system**, not Relay Rescue. Relay Rescue is the current authored reference slice. A future generated course may have a completely different story, cast, visual style and mechanic set while preserving canonical learning/evidence identity.
 
-The current Relay Rescue opening is user-rated **3/10** for first-touch/story quality and therefore fails before game acceptance regardless of the previous internal game score. The old `9.196` game critic result is historical only; it did not survive actual user review.
+Current story creation is topic/outcome-driven. Future explicit learner-controlled story preferences are planned, but they must not be inferred today.
 
-The story critic judges hook, clarity/causality, attachment, world appeal, telling quality, pacing/progression, stakes, payoff, and cross-age engagement. The game critic below judges whether the approved story/world was successfully realized as an engaging playable game.
+## Story critic is a prerequisite
+
+Before game review, the exact frozen story/world candidate must pass the separate story-only critic in [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md) with an unrounded **>=9.0/10** and no story blocker.
+
+Story quality cannot be hidden inside game UX scoring. A failed/rejected story goes back to story revision.
 
 ## Review question
 
-Would a curious younger non-specialist or an older teen/young adult choose to keep playing this exact rendered build voluntarily? Does the implementation preserve the story's attraction while turning it into meaningful agency, consequences, progression, and learning-relevant play?
+Would a curious younger non-specialist or an older teen/young adult choose to keep playing this exact rendered build voluntarily? Does the implementation preserve the story's attraction while turning it into meaningful agency, consequences, progression and learning-relevant play?
 
-Inspect a frozen rendered candidate: fresh entry, first story interaction, temporal/navigation controls, first meaningful action, discovery, consequential choice, mistake/recovery, progression, boss, ending, and replay. Hide XP. Collect browser actions, screenshots/traces, and adverse-path results. State automation/environment limits.
+Inspect a frozen rendered candidate with XP hidden: fresh entry, first 60–90 seconds, story navigation, first meaningful action, discovery, consequential choice, mistake/recovery, progression, chapter resolution, replay/forward pull and the bridge to the real subject.
 
-## Pass rule
+## Pass rule — two required experience scores
 
-Unrounded weighted **>=9.0/10**, both audience lenses passing, no critical blocker, exact-build executable/rendered evidence, **and a non-rejected story gate**, followed by the user's final review. No rounded-up sub-9 passes, score inflation, hidden failures, or recycled historical numbers.
+Do **not** produce one blended game score that can average away a bad opening.
 
-If the current user rejects the story/game after a critic pass, status immediately returns to `user_rejected` / `needs_revision` and the critic pass becomes historical evidence only.
+A candidate needs both:
 
-## Frozen weighted game rubric
+1. **First-touch magic >=9.0/10**, no first-touch blocker.
+2. **Whole-chapter game experience >=9.0/10**, no whole-chapter blocker.
+
+Both audience lenses must pass. Evidence must come from the exact rendered build. Only after both pass does the separate learning/transfer gate run. Passing critics only produces `ready_for_user_review`; the current user's explicit verdict remains final.
+
+No rounded-up sub-9 passes, score inflation, hidden failures, or recycled historical scores.
+
+## First-touch magic rubric
+
+Score the fresh first 60–90 seconds separately.
 
 | Area | Weight | 10/10 means |
 |---|---:|---|
-| Game identity vs website residue | 15% | Primary interaction feels like a coherent commercial game/world, not ordinary cards/forms/slides with game labels or graphics behind them. |
-| HUD and information at a glance | 15% | Objective/state/controls are legible and contextual; the UI supports the world without fighting it for attention. |
-| Core loop clarity and immediacy | 15% | Players quickly understand what they can do, act, explore alternatives, and see causally clear consequences. |
-| Progression and difficulty curve | 15% | Early confidence leads to variation, recombination, greater agency, challenge, and meaningful new possibilities. |
-| Feedback and game feel | 12% | Inputs, motion, cause/effect, setbacks, recovery, and success feel responsive and satisfying rather than like form submission. |
-| Story/world realization and visual cohesion | 10% | The approved story survives implementation: characters/world/events feel alive, coherent, attractive, and integrated with play rather than reduced to exposition panels. |
-| Learning integrity | 10% | Rules/assessment remain faithful and bounded; assistance/exposure/evidence semantics remain honest; rewards never substitute for learning. |
-| Accessibility and responsiveness | 8% | Keyboard/touch, narrow screens, text enlargement, contrast, reduced motion, story navigation, and fallback preserve required operations/meaning. |
+| Beauty / creative hook | 18% | The opening immediately creates visual/aesthetic interest and feels intentionally authored, not like an app loading a lesson. |
+| Curiosity / wonder / tension | 16% | Within moments the player wants to know what happened or what happens next. |
+| Character/world attachment | 14% | The focal character and world have readable personality, need and charm/interest worth caring about. |
+| Causal clarity | 16% | A bright child can explain who matters, what they want, what happened, what changed and why it matters. |
+| Initial cognitive-load control | 12% | The opening starts concrete/simple and does not front-load jargon, dashboards, rules or explanations. |
+| Player pacing/navigation control | 10% | Back/previous, Continue, Skip, Replay, visible progress and Pause/Resume when motion runs are clear and usable. |
+| First meaningful action | 8% | The first action is obvious, world-owned and causally connected to the story rather than “continue the lesson.” |
+| Story-to-play transition | 6% | The cinematic/world flows directly into play without collapsing into an unrelated course website. |
 
-Calculate `sum(area_score * weight)/100`. Give concrete evidence and criticism for every score. Three.js, test counts, code volume, or implementation effort earn no automatic points.
+Calculate the unrounded weighted result. Record strongest moment, most boring/confusing moment, likely abandonment point and reason to continue.
 
-## First-touch hard gate
+### First-touch blockers
 
-A fresh-start review must explicitly check:
+Any of these fails first touch regardless of average:
 
-1. Is the opening story/world immediately interesting rather than merely informative?
-2. Can the player go **back** to the previous story beat?
-3. Is first-run story pacing user-controlled, with next/continue and pause/resume where animation runs?
-4. If autoplay exists, is it optional and slow enough for each beat to land?
-5. Can the player skip and replay without losing essential context?
-6. Does back/forward restore coherent visual/narrative state?
-7. Can a bright child explain who matters, what they want, what happened, what changed, and why it matters?
-8. Can a teen/young adult find the presentation credible rather than childish or generic?
-9. Does the story create an emotional/curiosity reason to perform the first gameplay action?
-10. Does the first action feel like something done **inside the world**, not “continue the lesson”? 
+- story gate missing/below threshold/rejected;
+- no usable Back/previous control;
+- rapid forced autoplay or player loses control while reading/inspecting;
+- core actor/need/inciting event/causal chain is unclear;
+- opening is mostly explanatory slides/cards/captions when action/environment can tell it;
+- required meaning depends on audio, color or motion alone;
+- first screen presents a dense lesson/dashboard before establishing the world;
+- first action feels like website navigation rather than an action inside the world;
+- the critic's only defense is “the required information exists,” Three.js exists, or tests pass.
 
-Failure of back navigation, rushed forced autoplay, unclear causality, or slide-deck storytelling is a blocker even if browser tests pass.
+## Whole-chapter game-experience rubric
 
-## Critical blockers
+Score the complete chapter separately.
 
-Any of these blocks acceptance regardless of weighted average:
+| Area | Weight | 10/10 means |
+|---|---:|---|
+| Game identity vs website residue | 13% | Primary interaction remains a coherent game/world through the chapter, not cards/forms/slides after the opening. |
+| Story-to-play continuity | 13% | Character/world/conflict established in first touch keeps mattering to actions, consequences and resolution. |
+| Core loop clarity and agency | 14% | Players understand what they can do, choose meaningfully, explore alternatives and see causal consequences. |
+| Progression / cognitive-load curve | 14% | Concrete easy success grows into variation, combination, uncertainty and greater independence without text bloat. |
+| Feedback, consequence and recovery | 12% | Inputs and outcomes feel responsive; mistakes are visible/understandable; recovery teaches rather than punishes arbitrarily. |
+| Challenge / reasoning quality | 10% | Difficulty rises through reasoning, transfer, trade-offs and reduced scaffolding rather than longer instructions. |
+| Payoff / forward pull | 8% | Chapter resolution feels earned and creates a strong reason to continue. |
+| Learning integration | 10% | Subject concepts are embodied in play and then bridged accurately to real terminology/transfer. |
+| Accessibility / phone readiness | 6% | Required operations and meaning survive touch, mainstream phone portrait, text enlargement, reduced motion and fallback. |
 
-- Story gate missing, below threshold, or explicitly rejected by the current user.
-- First-touch sequence has no previous/back control or forces rapid timed progression.
-- Core premise/character/stakes/causality remain unclear after the opening.
-- Story is primarily explanatory slides/cards/captions when dramatized storytelling is feasible.
-- Mostly read-card/answer-form loop when direct subject-relevant play is feasible; no reason to continue with XP hidden.
-- No meaningful failure/recovery, earned resolution, or reasoning-changing replay variation.
-- Challenge rises mainly through reading or arbitrary UI complexity rather than agency/reasoning.
-- Unsafe constructed policies clear because unrelated answers happen to be correct.
-- Saved work is lost through navigation/reload, progression can be forged, learners can cross-access state, or submitted evidence can mutate.
-- XP/self-report changes mastery, evidence strength, or correctness-based unlocks.
-- Unknown declaration is mislabeled assisted, prior exposure is mislabeled current help, or revealed feedback is called fresh independent work.
-- Required actions/story meaning are inaccessible on keyboard/touch/narrow display or depend only on audio/color/motion.
-- Raw implementation/network errors replace understandable recovery.
+Calculate the unrounded weighted result. Record strongest/weakest chapter segment, where cognitive load jumps, whether the fantasy survives the mechanics, and whether another chapter feels earned.
+
+### Whole-chapter blockers
+
+Any of these fails regardless of average:
+
+- game reverts to a normal course website after the cinematic;
+- chapter progression is mostly more reading/forms with little new agency;
+- no meaningful failure/recovery or consequence;
+- story objects/characters stop mattering once “the lesson” starts;
+- jargon appears before the learner has a concrete model;
+- unsafe/incorrect actions can clear through unrelated answers;
+- save/reload/navigation loses work or progression can be forged;
+- learner/evidence boundaries are violated;
+- XP/self-report changes mastery/correctness;
+- `unknown`, current assistance and prior exposure are collapsed;
+- required action/meaning is inaccessible on touch/narrow display/reduced motion;
+- a guided exercise is claimed as durable transfer/mastery without evidence.
+
+## First-chapter comprehension check
+
+By the end of Chapter 1, the critic should be able to ask a bright child/non-specialist to explain, in plain language:
+
+1. Who is the central character/system and what help do they need?
+2. What are the important objects/resources/entities?
+3. What does each one actually do in the world?
+4. What happened before the player arrived?
+5. What changed/failed and why is that dangerous/important?
+6. What did the player do to help?
+7. What does success mean?
+8. What real subject idea does this world behavior represent?
+
+If these require memorizing a glossary rather than understanding observed cause/effect, Chapter 1 is not ready.
+
+## Mainstream phone target
+
+During current refinement, review primarily on the mainstream modern Android/iPhone portrait range: representative viewports around **360–430 CSS px wide** with common tall-phone aspect ratios, touch input and safe-area considerations. Use a compact matrix rather than tuning named devices. Desktop polish follows after phone quality is strong.
+
+Check that the 3D/story world remains visually dominant, story copy is readable without covering the important action, primary controls are comfortable touch targets, no essential control is pushed below an inaccessible fold, and there is no horizontal overflow.
 
 ## Three.js / rendering review
 
-Three.js 3D is a serious candidate for kid/teen/young-adult attention and may earn quality through world presence, spatial storytelling, character/world attachment, exploration, atmosphere, and direct interaction. The critic should compare the actual result against what a strong 2D/2.5D treatment could have achieved.
+Three.js 3D is a serious option for attention, atmosphere, spatial storytelling, character/world presence and direct interaction. It earns points only when the actual rendered result is more compelling/clear because of it.
 
-Do not award points simply because 3D exists. Inspect mobile performance, input/hit testing, camera legibility, resize/lifecycle, reduced motion, fallback, and whether the 3D world makes the story/play meaningfully more compelling.
+Inspect mobile performance, camera framing, input/hit testing, resize/lifecycle, context loss/fallback, reduced motion and whether 3D improves story/play rather than acting as decorative wallpaper.
 
-## Minimum evidence
+## Minimum executable evidence
 
-Inspect signed-out behavior, story opening and controls, first action, map/locks, causal feedback, error/recovery, save/reload/process resume, assistance/exposure semantics, sequential progression, unsafe/safe boss policies, ending/replay, XP-hidden play, keyboard/touch, narrow screens, text enlargement, reduced motion, and evidence scope.
+For an exact candidate, retain evidence for:
 
-For each audience lens record compelling and boring/confusing moments, likely first abandonment point, reason to continue, and whether another run is earned. These are critic hypotheses without authorized human playtesting.
+- signed-out/login behavior where hosted;
+- fresh first-touch at representative phone sizes;
+- Back/Continue/Skip/Replay/Pause semantics;
+- no forced autoplay after player interaction;
+- story-world state coherence when moving backward/forward;
+- first meaningful action and first consequential choice;
+- visible mistake + recovery;
+- Chapter 1 clear and story/real-concept bridge;
+- save/reload/process resume;
+- previous-chapter review without corrupting active progress;
+- reset-progress confirmation;
+- touch/narrow screens/text enlargement/reduced motion;
+- 3D fallback/context-loss behavior when applicable;
+- learner isolation and evidence semantics;
+- later chapter/boss/transfer checks applicable to the current reference.
 
-## Learning and experience remain separate
+Machine checks prove behavior, not delight. Critic scores remain hypotheses until the current user plays the candidate.
 
-Every promised course capability needs purposeful practice and defensible evidence, including fresh transfer and delayed retrieval where claimed. A guided retry slice does not prove a full course. Do not compensate for poor story/game appeal by scoring engineering integrity highly, or compensate for missing learning with graphics.
+## Learning remains a separate gate
 
-## Current and historical reviews
+Do not compensate for a weak game by scoring engineering integrity highly, and do not compensate for weak learning with graphics. Every promised course capability needs purposeful practice and defensible evidence, including fresh transfer and delayed retrieval where claimed.
 
-Consult STATE.md for the newest user verdict. `CURRENT-GAME-CRITIC.md` preserves the previous internal 9.196/9.35 pass as a superseded historical critic result because the current user subsequently rated the first-touch story 3/10. Historical critic success is never reusable for a materially changed or user-rejected experience.
+A chapter can be a 9+ game experience and still fail the learning gate.
 
-Future generated courses require separate story, structural/learning, content/grounding, accessibility, game, and learning/transfer gates. A manifest cannot self-certify its rendered experience.
+## Current acceptance authority
+
+Consult `docs/STATE.md` for the newest user verdict. The user's current first-touch/story rating is **3/10** until they review a materially changed verified/deployed candidate. Any previous internal 9+ game result is historical only because it failed to predict the user's actual experience.
