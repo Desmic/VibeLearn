@@ -12,7 +12,7 @@ The older 5/10 game / 5/10 learning verdict and the earlier internal 9+ critic p
 
 ## Product north star — general learning-game generator
 
-The root `CODEX-IMPLEMENTATION-PLAN.md` 1.4 is authoritative.
+The root `CODEX-IMPLEMENTATION-PLAN.md` 1.5 is authoritative.
 
 VibeLearn is a **general system for generating effective learning games/stories across subjects and courses**. Relay Rescue is the current authored reference slice, not the product schema.
 
@@ -66,15 +66,17 @@ Repository: `Desmic/VibeLearn`.
 
 Hosted branch: `deploy/render-supabase`. Render serves this branch; auto-deploy is disabled.
 
-The Echo Forge replacement work now includes a continuous Three.js story/world direction, user-paced Back/Continue/Skip/Replay/Pause controls, and Signal 1 intended to continue in the same world with progressive disclosure.
+The Echo Forge replacement now renders its continuous Three.js story world in integrated browser runs, has user-paced Back/Continue/Skip/Replay/Pause controls, and carries Signal 1 into the same world with progressive disclosure. The previously missing Three.js-canvas startup issue is fixed.
 
-However, the latest integrated browser gate exposed a real blocker: in a fresh mainstream-phone onboarding run, the expected Three.js story canvas did not appear. Backend/security tests passed, but the browser suite failed. This candidate therefore remains **`needs_revision`** and must not receive a new 9+ game score or be presented as accepted.
+The latest exact-build browser evidence then exposed a narrower phone blocker after Signal 1 success: once tutorial guidance was removed, the base desktop objective header could become about 795px wide in a 390px viewport. That is being fixed as a generic phone mission-header rule rather than a Signal-1-only patch. The candidate therefore remains **`needs_revision`** until the full phone/browser gate is green.
+
+In parallel, Phase 1 is extracting the renderer lifecycle into `web/story3d-runtime.js` with Echo Forge as a story-specific adapter. This is a reusable reference boundary for future generated fantasies; it does not authorize the full Phase 3 package loader/generator and does not make Three.js mandatory. See [THREE-STORY-FRAMEWORK.md](THREE-STORY-FRAMEWORK.md).
 
 Next implementation order follows the root plan:
 
-1. fix the exact-build 3D first-touch startup/fallback failure;
-2. verify representative phone first-touch + Chapter 1 journeys;
-3. inspect rendered evidence;
+1. close the post-success phone overflow and get the exact-build browser suite fully green;
+2. verify the shared Three.js runtime/adapter contract across cinematic + Signal 1, including fallback/reduced motion/context loss;
+3. inspect rendered phone evidence;
 4. run the **first-touch magic critic** and repair until >=9/no blocker;
 5. run the **whole-chapter game critic** and repair until >=9/no blocker;
 6. run the bounded learning/transfer gate;
