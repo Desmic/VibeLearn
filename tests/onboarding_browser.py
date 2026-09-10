@@ -65,6 +65,7 @@ def main():
             expect(page.locator('#rgi-back')).to_be_disabled()
             expect(page.locator('#rgi-next')).to_be_enabled()
             expect(page.locator('.rgi-three-canvas')).to_be_visible()
+            expect(page.locator('.rgi-three-canvas')).to_have_attribute('data-story3d-runtime', '1')
             # Fresh first-touch story is user-paced; it must not move while the player reads.
             page.wait_for_timeout(3600)
             expect(page.locator('#rgi-title')).to_have_text('Pip is almost home.')
@@ -97,7 +98,7 @@ def main():
             expect(page.locator('#rgi-dialogue')).to_contain_text('Help me find out what happened')
             expect(page.locator('.rgi-progress .current')).to_have_count(1)
             page.screenshot(path=str(out/'onboarding-echo-forge-06.png'), full_page=True)
-            checks.append('The Echo Forge opening is a single user-paced story world with real Back/Continue controls, optional motion pause/replay, no forced autoplay, and a visible six-scene progression')
+            checks.append('The Echo Forge opening uses the shared Story3D runtime and remains a single user-paced story world with real Back/Continue controls, optional motion pause/replay, no forced autoplay, and a visible six-scene progression')
             page.locator('#rgi-next').click()
 
             coach = page.locator('.rgc1-coach')
@@ -109,6 +110,7 @@ def main():
             expect(page.locator('[data-world-look="ticket"]')).to_be_disabled()
             expect(page.locator('[data-tool="retry"]')).to_be_disabled()
             expect(page.locator('.rgc1-mission-canvas')).to_be_visible()
+            expect(page.locator('.rgc1-mission-canvas')).to_have_attribute('data-story3d-runtime', '1')
             expect(page.locator('.rg-world')).to_have_class(re.compile(r'rgc1-three-ready'))
             expect(page.locator('.rg-console')).to_be_hidden()
             forge_target = page.locator('[data-world-look="workshop"]').bounding_box()
