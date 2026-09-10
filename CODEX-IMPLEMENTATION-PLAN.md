@@ -1,8 +1,8 @@
-# Learning OS — incremental implementation plan 1.4
+# Learning OS — incremental implementation plan 1.5
 
 **10 September 2026 · authoritative active plan**
 
-This file is the current build order. The checksummed `learning-os-design-package-v1.3/` remains immutable historical design. Its detailed phase/security/evidence requirements still apply wherever this 1.4 plan does not supersede them. Read `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/GAME-UX-SYSTEM.md`, and `docs/GAME-UX-REVIEW.md` with this file.
+This file is the current build order. The checksummed `learning-os-design-package-v1.3/` remains immutable historical design. Its detailed phase/security/evidence requirements still apply wherever this 1.5 plan does not supersede them. Read `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/GAME-UX-SYSTEM.md`, and `docs/GAME-UX-REVIEW.md` with this file.
 
 ## 1. Product north star
 
@@ -74,11 +74,15 @@ Prefer dramatized action, environmental storytelling, simple animation, direct m
 
 First-run story/cinematic progression is user-paced by default. Back/previous, Continue, Skip, Replay and visible progress are required where applicable; Pause/Resume is required when motion runs. Reduced-motion mode must preserve the same causal meaning and navigation.
 
-## 5. Rendering and 3D
+## 5. Rendering and reusable 3D story framework
 
 For important story/game candidates explicitly consider authored 2D, 2.5D/parallax and interactive Three.js 3D. Choose based on subject, story, attention/immersion value, mechanics, accessibility and device budget.
 
 Three.js is a serious option for capturing attention and making worlds/characters feel present, especially for kids, teens and young adults. It receives no automatic critic points and cannot rescue weak writing or unclear gameplay. Keep pinned/self-hosted assets, same-origin runtime, touch/keyboard operation, reduced motion, usable fallback and realistic mobile performance.
+
+**Phase 1 must also establish a small reusable Three.js story-world framework.** Future story/fantasy settings should not copy renderer initialization, resize loops, pixel-ratio policy, frame scheduling, pause/reduced-motion handling, context-loss recovery, or disposal. Those concerns belong in a story/domain-agnostic runtime. Each generated world supplies a versioned adapter containing only its story-specific scene/assets, camera compositions, beat states and mapping from authoritative game state to visuals. `StoryWorldSpec` remains renderer-agnostic and 2D/2.5D stay first-class alternatives.
+
+The runtime/adapter/package identity must never become competency/evidence identity. “Easy integration” also must not become arbitrary code serving: the current CSP/static allowlist stays strict, and a later generated-package publishing/validation boundary is required before Phase 3 can load arbitrary generated worlds. See `docs/THREE-STORY-FRAMEWORK.md`.
 
 ## 6. Primary device target during current refinement
 
@@ -93,8 +97,8 @@ Current work remains **private Phase 1 reference refinement**. We are not author
 Current bounded sequence:
 
 1. keep login/account/recovery consistent with the game shell;
-2. make the Echo Forge story/world first-touch experience work reliably on mainstream phones;
-3. make Signal 1 continue inside the same world with one obvious action at a time and progressively increasing cognitive load;
+2. make the Echo Forge story/world first-touch experience work reliably on mainstream phones while extracting its renderer lifecycle into the reusable Three.js story runtime/adapter boundary;
+3. make Signal 1 continue inside the same world through that same reusable runtime, with one obvious action at a time and progressively increasing cognitive load;
 4. preserve previous-chapter review, reset-progress, save/reload, learner isolation and evidence semantics;
 5. run exact-build browser verification;
 6. run **first-touch magic critic** and repair until >=9/no blocker;
@@ -112,7 +116,7 @@ The detailed 1.3 phase requirements remain applicable; this is the current inter
 - **Phase 0:** establish actual repo/tool/database/browser capabilities and failure boundaries.
 - **Phase 1:** one high-quality persisted learning-game reference slice with honest evidence and real user review.
 - **Phase 2:** prove course replacement, canonical competency/evidence reuse, learner isolation, export/restore and a second domain/user without binding history to one course/story.
-- **Phase 3:** implement the first real source-grounded course generator using the StoryWorld/Game/Learning package pipeline and critic gates above. Current story generation is topic-driven only.
+- **Phase 3:** implement the first real source-grounded course generator using the StoryWorld/Game/Learning package pipeline and critic gates above. Current story generation is topic-driven only. When Three.js is chosen, generation emits a versioned world adapter/package against the Phase-1 story-runtime contract rather than generating a fresh renderer lifecycle.
 - **Phase 4:** collaborative course/game evolution; later introduce explicit StoryPreferenceProfile and user-controlled creative preferences without contaminating mastery/evidence.
 - **Phase 5:** one genuinely new interaction/component through an isolated code-generation/release path.
 - **Phase 6:** consenting pilot, reliability/restore hardening, real delayed/transfer observations and ranked product-learning improvements.
