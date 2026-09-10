@@ -1,47 +1,70 @@
-# Game acceptance contract — 9/10, youth-engaging, course-capable
+# Game acceptance contract — story 9/10 + game 9/10 + learning gate
 
-Updated by the user's 9 September 2026 instruction; see [GAME-AS-COURSE.md](GAME-AS-COURSE.md).
+Updated by the user's 10 September 2026 instruction; read [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md), [GAME-AS-COURSE.md](GAME-AS-COURSE.md), [GAME-UX-REVIEW.md](GAME-UX-REVIEW.md), and [STATE.md](STATE.md).
 
-## Scope and current review method
+## Current status
 
-Review VibeLearn as a game that even a kid/younger non-specialist or an older teen/young adult would voluntarily play, not as a course website or engineering demonstration. The user's latest instruction permits **available-tool/internal criticism while Codex is blocked**. This temporarily supersedes the earlier strict separate-agent prerequisite for current private Phase 1 refinement.
+The current Relay Rescue candidate is **`user_rejected` / `needs_revision`**. The user's newest first-touch/story rating is **3/10**. The prior internal-tool-assisted `9.196` game critic / `9.35` bounded learning result is historical only and cannot keep the candidate in `ready_for_user_review` after explicit user rejection.
 
-Use actual rendered evidence, a deliberately distinct critic pass and the unchanged rubric. Label the method `internal_tool_assisted` and disclose automation/observation limits. Do not call the builder an independent agent. Codex setup is no longer a work blocker. This does not permanently permit an unattended course generator to self-certify.
+## Acceptance pipeline
 
-## Pass requirements
+Acceptance now requires separate gates in this order:
 
-The unrounded weighted score must be **>=9.0/10**; rounding 8.95 to 9 does not pass. Both audience-lens verdicts must pass, and no critical blocker may remain in engagement, comprehension, progression, learning integrity, accessibility, persistence or learner isolation. The user retains final product acceptance after the reviewer gate.
+`story/fantasy candidate -> story critic >=9 -> gameplay realization -> game critic >=9 -> learning/transfer >=9 where claimed -> ready_for_user_review -> explicit user acceptance -> user_accepted`
 
-A green test suite, appealing screenshot or change of rendering library never constitutes this score. A source-only assessment cannot certify gameplay. Preserve failed journeys and unresolved findings. Do not tune the rubric to the target, reuse historical scores or award points for implementation effort. A low score means `needs_revision`, not a request for Codex setup.
+The current user's explicit verdict can reject a candidate at any point and overrides every critic or automated result. Do not average user and critic scores.
 
-The original user 6.5/10 and later agent 7.5/10 refer to the older shopping campaign. Historical 8.8/9.1 passes were superseded. None approves the current game.
+## Story gate
 
-## What the critic must observe
+For every course/subject, generate a strong story/fantasy/world premise before gameplay realization. Evaluate **one frozen story candidate at a time** with the story-only rubric in STORY-GENERATION-AND-CRITIC.md.
 
-The complete playable candidate must include an understandable hook, a first meaningful action, curiosity/discovery, a consequential decision, a mistake and recovery, rising challenge, a combine/boss encounter, an earned ending and a working replay variation. Hide XP/rank during a pass through the core loop. The reason to continue must survive.
+Story pass requires unrounded **>=9.0/10**, no story blocker. The story critic evaluates hook, clarity/causality, character attachment, world appeal, storytelling quality, pacing/progression, stakes, payoff/forward pull, and cross-age engagement.
 
-Early play should change the world or reveal useful information, not just advance slides or select quiz answers. Use approximately 30 seconds to a first meaningful action as a diagnostic target, not a made-up measured result or a punitive timer. Separate sign-in/hosting delays from authored onboarding.
+It must not award story points for learning value, code quality, tests, graphics technology, Three.js, asset count, or implementation effort.
 
-For each audience lens record reading/knowledge assumptions, compelling moments, boring/confusing moments, the likely first quit point, a concrete reason to continue and whether another run is earned. Approachability does not require childish copy or the removal of eventual rigor. No actual youth enjoyment claim without authorized human evidence.
+A story critic pass does not mean the game passes. It only allows the story to proceed to gameplay realization.
 
-Keyboard, touch, narrow layouts, enlarged text, sound-off and reduced-motion equivalents are required. Do not move precise targets while the player selects them. A failed renderer must not erase progress or make the learning operation inaccessible.
+## First-touch acceptance requirements
 
-## Frozen weights
+The first-run story/cinematic must give the player control over time and navigation:
 
-Game identity 15%; HUD/information at a glance 15%; core loop 15%; progression/difficulty 15%; feedback/game feel 12%; theme/cohesion 10%; learning integrity 10%; accessibility/responsiveness 8%.
+- Back/previous beat is mandatory.
+- User-paced next/continue is the default.
+- Pause/resume is available while animation is active; skip and replay are available; progress/chapter position is visible.
+- Optional autoplay must be slow enough for beats to land and pause on player interaction.
+- Back/forward reconstructs coherent story state.
+- Reduced motion preserves causal meaning and navigation.
 
-Record each raw /10 score and compute `sum(score * weight) / 100`. Evidence quality and uncertainty must remain explicit even when a number is supplied. The detailed rubric and blockers are in [GAME-UX-REVIEW.md](GAME-UX-REVIEW.md).
+A rushed slideshow, missing back navigation, or a clear-but-unengaging exposition sequence fails regardless of animation polish.
 
-## Course-equivalent learning is a separate requirement
+## Game critic gate
 
-The intended game should deliver the useful outcomes of its declared course. Require an explicit outcome-to-mechanic-to-assessment ledger, varied practice, fresh transfer and delayed retrieval where those claims are made. No learning-equivalence claim from story completion or participation XP. A beautiful but shallow game fails; a rigorous but tedious lesson also fails. The current reference is guided retry practice, not a full-course replacement. See GAME-AS-COURSE.md for the coverage contract.
+After the story passes, review the exact rendered game as something a curious kid/younger non-specialist and a teen/young adult would voluntarily play. Use actual rendered evidence and the frozen game rubric. Available-tool/internal criticism may be used during current supervised refinement if honestly labeled `internal_tool_assisted`; it is not an independent agent or human playtest.
 
-## Review record and release status
+The unrounded game weighted score must be **>=9.0/10**, both audience lenses passing, and no critical blocker may remain. A green test suite, appealing screenshot, or renderer choice never constitutes this score.
 
-Record exact commit/build, reviewer identity and method, environment, actions/routes, artifacts, eight raw scores/calculation, both audience verdicts, blockers, uncertainty, changes since prior review and final status. Use null only when there is insufficient rendered evidence to score; do not invent an independent score.
+The game critic must explicitly verify that the approved story survived realization and that the first action, failure/recovery, progression, world changes, boss/transfer, ending, and replay feel like one coherent game rather than a lesson site.
 
-Allowed current statuses include `needs_revision`, `review_pending`, `ready_for_user_review`, `user_rejected` and `user_accepted`. A reviewer pass is not user acceptance and does not authorize external testers. Preserve existing private hosting, learner isolation and immutable evidence contracts.
+## Learning/real-world-transfer gate
 
-## Future generation
+The intended game should deliver the useful outcomes of its declared course. Require explicit outcome-to-mechanic-to-assessment coverage, varied practice, fresh transfer, and delayed retrieval where claimed. No course-equivalence claim from story completion, participation, or XP.
 
-Generated courses inherit the youth-engagement and course-outcome requirements, with structural/learning, grounding/content, accessibility and game review gates. A manifest cannot self-certify its rendered experience. Keep a separate critic role and configured bounded repair budget; failed candidates remain `draft_needs_review`. The temporary review-method exception above applies only to this supervised product refinement. Never lower the 9/10 threshold to pass a generated candidate.
+The learning gate is separate from story and game appeal. A strong story/game with shallow learning fails the product promise; rigorous learning with weak story/game appeal also fails.
+
+## Three.js / rendering direction
+
+Three.js 3D must be **seriously considered** as a realization option for this audience because it can improve attention, immersion, character presence, environmental storytelling, exploration, and direct interaction even when the learning concept itself is not inherently spatial.
+
+For important candidates, compare authored 2D, 2.5D, and interactive Three.js 3D. Choose the medium that best supports the story/audience/device budget. Do not award acceptance for 3D itself; weak writing in 3D still fails.
+
+If 3D is used, preserve pinned local assets, same-origin runtime, keyboard/touch equivalence, reduced-motion behavior, usable fallback, and realistic mobile performance validation.
+
+## Review record
+
+Every gate record includes exact story/build version, reviewer method, raw scores, evidence, blockers, limitations, likely abandonment points, changes since prior candidate, and status. Never reuse a historical score for a changed story/build.
+
+Allowed statuses include `story_needs_revision`, `needs_revision`, `review_pending`, `ready_for_user_review`, `user_rejected`, and `user_accepted`.
+
+## Scope and rollout
+
+This remains private Phase 1 refinement. The story-generation/gating contract also defines future course-generation behavior, but does not authorize Phase 2/3 implementation, external testers, paid resources, public rollout, untrusted execution, or new model integration. External users remain blocked until explicit user acceptance and later authorization.
