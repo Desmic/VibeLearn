@@ -145,6 +145,10 @@ Choose the medium based on story/world presence, attention, subject mechanics, d
 
 If 3D is used: self-host/pin runtime assets, keep same-origin behavior, preserve touch/keyboard/reduced-motion/fallback, and make camera/hit targets work on mainstream phones.
 
+Generated 3D worlds target the reusable contract in [THREE-STORY-FRAMEWORK.md](THREE-STORY-FRAMEWORK.md): a shared story/domain-agnostic Three.js runtime owns renderer lifecycle, resize/frame scheduling, resource cleanup, mobile DPR, pause/reduced motion and context loss; a versioned world adapter/package owns story-specific geometry/assets, art direction, camera compositions, beat states and game-state-to-visual mappings. The generator should replace/adapt the world package, not regenerate renderer boilerplate for every course.
+
+`StoryWorldSpec` stays renderer-agnostic. World-package/renderer IDs are provenance, never canonical competency or evidence IDs. Later arbitrary generated-package loading requires an explicit immutable publishing/asset-validation boundary; current explicit static allowlists/CSP must not be weakened for convenience.
+
 ## Dual game-experience gate
 
 Do not blend the opening and full chapter into one score.
