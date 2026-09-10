@@ -90,6 +90,8 @@ Three.js is a **serious option for attention and immersion**, not merely an opti
 
 Use locally served verified/pinned assets; no runtime CDN or relaxed CSP. Preserve keyboard/touch semantics, reduced motion, fallback, same-origin behavior, and realistic mobile performance. Renderer state never determines assessment/evidence/unlocks.
 
+Use the reusable boundary in `docs/THREE-STORY-FRAMEWORK.md`: `story3d-runtime.js` owns renderer/lifecycle/resource/resize/pause/reduced-motion/context-loss/disposal concerns; story-specific adapters own geometry/assets/camera/beat and game-state-to-visual mappings. Do not copy `WebGLRenderer`/`ResizeObserver` lifecycle into each new fantasy. Three.js remains optional; StoryWorldSpec is renderer-agnostic.
+
 ## Game-first and course-outcome invariants
 
 After the story gate, judge the game as something a curious kid or young adult would voluntarily continue with XP hidden. The approved story must survive implementation as an actual world, not collapse into cards/forms/exposition.
