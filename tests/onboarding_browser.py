@@ -10,6 +10,16 @@ ROOT = Path(__file__).resolve().parents[1]
 PHONE_VIEWPORTS = ((360, 800), (390, 844), (430, 932))
 
 
+def horizontal_overflow(page):
+    return page.evaluate("""() => ({
+      innerWidth, scrollWidth: document.documentElement.scrollWidth,
+      offenders: [...document.querySelectorAll('body *')].map(el => {
+        const r = el.getBoundingClientRect();
+        return {tag: el.tagName, id: el.id, cls: String(el.className || '').slice(0,160), left: Math.round(r.left), right: Math.round(r.right), width: Math.round(r.width), scrollWidth: el.scrollWidth};
+      }).filter(x => x.right > innerWidth + 1 || x.left < -1).sort((a,b) => b.right-a.right).slice(0,30)
+    })""")
+
+
 def assert_phone_first_touch(browser, url, out, errors, width, height):
     ctx = browser.new_context(viewport={'width': width, 'height': height}, has_touch=True)
     page = ctx.new_page(); page.on('pageerror', lambda e: errors.append(str(e)))
@@ -134,7 +144,10 @@ def main():
             expect(page.locator('.rgc1-recap')).to_contain_text('Echo Forge')
             expect(page.locator('.rgc1-recap')).to_contain_text('missing reply')
             checks.append('Wrong identity visibly creates the second gear, rewind recovers, and formal terminology is named only after concrete success')
-            assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+            page.screenshot(path=str(out/'signal1-echo-forge-post-success.png'), full_page=True)
+            overflow = horizontal_overflow(page)
+            (out/'signal1-phone-overflow-diagnostic.json').write_text(json.dumps(overflow, indent=2), encoding='utf-8')
+            assert overflow['scrollWidth'] <= overflow['innerWidth'], overflow
             ctx.close()
 
             reduced = browser.new_context(viewport={'width':390,'height':844}, has_touch=True, reduced_motion='reduce')
