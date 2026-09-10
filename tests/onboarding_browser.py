@@ -1,4 +1,4 @@
-"""Rendered first-touch/Signal-1 contract; machine UX evidence, not a child playtest."""
+"""Rendered phone-first Echo Forge/Signal-1 contract; machine UX evidence, not a youth playtest."""
 import json
 import re
 import tempfile
@@ -7,6 +7,33 @@ from playwright.sync_api import sync_playwright, expect
 from tests.browser_check import start_server, stop_server
 
 ROOT = Path(__file__).resolve().parents[1]
+PHONE_VIEWPORTS = ((360, 800), (390, 844), (430, 932))
+
+
+def assert_phone_first_touch(browser, url, out, errors, width, height):
+    ctx = browser.new_context(viewport={'width': width, 'height': height}, has_touch=True)
+    page = ctx.new_page(); page.on('pageerror', lambda e: errors.append(str(e)))
+    page.goto(url)
+    expect(page.locator('#rgi-intro')).to_be_visible()
+    expect(page.locator('.rgi-three-canvas')).to_be_visible()
+    expect(page.locator('#rgi-title')).to_have_text('Pip is almost home.')
+    expect(page.locator('#rgi-body')).to_be_visible()
+    expect(page.locator('#rgi-dialogue')).to_be_visible()
+    expect(page.locator('#rgi-next')).to_be_visible()
+    expect(page.locator('#rgi-back')).to_be_visible()
+    expect(page.locator('#rgi-replay-beat')).to_be_visible()
+    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+    world = page.locator('#rgi-world').bounding_box()
+    back = page.locator('#rgi-back').bounding_box()
+    nxt = page.locator('#rgi-next').bounding_box()
+    replay = page.locator('#rgi-replay-beat').bounding_box()
+    assert world and world['height'] >= height * .50
+    assert back and back['height'] >= 44
+    assert nxt and nxt['height'] >= 44
+    assert replay and replay['height'] >= 44
+    assert max(back['y'] + back['height'], nxt['y'] + nxt['height']) <= height + 1
+    page.screenshot(path=str(out / f'onboarding-phone-{width}.png'), full_page=True)
+    ctx.close()
 
 
 def main():
@@ -16,6 +43,10 @@ def main():
         proc, url = start_server(Path(tmp) / 'onboarding.db')
         browser = p.chromium.launch()
         try:
+            for width, height in PHONE_VIEWPORTS:
+                assert_phone_first_touch(browser, url, out, errors, width, height)
+            checks.append('First touch keeps the 3D world dominant, story copy readable, and primary/secondary controls touchable across representative 360–430px Android/iPhone portrait sizes')
+
             ctx = browser.new_context(viewport={'width':390,'height':844}, has_touch=True)
             page = ctx.new_page(); page.on('pageerror', lambda e: errors.append(str(e)))
             page.goto(url)
@@ -66,6 +97,8 @@ def main():
             expect(page.locator('.rgc1-mission-canvas')).to_be_visible()
             expect(page.locator('.rg-world')).to_have_class(re.compile(r'rgc1-three-ready'))
             expect(page.locator('.rg-console')).to_be_hidden()
+            forge_target = page.locator('[data-world-look="workshop"]').bounding_box()
+            assert forge_target and forge_target['height'] >= 44 and forge_target['width'] >= 96
             page.screenshot(path=str(out/'signal1-echo-forge-first-action.png'), full_page=True)
 
             page.locator('[data-world-look="workshop"]').click()
@@ -105,7 +138,6 @@ def main():
             expect(r.locator('#rgi-intro')).to_be_visible()
             expect(r.locator('#rgi-pause')).to_be_hidden()
             expect(r.locator('#rgi-back')).to_be_disabled()
-            # Reduced motion keeps the same navigable story instead of collapsing into a text dump.
             for _ in range(5): r.locator('#rgi-next').click()
             expect(r.locator('#rgi-title')).to_have_text('The storm wakes something for you.')
             expect(r.locator('#rgi-fact')).to_have_text('First move: inspect the Echo Forge.')
@@ -117,6 +149,7 @@ def main():
             assert errors == [], errors
             (out/'onboarding-browser-report.json').write_text(json.dumps({
                 'result':'passed','browser':browser.version,'checks':checks,'page_errors':errors,
+                'phone_viewports':[{'width':w,'height':h} for w,h in PHONE_VIEWPORTS],
                 'review_method':'automated browser evidence; not child/young-adult enjoyment validation'
             }, indent=2), encoding='utf-8')
         finally:
