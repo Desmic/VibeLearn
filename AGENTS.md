@@ -1,12 +1,14 @@
 # vibeLearn
 
-Read `docs/STATE.md`, then `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, and `docs/COURSE-GENERATION-GAME-SYSTEM.md` before substantial product work. The product is a game whose meaningful play delivers intended course outcomes, not a course website with game decoration. Experience is essential.
+**Read `CODEX-IMPLEMENTATION-PLAN.md` first**, then `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, and `docs/COURSE-GENERATION-GAME-SYSTEM.md` before substantial product work. The active implementation plan controls build order; user feedback that changes product direction must update the plan and affected docs before or in the same bounded implementation unit as code.
 
-The user currently permits available-tool/internal review while a genuinely separate critic is unavailable. Do not block current private Phase 1 refinement on critic tooling. Label any fallback `internal_tool_assisted`; never call it an independent agent or human playtest. Story, game, and learning/transfer reviews are separate gates. Each applicable critic target is unrounded >=9.0/10 with no blocker, but the user's final verdict overrides every critic.
+The product is a game whose meaningful play delivers intended course outcomes, not a course website with game decoration. **Product north star:** VibeLearn is a general system for turning many subjects/courses into source-grounded learning games; Relay Rescue is only the current reference slice. Current story generation is topic/outcome-driven; future explicit learner story preferences are planned but must not be inferred today.
+
+The user currently permits available-tool/internal review while a genuinely separate critic is unavailable. Do not block current private Phase 1 refinement on critic tooling. Label any fallback `internal_tool_assisted`; never call it an independent agent or human playtest. Story, first-touch, whole-chapter game, and learning/transfer reviews are separate gates. Each applicable critic target is unrounded >=9.0/10 with no blocker, but the user's final verdict overrides every critic.
 
 ## Current user verdict is authoritative
 
-The current Relay Rescue opening is **user rejected**. The newest first-touch/story rating is **3/10**. The user specifically reported: no back navigation in the animation/slides, beats move too quickly, the story is lazily told, causality/context is unclear, and it does not yet capture kids/young adults strongly enough.
+The current Relay Rescue opening is **user rejected**. The newest first-touch/story rating is **3/10**. The user specifically reported: no good back navigation in the animation/slides, beats move too quickly, the story is lazily told, causality/context is unclear, and it does not yet capture kids/young adults strongly enough.
 
 The previous internal 9.196 game / 9.35 bounded-learning critic result is historical only. Never cite it as evidence that the current experience is acceptable after the user's rejection. Current status is `needs_revision`.
 
@@ -14,23 +16,41 @@ The current user is the sole real product reviewer during private refinement. Do
 
 ## User feedback is product state, not chat-only context
 
-When user feedback changes story direction, onboarding, progression, rendering strategy, UI/UX, acceptance, course generation, testing, or rollout boundaries, **update the relevant repository docs in the same implementation unit**. A behavior change is incomplete if design contracts remain stale.
+When user feedback changes story direction, onboarding, progression, rendering strategy, UI/UX, platform priority, acceptance, course generation, testing, critic semantics, or rollout boundaries, **update `CODEX-IMPLEMENTATION-PLAN.md` and the materially affected repository docs in the same implementation unit**.
 
-At minimum inspect `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, and `docs/COURSE-GENERATION-GAME-SYSTEM.md`; update only the ones materially affected.
+At minimum inspect `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, and `docs/COURSE-GENERATION-GAME-SYSTEM.md`; update only the ones materially affected.
+
+## General generation boundary
+
+The reusable generated experience is conceptually split into:
+
+`LearningSpec -> StoryWorldSpec -> GameExperienceSpec -> AssessmentEvidenceSpec`
+
+Canonical competency/evidence identity must not depend on a story character, fantasy name, renderer, UI skin, or course-specific object. Future story/theme replacement must preserve legitimate learner history.
+
+**Today:** story is generated from topic/course intent, source-grounded outcomes, causal concept structure and a broad kid-through-young-adult quality target.
+
+**Future:** an explicit learner-controlled `StoryPreferenceProfile` may influence genre, fantasy/realism, tone, characters, visual style, pace, humor/darkness, exploration/action balance and narrative density. It is optional creative state, not mastery/evidence. Do not infer it from unrelated user data.
 
 ## Story-first product workflow
 
 For any course/subject, **generate the story/fantasy/world premise before gameplay realization**. Do not start with lesson cards/mechanics and add narrative afterward.
 
-Required conceptual pipeline **today**:
+Required conceptual pipeline:
 
-`course topic/outcomes -> story/fantasy candidate -> story critic >=9 -> gameplay/world realization -> game critic >=9 -> learning/transfer gate -> user review`
-
-There is no learner creative-preference input in the current implementation. Do not infer one from unrelated profile data. Future explicit `StoryPreferenceProfile` support may insert learner-chosen genre/tone/world constraints between topic/outcomes and story generation.
+`course/outcomes -> source grounding -> LearningSpec -> story/fantasy candidate -> story critic >=9 -> gameplay/world realization -> first-touch magic critic >=9 -> whole-chapter game critic >=9 -> learning/transfer gate >=9 -> user review`
 
 The story critic evaluates **one frozen story at a time**, solely on story quality: hook, clarity/causality, character attachment, world/fantasy appeal, storytelling quality, pacing/progression, stakes, payoff/forward pull, and cross-age engagement. It must not award story points for code, tests, curriculum value, Three.js, asset count, or engineering effort.
 
-Long term, story generation should support explicit learner preferences such as genre, tone, world type, realism/fantasy balance, character/relationship style, visual style, pace, humor/darkness, exploration/action preference, and narrative density. **Today those inputs do not exist:** story choice is driven by the topic/outcomes plus a fixed broad-audience quality target. Do not equate “kid-accessible” with childish writing.
+## First-touch magic and whole chapter are separate gates
+
+Do not average a poor opening into a strong chapter score.
+
+**First-touch magic** reviews the fresh first 60–90 seconds: beauty/creative hook, curiosity, character/world attachment, causal clarity, low initial cognitive load, player-owned pacing/navigation, obvious first meaningful action and story-to-play transition. It must independently score >=9/no blocker.
+
+**Whole-chapter game experience** reviews story-to-play continuity, progressive cognitive load, agency, challenge, feedback/recovery, payoff and forward pull across the complete chapter. It must independently score >=9/no blocker.
+
+Only after both pass does the learning/transfer gate run. Great graphics cannot compensate for weak learning; strong learning cannot compensate for a product nobody wants to play.
 
 ## First-touch story UX is a hard requirement
 
@@ -56,9 +76,15 @@ The first/tutorial chapter must make the world obvious to a child/novice before 
 
 Use tutorial focus mode: playfield/world first; nonessential evidence panels, journals, analytics, helper drawers, repeated briefings, settings, and long tool rails are deferred until useful. Underlying save/evidence semantics stay active.
 
+By the end of Chapter 1 the learner should understand who/what matters, what help is needed, the important objects/resources and their functions, what happened, what changed, why it matters, what the player did, what success means, and how the in-world behavior maps to the real subject concept.
+
+## Primary device target
+
+During current refinement, optimize first for the **mainstream modern Android/iPhone portrait range**, using a small representative matrix around 360–430 CSS px wide with common tall-phone aspect ratios, touch, safe-area behavior, text enlargement and reduced motion. Do not create separate 320-vs-390 product designs unless a real breakpoint failure requires it. Desktop polish follows later.
+
 ## Three.js / 3D direction
 
-Three.js is now a **serious option for attention and immersion**, not merely an optional renderer for inherently spatial learning mechanics. Explicitly consider authored 2D animation, 2.5D/parallax, and interactive Three.js 3D for important story/game candidates.
+Three.js is a **serious option for attention and immersion**, not merely an optional renderer for inherently spatial learning mechanics. Explicitly consider authored 2D animation, 2.5D/parallax, and interactive Three.js 3D for important story/game candidates.
 
 3D can be valuable for character/world presence, spatial storytelling, atmosphere, exploration, discovery, and direct interaction with the kid/teen/young-adult audience. But 3D never rescues weak writing or weak gameplay and earns no automatic critic points.
 
@@ -70,10 +96,6 @@ After the story gate, judge the game as something a curious kid or young adult w
 
 Teach -> easy success -> variation -> combine -> boss/transfer -> resolution -> new possibility. Increase reasoning and agency, not form length. Teach every required boss rule before graded use. New tools expand what the player can do.
 
-Story, game experience, and learning outcomes are separate gates. A great story with boring play fails. Great play with shallow learning fails. Strong learning with no voluntary engagement fails the product.
-
-The first chapter has an explicit world-model gate. A fresh player should be able to explain: who/what matters; what they want; why they care; important objects/resources and functions; what already happened; what changed; why it matters; what the player can do; why the first action is useful; and what makes them want the next beat.
-
 Map each learning outcome through mechanic, decision, feedback, varied practice, fresh transfer, delayed retrieval where claimed, and evidence limits. Do not claim a full course's outcomes from a short guided slice.
 
 ## Scope and verification
@@ -82,7 +104,7 @@ Stay within private Phase 1 product refinement. Do not silently open Phase 2 reu
 
 Use one Python modular monolith with semantic HTML/CSS/JavaScript. SQLite/loopback remain local; Flask/Gunicorn, PostgreSQL, and Supabase Auth remain hosted. Read HOSTING.md before infrastructure work.
 
-Install hosted/test dependencies from requirements.lock and requirements-dev.txt. Run `python manage.py build`, `python manage.py test`, and `python manage.py browser` at integrated gates. Use disposable browser databases. Preserve screenshots, traces, exact commits, and failures. No successful API mocks to claim live verification.
+Install hosted/test dependencies from requirements.lock and requirements-dev.txt. Run `python manage.py build`, `python manage.py test`, and `python manage.py browser` at integrated gates. Browser JavaScript that uses ES modules must be syntax-checked with module semantics. Use disposable browser databases. Preserve screenshots, traces, exact commits, and failures. No successful API mocks to claim live verification.
 
 Implement a small complete behavior, verify it, inspect it, then extend it. Machine checks are not human acceptance and source-only review is not story/game review.
 
