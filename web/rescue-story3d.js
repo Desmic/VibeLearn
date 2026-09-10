@@ -31,14 +31,14 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
   function mesh(parent,g,m,pos,scale=[1,1,1]){const o=new THREE.Mesh(g,m);o.position.set(...pos);o.scale.set(...scale);parent.add(o);return o;}
   function group(parent=scene){const g=new THREE.Group();parent.add(g);return g;}
 
-  const c={rock:mat(0x203b4b),grass:mat(0x527f6f),grass2:mat(0x6d9b7e),wood:mat(0x9d704e),gold:emissive(0xe8bf68,.3),paper:mat(0xf4d99a),dark:mat(0x122a36),pip:mat(0xe0a159,{metalness:.16}),red:mat(0xc65449),glass:emissive(0x72dcc9,.78),forge:mat(0xa68266,{metalness:.18}),storm:emissive(0xc8eaff,2.4),danger:emissive(0xff745f,.9,{transparent:true,opacity:.8}),ember:emissive(0xffa852,1.75),water:mat(0x0c4057,{transparent:true,opacity:.62,roughness:.32});
+  const c={rock:mat(0x203b4b),grass:mat(0x527f6f),grass2:mat(0x6d9b7e),wood:mat(0x9d704e),gold:emissive(0xe8bf68,.3),paper:mat(0xf4d99a),dark:mat(0x122a36),pip:mat(0xe0a159,{metalness:.16}),red:mat(0xc65449),glass:emissive(0x72dcc9,.78),forge:mat(0xa68266,{metalness:.18}),storm:emissive(0xc8eaff,2.4),danger:emissive(0xff745f,.9,{transparent:true,opacity:.8}),ember:emissive(0xffa852,1.75),water:mat(0x0c4057,{transparent:true,opacity:.62,roughness:.32})};
 
   const moon=mesh(scene,sphere,emissive(0xffe5b1,1.8),[-10,13,-24],[2.2,2.2,2.2]);
   const water=mesh(scene,plane,c.water,[0,-3.25,-7],[48,48,1]);water.rotation.x=-Math.PI/2;
   const starGeom=geo(new THREE.BufferGeometry()),starPos=[];for(let i=0;i<175;i++)starPos.push((Math.random()-.5)*74,5+Math.random()*27,-12-Math.random()*45);starGeom.setAttribute('position',new THREE.Float32BufferAttribute(starPos,3));
   const starMat=new THREE.PointsMaterial({color:0xd6f3f2,size:.105,sizeAttenuation:true,transparent:true,opacity:.82});materials.add(starMat);scene.add(new THREE.Points(starGeom,starMat));
   const cloudMat=mat(0x9fc9c5,{transparent:true,opacity:.09,roughness:1});
-  for(const [x,y,z,s] of [[-8,5,-8,2.4],[9,6,-12,3],[0,3.2,-18,4],[-14,2,-15,3]]){const g=group();g.position.set(x,y,z);for(let i=0;i<4;i++)mesh(g,sphere,cloudMat,[i*.9,Math.sin()*.2,0],[1.4*s/3,.55*s/3,.75*s/3]);}
+  for(const [x,y,z,s] of [[-8,5,-8,2.4],[9,6,-12,3],[0,3.2,-18,4],[-14,2,-15,3]]){const g=group();g.position.set(x,y,z);for(let i=0;i<4;i++)mesh(g,sphere,cloudMat,[i*.9,Math.sin(i*1.7)*.2,0],[1.4*s/3,.55*s/3,.75*s/3]);}
 
   function island(x,z,s=1){const g=group();g.position.set(x,-1,z);mesh(g,cone,c.rock,[0,-1.85,0],[3.8*s,4.4*s,3.8*s]);mesh(g,cyl,c.grass,[0,.08,0],[3.5*s,.42,3.5*s]);mesh(g,cyl,c.grass2,[.35,.32,-.2],[2.3*s,.08,2.3*s]);return g;}
   island(-5.2,0,1.05);island(5.3,-.3,1.05);island(-9,-9,.72);island(10,-10,.72);island(0,-13,.6);island(-1.8,-7,.48);island(5,-7.5,.42);
