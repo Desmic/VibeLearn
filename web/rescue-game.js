@@ -56,30 +56,44 @@ window.RescueGame = (() => {
   }
   function render(a,missions,handlers){
     stageCleanup();stageCleanup=()=>{};setup(handlers);attempt=a;const s=a.rescue_state,c=a.snapshot.rescue,n=missions.filter(m=>m.status==='cleared').length;
-    const submitted=a.status==='submitted',clear=submitted&&a.assessment.outcome==='correct',building=c.level>=6,transfer=c.level===7;
-    root.innerHTML=top(n,`${a.snapshot.mission.difficulty.toUpperCase()} · SIGNAL ${c.level}`)+`<section class="rg-encounter ${clear?'clear':''}"><div class="rg-objective"><span>${esc(c.brief)}</span><h1>${esc(c.goal)}</h1><p class="rg-xp" ${xp?'':'hidden'}>${a.practice_xp||0} practice XP · not mastery</p></div><div class="rg-arena"><div class="rg-field">${transfer?incident(c,s):world(s,clear)}${building?programPanel(transfer):''}${clear?clearPanel(c,a,transfer):''}</div>${building?'':consolePanel(c,s)}</div>${building?casePanel(s.rows):''}${!clear?evidence(a):''}</section>`;
+    const submitted=a.status==='submitted',clear=submitted&&a.assessment.outcome==='correct',ready=!submitted&&Boolean(s.complete),building=c.level>=6,transfer=c.level===7;
+    root.innerHTML=top(n,`${a.snapshot.mission.difficulty.toUpperCase()} · SIGNAL ${c.level}`)+`<section class="rg-encounter ${clear?'clear':''}"><div class="rg-objective"><span>${esc(c.brief)}</span><h1>${esc(c.goal)}</h1><p class="rg-xp" ${xp?'':'hidden'}>${a.practice_xp||0} practice XP · not mastery</p></div><div class="rg-arena"><div class="rg-field">${transfer?incident(c,s):world(s,clear||ready)}${building&&!submitted?programPanel(transfer):''}${ready||submitted?clearPanel(c,a,transfer,{ready,clear}):''}</div>${building?'':consolePanel(c,s)}</div>${building?casePanel(submitted?(a.assessment?.rows||s.rows):s.rows):''}<div id="rg-save-recovery" hidden><p>Save not confirmed. Your move is retained here. Retry saving, not the action.</p><button type="button" id="rg-retry-save" class="rg-primary">Retry save</button></div>${!clear?evidence(a):''}</section>`;
     bindTop();
     root.querySelector('#rg-map').onclick=()=>cb.campaign();
     if(!building){root.querySelectorAll('[data-look]').forEach(b=>b.onclick=()=>look(b.dataset.look));root.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>move(b.dataset.tool));}
-    if(building){root.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{selected=+b.dataset.slot;render(a,missions,handlers);});root.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{const p=[...program];p[selected]=b.dataset.block;while(p.length&&p.at(-1)==null)p.pop();setProgram(p);render(a,missions,handlers);});root.querySelector('#rg-clear-route').onclick=()=>{setProgram([]);selected=0;render(a,missions,handlers);};root.querySelector('#rg-run').onclick=()=>run();root.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{activeCase=+b.dataset.case;render(a,missions,handlers);});}
-    root.querySelector('#rg-next')?.addEventListener('click',()=>cb.campaign());
-    root.querySelector('#rg-retry-save')?.addEventListener('click',()=>cb.submit());
+    if(building&&!submitted){root.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{selected=+b.dataset.slot;render(a,missions,handlers);});root.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{const p=[...program];p[selected]=b.dataset.block;while(p.length&&p.at(-1)==null)p.pop();setProgram(p);render(a,missions,handlers);});root.querySelector('#rg-clear-route').onclick=()=>{setProgram([]);selected=0;render(a,missions,handlers);};root.querySelector('#rg-run').onclick=()=>run();}root.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{activeCase=+b.dataset.case;render(a,missions,handlers);});
+    root.querySelector('#rg-next')?.addEventListener('click',async()=>{
+      if(!submitted){if(await cb.submit()){const nextId=`rescue-${String(c.level+1).padStart(2,'0')}`;if(c.level<7)await cb.start(nextId);else cb.campaign();}}
+      else if(!clear)await cb.start(a.snapshot.mission.id);
+      else if(transfer)cb.campaign();
+      else await cb.start(`rescue-${String(c.level+1).padStart(2,'0')}`);
+    });
+    root.querySelector('#rg-retry-save')?.addEventListener('click',()=>retrySubmit?cb.submit():cb.save());
     root.querySelector('#rg-aid')?.addEventListener('change',e=>{log.aid_declaration=e.target.value;cb.edit();});
     if(window.RescueStage) stageCleanup=RescueStage.attach(root,s,c,{look:key=>look(key),sandbox:storm=>sandbox(storm),caseIndex:activeCase,autoPlay:building});
   }
   function setProgram(p){program=p.filter(Boolean).slice(0,4);log.draft=[...program];cb.edit();}
   function record(move){log.moves.push(move);cb.edit();}
-  function look(key){record({look:key});cb.save();}
-  function move(action){record(action);cb.save();}
-  function run(){log.draft=[...program];record({program:[...program]});cb.save();}
-  function sandbox(storm){log.draft=[...program];record({storm:{...storm,program:[...program]}});cb.save();}
+  async function act(move,submit=false){
+    if(!attempt||attempt.status!=='draft')return false;
+    if(log.moves.length!==attempt.response.rescue.moves.length){cb.error('Save the pending move before acting again.');return false;}
+    retrySubmit=submit;log.draft=[...program];record(move);
+    const feedback=root?.querySelector('#rg-feedback');if(feedback)feedback.textContent=submit?'Committing your repair before revealing the result…':'Pip is trying your idea…';
+    const ok=await(submit?cb.submit():cb.save());
+    if(!ok){const recovery=root?.querySelector('#rg-save-recovery');if(recovery)recovery.hidden=false;}
+    return ok;
+  }
+  function look(key){return act({look:key});}
+  function move(action){return act(action);}
+  function run(){const transfer=attempt?.snapshot?.rescue?.level===7;return act({program:[...program]},transfer);}
+  function sandbox(storm){return act({storm:{...storm,program:[...program]}});}
   function consolePanel(c,s){
     return `<aside class="rg-console"><div class="rg-pip-message"><span class="rg-face" aria-hidden="true">••</span><div><b>Pip</b><p id="rg-feedback">${esc(s.feedback||c.brief)}</p></div></div><div class="rg-ticket"><small>Current ticket</small><b>${esc(s.ticket||'order-01')}</b><span>${esc(s.payload||'one bridge gear')}</span></div>${c.inspections?.length?`<div class="rg-observations">${c.inspections.map(k=>`<button type="button" data-look="${k}">${esc(looks[k]||k)}</button>`).join('')}</div>`:''}<div class="rg-tools">${(s.available||[]).map(k=>`<button type="button" data-tool="${k}" ${s.complete||s.failed?'disabled':''}><b>${esc(toolNames[k]||k)}</b></button>`).join('')}</div><div class="rg-journal"><small>Field journal</small><p>${esc(s.journal||'No clues recorded yet.')}</p></div></aside>`;
   }
-  function clearPanel(c,a,transfer){return `<section class="rg-clear"><span>✓ SIGNAL RESTORED</span><h2>${esc(c.success||'Route stable')}</h2><p>${esc(c.debrief||'Pip can move again.')}</p><button type="button" class="rg-primary" id="rg-next">${transfer?'Return to map':'Continue to next signal'} →</button></section>`;}
+  function clearPanel(c,a,transfer,{ready=false,clear=false}={}){const ok=ready||clear;return `<section class="rg-clear"><span>${ok?'✓ SIGNAL RESTORED':'⚠ REPAIR NEEDED'}</span><h2>${esc(ok?(c.success||'Route stable'):'The storm found a counterexample.')}</h2><p>${esc(ok?(c.debrief||'Pip can move again.'):'Try a different route and test it again.')}</p><button type="button" class="rg-primary" id="rg-next">${ready?'Lock in this clear':!clear?'Try again':transfer?'Return to map':'Continue to next signal'} →</button></section>`;}
   function incident(c,s){return `<section class="rg-incident"><span>FIELD ASSIGNMENT</span><h2>${esc(c.brief)}</h2><p>${esc(c.goal)}</p><div class="rg-incident-grid"><div><small>JOB ID</small><b>${esc(c.job_id||'export-7')}</b></div><div><small>ATTEMPTS</small><b>${esc(c.max_attempts||3)}</b></div><div><small>RETENTION</small><b>${esc(c.retention_seconds||86400)}s</b></div></div>${s.sealed?'<p class="rg-sealed">Policy sealed for this attempt.</p>':''}</section>`;}
   function evidence(a){return `<details class="rg-evidence"><summary>Evidence & attempt state</summary><pre id="rg-evidence-json">${esc(JSON.stringify({assessment:a.assessment,evidence:a.evidence,response:a.response},null,2))}</pre></details>`;}
   function kit(){return `<section id="rg-kit" class="rg-kit"><h3>Relay repair kit</h3><p>Reference implementation and external-service tests for the transfer challenge.</p><a href="/relay-repair-kit.zip" download>Download repair kit</a></section>`;}
-  function sync(busy,a){attempt=a;if(!root)return;const save=root.querySelector('#rg-save');if(save)save.disabled=busy||!a||a.status!=='draft';const record=root.querySelector('#rg-record');if(record)record.disabled=busy||!a||a.status!=='draft'||!log.moves.length;root.querySelectorAll('[data-tool],[data-look],[data-world-look],[data-slot],[data-block],#rg-run,#rg-clear-route,#rg-aid').forEach(n=>{if(busy)n.disabled=true;});let status=root.querySelector('#rg-sync');if(!status){status=document.createElement('span');status.id='rg-sync';status.className='rg-sync';root.querySelector('.rg-top')?.append(status);}status.textContent=busy?'Saving…':'Saved';}
+  function sync(busy,a){attempt=a;if(!root)return;const pending=Boolean(a?.snapshot?.rescue)&&log.moves.length!==a.response.rescue.moves.length;const save=root.querySelector('#rg-save');if(save)save.disabled=busy||pending||!a||a.status!=='draft';const record=root.querySelector('#rg-record');if(record)record.disabled=busy||pending||!a||a.status!=='draft'||!log.moves.length;root.querySelectorAll('[data-tool],[data-look],[data-world-look],[data-slot],[data-block],#rg-run,#rg-clear-route,#rg-aid').forEach(n=>{if(busy||pending)n.disabled=true;});const recovery=root.querySelector('#rg-save-recovery');if(recovery)recovery.hidden=busy||!pending;let status=root.querySelector('#rg-sync');if(!status){status=document.createElement('span');status.id='rg-sync';status.className='rg-sync';root.querySelector('.rg-top')?.append(status);}status.textContent=busy?'Saving…':pending?'Save not confirmed':'Saved';}
   return {map,render,hide,setResponse,response,sync};
 })();
