@@ -50,7 +50,7 @@ A VibeLearn opening is not allowed to be a rushed slideshow. For first-run narra
 - going backward/forward reconstructs the correct world state;
 - story is told through events, characters, environment, dialogue, discovery, conflict, and consequence rather than caption dumps.
 
-For important stories the realization step explicitly considers **2D illustration, 2.5D/parallax, and interactive Three.js 3D**. Three.js may be chosen for immersion, character/world presence, atmosphere, environmental storytelling, and direct interaction, but earns no score merely for being 3D and never controls assessment/evidence.
+For important stories the realization step explicitly considers **2D illustration, 2.5D/parallax, and interactive Three.js 3D**. Three.js may be chosen for immersion, character/world presence, atmosphere, environmental storytelling, and direct interaction, but earns no score merely for being 3D and never controls assessment/evidence. Phase 1 now establishes a reusable Three.js story runtime + world-adapter seam so future fantasies can swap story-specific worlds without copying renderer lifecycle code; see [`docs/THREE-STORY-FRAMEWORK.md`](docs/THREE-STORY-FRAMEWORK.md).
 
 ## Quality gates
 
@@ -92,7 +92,8 @@ See [`docs/COURSE-GENERATION-GAME-SYSTEM.md`](docs/COURSE-GENERATION-GAME-SYSTEM
 - `app/service.py` — learner-scoped commands, progression, assistance, evidence/reward
 - `app/storage.py` / `app/postgres.py` — local/hosted persistence boundaries
 - `app/hosted.py` / `app/auth.py` / `app/pilot_auth.py` — hosted transport and identity
-- `web/rescue-intro.js` / `web/rescue-story3d.js` — first-touch story player and local Three.js realization
+- `web/story3d-runtime.js` / `web/rescue-story3d.js` — reusable Three.js story runtime and the Echo Forge world adapter
+- `web/rescue-intro.js` — first-touch story player consuming the current world adapter
 - `web/rescue.js` / `web/rescue-chapter1.js` — seven-signal playfield and tutorial focus mode
 - `tests/` — deterministic, PostgreSQL, hosted, and real-browser verification
 - `docs/` — current state, story/game/learning contracts, critic records, and Phase 1 history
