@@ -33,11 +33,10 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
 
   const c={rock:mat(0x203b4b),grass:mat(0x527f6f),grass2:mat(0x6d9b7e),wood:mat(0x9d704e),gold:emissive(0xe8bf68,.3),paper:mat(0xf4d99a),dark:mat(0x122a36),pip:mat(0xe0a159,{metalness:.16}),red:mat(0xc65449),glass:emissive(0x72dcc9,.78),forge:mat(0xa68266,{metalness:.18}),storm:emissive(0xc8eaff,2.4),danger:emissive(0xff745f,.9,{transparent:true,opacity:.8}),ember:emissive(0xffa852,1.75),water:mat(0x0c4057,{transparent:true,opacity:.62,roughness:.32});
 
-  // Sky, moon, water haze, stars and soft cloud islands create a readable world silhouette.
   const moon=mesh(scene,sphere,emissive(0xffe5b1,1.8),[-10,13,-24],[2.2,2.2,2.2]);
   const water=mesh(scene,plane,c.water,[0,-3.25,-7],[48,48,1]);water.rotation.x=-Math.PI/2;
   const starGeom=geo(new THREE.BufferGeometry()),starPos=[];for(let i=0;i<175;i++)starPos.push((Math.random()-.5)*74,5+Math.random()*27,-12-Math.random()*45);starGeom.setAttribute('position',new THREE.Float32BufferAttribute(starPos,3));
-  const starMat=new THREE.PointsMaterial({color:0xd6f3f2,size:.105,sizeAttenuation:true,sparent:true,opacity:.82});materials.add(starMat);scene.add(new THREE.Points(starGeom,starMat));
+  const starMat=new THREE.PointsMaterial({color:0xd6f3f2,size:.105,sizeAttenuation:true,transparent:true,opacity:.82});materials.add(starMat);scene.add(new THREE.Points(starGeom,starMat));
   const cloudMat=mat(0x9fc9c5,{transparent:true,opacity:.09,roughness:1});
   for(const [x,y,z,s] of [[-8,5,-8,2.4],[9,6,-12,3],[0,3.2,-18,4],[-14,2,-15,3]]){const g=group();g.position.set(x,y,z);for(let i=0;i<4;i++)mesh(g,sphere,cloudMat,[i*.9,Math.sin()*.2,0],[1.4*s/3,.55*s/3,.75*s/3]);}
 
@@ -51,7 +50,6 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
     const lamp=mesh(g,sphere,emissive(0x35545d,.08),[0,2.36,0],[.23,.23,.23]);beacons.push({g,lamp,i});
   }
 
-  // Pip — readable face, scarf, antenna, arm and a little satchel.
   const pip=group();pip.position.set(-5.2,.35,1.2);const pipBody=group(pip);
   mesh(pipBody,box,c.pip,[0,.65,0],[.68,.72,.52]);const head=group(pipBody);head.position.set(0,1.3,0);mesh(head,box,c.pip,[0,0,0],[.92,.62,.62]);mesh(head,box,c.dark,[0,.04,.34],[.78,.33,.05]);
   const eyes=[];for(const x of [-.2,.2])eyes.push(mesh(head,sphere,c.glass,[x,.05,.4],[.06,.06,.04]));
@@ -60,13 +58,11 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
   const antenna=mesh(pipBody,cyl,c.pip,[0,1.92,0],[.025,.42,.025]);antenna.rotation.z=.06;mesh(pipBody,sphere,c.glass,[0,2.15,0],[.08,.08,.08]);
   const arm=group(pipBody);arm.position.set(.5,.75,0);mesh(arm,box,c.pip,[.18,0,0],[.38,.12,.12]);
 
-  // Echo Forge — warm, slightly characterful silhouette with furnace "heart" and eye windows.
   const forge=group();forge.position.set(5.3,.2,-.5);mesh(forge,box,c.forge,[0,1,0],[2.45,1.9,2.1]);const roof=mesh(forge,cone,c.dark,[0,2.45,0],[2,1.25,2]);roof.rotation.y=Math.PI/4;
   const windows=[];for(const x of [-.68,-.15])windows.push(mesh(forge,box,c.glass,[x,1.3,1.08],[.3,.3,.05]));
   const furnace=mesh(forge,sphere,c.ember,[.65,.7,1.15],[.36,.36,.08]);mesh(forge,cyl,c.dark,[1.5,2.55,-.5],[.22,1.2,.22]);
   for(const x of [-1.4,1.3]){const pipe=mesh(forge,cyl,c.dark,[x,2.1,-.35],[.1,.65,.1]);pipe.rotation.z=x<0?.13:-.13;}
 
-  // Bridge and gears.
   const bridge=group();bridge.position.set(0,.2,1);const bridgeLeft=group(bridge),bridgeRight=group(bridge);bridgeLeft.position.x=-2.3;bridgeRight.position.x=2.3;
   for(let i=0;i<7;i++){mesh(bridgeLeft,box,c.wood,[i*.38,0,0],[.31,.12,1.05]);mesh(bridgeRight,box,c.wood,[-i*.38,0,0],[.31,.12,1.05]);}
   for(const x of [-2.8,2.8]){mesh(scene,box,c.wood,[x,.55,1],[.12,1.1,1.25]);}
@@ -90,8 +86,20 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
     {p:[2.2,4.7,11.5],t:[2.4,.9,.3]},
     {p:[-1.3,6.4,15.3],t:[-.6,1,-.6]}
   ];
+  const portraitTargets=[
+    {p:[0,8.7,29],t:[0,.8,-1.2]},
+    {p:[-.5,6.4,21.5],t:[-.7,.75,.9]},
+    {p:[1.6,6.4,22],t:[2.1,1,.1]},
+    {p:[0,7.1,25],t:[0,1.7,.1]},
+    {p:[1.5,6.1,22],t:[2.2,.9,.2]},
+    {p:[0,7.5,26],t:[0,1,-.4]}
+  ];
+  const cameraFor=(index,aspect)=>aspect<.72?portraitTargets[index]:cameraTargets[index];
+  const missionCamera=(complete,aspect)=>complete?(aspect<.72?{p:[0,7.2,23],t:[0,.8,.7]}:{p:[0,5.2,13.2],t:[0,.8,.8]}):cameraFor(5,aspect);
   let beat=mode==='mission'?5:0,paused=false,frame=0,disposed=false,beatStart=performance.now(),last=performance.now(),missionState=null;
-  const currentCam=new THREE.Vector3(...cameraTargets[beat].p),currentLook=new THREE.Vector3(...cameraTargets[beat].t);camera.position.copy(currentCam);camera.lookAt(currentLook);
+  const initialAspect=Math.max(.2,(host.clientWidth||390)/(host.clientHeight||650));
+  const initialTarget=cameraFor(beat,initialAspect);
+  const currentCam=new THREE.Vector3(...initialTarget.p),currentLook=new THREE.Vector3(...initialTarget.t);camera.position.copy(currentCam);camera.lookAt(currentLook);
   const setBeacon=(i,on,soft=false)=>{const lamp=beacons[i].lamp;const hex=on?0x72dcc9:0x35545d;lamp.material.color.setHex(hex);lamp.material.emissive.setHex(hex);lamp.material.emissiveIntensity=on?(soft?.55:1.45):.07;};
 
   function resetCharacter(){pip.position.set(-5.2,.35,1.2);pipBody.rotation.z=0;head.rotation.z=0;arm.rotation.z=0;eyes.forEach(e=>e.scale.set(.06,.06,.04));}
@@ -103,7 +111,7 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
     embers.forEach((e,i)=>{const dim=beat===4&&i===3;e.material.emissiveIntensity=dim?.12:1.75;e.scale.setScalar(dim?.55:1);});
     beacons.forEach((_,i)=>setBeacon(i,i===0,beat<5));
     if(beat===1){pipBody.rotation.z=-.08;head.rotation.z=.12;}if(beat===4){arm.rotation.z=-.65;head.rotation.z=-.12;}if(beat===5){head.rotation.y=-.35;}
-    stormLight.intensity=0;if(reducedMotion){currentCam.set(...cameraTargets[beat].p);currentLook.set(...cameraTargets[beat].t);camera.position.copy(currentCam);camera.lookAt(currentLook);}requestDraw();
+    stormLight.intensity=0;if(reducedMotion){const aspect=Math.max(.2,(host.clientWidth||390)/(host.clientHeight||650)),target=cameraFor(beat,aspect);currentCam.set(...target.p);currentLook.set(...target.t);camera.position.copy(currentCam);camera.lookAt(currentLook);}requestDraw();
   }
 
   function applyMissionState(state={}){
@@ -115,13 +123,14 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
     embers.forEach(e=>{e.scale.setScalar(1);e.material.emissiveIntensity=1.75;});
     forgeLight.intensity=failed?4.2:2.7;
     if(failed){head.rotation.z=.18;arm.rotation.z=-.35;}if(complete){head.rotation.y=.28;}
-    const target=complete?{p:[0,5.2,13.2],t:[0,.8,.8]}:cameraTargets[5];currentCam.set(...target.p);currentLook.set(...target.t);camera.position.copy(currentCam);camera.lookAt(currentLook);requestDraw();
+    const aspect=Math.max(.2,(host.clientWidth||390)/(host.clientHeight||650)),target=missionCamera(complete,aspect);currentCam.set(...target.p);currentLook.set(...target.t);camera.position.copy(currentCam);camera.lookAt(currentLook);requestDraw();
   }
 
   function render(time){
     frame=0;if(disposed||!host.isConnected)return;const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);if(canvas.width!==Math.round(w*renderer.getPixelRatio())||canvas.height!==Math.round(h*renderer.getPixelRatio()))renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
-    const dt=Math.min(.04,(time-last)/1000);last=time,target=cameraTargets[beat];
-    if(!reducedMotion&&!missionState){const ease=1-Math.pow(.001,dt);currentCam.lerp(new THREE.Vector3(...target.p),ease);currentLook.lerp(new THREE.Vector3(...target.t),ease);camera.position.copy(currentCam);camera.lookAt(currentLook);}
+    const dt=Math.min(.04,(time-last)/1000);last=time,aspect=w/h,target=missionState?missionCamera(Boolean(missionState.complete),aspect):cameraFor(beat,aspect);
+    if(reducedMotion){currentCam.set(...target.p);currentLook.set(...target.t);camera.position.copy(currentCam);camera.lookAt(currentLook);}
+    else {const ease=1-Math.pow(.001,dt);currentCam.lerp(new THREE.Vector3(...target.p),ease);currentLook.lerp(new THREE.Vector3(...target.t),ease);camera.position.copy(currentCam);camera.lookAt(currentLook);}
     if(!paused&&!reducedMotion){
       const t=(time-beatStart)/1000;pip.position.y=.35+Math.sin(time/700)*.035;scarf.rotation.z=Math.sin(time/360)*.07;moon.rotation.y+=dt*.015;newGear.rotation.z+=dt*.75;duplicateGear.rotation.z-=dt*.55;
       furnace.scale.setScalar(1+Math.sin(time/210)*.05);
