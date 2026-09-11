@@ -91,12 +91,15 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
     {p:[1.5,6.1,22],t:[2.2,.9,.2]},
     {p:[0,7.5,26],t:[0,1,-.4]}
   ];
-  const cameraFor=(index,aspect)=>aspect<.72?portraitTargets[index]:cameraTargets[index];
-  const missionCamera=(complete,aspect)=>complete?(aspect<.72?{p:[0,7.2,23],t:[0,.8,.7]}:{p:[0,5.2,13.2],t:[0,.8,.8]}):cameraFor(5,aspect);
+  const storyShots=cameraTargets.map((landscape,index)=>({landscape,portrait:portraitTargets[index]}));
+  const missionShots={
+    active:storyShots[5],
+    complete:{landscape:{p:[0,5.2,13.2],t:[0,.8,.8]},portrait:{p:[0,7.2,23],t:[0,.8,.7]}}
+  };
   let beat=mode==='mission'?5:0,beatStart=performance.now(),missionState=null;
   const initialAspect=Math.max(.2,(host.clientWidth||390)/(host.clientHeight||650));
-  const initialTarget=cameraFor(beat,initialAspect);
-  const currentCam=new THREE.Vector3(...initialTarget.p),currentLook=new THREE.Vector3(...initialTarget.t);camera.position.copy(currentCam);camera.lookAt(currentLook);
+  const cameraRig=runtime.createCameraRig(mode==='mission'?missionShots.active:storyShots[beat],{portraitMaxAspect:.72,responsiveness:.001});
+  cameraRig.snap(initialAspect);
   const setBeacon=(i,on,soft=false)=>{const lamp=beacons[i].lamp;const hex=on?0x72dcc9:0x35545d;lamp.material.color.setHex(hex);lamp.material.emissive.setHex(hex);lamp.material.emissiveIntensity=on?(soft?.55:1.45):.07;};
 
   function resetCharacter(){pip.position.set(-5.2,.35,1.2);pipBody.rotation.z=0;head.rotation.z=0;arm.rotation.z=0;eyes.forEach(e=>e.scale.set(.06,.06,.04));}
@@ -108,7 +111,7 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
     embers.forEach((e,i)=>{const dim=beat===4&&i===3;e.material.emissiveIntensity=dim?.12:1.75;e.scale.setScalar(dim?.55:1);});
     beacons.forEach((_,i)=>setBeacon(i,i===0,beat<5));
     if(beat===1){pipBody.rotation.z=-.08;head.rotation.z=.12;}if(beat===4){arm.rotation.z=-.65;head.rotation.z=-.12;}if(beat===5){head.rotation.y=-.35;}
-    stormLight.intensity=0;if(reducedMotion){const aspect=Math.max(.2,(host.clientWidth||390)/(host.clientHeight||650)),target=cameraFor(beat,aspect);currentCam.set(...target.p);currentLook.set(...target.t);camera.position.copy(currentCam);camera.lookAt(currentLook);}requestDraw();
+    stormLight.intensity=0;cameraRig.setShot(storyShots[beat]);if(reducedMotion)cameraRig.snap(Math.max(.2,(host.clientWidth||390)/(host.clientHeight||650)));requestDraw();
   }
 
   function applyMissionState(state={}){
@@ -120,13 +123,11 @@ export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
     embers.forEach(e=>{e.scale.setScalar(1);e.material.emissiveIntensity=1.75;});
     forgeLight.intensity=failed?4.2:2.7;
     if(failed){head.rotation.z=.18;arm.rotation.z=-.35;}if(complete){head.rotation.y=.28;}
-    const aspect=Math.max(.2,(host.clientWidth||390)/(host.clientHeight||650)),target=missionCamera(complete,aspect);currentCam.set(...target.p);currentLook.set(...target.t);camera.position.copy(currentCam);camera.lookAt(currentLook);requestDraw();
+    cameraRig.setShot(complete?missionShots.complete:missionShots.active,{snap:true,aspect:Math.max(.2,(host.clientWidth||390)/(host.clientHeight||650))});requestDraw();
   }
 
   runtime.setDraw(({time,dt,aspect,animate})=>{
-    const target=missionState?missionCamera(Boolean(missionState.complete),aspect):cameraFor(beat,aspect);
-    if(reducedMotion){currentCam.set(...target.p);currentLook.set(...target.t);camera.position.copy(currentCam);camera.lookAt(currentLook);}
-    else {const ease=1-Math.pow(.001,dt);currentCam.lerp(new THREE.Vector3(...target.p),ease);currentLook.lerp(new THREE.Vector3(...target.t),ease);camera.position.copy(currentCam);camera.lookAt(currentLook);}
+    cameraRig.update({dt,aspect,snap:reducedMotion});
     if(animate){
       const t=(time-beatStart)/1000;pip.position.y=.35+Math.sin(time/700)*.035;scarf.rotation.z=Math.sin(time/360)*.07;moon.rotation.y+=dt*.015;newGear.rotation.z+=dt*.75;duplicateGear.rotation.z-=dt*.55;
       furnace.scale.setScalar(1+Math.sin(time/210)*.05);
