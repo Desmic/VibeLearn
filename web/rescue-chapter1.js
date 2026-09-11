@@ -5,7 +5,7 @@
   const STEP_KEY = 'vibelearn.relay-rescue.signal1-guide.v3';
   const DONE_KEY = 'vibelearn.relay-rescue.signal1-guide.done.v3';
   const rootEl = () => document.querySelector(ROOT_ID);
-  const storyWorldModule=import('/rescue-story3d.js').catch(()=>null);
+  const storyWorldBundle=Promise.all([import('/story3d-world-host.js'),import('/rescue-story3d.js')]).then(([host,module])=>({host,module})).catch(()=>null);
   let missionWorld=null, missionHost=null;
   const disposeMissionWorld=()=>{missionWorld?.dispose?.();missionWorld=null;missionHost=null;};
   const readStep = () => { try { return Number(localStorage.getItem(STEP_KEY) || 0); } catch (_) { return 0; } };
@@ -115,9 +115,9 @@
     const host=root.querySelector('.rg-world'); if(!host) return;
     if(missionHost!==host){
       disposeMissionWorld(); missionHost=host;
-      storyWorldModule.then(module=>{
-        if(missionHost!==host || !host.isConnected || !module?.createStoryWorld) return;
-        missionWorld=module.createStoryWorld(host,{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,mode:'mission'});
+      storyWorldBundle.then(bundle=>{
+        if(missionHost!==host || !host.isConnected || !bundle) return;
+        missionWorld=bundle.host.mountStoryWorldModule(bundle.module,host,{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,mode:'mission'});
         if(missionWorld?.available){host.classList.add('rgc1-three-ready');missionWorld.setMissionState(a?.rescue_state||{});}
         else host.classList.add('rgc1-three-failed');
       });
