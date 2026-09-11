@@ -32,6 +32,27 @@ class Story3DFrameworkTests(unittest.TestCase):
         ):
             self.assertIn(contract, source)
 
+    def test_story_and_mission_mount_through_versioned_world_host(self):
+        intro = (ROOT / 'web' / 'rescue-intro.js').read_text(encoding='utf-8')
+        chapter = (ROOT / 'web' / 'rescue-chapter1.js').read_text(encoding='utf-8')
+        host = (ROOT / 'web' / 'story3d-world-host.js').read_text(encoding='utf-8')
+        adapter = (ROOT / 'web' / 'rescue-story3d.js').read_text(encoding='utf-8')
+        self.assertIn("import('/story3d-world-host.js')", intro)
+        self.assertIn('mountStoryWorldModule', intro)
+        self.assertIn("import('/story3d-world-host.js')", chapter)
+        self.assertIn('mountStoryWorldModule', chapter)
+        self.assertIn('STORY3D_ADAPTER_VERSION', host)
+        self.assertIn('validateStoryWorldModule', host)
+        self.assertIn('storyWorldManifest', adapter)
+        self.assertIn('adapterVersion:STORY3D_ADAPTER_VERSION', adapter)
+
+    def test_story3d_framework_assets_are_explicitly_served(self):
+        server = (ROOT / 'app' / 'server.py').read_text(encoding='utf-8')
+        hosted = (ROOT / 'app' / 'hosted.py').read_text(encoding='utf-8')
+        for asset in ('story3d-runtime.js', 'story3d-world-host.js', 'rescue-story3d.js'):
+            self.assertIn(asset, server)
+            self.assertIn(asset, hosted)
+
 
 if __name__ == '__main__':
     unittest.main()
