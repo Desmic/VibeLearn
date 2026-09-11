@@ -32,7 +32,7 @@ def main():
         print("Build passed: Python compiled; browser JavaScript parsed with ESM semantics.")
         return 0
     if command == "browser":
-        for module in ["tests.browser_check", "tests.expedition_browser_check", "tests.game_review_browser", "tests.onboarding_browser", "tests.rescue_browser"]:
+        for module in ["tests.browser_check", "tests.expedition_browser_check", "tests.game_review_browser", "tests.story3d_framework_browser", "tests.onboarding_browser", "tests.rescue_browser"]:
             result = subprocess.call([sys.executable, "-m", module, *sys.argv[2:]], cwd=ROOT)
             if result:
                 return result
