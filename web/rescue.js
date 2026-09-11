@@ -23,6 +23,13 @@ window.RescueStage = (() => {
   function attach(root, state, config, {look, sandbox, caseIndex = 0, autoPlay = false} = {}) {
     const abort = new AbortController(), timers = [];
     const listen = (n, type, fn) => n?.addEventListener(type, fn, {signal: abort.signal});
+    // Route-builder interactions redraw the game shell locally. Preserve a stable
+    // save-state landmark even before the app-level sync callback runs again.
+    // This is presentation only; app/rescue-game still owns the actual status.
+    if(root&&!root.querySelector('#rg-sync')){
+      const status=document.createElement('span');status.id='rg-sync';status.className='rg-sync';status.setAttribute('role','status');status.textContent='Saved';
+      const controls=root.querySelector('.rg-top>div');(controls||root.querySelector('.rg-top'))?.prepend(status);
+    }
     const world = root.querySelector('.rg-world'), svg = world?.querySelector('svg');
     if (svg && propMarkup[config.level]) {
       const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
