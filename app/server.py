@@ -104,6 +104,7 @@ def make_server(database, port=8000):
                 "/rescue-intro.css": ("rescue-intro.css", "text/css"),
                 "/rescue-story3d.js": ("rescue-story3d.js", "text/javascript"),
                 "/story3d-runtime.js": ("story3d-runtime.js", "text/javascript"),
+                "/story3d-world-host.js": ("story3d-world-host.js", "text/javascript"),
                 "/rescue-chapter1.js": ("rescue-chapter1.js", "text/javascript"),
                 "/rescue-chapter1.css": ("rescue-chapter1.css", "text/css"),
                 "/auth-game.js": ("auth-game.js", "text/javascript"),
