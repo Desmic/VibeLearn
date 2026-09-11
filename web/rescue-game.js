@@ -49,6 +49,10 @@ window.RescueGame = (() => {
   function programPanel(transfer){
     return `<section class="rg-workbench" aria-label="Construct the recovery route"><div class="rg-bench-title"><b>${transfer?'Recovery policy':'Pip’s route'}</b><span>Choose a block below. Tap a slot to replace it.</span></div><div class="rg-slots">${Array.from({length:4},(_,i)=>`<button type="button" class="rg-slot ${i===selected?'selected':''}" data-slot="${i}" aria-label="Route slot ${i+1}: ${names[program[i]]||'empty'}"><small>${i+1}</small><b>${program[i]?icons[program[i]]:'+'}</b><span>${names[program[i]]||'Empty slot'}</span></button>`).join('')}</div><div class="rg-palette">${Object.entries(names).map(([k,n])=>`<button type="button" data-block="${k}"><b aria-hidden="true">${icons[k]}</b>${n}</button>`).join('')}</div><div class="rg-bench-footer"><button type="button" id="rg-clear-route">Clear route</button><span id="rg-route-status">${program.length?program.length+' / 4 blocks placed':'Sending ends the route. What must happen first?'}</span></div></section>`;
   }
+  function buildingControls(transfer,a){
+    const aidValue=esc(a?.response?.aid_declaration||'unknown');
+    return `<div class="rg-build-actions"><p class="rg-run-note">${transfer?'No practice preview here: seal the route before incident results are revealed.':'The storm runs your route in order. Change the blocks, then test what actually happens.'}</p>${transfer?`<label class="rg-help-label">Outside help for this challenge<select id="rg-aid"><option value="unknown"${aidValue==='unknown'?' selected':''}>Not declared</option><option value="none"${aidValue==='none'?' selected':''}>No outside help</option><option value="external"${aidValue==='external'?' selected':''}>Yes, outside help</option></select></label>`:''}<button type="button" class="rg-primary" id="rg-run" ${program.length?'':'disabled'}>${transfer?'Commit incident repair':'Run the storm'} →</button></div>`;
+  }
   function casePanel(rows){
     if(!rows?.length)return '';
     const i=Math.min(activeCase,rows.length-1), row=rows[i];
@@ -56,8 +60,10 @@ window.RescueGame = (() => {
   }
   function render(a,missions,handlers){
     stageCleanup();stageCleanup=()=>{};setup(handlers);attempt=a;const s=a.rescue_state,c=a.snapshot.rescue,n=missions.filter(m=>m.status==='cleared').length;
-    const submitted=a.status==='submitted',clear=submitted&&a.assessment.outcome==='correct',ready=!submitted&&Boolean(s.complete),building=c.level>=6,transfer=c.level===7;
-    root.innerHTML=top(n,`${a.snapshot.mission.difficulty.toUpperCase()} · SIGNAL ${c.level}`)+`<section class="rg-encounter ${clear?'clear':''}"><div class="rg-objective"><span>${esc(c.brief)}</span><h1>${esc(c.goal)}</h1><p class="rg-xp" ${xp?'':'hidden'}>${a.practice_xp||0} practice XP · not mastery</p></div><div class="rg-arena"><div class="rg-field">${transfer?incident(c,s):world(s,clear||ready)}${building&&!submitted?programPanel(transfer):''}${ready||submitted?clearPanel(c,a,transfer,{ready,clear}):''}</div>${building?'':consolePanel(c,s)}</div>${building?casePanel(submitted?(a.assessment?.rows||s.rows):s.rows):''}<div id="rg-save-recovery" hidden><p>Save not confirmed. Your move is retained here. Retry saving, not the action.</p><button type="button" id="rg-retry-save" class="rg-primary">Retry save</button></div>${!clear?evidence(a):''}</section>`;
+    const submitted=a.status==='submitted',clear=submitted&&a.assessment.outcome==='correct',building=c.level>=6,transfer=c.level===7;
+    const localChanged=building&&!submitted&&JSON.stringify(program)!==JSON.stringify(s.program||[]);
+    const ready=!submitted&&Boolean(s.complete)&&!localChanged;
+    root.innerHTML=top(n,`${a.snapshot.mission.difficulty.toUpperCase()} · SIGNAL ${c.level}`)+`<section class="rg-encounter ${clear?'clear':''}"><div class="rg-objective"><span>${esc(c.brief)}</span><h1>${esc(c.goal)}</h1><p class="rg-xp" ${xp?'':'hidden'}>${a.practice_xp||0} practice XP · not mastery</p></div><div class="rg-arena"><div class="rg-field">${transfer?incident(c,s):world(s,clear||ready)}${building&&!submitted?programPanel(transfer)+buildingControls(transfer,a):''}${ready||submitted?clearPanel(c,a,transfer,{ready,clear}):''}</div>${building?'':consolePanel(c,s)}</div>${building?casePanel(submitted?(a.assessment?.rows||s.rows):s.rows):''}<div id="rg-save-recovery" hidden><p>Save not confirmed. Your move is retained here. Retry saving, not the action.</p><button type="button" id="rg-retry-save" class="rg-primary">Retry save</button></div>${!clear?evidence(a):''}</section>`;
     bindTop();
     root.querySelector('#rg-map').onclick=()=>cb.campaign();
     if(!building){root.querySelectorAll('[data-look]').forEach(b=>b.onclick=()=>look(b.dataset.look));root.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>move(b.dataset.tool));}
@@ -69,8 +75,8 @@ window.RescueGame = (() => {
       else await cb.start(`rescue-${String(c.level+1).padStart(2,'0')}`);
     });
     root.querySelector('#rg-retry-save')?.addEventListener('click',()=>retrySubmit?cb.submit():cb.save());
-    root.querySelector('#rg-aid')?.addEventListener('change',e=>{log.aid_declaration=e.target.value;cb.edit();});
-    if(window.RescueStage) stageCleanup=RescueStage.attach(root,s,c,{look:key=>look(key),sandbox:storm=>sandbox(storm),caseIndex:activeCase,autoPlay:building});
+    root.querySelector('#rg-aid')?.addEventListener('change',e=>{const hidden=document.querySelector('#aid-declaration');if(hidden)hidden.value=e.target.value;cb.edit();});
+    if(window.RescueStage) stageCleanup=RescueStage.attach(root,{...s,stale:localChanged},c,{look:key=>look(key),sandbox:storm=>sandbox(storm),caseIndex:activeCase,autoPlay:building});
   }
   function setProgram(p){program=p.filter(Boolean).slice(0,4);log.draft=[...program];cb.edit();}
   function record(move){log.moves.push(move);cb.edit();}
