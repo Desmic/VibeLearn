@@ -1,6 +1,10 @@
 /* Render observed causal steps. This module never evaluates a policy or writes evidence. */
 'use strict';
 window.RescueStage = (() => {
+  // UI-only disclosure preference. Local route edits redraw the workbench; an
+  // optional playground the player opened must not collapse just because the
+  // authored route changed. This never affects simulation/evidence state.
+  let sandboxDisclosureOpen=false;
   const DESCRIPTIONS = {
     remember: 'Load the durable ID of this job. A worker restart must not change it.',
     match: 'Compare this request with the saved parameters. Stop on a mismatch.',
@@ -58,7 +62,8 @@ window.RescueStage = (() => {
       bench.append(controls);
     }
     if(config.level===6 && config.sandbox_enabled && bench){
-      const panel=document.createElement('details');panel.className='rg-sandbox';panel.open=Boolean(state.sandbox);
+      const panel=document.createElement('details');panel.className='rg-sandbox';panel.open=Boolean(state.sandbox)||sandboxDisclosureOpen;
+      listen(panel,'toggle',()=>{sandboxDisclosureOpen=panel.open;});
       const title=document.createElement('summary');title.textContent='Make your own storm · optional playground';panel.append(title);
       const intro=document.createElement('p');intro.textContent='Change the conditions and try your route. These experiments do not award a clear or replace the six required storm tests.';panel.append(intro);
       const form=document.createElement('form');form.className='rg-storm-controls';
