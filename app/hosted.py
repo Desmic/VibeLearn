@@ -118,7 +118,7 @@ def create_app(config=None, auth_provider=None):
     @app.get("/<asset>")
     def asset(asset):
         if asset not in (
-            "rescue-game.js", "rescue.js", "rescue.css", "rescue-intro.js", "rescue-intro.css", "rescue-story3d.js", "story3d-runtime.js",
+            "rescue-game.js", "rescue.js", "rescue.css", "rescue-intro.js", "rescue-intro.css", "rescue-story3d.js", "story3d-runtime.js", "story3d-world-host.js",
             "rescue-chapter1.js", "rescue-chapter1.css", "auth-game.js", "auth-game.css",
             "progress-controls.js", "progress-controls.css", "phone-first.css",
             "relay-repair-kit.zip", "app.js", "style.css", "premium.css", "game.css",
