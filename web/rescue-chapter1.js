@@ -2,8 +2,8 @@
 'use strict';
 (() => {
   const ROOT_ID = '#rescue-game';
-  const STEP_KEY = 'vibelearn.relay-rescue.signal1-guide.v2';
-  const DONE_KEY = 'vibelearn.relay-rescue.signal1-guide.done.v2';
+  const STEP_KEY = 'vibelearn.relay-rescue.signal1-guide.v3';
+  const DONE_KEY = 'vibelearn.relay-rescue.signal1-guide.done.v3';
   const rootEl = () => document.querySelector(ROOT_ID);
   const storyWorldModule=import('/rescue-story3d.js').catch(()=>null);
   let missionWorld=null, missionHost=null;
@@ -188,7 +188,7 @@
   // Attach to the actual game lifecycle. Tutorial state comes from the confirmed
   // rescue attempt; a saving or failed-save frame keeps RescueGame's own locks.
   const game=window.RescueGame;
-  if (game && !game.__signalOneGuideV2) {
+  if (game && !game.__signalOneGuideV3) {
     const previousRender=game.render.bind(game);
     const previousSync=game.sync.bind(game);
     const previousHide=game.hide.bind(game);
@@ -200,7 +200,7 @@
       return result;
     };
     game.hide=(...args)=>{disposeMissionWorld();return previousHide(...args);};
-    game.__signalOneGuideV2=true;
+    game.__signalOneGuideV3=true;
   }
 
   // No raw-click progression here. A click may still be in flight; advancing the
