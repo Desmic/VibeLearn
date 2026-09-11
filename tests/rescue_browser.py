@@ -22,6 +22,10 @@ def main():
             page.locator(f'[data-tool="{action}"]').click()
             expect(page.locator('#rg-feedback')).not_to_have_text('Pip is trying your idea…')
             expect(page.locator('#rg-sync')).to_have_text('Saved')
+        def expect_story_world_continuity():
+            expect(page.locator('.rg-world.rg-three-continuity-ready')).to_be_visible()
+            expect(page.locator('.rg-world .rgc1-mission-canvas')).to_be_visible()
+            expect(page.locator('.rg-world .rgc1-mission-canvas')).to_have_attribute('data-story3d-runtime','1')
         def next_level(surface='field'):
             old=page.locator(MODE_LABEL).inner_text()
             page.locator('#rg-next').click();expect(page.locator(MODE_LABEL)).not_to_have_text(old)
@@ -59,18 +63,18 @@ def main():
             expect(page.locator('#rg-effects')).to_have_text('Not inspected')
             page.locator('[data-world-look="workshop"]').click();expect(page.locator('#rg-effects')).to_have_text('1 gear')
             move('new');move('retry');expect(page.locator('[data-tool="rewind"]')).to_be_visible();shot('rescue-setback.png')
-            move('rewind');move('retry');next_level()
+            move('rewind');move('retry');next_level();expect_story_world_continuity()
             move('retry');expect(page.locator('#rg-effects')).to_have_text('2 gears')
-            move('rewind');move('remember');move('retry');next_level()
+            move('rewind');move('remember');move('retry');next_level();expect_story_world_continuity()
             page.locator('[data-look="parcel"]').click();expect(page.locator('#rg-feedback')).to_contain_text('three large gears')
-            move('match');next_level()
+            move('match');next_level();expect_story_world_continuity()
             move('remember');move('retry');expect(page.locator('#rg-effects')).to_have_text('2 gears')
-            move('rewind');move('inspect');move('collect');next_level()
+            move('rewind');move('inspect');move('collect');next_level();expect_story_world_continuity()
             move('inspect');expect(page.locator('#rg-knowledge')).to_contain_text('Unknown')
             move('pause');expect(page.locator('#rg-knowledge')).to_contain_text('restored')
             move('inspect');expect(page.locator('#rg-knowledge')).to_contain_text('Absent')
-            move('retry');next_level('build')
-            checks.append('Five real field encounters, optional evidence inspection, duplicates, rewind, changed payload, expiry and unknown-to-authorized-absence recovery; construction intentionally replaces the field dialogue console with a game-native route workbench')
+            move('retry');next_level('build');expect_story_world_continuity()
+            checks.append('Signals 2-6 keep the shared Echo Forge Story3D world alive as the reasoning grows, while field encounters still cover duplicates, changed payload, expiry and unknown-to-authorized-absence recovery')
             build(['retry','remember','match','reconcile'])
             page.locator('#rg-run').click();expect(page.locator('.rg-case-tabs button')).to_have_count(6)
             expect(page.locator('#rg-next')).to_have_count(0);shot('rescue-route-failure.png')
@@ -86,6 +90,7 @@ def main():
             # the strong assertion that RescueGame itself contains the recovered plan.
             expect(page.locator('#notice')).to_contain_text('Recovered unsaved progress')
             expect(page.locator('[data-slot="0"]')).to_contain_text('Recover the ticket')
+            expect_story_world_continuity()
             after=draft_probe()
             stored_after=list(after['entries'].values())
             assert len(stored_after)==1 and stored_after[0]['response']['rescue']['draft']==SAFE, after
@@ -109,6 +114,7 @@ def main():
             checks.append('Direct scene inspection; causal route playback; player-created quick/expired storms change the outcome without granting a boss clear; stale-result navigation remains invalidated')
             next_level('incident')
             expect(page.locator('.rg-results')).to_have_count(0)
+            expect(page.locator('.rg-world.rg-three-continuity-ready')).to_have_count(0)
             build(SAFE);page.locator('#rg-aid').select_option('none')
             shot('rescue-transfer-before.png')
             def lose_ack(route):route.fetch();route.abort('failed')
@@ -123,7 +129,7 @@ def main():
             assert len(state['attempt']['response']['rescue']['moves'])==1
             with page.expect_download() as dl:page.locator('#rg-kit a').click()
             assert dl.value.suggested_filename=='relay-repair-kit.zip'
-            checks.append('Sealed transfer commits before feedback, preserves explicit no-help declaration, survives one lost acknowledgement without duplicate evidence/XP, and exposes the separate local Python repair kit')
+            checks.append('Signal 7 deliberately exits the fantasy for sealed transfer; it commits before feedback, preserves explicit no-help declaration, survives one lost acknowledgement without duplicate evidence/XP, and exposes the separate local Python repair kit')
             result={'result':'passed','browser':b.version,'checks':checks,'page_errors':errors,'independent_critic_score':None,'acceptance':'critic_pending','audience_validation':'No human child/teen playtest; browser checks are not enjoyment evidence.'}
             (out/'rescue-browser.json').write_text(json.dumps(result,indent=2));print(json.dumps(result,indent=2))
         finally:
