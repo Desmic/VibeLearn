@@ -14,12 +14,12 @@
   .rgi-marker{font-size:.47rem;padding:4px 6px}.rgi-markers .rgi-marker:nth-child(n+3){display:none}
 
   /* Mission headers stay inside the viewport after tutorial guidance ends too.
-     The title/goal live inside a nested div; constrain that flex child instead of
-     targeting nonexistent direct h1/span children. */
+     Support both the older nested objective markup and the current direct-child
+     briefing so story text never disappears behind overflow clipping. */
   #rescue-game .rg-objective{display:block!important;width:100%;max-width:100%;min-width:0;overflow:hidden;padding:7px 8px 9px!important}
   #rescue-game .rg-objective>div{display:block;width:100%;max-width:100%;min-width:0;overflow:hidden}
-  #rescue-game .rg-objective>div>.rg-eyebrow{display:block;width:100%;max-width:100%;white-space:normal!important;overflow-wrap:anywhere;word-break:normal;font-size:.58rem;line-height:1.4;color:#83bcb0}
-  #rescue-game .rg-objective>div>h1{display:block;width:100%;max-width:100%;min-width:0;margin:4px 0 0!important;font-size:1.18rem!important;line-height:1.08!important;white-space:normal!important;overflow-wrap:anywhere;text-wrap:balance}
+  #rescue-game .rg-objective>div>.rg-eyebrow,#rescue-game .rg-objective>span:not(#rg-sync){display:block;width:100%;max-width:100%;white-space:normal!important;overflow-wrap:anywhere;word-break:normal;font-size:.58rem;line-height:1.4;color:#83bcb0}
+  #rescue-game .rg-objective>div>h1,#rescue-game .rg-objective>h1{display:block;width:100%;max-width:100%;min-width:0;margin:4px 0 0!important;font-size:1.18rem!important;line-height:1.08!important;white-space:normal!important;overflow-wrap:anywhere;text-wrap:balance}
   #rescue-game .rg-objective>#rg-sync{display:block;width:max-content;max-width:100%;margin:5px 0 0 auto;white-space:normal!important;overflow-wrap:anywhere;font-size:.58rem;line-height:1.35;color:#83bcb0}
   #rescue-game .rg-objective>.rg-xp{display:none!important}
   #rescue-game .rg-encounter,#rescue-game .rg-arena,#rescue-game .rg-field,#rescue-game .rg-world{min-width:0;max-width:100%}
