@@ -1,6 +1,15 @@
 /* Relay Rescue: The Echo Forge — shared 3D story/Signal-1 world.
    Presentation only: the server remains authoritative for progress/evidence. */
 import {THREE,createThreeStoryRuntime} from './story3d-runtime.js';
+import {STORY3D_ADAPTER_VERSION} from './story3d-world-host.js';
+
+export const storyWorldManifest=Object.freeze({
+  id:'relay-rescue.echo-forge',
+  version:'2',
+  adapterVersion:STORY3D_ADAPTER_VERSION,
+  modes:Object.freeze(['story','mission']),
+  capabilities:Object.freeze(['beats','mission-state','pause','replay','stats','fallback'])
+});
 
 export function createStoryWorld(host,{reducedMotion=false,mode='story'}={}){
   const storyOverlay=host?.closest?.('.rgi-overlay');
