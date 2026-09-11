@@ -123,6 +123,18 @@ window.RescueStage = (() => {
       const replay=document.createElement('button');replay.type='button';replay.id='rg-replay-case';replay.className='rg-replay-case';replay.textContent='Replay this case';
       listen(replay,'click',()=>lane.querySelectorAll('.rg-live-node').forEach((n,i)=>{n.animate([{background:'#294b55'},{background:'transparent'}],{duration:550,delay:i*170});}));area.append(replay);
     }
+    // If a route previously passed and the player edits it, keep the earned
+    // success context visible but make forward progression explicitly unavailable
+    // until this edited route is tested. Hiding the control looked like lost
+    // progress and made the stale-result state harder to understand.
+    if(bench&&state.complete&&state.stale&&!root.querySelector('#rg-next')){
+      const stale=document.createElement('section');stale.className='rg-clear rg-stale-clear';
+      const label=document.createElement('span');label.textContent='ROUTE EDITED';
+      const heading=document.createElement('h2');heading.textContent='Retest this route before moving on.';
+      const copy=document.createElement('p');copy.textContent='Your last storm run passed, but these blocks are different. The old result does not prove this route works.';
+      const next=document.createElement('button');next.type='button';next.id='rg-next';next.className='rg-primary';next.disabled=true;next.textContent='Retest route to continue →';
+      stale.append(label,heading,copy,next);(root.querySelector('.rg-live-route')||bench).after(stale);
+    }
     return () => { abort.abort(); timers.forEach(clearTimeout); };
   }
   return {attach};
