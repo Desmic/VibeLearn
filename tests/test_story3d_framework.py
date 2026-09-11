@@ -53,6 +53,17 @@ class Story3DFrameworkTests(unittest.TestCase):
             self.assertIn(asset, server)
             self.assertIn(asset, hosted)
 
+    def test_shared_framework_has_no_relay_rescue_domain_assumptions(self):
+        runtime = (ROOT / 'web' / 'story3d-runtime.js').read_text(encoding='utf-8')
+        host = (ROOT / 'web' / 'story3d-world-host.js').read_text(encoding='utf-8')
+        generic = runtime + host
+        for domain_term in ('Pip', 'Echo Forge', 'order-01', 'bridge gear', 'rescue-01'):
+            self.assertNotIn(domain_term, generic)
+        # A new adapter should need only the public runtime/host seam, never the
+        # current world adapter. Browser CI proves that with Star Orchard.
+        self.assertNotIn('rescue-story3d.js', runtime)
+        self.assertNotIn('rescue-story3d.js', host)
+
 
 if __name__ == '__main__':
     unittest.main()
