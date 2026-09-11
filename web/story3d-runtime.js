@@ -1,17 +1,19 @@
 /* Reusable Three.js runtime for generated story/fantasy worlds.
    World modules own story-specific geometry/state; this file owns lifecycle,
-   renderer policy, resource cleanup, resize, reduced-motion and frame scheduling. */
+   renderer policy, resource cleanup, resize, reduced-motion, camera motion and frame scheduling. */
 'use strict';
 import * as THREE from './vendor/three.module.min.js';
 
 export {THREE};
 export const STORY3D_RUNTIME_VERSION='1';
 
+const noopCameraRig=()=>({setShot(){},update(){},snap(){},getShot(){return null;}});
 const noopRuntime=(error='WebGL unavailable')=>({
   available:false,error:String(error),scene:null,camera:null,renderer:null,canvas:null,
   trackGeometry:g=>g,trackMaterial:m=>m,group(){return null;},mesh(){return null;},
-  material(){return null;},emissive(){return null;},setDraw(){},requestDraw(){},
-  setPaused(){},replay(){},stats(){return{available:false,error:String(error)}},dispose(){}
+  material(){return null;},emissive(){return null;},createCameraRig:noopCameraRig,
+  setDraw(){},requestDraw(){},setPaused(){},replay(){},
+  stats(){return{available:false,error:String(error),runtimeVersion:STORY3D_RUNTIME_VERSION}},dispose(){}
 });
 
 export function createThreeStoryRuntime(host,{
@@ -55,6 +57,37 @@ export function createThreeStoryRuntime(host,{
   const group=(parent=scene)=>{const g=new THREE.Group();parent?.add(g);return g;};
   const mesh=(parent,geometry,mat,pos=[0,0,0],scale=[1,1,1])=>{const o=new THREE.Mesh(geometry,mat);o.position.set(...pos);o.scale.set(...scale);parent?.add(o);return o;};
 
+  function resolveShot(shot,aspect,portraitMaxAspect){
+    if(!shot) throw new TypeError('Camera shot is required');
+    const selected=(shot.portrait||shot.landscape)
+      ? (aspect<portraitMaxAspect?(shot.portrait||shot.landscape):(shot.landscape||shot.portrait))
+      : shot;
+    if(!Array.isArray(selected?.p)||selected.p.length!==3||!Array.isArray(selected?.t)||selected.t.length!==3){
+      throw new TypeError('Camera shot must provide p[3] and t[3]');
+    }
+    return selected;
+  }
+  function createCameraRig(initialShot,{portraitMaxAspect=.72,responsiveness=.001}={}){
+    let shot=initialShot,initialized=false;
+    const position=new THREE.Vector3(),lookAt=new THREE.Vector3(),targetPosition=new THREE.Vector3(),targetLookAt=new THREE.Vector3();
+    const apply=(aspect,dt=0,snap=false)=>{
+      const target=resolveShot(shot,aspect,portraitMaxAspect);
+      targetPosition.fromArray(target.p);targetLookAt.fromArray(target.t);
+      if(!initialized||snap){position.copy(targetPosition);lookAt.copy(targetLookAt);initialized=true;}
+      else{
+        const ease=1-Math.pow(responsiveness,Math.max(0,dt));
+        position.lerp(targetPosition,ease);lookAt.lerp(targetLookAt,ease);
+      }
+      camera.position.copy(position);camera.lookAt(lookAt);
+    };
+    return{
+      setShot(next,{snap=false,aspect=camera.aspect||1}={}){shot=next;if(snap)apply(aspect,0,true);requestDraw();},
+      update({dt=0,aspect=camera.aspect||1,snap=false}={}){apply(aspect,dt,snap);},
+      snap(aspect=camera.aspect||1){apply(aspect,0,true);requestDraw();},
+      getShot(){return shot;}
+    };
+  }
+
   function syncViewport(){
     const w=Math.max(1,canvas.clientWidth||host.clientWidth||1),h=Math.max(1,canvas.clientHeight||host.clientHeight||1);
     const pr=renderer.getPixelRatio();
@@ -83,7 +116,7 @@ export function createThreeStoryRuntime(host,{
 
   return{
     available:true,THREE,scene,camera,renderer,canvas,reducedMotion,
-    trackGeometry,trackMaterial,material,emissive,group,mesh,
+    trackGeometry,trackMaterial,material,emissive,group,mesh,createCameraRig,
     addDisposer(fn){if(typeof fn==='function')disposers.push(fn);return fn;},
     setDraw,requestDraw,setPaused,replay(){last=performance.now();requestDraw();},
     stats(){return{available:true,runtimeVersion:STORY3D_RUNTIME_VERSION,revision:THREE.REVISION,drawCalls:renderer.info.render.calls,pixelRatio:renderer.getPixelRatio(),paused,reducedMotion,contextLost};},
