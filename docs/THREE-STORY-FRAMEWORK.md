@@ -1,6 +1,6 @@
 # Three.js story-world framework — reusable Phase 1 contract
 
-**Status:** active Phase 1 reference contract · 11 September 2026  
+**Status:** active Phase 1 reference contract · 12 September 2026  
 **Authority:** read with root `CODEX-IMPLEMENTATION-PLAN.md`, `STORY-GENERATION-AND-CRITIC.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `GAME-UX-SYSTEM.md`, and `STATE.md`.
 
 ## Why this exists
@@ -134,13 +134,19 @@ No runtime CDN dependency, inline-script exception, remote model execution, or l
 
 ## Phase 1 executable proof
 
-The Echo Forge reference must prove at least:
+The Phase 1 seam must prove at least:
 
-- its adapter imports the shared runtime and does **not** instantiate its own `WebGLRenderer` or `ResizeObserver`;
-- its adapter does not own generic `currentCam` / `currentLook` interpolation state; camera motion comes through the shared camera rig;
+- the Echo Forge adapter imports the shared runtime and does **not** instantiate its own `WebGLRenderer` or `ResizeObserver`;
+- the Echo Forge adapter does not own generic `currentCam` / `currentLook` interpolation state; camera motion comes through the shared camera rig;
 - both cinematic and Signal 1 canvases identify the same runtime contract version;
+- a deliberately unrelated **synthetic world adapter** (currently the test-only “Star Orchard”) mounts through `story3d-world-host.js` and `story3d-runtime.js` without importing Relay Rescue/Pip-specific code;
+- that second adapter can select story state, use the shared camera/runtime policy, pause/replay, report runtime identity, and dispose its canvas cleanly;
+- incompatible adapter versions, unsupported modes, and incomplete returned instances fail closed, with partial instances disposed;
+- the generic runtime/host source contains no assumptions about Pip, Echo Forge, `order-01`, bridge gears, or rescue mission IDs;
 - context loss/fallback, reduced motion, pause, resize, camera composition switching and disposal still work;
 - 360–430px phone first-touch and Chapter 1 behavior remain green;
 - story/game critics judge the rendered result, not framework existence.
+
+The synthetic adapter is **verification only**, not a second product course and not an authorization to build Phase 2/3. It exists to make “reusable” executable instead of architectural prose.
 
 Framework extraction is engineering infrastructure. It earns **zero automatic story/game critic points**.
