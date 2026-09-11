@@ -81,6 +81,11 @@ def main():
             stored=list(before['entries'].values())
             assert len(stored)==1 and stored[0]['response']['rescue']['draft']==SAFE, before
             page.reload()
+            # boot() must resolve the learner/attempt before it can address the scoped
+            # localStorage key. Wait for the user-visible recovery contract, then keep
+            # the strong assertion that RescueGame itself contains the recovered plan.
+            expect(page.locator('#notice')).to_contain_text('Recovered unsaved progress')
+            expect(page.locator('[data-slot="0"]')).to_contain_text('Recover the ticket')
             after=draft_probe()
             stored_after=list(after['entries'].values())
             assert len(stored_after)==1 and stored_after[0]['response']['rescue']['draft']==SAFE, after
