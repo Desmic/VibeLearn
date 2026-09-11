@@ -4,8 +4,8 @@
   const game=window.RescueGame;
   if(!game||game.__firstMinuteStoryV3)return;
   const SEEN_KEY='vibelearn.relay-rescue.intro.v3';
-  let storyModule=null;
-  const loadStory=()=>storyModule||(storyModule=import('/rescue-story3d.js').catch(()=>null));
+  let storyBundle=null;
+  const loadStory=()=>storyBundle||(storyBundle=Promise.all([import('/story3d-world-host.js'),import('/rescue-story3d.js')]).then(([host,module])=>({host,module})).catch(()=>null));
   const scenes=[
     {kicker:'THE VALLEY OF SEVEN LIGHTS',title:'Pip is almost home.',body:'Seven islands. One old bridge. One last delivery before dark.',dialogue:'PIP  “One more crossing. Easy.”',fact:'Then the bridge screams.',markers:[['PIP · COURIER','warm'],['HOME →','soft']]},
     {kicker:'THE BREAK',title:'One tiny gear stops everything.',body:'The center gear cracks. The bridge needs exactly one replacement to move again.',dialogue:'PIP  “...I may have spoken too soon.”',fact:'Needed: 1 gear. Not 2.',markers:[['BROKEN GEAR','danger'],['1 NEEDED','warm']]},
@@ -62,9 +62,9 @@
       else if(e.key==='Escape'){e.preventDefault();close(false,true);}
     });
     cleanup=()=>close(false,false);update();overlay.focus({preventScroll:true});
-    loadStory().then(module=>{
-      if(closed||!module?.createStoryWorld)return;
-      world=module.createStoryWorld(worldHost,{reducedMotion:reduced()});
+    loadStory().then(bundle=>{
+      if(closed||!bundle)return;
+      world=bundle.host.mountStoryWorldModule(bundle.module,worldHost,{reducedMotion:reduced(),mode:'story'});
       if(world?.available){overlay.classList.add('rgi-three-ready');world.setBeat(step);world.setPaused(paused);}
       else overlay.classList.add('rgi-three-failed');
     });
