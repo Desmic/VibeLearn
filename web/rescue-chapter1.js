@@ -1,4 +1,5 @@
-/* Signal 1 progressive tutorial: concrete world first, terminology after successful play. */
+/* Signal 1 progressive tutorial: concrete world first, terminology after successful play.
+   The same replaceable Echo Forge adapter also keeps the valley visually present through Signals 2-6. */
 'use strict';
 (() => {
   const ROOT_ID = '#rescue-game';
@@ -7,7 +8,7 @@
   const rootEl = () => document.querySelector(ROOT_ID);
   const storyWorldBundle=Promise.all([import('/story3d-world-host.js'),import('/rescue-story3d.js')]).then(([host,module])=>({host,module})).catch(()=>null);
   let missionWorld=null, missionHost=null;
-  const disposeMissionWorld=()=>{missionWorld?.dispose?.();missionWorld=null;missionHost=null;};
+  const disposeMissionWorld=()=>{missionHost?.classList.remove('rg-three-continuity-ready','rg-three-continuity-failed','rgc1-three-ready','rgc1-three-failed');missionWorld?.dispose?.();missionWorld=null;missionHost=null;};
   const readStep = () => { try { return Number(localStorage.getItem(STEP_KEY) || 0); } catch (_) { return 0; } };
   const writeStep = value => { try { localStorage.setItem(STEP_KEY,String(value)); } catch (_) {} };
   const done = () => { try { return localStorage.getItem(DONE_KEY)==='yes'; } catch (_) { return false; } };
@@ -110,18 +111,25 @@
     if (tools && tools.parentElement!==dock) dock.append(tools);
   }
 
+  function visualState(a){return {...(a?.rescue_state||{}),level:Number(a?.snapshot?.rescue?.level||1)};}
+
   function mountMissionWorld(root,a) {
-    if (!isSignalOne(root) || isHistorical(root)) { disposeMissionWorld(); return; }
-    const host=root.querySelector('.rg-world'); if(!host) return;
+    const level=Number(a?.snapshot?.rescue?.level||0);
+    // Signal 7 intentionally transfers out of the fantasy into the real incident.
+    // Signals 1-6 stay in the valley using the same replaceable world adapter.
+    if (!root || root.hidden || isHistorical(root) || level<1 || level>6) { disposeMissionWorld(); return; }
+    const host=root.querySelector('.rg-world'); if(!host) { disposeMissionWorld(); return; }
+    const readyClass=level===1?'rgc1-three-ready':'rg-three-continuity-ready';
+    const failedClass=level===1?'rgc1-three-failed':'rg-three-continuity-failed';
     if(missionHost!==host){
       disposeMissionWorld(); missionHost=host;
       storyWorldBundle.then(bundle=>{
         if(missionHost!==host || !host.isConnected || !bundle) return;
         missionWorld=bundle.host.mountStoryWorldModule(bundle.module,host,{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,mode:'mission'});
-        if(missionWorld?.available){host.classList.add('rgc1-three-ready');missionWorld.setMissionState(a?.rescue_state||{});}
-        else host.classList.add('rgc1-three-failed');
+        if(missionWorld?.available){host.classList.add(readyClass);missionWorld.setMissionState(visualState(a));}
+        else host.classList.add(failedClass);
       });
-    } else missionWorld?.setMissionState?.(a?.rescue_state||{});
+    } else missionWorld?.setMissionState?.(visualState(a));
   }
 
   function addRecap(root) {
@@ -203,7 +211,7 @@
     game.sync=(busy,a,...rest)=>{
       const result=previousSync(busy,a,...rest);
       const status=rootEl()?.querySelector('#rg-sync')?.textContent;
-      if (!busy && status==='Saved') { syncStepFromAttempt(a); enhanceNow(); missionWorld?.setMissionState?.(a?.rescue_state||{}); }
+      if (!busy && status==='Saved') { syncStepFromAttempt(a); enhanceNow(); missionWorld?.setMissionState?.(visualState(a)); }
       return result;
     };
     game.hide=(...args)=>{disposeMissionWorld();return previousHide(...args);};
