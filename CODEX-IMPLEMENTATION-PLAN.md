@@ -1,8 +1,8 @@
-# Learning OS — incremental implementation plan 1.5
+# Learning OS — incremental implementation plan 1.6
 
-**10 September 2026 · authoritative active plan**
+**11 September 2026 · authoritative active plan**
 
-This file is the current build order. The checksummed `learning-os-design-package-v1.3/` remains immutable historical design. Its detailed phase/security/evidence requirements still apply wherever this 1.5 plan does not supersede them. Read `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/GAME-UX-SYSTEM.md`, and `docs/GAME-UX-REVIEW.md` with this file.
+This file is the current build order. The checksummed `learning-os-design-package-v1.3/` remains immutable historical design. Its detailed phase/security/evidence requirements still apply wherever this 1.6 plan does not supersede them. Read `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, and `docs/THREE-STORY-FRAMEWORK.md` with this file.
 
 ## 1. Product north star
 
@@ -80,9 +80,13 @@ For important story/game candidates explicitly consider authored 2D, 2.5D/parall
 
 Three.js is a serious option for capturing attention and making worlds/characters feel present, especially for kids, teens and young adults. It receives no automatic critic points and cannot rescue weak writing or unclear gameplay. Keep pinned/self-hosted assets, same-origin runtime, touch/keyboard operation, reduced motion, usable fallback and realistic mobile performance.
 
-**Phase 1 must also establish a small reusable Three.js story-world framework.** Future story/fantasy settings should not copy renderer initialization, resize loops, pixel-ratio policy, frame scheduling, pause/reduced-motion handling, context-loss recovery, or disposal. Those concerns belong in a story/domain-agnostic runtime. Each generated world supplies a versioned adapter containing only its story-specific scene/assets, camera compositions, beat states and mapping from authoritative game state to visuals. `StoryWorldSpec` remains renderer-agnostic and 2D/2.5D stay first-class alternatives.
+**Phase 1 must establish a small reusable Three.js story-world framework, not merely a reusable renderer constructor.** Future story/fantasy settings should not copy renderer initialization, resize loops, pixel-ratio policy, frame scheduling, pause/reduced-motion handling, context-loss recovery, disposal, generic camera current/target vectors, portrait/landscape shot selection, or camera interpolation. Those concerns belong in story/domain-agnostic infrastructure.
+
+Each generated world supplies a versioned adapter containing the things that are genuinely story-specific: scene/assets, art direction, landscape/portrait camera **compositions**, beat states, interaction anchors, and mapping from authoritative game state to visuals. The shared camera rig turns those compositions into responsive motion. `StoryWorldSpec` remains renderer-agnostic and 2D/2.5D stay first-class alternatives.
 
 The runtime/adapter/package identity must never become competency/evidence identity. “Easy integration” also must not become arbitrary code serving: the current CSP/static allowlist stays strict, and a later generated-package publishing/validation boundary is required before Phase 3 can load arbitrary generated worlds. See `docs/THREE-STORY-FRAMEWORK.md`.
+
+Do **not** implement the arbitrary generated-package loader during current Phase 1 merely to demonstrate generality. Prove the seam first: Echo Forge should consume shared rendering/camera infrastructure while remaining a replaceable adapter. Later Phase 3 can add immutable manifests/assets/package loading behind an explicit validation/security boundary.
 
 ## 6. Primary device target during current refinement
 
@@ -97,15 +101,16 @@ Current work remains **private Phase 1 reference refinement**. We are not author
 Current bounded sequence:
 
 1. keep login/account/recovery consistent with the game shell;
-2. make the Echo Forge story/world first-touch experience work reliably on mainstream phones while extracting its renderer lifecycle into the reusable Three.js story runtime/adapter boundary;
+2. make the Echo Forge story/world first-touch experience work reliably on mainstream phones while extracting renderer lifecycle **and generic camera orchestration** into the reusable Three.js story runtime/adapter boundary;
 3. make Signal 1 continue inside the same world through that same reusable runtime, with one obvious action at a time and progressively increasing cognitive load;
 4. preserve previous-chapter review, reset-progress, save/reload, learner isolation and evidence semantics;
 5. run exact-build browser verification;
-6. run **first-touch magic critic** and repair until >=9/no blocker;
-7. run **whole-chapter game critic** and repair until >=9/no blocker;
-8. run the bounded learning/transfer critic;
-9. deploy the exact verified candidate to Render;
-10. ask the current user for the decisive review.
+6. inspect exact rendered phone evidence, not just test output;
+7. run **first-touch magic critic** and repair until >=9/no blocker;
+8. run **whole-chapter game critic** and repair until >=9/no blocker;
+9. run the bounded learning/transfer critic;
+10. deploy the exact verified candidate to Render;
+11. verify the served revision and ask the current user for the decisive review.
 
 Do not mark `ready_for_user_review` before all three critic gates pass on the same verified build. Do not mark `user_accepted` until the user explicitly accepts it.
 
@@ -114,9 +119,9 @@ Do not mark `ready_for_user_review` before all three critic gates pass on the sa
 The detailed 1.3 phase requirements remain applicable; this is the current interpretation:
 
 - **Phase 0:** establish actual repo/tool/database/browser capabilities and failure boundaries.
-- **Phase 1:** one high-quality persisted learning-game reference slice with honest evidence and real user review.
+- **Phase 1:** one high-quality persisted learning-game reference slice with honest evidence and real user review; prove the reusable Story3D runtime/adapter seam when 3D is used.
 - **Phase 2:** prove course replacement, canonical competency/evidence reuse, learner isolation, export/restore and a second domain/user without binding history to one course/story.
-- **Phase 3:** implement the first real source-grounded course generator using the StoryWorld/Game/Learning package pipeline and critic gates above. Current story generation is topic-driven only. When Three.js is chosen, generation emits a versioned world adapter/package against the Phase-1 story-runtime contract rather than generating a fresh renderer lifecycle.
+- **Phase 3:** implement the first real source-grounded course generator using the StoryWorld/Game/Learning package pipeline and critic gates above. Current story generation is topic-driven only. When Three.js is chosen, generation emits a versioned world adapter/package against the Phase-1 story-runtime contract rather than generating a fresh renderer/camera lifecycle.
 - **Phase 4:** collaborative course/game evolution; later introduce explicit StoryPreferenceProfile and user-controlled creative preferences without contaminating mastery/evidence.
 - **Phase 5:** one genuinely new interaction/component through an isolated code-generation/release path.
 - **Phase 6:** consenting pilot, reliability/restore hardening, real delayed/transfer observations and ranked product-learning improvements.
@@ -135,7 +140,7 @@ Do not weaken tests/rubrics to make a candidate pass. A newly discovered blocker
 
 ## 10. Feedback changes the plan
 
-When direct user feedback changes product direction, story/game quality bars, generation assumptions, platform priority, critic semantics, or the meaning of done, update this plan and the affected authoritative docs **before or in the same bounded implementation unit as the code change**.
+When direct user feedback changes product direction, story/game quality bars, generation assumptions, platform priority, critic semantics, framework boundaries, or the meaning of done, update this plan and the affected authoritative docs **before or in the same bounded implementation unit as the code change**.
 
 Historical/checksummed design packages remain immutable. Current docs should describe the product we are actually building, not preserve stale assumptions for neatness.
 
