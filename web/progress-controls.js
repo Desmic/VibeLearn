@@ -1,5 +1,5 @@
 /* Hosted campaign progress controls: review cleared signals without losing the active run,
-   and reset all learning progress only after an explicit game-native confirmation. */
+   reset progress only after confirmation, and keep recovered local route drafts visible. */
 'use strict';
 (() => {
   const game = window.RescueGame;
@@ -7,6 +7,17 @@
 
   const originalMap = game.map.bind(game);
   const originalRender = game.render.bind(game);
+  const originalSetResponse = game.setResponse.bind(game);
+  let responsePreparedForRender = null;
+
+  /* app.js intentionally restores a device-local draft through setResponse before
+     rendering the server attempt. Remember that prepared response for one render.
+     This keeps unsaved route-builder edits visible after reload without mutating
+     server state or weakening the normal server-authoritative render path. */
+  game.setResponse = value => {
+    responsePreparedForRender = structuredClone(value || {moves:[], draft:[]});
+    return originalSetResponse(value);
+  };
 
   function hostedReady() {
     try { return Boolean(hosted); } catch (_) { return false; }
@@ -133,7 +144,23 @@
   };
 
   game.render = (activeAttempt, missions, handlers) => {
-    const result = originalRender(activeAttempt, missions, handlers);
+    const prepared = responsePreparedForRender;
+    responsePreparedForRender = null;
+    const serverResponse = activeAttempt?.response?.rescue;
+    const recoverLocal = Boolean(
+      activeAttempt?.status === 'draft' &&
+      prepared && serverResponse &&
+      JSON.stringify(prepared) !== JSON.stringify(serverResponse)
+    );
+
+    let result = originalRender(activeAttempt, missions, handlers);
+    if (recoverLocal) {
+      // Some render paths rebuild the route UI from authoritative attempt state.
+      // Reapply the already-selected local recovery envelope after that rebuild,
+      // then render once more so the visible slots match the recovered draft.
+      originalSetResponse(prepared);
+      result = originalRender(activeAttempt, missions, handlers);
+    }
     decorateMenu(document.querySelector('#rescue-game'));
     return result;
   };
