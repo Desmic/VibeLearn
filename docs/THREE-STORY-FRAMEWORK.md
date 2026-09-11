@@ -111,6 +111,16 @@ A new 3D setting should require roughly this work:
 
 If integrating a new setting requires copying renderer setup, resize loops, disposal, context-loss logic, mobile pixel-ratio policy, current/target camera vectors, or generic camera lerp code into the adapter, the framework boundary has failed and should be improved before adding more worlds.
 
+### Easy-integration acceptance rule
+
+The design target is stronger than “a second adapter can be made to work.” Future story/fantasy generation should normally be able to add or replace a world by changing a **versioned world package** plus story/game data, while the runtime and host stay untouched.
+
+A candidate world integration fails this rule when it needs story-specific changes in `story3d-runtime.js` or `story3d-world-host.js`. If a genuinely new engine capability is required, implement it as a small generic/versioned capability with compatibility tests first, then consume it from the adapter. Do not smuggle one story's assumptions into the shared runtime because doing so makes the next generated fantasy harder.
+
+A world package should be independently replaceable: uninstalling/replacing it must not change canonical competencies, learner evidence, assessment rules, save semantics or historical progress. Its manifest/version is provenance, not learning identity.
+
+The current test-only Star Orchard adapter proves the mechanical seam. A later milestone must prove the **authoring seam** with a materially different real generated/authored story: it should integrate without modifying runtime/host infrastructure, use the same phone/reduced-motion/fallback policies, and still achieve its own story/game critic gates.
+
 ## Mobile, accessibility, and performance defaults
 
 The runtime is deliberately conservative for the current phone-first target:
