@@ -22,10 +22,20 @@ def main():
             page.locator(f'[data-tool="{action}"]').click()
             expect(page.locator('#rg-feedback')).not_to_have_text('Pip is trying your idea…')
             expect(page.locator('#rg-sync')).to_have_text('Saved')
-        def next_level():
+        def next_level(surface='field'):
             old=page.locator(MODE_LABEL).inner_text()
             page.locator('#rg-next').click();expect(page.locator(MODE_LABEL)).not_to_have_text(old)
-            expect(page.locator('#rg-feedback')).to_be_visible()
+            if surface=='field':
+                expect(page.locator('#rg-feedback')).to_be_visible()
+            elif surface=='build':
+                expect(page.locator('#rg-feedback')).to_have_count(0)
+                expect(page.locator('#rg-run')).to_be_visible()
+            elif surface=='incident':
+                expect(page.locator('#rg-feedback')).to_have_count(0)
+                expect(page.locator('.rg-incident')).to_be_visible()
+                expect(page.locator('#rg-run')).to_be_visible()
+            else:
+                raise AssertionError(f'unknown rescue surface: {surface}')
         def build(program):
             page.locator('#rg-clear-route').click()
             for block in program:page.locator(f'[data-block="{block}"]').click()
@@ -48,9 +58,8 @@ def main():
             move('inspect');expect(page.locator('#rg-knowledge')).to_contain_text('Unknown')
             move('pause');expect(page.locator('#rg-knowledge')).to_contain_text('restored')
             move('inspect');expect(page.locator('#rg-knowledge')).to_contain_text('Absent')
-            move('retry');next_level()
-            expect(page.locator('#rg-run')).to_be_visible()
-            checks.append('Five real field encounters, optional evidence inspection, duplicates, rewind, changed payload, expiry and unknown-to-authorized-absence recovery')
+            move('retry');next_level('build')
+            checks.append('Five real field encounters, optional evidence inspection, duplicates, rewind, changed payload, expiry and unknown-to-authorized-absence recovery; construction intentionally replaces the field dialogue console with a game-native route workbench')
             build(['retry','remember','match','reconcile'])
             page.locator('#rg-run').click();expect(page.locator('.rg-case-tabs button')).to_have_count(6)
             expect(page.locator('#rg-next')).to_have_count(0);shot('rescue-route-failure.png')
@@ -73,7 +82,7 @@ def main():
             build(['retry']);page.locator('[data-case="1"]').click();expect(page.locator('#rg-next')).to_be_disabled()
             build(SAFE);page.locator('#rg-run').click();expect(page.locator('#rg-next')).to_be_enabled()
             checks.append('Direct scene inspection; causal route playback; player-created quick/expired storms change the outcome without granting a boss clear; stale-result navigation remains invalidated')
-            next_level();expect(page.locator('.rg-incident')).to_be_visible()
+            next_level('incident')
             expect(page.locator('.rg-results')).to_have_count(0)
             build(SAFE);page.locator('#rg-aid').select_option('none')
             shot('rescue-transfer-before.png')
@@ -114,14 +123,14 @@ def main():
                 for route in [['remember','retry'],['match'],['inspect','collect'],['inspect','pause','inspect','retry']]:
                     advance_mobile()
                     for action in route:mobile_move(action)
-                advance_mobile();expect(m.locator('#rg-run')).to_be_visible()
+                advance_mobile();expect(m.locator('#rg-run')).to_be_visible();expect(m.locator('#rg-feedback')).to_have_count(0)
                 for block in SAFE:m.locator(f'[data-block="{block}"]').tap()
                 m.locator('#rg-run').tap();expect(m.locator('#rg-next')).to_be_enabled()
                 m.evaluate("document.documentElement.style.fontSize='200%'")
                 assert m.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 m.screenshot(path=str(out/f'rescue-machine-mobile-{width}.png'),full_page=True)
                 m.evaluate("document.documentElement.style.fontSize=''");advance_mobile()
-                expect(m.locator('.rg-incident')).to_be_visible()
+                expect(m.locator('.rg-incident')).to_be_visible();expect(m.locator('#rg-feedback')).to_have_count(0)
                 m.locator('#rg-clear-route').tap()
                 for block in SAFE:m.locator(f'[data-block="{block}"]').tap()
                 m.locator('#rg-aid').select_option('none');m.locator('#rg-run').tap()
