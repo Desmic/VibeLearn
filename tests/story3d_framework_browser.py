@@ -52,7 +52,8 @@ def main():
                   if (!runtime.available) {
                     return {available:false,error:runtime.error,setBeat(){},setPaused(){},replay(){},stats(){return runtime.stats();},dispose(){runtime.dispose();}};
                   }
-                  const {THREE, scene} = runtimeApi;
+                  const {THREE} = runtimeApi;
+                  const {scene} = runtime;
                   const geometry = runtime.trackGeometry(new THREE.SphereGeometry(.65, 12, 8));
                   const material = runtime.emissive(0xffd56a, 1.2);
                   const star = runtime.mesh(scene, geometry, material, [0,0,0], [1,1,1]);
