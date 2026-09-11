@@ -1,6 +1,6 @@
 # Current checkpoint — user rejected first-touch story at 3/10
 
-Updated 11 September 2026. **Status: `user_rejected` / `needs_revision`.** The current user's explicit verdict is authoritative and supersedes every agent/critic/automation score for acceptance.
+Updated 12 September 2026. **Status: `user_rejected` / `needs_revision`.** The current user's explicit verdict is authoritative and supersedes every agent/critic/automation score for acceptance.
 
 ## Latest user review
 
@@ -12,7 +12,7 @@ The older 5/10 game / 5/10 learning verdict and the earlier internal 9+ critic p
 
 ## Product north star — general learning-game generator
 
-The root `CODEX-IMPLEMENTATION-PLAN.md` **1.6** is authoritative.
+The root `CODEX-IMPLEMENTATION-PLAN.md` **1.7** is authoritative.
 
 VibeLearn is a **general system for generating effective learning games/stories across subjects and courses**. Relay Rescue is the current authored reference slice, not the product schema.
 
@@ -66,33 +66,65 @@ Repository: `Desmic/VibeLearn`.
 
 Hosted branch: `deploy/render-supabase`. Render serves this branch; auto-deploy is disabled.
 
-The Echo Forge replacement renders a continuous Three.js story world, has user-paced Back/Continue/Skip/Replay/Pause controls, and carries Signal 1 into the same world with progressive disclosure. Signal 1 now uses tutorial-state version **v3**, so older completion flags cannot silently suppress the materially redesigned tutorial; experienced regression tests deliberately mark this current version complete when they are testing the later campaign rather than onboarding.
+The Echo Forge replacement renders a continuous Three.js story world, has user-paced Back/Continue/Skip/Replay/Pause controls, and carries Signal 1 into the same world with progressive disclosure. Signal 1 uses tutorial-state version **v3**, so older completion flags cannot silently suppress the redesigned tutorial.
 
-The prior 390px post-success overflow was traced to the base objective header after tutorial guidance ended. The phone CSS now constrains the base objective/encounter containers rather than applying a Signal-1-only patch. That fix still requires confirmation in the next exact-build browser run before it can be called closed.
+Recent phone work now:
+
+- keeps story copy and controls inside the mainstream phone viewport;
+- preserves the first mission as world-first progressive disclosure;
+- turns Signal 1 success into an earned **BRIDGE ONLINE / FIELD SKILL UNLOCKED** payoff, with the formal term revealed after success and the longer world-model explanation collapsed behind an optional debrief;
+- fixes the post-tutorial objective header so it cannot create horizontal overflow;
+- retains the exact recovery assertion for unsaved Signal-6 route drafts, but synchronizes the browser test on the actual user-visible `Recovered unsaved progress` state instead of racing asynchronous boot.
+
+The Echo Forge adapter is also being carried through **Signals 2-6**, rather than disappearing after Signal 1. Signal 7 intentionally leaves the fantasy for fresh real-world transfer. This is specifically aimed at the prior whole-chapter critic failure where later reasoning screens became a themed web tool and lost story/world identity.
 
 ## Reusable Three.js framework checkpoint
 
-Phase 1 is now proving a real runtime/adapter seam rather than only sharing renderer initialization:
+Phase 1 now treats easy future fantasy integration as a product/architecture gate, not just code cleanup. See [THREE-STORY-FRAMEWORK.md](THREE-STORY-FRAMEWORK.md).
 
-- `web/story3d-runtime.js` owns WebGL renderer/canvas lifecycle, DPR policy, resize, frame scheduling, pause/reduced motion, context loss/restoration, resource cleanup and runtime stats;
-- it now also owns a reusable aspect-aware **camera rig**: adapters supply landscape/portrait shot compositions while the shared runtime owns current/target vectors, interpolation, snapping and `camera.lookAt` application;
-- `web/rescue-story3d.js` remains the Echo Forge-specific adapter: geometry/assets, lighting/art direction, camera compositions, story beat states and game-state-to-visual mapping;
-- tests reject regressions where Echo Forge starts owning its own `WebGLRenderer`, `ResizeObserver`, `currentCam`, or `currentLook` camera loop;
-- the full arbitrary generated-package loader is intentionally deferred until the later publishing/validation/security boundary exists.
+Current reusable layers:
 
-This framework is reusable infrastructure for future generated fantasies, not evidence that the game is delightful. It earns zero automatic critic points. See [THREE-STORY-FRAMEWORK.md](THREE-STORY-FRAMEWORK.md).
+- `web/story3d-runtime.js` owns WebGL renderer/canvas lifecycle, DPR policy, resize, frame scheduling, pause/reduced motion, context loss/restoration, resource cleanup, runtime stats, and a reusable aspect-aware camera rig;
+- `web/story3d-world-host.js` owns the adapter/version/capability contract and fails closed on incompatible or incomplete adapters;
+- `web/rescue-story3d.js` is the Echo Forge-specific adapter: geometry/assets, lighting/art direction, landscape/portrait camera compositions, story beat states and game-state-to-visual mapping;
+- `tests/story3d_framework_browser.py` mounts an unrelated test-only **Star Orchard** adapter through the same host/runtime and verifies version/mode/capability/disposal behavior;
+- tests reject regressions where Echo Forge starts owning its own `WebGLRenderer`, `ResizeObserver`, `currentCam`, or `currentLook` camera loop.
+
+The **easy-integration rule** is now explicit in the implementation plan: a future story should normally integrate by providing a versioned world package/adapter plus story/game data, not by editing the shared runtime/host. If a genuinely new engine capability is needed, it must be generalized and versioned first. Package identity remains provenance and never becomes competency/evidence identity.
+
+The full arbitrary generated-package loader is intentionally deferred until the later immutable publishing/asset-validation/security boundary. Current Phase 1 proves the seam without weakening CSP/static allowlists.
+
+Framework extraction is infrastructure. It earns zero automatic critic points; the actual rendered story/game must still pass the story, first-touch, whole-chapter and learning gates.
+
+## Critic checkpoint
+
+The most recent frozen realized-game critic (`docs/CURRENT-GAME-CRITIC.md`) predates the newest framework/visual-continuity revisions and remains the active warning signal until a new exact build is frozen:
+
+- story treatment: **9.37/10 PASS** (`internal_tool_assisted`, story-only);
+- first-touch magic: **8.86/10 FAIL**;
+- whole-chapter game experience: **8.71/10 FAIL**;
+- learning/transfer critic: not run, because both game gates have not passed.
+
+Its main findings were limited visual/character presence in first touch and loss of game/world identity in later policy-construction/transfer screens. Current changes are targeted at those failures; do not recycle or round the old scores into a pass.
 
 ## Verification state
 
-The last completed CI before the camera-rig increment had green build/unit coverage but a browser failure caused by the full-campaign suite setting the redesigned Signal-1 tutorial's v3 completion key while the runtime still checked v2. The runtime and the experienced-campaign test are now intentionally aligned on v3. The camera-rig extraction and phone overflow fix must still pass the **same exact branch head** through build + all unit/backend + all browser suites before critics run.
+The last fully inspected integrated run before the newest changes proved:
 
-No new first-touch/game critic score has been assigned yet. No current candidate is `ready_for_user_review`, and no claim is being made that these framework changes are deployed to Render.
+- build/ESM parsing and all **116** backend/unit tests green;
+- the unrelated Star Orchard Story3D framework proof green;
+- campaign/renderer/context-loss/reduced-motion/phone checks green;
+- one final rescue-browser failure remained in the unsaved Signal-6 draft-reload test because it inspected `RescueGame.response()` immediately after `page.reload()` before async boot had recovered the scoped local draft.
+
+That browser test has now been corrected to wait for the real visible recovery state and then retain the same strong localStorage + RescueGame SAFE-route assertions. New browser assertions also require the shared Story3D world to remain visible through Signals 2-6 and disappear at the deliberate Signal-7 transfer boundary.
+
+The current exact branch head is still **under CI verification**. Do not call it green, critic-ready, or deployed until build + backend/unit + all browser suites complete on the same head.
 
 Next implementation order follows the root plan:
 
 1. get the exact branch head fully green across build, backend/unit and browser suites;
-2. inspect 360/390/430 phone evidence for opening scenes, first action, first choice, visible duplicate/recovery and post-success state;
-3. improve rendered first-touch magic if the evidence still looks materially below a commercial-game bar;
+2. inspect 360/390/430 phone evidence for opening scenes, first action, first choice, visible duplicate/recovery, post-success payoff and later Signal-6 world continuity;
+3. improve rendered first-touch magic / whole-chapter game identity if evidence remains below the commercial-game bar;
 4. run the **first-touch magic critic** and repair until >=9/no blocker;
 5. run the **whole-chapter game critic** and repair until >=9/no blocker;
 6. run the bounded learning/transfer gate;
