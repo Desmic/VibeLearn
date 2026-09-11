@@ -8,6 +8,7 @@ from tests.browser_check import start_server,stop_server
 ROOT=Path(__file__).resolve().parents[1]
 SAFE=['remember','match','reconcile','retry']
 ONBOARDING_DONE="localStorage.setItem('vibelearn.relay-rescue.intro.v3','seen');localStorage.setItem('vibelearn.relay-rescue.signal1-guide.done.v3','yes');"
+MODE_LABEL='header.rg-top > span:first-of-type'
 
 def main():
     out=ROOT/'artifacts';out.mkdir(exist_ok=True);errors=[];checks=[]
@@ -22,8 +23,8 @@ def main():
             expect(page.locator('#rg-feedback')).not_to_have_text('Pip is trying your idea…')
             expect(page.locator('#rg-sync')).to_have_text('Saved')
         def next_level():
-            old=page.locator('.rg-top>span').inner_text()
-            page.locator('#rg-next').click();expect(page.locator('.rg-top>span')).not_to_have_text(old)
+            old=page.locator(MODE_LABEL).inner_text()
+            page.locator('#rg-next').click();expect(page.locator(MODE_LABEL)).not_to_have_text(old)
             expect(page.locator('#rg-feedback')).to_be_visible()
         def build(program):
             page.locator('#rg-clear-route').click()
@@ -105,8 +106,8 @@ def main():
                 m.screenshot(path=str(out/f'rescue-text-{width}.png'),full_page=True)
                 m.evaluate("document.documentElement.style.fontSize=''")
                 def advance_mobile():
-                    old=m.locator('.rg-top>span').inner_text()
-                    m.locator('#rg-next').tap();expect(m.locator('.rg-top>span')).not_to_have_text(old)
+                    old=m.locator(MODE_LABEL).inner_text()
+                    m.locator('#rg-next').tap();expect(m.locator(MODE_LABEL)).not_to_have_text(old)
                 def mobile_move(action):
                     m.locator(f'[data-tool="{action}"]').tap()
                     expect(m.locator('#rg-feedback')).not_to_have_text('Pip is trying your idea…')
