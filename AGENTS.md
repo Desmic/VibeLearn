@@ -1,6 +1,6 @@
 # vibeLearn
 
-**Read `CODEX-IMPLEMENTATION-PLAN.md` first**, then `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, and `docs/COURSE-GENERATION-GAME-SYSTEM.md` before substantial product work. The active implementation plan controls build order; user feedback that changes product direction must update the plan and affected docs before or in the same bounded implementation unit as code.
+**Read `CODEX-IMPLEMENTATION-PLAN.md` first**, then `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, `docs/COURSE-GENERATION-GAME-SYSTEM.md`, and `docs/THREE-STORY-FRAMEWORK.md` before substantial product work. The active implementation plan controls build order; user feedback that changes product direction must update the plan and affected docs before or in the same bounded implementation unit as code.
 
 The product is a game whose meaningful play delivers intended course outcomes, not a course website with game decoration. **Product north star:** VibeLearn is a general system for turning many subjects/courses into source-grounded learning games; Relay Rescue is only the current reference slice. Current story generation is topic/outcome-driven; future explicit learner story preferences are planned but must not be inferred today.
 
@@ -18,7 +18,7 @@ The current user is the sole real product reviewer during private refinement. Do
 
 When user feedback changes story direction, onboarding, progression, rendering strategy, UI/UX, platform priority, acceptance, course generation, testing, critic semantics, or rollout boundaries, **update `CODEX-IMPLEMENTATION-PLAN.md` and the materially affected repository docs in the same implementation unit**.
 
-At minimum inspect `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, and `docs/COURSE-GENERATION-GAME-SYSTEM.md`; update only the ones materially affected.
+At minimum inspect `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, `docs/COURSE-GENERATION-GAME-SYSTEM.md`, and `docs/THREE-STORY-FRAMEWORK.md`; update only the ones materially affected.
 
 ## General generation boundary
 
@@ -90,7 +90,7 @@ Three.js is a **serious option for attention and immersion**, not merely an opti
 
 Use locally served verified/pinned assets; no runtime CDN or relaxed CSP. Preserve keyboard/touch semantics, reduced motion, fallback, same-origin behavior, and realistic mobile performance. Renderer state never determines assessment/evidence/unlocks.
 
-Use the reusable boundary in `docs/THREE-STORY-FRAMEWORK.md`: `story3d-runtime.js` owns renderer/lifecycle/resource/resize/pause/reduced-motion/context-loss/disposal concerns; story-specific adapters own geometry/assets/camera/beat and game-state-to-visual mappings. Do not copy `WebGLRenderer`/`ResizeObserver` lifecycle into each new fantasy. Three.js remains optional; StoryWorldSpec is renderer-agnostic.
+Use the reusable boundary in `docs/THREE-STORY-FRAMEWORK.md`. `story3d-runtime.js` owns renderer/canvas lifecycle, resource tracking, resize, frame scheduling, DPR policy, pause/reduced motion, context loss/recovery, disposal, and **generic camera orchestration** (current/target vectors, portrait/landscape shot selection, interpolation and snapping). Story-specific adapters own geometry/assets/art direction, camera **compositions**, beat states, interaction anchors, and game-state-to-visual mappings. If a new fantasy copies `WebGLRenderer`, `ResizeObserver`, or a generic camera lerp loop, improve the framework before adding more worlds. Three.js remains optional; `StoryWorldSpec` is renderer-agnostic, and the arbitrary generated-package loader stays deferred until its later publishing/validation security boundary.
 
 ## Game-first and course-outcome invariants
 
