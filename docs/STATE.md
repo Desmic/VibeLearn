@@ -1,6 +1,6 @@
 # Current checkpoint — user rejected first-touch story at 3/10
 
-Updated 10 September 2026. **Status: `user_rejected` / `needs_revision`.** The current user's explicit verdict is authoritative and supersedes every agent/critic/automation score for acceptance.
+Updated 11 September 2026. **Status: `user_rejected` / `needs_revision`.** The current user's explicit verdict is authoritative and supersedes every agent/critic/automation score for acceptance.
 
 ## Latest user review
 
@@ -12,7 +12,7 @@ The older 5/10 game / 5/10 learning verdict and the earlier internal 9+ critic p
 
 ## Product north star — general learning-game generator
 
-The root `CODEX-IMPLEMENTATION-PLAN.md` 1.5 is authoritative.
+The root `CODEX-IMPLEMENTATION-PLAN.md` **1.6** is authoritative.
 
 VibeLearn is a **general system for generating effective learning games/stories across subjects and courses**. Relay Rescue is the current authored reference slice, not the product schema.
 
@@ -30,7 +30,7 @@ Canonical competency/evidence identity must remain independent of a particular s
 
 ## Story and experience gates
 
-The pipeline is now:
+The pipeline is:
 
 `course/outcomes -> source grounding -> LearningSpec -> StoryWorldSpec -> story critic >=9 -> game realization -> first-touch magic >=9 -> whole-chapter game experience >=9 -> learning/transfer gate >=9 -> current user review -> acceptance`
 
@@ -66,22 +66,38 @@ Repository: `Desmic/VibeLearn`.
 
 Hosted branch: `deploy/render-supabase`. Render serves this branch; auto-deploy is disabled.
 
-The Echo Forge replacement now renders its continuous Three.js story world in integrated browser runs, has user-paced Back/Continue/Skip/Replay/Pause controls, and carries Signal 1 into the same world with progressive disclosure. The previously missing Three.js-canvas startup issue is fixed.
+The Echo Forge replacement renders a continuous Three.js story world, has user-paced Back/Continue/Skip/Replay/Pause controls, and carries Signal 1 into the same world with progressive disclosure. Signal 1 now uses tutorial-state version **v3**, so older completion flags cannot silently suppress the materially redesigned tutorial; experienced regression tests deliberately mark this current version complete when they are testing the later campaign rather than onboarding.
 
-The latest exact-build browser evidence then exposed a narrower phone blocker after Signal 1 success: once tutorial guidance was removed, the base desktop objective header could become about 795px wide in a 390px viewport. That is being fixed as a generic phone mission-header rule rather than a Signal-1-only patch. The candidate therefore remains **`needs_revision`** until the full phone/browser gate is green.
+The prior 390px post-success overflow was traced to the base objective header after tutorial guidance ended. The phone CSS now constrains the base objective/encounter containers rather than applying a Signal-1-only patch. That fix still requires confirmation in the next exact-build browser run before it can be called closed.
 
-In parallel, Phase 1 is extracting the renderer lifecycle into `web/story3d-runtime.js` with Echo Forge as a story-specific adapter. This is a reusable reference boundary for future generated fantasies; it does not authorize the full Phase 3 package loader/generator and does not make Three.js mandatory. See [THREE-STORY-FRAMEWORK.md](THREE-STORY-FRAMEWORK.md).
+## Reusable Three.js framework checkpoint
+
+Phase 1 is now proving a real runtime/adapter seam rather than only sharing renderer initialization:
+
+- `web/story3d-runtime.js` owns WebGL renderer/canvas lifecycle, DPR policy, resize, frame scheduling, pause/reduced motion, context loss/restoration, resource cleanup and runtime stats;
+- it now also owns a reusable aspect-aware **camera rig**: adapters supply landscape/portrait shot compositions while the shared runtime owns current/target vectors, interpolation, snapping and `camera.lookAt` application;
+- `web/rescue-story3d.js` remains the Echo Forge-specific adapter: geometry/assets, lighting/art direction, camera compositions, story beat states and game-state-to-visual mapping;
+- tests reject regressions where Echo Forge starts owning its own `WebGLRenderer`, `ResizeObserver`, `currentCam`, or `currentLook` camera loop;
+- the full arbitrary generated-package loader is intentionally deferred until the later publishing/validation/security boundary exists.
+
+This framework is reusable infrastructure for future generated fantasies, not evidence that the game is delightful. It earns zero automatic critic points. See [THREE-STORY-FRAMEWORK.md](THREE-STORY-FRAMEWORK.md).
+
+## Verification state
+
+The last completed CI before the camera-rig increment had green build/unit coverage but a browser failure caused by the full-campaign suite setting the redesigned Signal-1 tutorial's v3 completion key while the runtime still checked v2. The runtime and the experienced-campaign test are now intentionally aligned on v3. The camera-rig extraction and phone overflow fix must still pass the **same exact branch head** through build + all unit/backend + all browser suites before critics run.
+
+No new first-touch/game critic score has been assigned yet. No current candidate is `ready_for_user_review`, and no claim is being made that these framework changes are deployed to Render.
 
 Next implementation order follows the root plan:
 
-1. close the post-success phone overflow and get the exact-build browser suite fully green;
-2. verify the shared Three.js runtime/adapter contract across cinematic + Signal 1, including fallback/reduced motion/context loss;
-3. inspect rendered phone evidence;
+1. get the exact branch head fully green across build, backend/unit and browser suites;
+2. inspect 360/390/430 phone evidence for opening scenes, first action, first choice, visible duplicate/recovery and post-success state;
+3. improve rendered first-touch magic if the evidence still looks materially below a commercial-game bar;
 4. run the **first-touch magic critic** and repair until >=9/no blocker;
 5. run the **whole-chapter game critic** and repair until >=9/no blocker;
 6. run the bounded learning/transfer gate;
 7. deploy the exact verified candidate to Render;
-8. ask the current user for final review.
+8. verify the served revision and ask the current user for final review.
 
 ## Acceptance authority
 
