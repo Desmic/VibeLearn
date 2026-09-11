@@ -1,8 +1,8 @@
-# Learning OS — incremental implementation plan 1.6
+# Learning OS — incremental implementation plan 1.7
 
-**11 September 2026 · authoritative active plan**
+**12 September 2026 · authoritative active plan**
 
-This file is the current build order. The checksummed `learning-os-design-package-v1.3/` remains immutable historical design. Its detailed phase/security/evidence requirements still apply wherever this 1.6 plan does not supersede them. Read `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, and `docs/THREE-STORY-FRAMEWORK.md` with this file.
+This file is the current build order. The checksummed `learning-os-design-package-v1.3/` remains immutable historical design. Its detailed phase/security/evidence requirements still apply wherever this 1.7 plan does not supersede them. Read `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, and `docs/THREE-STORY-FRAMEWORK.md` with this file.
 
 ## 1. Product north star
 
@@ -86,6 +86,22 @@ Each generated world supplies a versioned adapter containing the things that are
 
 The runtime/adapter/package identity must never become competency/evidence identity. “Easy integration” also must not become arbitrary code serving: the current CSP/static allowlist stays strict, and a later generated-package publishing/validation boundary is required before Phase 3 can load arbitrary generated worlds. See `docs/THREE-STORY-FRAMEWORK.md`.
 
+### Easy-integration gate
+
+A framework is not considered reusable merely because two adapters can technically render. A new story/fantasy should be integrable mostly by authoring a **world package**, not by editing engine code.
+
+For current/future 3D worlds, require all of the following:
+
+- the world declares a versioned manifest/capability contract and mounts through the shared host;
+- story-specific code imports shared runtime/camera/world-building infrastructure instead of duplicating it;
+- adding a world does not require changing `story3d-runtime.js` or `story3d-world-host.js` unless the change is a genuinely generic, versioned capability useful beyond that one fantasy;
+- the same adapter can expose the story beats and authoritative mission-state visual mapping it needs without owning assessment, save, progression or evidence decisions;
+- accessible DOM-owned actions, reduced-motion behavior and meaning-equivalent fallback remain outside/alongside the canvas contract;
+- portrait compositions and performance defaults work on the mainstream phone matrix without per-device forks;
+- the package can be removed/replaced without changing canonical competency IDs or legitimate learner history.
+
+The synthetic unrelated-world test is the Phase-1 minimum proof of the seam. Before the future generator is considered mature, at least one materially different generated/authored fantasy must also integrate through this boundary without story-specific edits to runtime/host infrastructure.
+
 Do **not** implement the arbitrary generated-package loader during current Phase 1 merely to demonstrate generality. Prove the seam first: Echo Forge should consume shared rendering/camera infrastructure while remaining a replaceable adapter. Later Phase 3 can add immutable manifests/assets/package loading behind an explicit validation/security boundary.
 
 ## 6. Primary device target during current refinement
@@ -104,7 +120,7 @@ Current bounded sequence:
 2. make the Echo Forge story/world first-touch experience work reliably on mainstream phones while extracting renderer lifecycle **and generic camera orchestration** into the reusable Three.js story runtime/adapter boundary;
 3. make Signal 1 continue inside the same world through that same reusable runtime, with one obvious action at a time and progressively increasing cognitive load;
 4. preserve previous-chapter review, reset-progress, save/reload, learner isolation and evidence semantics;
-5. run exact-build browser verification;
+5. run exact-build browser verification, including the unrelated synthetic-world framework proof and unsaved-draft recovery;
 6. inspect exact rendered phone evidence, not just test output;
 7. run **first-touch magic critic** and repair until >=9/no blocker;
 8. run **whole-chapter game critic** and repair until >=9/no blocker;
@@ -136,7 +152,7 @@ Keep `unknown`, `declared_independent`, current-attempt `assisted` and `previous
 
 Build one small, working behavior at a time. For each increment: inspect the actual baseline -> define executable acceptance scenarios -> implement the smallest complete path -> run focused tests -> run persistent boundary checks -> exercise the actual interface -> inspect failures -> retain evidence -> update docs/state -> choose the next increment.
 
-Do not weaken tests/rubrics to make a candidate pass. A newly discovered blocker becomes a regression test where practical.
+Do not weaken tests/rubrics to make a candidate pass. A newly discovered blocker becomes a regression test where practical. When an asynchronous user-visible recovery contract is under test, synchronize on that visible recovery state and then retain the same strong state assertions; do not race page-load timing and mistake that race for product behavior.
 
 ## 10. Feedback changes the plan
 
