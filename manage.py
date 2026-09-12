@@ -11,7 +11,11 @@ ROOT = Path(__file__).resolve().parent
 def main():
     command = sys.argv[1] if len(sys.argv) > 1 else "serve"
     if command == "vendor":
-        for script in ("tools/vendor_three.py", "tools/vendor_playcanvas.py"):
+        for script in (
+            "tools/vendor_three.py",
+            "tools/vendor_playcanvas.py",
+            "tools/vendor_game_assets.py",
+        ):
             result = subprocess.call([sys.executable, script], cwd=ROOT)
             if result:
                 return result
