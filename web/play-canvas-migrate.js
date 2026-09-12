@@ -3,7 +3,7 @@
 'use strict';
 (() => {
   const game=window.RescueGame;
-  if(!game||game.__playCanvasMigrationV1)return;
+  if(!game||game.__playCanvasMigrationV2)return;
   let lastAttempt=null;
 
   const rootEl=()=>document.querySelector('#rescue-game');
@@ -42,13 +42,19 @@
 
   function migrateBuilder(root,world){
     world.classList.add('play-canvas-builder-world');
-    const hud=makeLayer(world,'play-canvas-builder-hud','Build Pip’s recovery route');
+    const hud=makeLayer(world,'play-canvas-builder-hud','Build Pip’s recovery route in the storm');
+    hud.classList.add('play-canvas-route-circuit');
     const bench=root.querySelector('.rg-workbench');
     const actions=root.querySelector('.rg-build-actions');
     const results=root.querySelector('.rg-results');
-    if(bench&&bench.parentElement!==hud)hud.append(bench);
-    if(actions&&actions.parentElement!==hud)hud.append(actions);
-    if(results&&results.parentElement!==hud)hud.append(results);
+    if(bench){
+      bench.classList.add('play-canvas-route-tools');
+      bench.querySelector('.rg-slots')?.classList.add('play-canvas-route-nodes');
+      bench.querySelector('.rg-palette')?.classList.add('play-canvas-toolbelt');
+      if(bench.parentElement!==hud)hud.append(bench);
+    }
+    if(actions){actions.classList.add('play-canvas-route-run');if(actions.parentElement!==hud)hud.append(actions);}
+    if(results){results.classList.add('play-canvas-storm-outcome');if(results.parentElement!==hud)hud.append(results);}
   }
 
   function migrateTransfer(root){
@@ -87,5 +93,5 @@
   const previousSync=game.sync.bind(game);
   game.render=(a,...rest)=>{const result=previousRender(a,...rest);migrate(a);return result;};
   game.sync=(busy,a,...rest)=>{const result=previousSync(busy,a,...rest);lastAttempt=a||lastAttempt;queueMicrotask(()=>migrate(lastAttempt));return result;};
-  game.__playCanvasMigrationV1=true;
+  game.__playCanvasMigrationV2=true;
 })();
