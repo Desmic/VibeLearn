@@ -99,8 +99,8 @@ def main():
 
             titles = [
                 'Pip sends one promise.',
-                'The gear survives. The reply does not.',
-                '“Just send another” has a cost.',
+                'Lightning takes the answer.',
+                'A second seal could mean a second gear.',
                 'The storm wakes something for you.',
             ]
             for title in titles:
@@ -113,7 +113,7 @@ def main():
             canvas_runtime_id = canvas.get_attribute('data-game-runtime-instance')
             assert runtime_id and canvas_runtime_id == runtime_id
             page.screenshot(path=str(out/'onboarding-echo-forge-06.png'), full_page=True)
-            checks.append('The opening runs directly through GameRuntime -> PlayCanvas Engine, remains user-paced, and preserves one runtime/world identity across reversible story states')
+            checks.append('The opening establishes a missing reply without revealing the Forge outcome, remains user-paced, and preserves one PlayCanvas runtime/world identity across reversible story states')
             page.locator('#rgi-next').click()
 
             coach = page.locator('.rgc1-coach')
@@ -135,7 +135,7 @@ def main():
             forge_target = page.locator('[data-world-look="workshop"]').bounding_box()
             assert forge_target and forge_target['height'] >= 44 and forge_target['width'] >= 96
             page.screenshot(path=str(out/'signal1-echo-forge-first-action.png'), full_page=True)
-            checks.append('The final story beat enters Signal 1 by reparenting the same GameRuntime stage and exact PlayCanvas canvas rather than creating a second renderer')
+            checks.append('Signal 1 begins with world truth visually hidden until the player inspects the Forge, while retaining the same GameRuntime stage and exact PlayCanvas canvas from the story')
 
             page.locator('[data-world-look="workshop"]').click()
             expect(page.locator('#rg-effects')).to_have_text('1 gear')
@@ -151,7 +151,7 @@ def main():
             expect(page.locator('.rg-console')).to_be_hidden()
             expect(page.locator('.rg-evidence')).to_be_hidden()
             page.screenshot(path=str(out/'signal1-echo-forge-first-choice.png'), full_page=True)
-            checks.append('Signal 1 continues inside the same PlayCanvas world and reveals one obvious action at a time before the first meaningful choice')
+            checks.append('Signal 1 reveals the gear through inspection, shifts attention to durable identity, then opens the first meaningful retry-vs-new-ticket choice')
 
             page.locator('[data-tool="new"]').click()
             expect(coach).to_contain_text('A NEW TICKET')
@@ -184,7 +184,7 @@ def main():
             for _ in range(5): r.locator('#rgi-next').click()
             expect(r.locator('#rgi-title')).to_have_text('The storm wakes something for you.')
             expect(r.locator('#rgi-fact')).to_have_text('First move: inspect the Echo Forge.')
-            r.locator('#rgi-back').click(); expect(r.locator('#rgi-title')).to_have_text('“Just send another” has a cost.')
+            r.locator('#rgi-back').click(); expect(r.locator('#rgi-title')).to_have_text('A second seal could mean a second gear.')
             assert r.evaluate('document.documentElement.scrollWidth<=innerWidth')
             checks.append('Reduced-motion players keep the same reversible causal story with no forced motion or lost meaning')
             reduced.close()
