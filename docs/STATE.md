@@ -1,133 +1,72 @@
-# Current checkpoint — Play Canvas + reusable Three.js world framework
+# Current checkpoint — PlayCanvas backend pivot
 
-Updated 12 September 2026. **Status: `user_rejected` / `needs_revision`.** The current user's explicit verdict is authoritative and supersedes every agent/critic/automation score for acceptance.
+Updated 12 September 2026. **Status: `user_rejected` / `needs_revision`.** The current user's explicit verdict remains authoritative until a materially changed verified/deployed candidate is reviewed.
 
-## Latest user direction
+## Latest direction
 
-The user has reaffirmed two architectural requirements:
+VibeLearn's objective is to **generate effective learning games/worlds for arbitrary concepts and subjects**.
 
-1. **Play Canvas remains the top-level game architecture**: one persistent game surface for story, mission play, progression, building and transfer.
-2. **Three.js must be developed as a reusable framework under Play Canvas** so future story/fantasy settings can be integrated easily instead of rebuilding renderer/camera/lifecycle code per course.
+The architecture therefore moves away from Three.js as a strategic foundation. Three.js remains only as temporary reference/migration infrastructure for the current Echo Forge implementation.
 
-This is not a request to make Three.js the product shell. The intended hierarchy is:
+**PlayCanvas Engine is the first strategic backend** for the current browser/phone-first product.
 
-`LearningSpec / StoryWorldSpec / GameExperienceSpec -> Play Canvas -> rendering backend -> Story3D runtime/host -> replaceable world package`
+The durable architecture is engine-neutral and spec-driven:
 
-The root `CODEX-IMPLEMENTATION-PLAN.md` **1.9** is authoritative. Read it with `docs/PLAY-CANVAS.md` and `docs/THREE-STORY-FRAMEWORK.md`.
+`LearningSpec -> StoryWorldSpec -> GameDesignSpec -> WorldSpec -> RuntimeExperienceSpec -> EngineCompiler -> EngineRuntime`
 
-## Current user verdict
+`AssessmentEvidenceSpec` remains outside engine truth.
 
-The newest explicit first-touch/story score remains **3/10** until the user reviews a materially changed verified/deployed candidate.
+Future backends may include Unity, Unreal, specialized 2D/simulation engines or other runtimes without changing canonical learning/evidence identity.
 
-The rejected predecessor opening lacked good Back navigation, moved too quickly, told the story lazily, left causality/stakes unclear and did not create the creative/beautiful first impression expected from a game that could capture kids, teens and young adults.
+Read root `CODEX-IMPLEMENTATION-PLAN.md` **2.0** and `docs/GAME-RUNTIME-ARCHITECTURE.md` as current authority.
 
-Older 5/10 game / 5/10 learning and historical internal 9+ critic results are not acceptance evidence.
+## Naming correction
 
-## Product north star
+The old internal architecture name **“Play Canvas”** is deprecated because it conflicts with the actual PlayCanvas Engine name. Existing `play-canvas*.js` files may remain during migration, but new architecture/code should use unambiguous runtime/compiler names.
 
-VibeLearn is a **general system for generating effective learning games/stories across subjects and courses**. Relay Rescue is the current authored reference, not the product schema.
+`docs/PLAY-CANVAS.md` and `docs/THREE-STORY-FRAMEWORK.md` are now legacy migration references.
 
-The durable package boundary is:
+## Generated framework target
 
-`LearningSpec -> StoryWorldSpec -> GameExperienceSpec -> AssessmentEvidenceSpec`
+Generated games should primarily be validated specs/data + assets:
 
-Canonical competencies/evidence remain independent of story, character, renderer, world-package version and Play Canvas implementation.
+- `LearningSpec` — learning identity/outcomes/sources;
+- `StoryWorldSpec` — semantic story/world;
+- `GameDesignSpec` — mechanics, core loop, challenge graph and progression;
+- `WorldSpec` — engine-neutral scenes/entities/components/assets/interactions/physics/animation intent;
+- `RuntimeExperienceSpec` — modes, input, HUD, save/resume, accessibility, performance and visible-state mapping;
+- `EngineTargetSpec` — backend capabilities/constraints;
+- `AssessmentEvidenceSpec` — authoritative evidence meaning.
 
-### Story inputs now vs later
+The framework should expose reusable engine-neutral primitives/archetypes that compile differently per backend rather than requiring freshly generated renderer/game-engine glue for each course.
 
-**Current:** story generation is driven by topic/course intent, source-grounded outcomes, their causal learning structure and a broad kid-through-young-adult quality target.
+## Immediate implementation order
 
-**Future:** an explicit learner-controlled `StoryPreferenceProfile` may influence genre, fantasy/realism, tone, characters, visual style, humor/darkness, pace, exploration/action balance and narrative density. Preference state is separate from mastery/evidence.
+1. freeze generic Three.js framework expansion;
+2. define versioned game/world/runtime/engine/asset schemas;
+3. define EngineCompiler/runtime adapter interfaces;
+4. add a pinned/self-hosted PlayCanvas Engine path;
+5. build a tiny spec-driven PlayCanvas vertical slice;
+6. compile a second unrelated synthetic world through the same backend;
+7. port Echo Forge opening + Signal 1;
+8. compare experience, performance and authoring friction with the Three.js predecessor;
+9. migrate later signals after the backend/spec seam is proven;
+10. preserve existing server-authoritative progression/evidence/save semantics;
+11. run phone/reduced-motion/performance verification and critic gates;
+12. deploy only the exact verified candidate for user review.
 
-## Quality pipeline
+## Current quality state
 
-`course/outcomes -> source grounding -> LearningSpec -> StoryWorldSpec -> story critic >=9 -> GameExperienceSpec/Play Canvas realization -> first-touch magic >=9 -> whole-chapter game experience >=9 -> learning/transfer >=9 -> current user review -> acceptance`
+The user's latest explicit predecessor first-touch/story rating remains **3/10**. Historical critic scores do not override that rejection.
 
-A weak first touch cannot be averaged into a passing chapter. A beautiful game cannot compensate for shallow learning. The current user's explicit verdict overrides every critic.
+The previous internal story treatment score and game scores remain historical diagnostics only. Engine/framework architecture earns zero automatic story/game/learning quality points.
 
-## Play Canvas architecture
+Required gate order remains:
 
-`docs/PLAY-CANVAS.md` is the authoritative game-surface contract.
+`story >=9 -> first-touch >=9 -> whole-game >=9 -> learning/transfer >=9 -> user review`
 
-- Play Canvas is the persistent game surface/orchestrator.
-- Rendering backends such as Three.js live inside it.
-- World packages are replaceable story/fantasy realizations.
-- Accessible DOM actions/fallback remain required but support the game surface rather than becoming a dashboard-first architecture.
-- Compatible story/mission states should reuse the same stage/world/runtime instead of spawning a new renderer.
-- No new bespoke course-specific canvases/page shells should be added during migration.
+## Deployment
 
-Current migration order remains opening + Signal 1 -> Signals 2-6 -> Signal 6 builder/HUD -> Signal 7 transfer shell -> removal of obsolete duplicate mounting paths after equivalent tests are green.
+Working/hosted branch: **`deploy/render-supabase`**. Render auto-deploy is disabled, so source changes are not live until an exact verified revision is explicitly deployed and the served revision is checked.
 
-## Three.js framework direction
-
-`docs/THREE-STORY-FRAMEWORK.md` is the authoritative rendering/world-package subsystem contract.
-
-Current reusable layers include:
-
-- `web/story3d-runtime.js` — renderer/canvas lifecycle, bounded DPR, resize, frame scheduling, pause/reduced motion, context loss/recovery, cleanup, runtime stats and camera rig;
-- `web/story3d-world-host.js` — adapter/version/capability validation;
-- `web/play-canvas.js` — persistent game-surface/world lifecycle above the renderer;
-- `web/rescue-story3d.js` — current Echo Forge-specific world realization;
-- synthetic unrelated-world coverage (Star Orchard) proving that shared infrastructure is not Relay Rescue-specific.
-
-### New explicit authoring target
-
-The framework must make **future generated settings easy to integrate**, not merely make multiple hand-written adapters technically possible.
-
-The long-term target is a versioned, data-first `WorldPackageSpec` interpreted by trusted shared runtime code. A generated 3D world should primarily provide:
-
-- manifest/backend/capabilities/assets;
-- scene/entity graph and reusable primitive references;
-- story/game visual states and transitions;
-- portrait/landscape camera compositions;
-- semantic interaction anchors;
-- approved same-origin assets;
-- semantic/2D fallback data.
-
-A custom JavaScript adapter should be exceptional/reviewed, not the default generated output. This keeps easy integration compatible with CSP/security instead of turning the generator into arbitrary client-code execution.
-
-Current Phase 1 may keep authored adapter code while extracting the reusable authoring seam. The full generated-package loader remains deferred until a later immutable publishing/asset-validation/security boundary.
-
-If a new fantasy requires story-specific changes to `play-canvas.js`, `story3d-runtime.js` or `story3d-world-host.js`, either the capability must first be generalized/versioned with tests, or the package boundary has failed.
-
-## Current Echo Forge reference
-
-Repository: `Desmic/VibeLearn`.
-
-Working/hosted branch: **`deploy/render-supabase`**. Render serves this branch; auto-deploy is disabled.
-
-At the time of this checkpoint the branch is in ongoing Play Canvas/framework migration. Do not infer green CI or live deployment from a source commit alone; exact-build verification and served-revision checks remain required before user review.
-
-The latest frozen realized-game critic before the current migration remains a warning signal:
-
-- Echo Forge story treatment: **9.37/10 PASS** (`internal_tool_assisted`, story only);
-- first-touch magic: **8.86/10 FAIL**;
-- whole-chapter game: **8.71/10 FAIL**;
-- learning/transfer critic: not run because game gates did not pass.
-
-Main critic failures were limited visual/character presence in first touch and loss of game/world identity in later construction/transfer screens. Framework extraction itself earns zero critic points.
-
-## Current execution order
-
-1. keep docs/plan aligned with user feedback;
-2. get the exact Play Canvas/framework migration head fully green;
-3. prove story -> Signal 1 instance continuity on phone;
-4. migrate Signals 2-6 / Signal 6 construction into the same Play Canvas lifecycle;
-5. continue extracting shared Story3D runtime/host/camera/interaction capabilities from Echo Forge-specific code;
-6. prove a data-first/easy-authoring world-package seam without opening an unsafe arbitrary package loader;
-7. preserve historical review, reset progress, save/reload, learner isolation and evidence semantics;
-8. inspect exact 360/390/430 rendered evidence;
-9. run first-touch critic and repair until >=9/no blocker;
-10. run whole-chapter critic and repair until >=9/no blocker;
-11. run bounded learning/transfer gate;
-12. deploy the exact verified candidate to Render;
-13. verify served revision;
-14. ask the current user for final review.
-
-## Acceptance authority and rollout
-
-Only explicit user acceptance produces `user_accepted`. Critic >=9 only permits the next gate or user review.
-
-No external testers/public rollout, paid infrastructure expansion, untrusted execution, new model integration or broad Phase 2+ work is authorized during current private Phase 1 refinement.
-
-Hosted auth, learner isolation, server-authoritative progression/evidence, immutable submitted evidence, assistance/exposure semantics, reset-progress confirmation and read-only historical review remain in force.
+Hosted auth, learner isolation, server-authoritative progression/evidence, immutable submitted evidence, assistance/exposure semantics, reset confirmation and historical review remain in force.
