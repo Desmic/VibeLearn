@@ -19,3 +19,7 @@
 }
 @media(max-width:430px){.play-canvas-mission-hud{max-height:47%}.play-canvas-builder-hud{max-height:61%}.play-canvas-builder-hud .rg-slot span{font-size:.6rem}.play-canvas-builder-hud .rg-palette button{font-size:.58rem!important;gap:3px!important}.play-canvas-transfer-surface .rg-incident{padding:14px}}
 @media(prefers-reduced-motion:reduce){.play-canvas-stage *{animation:none!important;transition:none!important}}
+
+/* The first-touch story is the one place where the renderer itself is an input
+   surface. Mission correctness still goes through semantic/server controls. */
+.rgi-overlay .play-canvas-stage,.rgi-overlay .play-canvas-stage canvas{pointer-events:auto}.rgi-overlay .play-canvas-stage canvas{cursor:pointer}
