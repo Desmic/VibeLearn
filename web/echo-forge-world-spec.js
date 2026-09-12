@@ -52,7 +52,7 @@ beaconPositions.forEach(([x,z],i)=>{
 export const echoForgeWorldSpec=Object.freeze({
   schemaVersion:'1',
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-1',
+  version:'pc-phase1-2',
   environment:{clearColor:'#071824',ambient:'#38525f'},
   materials:{
     rock:{diffuse:'#203b4b',gloss:.22},
@@ -79,13 +79,34 @@ export const echoForgeWorldSpec=Object.freeze({
   ],
   entities,
   cameras:{
-    'story.0':{position:[0,7.4,18.6],lookAt:[0,.8,-1.7],fov:46},
-    'story.1':{position:[-1.3,4.7,11.6],lookAt:[-1.5,.7,1],fov:44},
-    'story.2':{position:[1.9,4.9,12.1],lookAt:[2.6,1.2,.2],fov:43},
-    'story.3':{position:[1.0,6.1,13.2],lookAt:[1.8,2.0,.4],fov:46},
-    'story.4':{position:[3.6,4.2,10.5],lookAt:[4.9,.9,.7],fov:42},
-    'story.5':{position:[-2.4,5.2,12.5],lookAt:[-3.5,1.4,1.2],fov:43},
-    'mission':{position:[0,6.0,14.2],lookAt:[0,.9,.4],fov:48}
+    'story.0':{
+      position:[0,7.4,18.6],lookAt:[0,.8,-1.7],fov:46,
+      portrait:{position:[.4,4.5,22],lookAt:[.4,.75,.4],fov:52}
+    },
+    'story.1':{
+      position:[-1.3,4.7,11.6],lookAt:[-1.5,.7,1],fov:44,
+      portrait:{position:[0,3.0,9.5],lookAt:[0,.45,1.1],fov:46}
+    },
+    'story.2':{
+      position:[1.9,4.9,12.1],lookAt:[2.6,1.2,.2],fov:43,
+      portrait:{position:[.8,4.0,17.5],lookAt:[1.0,1.0,.6],fov:52}
+    },
+    'story.3':{
+      position:[1.0,6.1,13.2],lookAt:[1.8,2.0,.4],fov:46,
+      portrait:{position:[3.3,4.6,11.8],lookAt:[3.4,1.7,.5],fov:48}
+    },
+    'story.4':{
+      position:[3.6,4.2,10.5],lookAt:[4.9,.9,.7],fov:42,
+      portrait:{position:[4.8,3.1,9.2],lookAt:[5.0,.9,.8],fov:44}
+    },
+    'story.5':{
+      position:[-2.4,5.2,12.5],lookAt:[-3.5,1.4,1.2],fov:43,
+      portrait:{position:[-4.1,3.3,10.5],lookAt:[-4.2,1.15,1.0],fov:46}
+    },
+    'mission':{
+      position:[0,6.0,14.2],lookAt:[0,.9,.4],fov:48,
+      portrait:{position:[.2,4.2,16.8],lookAt:[0,.8,.7],fov:52}
+    }
   },
   states:{
     'story.0':{camera:'story.0',hide:['broken-gear','new-gear','duplicate-gear','order-seal','reply-orb','storm-bolt-a','storm-bolt-b']},
