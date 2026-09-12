@@ -1,7 +1,8 @@
 """Executable proof of the Phase 1 engine-neutral WorldSpec -> PlayCanvas backend seam.
 
 This is architecture/runtime evidence, not a story, gameplay, or learning-quality
-score. It deliberately mounts an unrelated synthetic world with no Rescue nouns.
+score. It proves both an unrelated synthetic world and the current Echo Forge package
+mount through the real PlayCanvas backend before UI integration is considered.
 """
 import json
 import tempfile
@@ -65,32 +66,56 @@ def main():
               await new Promise(resolve=>setTimeout(resolve,180));
               const stats=world.stats();
               const canvas=host.querySelector('canvas');
-              const before={...stats,canvasEngine:canvas?.dataset.engine||null,canvasVersion:canvas?.dataset.playcanvasEngine||null};
-              return {before};
+              const rect=canvas?.getBoundingClientRect();
+              const synthetic={...stats,canvasEngine:canvas?.dataset.engine||null,canvasVersion:canvas?.dataset.playcanvasEngine||null,canvasRect:rect?{width:rect.width,height:rect.height}:null};
+              world.dispose();host.remove();
+
+              const echoModule=await import('/rescue-playcanvas-world.js');
+              const echoHost=document.createElement('div');
+              echoHost.id='echo-forge-playcanvas-host';
+              Object.assign(echoHost.style,{position:'fixed',left:'0',top:'0',width:'390px',height:'600px',zIndex:'9999'});
+              document.body.append(echoHost);
+              const echo=echoModule.createGameWorld(echoHost,{reducedMotion:false,mode:'story'});
+              await new Promise(resolve=>setTimeout(resolve,180));
+              const echoCanvas=echoHost.querySelector('canvas');
+              const echoRect=echoCanvas?.getBoundingClientRect();
+              const echoResult={available:echo.available,error:echo.error||null,stats:echo.stats?.()||null,canvas:echoCanvas?{width:echoCanvas.width,height:echoCanvas.height,clientWidth:echoCanvas.clientWidth,clientHeight:echoCanvas.clientHeight,rect:echoRect?{width:echoRect.width,height:echoRect.height}:null,engine:echoCanvas.dataset.engine||null,vibelearnEngine:echoCanvas.dataset.vibelearnEngine||null}:null};
+              echo.dispose?.();echoHost.remove();
+              return {synthetic,echo:echoResult};
             }""")
-            assert result["before"]["available"] is True, result
-            assert result["before"]["engine"] == "playcanvas", result
-            assert result["before"]["engineVersion"] == "2.22.1", result
-            assert result["before"]["worldId"] == "framework-proof.star-orchard", result
-            assert result["before"]["state"] == "bloom", result
-            assert result["before"]["entityCount"] == 5, result
-            assert result["before"]["canvasCount"] == 1, result
-            # PlayCanvas owns data-engine on its canvas. Assert its actual pinned
-            # identity instead of replacing the engine's marker with ours.
-            assert result["before"]["canvasEngine"] == "PlayCanvas 2.22.1", result
-            assert result["before"]["canvasVersion"] == "2.22.1", result
-            page.screenshot(path=str(out / "playcanvas-star-orchard-390.png"), full_page=True)
+            synthetic = result["synthetic"]
+            assert synthetic["available"] is True, result
+            assert synthetic["engine"] == "playcanvas", result
+            assert synthetic["engineVersion"] == "2.22.1", result
+            assert synthetic["worldId"] == "framework-proof.star-orchard", result
+            assert synthetic["state"] == "bloom", result
+            assert synthetic["entityCount"] == 5, result
+            assert synthetic["canvasCount"] == 1, result
+            assert synthetic["canvasEngine"] == "PlayCanvas 2.22.1", result
+            assert synthetic["canvasVersion"] == "2.22.1", result
+            assert synthetic["canvasRect"]["width"] > 1 and synthetic["canvasRect"]["height"] > 1, result
+
+            echo = result["echo"]
+            assert echo["available"] is True, result
+            assert echo["stats"]["engine"] == "playcanvas", result
+            assert echo["stats"]["worldId"] == "relay-rescue.echo-forge", result
+            assert echo["stats"]["state"] == "story.0", result
+            assert echo["canvas"]["vibelearnEngine"] == "playcanvas", result
+            assert echo["canvas"]["rect"]["width"] > 1 and echo["canvas"]["rect"]["height"] > 1, result
+
+            page.screenshot(path=str(out / "playcanvas-framework-390.png"), full_page=True)
             if errors:
                 raise AssertionError(errors)
             print(json.dumps({
                 "result": "passed",
-                "engine": result["before"]["engine"],
-                "engine_version": result["before"]["engineVersion"],
-                "synthetic_world": result["before"]["worldId"],
+                "engine": synthetic["engine"],
+                "engine_version": synthetic["engineVersion"],
+                "synthetic_world": synthetic["worldId"],
+                "echo_world": echo["stats"]["worldId"],
                 "checks": [
                     "An unrelated engine-neutral WorldSpec compiled into the real PlayCanvas Engine.",
-                    "The backend created exactly one canvas and five semantic entities without Rescue-specific code.",
-                    "A declarative state changed camera/entity transforms through the shared backend."
+                    "The generic backend created a measurable embedded canvas without Rescue-specific code.",
+                    "The authored Echo Forge WorldSpec also mounts directly through the same backend before story UI integration."
                 ],
                 "page_errors": errors
             }, indent=2))
