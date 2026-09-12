@@ -5,7 +5,7 @@ import {echoForgeWorldSpec} from './echo-forge-world-spec.js';
 
 export const gameWorldManifest=Object.freeze({
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-3',
+  version:'pc-phase1-4',
   engine:'playcanvas',
   specVersion:echoForgeWorldSpec.schemaVersion,
   modes:Object.freeze(['story','mission']),
@@ -36,6 +36,13 @@ function missionPatch(state={}){
     patch.transforms={'pip':{rotation:[0,0,-5]}};
   }else if(state.complete){
     patch.camera='mission.success';
+    // Completion is presentation state, not new game truth: install the already
+    // discovered gear into the bridge and place Pip across the gap so success
+    // reads in the world before the textual recap appears.
+    patch.transforms={
+      'new-gear':{position:[0,.58,1.1],rotation:[90,0,0],scale:[1.15,.34,1.15]},
+      'pip':{position:[3.55,.3,.9],rotation:[0,-24,0]}
+    };
   }else if(rewound||looked.has('ticket')||(state.ticket&&state.ticket!=='order-01')){
     patch.camera='mission.choice';
   }else if(looked.has('workshop')){
