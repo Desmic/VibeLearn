@@ -24,6 +24,11 @@ class RuntimeMigrationTests(unittest.TestCase):
         # stable marker rather than depending on engine implementation metadata.
         self.assertIn("dataset.vibelearnEngine='playcanvas'", backend)
         self.assertIn("PLAYCANVAS_ENGINE_VERSION='2.22.1'", backend)
+        # A healthy generic backend instance must advertise readiness directly;
+        # adapters and the engine-neutral runtime must not infer it from stats().
+        self.assertIn('this.available=true', backend)
+        self.assertIn('this.available=false', backend)
+        self.assertIn('available:this.available', backend)
 
     def test_generic_playcanvas_runtime_has_no_relay_rescue_or_three_assumptions(self):
         runtime = (ROOT / 'web' / 'game-runtime.js').read_text(encoding='utf-8')
