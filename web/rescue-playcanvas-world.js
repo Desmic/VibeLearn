@@ -5,7 +5,7 @@ import {echoForgeWorldSpec} from './echo-forge-world-spec.js';
 
 export const gameWorldManifest=Object.freeze({
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-4',
+  version:'pc-phase1-5',
   engine:'playcanvas',
   specVersion:echoForgeWorldSpec.schemaVersion,
   modes:Object.freeze(['story','mission']),
