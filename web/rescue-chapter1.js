@@ -7,7 +7,7 @@
   const DONE_KEY = 'vibelearn.relay-rescue.signal1-guide.done.v3';
   const rootEl = () => document.querySelector(ROOT_ID);
   const storyWorldBundle=Promise.all([import('/play-canvas.js'),import('/rescue-story3d.js')]).then(([play,module])=>({play,module})).catch(()=>null);
-  let playCanvas=null, missionWorld=null, missionHost=null;
+  let playCanvas=null, missionWorld=null, missionHost=null, worldModule=null;
   const clearMissionHost=()=>{
     missionHost?.classList.remove('rg-three-continuity-ready','rg-three-continuity-failed','rgc1-three-ready','rgc1-three-failed');
     missionHost=null;
@@ -15,7 +15,7 @@
   const disposeMissionWorld=()=>{
     clearMissionHost();
     playCanvas?.disposeWorld?.();
-    playCanvas=null;missionWorld=null;
+    playCanvas=null;missionWorld=null;worldModule=null;
   };
   const readStep = () => { try { return Number(localStorage.getItem(STEP_KEY) || 0); } catch (_) { return 0; } };
   const writeStep = value => { try { localStorage.setItem(STEP_KEY,String(value)); } catch (_) {} };
@@ -114,8 +114,6 @@
 
   function mountMissionWorld(root,a) {
     const level=Number(a?.snapshot?.rescue?.level||0);
-    // Signal 7 is a deliberate fresh-transfer context. Signals 1-6 keep the same
-    // Play Canvas/world lifecycle even though legacy DOM containers are rerendered.
     if (!root || root.hidden || isHistorical(root) || level<1) { clearMissionHost(); return; }
     if(level>6){disposeMissionWorld();return;}
     const host=root.querySelector('.rg-world'); if(!host) { clearMissionHost(); return; }
@@ -124,8 +122,8 @@
     missionHost=host;
     storyWorldBundle.then(bundle=>{
       if(missionHost!==host || !host.isConnected || !bundle) return;
-      playCanvas=bundle.play.getPlayCanvas();
-      missionWorld=playCanvas.showMission(bundle.module,host,visualState(a),{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
+      playCanvas=bundle.play.getPlayCanvas();worldModule=bundle.module;
+      missionWorld=playCanvas.showMission(worldModule,host,visualState(a),{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
       if(missionWorld?.available){host.classList.add(readyClass);host.classList.remove(failedClass);}
       else{host.classList.add(failedClass);host.classList.remove(readyClass);}
     });
@@ -205,8 +203,6 @@
     const previousSync=game.sync.bind(game);
     const previousHide=game.hide.bind(game);
     game.render=(a,...rest)=>{
-      // Do not dispose the world before a rerender. Legacy DOM may be replaced,
-      // but the Play Canvas keeps its stable stage/runtime and reattaches below.
       clearMissionHost();
       const result=previousRender(a,...rest); syncStepFromAttempt(a); enhanceNow(); mountMissionWorld(rootEl(),a); return result;
     };
@@ -215,7 +211,7 @@
       const status=rootEl()?.querySelector('#rg-sync')?.textContent;
       if (!busy && status==='Saved') {
         syncStepFromAttempt(a); enhanceNow();
-        if(playCanvas&&missionHost)missionWorld=playCanvas.showMission(storyWorldBundle.module||null,missionHost,visualState(a));
+        if(playCanvas&&missionHost&&worldModule)missionWorld=playCanvas.showMission(worldModule,missionHost,visualState(a),{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
         else missionWorld?.setMissionState?.(visualState(a));
       }
       return result;
