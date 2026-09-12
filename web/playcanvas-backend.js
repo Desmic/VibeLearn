@@ -15,7 +15,7 @@ const TONE_MAPPINGS={
 
 function unavailable(error){
   const message=error instanceof Error?error.message:String(error);
-  return {available:false,error:message,setState(){},applyPatch(){},setPaused(){},replay(){},stats(){return{available:false,error:message,engine:'playcanvas'};},dispose(){}};
+  return {available:false,error:message,setState(){},applyPatch(){},setPaused(){},replay(){},async pickEntityAt(){return null;},stats(){return{available:false,error:message,engine:'playcanvas'};},dispose(){}};
 }
 function color(hex,fallback='#ffffff'){
   const raw=(typeof hex==='string'?hex:fallback).replace('#','');
@@ -60,6 +60,7 @@ class PlayCanvasWorld {
     this.disposed=false;
     this.cameraVariant='default';
     this.toneMapping='linear';
+    this.picker=null;
 
     const canvas=document.createElement('canvas');
     canvas.className='play-canvas-webgl vl-playcanvas-engine';
@@ -121,6 +122,7 @@ class PlayCanvasWorld {
       app.resizeCanvas(width,height);
       app.setCanvasResolution(pc.RESOLUTION_AUTO,width,height);
       app.updateCanvasSize();
+      this.picker?.resize(width,height);
       // Camera composition is presentation intent in WorldSpec. Re-evaluate the
       // active semantic camera when the surface crosses portrait/landscape.
       if(this.cameraName)this.setCamera(this.cameraName);
@@ -225,6 +227,27 @@ class PlayCanvasWorld {
     this.elapsed=0;
   }
 
+  async pickEntityAt(clientX,clientY,{radius=7}={}){
+    if(this.disposed||!this.available||!this.camera?.camera)return null;
+    const rect=this.canvas.getBoundingClientRect();
+    if(rect.width<1||rect.height<1||clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return null;
+    const width=Math.max(1,Math.round(rect.width));
+    const height=Math.max(1,Math.round(rect.height));
+    if(!this.picker)this.picker=new pc.Picker(this.app,width,height);
+    else this.picker.resize(width,height);
+    this.picker.prepare(this.camera.camera,this.app.scene);
+    const x=Math.round(clientX-rect.left);
+    const y=Math.round(clientY-rect.top);
+    const r=Math.max(1,Math.round(radius));
+    const left=Math.max(0,x-r),top=Math.max(0,y-r);
+    const selection=await this.picker.getSelectionAsync(left,top,Math.min(width-left,r*2+1),Math.min(height-top,r*2+1));
+    for(const item of selection||[]){
+      const name=item?.node?.name;
+      if(name&&this.entities.has(name))return name;
+    }
+    return null;
+  }
+
   _tick(dt){
     if(this.paused||this.reducedMotion)return;
     this.elapsed+=dt;
@@ -264,6 +287,8 @@ class PlayCanvasWorld {
     if(this.disposed)return;this.disposed=true;
     this.available=false;
     this.resizeObserver?.disconnect();
+    try{this.picker?.destroy();}catch(_){}
+    this.picker=null;
     try{this.app.off('update',this._update);}catch(_){}
     try{this.app.destroy();}catch(_){}
     this.canvas?.remove();
