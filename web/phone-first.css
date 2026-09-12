@@ -47,7 +47,10 @@
   .rgc1-guided[data-tutorial-stage='0'] .rgc1-world-key,.rgc1-guided[data-tutorial-stage='1'] .rgc1-world-key{display:none}
   .rgc1-guided[data-tutorial-stage='2'] .rgc1-world-key,.rgc1-guided[data-tutorial-stage='3'] .rgc1-world-key{bottom:58px;gap:3px}.rgc1-world-key span{padding:3px 5px;background:#0a2530e0}.rgc1-world-key small{display:none}
   .rgc1-guided .rg-world-targets{z-index:10}
-  .rgc1-guided .rg-scene-readout{pointer-events:none}
+  /* Signal 1 already carries the necessary state in the coach/action dock.
+     Generic station/readout/key chrome duplicates that information and makes the
+     world feel like a dashboard, so keep it out of the tutorial play surface. */
+  .rgc1-guided .rg-scene-readout,.rgc1-guided .rg-station,.rgc1-guided .rgc1-world-key{display:none!important}
   .rgc1-guided .rg-world.rgc1-three-ready .target-workshop,.rgc1-guided .rg-world.rgc1-three-ready .target-ticket{min-width:108px;min-height:48px;border-width:2px;font-size:.69rem}
   .rgc1-guided .rg-world.rgc1-three-ready .target-workshop{right:4%;top:43%}.rgc1-guided .rg-world.rgc1-three-ready .target-ticket{left:4%;top:49%}
   .rgc1-guided[data-tutorial-stage='2'] .rgc1-dock,.rgc1-guided[data-tutorial-stage='3'] .rgc1-dock,.rgc1-guided[data-tutorial-stage='failed'] .rgc1-dock{gap:6px;margin-top:6px;padding:7px;border-radius:13px}
@@ -83,6 +86,21 @@
   .rgc1-dock .rgc1-memory{border:0;background:transparent;padding:5px 7px}
   .rgc1-dock .rg-ticket{border-color:#476d72;background:#0b2b35}
   .rgc1-dock .rg-tools button{border-radius:10px}
+
+  /* Victory is a game payoff first. The pre-submit console/journal/evidence state
+     remains in DOM for semantics, but it should not turn the clear into a long
+     diagnostic page before the player commits the earned result. */
+  .rgc1-victory .rg-objective,.rgc1-victory .rg-console,.rgc1-victory .rg-evidence,
+  .rgc1-victory .rg-scene-readout,.rgc1-victory .rg-world-targets,.rgc1-victory .rg-station,
+  .rgc1-victory .rgc1-world-key,.rgc1-victory .rgc1-coach{display:none!important}
+  .rgc1-victory .rg-arena{display:block!important}.rgc1-victory .rg-field{max-width:720px!important;margin:0 auto!important}
+  .rgc1-victory .rg-world{min-height:43svh!important;border-color:#6c9c88!important;box-shadow:0 18px 46px #0008!important}
+  .rgc1-victory .rg-clear{margin:8px 0 0;padding:13px 0 0;border-top-color:#75a68f}
+  .rgc1-victory .rg-clear>span{font-size:.62rem;letter-spacing:.14em;color:#8fe3cb}
+  .rgc1-victory .rg-clear>h2{margin:5px 0 3px;font-size:1.65rem}.rgc1-victory .rg-clear>p{margin:0 0 8px}
+  .rgc1-victory .rgc1-recap{margin:10px 0;padding:13px;border-radius:14px}
+  .rgc1-victory .rgc1-causal-strip{margin:9px 0 3px}.rgc1-victory .rgc1-formal{margin-top:8px}
+  .rgc1-victory #rg-next{min-height:54px;margin-top:9px;border-radius:12px;font-size:.88rem;box-shadow:0 7px 22px #0005}
 }
 @media(max-width:430px){
   .rgi-storybar>b{display:none}.rgi-scene-caption{max-height:none;padding:43px 12px 11px}.rgi-scene-caption h2{font-size:1.42rem}.rgi-scene-caption p{font-size:.69rem}.rgi-scene-caption blockquote{font-size:.63rem}.rgi-fact{font-size:.56rem}
