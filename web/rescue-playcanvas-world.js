@@ -5,7 +5,7 @@ import {echoForgeWorldSpec} from './echo-forge-world-spec.js';
 
 export const gameWorldManifest=Object.freeze({
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-2',
+  version:'pc-phase1-3',
   engine:'playcanvas',
   specVersion:echoForgeWorldSpec.schemaVersion,
   modes:Object.freeze(['story','mission']),
@@ -14,16 +14,42 @@ export const gameWorldManifest=Object.freeze({
 
 function missionPatch(state={}){
   const looked=new Set(state.looked||[]);
-  const patch={camera:'mission',show:['new-gear'],hide:['duplicate-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']};
+  const rewound=Number(state.rewinds||0)>0;
+  const knowsForge=looked.has('workshop')||looked.has('ticket')||rewound||Boolean(state.complete)||Boolean(state.failed);
+  const patch={
+    camera:'mission.forge',
+    show:[],
+    hide:['new-gear','duplicate-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']
+  };
+
+  // World truth is deliberately not rendered as learner-visible knowledge until
+  // the player inspects the Forge. The server remains authoritative either way.
+  if(knowsForge){
+    patch.hide=patch.hide.filter(id=>id!=='new-gear');
+    patch.show.push('new-gear');
+  }
+
   if(state.failed){
+    patch.camera='mission.failure';
+    patch.hide=patch.hide.filter(id=>id!=='duplicate-gear');
     patch.show.push('duplicate-gear');
     patch.transforms={'pip':{rotation:[0,0,-5]}};
-  }else if(state.ticket&&state.ticket!=='order-01'){
+  }else if(state.complete){
+    patch.camera='mission.success';
+  }else if(rewound||looked.has('ticket')||(state.ticket&&state.ticket!=='order-01')){
+    patch.camera='mission.choice';
+  }else if(looked.has('workshop')){
+    patch.camera='mission.ticket';
+  }
+
+  if(state.ticket&&state.ticket!=='order-01'){
+    patch.hide=patch.hide.filter(id=>id!=='order-seal');
     patch.show.push('order-seal');
   }else if(looked.has('ticket')){
+    patch.hide=patch.hide.filter(id=>id!=='order-seal');
     patch.show.push('order-seal');
   }
-  if(Number(state.rewinds||0)>0)patch.hide.push('duplicate-gear');
+  if(rewound)patch.hide.push('duplicate-gear');
   return patch;
 }
 
