@@ -6,6 +6,7 @@ import {validateWorldSpec} from './world-spec.js';
 
 export const PLAYCANVAS_ENGINE_VERSION='2.22.1';
 export const PLAYCANVAS_BACKEND_VERSION='1';
+const PORTRAIT_ASPECT_MAX=.9;
 
 function unavailable(error){
   const message=error instanceof Error?error.message:String(error);
@@ -52,6 +53,7 @@ class PlayCanvasWorld {
     this.materials=new Map();
     this.elapsed=0;
     this.disposed=false;
+    this.cameraVariant='default';
 
     const canvas=document.createElement('canvas');
     canvas.className='play-canvas-webgl vl-playcanvas-engine';
@@ -105,6 +107,9 @@ class PlayCanvasWorld {
       app.resizeCanvas(width,height);
       app.setCanvasResolution(pc.RESOLUTION_AUTO,width,height);
       app.updateCanvasSize();
+      // Camera composition is presentation intent in WorldSpec. Re-evaluate the
+      // active semantic camera when the surface crosses portrait/landscape.
+      if(this.cameraName)this.setCamera(this.cameraName);
     };
     this.resizeObserver=new ResizeObserver(this._resize);
     this.resizeObserver.observe(host);
@@ -165,13 +170,24 @@ class PlayCanvasWorld {
     }
   }
 
+  _cameraShot(name){
+    const definition=this.spec.cameras[name];
+    if(!definition)throw new Error(`Unknown camera ${name}`);
+    const rect=this.canvas.getBoundingClientRect();
+    const aspect=rect.height>0?rect.width/rect.height:1;
+    if(definition.portrait&&aspect<=PORTRAIT_ASPECT_MAX){
+      return{shot:definition.portrait,variant:'portrait'};
+    }
+    return{shot:definition,variant:'default'};
+  }
+
   setCamera(name){
-    const shot=this.spec.cameras[name];
-    if(!shot)throw new Error(`Unknown camera ${name}`);
+    const {shot,variant}=this._cameraShot(name);
     this.camera.setPosition(...shot.position);
     this.camera.lookAt(...shot.lookAt);
     if(Number.isFinite(shot.fov))this.camera.camera.fov=shot.fov;
     this.cameraName=name;
+    this.cameraVariant=variant;
   }
 
   applyPatch(patch={}){
@@ -219,7 +235,7 @@ class PlayCanvasWorld {
     return{
       available:this.available,engine:'playcanvas',engineVersion:PLAYCANVAS_ENGINE_VERSION,
       backendVersion:PLAYCANVAS_BACKEND_VERSION,worldId:this.spec.id,worldVersion:this.spec.version,
-      state:this.state,camera:this.cameraName,entityCount:this.entities.size,
+      state:this.state,camera:this.cameraName,cameraVariant:this.cameraVariant,entityCount:this.entities.size,
       deviceType:this.app.graphicsDevice?.deviceType||'unknown',canvasCount:this.host.querySelectorAll('canvas').length,
       canvasCssWidth:Math.round(rect.width),canvasCssHeight:Math.round(rect.height),
       bufferWidth:this.app.graphicsDevice?.width||0,bufferHeight:this.app.graphicsDevice?.height||0
