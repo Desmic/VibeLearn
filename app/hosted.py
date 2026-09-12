@@ -138,6 +138,15 @@ def create_app(config=None, auth_provider=None):
             raise service.DomainError("NOT_FOUND", "Not found.", 404)
         return send_from_directory(ROOT / "web" / "vendor", name)
 
+    @app.get("/assets/<name>")
+    def game_asset(name):
+        if name not in (
+            "quaternius-animated-robot.glb",
+            "QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt",
+        ):
+            raise service.DomainError("NOT_FOUND", "Not found.", 404)
+        return send_from_directory(ROOT / "web" / "assets", name)
+
     @app.get("/api/config")
     def configuration():
         return jsonify(hosted=True, auth="supabase", sign_in_required=True)
