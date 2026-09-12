@@ -5,13 +5,13 @@
 
 export const STORY3D_ADAPTER_VERSION='1';
 const BASE_INSTANCE_METHODS=['setPaused','replay','stats','dispose'];
-const MODE_METHOD={story:'setBeat',mission:'setMissionState'};
+const MODE_METHOD={story:'setBeat',mission:'setMissionState',play:'setMode'};
 
 function unavailable(error,manifest=null){
   const message=error instanceof Error?error.message:String(error||'Story world unavailable');
   return {
     available:false,error:message,manifest,
-    setBeat(){},setMissionState(){},setPaused(){},replay(){},
+    setMode(){},setBeat(){},setMissionState(){},setPaused(){},replay(){},
     stats(){return{available:false,error:message,adapterVersion:STORY3D_ADAPTER_VERSION,worldId:manifest?.id||null,worldVersion:manifest?.version||null};},
     dispose(){}
   };
@@ -48,6 +48,10 @@ export function mountStoryWorldModule(module,host,options={}){
   if(modeMethod&&typeof instance[modeMethod]!=='function'){
     try{instance.dispose();}catch(_){}
     return unavailable(`Story-world instance is missing ${modeMethod}() for ${mode} mode`,checked.manifest);
+  }
+  if(mode==='play'&&(typeof instance.setBeat!=='function'||typeof instance.setMissionState!=='function')){
+    try{instance.dispose();}catch(_){}
+    return unavailable('Play Canvas worlds must expose setBeat() and setMissionState()',checked.manifest);
   }
   return Object.assign(instance,{manifest:checked.manifest});
 }
