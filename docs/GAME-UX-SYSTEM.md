@@ -1,12 +1,12 @@
 # VibeLearn game UX system — the game is the course
 
-Active user direction, updated 10 September 2026. Read with [GAME-AS-COURSE.md](GAME-AS-COURSE.md), [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md), [STATE.md](STATE.md), [GAME-UX-REVIEW.md](GAME-UX-REVIEW.md), and [COURSE-GENERATION-GAME-SYSTEM.md](COURSE-GENERATION-GAME-SYSTEM.md).
+Active user direction, updated 12 September 2026. Read with [GAME-AS-COURSE.md](GAME-AS-COURSE.md), [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md), [STATE.md](STATE.md), [GAME-UX-REVIEW.md](GAME-UX-REVIEW.md), [COURSE-GENERATION-GAME-SYSTEM.md](COURSE-GENERATION-GAME-SYSTEM.md), [PLAY-CANVAS.md](PLAY-CANVAS.md), and [THREE-STORY-FRAMEWORK.md](THREE-STORY-FRAMEWORK.md).
 
 ## Product and review standard
 
 Build a game whose subject-relevant actions develop the intended course capabilities. The experience must earn voluntary play from a curious younger non-specialist and an older teen/young adult. Do not mistake a game-themed website, a beautiful scene, easy quizzes, XP accumulation, or a 3D renderer for that product.
 
-The current user is the sole real product reviewer during private refinement. Their explicit verdict overrides critic/agent/automation scores. The current Relay Rescue first-touch/story verdict is **3/10**. The target remains unrounded **>=9.0/10** for each applicable story, game, and learning/transfer critic gate, no critical blocker, followed by explicit user acceptance.
+The current user is the sole real product reviewer during private refinement. Their explicit verdict overrides critic/agent/automation scores. The predecessor first-touch/story verdict remains **3/10** until the user reviews the materially changed verified/deployed candidate. The target remains unrounded **>=9.0/10** for each applicable story, game, and learning/transfer critic gate, no critical blocker, followed by explicit user acceptance.
 
 ## Story comes before interface
 
@@ -15,6 +15,23 @@ For every course/subject, generate a compelling **story/fantasy/world premise be
 A story candidate must first survive its own story critic. The story critic evaluates one frozen story at a time and does not award points for implementation, curriculum correctness, tests, rendering technology, or learning evidence. See [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md).
 
 Current story/world selection is driven by the topic/outcomes plus broad cross-age quality constraints. Learner creative preferences are **not** an input yet. Long term, an explicit preference profile may influence genre, tone, realism/fantasy balance, character style, visual style, pace, humor/darkness, exploration/action, and narrative density.
+
+## Play Canvas is the primary experience surface
+
+VibeLearn has converged on the **Play Canvas** as the higher-level game UX architecture.
+
+The Play Canvas is the persistent surface in which story, exploration, missions, visible consequences, progression, building and transfer are staged. Three.js/2D/2.5D are rendering backends inside it; none of them is the product shell.
+
+The game should therefore feel like one coherent playable world/system rather than:
+
+- story overlay -> different mission page -> web workbench -> report page;
+- course cards with a canvas inserted between them;
+- one renderer/canvas lifecycle per lesson;
+- a world that disappears exactly when the reasoning becomes difficult.
+
+When compatible story and mission states use the same world package, keep a persistent Play Canvas stage/world/runtime alive and update state/camera/HUD rather than remounting a new renderer. Accessible DOM actions/fallback remain essential, but they support the game surface rather than becoming a dashboard-first architecture.
+
+During migration, legacy DOM containers may still be replaced underneath. The measurable invariant is that the Play Canvas stage/world identity survives compatible transitions and new work does not add another bespoke game shell. See [PLAY-CANVAS.md](PLAY-CANVAS.md).
 
 ## Attention first, cognition second
 
@@ -31,7 +48,7 @@ For the first/tutorial chapter:
 - dramatize the inciting event: what happened first, what changed, what information was lost, and what remains true;
 - make the player's role emotionally and causally meaningful rather than merely observational;
 - give the player one obvious action at a time until the interaction grammar is understood;
-- use tutorial focus mode so the playfield dominates and nonessential system/UI surfaces are deferred;
+- use tutorial focus mode so the Play Canvas/world dominates and nonessential system/UI surfaces are deferred;
 - use informative failure to reveal why a wrong action matters, followed by easy recovery;
 - attach formal terms only after the concrete model exists when faithful;
 - preserve essential meaning with reduced motion and sound off.
@@ -40,7 +57,7 @@ The first chapter fails if a fresh novice cannot explain who/what matters, what 
 
 ## First-touch story UX
 
-The current opening failed because it behaved too much like a rushed slide sequence. Future story/cinematic UX must satisfy all of the following:
+The predecessor opening failed because it behaved too much like a rushed slide sequence. Story/cinematic UX must satisfy all of the following:
 
 - **Back / previous beat is mandatory.**
 - First-run progression is **user-paced by default**; do not force fast automatic advancement.
@@ -75,11 +92,13 @@ A great story with boring play fails. Fun play with shallow learning fails. Stro
 
 **Curiosity without coercion.** The reason to continue must survive hiding XP. Do not substitute shame, streak pressure, fake urgency, grinding, or reward spam for story/world pull and satisfying play.
 
+**World continuity as cognitive support.** As complexity rises, keep the character/world and established causal objects present where they still carry meaning. Do not throw away the concrete model and replace it with a themed form exactly when transfer should be built from that model.
+
 ## Current Relay Rescue implication
 
-Do not repair the current Relay Rescue opening by only slowing the existing six beats. Its story treatment is rejected at 3/10. The next candidate needs a stronger hook, clearer causal staging, more expressive character/world storytelling, better escalation, and explicit player control over time/navigation.
+The Echo Forge story treatment is the current reference story candidate, but the user's **3/10 remains the controlling review of the predecessor first-touch experience** until the realized replacement is verified, deployed and reviewed.
 
-The existing Signal 1 progressive interaction can remain a useful mechanic reference, but it must be re-evaluated after the new story/world establishes a stronger reason to care and act.
+Current Relay Rescue migration should not create another story-only canvas or lesson page. Opening -> Signal 1 -> Signals 2-6 should converge on the persistent Play Canvas. Signal 6 policy construction is a priority migration target because it currently risks feeling like a themed web workbench. Signal 7 may deliberately reveal a new real-world context, but that context should still be presented as a game mode inside the Play Canvas shell rather than a generic course page.
 
 ## HUD and visible-complexity budget
 
@@ -91,7 +110,7 @@ Every input receives acknowledgement. Pending saves prevent accidental duplicate
 
 ## 2D / 2.5D / Three.js 3D
 
-Three.js is now a serious option for **capturing attention and building attachment**, especially for kids, teens, and young adults. Evaluate it not only for spatial learning mechanics but also for immersive story openings, explorable environments, character presence, environmental storytelling, discovery, atmosphere, and direct interaction.
+Three.js is a serious option for **capturing attention and building attachment**, especially for kids, teens, and young adults. Evaluate it not only for spatial learning mechanics but also for immersive story openings, explorable environments, character presence, environmental storytelling, discovery, atmosphere, and direct interaction.
 
 For important story/game candidates, explicitly compare:
 
@@ -101,7 +120,7 @@ For important story/game candidates, explicitly compare:
 
 Today choose based on the topic, story, broad target audience, device budget, and whether the medium meaningfully increases world presence and voluntary engagement. Once an explicit StoryPreferenceProfile exists, learner preference may also influence the medium; do not infer it today. A technically impressive 3D scene with weak story still fails. Keep pinned local assets, same-origin runtime, keyboard/touch semantics, reduced-motion behavior, readable fallback, and realistic mobile performance targets. Renderer state never decides assessment/evidence.
 
-When Three.js is selected, use [THREE-STORY-FRAMEWORK.md](THREE-STORY-FRAMEWORK.md). The shared runtime owns WebGL lifecycle, resize, resource disposal, frame scheduling, pause/reduced motion, context-loss recovery and phone renderer policy. A story adapter owns only its world assets/geometry, camera compositions, beat states and authoritative-game-state visualization. A second fantasy should be integrated by replacing a world adapter/package, not by cloning renderer lifecycle code.
+When Three.js is selected, use [THREE-STORY-FRAMEWORK.md](THREE-STORY-FRAMEWORK.md) **under the Play Canvas contract**. The shared Story3D runtime owns WebGL lifecycle, resize, resource disposal, frame scheduling, pause/reduced motion, context-loss recovery and phone renderer policy. A story adapter owns only its world assets/geometry, camera compositions, beat states and authoritative-game-state visualization. Play Canvas owns the persistent game-surface/world lifecycle above them. A second fantasy should integrate by replacing a world adapter/package, not by cloning renderer lifecycle code or creating a new shell.
 
 ## Learning integrity and continuity
 
@@ -113,10 +132,10 @@ Observed simulation feedback is guided assistance, not fresh independent predict
 
 ## Documentation continuity
 
-User feedback that changes story, onboarding, progression, interaction grammar, rendering strategy, visual hierarchy, acceptance, or course generation must be reflected in relevant docs in the same implementation unit. A code-only change with stale design docs is incomplete.
+User feedback that changes story, onboarding, progression, interaction grammar, rendering strategy, visual hierarchy, Play Canvas/framework boundaries, acceptance, or course generation must be reflected in relevant docs in the same implementation unit. A code-only change with stale design docs is incomplete.
 
 ## Generation and scope
 
-[COURSE-GENERATION-GAME-SYSTEM.md](COURSE-GENERATION-GAME-SYSTEM.md) carries the future generation contract. Generated content must include story generation/critique, coherent gameplay, outcome coverage, progression, provenance, assistance, persistence, accessibility, and rendered critic evidence.
+[COURSE-GENERATION-GAME-SYSTEM.md](COURSE-GENERATION-GAME-SYSTEM.md) carries the future generation contract. Generated content must include story generation/critique, coherent Play Canvas gameplay, outcome coverage, progression, provenance, assistance, persistence, accessibility, and rendered critic evidence.
 
 This remains private Phase 1 refinement. No new model integration, untrusted runner, external testers, paid provisioning, or public rollout is authorized without explicit user approval.
