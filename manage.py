@@ -39,6 +39,7 @@ def main():
             "tests.game_review_browser",
             "tests.story3d_framework_browser",
             "tests.playcanvas_framework_browser",
+            "tests.playcanvas_story_interaction_browser",
             "tests.onboarding_browser",
             "tests.rescue_browser",
         ]:
