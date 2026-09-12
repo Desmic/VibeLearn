@@ -24,9 +24,11 @@ def expect_playcanvas_runtime(page):
     expect(page.locator('.game-runtime-stage')).to_have_attribute('data-game-runtime-version', '1')
     canvas = page.locator('.vl-playcanvas-engine')
     expect(canvas).to_be_visible()
-    expect(canvas).to_have_attribute('data-engine', 'playcanvas')
+    expect(canvas).to_have_attribute('data-vibelearn-engine', 'playcanvas')
     expect(canvas).to_have_attribute('data-playcanvas-engine', '2.22.1')
     expect(canvas).to_have_attribute('data-game-runtime-version', '1')
+    box = canvas.bounding_box()
+    assert box and box['width'] > 1 and box['height'] > 1, box
     return canvas
 
 
