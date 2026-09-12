@@ -75,7 +75,10 @@ def main():
             assert result["before"]["state"] == "bloom", result
             assert result["before"]["entityCount"] == 5, result
             assert result["before"]["canvasCount"] == 1, result
-            assert result["before"]["canvasEngine"] == "playcanvas", result
+            # PlayCanvas owns data-engine on its canvas. Assert its actual pinned
+            # identity instead of replacing the engine's marker with ours.
+            assert result["before"]["canvasEngine"] == "PlayCanvas 2.22.1", result
+            assert result["before"]["canvasVersion"] == "2.22.1", result
             page.screenshot(path=str(out / "playcanvas-star-orchard-390.png"), full_page=True)
             if errors:
                 raise AssertionError(errors)
