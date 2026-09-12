@@ -1,6 +1,6 @@
-# Current checkpoint — PlayCanvas Engine + portable game rules
+# Current checkpoint — verified PlayCanvas runtime, portable rules, world-quality next
 
-Updated 12 September 2026. **Status: `user_rejected` / `needs_revision`.** The current user's explicit verdict remains authoritative until a materially changed verified/deployed candidate is reviewed.
+Updated 12 September 2026. **Status: `user_rejected` / `needs_revision`.** The current user's explicit predecessor verdict remains authoritative until a materially changed verified/deployed candidate is reviewed by the user.
 
 ## Latest direction
 
@@ -8,7 +8,7 @@ VibeLearn's objective is to **generate effective learning games/worlds for arbit
 
 Three.js is no longer a strategic foundation. It remains temporary reference/migration infrastructure only while the old Echo Forge realization is retired.
 
-**PlayCanvas Engine is the first strategic backend and Phase 1 itself must run on it.** Phase 1 is not allowed to postpone the engine pivot and later claim the portable architecture was proved.
+**PlayCanvas Engine is the first strategic backend and Phase 1 now runs its primary Echo Forge opening/mission world through it.** Future backends may include Unity, Unreal, specialized 2D/simulation engines or other runtimes without changing canonical learning/evidence identity.
 
 The durable architecture is engine-neutral and spec-driven:
 
@@ -16,17 +16,98 @@ The durable architecture is engine-neutral and spec-driven:
 
 `AssessmentEvidenceSpec` remains outside both engine truth and game-success truth.
 
-Future backends may include Unity, Unreal, specialized 2D/simulation engines or other runtimes without changing canonical learning/evidence identity.
-
 Read root `CODEX-IMPLEMENTATION-PLAN.md`, `docs/GAME-RUNTIME-ARCHITECTURE.md`, and `docs/GAME-RULES-SPEC.md` as current architecture authority.
 
-## Why GameRulesSpec was added
+## Verified Phase 1 checkpoint
 
-A portable scene/world schema is not enough for a generated-game platform. VibeLearn also needs engine-neutral **gameplay semantics**: state, actions, preconditions, deterministic transitions, invariants, resources, objectives, success/failure and semantic events.
+Current isolated branch: **`phase1/playcanvas-engine`** · draft PR **#5**.  
+Verified source revision: **`8aaf9243d0289bebf5a5762f89bfe50f9a344734`**.  
+Echo Forge world package: **`pc-phase1-4`**.  
+Pinned engine: **PlayCanvas 2.22.1**, self-hosted/same-origin.
 
-`GameRulesSpec` now owns that portable gameplay layer. The PlayCanvas backend realizes visuals/input/animation/physics around it; a future Unity/Unreal backend should be able to consume the same rules and semantic actions. Learning-critical rules remain server-authoritative in the current hosted architecture, and engine callbacks never establish mastery by themselves.
+GitHub Actions run **34700489102** is green on that exact revision:
 
-Phase 1 must extract this contract incrementally from the already-tested Relay Rescue semantics rather than rewrite mature server logic just to make the new architecture look pure.
+- pinned PlayCanvas vendoring/SRI verification passed;
+- build passed;
+- **122 unit/backend tests passed**;
+- complete real-browser suite passed;
+- phone evidence is preserved for 360 / 390 / 430 portrait widths;
+- story -> Signal 1 keeps one `GameRuntime` instance and exact PlayCanvas canvas;
+- Signals 1–6 keep the shared runtime/world alive;
+- Signal 7 deliberately exits the fantasy world for sealed transfer;
+- reduced motion, narrow screens, save/reload/process restart, learner isolation and existing evidence semantics remain covered.
+
+This is the current rollback/integrity checkpoint. **Do not merge or deploy it simply because it is green.**
+
+## What pc-phase1-4 changed visibly
+
+Compared with the rejected predecessor and earlier PlayCanvas slices:
+
+- phone portrait uses authored camera variants rather than squeezing a landscape shot narrower;
+- the opening no longer tells the learner that the Forge definitely produced a gear after the reply is lost;
+- Signal 1 starts with the gear visually hidden and reveals it only after inspecting the Forge;
+- camera composition follows semantic discovery: Forge -> ticket/Pip -> choice -> duplicate consequence -> success;
+- generic station/readout/key dashboard chrome is removed from the phone Signal 1 play surface;
+- success is realized inside the world: the discovered gear moves into the bridge and Pip appears across the gap;
+- the immediate clear hides journal/evidence panels and gives one compact payoff/CTA (`Secure the crossing ->`) before deeper debrief.
+
+These are game-experience improvements only. They do not alter server-authoritative game state or learner evidence truth.
+
+## Current visual diagnosis
+
+`pc-phase1-4` is materially cleaner and more game-like than the predecessor, but **it is not a >=9 game candidate**.
+
+Fresh rendered evidence makes the main blocker unambiguous: **world/art quality now limits first-touch magic more than HUD layout**.
+
+Current weaknesses:
+
+- primitive/blockout geometry still reads as a prototype;
+- Pip has little animation/expression/personality in motion;
+- the Echo Forge and islands are sparse and lack environmental storytelling;
+- lighting/atmospheric depth is basic;
+- many frames contain large dead regions rather than authored composition/detail;
+- the opening still asks the player to advance through six Continue beats before meaningful agency;
+- later chapter states still need review for regression into workbench/web-surface interaction.
+
+Do not keep shaving dashboard pixels and mistake that for a 9/10 game. The next slice must raise the **world itself**: atmosphere, visual hierarchy, character/set composition, effects and earlier player agency.
+
+## GameRulesSpec implementation
+
+The first renderer-independent rules interpreter now exists and is intentionally isolated from Relay Rescue evidence writes.
+
+Implemented/proven:
+
+- allowlisted typed state: boolean, bounded integer/number, enum;
+- structured expressions rather than `eval`;
+- deterministic conditions/branches;
+- `set` and bounded arithmetic effects;
+- invariants, objectives and semantic events;
+- invalid actions/specs fail closed;
+- no PlayCanvas/DOM callbacks or engine-object truth;
+- no assessment/evidence side effects.
+
+Tests prove the same interpreter on:
+
+1. retry / durable-identity semantics related to Echo Forge; and
+2. a materially unrelated bounded-resource mechanic.
+
+This is architecture evidence only. It earns zero game/learning critic points.
+
+Next rules work is incremental mapping from the already-tested authoritative Relay Rescue service into semantic rule state/events. Do **not** rewrite the mature server model simply for architectural purity.
+
+## Engine/runtime implementation already established
+
+1. pinned/self-hosted PlayCanvas Engine 2.22.1;
+2. versioned engine-neutral `WorldSpec` validator;
+3. generic `WorldSpec -> PlayCanvas` backend creating real entities/materials/lights/cameras;
+4. unrelated synthetic Star Orchard WorldSpec proven in real Chromium/WebGL2 through the same backend;
+5. persistent engine-neutral `GameRuntime` shell;
+6. Echo Forge authored WorldSpec + PlayCanvas world adapter;
+7. direct opening/mission imports no longer depend on the Three.js adapter or old internal Play Canvas facade;
+8. embedded canvas lifecycle/resize/readiness contract corrected and browser-proven;
+9. server-authoritative progression/auth/isolation/evidence semantics remain unchanged.
+
+Three.js files/tests remain legacy/reference coverage until equivalent PlayCanvas behavior is fully proven and old paths can be removed safely. They must not regain strategic ownership.
 
 ## Naming correction
 
@@ -34,115 +115,37 @@ The old internal architecture name **“Play Canvas”** is deprecated because i
 
 `docs/PLAY-CANVAS.md` and `docs/THREE-STORY-FRAMEWORK.md` are legacy migration references.
 
-## Generated framework target
+## Critic / acceptance protocol
 
-Generated games should primarily be validated specs/data + assets:
+The predecessor's user rating remains **3/10** until the user reviews a materially changed verified/deployed candidate. Historical internal scores never carry forward automatically.
 
-- `LearningSpec` — learning identity/outcomes/sources;
-- `StoryWorldSpec` — semantic story/world;
-- `GameDesignSpec` — creative mechanics, core loop, challenge graph and progression;
-- `GameRulesSpec` — portable deterministic gameplay state/actions/transitions/invariants/objectives/events;
-- `WorldSpec` — engine-neutral scenes/entities/components/assets/interactions/physics/animation intent;
-- `RuntimeExperienceSpec` — modes, input, HUD, save/resume UX, accessibility, performance and rule/world presentation mappings;
-- `EngineTargetSpec` — backend capabilities/constraints;
-- `AssessmentEvidenceSpec` — authoritative evidence meaning, assistance/exposure and transfer/retrieval claims.
+Do not present a build merely because tests pass. Critics are separate gates on the **same exact rendered build**:
 
-The framework exposes reusable engine-neutral mechanics, primitives and archetypes that compile differently per backend rather than requiring freshly generated renderer/game-engine glue for each course.
+1. story/world >=9.0, no blocker;
+2. first-touch gameplay >=9.0, no blocker;
+3. whole-game gameplay >=9.0, no blocker;
+4. learning/transfer >=9.0, no blocker;
+5. architecture/runtime/security/persistence as a hard engineering gate that contributes zero automatic quality points.
 
-## Phase 1 engine execution
-
-Current work lives on isolated branch **`phase1/playcanvas-engine`**, draft PR **#5**. Do not merge/deploy it simply because the architecture compiles.
-
-Implemented so far:
-
-1. pinned/self-hosted PlayCanvas Engine **2.22.1** with npm SRI verification and same-origin learner runtime;
-2. versioned engine-neutral `WorldSpec` validator;
-3. generic `WorldSpec -> PlayCanvas` backend creating real PlayCanvas entities/materials/lights/cameras;
-4. unrelated synthetic `Star Orchard` WorldSpec proven in real Chromium/WebGL2 through the same backend;
-5. persistent engine-neutral `GameRuntime` shell;
-6. Echo Forge authored `WorldSpec` + PlayCanvas world adapter;
-7. primary Echo Forge opening and Signal 1 now import `game-runtime.js` + `rescue-playcanvas-world.js` directly and no longer import the Three.js adapter or old Play Canvas façade;
-8. Render build path vendors the pinned engine before startup;
-9. existing server-authoritative progression/evidence/auth/isolation semantics remain unchanged.
-
-The latest browser cycle exposed a real embedded-runtime defect: the stage was marked failed before mount, causing PlayCanvas to initialize against a hidden `0x0` host. That lifecycle has been corrected and the backend now sizes the canvas explicitly from the containing game surface using PlayCanvas's supported embedded-canvas APIs. Verification of that exact revision is currently in CI.
-
-Three.js files/tests still exist as legacy/reference coverage until equivalent PlayCanvas behavior and quality are proven. They must not regain strategic ownership.
-
-## GameRulesSpec implementation target
-
-Next architecture slice after the PlayCanvas runtime baseline is green:
-
-1. implement a deliberately small allowlisted GameRulesSpec schema/interpreter;
-2. derive the first rules package from current Echo Forge Signal 1 semantics without changing evidence truth;
-3. map authoritative server command results into semantic rule state/events;
-4. prove deterministic rule replay without any renderer;
-5. prove a second unrelated synthetic mechanic through the same interpreter;
-6. keep PlayCanvas bound to semantic actions/state/events rather than course-specific business logic;
-7. expand the rule vocabulary only from concrete game needs.
-
-See `docs/GAME-RULES-SPEC.md`.
-
-## Experience direction
-
-Architecture is not the current product-quality bottleneck by itself.
-
-The predecessor critic evidence and rendered screenshots show the main experience problem clearly: **a web HUD surrounding a small 3D diorama**. The next product revision must invert that hierarchy:
-
-- world first, HUD second;
-- Pip, the Forge, the broken bridge and consequences occupy meaningful phone-frame area;
-- action/environment carries more causal storytelling than caption panels;
-- first meaningful input feels like acting in the world, not navigating a website;
-- visible failure/recovery happens spatially and immediately;
-- later construction/transfer keeps the game world/fantasy alive instead of collapsing into generic workbench/forms;
-- phone portrait composition gets first-class camera/layout treatment rather than desktop framing squeezed narrower.
-
-Do not increase score because PlayCanvas exists. The engine earns points only when the rendered/player experience improves.
-
-## Critic/acceptance protocol
-
-Do not present a candidate to the user simply because it runs or because the architecture is clean.
-
-Critics are separate gates and must score the same verified build independently:
-
-1. **story/world >=9.0/10** — hook, character/world attachment, causality, pacing, stakes, payoff and cross-age appeal;
-2. **first-touch gameplay >=9.0/10** — first 60–90 seconds as an actual game, clarity, agency, controls, feedback, delight, recovery and story-to-play transition;
-3. **whole-game gameplay >=9.0/10** — progression, challenge, variety, agency, cohesion, payoff and whether later reasoning still feels like a game rather than a website;
-4. **learning/transfer >=9.0/10** — correctness, meaningful practice, misconception handling, scaffolding, unassisted evidence, fresh transfer and delayed retrieval where claimed;
-5. **architecture/runtime** — portability, rules/spec/compiler genericity, persistence/security/accessibility/performance. This is a hard engineering gate but contributes **zero automatic points** to story/gameplay/learning scores.
-
-Every scored gate requires no blocker. A failure causes another repair cycle; scores cannot be averaged across categories to hide a failure. Use a genuinely separate critic/agent where available. If only an internal/tool-assisted critic is available, label it `internal_tool_assisted` and never call it independent or human/youth-tested.
-
-Only after all applicable >=9 gates pass on the same exact verified build should that build be deployed, the served revision verified, and the user invited to review it. The user's explicit verdict remains final and can reject a critic-passing build.
+Use a genuinely separate critic/agent where available. If only builder/tool-assisted review is available, label it **`internal_tool_assisted`** and never call it independent or human/youth-tested. Machine success proves behavior, not delight or learning efficacy. User verdict remains final.
 
 ## Immediate implementation order
 
-1. make the direct opening -> Signal 1 PlayCanvas runtime/browser gate completely green;
-2. inspect fresh 360/390/430 portrait screenshots from that exact build;
-3. add portrait-aware camera composition and improve first-touch world/character scale, visual causality and early agency;
-4. establish minimal GameRulesSpec/interpreter + engine-independent tests and an unrelated mechanic proof;
-5. bind Echo Forge authoritative state/events through the portable rules/runtime seam without weakening existing server tests;
-6. migrate Signals 2–7 into the same PlayCanvas game/runtime architecture while keeping world identity alive as reasoning becomes harder;
-7. replace migration façade/CSS names and remove primary Three.js paths once parity is proven;
-8. verify save/reload, reset, history, learner isolation, evidence semantics, touch, reduced motion, context failure and performance;
-9. run story/world critic and repair until >=9/no blocker;
-10. run first-touch gameplay critic and repair until >=9/no blocker;
-11. run whole-game gameplay critic and repair until >=9/no blocker;
-12. run learning/transfer critic and repair until >=9/no blocker;
-13. run final architecture/security/persistence verification on the same build;
-14. deploy that exact revision only after every gate passes;
-15. verify the served revision and then ask the current user for the decisive review.
-
-## Current quality state
-
-The user's latest explicit predecessor first-touch/story rating remains **3/10**. Historical critic scores do not override that rejection.
-
-Historical internal diagnostics remain: story treatment 9.37 pass, first-touch 8.86 fail, whole chapter 8.71 fail. They do **not** carry forward as scores for the new PlayCanvas candidate.
-
-No new story/game/learning critic score is valid until the new PlayCanvas candidate has passed machine/runtime verification and fresh rendered evidence is inspected.
+1. keep `8aaf924... / pc-phase1-4` frozen as the green rollback checkpoint;
+2. add a small engine-neutral atmosphere/rendering-intent extension to WorldSpec only where PlayCanvas can realize it portably (exposure, fog, camera tone mapping);
+3. materially enrich Echo Forge/Pip/environment composition using reusable primitives/archetype patterns, without making the generic backend Rescue-specific;
+4. verify the richer world across 360 / 390 / 430 portrait evidence and keep phone performance sane;
+5. then move meaningful player agency earlier into the opening instead of six consecutive Continue beats;
+6. rerun story/world and first-touch internal diagnostics on the exact rendered candidate and repair until no blocker remains;
+7. continue migrating later chapter mechanics so the fantasy/world survives harder reasoning rather than reverting to a generic workbench;
+8. incrementally bind authoritative service results to GameRulesSpec semantic state/events without weakening persistence/evidence tests;
+9. remove legacy Three.js/migration facade paths only after PlayCanvas parity/quality is proven;
+10. run whole-game and learning/transfer gates, then final architecture/security/persistence verification;
+11. deploy only an exact build that passes every applicable gate;
+12. verify served revision, then ask the current user for the decisive review.
 
 ## Deployment
 
-Production/hosted branch remains **`deploy/render-supabase`**. Render auto-deploy is disabled. The Phase 1 PlayCanvas branch is not live and must remain isolated until an exact verified review candidate is ready.
+Production/hosted branch remains **`deploy/render-supabase`**. Render auto-deploy is disabled. The PlayCanvas Phase 1 branch is **not live** and remains isolated.
 
 Hosted auth, learner isolation, server-authoritative progression/evidence, immutable submitted evidence, assistance/exposure semantics, reset confirmation and historical review remain in force.
