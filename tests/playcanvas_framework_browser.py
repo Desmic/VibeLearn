@@ -34,7 +34,10 @@ def main():
                 schemaVersion:'1',
                 id:'framework-proof.star-orchard',
                 version:'1',
-                environment:{clearColor:'#101022',ambient:'#40405a'},
+                environment:{
+                  clearColor:'#101022',ambient:'#40405a',exposure:1.12,toneMapping:'aces',
+                  fog:{type:'linear',color:'#202638',start:2,end:18}
+                },
                 materials:{
                   star:{diffuse:'#ffd56a',emissive:'#ffd56a',emissiveIntensity:1.3},
                   trunk:{diffuse:'#714a35'},
@@ -50,7 +53,7 @@ def main():
                 ],
                 cameras:{
                   near:{position:[0,2.3,6],lookAt:[0,.5,-.5],fov:46},
-                  far:{position:[0,3.4,8],lookAt:[0,.4,-.8],fov:48}
+                  far:{position:[0,3.4,8],lookAt:[0,.4,-.8],fov:48,toneMapping:'neutral'}
                 },
                 states:{
                   seed:{camera:'near'},
@@ -70,6 +73,13 @@ def main():
               const synthetic={...stats,canvasEngine:canvas?.dataset.engine||null,canvasVersion:canvas?.dataset.playcanvasEngine||null,canvasRect:rect?{width:rect.width,height:rect.height}:null};
               world.dispose();host.remove();
 
+              const badHost=document.createElement('div');
+              Object.assign(badHost.style,{position:'fixed',width:'120px',height:'120px'});
+              document.body.append(badHost);
+              const bad=createPlayCanvasWorld(badHost,{...spec,id:'framework-proof.invalid-fog',environment:{...spec.environment,fog:{type:'mystery'}}});
+              const invalidFogRejected=bad.available===false&&String(bad.error||'').includes('unsupported type');
+              bad.dispose?.();badHost.remove();
+
               const echoModule=await import('/rescue-playcanvas-world.js');
               const echoHost=document.createElement('div');
               echoHost.id='echo-forge-playcanvas-host';
@@ -81,7 +91,7 @@ def main():
               const echoRect=echoCanvas?.getBoundingClientRect();
               const echoResult={available:echo.available,error:echo.error||null,stats:echo.stats?.()||null,canvas:echoCanvas?{width:echoCanvas.width,height:echoCanvas.height,clientWidth:echoCanvas.clientWidth,clientHeight:echoCanvas.clientHeight,rect:echoRect?{width:echoRect.width,height:echoRect.height}:null,engine:echoCanvas.dataset.engine||null,vibelearnEngine:echoCanvas.dataset.vibelearnEngine||null}:null};
               echo.dispose?.();echoHost.remove();
-              return {synthetic,echo:echoResult};
+              return {synthetic,echo:echoResult,invalidFogRejected};
             }""")
             synthetic = result["synthetic"]
             assert synthetic["available"] is True, result
@@ -92,17 +102,24 @@ def main():
             assert synthetic["entityCount"] == 5, result
             assert synthetic["canvasCount"] == 1, result
             assert synthetic["cameraVariant"] == "default", result
+            assert synthetic["toneMapping"] == "neutral", result
+            assert abs(synthetic["exposure"] - 1.12) < 0.001, result
+            assert synthetic["fogType"] == "linear", result
             assert synthetic["canvasEngine"] == "PlayCanvas 2.22.1", result
             assert synthetic["canvasVersion"] == "2.22.1", result
             assert synthetic["canvasRect"]["width"] > 1 and synthetic["canvasRect"]["height"] > 1, result
+            assert result["invalidFogRejected"] is True, result
 
             echo = result["echo"]
             assert echo["available"] is True, result
             assert echo["stats"]["engine"] == "playcanvas", result
             assert echo["stats"]["worldId"] == "relay-rescue.echo-forge", result
-            assert echo["stats"]["worldVersion"] == "pc-phase1-4", result
+            assert echo["stats"]["worldVersion"] == "pc-phase1-5", result
             assert echo["stats"]["state"] == "story.0", result
             assert echo["stats"]["cameraVariant"] == "portrait", result
+            assert echo["stats"]["toneMapping"] == "aces2", result
+            assert abs(echo["stats"]["exposure"] - 1.18) < 0.001, result
+            assert echo["stats"]["fogType"] == "exp2", result
             assert echo["canvas"]["vibelearnEngine"] == "playcanvas", result
             assert echo["canvas"]["rect"]["width"] > 1 and echo["canvas"]["rect"]["height"] > 1, result
 
@@ -118,8 +135,8 @@ def main():
                 "echo_camera_variant": echo["stats"]["cameraVariant"],
                 "checks": [
                     "An unrelated engine-neutral WorldSpec compiled into the real PlayCanvas Engine.",
-                    "The generic backend created a measurable embedded canvas without Rescue-specific code.",
-                    "The authored Echo Forge WorldSpec selects its portrait camera variant through the same generic backend on a 390x600 surface."
+                    "Portable exposure, fog and camera tone-mapping intent compiled through the generic backend and invalid fog failed closed.",
+                    "The enriched Echo Forge WorldSpec uses the same generic backend and portrait camera path without Rescue-specific renderer code."
                 ],
                 "page_errors": errors
             }, indent=2))
