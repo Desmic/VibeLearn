@@ -8,7 +8,7 @@ VibeLearn's objective is to **generate effective learning games/worlds for arbit
 
 The architecture therefore moves away from Three.js as a strategic foundation. Three.js remains only as temporary reference/migration infrastructure for the current Echo Forge implementation.
 
-**PlayCanvas Engine is the first strategic backend** for the current browser/phone-first product.
+**PlayCanvas Engine is the first strategic backend** for the current browser/phone-first product, including Phase 1 itself. Phase 1 is not allowed to defer the engine pivot and then claim the architecture was proved later.
 
 The durable architecture is engine-neutral and spec-driven:
 
@@ -40,20 +40,57 @@ Generated games should primarily be validated specs/data + assets:
 
 The framework should expose reusable engine-neutral primitives/archetypes that compile differently per backend rather than requiring freshly generated renderer/game-engine glue for each course.
 
+## Phase 1 execution rule
+
+Phase 1 must be built and judged as a **real PlayCanvas learning game**, while simultaneously proving that the game is generated/assembled through reusable specs and runtime/compiler boundaries rather than one-off PlayCanvas scene code.
+
+The current first implementation slice is intentionally narrow:
+
+1. self-host one pinned PlayCanvas Engine version under the existing same-origin CSP;
+2. validate a versioned engine-neutral `WorldSpec`;
+3. compile that spec into real PlayCanvas entities/materials/lights/cameras;
+4. prove the compiler with a materially unrelated synthetic world (`Star Orchard`);
+5. route the Echo Forge opening and mission world through the real PlayCanvas backend without changing server/evidence semantics;
+6. expand the spec/runtime vocabulary only when the actual Phase 1 game requires a reusable capability;
+7. migrate the rest of Relay Rescue/Echo Forge and remove Three.js only after equivalent behavior, persistence and quality evidence are green.
+
+The existing `play-canvas.js` name is temporarily retained as a compatibility façade so the current story/mission callers can migrate incrementally. It must not become the permanent runtime abstraction.
+
+Current slice is **work in progress and not review-ready**. Syntax checks are green locally. Real-browser verification of the pinned engine and PlayCanvas backend must pass in CI before this slice may be promoted to the working deploy branch.
+
+## Critic/acceptance protocol
+
+Do not present a candidate to the user simply because it runs or because the architecture is clean.
+
+Critics are separate gates and must score the same verified build independently:
+
+1. **story/world >=9.0/10** — hook, character/world attachment, causality, pacing, stakes, payoff and cross-age appeal;
+2. **first-touch gameplay >=9.0/10** — first 60–90 seconds as an actual game, clarity, agency, controls, feedback, delight, recovery and story-to-play transition;
+3. **whole-game gameplay >=9.0/10** — progression, challenge, variety, agency, cohesion, payoff and whether later reasoning still feels like a game rather than a website;
+4. **learning/transfer >=9.0/10** — correctness, meaningful practice, misconception handling, scaffolding, unassisted evidence, fresh transfer and delayed retrieval where claimed;
+5. **architecture/runtime** — portability, spec/compiler genericity, persistence/security/accessibility/performance. This is a hard engineering gate but contributes **zero automatic points** to story/gameplay/learning scores.
+
+Every scored gate requires no blocker. A critic failure causes another repair cycle; scores cannot be averaged across categories to hide a failure. Use a genuinely separate critic/agent where available. If only an internal/tool-assisted critic is available, label it `internal_tool_assisted` and never call it independent or human-tested.
+
+Only after all applicable >=9 gates pass on the same exact verified build should that build be deployed, the served revision verified, and the user invited to review it. The user's explicit verdict remains final and can reject a critic-passing build.
+
 ## Immediate implementation order
 
 1. freeze generic Three.js framework expansion;
-2. define versioned game/world/runtime/engine/asset schemas;
-3. define EngineCompiler/runtime adapter interfaces;
-4. add a pinned/self-hosted PlayCanvas Engine path;
-5. build a tiny spec-driven PlayCanvas vertical slice;
-6. compile a second unrelated synthetic world through the same backend;
-7. port Echo Forge opening + Signal 1;
-8. compare experience, performance and authoring friction with the Three.js predecessor;
-9. migrate later signals after the backend/spec seam is proven;
-10. preserve existing server-authoritative progression/evidence/save semantics;
-11. run phone/reduced-motion/performance verification and critic gates;
-12. deploy only the exact verified candidate for user review.
+2. land the pinned/self-hosted PlayCanvas dependency and generic WorldSpec compiler;
+3. make the unrelated Star Orchard PlayCanvas proof green in a real browser;
+4. make opening -> Signal 1 use one persistent real PlayCanvas runtime/world;
+5. preserve save/reload, reset, history, learner isolation and evidence semantics;
+6. migrate Signals 2–7 into the same game/runtime architecture while keeping the world/game identity alive as reasoning becomes harder;
+7. replace authored adapter glue with declarative `RuntimeExperienceSpec` mappings where the concrete game proves the vocabulary;
+8. verify phone layouts at 360/390/430 CSS px, touch, reduced motion, context/failure behavior and performance budgets;
+9. run story/world critic and repair until >=9/no blocker;
+10. run first-touch gameplay critic and repair until >=9/no blocker;
+11. run whole-game gameplay critic and repair until >=9/no blocker;
+12. run learning/transfer critic and repair until >=9/no blocker;
+13. run final architecture/security/persistence verification on the same build;
+14. deploy that exact revision only after every gate passes;
+15. verify the served revision and then ask the current user for the decisive review.
 
 ## Current quality state
 
@@ -61,9 +98,7 @@ The user's latest explicit predecessor first-touch/story rating remains **3/10**
 
 The previous internal story treatment score and game scores remain historical diagnostics only. Engine/framework architecture earns zero automatic story/game/learning quality points.
 
-Required gate order remains:
-
-`story >=9 -> first-touch >=9 -> whole-game >=9 -> learning/transfer >=9 -> user review`
+No new critic score is valid yet for the current PlayCanvas candidate because the new engine slice has not completed real-browser verification.
 
 ## Deployment
 
