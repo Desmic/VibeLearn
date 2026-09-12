@@ -1,11 +1,12 @@
-/* Relay Rescue first-touch story: a user-paced scene inside the persistent Play Canvas. */
+/* Relay Rescue first-touch story: user-paced states inside the persistent game runtime.
+   Phase 1 runs directly on PlayCanvas Engine; the old Play Canvas/Three.js facade is not on this path. */
 'use strict';
 (() => {
   const game=window.RescueGame;
-  if(!game||game.__firstMinuteStoryV3)return;
+  if(!game||game.__firstMinuteStoryV4)return;
   const SEEN_KEY='vibelearn.relay-rescue.intro.v3';
   let storyBundle=null;
-  const loadStory=()=>storyBundle||(storyBundle=Promise.all([import('/play-canvas.js'),import('/rescue-story3d.js')]).then(([play,module])=>({play,module})).catch(()=>null));
+  const loadStory=()=>storyBundle||(storyBundle=Promise.all([import('/game-runtime.js'),import('/rescue-playcanvas-world.js')]).then(([runtime,module])=>({runtime,module})).catch(()=>null));
   const scenes=[
     {kicker:'THE VALLEY OF SEVEN LIGHTS',title:'Pip is almost home.',body:'Seven islands. One old bridge. One last delivery before dark.',dialogue:'PIP  “One more crossing. Easy.”',fact:'Then the bridge screams.',markers:[['PIP · COURIER','warm'],['HOME →','soft']]},
     {kicker:'THE BREAK',title:'One tiny gear stops everything.',body:'The center gear cracks. The bridge needs exactly one replacement to move again.',dialogue:'PIP  “...I may have spoken too soon.”',fact:'Needed: 1 gear. Not 2.',markers:[['BROKEN GEAR','danger'],['1 NEEDED','warm']]},
@@ -37,13 +38,17 @@
       <div class="rgi-controls"><div class="rgi-nav"><button type="button" id="rgi-back">← Back</button><button type="button" class="rg-primary" id="rgi-next">Continue →</button></div><div class="rgi-utilities"><button type="button" id="rgi-replay-beat" aria-label="Replay this scene">↻ Replay</button><button type="button" id="rgi-pause" aria-label="Pause story motion">Pause</button><button type="button" id="rgi-skip">Skip</button></div></div>
     </div>`;
     root.append(overlay);
-    let step=0,closed=false,paused=false,playCanvas=null,world=null,bundle=null;
+    let step=0,closed=false,paused=false,gameRuntime=null,world=null,bundle=null;
     const worldHost=overlay.querySelector('#rgi-world');
     const renderWorld=()=>{
-      if(!playCanvas||!bundle||closed)return;
-      world=playCanvas.showStory(bundle.module,worldHost,step,{reducedMotion:reduced(),paused});
-      if(world?.available){overlay.classList.add('rgi-three-ready');overlay.classList.remove('rgi-three-failed');}
-      else{overlay.classList.add('rgi-three-failed');overlay.classList.remove('rgi-three-ready');}
+      if(!gameRuntime||!bundle||closed)return;
+      world=gameRuntime.showStory(bundle.module,worldHost,step,{reducedMotion:reduced(),paused});
+      const ready=Boolean(world?.available);
+      overlay.classList.toggle('rgi-engine-ready',ready);
+      overlay.classList.toggle('rgi-engine-failed',!ready);
+      // Temporary styling aliases until the old Three.js-named selectors are removed.
+      overlay.classList.toggle('rgi-three-ready',ready);
+      overlay.classList.toggle('rgi-three-failed',!ready);
     };
     const update=()=>{
       if(closed)return;overlay.dataset.step=String(step);
@@ -56,19 +61,17 @@
     };
     const close=(start=false,persist=true)=>{
       if(closed)return;closed=true;
-      // The Play Canvas owns the world lifecycle. Detach the stable stage instead
-      // of disposing it so the exact same WebGL/runtime instance can enter Signal 1.
-      playCanvas?.detach();
+      gameRuntime?.detach();
       if(persist)remember();overlay.remove();setLaunchReady(launch);
       if(start)launch?.click();else launch?.focus({preventScroll:true});
     };
     overlay.querySelector('#rgi-next').onclick=()=>step===scenes.length-1?close(true,true):(step+=1,update());
     overlay.querySelector('#rgi-back').onclick=()=>{if(step>0){step-=1;update();}};
     overlay.querySelector('#rgi-skip').onclick=()=>close(false,true);
-    overlay.querySelector('#rgi-replay-beat').onclick=()=>playCanvas?.replay();
+    overlay.querySelector('#rgi-replay-beat').onclick=()=>gameRuntime?.replay();
     const pauseButton=overlay.querySelector('#rgi-pause');
     if(reduced()){pauseButton.hidden=true;overlay.classList.add('rgi-reduced');}
-    pauseButton.onclick=()=>{paused=!paused;playCanvas?.setPaused(paused);pauseButton.textContent=paused?'Resume':'Pause';pauseButton.setAttribute('aria-label',paused?'Resume story motion':'Pause story motion');overlay.classList.toggle('rgi-paused',paused);};
+    pauseButton.onclick=()=>{paused=!paused;gameRuntime?.setPaused(paused);pauseButton.textContent=paused?'Resume':'Pause';pauseButton.setAttribute('aria-label',paused?'Resume story motion':'Pause story motion');overlay.classList.toggle('rgi-paused',paused);};
     overlay.addEventListener('keydown',e=>{
       if(e.key==='ArrowLeft'&&step>0){e.preventDefault();step-=1;update();}
       else if(e.key==='ArrowRight'){e.preventDefault();step===scenes.length-1?close(true,true):(step+=1,update());}
@@ -77,7 +80,7 @@
     cleanup=()=>close(false,false);update();overlay.focus({preventScroll:true});
     loadStory().then(loaded=>{
       if(closed||!loaded)return;
-      bundle=loaded;playCanvas=loaded.play.getPlayCanvas();renderWorld();
+      bundle=loaded;gameRuntime=loaded.runtime.getGameRuntime();renderWorld();
     });
   }
 
@@ -97,5 +100,5 @@
 
   game.map=(missions,attempt,handlers)=>{cleanup();const result=originalMap(missions,attempt,handlers);enhanceMap(missions,attempt);return result;};
   game.render=(...args)=>{cleanup();return originalRender(...args);};game.hide=(...args)=>{cleanup();return originalHide(...args);};
-  game.__firstMinuteStoryV3=true;
+  game.__firstMinuteStoryV4=true;
 })();
