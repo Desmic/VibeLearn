@@ -52,7 +52,7 @@ beaconPositions.forEach(([x,z],i)=>{
 export const echoForgeWorldSpec=Object.freeze({
   schemaVersion:'1',
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-2',
+  version:'pc-phase1-3',
   environment:{clearColor:'#071824',ambient:'#38525f'},
   materials:{
     rock:{diffuse:'#203b4b',gloss:.22},
@@ -81,40 +81,60 @@ export const echoForgeWorldSpec=Object.freeze({
   cameras:{
     'story.0':{
       position:[0,7.4,18.6],lookAt:[0,.8,-1.7],fov:46,
-      portrait:{position:[.4,4.5,22],lookAt:[.4,.75,.4],fov:52}
+      portrait:{position:[.3,2.9,17.8],lookAt:[.3,.85,.5],fov:48}
     },
     'story.1':{
       position:[-1.3,4.7,11.6],lookAt:[-1.5,.7,1],fov:44,
-      portrait:{position:[0,3.0,9.5],lookAt:[0,.45,1.1],fov:46}
+      portrait:{position:[0,2.6,8.7],lookAt:[0,.5,1.1],fov:44}
     },
     'story.2':{
       position:[1.9,4.9,12.1],lookAt:[2.6,1.2,.2],fov:43,
-      portrait:{position:[.8,4.0,17.5],lookAt:[1.0,1.0,.6],fov:52}
+      portrait:{position:[1.3,3.0,13.8],lookAt:[1.2,.9,.7],fov:48}
     },
     'story.3':{
       position:[1.0,6.1,13.2],lookAt:[1.8,2.0,.4],fov:46,
-      portrait:{position:[3.3,4.6,11.8],lookAt:[3.4,1.7,.5],fov:48}
+      portrait:{position:[3.0,3.2,9.5],lookAt:[2.8,1.4,.5],fov:44}
     },
     'story.4':{
       position:[3.6,4.2,10.5],lookAt:[4.9,.9,.7],fov:42,
-      portrait:{position:[4.8,3.1,9.2],lookAt:[5.0,.9,.8],fov:44}
+      portrait:{position:[4.8,2.6,7.7],lookAt:[5.0,.9,.8],fov:41}
     },
     'story.5':{
       position:[-2.4,5.2,12.5],lookAt:[-3.5,1.4,1.2],fov:43,
-      portrait:{position:[-4.1,3.3,10.5],lookAt:[-4.2,1.15,1.0],fov:46}
+      portrait:{position:[-4.2,2.5,7.6],lookAt:[-4.3,1.2,1.0],fov:42}
     },
     'mission':{
       position:[0,6.0,14.2],lookAt:[0,.9,.4],fov:48,
-      portrait:{position:[.2,4.2,16.8],lookAt:[0,.8,.7],fov:52}
+      portrait:{position:[.2,3.2,13.5],lookAt:[0,.8,.8],fov:48}
+    },
+    'mission.forge':{
+      position:[4.1,3.3,9.7],lookAt:[5.0,1.15,.7],fov:43,
+      portrait:{position:[4.4,2.7,8.2],lookAt:[5.0,1.1,.8],fov:41}
+    },
+    'mission.ticket':{
+      position:[-4.0,3.2,9.6],lookAt:[-4.2,1.2,.7],fov:43,
+      portrait:{position:[-4.2,2.65,8.1],lookAt:[-4.25,1.2,.8],fov:41}
+    },
+    'mission.choice':{
+      position:[0,5.0,13.2],lookAt:[0,.9,.7],fov:47,
+      portrait:{position:[.1,3.05,12.6],lookAt:[0,.8,.8],fov:47}
+    },
+    'mission.failure':{
+      position:[4.8,3.1,8.5],lookAt:[5.1,.9,1.0],fov:41,
+      portrait:{position:[4.9,2.35,7.2],lookAt:[5.1,.85,1.0],fov:39}
+    },
+    'mission.success':{
+      position:[0,4.4,11.8],lookAt:[0,.6,1.0],fov:44,
+      portrait:{position:[0,2.75,10.5],lookAt:[0,.55,1.0],fov:43}
     }
   },
   states:{
     'story.0':{camera:'story.0',hide:['broken-gear','new-gear','duplicate-gear','order-seal','reply-orb','storm-bolt-a','storm-bolt-b']},
     'story.1':{camera:'story.1',show:['broken-gear'],hide:['new-gear','duplicate-gear','order-seal','reply-orb','storm-bolt-a','storm-bolt-b'],transforms:{'bridge-left-6':{rotation:[0,0,14]},'bridge-right-6':{rotation:[0,0,-14]}}},
-    'story.2':{camera:'story.2',show:['order-seal','new-gear'],hide:['duplicate-gear','reply-orb','storm-bolt-a','storm-bolt-b','broken-gear']},
-    'story.3':{camera:'story.3',show:['new-gear','reply-orb','storm-bolt-a','storm-bolt-b'],hide:['duplicate-gear','order-seal','broken-gear']},
-    'story.4':{camera:'story.4',show:['new-gear','duplicate-gear'],hide:['reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']},
-    'story.5':{camera:'story.5',show:['new-gear'],hide:['duplicate-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']},
-    'mission':{camera:'mission',show:['new-gear'],hide:['duplicate-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']}
+    'story.2':{camera:'story.2',show:['order-seal'],hide:['new-gear','duplicate-gear','reply-orb','storm-bolt-a','storm-bolt-b','broken-gear']},
+    'story.3':{camera:'story.3',show:['reply-orb','storm-bolt-a','storm-bolt-b'],hide:['new-gear','duplicate-gear','order-seal','broken-gear']},
+    'story.4':{camera:'story.4',show:['duplicate-gear'],hide:['new-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']},
+    'story.5':{camera:'story.5',hide:['new-gear','duplicate-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']},
+    'mission':{camera:'mission.forge',hide:['new-gear','duplicate-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']}
   }
 });
