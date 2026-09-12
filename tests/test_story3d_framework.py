@@ -32,15 +32,23 @@ class Story3DFrameworkTests(unittest.TestCase):
         ):
             self.assertIn(contract, source)
 
-    def test_story_and_mission_mount_through_versioned_world_host(self):
+    def test_story_and_mission_mount_through_play_canvas_and_versioned_world_host(self):
         intro = (ROOT / 'web' / 'rescue-intro.js').read_text(encoding='utf-8')
         chapter = (ROOT / 'web' / 'rescue-chapter1.js').read_text(encoding='utf-8')
+        play = (ROOT / 'web' / 'play-canvas.js').read_text(encoding='utf-8')
         host = (ROOT / 'web' / 'story3d-world-host.js').read_text(encoding='utf-8')
         adapter = (ROOT / 'web' / 'rescue-story3d.js').read_text(encoding='utf-8')
-        self.assertIn("import('/story3d-world-host.js')", intro)
-        self.assertIn('mountStoryWorldModule', intro)
-        self.assertIn("import('/story3d-world-host.js')", chapter)
-        self.assertIn('mountStoryWorldModule', chapter)
+        # Story/mission code talks to the higher-level persistent game surface.
+        self.assertIn("import('/play-canvas.js')", intro)
+        self.assertIn('getPlayCanvas', intro)
+        self.assertIn("import('/play-canvas.js')", chapter)
+        self.assertIn('getPlayCanvas', chapter)
+        # Play Canvas, not each story screen, owns the versioned renderer-host seam.
+        self.assertIn("from './story3d-world-host.js'", play)
+        self.assertIn('mountStoryWorldModule', play)
+        self.assertIn('data-play-canvas-instance', play)
+        self.assertIn('showStory', play)
+        self.assertIn('showMission', play)
         self.assertIn('STORY3D_ADAPTER_VERSION', host)
         self.assertIn('validateStoryWorldModule', host)
         self.assertIn('storyWorldManifest', adapter)
@@ -49,20 +57,23 @@ class Story3DFrameworkTests(unittest.TestCase):
     def test_story3d_framework_assets_are_explicitly_served(self):
         server = (ROOT / 'app' / 'server.py').read_text(encoding='utf-8')
         hosted = (ROOT / 'app' / 'hosted.py').read_text(encoding='utf-8')
-        for asset in ('story3d-runtime.js', 'story3d-world-host.js', 'rescue-story3d.js'):
+        for asset in ('play-canvas.js', 'play-canvas.css', 'story3d-runtime.js', 'story3d-world-host.js', 'rescue-story3d.js'):
             self.assertIn(asset, server)
             self.assertIn(asset, hosted)
 
     def test_shared_framework_has_no_relay_rescue_domain_assumptions(self):
         runtime = (ROOT / 'web' / 'story3d-runtime.js').read_text(encoding='utf-8')
         host = (ROOT / 'web' / 'story3d-world-host.js').read_text(encoding='utf-8')
-        generic = runtime + host
+        play = (ROOT / 'web' / 'play-canvas.js').read_text(encoding='utf-8')
+        generic = runtime + host + play
         for domain_term in ('Pip', 'Echo Forge', 'order-01', 'bridge gear', 'rescue-01'):
             self.assertNotIn(domain_term, generic)
-        # A new adapter should need only the public runtime/host seam, never the
-        # current world adapter. Browser CI proves that with Star Orchard.
+        # A new adapter should need only the public Play Canvas/runtime/host seam,
+        # never the current Echo Forge adapter. Browser CI proves the lower seam
+        # with Star Orchard; Play Canvas continuity is checked by onboarding CI.
         self.assertNotIn('rescue-story3d.js', runtime)
         self.assertNotIn('rescue-story3d.js', host)
+        self.assertNotIn('rescue-story3d.js', play)
 
 
 if __name__ == '__main__':
