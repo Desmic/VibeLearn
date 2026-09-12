@@ -54,7 +54,9 @@ class PlayCanvasWorld {
 
     const canvas=document.createElement('canvas');
     canvas.className='play-canvas-webgl vl-playcanvas-engine';
-    canvas.dataset.engine='playcanvas';
+    // data-engine is also used internally by PlayCanvas; keep a namespaced marker
+    // for VibeLearn's stable runtime contract instead of fighting engine metadata.
+    canvas.dataset.vibelearnEngine='playcanvas';
     canvas.dataset.playcanvasEngine=PLAYCANVAS_ENGINE_VERSION;
     canvas.dataset.playcanvasBackend=PLAYCANVAS_BACKEND_VERSION;
     canvas.setAttribute('aria-hidden','true');
@@ -67,7 +69,8 @@ class PlayCanvasWorld {
     });
     this.app=app;
     app.graphicsDevice.maxPixelRatio=dpr;
-    app.setCanvasResolution(pc.RESOLUTION_AUTO);
+    app.setCanvasFillMode(pc.FILLMODE_NONE,1,1);
+    app.setCanvasResolution(pc.RESOLUTION_AUTO,1,1);
     app.start();
 
     if(this.spec.environment?.ambient){
@@ -90,10 +93,23 @@ class PlayCanvasWorld {
     });
     app.root.addChild(this.camera);
 
-    this._resize=()=>app.resizeCanvas();
+    this._resize=()=>{
+      if(this.disposed)return;
+      let rect=host.getBoundingClientRect();
+      if((rect.width<1||rect.height<1)&&host.parentElement)rect=host.parentElement.getBoundingClientRect();
+      const width=Math.max(1,Math.round(rect.width));
+      const height=Math.max(1,Math.round(rect.height));
+      // Embedded worlds must be sized from their containing game surface, not
+      // from window defaults. FILLMODE_NONE makes that contract explicit.
+      app.resizeCanvas(width,height);
+      app.setCanvasResolution(pc.RESOLUTION_AUTO,width,height);
+      app.updateCanvasSize();
+    };
     this.resizeObserver=new ResizeObserver(this._resize);
     this.resizeObserver.observe(host);
+    if(host.parentElement)this.resizeObserver.observe(host.parentElement);
     this._resize();
+    requestAnimationFrame(this._resize);
 
     this._update=dt=>this._tick(dt);
     app.on('update',this._update);
@@ -198,11 +214,14 @@ class PlayCanvasWorld {
   setPaused(value){this.paused=Boolean(value);this.app.timeScale=this.paused?0:1;}
   replay(){if(this.state)this.setState(this.state);}
   stats(){
+    const rect=this.canvas.getBoundingClientRect();
     return{
       available:true,engine:'playcanvas',engineVersion:PLAYCANVAS_ENGINE_VERSION,
       backendVersion:PLAYCANVAS_BACKEND_VERSION,worldId:this.spec.id,worldVersion:this.spec.version,
       state:this.state,camera:this.cameraName,entityCount:this.entities.size,
-      deviceType:this.app.graphicsDevice?.deviceType||'unknown',canvasCount:this.host.querySelectorAll('canvas').length
+      deviceType:this.app.graphicsDevice?.deviceType||'unknown',canvasCount:this.host.querySelectorAll('canvas').length,
+      canvasCssWidth:Math.round(rect.width),canvasCssHeight:Math.round(rect.height),
+      bufferWidth:this.app.graphicsDevice?.width||0,bufferHeight:this.app.graphicsDevice?.height||0
     };
   }
   dispose(){
