@@ -134,10 +134,13 @@ def make_server(database, port=8000):
                 "/vendor/THREE-LICENSE.txt": ("vendor/THREE-LICENSE.txt", "text/plain"),
                 "/vendor/playcanvas.mjs": ("vendor/playcanvas.mjs", "text/javascript"),
                 "/vendor/PLAYCANVAS-LICENSE.txt": ("vendor/PLAYCANVAS-LICENSE.txt", "text/plain"),
+                "/assets/quaternius-animated-robot.glb": ("assets/quaternius-animated-robot.glb", "model/gltf-binary"),
+                "/assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt": ("assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt", "text/plain"),
             }
             if path in assets:
                 name, mime = assets[path]
-                return self.send(200, (ROOT / "web" / name).read_bytes(), mime + "; charset=utf-8")
+                content_type = mime if mime in ("application/zip", "model/gltf-binary") else mime + "; charset=utf-8"
+                return self.send(200, (ROOT / "web" / name).read_bytes(), content_type)
             return self.send(404, {"error": "NOT_FOUND"})
 
     return ThreadingHTTPServer(("127.0.0.1", port), Handler)
