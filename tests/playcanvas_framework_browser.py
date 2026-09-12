@@ -91,6 +91,7 @@ def main():
             assert synthetic["state"] == "bloom", result
             assert synthetic["entityCount"] == 5, result
             assert synthetic["canvasCount"] == 1, result
+            assert synthetic["cameraVariant"] == "default", result
             assert synthetic["canvasEngine"] == "PlayCanvas 2.22.1", result
             assert synthetic["canvasVersion"] == "2.22.1", result
             assert synthetic["canvasRect"]["width"] > 1 and synthetic["canvasRect"]["height"] > 1, result
@@ -99,7 +100,9 @@ def main():
             assert echo["available"] is True, result
             assert echo["stats"]["engine"] == "playcanvas", result
             assert echo["stats"]["worldId"] == "relay-rescue.echo-forge", result
+            assert echo["stats"]["worldVersion"] == "pc-phase1-2", result
             assert echo["stats"]["state"] == "story.0", result
+            assert echo["stats"]["cameraVariant"] == "portrait", result
             assert echo["canvas"]["vibelearnEngine"] == "playcanvas", result
             assert echo["canvas"]["rect"]["width"] > 1 and echo["canvas"]["rect"]["height"] > 1, result
 
@@ -112,10 +115,11 @@ def main():
                 "engine_version": synthetic["engineVersion"],
                 "synthetic_world": synthetic["worldId"],
                 "echo_world": echo["stats"]["worldId"],
+                "echo_camera_variant": echo["stats"]["cameraVariant"],
                 "checks": [
                     "An unrelated engine-neutral WorldSpec compiled into the real PlayCanvas Engine.",
                     "The generic backend created a measurable embedded canvas without Rescue-specific code.",
-                    "The authored Echo Forge WorldSpec also mounts directly through the same backend before story UI integration."
+                    "The authored Echo Forge WorldSpec selects its portrait camera variant through the same generic backend on a 390x600 surface."
                 ],
                 "page_errors": errors
             }, indent=2))
