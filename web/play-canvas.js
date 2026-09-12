@@ -48,8 +48,13 @@ class PlayCanvasController{
 
   _syncTargetState(){
     if(!this.target)return;
-    this.target.classList.toggle('play-canvas-ready',Boolean(this.world?.available&&!this.contextLost));
-    this.target.classList.toggle('play-canvas-failed',Boolean(!this.world?.available||this.contextLost));
+    const ready=Boolean(this.world?.available&&!this.contextLost);
+    this.target.classList.toggle('play-canvas-ready',ready);
+    this.target.classList.toggle('play-canvas-failed',!ready);
+    // Legacy migration classes must never keep the semantic SVG hidden when the
+    // shared renderer is unavailable/context-lost. Generic Play Canvas readiness
+    // is sufficient after restoration even if a legacy compatibility class stays off.
+    if(!ready)this.target.classList.remove('rgc1-three-ready','rg-three-continuity-ready');
     this.target.dataset.playCanvasMode=this.mode||'';
   }
 
@@ -79,9 +84,6 @@ class PlayCanvasController{
     }
     this.disposeWorld({keepStage:true});
     this.module=module;this.worldKey=key;
-    // Current Echo Forge predates the Play Canvas mount mode but already exposes
-    // both beat and mission-state APIs. Prefer the explicit play capability when
-    // a future adapter declares it; otherwise mount once through its story mode.
     const supported=module.storyWorldManifest?.modes||[];
     const mountMode=supported.includes('play')?'play':supported.includes('story')?'story':mode;
     this.world=mountStoryWorldModule(module,this.stage,{reducedMotion,mode:mountMode});
@@ -93,6 +95,7 @@ class PlayCanvasController{
   showStory(module,target,beat,{reducedMotion=false,paused=false}={}){
     const world=this.mount(module,target,{mode:'story',reducedMotion});
     this.mode='story';this.stage.dataset.playCanvasMode='story';
+    const canvas=this.stage.querySelector('canvas');canvas?.classList.remove('rgc1-mission-canvas');
     world?.setMode?.('story');world?.setBeat?.(beat);world?.setPaused?.(paused);
     this._syncTargetState();
     return world;
@@ -112,7 +115,6 @@ class PlayCanvasController{
   detach(){
     if(this.target){this.target.classList.remove('play-canvas-ready','play-canvas-failed','play-canvas-target');delete this.target.dataset.playCanvasMode;}
     this.target=null;this.mode=null;
-    // Keep the stage/world alive so a compatible next game state can reattach it.
     this.stage.remove();
   }
   disposeWorld({keepStage=false}={}){
