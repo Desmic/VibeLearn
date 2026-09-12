@@ -101,6 +101,7 @@ def make_server(database, port=8000):
                 "/rescue.js": ("rescue.js", "text/javascript"),
                 "/rescue.css": ("rescue.css", "text/css"),
                 "/play-canvas.js": ("play-canvas.js", "text/javascript"),
+                "/play-canvas-migrate.js": ("play-canvas-migrate.js", "text/javascript"),
                 "/play-canvas.css": ("play-canvas.css", "text/css"),
                 "/rescue-intro.js": ("rescue-intro.js", "text/javascript"),
                 "/rescue-intro.css": ("rescue-intro.css", "text/css"),
