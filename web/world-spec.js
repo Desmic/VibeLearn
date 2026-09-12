@@ -4,17 +4,43 @@
 export const WORLD_SPEC_VERSION = '1';
 const PRIMITIVES = new Set(['box','sphere','cone','cylinder','plane','torus','capsule']);
 const MOTIONS = new Set(['spin','bob','pulse']);
+const FOG_TYPES = new Set(['none','linear','exp','exp2']);
+const TONE_MAPPINGS = new Set(['linear','filmic','hejl','aces','aces2','neutral']);
 
 function assert(condition,message){if(!condition)throw new Error(`WorldSpec invalid: ${message}`);}
 function vec(value,n,label){
   assert(Array.isArray(value)&&value.length===n&&value.every(Number.isFinite),`${label} must be ${n} finite numbers`);
 }
 function id(value,label){assert(typeof value==='string'&&/^[a-zA-Z0-9._:-]+$/.test(value),`${label} has invalid id`);}
+function hex(value,label){assert(typeof value==='string'&&/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(value),`${label} must be a hex color`);}
+function tone(value,label){assert(TONE_MAPPINGS.has(value),`${label} has unsupported tone mapping ${value}`);}
 function cameraShot(shot,label){
   assert(shot&&typeof shot==='object',`${label} must be a camera shot`);
   vec(shot.position,3,`${label}.position`);
   vec(shot.lookAt,3,`${label}.lookAt`);
-  if('fov' in shot)assert(Number.isFinite(shot.fov),`${label}.fov`);
+  if('fov' in shot)assert(Number.isFinite(shot.fov)&&shot.fov>1&&shot.fov<179,`${label}.fov must be between 1 and 179`);
+  if('toneMapping' in shot)tone(shot.toneMapping,`${label}.toneMapping`);
+}
+function environment(def){
+  if(def==null)return;
+  assert(typeof def==='object'&&!Array.isArray(def),'environment must be an object');
+  if('clearColor' in def)hex(def.clearColor,'environment.clearColor');
+  if('ambient' in def)hex(def.ambient,'environment.ambient');
+  if('exposure' in def)assert(Number.isFinite(def.exposure)&&def.exposure>0&&def.exposure<=8,'environment.exposure must be > 0 and <= 8');
+  if('toneMapping' in def)tone(def.toneMapping,'environment.toneMapping');
+  if(def.fog!=null){
+    const fog=def.fog;
+    assert(typeof fog==='object'&&!Array.isArray(fog),'environment.fog must be an object');
+    assert(FOG_TYPES.has(fog.type),`environment.fog has unsupported type ${fog.type}`);
+    if('color' in fog)hex(fog.color,'environment.fog.color');
+    if(fog.type==='linear'){
+      assert(Number.isFinite(fog.start)&&fog.start>=0,'environment.fog.start must be >= 0');
+      assert(Number.isFinite(fog.end)&&fog.end>fog.start,'environment.fog.end must be greater than start');
+    }
+    if(fog.type==='exp'||fog.type==='exp2'){
+      assert(Number.isFinite(fog.density)&&fog.density>0&&fog.density<=1,'environment.fog.density must be > 0 and <= 1');
+    }
+  }
 }
 
 export function validateWorldSpec(spec){
@@ -22,6 +48,7 @@ export function validateWorldSpec(spec){
   assert(String(spec.schemaVersion)===WORLD_SPEC_VERSION,`schemaVersion must be ${WORLD_SPEC_VERSION}`);
   id(spec.id,'world');
   assert(typeof spec.version==='string'&&spec.version.length>0,'version is required');
+  environment(spec.environment);
   assert(spec.materials&&typeof spec.materials==='object','materials are required');
   assert(Array.isArray(spec.entities)&&spec.entities.length>0,'entities are required');
   const ids=new Set();
