@@ -1,11 +1,11 @@
-/* Relay Rescue first-touch story: a user-paced scene, not an autoplay slide deck. */
+/* Relay Rescue first-touch story: a user-paced scene inside the persistent Play Canvas. */
 'use strict';
 (() => {
   const game=window.RescueGame;
   if(!game||game.__firstMinuteStoryV3)return;
   const SEEN_KEY='vibelearn.relay-rescue.intro.v3';
   let storyBundle=null;
-  const loadStory=()=>storyBundle||(storyBundle=Promise.all([import('/story3d-world-host.js'),import('/rescue-story3d.js')]).then(([host,module])=>({host,module})).catch(()=>null));
+  const loadStory=()=>storyBundle||(storyBundle=Promise.all([import('/play-canvas.js'),import('/rescue-story3d.js')]).then(([play,module])=>({play,module})).catch(()=>null));
   const scenes=[
     {kicker:'THE VALLEY OF SEVEN LIGHTS',title:'Pip is almost home.',body:'Seven islands. One old bridge. One last delivery before dark.',dialogue:'PIP  “One more crossing. Easy.”',fact:'Then the bridge screams.',markers:[['PIP · COURIER','warm'],['HOME →','soft']]},
     {kicker:'THE BREAK',title:'One tiny gear stops everything.',body:'The center gear cracks. The bridge needs exactly one replacement to move again.',dialogue:'PIP  “...I may have spoken too soon.”',fact:'Needed: 1 gear. Not 2.',markers:[['BROKEN GEAR','danger'],['1 NEEDED','warm']]},
@@ -37,8 +37,14 @@
       <div class="rgi-controls"><div class="rgi-nav"><button type="button" id="rgi-back">← Back</button><button type="button" class="rg-primary" id="rgi-next">Continue →</button></div><div class="rgi-utilities"><button type="button" id="rgi-replay-beat" aria-label="Replay this scene">↻ Replay</button><button type="button" id="rgi-pause" aria-label="Pause story motion">Pause</button><button type="button" id="rgi-skip">Skip</button></div></div>
     </div>`;
     root.append(overlay);
-    let step=0,closed=false,paused=false,world=null;
+    let step=0,closed=false,paused=false,playCanvas=null,world=null,bundle=null;
     const worldHost=overlay.querySelector('#rgi-world');
+    const renderWorld=()=>{
+      if(!playCanvas||!bundle||closed)return;
+      world=playCanvas.showStory(bundle.module,worldHost,step,{reducedMotion:reduced(),paused});
+      if(world?.available){overlay.classList.add('rgi-three-ready');overlay.classList.remove('rgi-three-failed');}
+      else{overlay.classList.add('rgi-three-failed');overlay.classList.remove('rgi-three-ready');}
+    };
     const update=()=>{
       if(closed)return;overlay.dataset.step=String(step);
       const s=scenes[step];overlay.querySelector('.rgi-kicker').textContent=s.kicker;overlay.querySelector('#rgi-title').textContent=s.title;overlay.querySelector('#rgi-body').textContent=s.body;overlay.querySelector('#rgi-dialogue').textContent=s.dialogue;overlay.querySelector('#rgi-fact').textContent=s.fact;
@@ -46,27 +52,32 @@
       const markers=overlay.querySelector('.rgi-markers');markers.replaceChildren(...s.markers.map(([label,tone])=>{const n=document.createElement('span');n.className=`rgi-marker ${tone||''}`;n.textContent=label;return n;}));
       overlay.querySelector('#rgi-back').disabled=step===0;overlay.querySelector('#rgi-next').textContent=step===scenes.length-1?'Wake Signal 1 →':'Continue →';
       overlay.querySelectorAll('.rgi-progress i').forEach((n,i)=>{n.classList.toggle('on',i<=step);n.classList.toggle('current',i===step);});
-      world?.setBeat(step);
+      renderWorld();
     };
-    const close=(start=false,persist=true)=>{if(closed)return;closed=true;world?.dispose();if(persist)remember();overlay.remove();setLaunchReady(launch);if(start)launch?.click();else launch?.focus({preventScroll:true});};
+    const close=(start=false,persist=true)=>{
+      if(closed)return;closed=true;
+      // The Play Canvas owns the world lifecycle. Detach the stable stage instead
+      // of disposing it so the exact same WebGL/runtime instance can enter Signal 1.
+      playCanvas?.detach();
+      if(persist)remember();overlay.remove();setLaunchReady(launch);
+      if(start)launch?.click();else launch?.focus({preventScroll:true});
+    };
     overlay.querySelector('#rgi-next').onclick=()=>step===scenes.length-1?close(true,true):(step+=1,update());
     overlay.querySelector('#rgi-back').onclick=()=>{if(step>0){step-=1;update();}};
     overlay.querySelector('#rgi-skip').onclick=()=>close(false,true);
-    overlay.querySelector('#rgi-replay-beat').onclick=()=>world?.replay();
+    overlay.querySelector('#rgi-replay-beat').onclick=()=>playCanvas?.replay();
     const pauseButton=overlay.querySelector('#rgi-pause');
     if(reduced()){pauseButton.hidden=true;overlay.classList.add('rgi-reduced');}
-    pauseButton.onclick=()=>{paused=!paused;world?.setPaused(paused);pauseButton.textContent=paused?'Resume':'Pause';pauseButton.setAttribute('aria-label',paused?'Resume story motion':'Pause story motion');overlay.classList.toggle('rgi-paused',paused);};
+    pauseButton.onclick=()=>{paused=!paused;playCanvas?.setPaused(paused);pauseButton.textContent=paused?'Resume':'Pause';pauseButton.setAttribute('aria-label',paused?'Resume story motion':'Pause story motion');overlay.classList.toggle('rgi-paused',paused);};
     overlay.addEventListener('keydown',e=>{
       if(e.key==='ArrowLeft'&&step>0){e.preventDefault();step-=1;update();}
       else if(e.key==='ArrowRight'){e.preventDefault();step===scenes.length-1?close(true,true):(step+=1,update());}
       else if(e.key==='Escape'){e.preventDefault();close(false,true);}
     });
     cleanup=()=>close(false,false);update();overlay.focus({preventScroll:true});
-    loadStory().then(bundle=>{
-      if(closed||!bundle)return;
-      world=bundle.host.mountStoryWorldModule(bundle.module,worldHost,{reducedMotion:reduced(),mode:'story'});
-      if(world?.available){overlay.classList.add('rgi-three-ready');world.setBeat(step);world.setPaused(paused);}
-      else overlay.classList.add('rgi-three-failed');
+    loadStory().then(loaded=>{
+      if(closed||!loaded)return;
+      bundle=loaded;playCanvas=loaded.play.getPlayCanvas();renderWorld();
     });
   }
 
