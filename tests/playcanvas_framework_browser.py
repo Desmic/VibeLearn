@@ -100,7 +100,7 @@ def main():
             assert echo["available"] is True, result
             assert echo["stats"]["engine"] == "playcanvas", result
             assert echo["stats"]["worldId"] == "relay-rescue.echo-forge", result
-            assert echo["stats"]["worldVersion"] == "pc-phase1-3", result
+            assert echo["stats"]["worldVersion"] == "pc-phase1-4", result
             assert echo["stats"]["state"] == "story.0", result
             assert echo["stats"]["cameraVariant"] == "portrait", result
             assert echo["canvas"]["vibelearnEngine"] == "playcanvas", result
