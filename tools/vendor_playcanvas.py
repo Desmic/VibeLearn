@@ -19,7 +19,10 @@ VERSION = "2.22.1"
 METADATA_URL = f"https://registry.npmjs.org/playcanvas/{VERSION}"
 EXPECTED_TARBALL = f"https://registry.npmjs.org/playcanvas/-/playcanvas-{VERSION}.tgz"
 USER_AGENT = "VibeLearn-pinned-build"
-MAX_TARBALL_BYTES = 12_000_000
+# The PlayCanvas npm package contains source, examples/types and several builds,
+# so the verified tarball is substantially larger than the single ESM file we retain.
+# Keep a bounded cap while allowing the current pinned package to be inspected.
+MAX_TARBALL_BYTES = 32_000_000
 ENGINE_MEMBER = "package/build/playcanvas.mjs"
 LICENSE_MEMBER = "package/LICENSE"
 
@@ -27,6 +30,9 @@ LICENSE_MEMBER = "package/LICENSE"
 def _read_url(url: str, limit: int) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=45) as response:
+        length = response.headers.get("Content-Length")
+        if length and int(length) > limit:
+            raise RuntimeError(f"PlayCanvas dependency exceeded {limit} bytes")
         data = response.read(limit + 1)
     if len(data) > limit:
         raise RuntimeError(f"PlayCanvas dependency exceeded {limit} bytes")
@@ -77,6 +83,7 @@ def main() -> None:
     report = {
         "version": VERSION,
         "npm_integrity": integrity,
+        "tarball_bytes": len(archive),
         "tarball_sha256": hashlib.sha256(archive).hexdigest(),
         "engine_sha256": hashlib.sha256(engine).hexdigest(),
         "engine_bytes": len(engine),
