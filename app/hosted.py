@@ -118,7 +118,8 @@ def create_app(config=None, auth_provider=None):
     @app.get("/<asset>")
     def asset(asset):
         if asset not in (
-            "rescue-game.js", "rescue.js", "rescue.css", "play-canvas.js", "play-canvas.css",
+            "rescue-game.js", "rescue.js", "rescue.css", "play-canvas.js", "play-canvas-migrate.js", "play-canvas.css",
+            "game-runtime.js", "world-spec.js", "playcanvas-backend.js", "echo-forge-world-spec.js", "rescue-playcanvas-world.js",
             "rescue-intro.js", "rescue-intro.css", "rescue-story3d.js", "story3d-runtime.js", "story3d-world-host.js",
             "rescue-chapter1.js", "rescue-chapter1.css", "auth-game.js", "auth-game.css",
             "progress-controls.js", "progress-controls.css", "phone-first.css",
@@ -130,7 +131,10 @@ def create_app(config=None, auth_provider=None):
 
     @app.get("/vendor/<name>")
     def vendor_asset(name):
-        if name not in ("three.module.min.js", "three.core.min.js", "THREE-LICENSE.txt"):
+        if name not in (
+            "three.module.min.js", "three.core.min.js", "THREE-LICENSE.txt",
+            "playcanvas.mjs", "PLAYCANVAS-LICENSE.txt"
+        ):
             raise service.DomainError("NOT_FOUND", "Not found.", 404)
         return send_from_directory(ROOT / "web" / "vendor", name)
 
