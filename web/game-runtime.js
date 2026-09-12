@@ -37,12 +37,18 @@ class GameRuntimeController{
   }
   _syncTargetState(){
     if(!this.target)return;
-    const ready=Boolean(this.world?.available&&!this.contextLost);
+    this.target.dataset.gameRuntimeMode=this.mode||'';
+    this.target.dataset.gameEngine=this.world?.engine||this.module?.gameWorldManifest?.engine||'';
+    // Mounting is a neutral state, not a failure. Hiding the stage here makes an
+    // embedded engine measure a 0x0 host before the world can become available.
+    if(!this.world){
+      this.target.classList.remove('play-canvas-ready','play-canvas-failed','rgc1-three-ready','rg-three-continuity-ready');
+      return;
+    }
+    const ready=Boolean(this.world.available&&!this.contextLost);
     this.target.classList.toggle('play-canvas-ready',ready);
     this.target.classList.toggle('play-canvas-failed',!ready);
     if(!ready)this.target.classList.remove('rgc1-three-ready','rg-three-continuity-ready');
-    this.target.dataset.gameRuntimeMode=this.mode||'';
-    this.target.dataset.gameEngine=this.world?.engine||this.module?.gameWorldManifest?.engine||'';
   }
   _attach(target,mode){
     if(!target?.isConnected)throw new Error('Game runtime target is not connected');
@@ -62,7 +68,7 @@ class GameRuntimeController{
     try{this._attach(target,mode);}catch(error){return unavailable(error);}
     if(this.world&&this.worldKey===key){this._syncCanvasIdentity();this._syncTargetState();return this.world;}
     this.disposeWorld({keepStage:true});
-    this.module=module;this.worldKey=key;
+    this.module=module;this.worldKey=key;this._syncTargetState();
     try{this.world=module.createGameWorld(this.stage,{reducedMotion,mode});}
     catch(error){this.world=unavailable(error);}
     this._syncCanvasIdentity();this._syncTargetState();
@@ -95,7 +101,7 @@ class GameRuntimeController{
     canvas?.removeEventListener('webglcontextrestored',this.boundContextRestored);
     try{this.world?.dispose?.();}catch(_){}
     this.world=null;this.worldKey=null;this.module=null;this.contextLost=false;
-    if(!keepStage)this.detach();
+    if(keepStage)this._syncTargetState();else this.detach();
   }
   stats(){return{gameRuntimeVersion:GAME_RUNTIME_VERSION,instanceId:this.instanceId,mode:this.mode,worldKey:this.worldKey,connected:this.stage.isConnected,contextLost:this.contextLost,world:this.world?.stats?.()||null};}
   dispose(){this.disposeWorld();this.stage.remove();}
