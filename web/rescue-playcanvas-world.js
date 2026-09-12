@@ -13,6 +13,7 @@ export const gameWorldManifest=Object.freeze({
 });
 
 const PIP_LIMBS=['pip-arm-l','pip-arm-r','pip-hand-l','pip-hand-r','pip-leg-l','pip-leg-r','pip-boot-l','pip-boot-r'];
+const INTERACTIVE_SEMANTICS=new Set(['broken-gear','order-seal','signal','signal-tower','pip','forge']);
 
 function semanticPick(entityId){
   if(!entityId)return null;
@@ -23,6 +24,11 @@ function semanticPick(entityId){
   if(entityId==='pip'||entityId.startsWith('pip-'))return 'pip';
   if(entityId==='forge'||entityId.startsWith('forge-'))return 'forge';
   return entityId;
+}
+
+function semanticPickFromSelection(ids=[]){
+  const mapped=ids.map(semanticPick).filter(Boolean);
+  return mapped.find(id=>INTERACTIVE_SEMANTICS.has(id))||mapped[0]||null;
 }
 
 function storyPresentationPatch(beat){
@@ -123,7 +129,7 @@ export function createGameWorld(host,{reducedMotion=false,mode='story'}={}){
     setMissionState(state){applyMission(state);},
     setPaused(value){engine.setPaused(value);},
     replay(){missionState?applyMission(missionState):applyBeat(beat);},
-    async pickSemanticAt(clientX,clientY){return semanticPick(await engine.pickEntityAt(clientX,clientY));},
+    async pickSemanticAt(clientX,clientY){return semanticPickFromSelection(await engine.pickEntityIdsAt(clientX,clientY));},
     stats(){return{...engine.stats(),mode:currentMode,beat,manifest:gameWorldManifest.id,manifestVersion:gameWorldManifest.version};},
     dispose(){engine.dispose();host.classList.remove('vibelearn-playcanvas-ready');}
   };
