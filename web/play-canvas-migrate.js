@@ -45,7 +45,8 @@
     const hud=makeLayer(world,'play-canvas-builder-hud','Build Pip’s recovery route in the storm');
     hud.classList.add('play-canvas-route-circuit');
     const bench=root.querySelector('.rg-workbench');
-    const actions=root.querySelector('.rg-build-actions');
+    const runButton=root.querySelector('#rg-run');
+    const actions=runButton?.closest('.rg-build-actions')||runButton?.parentElement||root.querySelector('.rg-build-actions');
     const results=root.querySelector('.rg-results');
     if(bench){
       bench.classList.add('play-canvas-route-tools');
