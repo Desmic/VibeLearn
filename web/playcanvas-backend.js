@@ -7,6 +7,11 @@ import {validateWorldSpec} from './world-spec.js';
 export const PLAYCANVAS_ENGINE_VERSION='2.22.1';
 export const PLAYCANVAS_BACKEND_VERSION='1';
 const PORTRAIT_ASPECT_MAX=.9;
+const FOG_TYPES={none:pc.FOG_NONE,linear:pc.FOG_LINEAR,exp:pc.FOG_EXP,exp2:pc.FOG_EXP2};
+const TONE_MAPPINGS={
+  linear:pc.TONEMAP_LINEAR,filmic:pc.TONEMAP_FILMIC,hejl:pc.TONEMAP_HEJL,
+  aces:pc.TONEMAP_ACES,aces2:pc.TONEMAP_ACES2,neutral:pc.TONEMAP_NEUTRAL
+};
 
 function unavailable(error){
   const message=error instanceof Error?error.message:String(error);
@@ -54,6 +59,7 @@ class PlayCanvasWorld {
     this.elapsed=0;
     this.disposed=false;
     this.cameraVariant='default';
+    this.toneMapping='linear';
 
     const canvas=document.createElement('canvas');
     canvas.className='play-canvas-webgl vl-playcanvas-engine';
@@ -76,8 +82,16 @@ class PlayCanvasWorld {
     app.setCanvasResolution(pc.RESOLUTION_AUTO,1,1);
     app.start();
 
-    if(this.spec.environment?.ambient){
-      app.scene.ambientLight=color(this.spec.environment.ambient);
+    const environment=this.spec.environment||{};
+    if(environment.ambient)app.scene.ambientLight=color(environment.ambient);
+    if(Number.isFinite(environment.exposure))app.scene.exposure=environment.exposure;
+    if(environment.fog){
+      const fog=environment.fog;
+      app.scene.fog.type=FOG_TYPES[fog.type];
+      if(fog.color)app.scene.fog.color=color(fog.color);
+      if(Number.isFinite(fog.start))app.scene.fog.start=fog.start;
+      if(Number.isFinite(fog.end))app.scene.fog.end=fog.end;
+      if(Number.isFinite(fog.density))app.scene.fog.density=fog.density;
     }
 
     for(const [name,definition] of Object.entries(this.spec.materials)){
@@ -91,7 +105,7 @@ class PlayCanvasWorld {
 
     this.camera=new pc.Entity('vibelearn-camera');
     this.camera.addComponent('camera',{
-      clearColor:color(this.spec.environment?.clearColor,'#071824'),
+      clearColor:color(environment.clearColor,'#071824'),
       nearClip:.1,farClip:250
     });
     app.root.addChild(this.camera);
@@ -186,8 +200,11 @@ class PlayCanvasWorld {
     this.camera.setPosition(...shot.position);
     this.camera.lookAt(...shot.lookAt);
     if(Number.isFinite(shot.fov))this.camera.camera.fov=shot.fov;
+    const toneName=shot.toneMapping||this.spec.environment?.toneMapping||'linear';
+    this.camera.camera.toneMapping=TONE_MAPPINGS[toneName];
     this.cameraName=name;
     this.cameraVariant=variant;
+    this.toneMapping=toneName;
   }
 
   applyPatch(patch={}){
@@ -232,10 +249,12 @@ class PlayCanvasWorld {
   replay(){if(this.state)this.setState(this.state);}
   stats(){
     const rect=this.canvas.getBoundingClientRect();
+    const fog=this.spec.environment?.fog||{type:'none'};
     return{
       available:this.available,engine:'playcanvas',engineVersion:PLAYCANVAS_ENGINE_VERSION,
       backendVersion:PLAYCANVAS_BACKEND_VERSION,worldId:this.spec.id,worldVersion:this.spec.version,
-      state:this.state,camera:this.cameraName,cameraVariant:this.cameraVariant,entityCount:this.entities.size,
+      state:this.state,camera:this.cameraName,cameraVariant:this.cameraVariant,toneMapping:this.toneMapping,
+      exposure:this.app.scene.exposure,fogType:fog.type,entityCount:this.entities.size,
       deviceType:this.app.graphicsDevice?.deviceType||'unknown',canvasCount:this.host.querySelectorAll('canvas').length,
       canvasCssWidth:Math.round(rect.width),canvasCssHeight:Math.round(rect.height),
       bufferWidth:this.app.graphicsDevice?.width||0,bufferHeight:this.app.graphicsDevice?.height||0
