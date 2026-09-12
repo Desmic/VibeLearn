@@ -20,7 +20,10 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn('createPlayCanvasWorld', adapter)
         self.assertIn('class GameRuntimeController', runtime)
         self.assertIn("import * as pc from './vendor/playcanvas.mjs'", backend)
-        self.assertIn("dataset.engine='playcanvas'", backend)
+        # PlayCanvas owns data-engine internally; VibeLearn uses a namespaced,
+        # stable marker rather than depending on engine implementation metadata.
+        self.assertIn("dataset.vibelearnEngine='playcanvas'", backend)
+        self.assertIn("PLAYCANVAS_ENGINE_VERSION='2.22.1'", backend)
 
     def test_generic_playcanvas_runtime_has_no_relay_rescue_or_three_assumptions(self):
         runtime = (ROOT / 'web' / 'game-runtime.js').read_text(encoding='utf-8')
