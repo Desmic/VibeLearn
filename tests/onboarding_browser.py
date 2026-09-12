@@ -1,5 +1,6 @@
 """Rendered phone-first Echo Forge/Signal-1 contract; machine UX evidence, not a youth playtest."""
 import json
+import re
 import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
@@ -129,7 +130,7 @@ def main():
             expect(page.locator('.play-canvas-stage')).to_have_count(1)
             expect(page.locator('.play-canvas-webgl')).to_have_count(1)
             expect(page.locator('.rg-world')).to_have_attribute('data-game-engine', 'playcanvas')
-            expect(page.locator('.rg-world')).to_have_class('play-canvas-ready')
+            expect(page.locator('.rg-world')).to_have_class(re.compile(r'(^|\s)play-canvas-ready(\s|$)'))
             expect(page.locator('.rg-console')).to_be_hidden()
             forge_target = page.locator('[data-world-look="workshop"]').bounding_box()
             assert forge_target and forge_target['height'] >= 44 and forge_target['width'] >= 96
