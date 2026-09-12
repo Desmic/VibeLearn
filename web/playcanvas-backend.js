@@ -15,7 +15,7 @@ const TONE_MAPPINGS={
 
 function unavailable(error){
   const message=error instanceof Error?error.message:String(error);
-  return {available:false,error:message,setState(){},applyPatch(){},setPaused(){},replay(){},async pickEntityAt(){return null;},stats(){return{available:false,error:message,engine:'playcanvas'};},dispose(){}};
+  return {available:false,error:message,setState(){},applyPatch(){},setPaused(){},replay(){},async pickEntityIdsAt(){return[];},async pickEntityAt(){return null;},stats(){return{available:false,error:message,engine:'playcanvas'};},dispose(){}};
 }
 function color(hex,fallback='#ffffff'){
   const raw=(typeof hex==='string'?hex:fallback).replace('#','');
@@ -227,10 +227,10 @@ class PlayCanvasWorld {
     this.elapsed=0;
   }
 
-  async pickEntityAt(clientX,clientY,{radius=7}={}){
-    if(this.disposed||!this.available||!this.camera?.camera)return null;
+  async pickEntityIdsAt(clientX,clientY,{radius=7}={}){
+    if(this.disposed||!this.available||!this.camera?.camera)return [];
     const rect=this.canvas.getBoundingClientRect();
-    if(rect.width<1||rect.height<1||clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return null;
+    if(rect.width<1||rect.height<1||clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return [];
     const width=Math.max(1,Math.round(rect.width));
     const height=Math.max(1,Math.round(rect.height));
     if(!this.picker)this.picker=new pc.Picker(this.app,width,height);
@@ -241,11 +241,16 @@ class PlayCanvasWorld {
     const r=Math.max(1,Math.round(radius));
     const left=Math.max(0,x-r),top=Math.max(0,y-r);
     const selection=await this.picker.getSelectionAsync(left,top,Math.min(width-left,r*2+1),Math.min(height-top,r*2+1));
+    const result=[];
     for(const item of selection||[]){
       const name=item?.node?.name;
-      if(name&&this.entities.has(name))return name;
+      if(name&&this.entities.has(name)&&!result.includes(name))result.push(name);
     }
-    return null;
+    return result;
+  }
+
+  async pickEntityAt(clientX,clientY,options={}){
+    return (await this.pickEntityIdsAt(clientX,clientY,options))[0]||null;
   }
 
   _tick(dt){
