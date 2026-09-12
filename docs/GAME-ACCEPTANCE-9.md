@@ -1,70 +1,103 @@
-# Game acceptance contract — story 9/10 + game 9/10 + learning gate
+# Game acceptance contract — story + first touch + whole chapter + learning + user
 
-Updated by the user's 10 September 2026 instruction; read [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md), [GAME-AS-COURSE.md](GAME-AS-COURSE.md), [GAME-UX-REVIEW.md](GAME-UX-REVIEW.md), and [STATE.md](STATE.md).
+**Updated 12 September 2026.** Read `STORY-GENERATION-AND-CRITIC.md`, `GAME-AS-COURSE.md`, `GAME-UX-REVIEW.md`, `PLAY-CANVAS.md`, `THREE-STORY-FRAMEWORK.md`, and `STATE.md`.
 
 ## Current status
 
-The current Relay Rescue candidate is **`user_rejected` / `needs_revision`**. The user's newest first-touch/story rating is **3/10**. The prior internal-tool-assisted `9.196` game critic / `9.35` bounded learning result is historical only and cannot keep the candidate in `ready_for_user_review` after explicit user rejection.
+The current Relay Rescue predecessor remains **`user_rejected` / `needs_revision`**. The user's latest explicit first-touch/story rating is **3/10**. Historical internal scores cannot keep a changed/rejected candidate in `ready_for_user_review`.
 
 ## Acceptance pipeline
 
-Acceptance now requires separate gates in this order:
+Required order:
 
-`story/fantasy candidate -> story critic >=9 -> gameplay realization -> game critic >=9 -> learning/transfer >=9 where claimed -> ready_for_user_review -> explicit user acceptance -> user_accepted`
+`StoryWorldSpec -> story critic >=9 -> GameExperienceSpec/Play Canvas realization -> first-touch magic >=9 -> whole-chapter game >=9 -> learning/transfer >=9 where applicable -> ready_for_user_review -> explicit user acceptance -> user_accepted`
 
-The current user's explicit verdict can reject a candidate at any point and overrides every critic or automated result. Do not average user and critic scores.
+All critic thresholds are unrounded with no blocker. The current user's explicit verdict can reject a candidate at any point and overrides every critic/automation result.
 
 ## Story gate
 
-For every course/subject, generate a strong story/fantasy/world premise before gameplay realization. Evaluate **one frozen story candidate at a time** with the story-only rubric in STORY-GENERATION-AND-CRITIC.md.
+For every course/subject, create a strong story/fantasy/world before gameplay realization. Evaluate one frozen StoryWorldSpec at a time using `STORY-GENERATION-AND-CRITIC.md`.
 
-Story pass requires unrounded **>=9.0/10**, no story blocker. The story critic evaluates hook, clarity/causality, character attachment, world appeal, storytelling quality, pacing/progression, stakes, payoff/forward pull, and cross-age engagement.
+Story critic judges hook, causality, attachment, world appeal, storytelling, pacing/progression, stakes, payoff/forward pull and cross-age engagement. It does not award points for learning value, code/tests, Play Canvas, Three.js, framework reuse or implementation effort.
 
-It must not award story points for learning value, code quality, tests, graphics technology, Three.js, asset count, or implementation effort.
+Pass: **>=9.0/no blocker**.
 
-A story critic pass does not mean the game passes. It only allows the story to proceed to gameplay realization.
+## First-touch game gate
 
-## First-touch acceptance requirements
+The fresh first 60–90 seconds independently need **>=9.0/no blocker**.
 
-The first-run story/cinematic must give the player control over time and navigation:
+Requirements include:
 
-- Back/previous beat is mandatory.
-- User-paced next/continue is the default.
-- Pause/resume is available while animation is active; skip and replay are available; progress/chapter position is visible.
-- Optional autoplay must be slow enough for beats to land and pause on player interaction.
-- Back/forward reconstructs coherent story state.
-- Reduced motion preserves causal meaning and navigation.
+- beauty/creative hook;
+- curiosity/wonder/tension;
+- character/world attachment;
+- causal clarity understandable to a bright child;
+- low initial cognitive load;
+- Back/Continue/Skip/Replay/progress and Pause/Resume while motion runs;
+- obvious first meaningful world-owned action;
+- continuous story-to-play transition.
 
-A rushed slideshow, missing back navigation, or a clear-but-unengaging exposition sequence fails regardless of animation polish.
+A rushed slideshow, missing back navigation, clear-but-unengaging exposition, dense dashboard or needless story→mission surface break fails first touch.
 
-## Game critic gate
+## Whole-chapter game gate
 
-After the story passes, review the exact rendered game as something a curious kid/younger non-specialist and a teen/young adult would voluntarily play. Use actual rendered evidence and the frozen game rubric. Available-tool/internal criticism may be used during current supervised refinement if honestly labeled `internal_tool_assisted`; it is not an independent agent or human playtest.
+The full chapter independently needs **>=9.0/no blocker**.
 
-The unrounded game weighted score must be **>=9.0/10**, both audience lenses passing, and no critical blocker may remain. A green test suite, appealing screenshot, or renderer choice never constitutes this score.
+Judge story/world continuity, agency, progressive cognitive load, reasoning quality, feedback/recovery, payoff, forward pull, game identity, learning integration and phone/accessibility quality.
 
-The game critic must explicitly verify that the approved story survived realization and that the first action, failure/recovery, progression, world changes, boss/transfer, ending, and replay feel like one coherent game rather than a lesson site.
+A later build/policy phase that turns into a conventional themed web workbench is a failure even if the opening is beautiful.
 
 ## Learning/real-world-transfer gate
 
-The intended game should deliver the useful outcomes of its declared course. Require explicit outcome-to-mechanic-to-assessment coverage, varied practice, fresh transfer, and delayed retrieval where claimed. No course-equivalence claim from story completion, participation, or XP.
+The intended game should deliver the useful outcomes of its declared LearningSpec. Require explicit outcome->mechanic->assessment coverage, varied practice, fresh transfer and delayed retrieval where claimed.
 
-The learning gate is separate from story and game appeal. A strong story/game with shallow learning fails the product promise; rigorous learning with weak story/game appeal also fails.
+No course-equivalence/mastery claim from story completion, XP, participation or immediately repeated guided practice.
 
-## Three.js / rendering direction
+Pass applicable learning/transfer review at **>=9.0/no blocker** before user review under the current process.
 
-Three.js 3D must be **seriously considered** as a realization option for this audience because it can improve attention, immersion, character presence, environmental storytelling, exploration, and direct interaction even when the learning concept itself is not inherently spatial.
+## Play Canvas engineering gate
 
-For important candidates, compare authored 2D, 2.5D, and interactive Three.js 3D. Choose the medium that best supports the story/audience/device budget. Do not award acceptance for 3D itself; weak writing in 3D still fails.
+Game quality scoring does not replace runtime integrity.
 
-If 3D is used, preserve pinned local assets, same-origin runtime, keyboard/touch equivalence, reduced-motion behavior, usable fallback, and realistic mobile performance validation.
+For exact candidates using Play Canvas, machine evidence must separately verify:
+
+- compatible story/mission modes retain intended stage/world identity;
+- direct actions still issue server-authoritative commands;
+- save/reload/history/reset/isolation/evidence semantics remain intact;
+- phone/touch/text enlargement/reduced motion/fallback are operable;
+- no duplicate course-specific renderer lifecycle is introduced.
+
+A framework failure can block release even when screenshots look good. Passing this gate earns no automatic game-quality points.
+
+## Reusable Three.js framework gate
+
+When Three.js is used, the implementation must consume the shared Story3D runtime/host/world-package boundary.
+
+The user explicitly requires future story/fantasy settings to be easy to integrate. Therefore:
+
+- runtime/host/Play Canvas remain story-neutral;
+- world-specific scene/assets/states/cameras/anchors live in replaceable packages;
+- new stories normally do not modify core infrastructure;
+- synthetic unrelated-world tests prove mechanical genericity;
+- future generator maturity requires a materially different real world to integrate without story-specific core edits;
+- long-term generated worlds should prefer validated declarative WorldPackageSpec data over arbitrary generated JavaScript.
+
+The full arbitrary package loader is not a Phase 1 acceptance requirement and must not be built by weakening CSP/security.
+
+## Three.js/rendering direction
+
+For important candidates compare 2D, 2.5D and interactive Three.js. Choose the medium that serves the story/audience/device budget.
+
+3D itself never earns acceptance. If used, preserve pinned local assets, same-origin runtime, touch/keyboard, reduced motion, fallback and realistic phone performance.
 
 ## Review record
 
-Every gate record includes exact story/build version, reviewer method, raw scores, evidence, blockers, limitations, likely abandonment points, changes since prior candidate, and status. Never reuse a historical score for a changed story/build.
+Every gate record includes exact story/build/package version, reviewer method, raw scores, evidence, blockers, limitations, likely abandonment points, changes since prior candidate and status.
+
+Never reuse a historical score for a changed build/world/package.
 
 Allowed statuses include `story_needs_revision`, `needs_revision`, `review_pending`, `ready_for_user_review`, `user_rejected`, and `user_accepted`.
 
 ## Scope and rollout
 
-This remains private Phase 1 refinement. The story-generation/gating contract also defines future course-generation behavior, but does not authorize Phase 2/3 implementation, external testers, paid resources, public rollout, untrusted execution, or new model integration. External users remain blocked until explicit user acceptance and later authorization.
+This remains private Phase 1 refinement. The architecture also guides future generation, but does not authorize Phase 2/3 implementation, external testers, paid resources, public rollout, untrusted execution, arbitrary generated client code or new model integrations.

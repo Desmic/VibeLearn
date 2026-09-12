@@ -1,137 +1,136 @@
 # vibeLearn
 
-**Read `CODEX-IMPLEMENTATION-PLAN.md` first**, then `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, `docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/PLAY-CANVAS.md`, and `docs/THREE-STORY-FRAMEWORK.md` before substantial product work. The active implementation plan controls build order; user feedback that changes product direction must update the plan and affected docs before or in the same bounded implementation unit as code.
+**Read `CODEX-IMPLEMENTATION-PLAN.md` first**, then `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, `docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/PLAY-CANVAS.md`, and `docs/THREE-STORY-FRAMEWORK.md` before substantial product work.
 
-The product is a game whose meaningful play delivers intended course outcomes, not a course website with game decoration. **Product north star:** VibeLearn is a general system for turning many subjects/courses into source-grounded learning games; Relay Rescue is only the current reference slice. Current story generation is topic/outcome-driven; future explicit learner story preferences are planned but must not be inferred today.
+The active implementation plan controls build order. User feedback that changes product direction, story/game quality, generation assumptions, platform priority, critic semantics, Play Canvas/framework boundaries or the meaning of done must update the plan and materially affected current docs before or in the same bounded implementation unit as code.
 
-The user currently permits available-tool/internal review while a genuinely separate critic is unavailable. Do not block current private Phase 1 refinement on critic tooling. Label any fallback `internal_tool_assisted`; never call it an independent agent or human playtest. Story, first-touch, whole-chapter game, and learning/transfer reviews are separate gates. Each applicable critic target is unrounded >=9.0/10 with no blocker, but the user's final verdict overrides every critic.
+## Product north star
 
-## Current user verdict is authoritative
+VibeLearn is a **general learning-game generation system**, not Relay Rescue and not a course website with game decoration. Relay Rescue/Echo Forge is the current authored Phase 1 reference used to prove reusable contracts.
 
-The current Relay Rescue predecessor opening is **user rejected**. The newest first-touch/story rating is **3/10**. The user specifically reported: no good back navigation in the animation/slides, beats move too quickly, the story is lazily told, causality/context is unclear, and it does not yet capture kids/young adults strongly enough.
-
-The previous internal 9.196 game / 9.35 bounded-learning critic result is historical only. Never cite it as evidence that the current experience is acceptable after the user's rejection. Current status is `needs_revision`.
-
-The current user is the sole real product reviewer during private refinement. Do not average their verdict with agent/critic/automation scores.
-
-## User feedback is product state, not chat-only context
-
-When user feedback changes story direction, onboarding, progression, rendering strategy, UI/UX, platform priority, acceptance, course generation, testing, critic semantics, Play Canvas/framework boundaries, or rollout boundaries, **update `CODEX-IMPLEMENTATION-PLAN.md` and the materially affected repository docs in the same implementation unit**.
-
-At minimum inspect `docs/STATE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, `docs/COURSE-GENERATION-GAME-SYSTEM.md`, `docs/PLAY-CANVAS.md`, and `docs/THREE-STORY-FRAMEWORK.md`; update only the ones materially affected.
-
-## General generation boundary
-
-The reusable generated experience is conceptually split into:
+The durable generated boundary is:
 
 `LearningSpec -> StoryWorldSpec -> GameExperienceSpec -> AssessmentEvidenceSpec`
 
-Canonical competency/evidence identity must not depend on a story character, fantasy name, renderer, UI skin, Play Canvas implementation, or course-specific object. Future story/theme replacement must preserve legitimate learner history.
+Canonical competency/evidence identity must not depend on Pip, a fantasy name, visual style, renderer, world package, Play Canvas implementation or course-specific object.
 
-**Today:** story is generated from topic/course intent, source-grounded outcomes, causal concept structure and a broad kid-through-young-adult quality target.
+**Today:** story/world generation is driven by topic/course intent, source-grounded outcomes, causal concept structure and a broad kid-through-young-adult quality target.
 
-**Future:** an explicit learner-controlled `StoryPreferenceProfile` may influence genre, fantasy/realism, tone, characters, visual style, pace, humor/darkness, exploration/action balance and narrative density. It is optional creative state, not mastery/evidence. Do not infer it from unrelated user data.
+**Future:** an explicit learner-controlled `StoryPreferenceProfile` may influence genre, fantasy/realism, tone, characters, visual style, humor/darkness, pace, exploration/action balance and narrative density. It is creative state, not mastery/evidence. Never infer it from unrelated personal data.
 
-## Story-first product workflow
+## Acceptance authority
 
-For any course/subject, **generate the story/fantasy/world premise before gameplay realization**. Do not start with lesson cards/mechanics and add narrative afterward.
+The current user is the sole real product reviewer during private refinement. Their latest explicit predecessor first-touch/story verdict is **3/10** and remains authoritative until they review a materially changed verified/deployed candidate.
 
-Required conceptual pipeline:
+Historical critic scores never override direct user rejection.
 
-`course/outcomes -> source grounding -> LearningSpec -> story/fantasy candidate -> story critic >=9 -> GameExperienceSpec/Play Canvas realization -> first-touch magic critic >=9 -> whole-chapter game critic >=9 -> learning/transfer gate >=9 -> user review`
+Available-tool/internal criticism is allowed when a genuinely separate critic is unavailable, but label it `internal_tool_assisted`; never call it independent or human-tested.
 
-The story critic evaluates **one frozen story at a time**, solely on story quality: hook, clarity/causality, character attachment, world/fantasy appeal, storytelling quality, pacing/progression, stakes, payoff/forward pull, and cross-age engagement. It must not award story points for code, tests, curriculum value, Three.js, asset count, or engineering effort.
+Required gate order:
 
-## First-touch magic and whole chapter are separate gates
+`story critic >=9 -> first-touch magic >=9 -> whole-chapter game >=9 -> learning/transfer >=9 -> user review`
 
-Do not average a poor opening into a strong chapter score.
+All scores are unrounded and require no blocker. Critic pass only authorizes the next gate.
 
-**First-touch magic** reviews the fresh first 60–90 seconds: beauty/creative hook, curiosity, character/world attachment, causal clarity, low initial cognitive load, player-owned pacing/navigation, obvious first meaningful action and story-to-play transition. It must independently score >=9/no blocker.
+## Story-first workflow
 
-**Whole-chapter game experience** reviews story-to-play continuity, progressive cognitive load, agency, challenge, feedback/recovery, payoff and forward pull across the complete chapter. It must independently score >=9/no blocker.
+For every course/subject, generate and freeze a compelling story/fantasy/world before gameplay realization. Do not begin with generic lesson prose/UI and reskin it later.
 
-Only after both pass does the learning/transfer gate run. Great graphics cannot compensate for weak learning; strong learning cannot compensate for a product nobody wants to play.
+The story critic evaluates one frozen story only: hook, causality, character attachment, world appeal, storytelling quality, pacing/progression, stakes, payoff/forward pull and cross-age engagement. It gives zero credit for Three.js, code, tests, curriculum value or engineering effort.
+
+The first chapter must build a clear world model before raising cognitive load. Default early-load ladder:
+
+`beauty / curiosity / hook -> character + world desire -> concrete need -> one obvious action -> visible consequence -> easy recovery/success -> formal concept -> variation -> combination -> transfer`
+
+First-run narrative UX is user-paced by default. Back/previous, Continue, Skip, Replay and visible progress are required where applicable; Pause/Resume is required while motion runs. Reduced motion preserves causal meaning and navigation. A slower slide deck is still a failure if the story is not dramatized.
 
 ## Play Canvas is the game architecture
 
-VibeLearn has converged on the **Play Canvas** in `docs/PLAY-CANVAS.md`.
+The **Play Canvas** in `docs/PLAY-CANVAS.md` is the persistent game surface/orchestrator. Story, exploration, missions, consequences, progression, building and transfer should happen inside it.
 
-The Play Canvas is the persistent game surface/orchestrator. Story, exploration, missions, consequences, progression, building and transfer should happen inside it rather than in a sequence of course pages with occasional canvases.
+Do not add new course-specific game shells, bespoke story/mission canvases or page/card experiences for gameplay phases. During migration, legacy DOM containers may remain temporarily, but new work must move toward one persistent Play Canvas lifecycle.
 
-**Do not add new bespoke story/mission canvases or new page/card shells for gameplay phases.** Migrate legacy surfaces into the Play Canvas in bounded increments while preserving server/evidence semantics.
+For compatible modes sharing a world package, prefer the same Play Canvas stage/world/runtime instance across transitions. Accessible semantic DOM actions/fallback remain required, but they support the game surface and never decide correctness/mastery/evidence.
 
-When story and mission use the same compatible world package, prefer one persistent stage/world/runtime instance across the transition. A legacy DOM container may temporarily be rerendered/replaced during migration, but the Play Canvas stage should survive and reattach rather than spawning a new renderer.
+## Three.js framework is a hard reusable subsystem requirement
 
-Accessible DOM actions/fallback remain required. They support/mirror the game surface and carry semantics; they should not dominate the visual architecture or decide correctness/progression.
+The user explicitly requires a **Three.js framework that makes future story/fantasy settings easy to integrate**.
 
-Current migration order: opening + Signal 1 -> Signals 2-6 -> Signal 6 builder/HUD -> Signal 7 transfer shell -> remove obsolete duplicate mount/page paths after equivalent tests are green.
+The hierarchy is:
 
-## First-touch story UX is a hard requirement
+`Play Canvas -> renderer backend -> Story3D runtime/host -> world package`
 
-A story/cinematic must not behave like a rushed slide deck.
+Three.js is optional per course; 2D and 2.5D remain valid. When Three.js is used, shared infrastructure owns renderer/canvas lifecycle, DPR, resize, frame scheduling, pause/reduced motion, context recovery, resource disposal, camera orchestration and adapter/package validation.
 
-- **Back / previous beat is mandatory.**
-- First-run story progression is **user-paced by default**.
-- Provide next/continue, pause/resume while animation is active, skip, replay, and visible progress/chapter position.
-- Optional autoplay must be slow enough for the beat to land and pause on inspection/interaction.
-- Back/forward restores coherent story/world state.
-- Reduced motion preserves the same causal meaning and navigation.
-- Do not make the player rewatch long exposition after ordinary failure/resume.
+Story-specific world packages own art/assets, scene entities, beat states, game-state visual mappings, camera compositions, interaction anchors and fallback metadata.
 
-Do not “fix” a weak story by only increasing timers. Story should be dramatized through action, scene change, character behavior, discovery, dialogue, conflict, consequence, or direct interaction rather than explanatory captions.
+### Data-first authoring target
 
-## Attention first, cognition second
+Long term, generated 3D worlds should be **versioned declarative packages interpreted by trusted runtime code**, not arbitrary generated JavaScript. Prefer package data such as:
 
-The early-load ladder is:
+- manifest/backend/capabilities/assets;
+- scene/entity graph;
+- story/game visual states;
+- camera compositions;
+- semantic interaction anchors;
+- approved same-origin assets;
+- semantic/2D fallback.
 
-`story hook / beauty / curiosity -> character + world desire -> concrete need -> one obvious action -> visible consequence -> easy recovery/success -> name the concept -> variation -> combination -> transfer`
+A custom adapter module should be exceptional/reviewed, not the default generated output.
 
-The first/tutorial chapter must make the world obvious to a child/novice before demanding technical reasoning while remaining stylish enough for teens/young adults. Formal terminology comes after a concrete model when faithful.
+Current Phase 1 may keep authored `rescue-story3d.js`, but future-world integration should mostly change package data/assets rather than `play-canvas.js`, `story3d-runtime.js` or `story3d-world-host.js`.
 
-Use tutorial focus mode: playfield/world first; nonessential evidence panels, journals, analytics, helper drawers, repeated briefings, settings, and long tool rails are deferred until useful. Underlying save/evidence semantics stay active.
+If a new fantasy needs story-specific core edits, either generalize the capability as a versioned shared feature with tests or treat it as a framework-boundary failure.
 
-By the end of Chapter 1 the learner should understand who/what matters, what help is needed, the important objects/resources and their functions, what happened, what changed, why it matters, what the player did, what success means, and how the in-world behavior maps to the real subject concept.
+Do not implement an unsafe arbitrary package loader during current Phase 1. CSP/static allowlists remain strict until a later immutable publishing/asset-validation boundary exists.
+
+## Game-first learning invariants
+
+Meaningful play must embody subject thinking: investigate, manipulate, compare, arrange, construct, diagnose, test, explore or control systems when those actions map to the capability.
+
+Difficulty rises through reasoning, transfer, uncertainty, trade-offs, interacting rules and reduced scaffolding—not longer prompts or denser dashboards.
+
+Keep the story/world alive as complexity rises where it still carries meaning. Do not collapse into a themed form/workbench exactly when reasoning becomes harder.
+
+Every intended outcome maps through prerequisite -> mechanic -> player decision -> causal feedback -> varied practice -> fresh transfer -> delayed retrieval where claimed -> evidence limits.
 
 ## Primary device target
 
-During current refinement, optimize first for the **mainstream modern Android/iPhone portrait range**, using a small representative matrix around 360–430 CSS px wide with common tall-phone aspect ratios, touch, safe-area behavior, text enlargement and reduced motion. Do not create separate 320-vs-390 product designs unless a real breakpoint failure requires it. Desktop polish follows later.
+Current refinement is phone-first for mainstream modern Android/iPhone portrait use, roughly **360–430 CSS px** wide with common tall aspect ratios, touch, safe areas, text enlargement and reduced motion. Desktop polish follows after phone quality is strong.
 
-## Three.js / 3D subsystem direction
+## Engineering and verification
 
-Three.js is a **serious option for attention and immersion**, not merely an optional renderer for inherently spatial learning mechanics. Explicitly consider authored 2D animation, 2.5D/parallax, and interactive Three.js 3D for important story/game candidates.
+Stay inside private Phase 1 unless explicitly authorized otherwise.
 
-3D can be valuable for character/world presence, spatial storytelling, atmosphere, exploration, discovery, and direct interaction with the kid/teen/young-adult audience. But 3D never rescues weak writing or weak gameplay and earns no automatic critic points.
+Use the Python modular monolith and preserve hosted auth, PostgreSQL/RLS, learner isolation, server-authoritative progression/evidence, submitted-evidence immutability, reset confirmation and historical-review boundaries.
 
-Three.js is a rendering subsystem **inside Play Canvas**, not the game shell. Use locally served verified/pinned assets; no runtime CDN or relaxed CSP. Preserve keyboard/touch semantics, reduced motion, fallback, same-origin behavior, and realistic mobile performance. Renderer state never determines assessment/evidence/unlocks.
+Run integrated gates with:
 
-Use the reusable boundary in `docs/THREE-STORY-FRAMEWORK.md`. `story3d-runtime.js` owns renderer/canvas lifecycle, resource tracking, resize, frame scheduling, DPR policy, pause/reduced motion, context loss/recovery, disposal, and generic camera orchestration. `story3d-world-host.js` owns adapter compatibility. Story-specific adapters own geometry/assets/art direction, camera compositions, beat states, interaction anchors, and game-state-to-visual mappings. `play-canvas.js` owns the persistent game-surface/world lifecycle above them.
+```text
+python manage.py vendor
+python manage.py build
+python manage.py test
+python manage.py browser
+```
 
-If a new fantasy copies `WebGLRenderer`, `ResizeObserver`, a generic camera lerp loop, or requires a new course-specific app shell, improve the reusable boundary before adding more worlds. Three.js remains optional; `StoryWorldSpec` is renderer-agnostic, and arbitrary generated-package loading stays deferred until the later publishing/validation security boundary.
+Browser ES modules must be syntax-checked with module semantics. Preserve exact commits, failures, screenshots/traces and real persistence/restart paths. Do not claim human delight from machine checks.
 
-## Game-first and course-outcome invariants
+For Play Canvas/Story3D migration, executable tests should verify **instance continuity and genericity**, not just similar pixels:
 
-After the story gate, judge the game as something a curious kid or young adult would voluntarily continue with XP hidden. The approved story must survive implementation as an actual world, not collapse into cards/forms/exposition.
+- same compatible Play Canvas/world/WebGL instance across story -> mission;
+- no duplicate renderer lifecycle;
+- synthetic unrelated world mounts through shared infrastructure;
+- shared runtime/host has no Pip/Echo Forge/rescue assumptions;
+- phone/reduced-motion/fallback/context-loss behavior remains green.
 
-Teach -> easy success -> variation -> combine -> boss/transfer -> resolution -> new possibility. Increase reasoning and agency, not form length. Teach every required boss rule before graded use. New tools expand what the player can do.
+## Evidence semantics
 
-Map each learning outcome through mechanic, decision, feedback, varied practice, fresh transfer, delayed retrieval where claimed, and evidence limits. Do not claim a full course's outcomes from a short guided slice.
+Every command resolves learner, command ID and expected revision. Server validation owns progression and replays pinned rules.
 
-## Scope and verification
+`unknown` is not `assisted`; current observed/declared help is `assisted`; earlier family exposure is `previously_exposed`; explicit no-help may be `declared_independent`. XP never establishes mastery or correctness. Rendering/world state never becomes evidence merely because animation played.
 
-Stay within private Phase 1 product refinement. Do not silently open Phase 2 reuse, Phase 3 generation implementation, model integration, untrusted code execution, external testers, paid resources, or public rollout. Preserve historical snapshots and evidence. The current Render branch is `deploy/render-supabase`; verify branch/service before claiming something is live.
+## Scope
 
-Use one Python modular monolith with semantic HTML/CSS/JavaScript. SQLite/loopback remain local; Flask/Gunicorn, PostgreSQL, and Supabase Auth remain hosted. Read HOSTING.md before infrastructure work.
+No Phase 2+ implementation, new model/provider integration, untrusted runner, external testers, paid provisioning or public rollout without explicit authorization.
 
-Install hosted/test dependencies from requirements.lock and requirements-dev.txt. Run `python manage.py build`, `python manage.py test`, and `python manage.py browser` at integrated gates. Browser JavaScript that uses ES modules must be syntax-checked with module semantics. Use disposable browser databases. Preserve screenshots, traces, exact commits, and failures. No successful API mocks to claim live verification.
-
-For Play Canvas migration, executable tests should verify **instance continuity**, not just similar pixels: when a compatible world crosses story -> mission, retain the same Play Canvas/stage/WebGL identity and ensure only one renderer exists. Machine checks are not human acceptance and source-only review is not story/game review.
-
-Implement a small complete behavior, verify it, inspect it, then extend it.
-
-## Evidence, privacy and persistence
-
-Every command resolves learner session, command ID, and expected revision. Server validation owns progression and replays pinned game rules. Submitted evidence remains immutable; resets must be explicit learner-scoped operations. XP/self-report never establishes mastery, evidence strength, or correctness-based unlocks.
-
-`unknown` is not `assisted`; observed/declared current help is `assisted`; earlier family exposure is `previously_exposed`, not current help. Interactive feedback is guided practice, not fresh independent prediction. Missing evidence is not failure.
-
-Hosted mode fails closed without verified identity/authorized pilot access, HTTPS, and scoped PostgreSQL access. Keep auth, RLS, secrets, and learner-data boundaries intact. Preserve unrelated work and supplied files, and record recovery paths/limitations.
+Render serves `deploy/render-supabase`; auto-deploy is disabled. Verify branch/service and exact revision before saying something is live.

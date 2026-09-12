@@ -1,66 +1,78 @@
-# Three.js story-world framework — reusable Phase 1 rendering contract
+# Three.js story-world framework — reusable rendering and world-authoring contract
 
-**Status:** active Phase 1 rendering subsystem · 12 September 2026  
+**Status:** active Phase 1 rendering subsystem · updated 12 September 2026  
 **Authority:** read with root `CODEX-IMPLEMENTATION-PLAN.md`, `PLAY-CANVAS.md`, `STORY-GENERATION-AND-CRITIC.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `GAME-UX-SYSTEM.md`, and `STATE.md`.
 
 ## Relationship to Play Canvas
 
 VibeLearn has converged on **Play Canvas** as the higher-level game architecture.
 
-This document describes the reusable **Three.js rendering/world-package subsystem inside Play Canvas**. It is not the overall game shell and it must not cause story, mission, builder and transfer states to become separate canvas/page experiences.
+This document defines the reusable **Three.js runtime + world-package framework inside Play Canvas**. It is not the overall game shell and must not cause story, mission, builder and transfer states to become separate course pages/canvases.
 
-The intended hierarchy is:
+Hierarchy:
 
-`Play Canvas -> rendering backend (Story3D when chosen) -> replaceable world adapter/package`
+`Play Canvas -> rendering backend -> Story3D runtime/host -> replaceable world package`
 
-When the same world package is compatible across story and mission states, Play Canvas should keep the world/runtime alive and change its state/mode rather than destroying one renderer and creating another. See `PLAY-CANVAS.md` for the persistent lifecycle contract.
+When compatible story/mission states use the same world package, Play Canvas should keep the world/runtime alive and update state/mode/camera/HUD instead of destroying one renderer and creating another.
 
-## Why this exists
+## Why this framework exists
 
-VibeLearn must be able to realize many different generated stories/fantasies without rebuilding WebGL infrastructure for every course. The Echo Forge is the first adapter proving that boundary; it is not the framework itself.
+VibeLearn is intended to generate many different stories/fantasy settings across many subjects. A new world must not require rebuilding WebGL infrastructure or modifying course-wide app structure.
 
-The framework should make a future world package easy to integrate while keeping **LearningSpec and learner evidence independent of Three.js, Pip, gears, or any visual asset**. Three.js remains one rendering choice alongside 2D and 2.5D, not a mandatory engine assumption.
+The Echo Forge is the first authored world proving the boundary. It is **not** the framework itself.
 
-“Reusable” means more than sharing `new WebGLRenderer(...)`. Generated worlds should primarily author the things that are genuinely creative/story-specific: assets/geometry, art direction, camera **compositions**, beat states, interactions, and mappings from authoritative game state to visible state. Renderer lifecycle, device policy, camera interpolation, aspect-aware shot selection, reduced motion, context recovery, and cleanup belong to shared infrastructure.
+A reusable framework means a future setting primarily authors:
 
-## Layering
+- its world entities/assets and art direction;
+- character/environment compositions;
+- story beat states;
+- authoritative game-state visual mappings;
+- interaction anchors;
+- camera compositions;
+- semantic fallback metadata.
 
-Keep these layers separate:
+It should **not** copy renderer setup, DPR policy, resize loops, animation loops, camera interpolation, context-recovery logic, disposal or Play Canvas lifecycle.
 
-1. **StoryWorldSpec** — renderer-agnostic narrative/world semantics: premise, actors, places, objects/resources, causal rules, stakes, beats, chapter arc, and mappings to learning concepts.
-2. **GameExperienceSpec / Play Canvas** — mechanics, player actions, mission/state graph, persistent game-surface/mode transitions, progressive disclosure, device/accessibility contract, and the chosen realization medium.
-3. **`story3d-runtime.js`** — generic Three.js lifecycle and presentation infrastructure: renderer/canvas policy, scene/camera shell, resource tracking/disposal, resize, frame scheduling, reduced motion, pause, context-loss recovery, runtime stats, and reusable camera-shot interpolation/aspect selection.
-4. **World adapter module** — story-specific geometry/assets, lighting/art direction, camera compositions, beat states, interaction anchors, and mapping from game state to visual state. `rescue-story3d.js` is the current example.
-5. **DOM/action/evidence layer** — accessible controls, authoritative game commands, save/retry behavior, and assessment/evidence. Renderer state never decides correctness, progression, mastery, or evidence.
+LearningSpec and learner evidence remain independent of Three.js and of every world-package identity.
 
-A generated 3D story should normally replace layer 4 and data feeding it, **not fork layer 3 or Play Canvas**.
+## Framework layering
+
+1. **StoryWorldSpec** — renderer-agnostic narrative/world semantics: actors, places, meaningful objects/resources, causal rules, stakes, story beats/chapter arc and mappings to learning concepts.
+2. **GameExperienceSpec / Play Canvas** — mechanics, player actions, game modes, progression, persistent game-surface lifecycle, HUD/visibility schedule, device/accessibility contract and selected renderer backend.
+3. **`story3d-runtime.js`** — generic Three.js lifecycle/presentation infrastructure.
+4. **`story3d-world-host.js`** — world-package/adapter validation, capability negotiation and mount boundary.
+5. **World package** — story-specific scene data/assets/compositions/states/anchors and minimal adapter glue where still necessary.
+6. **Semantic action/evidence layer** — accessible actions, authoritative server commands, save/retry, assessment and evidence. Rendering never decides learning truth.
+
+A generated 3D story should normally replace layer 5 and its data, **not fork layers 3–4 or Play Canvas**.
 
 ## Runtime contract
 
-`createThreeStoryRuntime(host, options)` returns a small reusable runtime with:
+`createThreeStoryRuntime(host, options)` should remain generic and expose a small stable surface including:
 
-- `scene`, `camera`, `renderer`, and `canvas`;
-- tracked `material`, `emissive`, `mesh`, `group`, geometry/material registration helpers;
-- `setDraw(fn)` and `requestDraw()` for state-driven rendering;
-- `setPaused(bool)` and reduced-motion-aware animation scheduling;
-- viewport/aspect handling through `ResizeObserver`;
-- bounded device pixel ratio for phone performance;
-- `webglcontextlost` / `webglcontextrestored` hooks;
-- `createCameraRig(initialShot, options)` for reusable aspect-aware camera composition selection and interpolation;
-- `stats()` including runtime version and renderer state;
-- idempotent `dispose()` that owns renderer/resource cleanup.
+- scene, camera, renderer and canvas;
+- resource/material/geometry tracking helpers;
+- state-driven `setDraw(fn)` / `requestDraw()`;
+- reduced-motion-aware scheduling and `setPaused(bool)`;
+- resize/aspect handling with bounded phone DPR;
+- WebGL context loss/restoration hooks;
+- reusable camera rig with portrait/landscape composition selection;
+- runtime stats/version;
+- idempotent cleanup/disposal.
 
-The runtime must remain free of course names, story characters, competencies, assessment rules, mission IDs, learner state semantics, and Play Canvas product-flow decisions.
+The runtime must remain free of course names, story nouns, learner semantics, mission IDs, assessment rules and Play Canvas product-flow decisions.
 
-### Camera-shot contract
+## Camera composition contract
 
-World adapters define **camera compositions**, not camera-loop boilerplate. A shot is either:
+World packages declare compositions; the runtime owns generic interpolation and aspect handling.
+
+A composition may be a direct shot:
 
 ```js
 { p: [x, y, z], t: [lookX, lookY, lookZ] }
 ```
 
-or an aspect-aware pair:
+or aspect-aware:
 
 ```js
 {
@@ -69,111 +81,158 @@ or an aspect-aware pair:
 }
 ```
 
-The shared camera rig owns current/target vectors, portrait-vs-landscape selection, interpolation, snapping for reduced motion/state changes, and applying `camera.lookAt`. A world adapter may choose the compositions and transition intent, but should not reimplement vector lerp loops merely because its fantasy is different.
+The shared camera rig owns current/target vectors, portrait/landscape selection, interpolation, reduced-motion snapping and `lookAt` application. World packages choose shots and transition intent, not generic vector-loop boilerplate.
 
-This is deliberately small. It is not a cinematic timeline editor and it does not decide story pacing. Story pacing remains player-owned; Play Canvas and the active story/game state decide which beat/shot is active.
+## Current adapter contract
 
-## World-adapter contract
-
-The story host supports the legacy story/mission modes and a Play Canvas-compatible mount mode. A world adapter exposes the relevant behavior:
+During Phase 1 migration an authored world adapter may expose:
 
 ```js
 createStoryWorld(host, { reducedMotion, mode }) -> {
   available,
-  setMode?(storyOrMission),
-  setBeat(index),
-  setMissionState(state),
-  setPaused(value),
-  replay(),
-  stats(),
+  setMode?(mode),
+  setBeat?(index),
+  setMissionState?(state),
+  setPaused?(value),
+  replay?(),
+  stats?(),
   dispose()
 }
 ```
 
-`story` and `mission` remain compatible during migration. `play` is the persistent Play Canvas mount capability for adapters that explicitly support it. During migration, Play Canvas may also keep an older adapter mounted once through a compatible mode when that adapter already exposes both `setBeat` and `setMissionState`; new adapters should prefer the explicit Play Canvas capability.
+`play` is the persistent Play Canvas capability. Legacy `story`/`mission` modes remain compatible only while migration is incomplete.
 
-The adapter may interpret beat/game state into cameras and object states, but it must never commit actions or mutate learning evidence.
+Adapters interpret story/game state into visuals. They never commit gameplay actions, decide correctness, unlock progression or mutate evidence.
 
-Future generated packages may add versioned optional capabilities (for example named interaction anchors, asset manifests, camera presets, or environment transitions), but compatibility must be negotiated explicitly rather than by probing arbitrary globals.
+## Long-term world-authoring target: data first
 
-## Future generated-world package shape
+The user's requirement is not merely “share the renderer.” Future generated stories/fantasies should be **easy to integrate**.
 
-When Phase 3 generation chooses Three.js, the generator should emit/version a package conceptually like:
+The long-term target is a versioned, declarative **`WorldPackageSpec`** interpreted by trusted shared engine/runtime code. Conceptually:
 
 ```text
 world-package/
-  manifest.json          # package id/version, adapter entry, asset list, capabilities
-  world-adapter.js       # implements the VibeLearn story-world adapter contract
-  assets/...             # same-origin approved models/textures/audio where applicable
-  fallback/...           # semantic/2D fallback data or assets
+  manifest.json          # package id/version/backend/capabilities/assets
+  world.json             # scene/entity graph + reusable primitive references
+  states.json            # story beat and game visual states/transitions
+  cameras.json           # named portrait/landscape compositions
+  interactions.json      # semantic action anchors/hit metadata
+  effects.json?          # reusable effect compositions, if needed
+  assets/...             # approved same-origin models/textures/audio
+  fallback/...           # semantic/2D fallback data/assets
+  adapter.js?            # exceptional reviewed extension, not default generation
 ```
 
-The package ID/version belongs to `StoryWorldSpec` / `GameExperienceSpec` provenance. It **must not become a canonical competency ID or evidence ID**. Re-generating the fantasy can therefore swap world packages while legitimate learner history remains mapped to the same LearningSpec.
+### Why declarative packages matter
 
-Current Phase 1 does not implement the full arbitrary package loader or generation pipeline. It establishes the Play Canvas + runtime/adapter seam first; broad package loading belongs behind the later generator/security boundary.
+A data-first package gives us:
 
-## Integration rules for a new story/fantasy
+- easier generation and regeneration of many fantasy settings;
+- stable validation/schema checks before publishing;
+- less course-specific engine code;
+- safer CSP/static serving than arbitrary generated JavaScript;
+- easier versioning/provenance and replacement;
+- clearer tests that a world package does not contaminate learning/evidence identity.
 
-A new 3D setting should require roughly this work:
+Current Phase 1 does **not** implement the full arbitrary package loader. It defines and proves the authoring seam first.
 
-1. freeze and pass its `StoryWorldSpec` story critic;
-2. choose Three.js in `GameExperienceSpec` for a justified reason;
-3. implement a world adapter using `story3d-runtime.js` rather than creating its own renderer lifecycle or camera interpolation loop;
-4. author landscape/portrait camera compositions and map story beats plus authoritative game state to visible scene states;
-5. mount it through Play Canvas rather than creating a new application shell;
-6. expose accessible DOM-owned interactions instead of relying on canvas-only meaning/input;
-7. provide reduced-motion and renderer-failure meaning-equivalent behavior;
-8. run phone/rendering/critic evidence on the exact build.
+## Shared primitive/capability direction
 
-If integrating a new setting requires copying renderer setup, resize loops, disposal, context-loss logic, mobile pixel-ratio policy, current/target camera vectors, generic camera lerp code, or creating a new course-specific game shell, the framework boundary has failed and should be improved before adding more worlds.
+Only generalize a primitive after there is evidence it is useful beyond one story. Candidate reusable capabilities include:
 
-### Easy-integration acceptance rule
+- environment/lighting presets as composable primitives rather than fixed themes;
+- actor/entity registration and named anchors;
+- prop/resource visibility/state transitions;
+- emissive/highlight/focus effects;
+- path/message/projectile transitions;
+- camera composition library and transition policies;
+- semantic interaction-anchor projection between world and DOM;
+- named environment-state transitions;
+- generic particle/effect hooks with bounded mobile budgets;
+- asset manifest loading/validation once the publishing boundary exists.
 
-The design target is stronger than “a second adapter can be made to work.” Future story/fantasy generation should normally be able to add or replace a world by changing a **versioned world package** plus story/game data, while Play Canvas, runtime and host stay untouched.
+Do **not** create a huge generic game engine speculatively. The framework should grow through real story requirements, but each new reusable capability must be story-neutral and versioned.
 
-A candidate world integration fails this rule when it needs story-specific changes in `story3d-runtime.js`, `story3d-world-host.js`, or Play Canvas core. If a genuinely new engine capability is required, implement it as a small generic/versioned capability with compatibility tests first, then consume it from the adapter. Do not smuggle one story's assumptions into shared infrastructure because doing so makes the next generated fantasy harder.
+## World-package integration rule
 
-A world package should be independently replaceable: uninstalling/replacing it must not change canonical competencies, learner evidence, assessment rules, save semantics or historical progress. Its manifest/version is provenance, not learning identity.
+A new setting should normally require:
 
-The current test-only Star Orchard adapter proves the mechanical Story3D seam. A later milestone must prove the **authoring seam** with a materially different real generated/authored story: it should integrate without modifying Play Canvas/runtime/host infrastructure, use the same phone/reduced-motion/fallback policies, and still achieve its own story/game critic gates.
+1. freeze/pass StoryWorldSpec story critic;
+2. select Three.js in GameExperienceSpec for a justified reason;
+3. author/compile a versioned world package against the shared contract;
+4. define portrait/landscape camera compositions;
+5. map story beats and authoritative game state to visible world states;
+6. expose semantic interaction anchors/fallback;
+7. mount through Play Canvas;
+8. run phone, fallback, reduced-motion, context-loss and critic evidence.
 
-## Mobile, accessibility, and performance defaults
+If integrating a new setting requires story-specific changes to `play-canvas.js`, `story3d-runtime.js` or `story3d-world-host.js`, either:
 
-The runtime is deliberately conservative for the current phone-first target:
+- the new capability is genuinely generic and should first become a versioned shared capability with compatibility tests; or
+- the world package is violating the framework boundary.
 
-- self-hosted pinned Three.js;
-- same-origin assets/runtime;
-- bounded pixel ratio rather than blindly rendering at physical device DPR;
-- resize-aware camera/aspect behavior;
-- shared portrait/landscape shot selection and camera interpolation;
+## Easy-integration acceptance rule
+
+“Reusable” is not satisfied by one Echo Forge adapter.
+
+Phase 1 minimum proof:
+
+- Echo Forge uses shared runtime/host rather than its own renderer lifecycle;
+- opening and Signal 1 retain the same Play Canvas/world/runtime where compatible;
+- an unrelated synthetic **Star Orchard** world mounts through shared infrastructure without Relay Rescue assumptions;
+- incompatible versions/capabilities fail closed;
+- context loss, reduced motion, resize, camera aspect switching and cleanup remain green.
+
+Before the future generator is considered mature, require a stronger **authoring proof**:
+
+- a materially different real generated/authored story integrates by adding/replacing its world package and story/game data;
+- no story-specific changes are needed in Play Canvas/runtime/host core;
+- the same phone/reduced-motion/fallback contracts work;
+- package replacement leaves canonical competencies/evidence/history unchanged;
+- the new story/game still passes its own critics.
+
+The synthetic adapter is verification only, not a second product course or authorization for Phase 2/3.
+
+## Package provenance vs learning identity
+
+World package ID/version belongs to StoryWorldSpec/GameExperienceSpec provenance. It must never become a canonical competency or evidence ID.
+
+A learner may later replay the same LearningSpec in a different world. Legitimate learner history stays attached to the learning identity, with story/package exposure tracked separately when it matters.
+
+## Phone/accessibility/performance defaults
+
+The shared runtime minimums are:
+
+- pinned/self-hosted Three.js;
+- same-origin runtime/assets;
+- bounded DPR;
+- resize/aspect-aware compositions;
 - pause and reduced-motion support;
-- WebGL context-loss fallback hooks;
-- semantic DOM controls remain operable if 3D fails.
+- WebGL context-loss/fallback hooks;
+- semantic DOM controls/fallback operable if 3D fails;
+- touch-friendly interaction anchors;
+- no required meaning through color, motion or audio alone.
 
-A world adapter can choose its own art direction and performance budget within the GameExperienceSpec, but it cannot weaken these minimums without explicit evidence/review.
+A world may choose its own art direction/performance budget inside GameExperienceSpec, but cannot silently weaken these minimums.
 
-## Security / hosting boundary
+## Security/publishing boundary
 
-Do not turn “easy world integration” into arbitrary client code execution. Current hosted static files remain explicitly allowlisted and CSP stays strict. Later generated-world packages need a deliberate immutable publishing/asset-validation boundary before arbitrary package paths are served.
+Easy integration must **not** become arbitrary learner/generated code execution.
 
-No runtime CDN dependency, inline-script exception, remote model execution, or learner-supplied JavaScript is authorized by this framework.
+Current hosted static files remain explicitly allowlisted and CSP stays strict. The future generated-world loader needs:
 
-## Phase 1 executable proof
+- immutable package/version identity;
+- schema/capability validation;
+- asset MIME/size/origin validation;
+- approved asset transforms/limits;
+- no inline/eval/remote-script escape hatch;
+- safe rollback/version pinning;
+- provenance linking StoryWorldSpec/GameExperienceSpec to the exact package.
 
-The Phase 1 seam must prove at least:
+No runtime CDN dependency, learner-supplied JavaScript or relaxed CSP is authorized by this framework.
 
-- the Echo Forge adapter imports the shared runtime and does **not** instantiate its own `WebGLRenderer` or `ResizeObserver`;
-- the Echo Forge adapter does not own generic `currentCam` / `currentLook` interpolation state; camera motion comes through the shared camera rig;
-- opening story and Signal 1 use the **same Play Canvas stage and same compatible world/runtime/canvas instance** instead of spawning separate renderers;
-- the Play Canvas can reattach that world through later compatible Signals 2-6;
-- both cinematic and mission states identify the same runtime contract version;
-- a deliberately unrelated **synthetic world adapter** (currently the test-only “Star Orchard”) mounts through shared infrastructure without importing Relay Rescue/Pip-specific code;
-- incompatible adapter versions, unsupported modes, and incomplete returned instances fail closed, with partial instances disposed;
-- generic Play Canvas/runtime/host source contains no assumptions about Pip, Echo Forge, `order-01`, bridge gears, or rescue mission IDs;
-- context loss/fallback, reduced motion, pause, resize, camera composition switching and disposal still work;
-- 360–430px phone first-touch and Chapter 1 behavior remain green;
-- story/game critics judge the rendered result, not framework existence.
+## Critic relationship
 
-The synthetic adapter is **verification only**, not a second product course and not an authorization to build Phase 2/3. It exists to make “reusable” executable instead of architectural prose.
+Framework quality is an engineering prerequisite, not a game-quality score. A perfectly reusable renderer earns **zero automatic story/game critic points**.
 
-Framework extraction is engineering infrastructure. It earns **zero automatic story/game critic points**.
+Critics judge the exact rendered result: beauty, attachment, clarity, agency, game identity, progression, payoff, learning integration and phone/accessibility quality.

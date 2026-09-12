@@ -1,93 +1,144 @@
 # VibeLearn UI/UX direction — story-first commercial game
 
-Status: active direction after user review on 10 September 2026. Read [STATE.md](STATE.md), [STORY-GENERATION-AND-CRITIC.md](STORY-GENERATION-AND-CRITIC.md), and [GAME-UX-SYSTEM.md](GAME-UX-SYSTEM.md).
+**Status:** active direction · updated 12 September 2026. Read `STATE.md`, `STORY-GENERATION-AND-CRITIC.md`, `GAME-UX-SYSTEM.md`, `PLAY-CANVAS.md`, and `THREE-STORY-FRAMEWORK.md`.
 
 ## Product feeling
 
-VibeLearn should feel like a **real game someone could plausibly choose from the Play Store or Steam**, with serious learning underneath. It must not feel like premium SaaS, a course website, or a slide deck wearing game art.
+VibeLearn should feel like a **real game someone could plausibly choose from the Play Store or Steam**, with rigorous learning underneath. It must not feel like premium SaaS, a course website, a slideshow, or a web workbench wearing game art.
 
-The current user is the sole real product reviewer during private refinement. The current Relay Rescue opening is user-rated **3/10 for first-touch/story quality** and is rejected.
+The current user is the sole real reviewer during private refinement. Their latest predecessor first-touch/story verdict remains **3/10** until they play the materially changed verified/deployed candidate.
 
 ## Story/world before UI shell
 
-For every course/subject, begin with a compelling story/fantasy/world premise before deciding the final mission UI. The interface should feel native to the player role and world.
+For every course/subject, begin with a strong story/fantasy/world premise before deciding the final mission UI. Interface language, materials, animation grammar, HUD metaphor and world feedback should emerge from the player role/story rather than from one permanent VibeLearn skin.
 
-**Today, story/world/visual direction is chosen from the topic/outcomes and a broad cross-age quality target; learner creative preferences are not an input.** Long term, an explicit learner-controlled story preference profile should be able to shape genre, tone, realism vs fantasy, character style, visual style, pace, humor/darkness, exploration/action, and narrative density. Do not infer those preferences from unrelated learner data.
+Today story/world direction is topic/outcome-driven. Future explicit learner-controlled story preferences may shape genre, tone, realism/fantasy balance, characters, visual style, pace, humor/darkness, exploration/action and narrative density without changing learning/evidence identity.
 
-The story has its own single-story critic gate before game realization. A visually polished UI cannot compensate for weak storytelling.
+## Play Canvas is the visual hierarchy
 
-## Current first-touch failures to avoid
+The **Play Canvas** is the dominant persistent game surface. Story, exploration, mission play, consequences, progression, construction and transfer belong inside that surface.
 
-The rejected opening exposed concrete UX failures:
+Cross-course platform UI may preserve consistent accessibility, save/recovery, navigation and evidence semantics, but gameplay must not keep falling back to generic page/card shells.
 
-- no previous/back control for story beats;
-- automatic progression too fast;
-- lazy/unclear storytelling;
-- insufficient causal staging and emotional/world attachment;
-- slide-like presentation rather than a lived/dramatized event;
-- insufficient pull for kids, teens, and young adults.
+For compatible world states, the visual transition should happen through camera/world/HUD change inside one Play Canvas rather than by destroying a cinematic and loading a lesson page.
 
-These are product failures even if the information technically exists somewhere on screen.
+## First-touch failures to avoid
+
+The rejected predecessor exposed concrete failures:
+
+- missing Back/previous story navigation;
+- forced/too-fast progression;
+- lazy/explanatory storytelling;
+- weak causal staging and insufficient emotional/world attachment;
+- slide-like presentation;
+- insufficient pull for kids, teens and young adults.
+
+These remain product failures even if every fact technically appears somewhere.
 
 ## First-touch interaction direction
 
-First-run story progression is **user-paced by default**. Back/previous is mandatory. Provide next/continue, pause/resume while animation runs, skip, replay, and visible progress/chapter position. Optional autoplay is secondary and pauses when the player interacts.
+First-run progression is user-paced by default. Back/previous is mandatory. Continue, Skip, Replay and progress are visible; Pause/Resume exists while animation runs; reduced motion keeps causal meaning/navigation.
 
-Tell stories through scene changes, character behavior, dialogue, environmental events, discovery, direct manipulation, conflict, consequence, and world reaction. Do not rely on explanatory cards/captions as the primary storytelling medium.
+Tell story through environment, action, character behavior, dialogue, discovery, conflict and consequence. Do not rely on caption cards as the primary storytelling medium.
 
-Capture attention before asking for difficult reasoning:
+Early-load curve:
 
-`story hook / beauty / curiosity -> character + world desire -> concrete problem -> one obvious action -> visible consequence -> easy recovery/success -> formal concept -> variation -> combination -> transfer`
+`beauty / curiosity -> character + world desire -> concrete problem -> one obvious action -> visible consequence -> easy recovery/success -> formal concept -> variation -> combination -> transfer`
 
 ## Playfield-first hierarchy
 
-During early play, the world/playfield dominates. Evidence panels, analytics, learning metadata, journals, settings, helper drawers, long tool rails, and postmortems remain quiet/deferred until useful.
+During early play, world/action dominates. Evidence panels, analytics, learning metadata, journals, settings, helper drawers, long tool rails and postmortems remain deferred until useful.
 
-Underlying persistence/evidence can stay fully active without demanding visual attention. Introduce the smallest useful HUD/action dock as the player gains context and agency.
+Saving/recovery should be understandable in player language. Backend/assessment vocabulary should not occupy game chrome unless it is genuinely part of the player's decision.
 
-Saving should be understandable without implementation vocabulary. Do not expose backend/assessment terminology as player-facing chrome unless it becomes genuinely useful to the player's decision.
-
-## 2D / 2.5D / Three.js 3D
-
-Three.js 3D is a **serious candidate**, especially because the target kid/teen/young-adult audience may respond strongly to immersion, character/world presence, explorable spaces, environmental storytelling, atmosphere, and direct interaction.
+## Rendering strategy: 2D / 2.5D / Three.js
 
 For important story/game candidates compare:
 
 1. authored 2D/illustrated animation;
-2. 2.5D/parallax/layered scenes;
+2. 2.5D/parallax/layered interaction;
 3. interactive Three.js 3D.
 
-Choose the medium that best serves the story, subject, broad target audience, and mobile/device budget today; once explicit story preferences exist, those may also influence the choice. Do not treat Three.js itself as quality. Weak story in 3D remains weak.
+Three.js is a serious candidate for character/world presence, atmosphere, environmental storytelling, discovery, exploration and direct interaction, especially for the kid/teen/young-adult audience. It earns no quality credit merely for existing.
 
-If 3D is chosen, keep local pinned assets, same-origin runtime, keyboard/touch equivalence, reduced-motion behavior, readable fallback, stable hit targets, and realistic mobile performance.
+## Reusable world visual framework
 
-## Visual/game language
+When Three.js is chosen, use the shared framework under Play Canvas. Future stories/fantasies should integrate by supplying a **versioned world package**, not by creating a new renderer or game shell.
 
-The visual system should come from the generated story/world rather than one permanent VibeLearn skin. Cross-course UI can preserve consistent accessibility, save/recovery, navigation, and evidence semantics while themes, materials, animation grammar, characters, environments, and HUD metaphors change with the story.
+The long-term visual-authoring target is data-first:
 
-Use feedback to communicate state and consequence. Animation should make events, causality, success, failure, and transformation easier to feel/understand. Decorative motion alone is insufficient.
+- scene/entity graph;
+- visual states and transitions;
+- camera compositions for portrait/landscape;
+- semantic interaction anchors;
+- approved world-specific assets;
+- semantic/fallback representation;
+- optional reviewed adapter only for genuinely new capabilities.
+
+This lets radically different fantasy styles coexist without one hard-coded VibeLearn look while preserving shared phone/accessibility/runtime behavior.
+
+If a new theme requires story-specific edits to Play Canvas/runtime/host core, first ask whether the missing capability can be generalized/versioned. Do not pollute shared infrastructure with one world's art assumptions.
+
+## Phone-first composition
+
+Optimize current first touch and Chapter 1 for mainstream Android/iPhone portrait, roughly **360–430 CSS px** wide with tall aspect ratios.
+
+Priorities:
+
+- focal character/action large enough to read immediately;
+- world uses most of the viewport;
+- story/HUD overlays do not bury the event;
+- thumb-sized reachable primary actions;
+- safe-area handling;
+- no horizontal overflow;
+- bounded renderer performance/DPR;
+- no device-specific fork without evidence.
+
+Desktop polish follows after phone quality is strong.
+
+## Visual/game language across generated courses
+
+The framework supplies structural consistency, not a single art direction.
+
+World packages may change:
+
+- materials/colors/lighting;
+- character and environment style;
+- HUD metaphor and animation grammar;
+- camera language;
+- world reactions/rewards;
+- sound/atmosphere where later supported.
+
+They must preserve platform invariants: readable state, accessibility, clear actions, save/recovery, semantic fallback, honest evidence and safe performance.
+
+## Animation and feedback
+
+Animation should communicate causality, transformation, focus, success, failure or world response. Decorative motion alone is insufficient.
+
+Inputs need immediate acknowledgement. Failure should be visible and understandable; recovery should teach rather than punish arbitrarily. Chapter payoff should materially change the world, not only show a report/score.
 
 ## Serious learning underneath
 
-XP never determines mastery. Assistance remains recorded. Evidence stays inspectable and immutable. Familiar practice does not become independent mastery because the game celebrates it.
+XP never determines mastery. Assistance/exposure remain recorded accurately. Evidence is inspectable/immutable where required. Familiar practice does not become independent mastery because the game celebrates it.
 
-Story/game presentation may be highly imaginative, but target competencies, provenance, assessment integrity, learner isolation, and honest evidence claims remain rigorous.
+Story/game presentation may be imaginative; competencies, provenance, assessment integrity and learner isolation remain rigorous.
 
 ## Accessibility
 
-Required meaning survives reduced motion and sound off. Keyboard/touch, narrow screens, text enlargement, contrast, stable targets, story back/forward navigation, and usable fallback remain mandatory.
+Required meaning survives reduced motion and sound off. Keyboard/touch, text enlargement, contrast, stable targets, story navigation and meaning-equivalent fallback remain mandatory.
 
 ## Explicit non-goals
 
-- one generic fantasy/story template for every course;
-- a slideshow marketed as a cinematic;
-- Three.js used only as visual decoration;
-- copying another game's art/layout;
-- manipulative streak loss, fake urgency, punishment, or grind;
-- currencies/shops added merely to inflate engagement;
+- one generic fantasy template for every course;
+- one permanent VibeLearn visual skin;
+- slideshow marketed as cinematic;
+- Three.js used only as wallpaper;
+- new renderer/app shell per generated course;
+- manipulative streak loss/fake urgency/grind;
+- currencies/shops added only to inflate engagement;
 - hiding evidence/uncertainty behind celebration;
-- simplifying technical material just to preserve flow.
+- simplifying important technical meaning only to preserve flow.
 
 ## Documentation feedback loop
 
-User feedback that changes story, first-touch controls, progression, rendering, visual hierarchy, acceptance, or future generation must be reflected in the appropriate repository docs in the same implementation unit.
+User feedback that changes story, first touch, progression, rendering, Play Canvas/framework architecture, visual hierarchy, acceptance or generation must be reflected in the appropriate current docs in the same implementation unit.

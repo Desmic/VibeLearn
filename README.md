@@ -1,62 +1,106 @@
 # VibeLearn · game-first learning system
 
-VibeLearn is a **game whose meaningful play is intended to deliver course outcomes**, not a course website decorated with XP. The current private Phase 1 reference is **Relay Rescue**, a seven-signal reliability adventure running on Render + Supabase.
+VibeLearn is a **general system for turning subjects/courses into source-grounded learning games**, not a course website decorated with XP. The current private Phase 1 reference is **Relay Rescue: The Echo Forge**, a seven-signal reliability adventure.
 
-Start with [`docs/STATE.md`](docs/STATE.md). Product/story authority lives in [`docs/STORY-GENERATION-AND-CRITIC.md`](docs/STORY-GENERATION-AND-CRITIC.md), [`docs/GAME-AS-COURSE.md`](docs/GAME-AS-COURSE.md), [`docs/GAME-UX-SYSTEM.md`](docs/GAME-UX-SYSTEM.md), and [`docs/COURSE-GENERATION-GAME-SYSTEM.md`](docs/COURSE-GENERATION-GAME-SYSTEM.md). The root [`CODEX-IMPLEMENTATION-PLAN.md`](CODEX-IMPLEMENTATION-PLAN.md) carries the active implementation order; the checksummed `learning-os-design-package-v1.3/` remains historical and is not rewritten.
+Start with [`CODEX-IMPLEMENTATION-PLAN.md`](CODEX-IMPLEMENTATION-PLAN.md) and [`docs/STATE.md`](docs/STATE.md). Current product/runtime authority also includes [`docs/STORY-GENERATION-AND-CRITIC.md`](docs/STORY-GENERATION-AND-CRITIC.md), [`docs/GAME-AS-COURSE.md`](docs/GAME-AS-COURSE.md), [`docs/GAME-UX-SYSTEM.md`](docs/GAME-UX-SYSTEM.md), [`docs/COURSE-GENERATION-GAME-SYSTEM.md`](docs/COURSE-GENERATION-GAME-SYSTEM.md), [`docs/PLAY-CANVAS.md`](docs/PLAY-CANVAS.md), and [`docs/THREE-STORY-FRAMEWORK.md`](docs/THREE-STORY-FRAMEWORK.md).
+
+The checksummed `learning-os-design-package-v1.3/` remains historical and is not rewritten.
 
 ## Current product state
 
-The current user is the sole real product reviewer during private refinement. Their latest first-touch/story verdict is **3/10**. It supersedes older critic passes. The rejected opening moved too quickly, had no Back control, explained rather than dramatized, and did not create enough clarity, attachment, or forward pull for kids/young adults.
+The current user is the sole real product reviewer during private refinement. Their latest predecessor first-touch/story verdict is **3/10** and supersedes older critic passes.
 
-The replacement candidate is **Relay Rescue: The Echo Forge**. It is a new story treatment rather than a timer adjustment to the old slides. Its story-only critic is a separate gate from game and learning review; a critic pass never overrides the user's judgment.
+Current gate sequence:
 
-Current conceptual pipeline:
+`LearningSpec -> StoryWorldSpec -> story critic >=9 -> GameExperienceSpec/Play Canvas realization -> first-touch magic >=9 -> whole-chapter game >=9 -> learning/transfer >=9 -> user review`
 
-`course topic/outcomes -> story/fantasy -> story critic >=9 -> gameplay/world realization -> game critic >=9 -> learning/transfer gate -> user review`
+Critic/machine success never overrides the user.
 
-**Today, story choice is topic-driven only.** Learner creative preferences are not an input. Future explicit `StoryPreferenceProfile` support may let a learner influence genre, tone, world type, realism/fantasy balance, character style, visual style, humor/darkness, pace, exploration/action, and narrative density without changing the learning contract.
+**Today**, story generation is topic/outcome/source-structure driven. **Future** explicit `StoryPreferenceProfile` support may let a learner influence genre, tone, fantasy/realism, character/visual style, humor/darkness, pace, exploration/action balance and narrative density without changing the learning/evidence contract.
 
-## Live private pilot
+## Architecture: generated learning package
 
-`https://vibelearn-4xws.onrender.com`
+The durable product boundary is:
 
-Hosted mode uses Flask/Gunicorn on Render, PostgreSQL in Supabase, Supabase Auth plus the private pilot test-identity path, secure revocable application sessions, learner-scoped PostgreSQL/RLS boundaries, and server-authoritative progression/evidence. Render serves `deploy/render-supabase`; auto-deploy is disabled, so verified candidate changes are manually deployed.
+`LearningSpec -> StoryWorldSpec -> GameExperienceSpec -> AssessmentEvidenceSpec`
 
-This remains a private refinement environment. Passing CI/critics does not authorize public rollout or external testing.
+Learning/evidence identity remains independent of story names, characters, renderer, world package and Play Canvas implementation. A future learner can experience the same learning requirements through a different world without erasing/counterfeiting legitimate history.
 
-## Relay Rescue learning/game arc
+## Play Canvas
 
-Relay Rescue currently develops retry-safety reasoning through seven signals:
+VibeLearn has converged on a persistent **Play Canvas** as the game surface.
+
+Story, exploration, missions, visible consequence/recovery, progression, building and transfer are modes inside the game rather than separate lesson pages.
+
+For compatible modes, Play Canvas should keep the same stage/world/runtime and change state/camera/HUD rather than spawning a new course-specific renderer.
+
+Three.js, 2D and 2.5D are rendering backends inside Play Canvas.
+
+## Reusable Three.js world framework
+
+The user explicitly requires a **Three.js framework that makes future stories/fantasy settings easy to integrate**.
+
+Current hierarchy:
+
+`Play Canvas -> renderer backend -> story3d-runtime/world-host -> replaceable world package`
+
+Shared infrastructure owns renderer lifecycle, DPR, resize, frame scheduling, pause/reduced motion, context recovery, cleanup, camera orchestration and package capability validation.
+
+World-specific packages own scene/entities/assets, art direction, story/game visual states, camera compositions, interaction anchors and fallback metadata.
+
+### Data-first world-package direction
+
+The long-term generator should normally emit a validated/versioned declarative package rather than arbitrary renderer JavaScript:
+
+```text
+world-package/
+  manifest.json
+  world.json
+  states.json
+  cameras.json
+  interactions.json
+  assets/...
+  fallback/...
+  adapter.js?   # exceptional reviewed extension only
+```
+
+Current Phase 1 does **not** implement the arbitrary generated-package loader. It proves the Play Canvas + reusable world-authoring seam first, while strict CSP/static allowlists stay intact.
+
+A new fantasy should usually integrate by changing package data/assets, not by editing Play Canvas/runtime/host. If it needs a genuinely new engine capability, generalize/version/test that capability first.
+
+## Relay Rescue arc
+
+The current reference develops retry-safety reasoning through seven signals:
 
 1. **The Echo Forge went silent** — distinguish a lost reply from a failed effect.
 2. **A new body, the same promise** — preserve intent identity across a restart.
 3. **The parcel changed under the same seal** — bind identity to request meaning.
 4. **The Echo Forge forgot the old seal** — respect finite retention.
-5. **The valley ledger goes dark** — keep unknown distinct from known absence and reconcile safely.
+5. **The valley ledger goes dark** — preserve unknown vs known absence and reconcile safely.
 6. **Weave the storm route** — construct a bounded multi-rule recovery policy.
-7. **Beyond the valley** — transfer the reasoning to a fresh export-worker incident.
+7. **Beyond the valley** — transfer reasoning to a fresh export-worker incident.
 
-Signal 1 is deliberately a world-model/tutorial chapter. The player should understand Pip, the broken crossing, the Echo Forge, one replacement gear, `order-01`, the missing reply, why a duplicate costs something, why Pip needs help, and why inspecting before resending is useful **before** formal terminology such as `idempotent retry` is introduced.
+Signal 1 is the world-model/tutorial chapter. Formal terminology such as `idempotent retry` appears after the player understands the concrete one-order/one-gear/lost-reply model.
 
-## Story-first first-touch contract
+## Story-first first touch
 
-A VibeLearn opening is not allowed to be a rushed slideshow. For first-run narrative sequences:
+First-run narrative progression is user-paced. Back/previous and Continue are mandatory where applicable; motion can be paused/resumed; Skip/Replay/progress are available; reduced motion preserves causal meaning/navigation.
 
-- progression is user-paced by default;
-- Back/previous and Continue are required;
-- active motion can be paused/resumed;
-- Skip, replay, and visible story position are available;
-- reduced-motion preserves the same causal story and navigation;
-- going backward/forward reconstructs the correct world state;
-- story is told through events, characters, environment, dialogue, discovery, conflict, and consequence rather than caption dumps.
+The opening should be dramatized through world events, character behavior, dialogue, discovery, conflict and consequence—not exposition slides.
 
-For important stories the realization step explicitly considers **2D illustration, 2.5D/parallax, and interactive Three.js 3D**. Three.js may be chosen for immersion, character/world presence, atmosphere, environmental storytelling, and direct interaction, but earns no score merely for being 3D and never controls assessment/evidence. Phase 1 now establishes a reusable Three.js story runtime + world-adapter seam so future fantasies can swap story-specific worlds without copying renderer lifecycle code; see [`docs/THREE-STORY-FRAMEWORK.md`](docs/THREE-STORY-FRAMEWORK.md).
+## Phone-first quality target
 
-## Quality gates
+Current first touch/Chapter 1 refinement targets mainstream modern Android/iPhone portrait use, roughly **360–430 CSS px** wide with tall aspect ratios, touch, safe areas, text enlargement and reduced motion. Desktop polish follows after phone quality is strong.
 
-Story, game experience, and learning/real-world transfer are separate gates. Each applicable critic target is unrounded **>=9.0/10 with no blocker**, followed by the user's own review. The story critic evaluates exactly one frozen story at a time and ignores code quality, renderer sophistication, test count, and curriculum usefulness when scoring the story itself.
+## Private hosted pilot
 
-Machine verification remains separate again: build, deterministic tests, real-browser journeys, persistence, learner isolation, mobile/narrow layouts, enlarged text, reduced motion, renderer fallback, and failure/recovery paths must stay green. Machine success is not evidence that a story is loved or a game is fun.
+Live private environment: `https://vibelearn-4xws.onrender.com`
+
+Render serves branch **`deploy/render-supabase`**. Auto-deploy is disabled, so only the exact verified review candidate should be manually deployed.
+
+Hosted mode uses Flask/Gunicorn on Render, PostgreSQL in Supabase, Supabase Auth plus the private test-identity path, secure revocable sessions, learner-scoped PostgreSQL/RLS boundaries and server-authoritative progression/evidence.
+
+This is a private refinement environment; CI/critic passes do not authorize public rollout or external testing.
 
 ## Verification
 
@@ -67,7 +111,7 @@ python manage.py test
 python manage.py browser
 ```
 
-GitHub Actions is the integrated hosted gate because it installs the pinned hosted/PostgreSQL/browser dependencies. Local environments without `psycopg`/`supabase-auth` cannot execute the complete hosted suite and must not be described as a full pass.
+GitHub Actions is the integrated hosted gate. Preserve exact commit, failures, screenshots/traces, persistence/restart evidence and phone/fallback behavior. Machine success is not proof that the game is loved or that learning is durable.
 
 ## Run locally
 
@@ -76,26 +120,23 @@ python manage.py vendor
 python manage.py serve
 ```
 
-Open `http://127.0.0.1:8000`. Local mode uses SQLite and a browser-scoped development identity; it is intentionally separate from hosted learner data.
-
-## Course-generation direction
-
-Future Phase 3 generation is not “LLM writes lessons.” The generator must produce a versioned, source-grounded teaching system with a story package and story critic first, then a campaign/gameplay realization, progression and UI disclosure plan, outcome-to-mechanic/assessment coverage, provenance, accessibility/fallback behavior, persistence/evidence contracts, generated fixtures, rendered game criticism, and learning/transfer validation.
-
-Current story generation uses the **course topic/outcomes and causal learning structure only**. Future learner-controlled story preferences are an explicit later capability, not something the system should infer today.
-
-See [`docs/COURSE-GENERATION-GAME-SYSTEM.md`](docs/COURSE-GENERATION-GAME-SYSTEM.md) and [`docs/STORY-GENERATION-AND-CRITIC.md`](docs/STORY-GENERATION-AND-CRITIC.md).
+Open `http://127.0.0.1:8000`. Local mode uses SQLite/browser-scoped development identity and is intentionally separate from hosted learner data.
 
 ## Code map
 
-- `app/rescue.py` — Relay Rescue world/rules and deterministic bounded simulation
+- `app/rescue.py` — Relay Rescue rules and deterministic simulation
 - `app/service.py` — learner-scoped commands, progression, assistance, evidence/reward
-- `app/storage.py` / `app/postgres.py` — local/hosted persistence boundaries
-- `app/hosted.py` / `app/auth.py` / `app/pilot_auth.py` — hosted transport and identity
-- `web/story3d-runtime.js` / `web/rescue-story3d.js` — reusable Three.js story runtime and the Echo Forge world adapter
-- `web/rescue-intro.js` — first-touch story player consuming the current world adapter
-- `web/rescue.js` / `web/rescue-chapter1.js` — seven-signal playfield and tutorial focus mode
-- `tests/` — deterministic, PostgreSQL, hosted, and real-browser verification
-- `docs/` — current state, story/game/learning contracts, critic records, and Phase 1 history
+- `app/storage.py` / `app/postgres.py` — local/hosted persistence
+- `app/hosted.py` / `app/auth.py` / `app/pilot_auth.py` — hosted transport/identity
+- `web/play-canvas.js` / `web/play-canvas.css` — persistent game surface/stage lifecycle
+- `web/story3d-runtime.js` — reusable Three.js renderer/device/camera/lifecycle infrastructure
+- `web/story3d-world-host.js` — world adapter/package capability boundary
+- `web/rescue-story3d.js` — Echo Forge-specific current world implementation
+- `web/rescue-intro.js` — first-touch story state/player controls
+- `web/rescue-game.js` / `web/rescue-chapter1.js` — seven-signal game and Chapter 1 tutorial focus
+- `tests/` — deterministic, PostgreSQL, hosted, browser, Play Canvas and Story3D verification
+- `docs/` — current architecture/product contracts plus historical records
 
-PR #1 remains draft until the current user accepts the experience and the remaining private-pilot release gates are intentionally closed. Phase 2+ remains gated.
+## Scope
+
+Current work remains private Phase 1. Phase 2+, broad generator implementation, arbitrary generated client code loading, new model/provider integrations, untrusted execution, external testers, paid expansion and public rollout remain gated.

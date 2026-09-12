@@ -1,121 +1,134 @@
 # Play Canvas — primary game-surface contract
 
-**Status:** authoritative Phase 1 product/runtime contract · 12 September 2026  
+**Status:** authoritative Phase 1 product/runtime contract · updated 12 September 2026  
 **Read with:** root `CODEX-IMPLEMENTATION-PLAN.md`, `GAME-UX-SYSTEM.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `THREE-STORY-FRAMEWORK.md`, and `STATE.md`.
 
 ## Decision
 
 VibeLearn has converged on a **Play Canvas** architecture.
 
-The Play Canvas is the persistent game surface in which story, exploration, mission play, visible consequences, progression, chapter payoff and later game modes are staged. The product must not behave like a course website that occasionally embeds a Three.js canvas, and it must not keep spawning unrelated cinematic, mission and chapter pages that make the player mentally leave the game.
+The Play Canvas is the persistent game surface in which story, exploration, mission play, visible consequences, progression, chapter payoff, building and transfer are staged. The product must not behave like a course website that occasionally embeds a canvas.
 
-Three.js is one rendering backend **inside** the Play Canvas. `story3d-runtime.js` and `story3d-world-host.js` are therefore renderer/world-package infrastructure, not the top-level UX architecture.
+Three.js is one rendering backend **inside** Play Canvas. The reusable Story3D runtime/host and world-package framework are renderer infrastructure, not the top-level UX architecture.
 
-This distinction is important for the general system: future generated stories/fantasies should plug into the same Play Canvas without requiring a new app shell.
+This distinction is essential to the general system: future generated stories/fantasies plug into the same Play Canvas rather than creating a new app shell.
 
 ## Product invariant
 
-For an active learning game, the player should experience **one continuous play surface**.
+For an active learning game, the player should experience **one coherent play surface**.
 
-A course may change camera, location, chapter, mechanic, HUD, interaction mode, art direction or even rendering backend, but those transitions should happen *inside the game surface* unless there is a deliberate product reason to leave it.
+A course may change camera, location, chapter, mechanic, HUD, interaction mode, world package, art direction or even rendering backend, but those transitions should happen inside the game surface unless there is a deliberate reason to leave it.
 
-For the current Relay Rescue reference:
+For Relay Rescue:
 
-- opening story -> Signal 1 must use the same Play Canvas lifecycle;
-- story-to-play should not destroy the world and open a different game page;
-- Signals 1-6 should preserve Echo Forge/valley world presence while mechanics become progressively more demanding;
-- Signal 7 intentionally changes into a fresh real-world transfer scenario, but it should still be presented by the Play Canvas shell rather than falling back to a normal website lesson;
-- account/login/recovery remain outside gameplay but should retain the game's visual identity.
+- opening story -> Signal 1 uses the same Play Canvas lifecycle;
+- compatible world/runtime should persist through that transition;
+- Signals 1-6 preserve valley/Echo Forge world presence while mechanics become more demanding;
+- Signal 6 construction moves toward in-world operation rather than a web workbench;
+- Signal 7 intentionally changes into a fresh transfer context but remains a Play Canvas game mode;
+- login/account/recovery remain outside gameplay but retain game identity.
 
 ## Layering
 
-Keep these concerns separate:
+1. **LearningSpec / AssessmentEvidenceSpec** — canonical learning/evidence, server-authoritative and independent of renderer/world identity.
+2. **Play Canvas shell/orchestrator** — persistent stage lifecycle, active backend/world, mode transitions, HUD/action/debrief layers, phone/safe-area policy, pause/replay, reduced-motion coordination and renderer fallback coordination.
+3. **Rendering backend** — Three.js where justified; 2D/2.5D remain first-class alternatives.
+4. **World package** — replaceable story/fantasy-specific visual realization: scene/entities/assets, art direction, camera compositions, story/game visual states, interaction anchors and fallback metadata.
+5. **Accessible action/evidence layer** — semantic DOM actions/status/fallback, server commands, save/retry and evidence.
 
-1. **LearningSpec / AssessmentEvidenceSpec** — canonical competencies, source grounding, assessment meaning, evidence, assistance, retrieval and transfer. Server-authoritative and independent of renderer/world identity.
-2. **Play Canvas shell/orchestrator** — persistent game-surface lifecycle, active world/backend, game mode, stage layers, HUD/action layers, viewport/safe-area policy, pause/replay, reduced-motion coordination, transition ownership and renderer fallback coordination.
-3. **Rendering backend** — Three.js today where justified; 2D/2.5D remain valid future backends. Rendering infrastructure should not know course correctness or mastery.
-4. **World package/adapter** — story-specific visual world, assets/geometry, art direction, camera compositions, story states, interaction anchors and mapping from authoritative game state to visuals.
-5. **Accessible action/evidence layer** — semantic DOM actions and status/fallback content, server commands, save/retry and evidence. DOM controls support the Play Canvas; they must not turn it back into a dashboard/site.
+## Responsibilities
 
-## Play Canvas responsibilities
+The Play Canvas owns or coordinates:
 
-The Play Canvas should own or coordinate:
-
-- a stable root surface for the current game;
-- a persistent stage host that can keep a compatible world/runtime alive across story -> mission -> later chapter transitions;
-- `story`, `mission`, `map`, `build`, `transfer`, and future game-mode transitions;
-- stage/world attachment without unnecessary renderer destruction/recreation;
+- stable root surface for the active game;
+- persistent stage host;
+- active renderer backend/world package;
+- `story`, `explore`, `mission`, `map`, `build`, `boss`, `transfer` and future game-mode transitions;
+- stage/world attachment without unnecessary remounts;
 - HUD/action/debrief overlay slots with progressive disclosure;
-- phone viewport, safe-area and orientation-aware layout;
-- pause/replay and reduced-motion coordination;
-- fallback when a rendering backend is unavailable or loses context;
-- lifecycle cleanup when the world package genuinely changes or the player leaves the game.
+- phone viewport/safe-area/orientation policy;
+- pause/replay/reduced-motion coordination;
+- renderer failure/context-loss fallback;
+- cleanup when leaving/replacing the game/world/backend.
 
-The Play Canvas must **not** decide:
+The Play Canvas never decides:
 
-- whether an answer/action is correct;
-- whether a competency is mastered;
+- answer/action correctness;
+- mastery;
 - learner evidence semantics;
-- XP-based unlocking of learning truth;
-- server save/revision authority;
+- XP-based learning truth;
+- server revision/save authority;
 - source/provenance validity.
 
 ## World-package integration
 
-A future generated story/fantasy should normally integrate by providing:
+A future generated game should normally provide:
 
-- a `StoryWorldSpec`;
-- a `GameExperienceSpec` describing game modes/mechanics and Play Canvas presentation;
-- a versioned world package/adapter for the chosen rendering backend;
-- semantic action/fallback metadata;
-- mappings from authoritative game state to visible world state.
+- StoryWorldSpec;
+- GameExperienceSpec describing Play Canvas modes/mechanics;
+- chosen renderer backend;
+- versioned world package;
+- semantic actions/fallback metadata;
+- mappings from authoritative game state to visible state.
 
-It should **not** need a new app shell, a copied renderer loop, bespoke authentication UI, or course-specific changes to Play Canvas core.
+It should **not** need a new app shell, copied renderer loop or course-specific changes to Play Canvas core.
 
-When Three.js is chosen, the world adapter consumes `story3d-runtime.js` / `story3d-world-host.js`. A genuinely new reusable capability should be generalized/versioned in that subsystem before a story consumes it.
+When Three.js is selected, Play Canvas mounts the world package through `story3d-world-host.js` / `story3d-runtime.js`.
 
-Package identity is provenance. It never becomes competency/evidence identity.
+### Data-first integration target
+
+The preferred long-term integration is not arbitrary generated adapter code. Generated settings should increasingly be represented by a validated declarative `WorldPackageSpec` containing:
+
+- package manifest/version/backend/capabilities;
+- scene/entity graph and reusable primitive references;
+- story/game visual states;
+- portrait/landscape camera compositions;
+- semantic interaction anchors;
+- approved assets;
+- semantic/2D fallback.
+
+A custom world adapter remains an authored/reviewed escape hatch for capabilities that cannot yet be expressed safely/declaratively. It is not the default long-term generator output.
+
+This lets the Play Canvas remain stable while stories/fantasies change freely.
 
 ## Persistent-world lifecycle
 
-The migration target is stronger than “the two canvases look similar.”
-
-When story and mission use the same compatible world package, the preferred lifecycle is:
+For compatible story/mission states:
 
 1. Play Canvas mounts one stable stage host.
-2. The world package mounts once.
-3. Story beats update that instance.
-4. Transition into mission changes the mode/state on the same world/runtime where practical.
-5. Later compatible missions update authoritative visual state without remounting a fresh renderer merely because the DOM screen changed.
-6. Dispose only when leaving the game, replacing the world/backend, or recovering from an unrecoverable renderer failure.
+2. Chosen world/backend mounts once.
+3. Story beats update the same instance.
+4. Transition into mission changes mode/state/camera/HUD.
+5. Later compatible missions update authoritative visual state without remounting merely because surrounding DOM changed.
+6. Dispose only when leaving the game, swapping incompatible backend/world, or recovering from unrecoverable renderer failure.
 
-During incremental migration a temporary adapter may still reposition the stable stage host between legacy containers, but new work must move toward the persistent Play Canvas rather than adding more separate canvases.
+Incremental migration may temporarily reattach the stable stage between legacy containers, but must not create new course-specific canvas lifecycles.
 
 ## DOM, HUD and accessibility
 
-The game is canvas-first, **not canvas-only**.
+The product is canvas-first, **not canvas-only**.
 
 - Required actions remain semantic and keyboard/touch operable.
-- Essential meaning cannot exist only in pixels, color, motion or audio.
-- Canvas interaction may mirror/augment DOM actions, but server commands stay authoritative.
-- Reduced-motion mode keeps the same causal state changes without requiring animation.
+- Essential meaning cannot exist only in pixels/color/motion/audio.
+- Canvas interaction may mirror semantic actions; server commands remain authoritative.
+- Reduced motion preserves causal state changes.
 - Renderer failure/context loss leaves a meaning-equivalent playable fallback.
-- HUD and coaching should be sparse and progressive; first touch must not expose a course dashboard.
-- Longer explanations, evidence and technical debriefs stay secondary/collapsed until the player asks for them or the learning design requires them.
+- HUD/coaching stay sparse and progressive.
+- Technical evidence/debrief remains secondary/collapsed until useful.
 
 ## Phone-first contract
 
-Current refinement targets mainstream modern Android/iPhone portrait use (~360–430 CSS px wide, common tall aspect ratios).
+Current refinement targets mainstream Android/iPhone portrait use, roughly **360–430 CSS px** wide with common tall aspect ratios.
 
-The Play Canvas should:
+Play Canvas should:
 
 - occupy the visual majority of the phone;
-- keep the focal character/action readable under story/HUD overlays;
+- keep focal character/action readable under overlays;
 - keep primary actions thumb-sized and reachable;
 - respect safe-area insets;
 - avoid horizontal overflow;
-- avoid a fixed device-specific fork unless evidence requires a breakpoint;
-- keep renderer DPR/performance bounded through the rendering backend.
+- avoid device-specific forks unless evidence requires them;
+- keep renderer performance/DPR bounded.
 
 Desktop polish follows after phone quality is strong.
 
@@ -123,44 +136,42 @@ Desktop polish follows after phone quality is strong.
 
 From this point forward:
 
-- **do not add another bespoke story/mission canvas**;
-- **do not add another page/card shell for a gameplay phase that belongs inside the Play Canvas**;
-- migrate existing story and mission rendering into the Play Canvas in bounded slices;
-- keep server/evidence behavior unchanged while presentation migrates;
-- preserve executable tests for save/reload, previous-chapter review, reset progress, learner isolation and accessibility.
+- do not add another bespoke story/mission canvas;
+- do not add another page/card shell for a gameplay phase that belongs in Play Canvas;
+- migrate existing story/mission/build/transfer states in bounded slices;
+- keep server/evidence behavior unchanged during presentation migration;
+- remove obsolete paths only after equivalent tests are green.
 
-Current migration order:
+Current order:
 
-1. document Play Canvas as the top-level architecture;
-2. introduce a reusable Play Canvas controller/stage host;
-3. migrate Echo Forge opening + Signal 1 to one persistent world/runtime instance;
-4. migrate Signals 2-6 to update the same Play Canvas/world lifecycle;
-5. migrate Signal 6 builder/HUD so construction feels like in-world play rather than a web workbench;
-6. keep Signal 7 as deliberate transfer, but render it through the Play Canvas shell;
-7. remove obsolete duplicated story/mission mounting paths only after equivalent tests are green.
+1. opening + Signal 1 persistent stage/world;
+2. Signals 2-6 same lifecycle;
+3. Signal 6 builder/HUD into in-world Play Canvas interaction;
+4. Signal 7 transfer inside Play Canvas shell;
+5. remove duplicate legacy paths.
 
 ## Executable acceptance
 
-The migration is not complete because a document says so. Tests/evidence should prove:
+Tests/evidence should prove:
 
-- the same Play Canvas root persists from the last opening beat into Signal 1;
-- for a compatible Echo Forge transition, the same world/runtime/canvas instance persists rather than a second WebGL renderer appearing;
-- Back/Continue/Replay/Pause and reduced-motion semantics still work;
-- first mission direct actions still issue the same server-authoritative commands;
-- visible mistake -> rewind -> safe recovery still works;
-- Signals 2-6 retain the world through the same Play Canvas lifecycle;
-- Signal 6 construction is presented inside the game surface;
-- Signal 7 changes context intentionally without reverting to a generic course page;
-- context-loss/fallback remains operable;
-- an unrelated synthetic world can mount through the same Play Canvas + world-host boundary without Relay Rescue assumptions;
-- replacing a world package does not alter canonical competencies or legitimate learner history.
+- same Play Canvas root/stage/world/WebGL identity across compatible opening -> Signal 1;
+- no duplicate renderer instance merely because mode changes;
+- Back/Continue/Replay/Pause/reduced-motion semantics;
+- direct first action and visible consequence/recovery;
+- Signals 2-6 keep world presence;
+- Signal 6 construction is game-surface interaction, not a generic web form;
+- Signal 7 context change is intentional and still game-native;
+- phone no-overflow/touch behavior;
+- renderer context-loss/fallback remains operable;
+- unrelated synthetic world mounts through the same Play Canvas + world-host boundary;
+- replacing a world package cannot alter canonical competencies/evidence/history.
 
 ## Relationship to the Three.js framework
 
-`THREE-STORY-FRAMEWORK.md` remains valid but is subordinate to this contract:
+`THREE-STORY-FRAMEWORK.md` is subordinate to this contract but a required reusable subsystem when Three.js is chosen:
 
 **Play Canvas = persistent game surface/orchestrator.**  
-**Story3D runtime/host = Three.js rendering subsystem.**  
-**World adapter = replaceable fantasy-specific realization.**
+**Story3D runtime/host = generic Three.js engine services.**  
+**World package = replaceable story/fantasy realization.**
 
-This prevents us from mistaking renderer abstraction for product architecture and is the intended basis for future generated games/stories.
+Framework reuse earns no automatic game-quality points. It exists so future generated worlds are cheap/safe to integrate while the exact rendered experience is still judged on its own merits.
