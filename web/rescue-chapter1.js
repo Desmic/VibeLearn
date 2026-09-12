@@ -133,6 +133,7 @@
   function addRecap(root) {
     const clear=root.querySelector('.rg-clear');
     if (!clear || clear.querySelector('.rgc1-recap')) return;
+    root.classList.add('rgc1-victory');
     clear.classList.add('rgc1-finale');
     const clearLabel=clear.querySelector(':scope > span');
     const clearTitle=clear.querySelector(':scope > h2');
@@ -142,7 +143,8 @@
     if(clearCopy) clearCopy.textContent='You recovered the same promise instead of creating another one.';
     const recap=document.createElement('section'); recap.className='rgc1-recap';
     recap.innerHTML=`<span>FIELD SKILL UNLOCKED</span><h3>One intent → one safe result.</h3><div class="rgc1-causal-strip" aria-label="What made the recovery safe"><div><small>1 · KEEP</small><b>order-01</b><span>the same job identity</span></div><i aria-hidden="true">→</i><div><small>2 · RETRY</small><b>same promise</b><span>not a fresh order</span></div><i aria-hidden="true">→</i><div><small>3 · RESULT</small><b>one gear</b><span>the bridge moves</span></div></div><div class="rgc1-formal"><small>ENGINEERS CALL THIS</small><strong>Idempotent retry</strong><p>Retrying the same intent safely still produces one effect.</p></div><details class="rgc1-debrief"><summary>What you figured out</summary><div class="rgc1-recap-grid"><p><b>Pip</b> is the courier who needs the bridge.</p><p><b>The Echo Forge</b> shapes the replacement gear.</p><p><b>The gear</b> makes the bridge mechanism move.</p><p><b>order-01</b> tells the Echo Forge “this is the same job.”</p><p><b>The missing reply</b> created uncertainty, not proof of failure.</p><p><b>Why it matters</b>: a brand-new order could make a duplicate.</p></div></details>`;
-    const next=clear.querySelector('#rg-next'); if(next) clear.insertBefore(recap,next); else clear.append(recap);
+    const next=clear.querySelector('#rg-next');
+    if(next){next.textContent='Secure the crossing →';clear.insertBefore(recap,next);}else clear.append(recap);
     markDone(); writeStep(4);
   }
 
@@ -204,6 +206,7 @@
     const previousSync=game.sync.bind(game);
     const previousHide=game.hide.bind(game);
     game.render=(a,...rest)=>{
+      rootEl()?.classList.remove('rgc1-victory');
       clearMissionHost();
       const result=previousRender(a,...rest); syncStepFromAttempt(a); enhanceNow(); mountMissionWorld(rootEl(),a); return result;
     };
