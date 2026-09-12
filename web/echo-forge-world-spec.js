@@ -52,7 +52,7 @@ beaconPositions.forEach(([x,z],i)=>{
 export const echoForgeWorldSpec=Object.freeze({
   schemaVersion:'1',
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-3',
+  version:'pc-phase1-4',
   environment:{clearColor:'#071824',ambient:'#38525f'},
   materials:{
     rock:{diffuse:'#203b4b',gloss:.22},
