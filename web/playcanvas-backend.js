@@ -43,6 +43,7 @@ class PlayCanvasWorld {
   constructor(host,spec,{reducedMotion=false,pixelRatioCap=1.5}={}){
     this.host=host;
     this.spec=validateWorldSpec(spec);
+    this.available=true;
     this.reducedMotion=Boolean(reducedMotion);
     this.paused=false;
     this.state=null;
@@ -216,7 +217,7 @@ class PlayCanvasWorld {
   stats(){
     const rect=this.canvas.getBoundingClientRect();
     return{
-      available:true,engine:'playcanvas',engineVersion:PLAYCANVAS_ENGINE_VERSION,
+      available:this.available,engine:'playcanvas',engineVersion:PLAYCANVAS_ENGINE_VERSION,
       backendVersion:PLAYCANVAS_BACKEND_VERSION,worldId:this.spec.id,worldVersion:this.spec.version,
       state:this.state,camera:this.cameraName,entityCount:this.entities.size,
       deviceType:this.app.graphicsDevice?.deviceType||'unknown',canvasCount:this.host.querySelectorAll('canvas').length,
@@ -226,6 +227,7 @@ class PlayCanvasWorld {
   }
   dispose(){
     if(this.disposed)return;this.disposed=true;
+    this.available=false;
     this.resizeObserver?.disconnect();
     try{this.app.off('update',this._update);}catch(_){}
     try{this.app.destroy();}catch(_){}
