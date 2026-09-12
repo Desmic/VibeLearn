@@ -10,6 +10,12 @@ function vec(value,n,label){
   assert(Array.isArray(value)&&value.length===n&&value.every(Number.isFinite),`${label} must be ${n} finite numbers`);
 }
 function id(value,label){assert(typeof value==='string'&&/^[a-zA-Z0-9._:-]+$/.test(value),`${label} has invalid id`);}
+function cameraShot(shot,label){
+  assert(shot&&typeof shot==='object',`${label} must be a camera shot`);
+  vec(shot.position,3,`${label}.position`);
+  vec(shot.lookAt,3,`${label}.lookAt`);
+  if('fov' in shot)assert(Number.isFinite(shot.fov),`${label}.fov`);
+}
 
 export function validateWorldSpec(spec){
   assert(spec&&typeof spec==='object','spec must be an object');
@@ -41,9 +47,8 @@ export function validateWorldSpec(spec){
   }
   assert(spec.cameras&&typeof spec.cameras==='object'&&Object.keys(spec.cameras).length,'cameras are required');
   for(const [name,camera] of Object.entries(spec.cameras)){
-    vec(camera.position,3,`${name}.position`);
-    vec(camera.lookAt,3,`${name}.lookAt`);
-    if('fov' in camera)assert(Number.isFinite(camera.fov),`${name}.fov`);
+    cameraShot(camera,name);
+    if(camera.portrait)cameraShot(camera.portrait,`${name}.portrait`);
   }
   if(spec.states){
     for(const [name,state] of Object.entries(spec.states)){
