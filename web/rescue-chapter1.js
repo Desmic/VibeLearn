@@ -1,14 +1,22 @@
 /* Signal 1 progressive tutorial: concrete world first, terminology after successful play.
-   The same replaceable Echo Forge adapter also keeps the valley visually present through Signals 2-6. */
+   The same replaceable Echo Forge world remains mounted through the Play Canvas for Signals 1-6. */
 'use strict';
 (() => {
   const ROOT_ID = '#rescue-game';
   const STEP_KEY = 'vibelearn.relay-rescue.signal1-guide.v3';
   const DONE_KEY = 'vibelearn.relay-rescue.signal1-guide.done.v3';
   const rootEl = () => document.querySelector(ROOT_ID);
-  const storyWorldBundle=Promise.all([import('/story3d-world-host.js'),import('/rescue-story3d.js')]).then(([host,module])=>({host,module})).catch(()=>null);
-  let missionWorld=null, missionHost=null;
-  const disposeMissionWorld=()=>{missionHost?.classList.remove('rg-three-continuity-ready','rg-three-continuity-failed','rgc1-three-ready','rgc1-three-failed');missionWorld?.dispose?.();missionWorld=null;missionHost=null;};
+  const storyWorldBundle=Promise.all([import('/play-canvas.js'),import('/rescue-story3d.js')]).then(([play,module])=>({play,module})).catch(()=>null);
+  let playCanvas=null, missionWorld=null, missionHost=null;
+  const clearMissionHost=()=>{
+    missionHost?.classList.remove('rg-three-continuity-ready','rg-three-continuity-failed','rgc1-three-ready','rgc1-three-failed');
+    missionHost=null;
+  };
+  const disposeMissionWorld=()=>{
+    clearMissionHost();
+    playCanvas?.disposeWorld?.();
+    playCanvas=null;missionWorld=null;
+  };
   const readStep = () => { try { return Number(localStorage.getItem(STEP_KEY) || 0); } catch (_) { return 0; } };
   const writeStep = value => { try { localStorage.setItem(STEP_KEY,String(value)); } catch (_) {} };
   const done = () => { try { return localStorage.getItem(DONE_KEY)==='yes'; } catch (_) { return false; } };
@@ -32,8 +40,6 @@
   function syncStepFromAttempt(a) {
     if (done() || a?.snapshot?.rescue?.level !== 1 || !a?.rescue_state) return;
     const s=a.rescue_state, looked=new Set(s.looked || []);
-    // Derive tutorial progress from the server-confirmed world, not from raw clicks.
-    // That keeps guidance from ever re-enabling controls while a move is saving.
     if (s.rewinds > 0 && !s.failed) writeStep(2);
     else if (s.ticket && s.ticket !== 'order-01') writeStep(3);
     else if (looked.has('ticket')) writeStep(2);
@@ -44,8 +50,6 @@
   function addWorldKey(root) {
     const world = root.querySelector('.rg-world');
     if (!world) return;
-    // Signal 1 has direct scene-owned inspection targets. Remove the older duplicate
-    // observation tray so the tutorial teaches one clear interaction surface.
     root.querySelector('.rg-observations')?.remove();
     if (world.querySelector('.rgc1-world-key')) return;
     const key = document.createElement('div'); key.className='rgc1-world-key';
@@ -90,9 +94,6 @@
   }
 
   function buildPlayDock(root) {
-    // The compact dock is onboarding-only. Experienced/replay sessions must keep
-    // the ordinary controls in their normal console rather than moving them into
-    // a hidden tutorial container.
     if (done()) return;
     const field=root.querySelector('.rg-field'), world=root.querySelector('.rg-world');
     if (!field || !world) return;
@@ -101,8 +102,6 @@
       dock=document.createElement('section'); dock.className='rgc1-dock'; dock.setAttribute('aria-label','Signal 1 action dock');
       world.after(dock);
     }
-    // Move the real controls instead of cloning them: handlers, save semantics and
-    // accessibility all remain authoritative while the first mission reads as a game HUD.
     const memory=root.querySelector('.rgc1-memory');
     const ticket=root.querySelector('.rg-ticket');
     const tools=root.querySelector('.rg-tools');
@@ -115,21 +114,21 @@
 
   function mountMissionWorld(root,a) {
     const level=Number(a?.snapshot?.rescue?.level||0);
-    // Signal 7 intentionally transfers out of the fantasy into the real incident.
-    // Signals 1-6 stay in the valley using the same replaceable world adapter.
-    if (!root || root.hidden || isHistorical(root) || level<1 || level>6) { disposeMissionWorld(); return; }
-    const host=root.querySelector('.rg-world'); if(!host) { disposeMissionWorld(); return; }
+    // Signal 7 is a deliberate fresh-transfer context. Signals 1-6 keep the same
+    // Play Canvas/world lifecycle even though legacy DOM containers are rerendered.
+    if (!root || root.hidden || isHistorical(root) || level<1) { clearMissionHost(); return; }
+    if(level>6){disposeMissionWorld();return;}
+    const host=root.querySelector('.rg-world'); if(!host) { clearMissionHost(); return; }
     const readyClass=level===1?'rgc1-three-ready':'rg-three-continuity-ready';
     const failedClass=level===1?'rgc1-three-failed':'rg-three-continuity-failed';
-    if(missionHost!==host){
-      disposeMissionWorld(); missionHost=host;
-      storyWorldBundle.then(bundle=>{
-        if(missionHost!==host || !host.isConnected || !bundle) return;
-        missionWorld=bundle.host.mountStoryWorldModule(bundle.module,host,{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,mode:'mission'});
-        if(missionWorld?.available){host.classList.add(readyClass);missionWorld.setMissionState(visualState(a));}
-        else host.classList.add(failedClass);
-      });
-    } else missionWorld?.setMissionState?.(visualState(a));
+    missionHost=host;
+    storyWorldBundle.then(bundle=>{
+      if(missionHost!==host || !host.isConnected || !bundle) return;
+      playCanvas=bundle.play.getPlayCanvas();
+      missionWorld=playCanvas.showMission(bundle.module,host,visualState(a),{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
+      if(missionWorld?.available){host.classList.add(readyClass);host.classList.remove(failedClass);}
+      else{host.classList.add(failedClass);host.classList.remove(readyClass);}
+    });
   }
 
   function addRecap(root) {
@@ -200,25 +199,30 @@
     decorateMenu(root); updateGuidance(root);
   }
 
-  // Attach to the actual game lifecycle. Tutorial state comes from the confirmed
-  // rescue attempt; a saving or failed-save frame keeps RescueGame's own locks.
   const game=window.RescueGame;
   if (game && !game.__signalOneGuideV3) {
     const previousRender=game.render.bind(game);
     const previousSync=game.sync.bind(game);
     const previousHide=game.hide.bind(game);
-    game.render=(a,...rest)=>{ disposeMissionWorld(); const result=previousRender(a,...rest); syncStepFromAttempt(a); enhanceNow(); mountMissionWorld(rootEl(),a); return result; };
+    game.render=(a,...rest)=>{
+      // Do not dispose the world before a rerender. Legacy DOM may be replaced,
+      // but the Play Canvas keeps its stable stage/runtime and reattaches below.
+      clearMissionHost();
+      const result=previousRender(a,...rest); syncStepFromAttempt(a); enhanceNow(); mountMissionWorld(rootEl(),a); return result;
+    };
     game.sync=(busy,a,...rest)=>{
       const result=previousSync(busy,a,...rest);
       const status=rootEl()?.querySelector('#rg-sync')?.textContent;
-      if (!busy && status==='Saved') { syncStepFromAttempt(a); enhanceNow(); missionWorld?.setMissionState?.(visualState(a)); }
+      if (!busy && status==='Saved') {
+        syncStepFromAttempt(a); enhanceNow();
+        if(playCanvas&&missionHost)missionWorld=playCanvas.showMission(storyWorldBundle.module||null,missionHost,visualState(a));
+        else missionWorld?.setMissionState?.(visualState(a));
+      }
       return result;
     };
     game.hide=(...args)=>{disposeMissionWorld();return previousHide(...args);};
     game.__signalOneGuideV3=true;
   }
 
-  // No raw-click progression here. A click may still be in flight; advancing the
-  // tutorial before the server confirms it can accidentally unlock a second move.
   queueMicrotask(enhanceNow);
 })();
