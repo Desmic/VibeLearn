@@ -26,6 +26,8 @@ def assert_phone_first_touch(browser, url, out, errors, width, height):
     page.goto(url)
     expect(page.locator('#rgi-intro')).to_be_visible()
     expect(page.locator('.rgi-three-canvas')).to_be_visible()
+    expect(page.locator('.play-canvas-stage')).to_have_count(1)
+    expect(page.locator('.play-canvas-stage')).to_have_attribute('data-play-canvas-version', '1')
     expect(page.locator('#rgi-title')).to_have_text('Pip is almost home.')
     expect(page.locator('#rgi-body')).to_be_visible()
     expect(page.locator('#rgi-dialogue')).to_be_visible()
@@ -55,7 +57,7 @@ def main():
         try:
             for width, height in PHONE_VIEWPORTS:
                 assert_phone_first_touch(browser, url, out, errors, width, height)
-            checks.append('First touch keeps the 3D world dominant, story copy readable, and primary/secondary controls touchable across representative 360–430px Android/iPhone portrait sizes')
+            checks.append('First touch keeps the Play Canvas/3D world dominant, story copy readable, and primary/secondary controls touchable across representative 360–430px Android/iPhone portrait sizes')
 
             ctx = browser.new_context(viewport={'width':390,'height':844}, has_touch=True)
             page = ctx.new_page(); page.on('pageerror', lambda e: errors.append(str(e)))
@@ -66,6 +68,7 @@ def main():
             expect(page.locator('#rgi-next')).to_be_enabled()
             expect(page.locator('.rgi-three-canvas')).to_be_visible()
             expect(page.locator('.rgi-three-canvas')).to_have_attribute('data-story3d-runtime', '1')
+            expect(page.locator('.rgi-three-canvas')).to_have_attribute('data-play-canvas-version', '1')
             # Fresh first-touch story is user-paced; it must not move while the player reads.
             page.wait_for_timeout(3600)
             expect(page.locator('#rgi-title')).to_have_text('Pip is almost home.')
@@ -97,8 +100,11 @@ def main():
             expect(page.locator('#rgi-fact')).to_have_text('First move: inspect the Echo Forge.')
             expect(page.locator('#rgi-dialogue')).to_contain_text('Help me find out what happened')
             expect(page.locator('.rgi-progress .current')).to_have_count(1)
+            play_canvas_id = page.locator('.play-canvas-stage').get_attribute('data-play-canvas-instance')
+            webgl_canvas_id = page.locator('.rgi-three-canvas').get_attribute('data-play-canvas-instance')
+            assert play_canvas_id and webgl_canvas_id == play_canvas_id
             page.screenshot(path=str(out/'onboarding-echo-forge-06.png'), full_page=True)
-            checks.append('The Echo Forge opening uses the shared Story3D runtime and remains a single user-paced story world with real Back/Continue controls, optional motion pause/replay, no forced autoplay, and a visible six-scene progression')
+            checks.append('The Echo Forge opening uses the shared Play Canvas + Story3D runtime and remains a single user-paced story world with real Back/Continue controls, optional motion pause/replay, no forced autoplay, and a visible six-scene progression')
             page.locator('#rgi-next').click()
 
             coach = page.locator('.rgc1-coach')
@@ -111,11 +117,16 @@ def main():
             expect(page.locator('[data-tool="retry"]')).to_be_disabled()
             expect(page.locator('.rgc1-mission-canvas')).to_be_visible()
             expect(page.locator('.rgc1-mission-canvas')).to_have_attribute('data-story3d-runtime', '1')
+            expect(page.locator('.play-canvas-stage')).to_have_attribute('data-play-canvas-instance', play_canvas_id)
+            expect(page.locator('.rgc1-mission-canvas')).to_have_attribute('data-play-canvas-instance', webgl_canvas_id)
+            expect(page.locator('.play-canvas-stage')).to_have_count(1)
+            expect(page.locator('.play-canvas-webgl')).to_have_count(1)
             expect(page.locator('.rg-world')).to_have_class(re.compile(r'rgc1-three-ready'))
             expect(page.locator('.rg-console')).to_be_hidden()
             forge_target = page.locator('[data-world-look="workshop"]').bounding_box()
             assert forge_target and forge_target['height'] >= 44 and forge_target['width'] >= 96
             page.screenshot(path=str(out/'signal1-echo-forge-first-action.png'), full_page=True)
+            checks.append('The final story beat enters Signal 1 by reparenting the same Play Canvas stage and the same WebGL/runtime instance instead of spawning a second mission canvas')
 
             page.locator('[data-world-look="workshop"]').click()
             expect(page.locator('#rg-effects')).to_have_text('1 gear')
@@ -131,7 +142,7 @@ def main():
             expect(page.locator('.rg-console')).to_be_hidden()
             expect(page.locator('.rg-evidence')).to_be_hidden()
             page.screenshot(path=str(out/'signal1-echo-forge-first-choice.png'), full_page=True)
-            checks.append('Signal 1 continues inside the same Echo Forge 3D world and reveals one obvious action at a time before the first meaningful choice')
+            checks.append('Signal 1 continues inside the same Echo Forge Play Canvas and reveals one obvious action at a time before the first meaningful choice')
 
             page.locator('[data-tool="new"]').click()
             expect(coach).to_contain_text('A NEW TICKET')
