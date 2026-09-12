@@ -84,6 +84,8 @@ def make_server(database, port=8000):
             if not self.allowed_host():
                 return self.send(403, {"error": "FORBIDDEN"})
             path = urlsplit(self.path).path
+            if path == "/api/config":
+                return self.send(200, {"hosted": False, "sign_in_required": False})
             if path == "/api/health":
                 return self.send(200, {"status": "ok", **running_manifest})
             if path == "/api/state":
@@ -94,7 +96,38 @@ def make_server(database, port=8000):
                     return self.send(200, service.state(database, learner))
                 except sqlite3.Error:
                     return self.send(503, {"error": "STORAGE_UNAVAILABLE", "message": "The database is unavailable. Retry shortly."})
-            assets = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"), "/style.css": ("style.css", "text/css")}
+            assets = {
+                "/rescue-game.js": ("rescue-game.js", "text/javascript"),
+                "/rescue.js": ("rescue.js", "text/javascript"),
+                "/rescue.css": ("rescue.css", "text/css"),
+                "/play-canvas.js": ("play-canvas.js", "text/javascript"),
+                "/play-canvas-migrate.js": ("play-canvas-migrate.js", "text/javascript"),
+                "/play-canvas.css": ("play-canvas.css", "text/css"),
+                "/rescue-intro.js": ("rescue-intro.js", "text/javascript"),
+                "/rescue-intro.css": ("rescue-intro.css", "text/css"),
+                "/rescue-story3d.js": ("rescue-story3d.js", "text/javascript"),
+                "/story3d-runtime.js": ("story3d-runtime.js", "text/javascript"),
+                "/story3d-world-host.js": ("story3d-world-host.js", "text/javascript"),
+                "/rescue-chapter1.js": ("rescue-chapter1.js", "text/javascript"),
+                "/rescue-chapter1.css": ("rescue-chapter1.css", "text/css"),
+                "/auth-game.js": ("auth-game.js", "text/javascript"),
+                "/auth-game.css": ("auth-game.css", "text/css"),
+                "/progress-controls.js": ("progress-controls.js", "text/javascript"),
+                "/progress-controls.css": ("progress-controls.css", "text/css"),
+                "/phone-first.css": ("phone-first.css", "text/css"),
+                "/relay-repair-kit.zip": ("relay-repair-kit.zip", "application/zip"),
+                "/": ("index.html", "text/html"),
+                "/app.js": ("app.js", "text/javascript"),
+                "/style.css": ("style.css", "text/css"),
+                "/premium.css": ("premium.css", "text/css"),
+                "/game.css": ("game.css", "text/css"),
+                "/expedition.js": ("expedition.js", "text/javascript"),
+                "/expedition.css": ("expedition.css", "text/css"),
+                "/valley3d.js": ("valley3d.js", "text/javascript"),
+                "/vendor/three.module.min.js": ("vendor/three.module.min.js", "text/javascript"),
+                "/vendor/three.core.min.js": ("vendor/three.core.min.js", "text/javascript"),
+                "/vendor/THREE-LICENSE.txt": ("vendor/THREE-LICENSE.txt", "text/plain")
+            }
             if path in assets:
                 name, mime = assets[path]
                 return self.send(200, (ROOT / "web" / name).read_bytes(), mime + "; charset=utf-8")

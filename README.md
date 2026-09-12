@@ -1,95 +1,142 @@
-# vibeLearn · first slice
+# VibeLearn · game-first learning system
 
-One local, persisted practice episode about reliable agent execution. Implemented
-in the order Phase 0 → 1A → 1B → 1C. The next step is real user feedback, not Phase 2.
+VibeLearn is a **general system for turning subjects/courses into source-grounded learning games**, not a course website decorated with XP. The current private Phase 1 reference is **Relay Rescue: The Echo Forge**, a seven-signal reliability adventure.
 
-## Run locally
+Start with [`CODEX-IMPLEMENTATION-PLAN.md`](CODEX-IMPLEMENTATION-PLAN.md) and [`docs/STATE.md`](docs/STATE.md). Current product/runtime authority also includes [`docs/STORY-GENERATION-AND-CRITIC.md`](docs/STORY-GENERATION-AND-CRITIC.md), [`docs/GAME-AS-COURSE.md`](docs/GAME-AS-COURSE.md), [`docs/GAME-UX-SYSTEM.md`](docs/GAME-UX-SYSTEM.md), [`docs/COURSE-GENERATION-GAME-SYSTEM.md`](docs/COURSE-GENERATION-GAME-SYSTEM.md), [`docs/PLAY-CANVAS.md`](docs/PLAY-CANVAS.md), and [`docs/THREE-STORY-FRAMEWORK.md`](docs/THREE-STORY-FRAMEWORK.md).
 
-Tested on Windows with Python 3.13.5 and SQLite 3.49.1. No runtime packages or API
-keys are required. From `E:\Projects\VibeLearn`:
+The checksummed `learning-os-design-package-v1.3/` remains historical and is not rewritten.
 
-```powershell
-python manage.py serve
+## Current product state
+
+The current user is the sole real product reviewer during private refinement. Their latest predecessor first-touch/story verdict is **3/10** and supersedes older critic passes.
+
+Current gate sequence:
+
+`LearningSpec -> StoryWorldSpec -> story critic >=9 -> GameExperienceSpec/Play Canvas realization -> first-touch magic >=9 -> whole-chapter game >=9 -> learning/transfer >=9 -> user review`
+
+Critic/machine success never overrides the user.
+
+**Today**, story generation is topic/outcome/source-structure driven. **Future** explicit `StoryPreferenceProfile` support may let a learner influence genre, tone, fantasy/realism, character/visual style, humor/darkness, pace, exploration/action balance and narrative density without changing the learning/evidence contract.
+
+## Architecture: generated learning package
+
+The durable product boundary is:
+
+`LearningSpec -> StoryWorldSpec -> GameExperienceSpec -> AssessmentEvidenceSpec`
+
+Learning/evidence identity remains independent of story names, characters, renderer, world package and Play Canvas implementation. A future learner can experience the same learning requirements through a different world without erasing/counterfeiting legitimate history.
+
+## Play Canvas
+
+VibeLearn has converged on a persistent **Play Canvas** as the game surface.
+
+Story, exploration, missions, visible consequence/recovery, progression, building and transfer are modes inside the game rather than separate lesson pages.
+
+For compatible modes, Play Canvas should keep the same stage/world/runtime and change state/camera/HUD rather than spawning a new course-specific renderer.
+
+Three.js, 2D and 2.5D are rendering backends inside Play Canvas.
+
+## Reusable Three.js world framework
+
+The user explicitly requires a **Three.js framework that makes future stories/fantasy settings easy to integrate**.
+
+Current hierarchy:
+
+`Play Canvas -> renderer backend -> story3d-runtime/world-host -> replaceable world package`
+
+Shared infrastructure owns renderer lifecycle, DPR, resize, frame scheduling, pause/reduced motion, context recovery, cleanup, camera orchestration and package capability validation.
+
+World-specific packages own scene/entities/assets, art direction, story/game visual states, camera compositions, interaction anchors and fallback metadata.
+
+### Data-first world-package direction
+
+The long-term generator should normally emit a validated/versioned declarative package rather than arbitrary renderer JavaScript:
+
+```text
+world-package/
+  manifest.json
+  world.json
+  states.json
+  cameras.json
+  interactions.json
+  assets/...
+  fallback/...
+  adapter.js?   # exceptional reviewed extension only
 ```
 
-Open [the local workspace](http://127.0.0.1:8000). Keep that terminal running.
-Stop with Ctrl+C and run the same command to resume. The database defaults to
-`data/learning.sqlite3`; migrations apply transactionally on startup.
-Keep the same browser profile and hostname: an HttpOnly cookie identifies the local
-learner. A different browser profile gets a separate learner. Losing/clearing that
-cookie does not delete database records, but there is no account recovery UI yet.
-This is deliberately a local development session, not production authentication.
+Current Phase 1 does **not** implement the arbitrary generated-package loader. It proves the Play Canvas + reusable world-authoring seam first, while strict CSP/static allowlists stay intact.
 
-## Verify an increment
+A new fantasy should usually integrate by changing package data/assets, not by editing Play Canvas/runtime/host. If it needs a genuinely new engine capability, generalize/version/test that capability first.
 
-The app does not need Node, but its build verification uses Node 22.17.0 to check JS.
-The browser suite uses Playwright 1.53.0 and Chromium 138.0.7204.23 (observed here).
-If setting up a new test environment, install `requirements-dev.txt` and run
-`python -m playwright install chromium`. Those installation commands were not
-needed or exercised here; the dependencies were already installed.
+## Relay Rescue arc
+
+The current reference develops retry-safety reasoning through seven signals:
+
+1. **The Echo Forge went silent** — distinguish a lost reply from a failed effect.
+2. **A new body, the same promise** — preserve intent identity across a restart.
+3. **The parcel changed under the same seal** — bind identity to request meaning.
+4. **The Echo Forge forgot the old seal** — respect finite retention.
+5. **The valley ledger goes dark** — preserve unknown vs known absence and reconcile safely.
+6. **Weave the storm route** — construct a bounded multi-rule recovery policy.
+7. **Beyond the valley** — transfer reasoning to a fresh export-worker incident.
+
+Signal 1 is the world-model/tutorial chapter. Formal terminology such as `idempotent retry` appears after the player understands the concrete one-order/one-gear/lost-reply model.
+
+## Story-first first touch
+
+First-run narrative progression is user-paced. Back/previous and Continue are mandatory where applicable; motion can be paused/resumed; Skip/Replay/progress are available; reduced motion preserves causal meaning/navigation.
+
+The opening should be dramatized through world events, character behavior, dialogue, discovery, conflict and consequence—not exposition slides.
+
+## Phone-first quality target
+
+Current first touch/Chapter 1 refinement targets mainstream modern Android/iPhone portrait use, roughly **360–430 CSS px** wide with tall aspect ratios, touch, safe areas, text enlargement and reduced motion. Desktop polish follows after phone quality is strong.
+
+## Private hosted pilot
+
+Live private environment: `https://vibelearn-4xws.onrender.com`
+
+Render serves branch **`deploy/render-supabase`**. Auto-deploy is disabled, so only the exact verified review candidate should be manually deployed.
+
+Hosted mode uses Flask/Gunicorn on Render, PostgreSQL in Supabase, Supabase Auth plus the private test-identity path, secure revocable sessions, learner-scoped PostgreSQL/RLS boundaries and server-authoritative progression/evidence.
+
+This is a private refinement environment; CI/critic passes do not authorize public rollout or external testing.
+
+## Verification
 
 ```powershell
+python manage.py vendor
 python manage.py build
 python manage.py test
 python manage.py browser
 ```
 
-Each command must exit successfully before continuing. The browser suite starts
-its own server process and temporary real SQLite database, performs browser reloads
-and process restarts, injects a lost acknowledgement after a real commit, and saves
-screenshots and its report to `artifacts/`. Tests never use the real learner DB.
-The build writes `artifacts/build-manifest.json`; `/api/health` reports the source
-identity captured when the server started. Restart the server after source edits.
+GitHub Actions is the integrated hosted gate. Preserve exact commit, failures, screenshots/traces, persistence/restart evidence and phone/fallback behavior. Machine success is not proof that the game is loved or that learning is durable.
 
-## What to try
+## Run locally
 
-1. Begin in LEARN, predict three charge counts, and write a diagnosis.
-2. Save, reload, and resume. Reveal a hint if useful; the pre-hint answer is retained.
-3. Submit and inspect the trace feedback, earlier checkpoints, pinned evidence and
-   future review need. The first completed trace family earns 10 practice XP.
-4. Try PAIR for source access or BUILD for a prepared worked example. Prior help
-   remains recorded when modes change. Repeating the trace earns no additional XP.
+```powershell
+python manage.py vendor
+python manage.py serve
+```
 
-The prepared hints are static, not adaptive AI dialogue. The deterministic assessor
-checks exactly the stated trace counts. Written reasoning is ungraded; all frame
-claims remain provisional. The review targets a competency/frame, and honestly says
-that a fresh review activity is still needed. There is no review notification job.
-The original content has an executable criterion check and implementation-agent
-inspection; independent human content review and product acceptance are pending.
+Open `http://127.0.0.1:8000`. Local mode uses SQLite/browser-scoped development identity and is intentionally separate from hosted learner data.
 
-## Recovery and data
+## Code map
 
-Drafts are committed with explicit Save. Unsaved edits are additionally retained in
-browser storage, scoped by learner/attempt. Failed requests keep the visible answer.
-If a stale-tab conflict appears, copy the visible text if needed, reload, inspect the
-recovered local draft, and save the intended version. Device-local recovery is not a
-cross-device synchronization or guaranteed backup service.
+- `app/rescue.py` — Relay Rescue rules and deterministic simulation
+- `app/service.py` — learner-scoped commands, progression, assistance, evidence/reward
+- `app/storage.py` / `app/postgres.py` — local/hosted persistence
+- `app/hosted.py` / `app/auth.py` / `app/pilot_auth.py` — hosted transport/identity
+- `web/play-canvas.js` / `web/play-canvas.css` — persistent game surface/stage lifecycle
+- `web/story3d-runtime.js` — reusable Three.js renderer/device/camera/lifecycle infrastructure
+- `web/story3d-world-host.js` — world adapter/package capability boundary
+- `web/rescue-story3d.js` — Echo Forge-specific current world implementation
+- `web/rescue-intro.js` — first-touch story state/player controls
+- `web/rescue-game.js` / `web/rescue-chapter1.js` — seven-signal game and Chapter 1 tutorial focus
+- `tests/` — deterministic, PostgreSQL, hosted, browser, Play Canvas and Story3D verification
+- `docs/` — current architecture/product contracts plus historical records
 
-Before changing versions, stop the server and copy `data/learning.sqlite3` to a safe
-backup location. Preserve any accompanying SQLite journal until a clean restart;
-do not copy a live database as a backup. To inspect a saved backup independently, first make a working copy, then
-start the app with `python manage.py serve --db <working-copy-path> --port 8001`.
-Schema changes are forward-only. Older versions refuse newer schemas; code rollback
-is not database rollback. No destructive reset command is supplied.
+## Scope
 
-The source checkpoint archive listed in `docs/PHASE-1.md` excludes all learner data.
-Unpack it in a fresh directory for code recovery; keep your existing database intact.
-Full export/restore, course replacement, generation, hosting and untrusted code
-execution are intentionally deferred. Public/multi-user exposure is unsupported.
-
-## Code and evidence
-
-- `app/content.py`: original task, exact frame/rubric/binding definitions and source metadata.
-- `app/assessment.py`: pure trace assessment and clock-explicit retrieval policy.
-- `app/service.py`: scoped commands, checkpoints, evidence, assistance and reward transaction.
-- `app/storage.py`: SQLite schema migrations and immutable-history guards.
-- `app/server.py`: loopback transport, session resolution and explicit static file allowlist.
-- `web/`: semantic responsive interface with optional WebMCP save action.
-- `tests/`: real database and HTTP tests, pure criterion tests and browser journey.
-- `docs/STATE.md`, `docs/PHASE-1.md`: current handoff, verification and limits.
-
-No Git repository existed in the supplied directory. A local repository was
-subsequently initialized on `main` at the user's request. No commit or remote is
-configured yet. Learner data, generated artifacts, Python caches and local environment
-files are ignored. The design package is preserved unchanged; the verified Phase 1
-source identity remains recorded in its SHA-256 manifest.
+Current work remains private Phase 1. Phase 2+, broad generator implementation, arbitrary generated client code loading, new model/provider integrations, untrusted execution, external testers, paid expansion and public rollout remain gated.

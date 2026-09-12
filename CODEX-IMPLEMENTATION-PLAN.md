@@ -1,184 +1,267 @@
-# Learning OS — incremental implementation plan 1.3
+# Learning OS — incremental implementation plan 2.0
 
-**6 September 2026 · Design handoff, not implemented software**
+**12 September 2026 · authoritative active plan**
 
-This is the authoritative build order for the next coding agent. It replaces milestone order and first-release definitions in the 1.0 architecture, 1.1 amendment, and 1.2 collaboration amendment. Their applicable domain invariants and acceptance requirements remain in force. This document does not authorize application implementation in the current design conversation.
+This file is the current build order. The checksummed `learning-os-design-package-v1.3/` remains immutable historical design. Its detailed phase/security/evidence requirements still apply wherever this plan does not supersede them.
 
-## 1. Execution contract
+Read, in order, `docs/STATE.md`, `docs/GAME-RUNTIME-ARCHITECTURE.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, and `docs/COURSE-GENERATION-GAME-SYSTEM.md` before substantial product work. `docs/PLAY-CANVAS.md` and `docs/THREE-STORY-FRAMEWORK.md` now describe legacy/migration state and are not the strategic architecture.
 
-Build one small, working, reviewable behavior at a time. Integrate and verify it before accumulating dependent work. A phase is a product checkpoint, not permission to implement its entire subsystem in one large patch.
+## 1. Product north star
 
-For each increment, state the user-visible outcome, affected contracts, roughly three to five concrete acceptance scenarios, deliberately excluded work, and a recovery path. Split the increment when it contains independently shippable behaviors or several unrelated risky contract changes. Patch size is a review aid, not a correctness metric.
+VibeLearn is a **general system for generating effective learning games/worlds for arbitrary subjects and concepts**. Relay Rescue/Echo Forge is only the current authored reference slice.
 
-Use this loop:
+The durable generation boundary is:
 
-```text
-inspect actual baseline -> choose one behavior -> make criteria executable
--> implement the smallest complete path -> run focused tests
--> run persistent cross-boundary checks -> exercise the actual interface
--> inspect failures and repair -> retain evidence -> request relevant feedback
--> checkpoint and choose the next bounded increment
-```
+`LearningSpec -> StoryWorldSpec -> GameDesignSpec -> WorldSpec -> RuntimeExperienceSpec -> EngineCompiler -> EngineRuntime`
 
-Do not build an entire backend before connecting a browser. Do not polish many screens before testing one learning episode. Do not write all provider/research/code-agent consumers against an untested integration assumption. Do not postpone course replacement, learner isolation, migrations, or restart behavior until a final hardening sprint.
+with `AssessmentEvidenceSpec` remaining authoritative and engine-independent throughout.
 
-Continue reversible engineering work without asking permission for every implementation detail. Obtain actual human feedback at the named product checkpoints, and do not call an unreviewed experience accepted. Independent low-risk work may proceed while feedback is pending; changes depending on the disputed decision must not accumulate. No response from the user is not approval.
+The system must be able to regenerate story, mechanics, world, assets or engine target without corrupting canonical competency/evidence identity.
 
-## 2. What remains stable; what can be revised cheaply
+## 2. Strategic engine decision
 
-Protect evidence identity, pinned assessment meaning, learner isolation, explicit assistance, immutable published content, provenance, source constraints, permission boundaries, and the difference between verification, user acceptance, and activation.
+VibeLearn must not grow a custom game engine on top of Three.js.
 
-Treat layout, wording, reward prominence, onboarding questions, initial route choices, heuristics, and component styling as revisable hypotheses. Use ordinary components and small typed configuration objects, not a universal page-builder language. Keep a modular monolith, one transactional database, and a simple artifact store. Reuse an existing sound stack rather than rewriting it to match example folder names.
+**PlayCanvas Engine is the first strategic runtime/backend target.** It is currently the best fit for the product because delivery is web/phone-first while generated games need real engine primitives: entities/components, animation, physics, input, audio, asset management and WebGL/WebGPU.
 
-One external model/provider and one generic permitted web-source path are enough initially. Provider-specific websites are source data, not branches in the learning engine. Leave richer integrations unsupported explicitly rather than constructing speculative adapters.
+Three.js is now **legacy/migration infrastructure only**.
 
-## 3. The seven phases
+Do not add new generic Three.js engine capabilities unless they are strictly required to preserve/verify the current reference while it is being migrated.
 
-### Phase 0 — establish the baseline and probe expensive assumptions
+Future backends may include Unity, Unreal, specialized 2D engines, simulation runtimes or other engines. The canonical game/world specs must remain independent of all of them.
 
-**Purpose:** discover what is real before designing consumers around it.
+See `docs/GAME-RUNTIME-ARCHITECTURE.md`.
 
-Inspect the actual repository and applicable instructions. Record entry points, current stack, working-tree state, storage, migrations, test commands, UI entry point, and available execution credentials. Preserve unrelated work. Reconcile the specification with existing useful code. Merge relevant handoff guidance into an existing `AGENTS.md`; do not replace it blindly.
+## 3. Engine-neutral generated specs
 
-Create the smallest reproducible build/test path using the chosen real database and a real browser. Probe available external capabilities with bounded, non-sensitive examples: a structured model response, a permitted source inspection, and browser observation. Check whether a code-agent adapter and an actual isolation boundary will be available for the later code-change phase. A harmless connectivity probe is not sandbox certification and must not execute untrusted code.
+### LearningSpec
 
-**Verification:** baseline commands and failures are recorded honestly; a database write/read and browser visit run in the actual environment; each capability is marked `observed_working`, `blocked`, or `unavailable`, with evidence and limits. A mocked response does not count as a live probe.
+Owns competencies, prerequisites, sources/provenance, misconceptions, intended outcomes, transfer/retrieval and assessment requirements.
 
-**Exit:** a short repository assessment, executable test entry points, a capability-risk register, and the first increment selected. Missing credentials block the relevant live gate, not unrelated deterministic work. Do not call a blocked integration operational.
+### StoryWorldSpec
 
-**Do not build:** the complete registry, agent framework, all screens, or a production authoring pipeline.
+Owns premise, characters, locations, causal world rules, important resources/objects, stakes, emotional/progression arc and mapping back to concepts.
 
-### Phase 1 — one usable, persisted learning episode
+### GameDesignSpec
 
-**Demonstration:** open one small static course, attempt a meaningful problem, request a hint if needed, submit, see justified feedback and a future review need, reload, and continue.
+Owns actual game design: core loop, player verbs, mechanics, challenge/mission graph, difficulty curve, failure/recovery, rewards/payoff, tutorial/scaffolding policy, information schedule and mappings from play to learning outcomes.
 
-Use a handful of competencies/frames, one supported response modality, reviewed static content, learner-scoped commands, and the real database. Pin the presented activity, rubric, frame bindings, allowed aids, answer, and assistance. Use a narrow deterministic or explicit human assessment path where valid; do not fabricate a canned pass or claim synthetic grading establishes real learning.
+### WorldSpec
 
-Build the small hybrid UI immediately: journey entry, focused task workspace, source card/link, contextual hints, save/resume, a recap, and bounded practice recognition. Show unknown/provisional status honestly. Record enough build/config/component identity to support later UI feedback without building the collaboration subsystem now. Expose LEARN/PAIR/BUILD mode and respect its assistance contract; advanced adaptive dialogue can follow later.
+Owns engine-neutral executable world structure: scenes/zones, entities, semantic components, transforms, assets, physics intent, animation intent, cameras, lights, interactions, triggers, navigation intent, effects, world variables and prefab/archetype references.
 
-Suggested increments: (1) persist and resume an attempt in a real screen; (2) evaluate one valid criterion path and show evidence/review; (3) handle assistance, error/reload states, and the first reward without duplication. Each is integrated before the next.
+### RuntimeExperienceSpec
 
-**Verification:** unit and real-database tests; duplicate submit; restart and reload; missing/invalid answer; pre-hint versus assisted checkpoints; source-panel aid restrictions; unknown versus failed assessment; no reward-to-mastery dependency; keyboard and narrow-layout browser interaction; preserved answer on failure. Verify the actual learner identity used by commands, not a global singleton.
+Owns cross-engine runtime orchestration: game modes, active world, input/action mapping, HUD/UI slots, pause/replay/save/resume, accessibility/reduced motion, performance budgets and authoritative-state -> visible-state mapping.
 
-**Human checkpoint:** try the first episode. Ask whether the task, feedback, workspace, and light game elements are useful and appealing. Repair the core interaction before building more screens.
+### AssessmentEvidenceSpec
 
-**Do not build:** hundreds of lessons, a graph dashboard, universal activity types, a trained mastery model, or untrusted code execution.
+Owns evidence semantics. Rendering, collisions, effects or local game state never establish mastery by themselves.
 
-### Phase 2 — prove reuse before generating at scale
+## 4. Compiler/runtime architecture
 
-**Demonstration:** acquire evidence in Course A, replace A with Course B, and observe B use retained evidence; then delete all installed courses and still inspect Knowledge, Evidence, and Review.
+Every engine implementation must sit behind an `EngineCompiler` / runtime adapter boundary.
 
-Use actual persistence and application paths. A and B must differ in route and activity identities while sharing some canonical frames. Retain minimal historical assessment context rather than secretly keeping A installed. Fix the clock and policy versions when comparing projections. Due retrieval targets frames, not vanished exercise IDs; unavailable activities produce a visible content gap rather than lost review debt.
+Conceptual build path:
 
-Add a second learner with a different declared background and preferences, plus a small non-software course using the existing text modality. Verify private experiences and state are separate. Self-report can affect scaffolding; it cannot silently become measured mastery. A local fixture identity selector tests scope, not production authentication.
+`Specs + AssetManifest + EngineTargetSpec -> validate -> compile -> EngineArtifactBundle -> runtime`
 
-Suggested increments: (1) replacement/deletion plus contradictory/regraded evidence; (2) second learner and supported non-software domain; (3) export and restore into a clean database, with no installed courses or live model required for replay.
+Backend capabilities include approximately:
 
-**Verification:** A/B replacement; physical curriculum deletion; zero-course restart; private attempt/brief/reward/context isolation; deduplication and judgment replacement; consistent course-independent projections; import reference/version conflicts; old-schema fixture migration; export includes sufficient definitions and assessment context; restore preserves evidence semantics and review obligations. Changing a URL or platform difficulty label cannot change mastery.
+- world load/unload;
+- entity instantiate/destroy;
+- state synchronization;
+- animation/effect/audio;
+- cameras;
+- physics/collision;
+- semantic interactions;
+- HUD/UI binding;
+- input;
+- pause/resume;
+- save/restore presentation state;
+- performance/failure reporting;
+- disposal.
 
-**Exit:** permanent boundary tests run in the ordinary regression suite. Show the actual retained evidence and B's changed planning decision. Tests that only assert `mastery_table` still exists do not pass.
+Backend code never owns canonical competency IDs, assessment rules or learner mastery.
 
-**Do not build:** all ontology migration types. Unsupported splits/merges return explicit diagnostic/review requirements.
+## 5. Generated games are spec-first, not code-first
 
-### Phase 3 — source-guided onboarding and one genuinely generated module
+The desired generation pipeline is:
 
-**Demonstration:** a learner describes a goal and suggested sources, or selects Surprise me; the system prepares one coherent, source-grounded module and starts a useful activity.
+`course intent -> source grounding -> LearningSpec -> StoryWorldSpec -> story critic -> GameDesignSpec -> WorldSpec + RuntimeExperienceSpec -> capability validation -> engine compile -> runtime verification -> first-touch critic -> whole-game critic -> learning/transfer critic -> user review`
 
-Add the small `SourceSelectionPolicy` value object specified in `SOURCE-STEERING.md` to the private course brief. Support named sites/URLs, preferred versus required/excluded sources, an explicit only-listed boundary, and role-specific choices. Show the interpreted constraints without requiring a form. A suggestion is not exclusive by default and does not become a permanent profile preference without an explicit save request.
+Generated games should mostly be **validated specs/data + assets**.
 
-Use one model integration and one permitted web research path. Perform actual source inspection where allowed, record inaccessible/link-only sources, generate a scoped outline and first module, validate its tasks and grading basis, and publish immutable artifacts with honest readiness labels. Reuse the Phase 1 loop. Build bounded cancellation/retry and useful partial results into this first external workflow; do not add a distributed workflow platform.
+Arbitrary generated JavaScript/C#/C++ is not the normal authoring model. Custom code is a later exceptional extension point with stronger review/sandbox requirements.
 
-Suggested increments: (1) conversational brief and editable source constraints; (2) actual source discovery/inspection with an explainable source report; (3) generate, validate, publish, and experience one module. Do not widen curriculum before this path works with real tools.
+## 6. Reusable world/game framework
 
-**Verification:** actual provider and permitted source smoke/integration checks, separately from recorded fixtures; malformed structured output; timeout/rate-limit/cancel; missing required source; only-listed boundary; prompt injection; forbidden/private URL and redirect handling; no private profile in public queries; no source-snippet-as-full-reading claim; broken embed/link fallback; snapshot policy revision; cold-start Surprise me; provisional versus validated assessment status; goals/evidence unchanged by generation alone. Use `SS01`–`SS14` in `SOURCE-STEERING.md`.
+Build a versioned engine-neutral primitive/archetype library from real game requirements.
 
-**Human checkpoint:** inspect the first module and source-selection explanation. Does it reflect the requested goal, depth, and source guidance? Record actual revisions/acceptance. Automated checks alone do not establish course fit or correctness.
+Candidate semantic primitives include:
 
-**Exit:** first useful personalized learning release for local trials, not full collaborative product generation. A real browser and real grounded-generation path are required for this claim. Mocks-only delivery is a narrower architecture demo.
+- interactable;
+- resource/collectible;
+- inventory;
+- control/switch;
+- movable/attachable object;
+- route/network;
+- timer/cooldown;
+- simulation variable/meter;
+- character/NPC state;
+- trigger zone;
+- puzzle constraint;
+- build/crafting slots;
+- projectile/flow/message;
+- camera focus/cinematic beat;
+- mission objective;
+- success/failure consequence;
+- semantic HUD indicator.
 
-### Phase 4 — collaborate on the experience, in two independently verified slices
+Candidate archetypes include characters, interactive machines, resource-flow systems, networks, puzzle boards, environment zones and dialogue NPCs.
 
-**4A: supported personal UI change.** Capture feedback with the actual manifest and selected component; create a small configuration candidate; run browser checks; let the user try and revise it; receive explicit acceptance; activate the same artifact; confirm after reload; demonstrate another learner is unchanged; support undo.
+The same semantic primitive may compile differently on PlayCanvas, Unity or Unreal.
 
-**4B: source-guided course expansion.** Reuse Phase 3 authoring with a revised brief and source policy. Show coverage, source, and workload changes. Add one useful section and task, not arbitrary word count. Preserve active and historical assessments. Get feedback and activate a new experience revision. Source changes arriving during generation cannot silently approve an outdated candidate.
+Do not speculatively build a universal engine. Add versioned primitives when concrete learning games demand them.
 
-Implement the minimum durable change/review/check/activation records from revision 1.2. Share them between these two paths rather than building separate UI and content approval frameworks. Verification, user response, and activation status remain distinct.
+## 7. Asset portability
 
-**Verification:** resume interrupted change; reject/adjust/defer; duplicate accept; stale dependency; learner isolation; actual served-manifest match; broken change preserves last accepted experience; rollback preserves subsequent learning; real solution exposure during preview is retained; synthetic verifier attempts do not contaminate learner evidence or XP. Expand the permanent suite as each path appears; do not defer failures until both are finished.
+WorldSpec references immutable `AssetRef`s rather than engine-native object identity.
 
-**Human checkpoint:** one real revision cycle for the UI and one for content. A scripted `synthetic_user_acceptance` tests state transitions only.
+Track id/version/hash, provenance/license, semantic role, source format, derived engine variants and performance metadata.
 
-**Exit:** useful course and presentation co-creation, without claiming arbitrary feature generation.
+Prefer portable interchange formats where practical (for example glTF for 3D assets) so future engine migration is feasible.
 
-### Phase 5 — one genuinely new component through the code path
+## 8. PlayCanvas backend — immediate target
 
-**Demonstration:** request an interaction absent from the current component catalog, build it in an isolated candidate environment, verify the running UI, receive user feedback and release authority, activate, and verify the served result.
+Use PlayCanvas Engine programmatically as the primary runtime. The PlayCanvas Editor may assist authoring/debugging, but editor project state must not become canonical product state.
 
-Start with a bounded frontend capability, such as a trace-comparison interaction, that does not require changing assessment, authentication, runner permissions, or database schemas. Read the actual relevant code and rendered UI; record exact base/runtime versions; preserve dirty user work. One builder and an independently authorized verification/release path are sufficient.
+Initial PlayCanvas backend proof must demonstrate from specs:
 
-Suggested increments: (1) reproduce pinned source/UI and test isolated candidate setup; (2) build and exercise the component in a preview with protected gates; (3) accept, release with scoped adoption, confirm, and undo safely. No autonomous broad repository rewrite.
+1. create/load a world;
+2. instantiate entities/archetypes;
+3. semantic player interaction;
+4. camera transitions;
+5. animation/effects;
+6. physics/collision where needed;
+7. touch + keyboard input mapping;
+8. HUD binding;
+9. authoritative game-state synchronization;
+10. save/resume presentation state;
+11. reduced motion/accessibility behavior;
+12. cleanup/failure reporting.
 
-**Verification:** actual code-agent invocation, built artifact, browser behavior, unchanged critical contracts, permission denial for secrets/production data/protected gates, fresh dependency checks, rejection and repair, release authority, candidate-to-deployed digest match, and a real rollback drill. A Git branch or worktree is not the isolation boundary. Model-authored test prose is not a runner result. New or modified visual baselines require review; the builder cannot make itself pass by deleting a requirement.
+Then a materially different synthetic world must compile through the same backend without core/backend edits.
 
-**Human checkpoint:** the learner evaluates the running feature; the product owner approves shared code release. Personal preference acceptance alone cannot authorize global code changes. These roles may be the same person in the initial local installation.
+## 9. Three.js migration policy
 
-**Exit:** only now claim that the product supports genuine conversational feature generation. Missing isolation or release capabilities keep this gate blocked; do not disguise that limitation with a settings-only demonstration.
+Current Story3D/Play-Canvas-named code remains a reference while migration happens:
 
-### Phase 6 — pilot and consolidate, not a delayed testing phase
+- `web/story3d-runtime.js`;
+- `web/story3d-world-host.js`;
+- `web/rescue-story3d.js`;
+- `web/play-canvas.js`;
+- `web/play-canvas-migrate.js`.
 
-Use the already working loop with a small number of consenting users in the chosen permitted deployment. Review task quality, frustration, voluntary return, cost, change usefulness, hint dependence, and delayed/transfer outcomes separately. Revise the highest-impact weakness rather than widening subjects automatically.
+Rules:
 
-Run clean-checkout/start, migration from previous pilot data, backup/restore, restart/cancellation, accepted-manifest checks, and critical end-to-end journeys again on the candidate release. Keep earlier regression gates active. First validate new contracts on realistic prior data before creating broad consumers.
+- freeze new framework expansion on Three.js;
+- extract semantic concepts into engine-neutral specs;
+- do not encode new generated-world contracts using Three.js classes/API names;
+- implement equivalent PlayCanvas behavior behind the new engine boundary;
+- port Echo Forge opening + Signal 1 first;
+- compare quality/performance/authoring friction;
+- migrate later signals after the compiler/backend seam is proven;
+- remove Three.js infrastructure only after equivalent behavior/tests/critic quality are achieved.
 
-Before any hosted or externally accessible multi-user trial, implement and verify real authentication, ownership authorization, account/privacy lifecycle, secret handling, tenant-safe caches/storage, and execution/egress policy. These prerequisites apply before exposure, even if hosting is requested earlier than this phase. Development profile switching is not production identity enforcement.
+The old internal term **“Play Canvas”** must not be used as the strategic abstraction because it conflicts with the PlayCanvas engine name. Existing code/file names may remain during migration; new architectural code should use `RuntimeExperience`, `GameRuntime`, `WorldRuntime`, or similarly unambiguous terminology.
 
-**Exit:** a documented tested release, explicit known limitations, rollback/restore evidence, real user feedback, and a ranked next experiment. Do not infer educational efficacy from a green suite or course completion.
+## 10. First-touch and Chapter 1 contract
 
-## 4. Verification matrix: checks begin when their risks first exist
+The opening must earn attention before increasing cognitive load.
 
-| Risk | First gate | Keep checking thereafter |
-|---|---|---|
-| Wrong repository/build/tool assumptions | Phase 0 | Startup/resume and integration changes |
-| Lost answers, duplicate submissions, hint misattribution | Phase 1 | Every learning-path increment |
-| UI usability, focus, narrow layouts, resume | Phase 1 | Every affected UI candidate |
-| Course-dependent history or review debt | Phase 2 | Persistence, authoring, planner, and course changes |
-| Cross-learner leakage | Phase 1 scoped command tests; full Phase 2 fixture matrix | Every scoped command/cache/artifact path |
-| Migration/export/restore regressions | Phase 2, then every schema change | Every persistence release |
-| Invented grounding, ignored source constraints | First source probe in Phase 0; full Phase 3 | Every authoring/source change |
-| Fake acceptance, stale candidate, wrong activation | Phase 4 | Every collaborative change |
-| Arbitrary code/privilege leakage, false verifier reports | Before the first Phase 5 execution | Every runner/capability release |
-| Hosted identity and private data exposure | Before any external access | Every hosted deployment |
+Default curve:
 
-Keep ordinary CI deterministic with local fixtures or permitted stored responses. Separately run live provider/source checks at initial integration, affected integration changes, and release checkpoints. Live failures must remain visible: do not poll public sites for every unit test, and do not relabel an unavailable service a successful integration. Store only responses you are authorized to retain.
+`beauty / curiosity / story hook -> character + world desire -> concrete need -> one obvious action -> visible consequence -> easy recovery/success -> formal concept -> variation -> combination -> transfer`
 
-Focused unit/contract checks run while editing. A small persistent critical-boundary suite runs for each integrated increment. Run the full implemented suite at phase/release gates and immediately when changing shared storage, identity, permission, or versioning contracts. Maintain a stable browser smoke journey; use targeted interaction/visual tests for affected components rather than brittle screenshots of everything.
+By the end of Chapter 1 a bright child/non-specialist should understand who/what matters, important entities/resources, what happened, why it matters, what the player can do, what success/failure means and how world behavior maps to the real concept.
 
-A newly required unavailable check blocks the associated claim/adoption. Existing unrelated baseline failures may be recorded with their impact and owner, but cannot excuse a new failure or compromise the active gate. Never silently delete, skip, loosen, or fabricate a gate to advance.
+Prefer dramatized action, environmental storytelling, direct manipulation and visible consequence over lesson prose.
 
-## 5. Rework protocol
+First-run narrative progression is user-paced by default. Back/previous, Continue, Skip, Replay and visible progress are required where applicable. Pause/Resume is required while motion runs. Reduced motion preserves causal meaning/navigation.
 
-When a core assumption fails, stop dependent expansion. Save the failing case as a regression test, inspect which existing consumers actually depend on it, write a brief decision update, and make the smallest compatible correction. Re-run the boundary suite before resuming feature work. Do not bury the failing abstraction under successive adapters and fallback branches.
+## 11. Quality gates
 
-Contract changes require a compatibility decision: supported addition, explicit new revision, or migration. Use a representative database from the previous phase in migration tests. Prefer additive, backward-compatible rollout initially. Restoring a UI/course selection must not erase learner work; restoring application code is not automatically a database rollback.
+Do not blend scores.
 
-Allow parallel work only across genuinely independent verified interfaces. One owner coordinates shared schema, identity, and API changes. Do not let several agents invent incompatible versions of the same contract and merge them at the end.
+Required order:
 
-Small code checkpoints should preserve a runnable baseline, completed test evidence, and a clear recovery route. A feature flag limits rollout but does not substitute for authorization or isolation. Do not commit secrets or unrelated user files to create a checkpoint.
+`story critic >=9 -> first-touch magic >=9 -> whole-chapter game >=9 -> learning/transfer >=9 -> user review`
 
-## 6. Durable handoff and completion report
+All applicable scores are unrounded and require no blocker.
 
-Keep a short repository-local guidance file plus the current increment and test evidence. The main agent context should point to exact files, commits, manifests, sources, and logs; do not reload every design document or rely on an old chat summary as current code state.
+Engine/framework quality earns zero automatic game-quality points. A technically elegant PlayCanvas build can still fail badly as a game or as learning.
 
-Use `handoff/AGENTS.template.md` as guidance to merge into existing instructions. OpenAI's official documentation describes `AGENTS.md` discovery, and recommends practical project/test guidance rather than a sprawling generic rulebook [R1, R2]. The template does not override the repository's actual commands or the user's authorization.
+The current user's explicit verdict remains final.
 
-After each increment, report: what changed; exact base/candidate/served versions where applicable; commands and checks actually run; failures/blocked/skipped checks; actual user feedback or pending state; persisted-state/migration implications; rollback path; and the single next increment. Separate machine verification, product acceptance, and activation.
+## 12. Phone-first target
 
-Do not write “all phases complete” after scaffolding. Do not claim the schemas/tests in this design package are application behavior. Do not infer one feature works merely because its mocked port compiles.
+Current delivery remains mainstream Android/iPhone portrait first, roughly **360–430 CSS px** wide with common tall aspect ratios, touch, safe areas, text enlargement and reduced motion.
 
-## 7. Scope and sources
+PlayCanvas is attractive specifically because it keeps the primary runtime web-native for this phase.
 
-No application code, database, browser, provider integration, sandbox, or runtime tests were created or executed for revision 1.3. The phase descriptions are requirements. Existing design schemas must be extended in the phase that first consumes a new contract; do not attempt to encode all future records before Phase 1.
+Desktop polish follows after phone quality is strong.
 
-[R1] OpenAI, Custom instructions with AGENTS.md. https://developers.openai.com/codex/agent-configuration/agents-md — consulted 6 September 2026.
+## 13. Current execution order
 
-[R2] OpenAI, Codex best practices. https://developers.openai.com/codex/learn/best-practices — consulted 6 September 2026.
+1. update docs/agent instructions to the engine-neutral direction;
+2. stop Three.js framework expansion;
+3. define versioned `GameDesignSpec`, `WorldSpec`, `RuntimeExperienceSpec`, `EngineTargetSpec` and `AssetRef` schemas;
+4. define engine compiler/runtime adapter interfaces;
+5. add a PlayCanvas Engine vendor/build path without runtime CDN dependence;
+6. implement a tiny spec-driven PlayCanvas vertical slice;
+7. prove a second unrelated world from the same specs/backend;
+8. port Echo Forge opening + Signal 1 to PlayCanvas;
+9. preserve existing server-authoritative progression/evidence/save semantics;
+10. test phone, touch, reduced-motion, reload, context/device failure and performance;
+11. compare against the Three.js reference and keep only improvements;
+12. migrate Signals 2-7 through the new runtime architecture;
+13. run first-touch critic until >=9/no blocker;
+14. run whole-chapter critic until >=9/no blocker;
+15. run learning/transfer critic;
+16. deploy the exact verified candidate to Render;
+17. verify served revision and ask the current user for decisive review.
+
+Do not continue polishing the old Three.js world as if it were the target architecture.
+
+## 14. Future engine targets
+
+Unity/Unreal are future backend possibilities, not current dependencies.
+
+The point of the engine-neutral spec/compiler layer is to make them feasible later when their quality/tooling justifies deployment cost.
+
+Do not force identical engine capabilities. `EngineTargetSpec` declares supported features/costs and the game generator adapts/selects a compatible design.
+
+A future portability proof should compile one engine-neutral synthetic WorldSpec to at least two backends without changing LearningSpec/AssessmentEvidenceSpec.
+
+## 15. Engineering/evidence invariants
+
+Protect learner isolation, immutable submitted evidence, pinned assessment meaning, source/provenance constraints, explicit assistance, evidence identity, course-independent competencies, restart/reload behavior and the difference between verification, acceptance and activation.
+
+Keep `unknown`, `declared_independent`, current `assisted` and `previously_exposed` distinct. XP never establishes mastery. Prior exposure is not current help. Rendering/world state never establishes learning evidence merely because an animation happened.
+
+Build in bounded increments: inspect baseline -> define executable acceptance -> implement smallest complete path -> run focused tests -> run persistence/security checks -> exercise actual UI -> inspect evidence -> update docs/state -> continue.
+
+Do not weaken tests or critic rubrics to make a candidate pass.
+
+## 16. Security boundary
+
+Generated specs/data do not authorize arbitrary code execution.
+
+Prefer validated schemas, allowlisted/versioned primitives, immutable artifacts, asset validation, capability validation, strict CSP/no eval, provenance linking and sandboxed extension points when custom behavior is eventually necessary.
+
+## 17. Scope and deployment
+
+Current work remains private Phase 1 architecture/reference refinement. Do not open external testing, paid infrastructure expansion, untrusted execution, new model/provider integration or public rollout without explicit authorization.
+
+Render serves `deploy/render-supabase`; auto-deploy is disabled. Deploy only an exact verified candidate intended for review, then verify the served revision.
