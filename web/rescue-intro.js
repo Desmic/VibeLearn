@@ -1,17 +1,18 @@
-/* Relay Rescue first-touch story: a user-paced scene inside the persistent Play Canvas. */
+/* Relay Rescue first-touch story: user-paced states inside the persistent game runtime.
+   Phase 1 runs directly on PlayCanvas Engine; the old Play Canvas/Three.js facade is not on this path. */
 'use strict';
 (() => {
   const game=window.RescueGame;
-  if(!game||game.__firstMinuteStoryV3)return;
+  if(!game||game.__firstMinuteStoryV5)return;
   const SEEN_KEY='vibelearn.relay-rescue.intro.v3';
   let storyBundle=null;
-  const loadStory=()=>storyBundle||(storyBundle=Promise.all([import('/play-canvas.js'),import('/rescue-story3d.js')]).then(([play,module])=>({play,module})).catch(()=>null));
+  const loadStory=()=>storyBundle||(storyBundle=Promise.all([import('/game-runtime.js'),import('/rescue-playcanvas-world.js')]).then(([runtime,module])=>({runtime,module})).catch(()=>null));
   const scenes=[
     {kicker:'THE VALLEY OF SEVEN LIGHTS',title:'Pip is almost home.',body:'Seven islands. One old bridge. One last delivery before dark.',dialogue:'PIP  “One more crossing. Easy.”',fact:'Then the bridge screams.',markers:[['PIP · COURIER','warm'],['HOME →','soft']]},
-    {kicker:'THE BREAK',title:'One tiny gear stops everything.',body:'The center gear cracks. The bridge needs exactly one replacement to move again.',dialogue:'PIP  “...I may have spoken too soon.”',fact:'Needed: 1 gear. Not 2.',markers:[['BROKEN GEAR','danger'],['1 NEEDED','warm']]},
-    {kicker:'THE ECHO FORGE',title:'Pip sends one promise.',body:'Pip stamps order-01. The Echo Forge accepts that seal and spends one glowing ember to shape one gear.',dialogue:'PIP  “Echo Forge: one bridge gear. Seal order-01.”',fact:'order-01 = this one job.',markers:[['ORDER-01','warm'],['ECHO FORGE','soft'],['EMBER → GEAR','warm']]},
-    {kicker:'THE SILENCE',title:'The gear survives. The reply does not.',body:'The Forge finishes. Its reply starts home—then lightning erases only the message.',dialogue:'PIP  “Forge? ...Did you make it?”',fact:'Silence changed what Pip knows, not what happened.',markers:[['GEAR EXISTS','safe'],['REPLY','soft'],['ϟ LOST HERE','danger']]},
-    {kicker:'THE TEMPTATION',title:'“Just send another” has a cost.',body:'A fresh seal looks like a fresh job. The Forge could spend another scarce ember on a gear nobody needs.',dialogue:'PIP  “I could just send another order...”',fact:'One intention can accidentally become two effects.',markers:[['NEW SEAL?','danger'],['SECOND GEAR?','danger'],['EMBER 3 → 2','warm']]},
+    {kicker:'THE BREAK',title:'One tiny gear stops everything.',body:'The center gear cracks. The bridge needs exactly one replacement to move again.',dialogue:'PIP  “...I may have spoken too soon.”',fact:'Needed: 1 gear. Not 2.',markers:[['BROKEN GEAR','danger'],['1 NEEDED','warm']],action:{target:'broken-gear',label:'Inspect broken gear'}},
+    {kicker:'THE ECHO FORGE',title:'Pip sends one promise.',body:'Pip stamps order-01. The Echo Forge accepts that seal: one request to make one bridge gear.',dialogue:'PIP  “Echo Forge: one bridge gear. Seal order-01.”',fact:'order-01 = this one job.',markers:[['ORDER-01','warm'],['ECHO FORGE','soft'],['1 REQUEST','warm']],action:{target:'forge',label:'Send order-01 to Forge'}},
+    {kicker:'THE SILENCE',title:'Lightning takes the answer.',body:'A reply starts home—then lightning tears through the signal line. Pip cannot tell whether the Forge finished the gear.',dialogue:'PIP  “Forge? ...Did you make it?”',fact:'No reply is not the same as “nothing happened.”',markers:[['REPLY LOST','danger'],['OUTCOME ?','soft'],['ϟ SIGNAL CUT','danger']],action:{target:'signal',label:'Trace the lost reply'}},
+    {kicker:'THE TEMPTATION',title:'A second seal could mean a second gear.',body:'A fresh seal looks like a fresh job. If the Forge already acted, sending another order could spend another scarce ember for nothing.',dialogue:'PIP  “I could just send another order...”',fact:'Same intent + new identity = duplicate risk.',markers:[['NEW SEAL?','danger'],['SECOND GEAR?','danger'],['EMBER AT RISK','warm']]},
     {kicker:'THE FIRST SIGNAL',title:'The storm wakes something for you.',body:'An old signal tower reveals the hidden trail. Pip cannot see it. You can.',dialogue:'PIP  “You can see the echoes, can’t you? Help me find out what happened.”',fact:'First move: inspect the Echo Forge.',markers:[['YOU · SIGNAL KEEPER','safe'],['HIDDEN ECHO','safe'],['START → ECHO FORGE','warm']]}
   ];
   let cleanup=()=>{};
@@ -37,47 +38,73 @@
       <div class="rgi-controls"><div class="rgi-nav"><button type="button" id="rgi-back">← Back</button><button type="button" class="rg-primary" id="rgi-next">Continue →</button></div><div class="rgi-utilities"><button type="button" id="rgi-replay-beat" aria-label="Replay this scene">↻ Replay</button><button type="button" id="rgi-pause" aria-label="Pause story motion">Pause</button><button type="button" id="rgi-skip">Skip</button></div></div>
     </div>`;
     root.append(overlay);
-    let step=0,closed=false,paused=false,playCanvas=null,world=null,bundle=null;
+    let step=0,closed=false,paused=false,picking=false,gameRuntime=null,world=null,bundle=null;
     const worldHost=overlay.querySelector('#rgi-world');
+    const nextButton=overlay.querySelector('#rgi-next');
     const renderWorld=()=>{
-      if(!playCanvas||!bundle||closed)return;
-      world=playCanvas.showStory(bundle.module,worldHost,step,{reducedMotion:reduced(),paused});
-      if(world?.available){overlay.classList.add('rgi-three-ready');overlay.classList.remove('rgi-three-failed');}
-      else{overlay.classList.add('rgi-three-failed');overlay.classList.remove('rgi-three-ready');}
+      if(!gameRuntime||!bundle||closed)return;
+      world=gameRuntime.showStory(bundle.module,worldHost,step,{reducedMotion:reduced(),paused});
+      const ready=Boolean(world?.available);
+      overlay.classList.toggle('rgi-engine-ready',ready);
+      overlay.classList.toggle('rgi-engine-failed',!ready);
+      // Temporary styling aliases until the old Three.js-named selectors are removed.
+      overlay.classList.toggle('rgi-three-ready',ready);
+      overlay.classList.toggle('rgi-three-failed',!ready);
+    };
+    const advance=()=>{
+      if(closed)return;
+      if(step===scenes.length-1)close(true,true);
+      else{step+=1;update();}
     };
     const update=()=>{
       if(closed)return;overlay.dataset.step=String(step);
       const s=scenes[step];overlay.querySelector('.rgi-kicker').textContent=s.kicker;overlay.querySelector('#rgi-title').textContent=s.title;overlay.querySelector('#rgi-body').textContent=s.body;overlay.querySelector('#rgi-dialogue').textContent=s.dialogue;overlay.querySelector('#rgi-fact').textContent=s.fact;
       overlay.querySelector('#rgi-step').textContent=`${step+1} / ${scenes.length}${replay?' · REPLAY':''}`;
       const markers=overlay.querySelector('.rgi-markers');markers.replaceChildren(...s.markers.map(([label,tone])=>{const n=document.createElement('span');n.className=`rgi-marker ${tone||''}`;n.textContent=label;return n;}));
-      overlay.querySelector('#rgi-back').disabled=step===0;overlay.querySelector('#rgi-next').textContent=step===scenes.length-1?'Wake Signal 1 →':'Continue →';
+      overlay.querySelector('#rgi-back').disabled=step===0;
+      const label=step===scenes.length-1?'Wake Signal 1':(s.action?.label||'Continue');
+      nextButton.textContent=`${label} →`;
+      if(s.action)nextButton.dataset.storyAction=s.action.target;else delete nextButton.dataset.storyAction;
+      overlay.classList.toggle('rgi-action-beat',Boolean(s.action));
       overlay.querySelectorAll('.rgi-progress i').forEach((n,i)=>{n.classList.toggle('on',i<=step);n.classList.toggle('current',i===step);});
       renderWorld();
     };
     const close=(start=false,persist=true)=>{
       if(closed)return;closed=true;
-      // The Play Canvas owns the world lifecycle. Detach the stable stage instead
-      // of disposing it so the exact same WebGL/runtime instance can enter Signal 1.
-      playCanvas?.detach();
+      worldHost.removeEventListener('pointerup',handleWorldPick);
+      gameRuntime?.detach();
       if(persist)remember();overlay.remove();setLaunchReady(launch);
       if(start)launch?.click();else launch?.focus({preventScroll:true});
     };
-    overlay.querySelector('#rgi-next').onclick=()=>step===scenes.length-1?close(true,true):(step+=1,update());
+    const handleWorldPick=async event=>{
+      const action=scenes[step]?.action;
+      if(closed||paused||picking||!action||!world?.pickSemanticAt||event.target?.closest?.('.rgi-scene-caption,.rgi-storybar'))return;
+      picking=true;
+      try{
+        const picked=await world.pickSemanticAt(event.clientX,event.clientY);
+        if(!closed&&scenes[step]?.action===action&&picked===action.target){
+          overlay.dataset.lastWorldAction=action.target;
+          advance();
+        }
+      }finally{picking=false;}
+    };
+    nextButton.onclick=advance;
     overlay.querySelector('#rgi-back').onclick=()=>{if(step>0){step-=1;update();}};
     overlay.querySelector('#rgi-skip').onclick=()=>close(false,true);
-    overlay.querySelector('#rgi-replay-beat').onclick=()=>playCanvas?.replay();
+    overlay.querySelector('#rgi-replay-beat').onclick=()=>gameRuntime?.replay();
     const pauseButton=overlay.querySelector('#rgi-pause');
     if(reduced()){pauseButton.hidden=true;overlay.classList.add('rgi-reduced');}
-    pauseButton.onclick=()=>{paused=!paused;playCanvas?.setPaused(paused);pauseButton.textContent=paused?'Resume':'Pause';pauseButton.setAttribute('aria-label',paused?'Resume story motion':'Pause story motion');overlay.classList.toggle('rgi-paused',paused);};
+    pauseButton.onclick=()=>{paused=!paused;gameRuntime?.setPaused(paused);pauseButton.textContent=paused?'Resume':'Pause';pauseButton.setAttribute('aria-label',paused?'Resume story motion':'Pause story motion');overlay.classList.toggle('rgi-paused',paused);};
     overlay.addEventListener('keydown',e=>{
       if(e.key==='ArrowLeft'&&step>0){e.preventDefault();step-=1;update();}
-      else if(e.key==='ArrowRight'){e.preventDefault();step===scenes.length-1?close(true,true):(step+=1,update());}
+      else if(e.key==='ArrowRight'){e.preventDefault();advance();}
       else if(e.key==='Escape'){e.preventDefault();close(false,true);}
     });
+    worldHost.addEventListener('pointerup',handleWorldPick);
     cleanup=()=>close(false,false);update();overlay.focus({preventScroll:true});
     loadStory().then(loaded=>{
       if(closed||!loaded)return;
-      bundle=loaded;playCanvas=loaded.play.getPlayCanvas();renderWorld();
+      bundle=loaded;gameRuntime=loaded.runtime.getGameRuntime();renderWorld();
     });
   }
 
@@ -97,5 +124,5 @@
 
   game.map=(missions,attempt,handlers)=>{cleanup();const result=originalMap(missions,attempt,handlers);enhanceMap(missions,attempt);return result;};
   game.render=(...args)=>{cleanup();return originalRender(...args);};game.hide=(...args)=>{cleanup();return originalHide(...args);};
-  game.__firstMinuteStoryV3=true;
+  game.__firstMinuteStoryV5=true;
 })();

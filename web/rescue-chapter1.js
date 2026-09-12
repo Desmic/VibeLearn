@@ -1,21 +1,21 @@
 /* Signal 1 progressive tutorial: concrete world first, terminology after successful play.
-   The same replaceable Echo Forge world remains mounted through the Play Canvas for Signals 1-6. */
+   The same PlayCanvas world/runtime persists from the opening through compatible missions. */
 'use strict';
 (() => {
   const ROOT_ID = '#rescue-game';
   const STEP_KEY = 'vibelearn.relay-rescue.signal1-guide.v3';
   const DONE_KEY = 'vibelearn.relay-rescue.signal1-guide.done.v3';
   const rootEl = () => document.querySelector(ROOT_ID);
-  const storyWorldBundle=Promise.all([import('/play-canvas.js'),import('/rescue-story3d.js')]).then(([play,module])=>({play,module})).catch(()=>null);
-  let playCanvas=null, missionWorld=null, missionHost=null, worldModule=null;
+  const gameWorldBundle=Promise.all([import('/game-runtime.js'),import('/rescue-playcanvas-world.js')]).then(([runtime,module])=>({runtime,module})).catch(()=>null);
+  let gameRuntime=null, missionWorld=null, missionHost=null, worldModule=null;
   const clearMissionHost=()=>{
     missionHost?.classList.remove('rg-three-continuity-ready','rg-three-continuity-failed','rgc1-three-ready','rgc1-three-failed');
     missionHost=null;
   };
   const disposeMissionWorld=()=>{
     clearMissionHost();
-    playCanvas?.disposeWorld?.();
-    playCanvas=null;missionWorld=null;worldModule=null;
+    gameRuntime?.disposeWorld?.();
+    gameRuntime=null;missionWorld=null;worldModule=null;
   };
   const readStep = () => { try { return Number(localStorage.getItem(STEP_KEY) || 0); } catch (_) { return 0; } };
   const writeStep = value => { try { localStorage.setItem(STEP_KEY,String(value)); } catch (_) {} };
@@ -120,10 +120,11 @@
     const readyClass=level===1?'rgc1-three-ready':'rg-three-continuity-ready';
     const failedClass=level===1?'rgc1-three-failed':'rg-three-continuity-failed';
     missionHost=host;
-    storyWorldBundle.then(bundle=>{
+    gameWorldBundle.then(bundle=>{
       if(missionHost!==host || !host.isConnected || !bundle) return;
-      playCanvas=bundle.play.getPlayCanvas();worldModule=bundle.module;
-      missionWorld=playCanvas.showMission(worldModule,host,visualState(a),{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
+      gameRuntime=bundle.runtime.getGameRuntime();worldModule=bundle.module;
+      missionWorld=gameRuntime.showMission(worldModule,host,visualState(a),{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
+      // Temporary style aliases; runtime identity is PlayCanvas and is asserted separately.
       if(missionWorld?.available){host.classList.add(readyClass);host.classList.remove(failedClass);}
       else{host.classList.add(failedClass);host.classList.remove(readyClass);}
     });
@@ -132,6 +133,7 @@
   function addRecap(root) {
     const clear=root.querySelector('.rg-clear');
     if (!clear || clear.querySelector('.rgc1-recap')) return;
+    root.classList.add('rgc1-victory');
     clear.classList.add('rgc1-finale');
     const clearLabel=clear.querySelector(':scope > span');
     const clearTitle=clear.querySelector(':scope > h2');
@@ -141,7 +143,8 @@
     if(clearCopy) clearCopy.textContent='You recovered the same promise instead of creating another one.';
     const recap=document.createElement('section'); recap.className='rgc1-recap';
     recap.innerHTML=`<span>FIELD SKILL UNLOCKED</span><h3>One intent → one safe result.</h3><div class="rgc1-causal-strip" aria-label="What made the recovery safe"><div><small>1 · KEEP</small><b>order-01</b><span>the same job identity</span></div><i aria-hidden="true">→</i><div><small>2 · RETRY</small><b>same promise</b><span>not a fresh order</span></div><i aria-hidden="true">→</i><div><small>3 · RESULT</small><b>one gear</b><span>the bridge moves</span></div></div><div class="rgc1-formal"><small>ENGINEERS CALL THIS</small><strong>Idempotent retry</strong><p>Retrying the same intent safely still produces one effect.</p></div><details class="rgc1-debrief"><summary>What you figured out</summary><div class="rgc1-recap-grid"><p><b>Pip</b> is the courier who needs the bridge.</p><p><b>The Echo Forge</b> shapes the replacement gear.</p><p><b>The gear</b> makes the bridge mechanism move.</p><p><b>order-01</b> tells the Echo Forge “this is the same job.”</p><p><b>The missing reply</b> created uncertainty, not proof of failure.</p><p><b>Why it matters</b>: a brand-new order could make a duplicate.</p></div></details>`;
-    const next=clear.querySelector('#rg-next'); if(next) clear.insertBefore(recap,next); else clear.append(recap);
+    const next=clear.querySelector('#rg-next');
+    if(next){next.textContent='Secure the crossing →';clear.insertBefore(recap,next);}else clear.append(recap);
     markDone(); writeStep(4);
   }
 
@@ -198,11 +201,12 @@
   }
 
   const game=window.RescueGame;
-  if (game && !game.__signalOneGuideV3) {
+  if (game && !game.__signalOneGuideV4) {
     const previousRender=game.render.bind(game);
     const previousSync=game.sync.bind(game);
     const previousHide=game.hide.bind(game);
     game.render=(a,...rest)=>{
+      rootEl()?.classList.remove('rgc1-victory');
       clearMissionHost();
       const result=previousRender(a,...rest); syncStepFromAttempt(a); enhanceNow(); mountMissionWorld(rootEl(),a); return result;
     };
@@ -211,13 +215,13 @@
       const status=rootEl()?.querySelector('#rg-sync')?.textContent;
       if (!busy && status==='Saved') {
         syncStepFromAttempt(a); enhanceNow();
-        if(playCanvas&&missionHost&&worldModule)missionWorld=playCanvas.showMission(worldModule,missionHost,visualState(a),{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
+        if(gameRuntime&&missionHost&&worldModule)missionWorld=gameRuntime.showMission(worldModule,missionHost,visualState(a),{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
         else missionWorld?.setMissionState?.(visualState(a));
       }
       return result;
     };
     game.hide=(...args)=>{disposeMissionWorld();return previousHide(...args);};
-    game.__signalOneGuideV3=true;
+    game.__signalOneGuideV4=true;
   }
 
   queueMicrotask(enhanceNow);

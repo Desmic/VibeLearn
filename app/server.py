@@ -101,6 +101,11 @@ def make_server(database, port=8000):
                 "/rescue.js": ("rescue.js", "text/javascript"),
                 "/rescue.css": ("rescue.css", "text/css"),
                 "/play-canvas.js": ("play-canvas.js", "text/javascript"),
+                "/game-runtime.js": ("game-runtime.js", "text/javascript"),
+                "/world-spec.js": ("world-spec.js", "text/javascript"),
+                "/playcanvas-backend.js": ("playcanvas-backend.js", "text/javascript"),
+                "/echo-forge-world-spec.js": ("echo-forge-world-spec.js", "text/javascript"),
+                "/rescue-playcanvas-world.js": ("rescue-playcanvas-world.js", "text/javascript"),
                 "/play-canvas-migrate.js": ("play-canvas-migrate.js", "text/javascript"),
                 "/play-canvas.css": ("play-canvas.css", "text/css"),
                 "/rescue-intro.js": ("rescue-intro.js", "text/javascript"),
@@ -126,11 +131,16 @@ def make_server(database, port=8000):
                 "/valley3d.js": ("valley3d.js", "text/javascript"),
                 "/vendor/three.module.min.js": ("vendor/three.module.min.js", "text/javascript"),
                 "/vendor/three.core.min.js": ("vendor/three.core.min.js", "text/javascript"),
-                "/vendor/THREE-LICENSE.txt": ("vendor/THREE-LICENSE.txt", "text/plain")
+                "/vendor/THREE-LICENSE.txt": ("vendor/THREE-LICENSE.txt", "text/plain"),
+                "/vendor/playcanvas.mjs": ("vendor/playcanvas.mjs", "text/javascript"),
+                "/vendor/PLAYCANVAS-LICENSE.txt": ("vendor/PLAYCANVAS-LICENSE.txt", "text/plain"),
+                "/assets/quaternius-animated-robot.glb": ("assets/quaternius-animated-robot.glb", "model/gltf-binary"),
+                "/assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt": ("assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt", "text/plain"),
             }
             if path in assets:
                 name, mime = assets[path]
-                return self.send(200, (ROOT / "web" / name).read_bytes(), mime + "; charset=utf-8")
+                content_type = mime if mime in ("application/zip", "model/gltf-binary") else mime + "; charset=utf-8"
+                return self.send(200, (ROOT / "web" / name).read_bytes(), content_type)
             return self.send(404, {"error": "NOT_FOUND"})
 
     return ThreadingHTTPServer(("127.0.0.1", port), Handler)

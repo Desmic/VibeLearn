@@ -11,17 +11,22 @@ ROOT = Path(__file__).resolve().parent
 def main():
     command = sys.argv[1] if len(sys.argv) > 1 else "serve"
     if command == "vendor":
-        return subprocess.call([sys.executable, "tools/vendor_three.py"], cwd=ROOT)
+        for script in (
+            "tools/vendor_three.py",
+            "tools/vendor_playcanvas.py",
+            "tools/vendor_game_assets.py",
+        ):
+            result = subprocess.call([sys.executable, script], cwd=ROOT)
+            if result:
+                return result
+        return 0
     if command == "build":
         from tools.package_repair import build as package_repair
         package_repair()
         if not compileall.compile_dir(ROOT / "app", quiet=1):
             return 1
-        # Browser code now includes real ES modules. Node's default `--check` can
-        # parse classic .js without selecting ESM semantics, which previously let
-        # a malformed imported Three.js scene pass build and fail only in-browser.
-        # Parse every browser script as an ES module; the classic scripts are
-        # already strict-mode compatible and this catches both forms reliably.
+        # Browser code includes ES modules. Parse every script with ESM semantics
+        # so engine/runtime imports fail in build rather than only in-browser.
         for script in sorted((ROOT / "web").glob("*.js")):
             subprocess.run([
                 "node", "--experimental-default-type=module", "--check", str(script)
@@ -32,7 +37,16 @@ def main():
         print("Build passed: Python compiled; browser JavaScript parsed with ESM semantics.")
         return 0
     if command == "browser":
-        for module in ["tests.browser_check", "tests.expedition_browser_check", "tests.game_review_browser", "tests.story3d_framework_browser", "tests.onboarding_browser", "tests.rescue_browser"]:
+        for module in [
+            "tests.browser_check",
+            "tests.expedition_browser_check",
+            "tests.game_review_browser",
+            "tests.story3d_framework_browser",
+            "tests.playcanvas_framework_browser",
+            "tests.playcanvas_story_interaction_browser",
+            "tests.onboarding_browser",
+            "tests.rescue_browser",
+        ]:
             result = subprocess.call([sys.executable, "-m", module, *sys.argv[2:]], cwd=ROOT)
             if result:
                 return result
@@ -42,7 +56,7 @@ def main():
         "test": ["-m", "unittest", "discover", "-s", "tests", "-v"],
     }
     if command not in commands:
-        print("Usage: python manage.py [build|test|browser|serve --port 8000 --db path]")
+        print("Usage: python manage.py [vendor|build|test|browser|serve --port 8000 --db path]")
         return 2
     return subprocess.call([sys.executable, *commands[command]], cwd=ROOT)
 

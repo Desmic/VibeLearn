@@ -1,8 +1,8 @@
 # Current story candidate — Relay Rescue: The Echo Forge
 
 **Candidate:** story-v2 / 10 September 2026  
-**Story status:** frozen story treatment; story-only critic previously passed.  
-**Runtime direction updated:** 12 September 2026 for Play Canvas + reusable world-package architecture.  
+**Story status:** frozen story treatment; story-only critic previously passed, but the user's rejected first-touch verdict remains authoritative for realized experience.  
+**Runtime direction updated:** 12 September 2026 for PlayCanvas Engine + engine-neutral generated-world architecture.  
 **Current generation input:** retry-safety topic/outcomes plus a fixed broad-audience quality target. No personal story-preference profile is used yet.
 
 ## Story promise
@@ -106,31 +106,36 @@ Restoring the route lights the seven towers in sequence and lets Pip cross. The 
 
 The ending opens a new possibility: the valley route connects to an unfamiliar real system and asks the player to carry the learned rule beyond the fantasy.
 
-## Realization direction — Play Canvas first
+## Realization direction — real PlayCanvas Engine, continuous playable world
 
-The story treatment remains renderer-neutral, but the current reference realization uses **Play Canvas** as the persistent game surface and the shared Story3D subsystem when Three.js is active.
+The story treatment remains engine-neutral. The Phase 1 reference is now realized with the **actual PlayCanvas Engine** through the engine-neutral `WorldSpec -> PlayCanvas backend` path in `docs/GAME-RUNTIME-ARCHITECTURE.md`.
 
-The target is not “six separate slides” and not even “six separate Three.js scenes.” It is a continuous world whose state/camera/composition changes as the player navigates the six beats.
+The target is emphatically not “six slides over a renderer.” It is one continuous playable world whose camera, entities, interactions, consequences and information layers change as the player advances. Narrative controls may pace the opening, but causal meaning should be dramatized in the world and the player should gain agency as early as clarity allows.
 
-For the current compatible Echo Forge path:
+For the current Echo Forge path:
 
-1. Play Canvas owns one stable stage.
-2. Echo Forge world package/runtime mounts once where practical.
-3. Back/Continue selects coherent story states/camera compositions.
-4. The final story state transitions into Signal 1 on the same Play Canvas/world/runtime instance.
-5. Signal 1 updates authoritative mission visuals instead of opening a different lesson page.
-6. Later compatible signals should continue the same lifecycle as migration progresses.
+1. `GameRuntime` owns one stable stage while compatible story/mission states are active.
+2. An engine-neutral Echo Forge `WorldSpec` is validated and compiled into PlayCanvas entities/materials/lights/cameras.
+3. Back/Continue selects reversible world states/camera compositions; important consequences remain visually legible rather than living only in text.
+4. The final story state transitions into Signal 1 using the same compatible PlayCanvas world/runtime instance where possible.
+5. Signal 1 maps authoritative server state into visible world changes instead of opening a separate renderer or deciding correctness on the client.
+6. Signals 2–7 should remain game-native as they become harder; later reasoning/build/transfer must not collapse into a normal themed website.
+7. Touch, keyboard, reduced motion, pause/replay, failure fallback and phone composition are runtime contracts rather than story-specific hacks.
 
-Ambient/scene motion can be paused/replayed. Reduced-motion mode preserves the same reversible causal states without requiring camera/object animation.
+The currently checked-in opening UI remains migration material and is **not presumed to satisfy the first-touch gate** merely because the renderer is PlayCanvas. The user's prior 3/10 first-touch verdict remains the baseline until a materially changed verified build is reviewed.
 
-## World-package/framework direction
+## Generated world/framework direction
 
-Echo Forge is a **reference world**, not a hard-coded engine template.
+Echo Forge is a **reference world**, not an engine template.
 
-Current authored implementation may use `rescue-story3d.js`, but reusable renderer/camera/device/lifecycle logic belongs in `story3d-runtime.js` / `story3d-world-host.js` under Play Canvas.
+Current authored Phase 1 code may contain a small Relay Rescue adapter that maps story/mission semantic state onto `WorldSpec` state/patches. That glue is migration scaffolding. The long-term generated output is validated, versioned data/specs + assets interpreted/compiled by trusted shared runtime code.
 
-Future generated stories should increasingly express their world as versioned data-first packages: scene/entities, visual states, camera compositions, semantic interaction anchors, approved assets and fallback metadata. A custom adapter should be exceptional rather than the default generated output.
+The reusable boundary is now approximately:
 
-Nothing about Pip, Echo Forge, `order-01`, gears, embers or floating islands may leak into generic Play Canvas/runtime/host contracts.
+`StoryWorldSpec + GameDesignSpec + WorldSpec + RuntimeExperienceSpec -> EngineTargetSpec -> EngineCompiler -> PlayCanvas EngineRuntime`
+
+Nothing about Pip, Echo Forge, `order-01`, gears, embers or floating islands may leak into the generic WorldSpec validator, GameRuntime or PlayCanvas backend.
+
+An unrelated synthetic world must compile through the same backend without backend-core edits before the seam is considered proved. Later Unity/Unreal/other backends should be able to consume the same semantic specs without changing LearningSpec or AssessmentEvidenceSpec.
 
 Replacing this world later must not change canonical competency IDs or legitimate learner evidence/history.

@@ -1,64 +1,85 @@
-# Current game critic — Echo Forge realized candidate
+# Current game critic — PlayCanvas pc-phase1-5
 
 **Status: NEEDS REVISION. Not ready for user review.**
 
-**Frozen runtime candidate:** `357500a9a81c5772d0378d30ba7894b35af7cc6f` on `deploy/render-supabase`.  
-**Verification:** GitHub Actions run `34647103844` is fully green across build, 116 backend/unit tests and all browser suites.  
-**Review method:** `internal_tool_assisted` against the frozen rubric in `GAME-UX-REVIEW.md`, using the exact rendered evidence from that run. This is not an independent model/agent and not a child/teen/young-adult playtest.
+**Frozen rendered candidate:** `555d2959b23873661dbcf51a811155bbf45dfd7a` on `phase1/playcanvas-engine`.  
+**World package:** `pc-phase1-5`.  
+**Engine:** self-hosted PlayCanvas 2.22.1.  
+**Verification:** GitHub Actions run `34701177068` is fully green across vendoring, build, 122 backend/unit tests and the complete browser suite.  
+**Review method:** `internal_tool_assisted` against `GAME-UX-REVIEW.md`, using the exact rendered phone evidence from that run. This is not an independent agent/model and not a child/teen/young-adult playtest.
 
-The separate frozen Echo Forge story treatment previously passed its story-only gate at **9.37/10**. This review judges the *realized game*, not the prose treatment.
+The current user's predecessor verdict remains **3/10** until they review a materially changed verified/deployed candidate. The scores below are diagnostic gates only and do not replace the user's verdict.
 
-The current user's earlier **3/10** first-touch/story verdict remains the controlling real product rating until they review a materially changed verified/deployed candidate. These internal scores do not replace it.
+## What improved in pc-phase1-5
+
+Compared with pc-phase1-4:
+
+- `WorldSpec` now carries validated exposure, fog and semantic tone-mapping intent;
+- the generic PlayCanvas backend realizes that atmosphere without Relay Rescue-specific engine code;
+- unrelated Star Orchard exercises the same atmosphere path and invalid renderer intent fails closed;
+- Echo Forge has materially richer procedural set dressing, lighting and atmosphere;
+- Pip is a multi-part character rather than the earlier minimal blockout;
+- Signal 1 remains mechanically clean: world truth is hidden until inspection, duplicate failure is visible, recovery works and success is shown in-world before the recap;
+- all prior persistence/evidence/runtime/browser contracts remain green.
+
+Those are real improvements, but architecture and entity count earn zero game-quality points by themselves.
 
 ## First-touch magic
 
 | Area | Weight | Score | Judgment |
 |---|---:|---:|---|
-| Beauty / creative hook | 18% | 7.7 | The continuous Three.js floating-island world is much better than the rejected slide opening, but the phone composition still has too much dark/dead sky, Pip and important objects read small, and the low-poly scene currently looks like a strong prototype rather than an opening a great commercial game would confidently lead with. |
-| Curiosity / wonder / tension | 16% | 9.1 | The broken crossing, Echo Forge, lost reply and scarce-ember duplicate risk create a clear mystery and reason to continue. |
-| Character/world attachment | 14% | 8.0 | Pip has personality and readable need, but limited expression/animation and small on-screen presence keep attachment below the story treatment's promise. |
-| Causal clarity | 16% | 9.5 | A non-specialist can follow one gear, one sealed order, a surviving effect, a destroyed reply and the danger of a second order. |
-| Initial cognitive-load control | 12% | 9.4 | The opening reveals one concrete change at a time and withholds formal terminology. |
-| Player pacing/navigation control | 10% | 9.8 | Back, Continue, Replay, Pause/Resume, Skip and six-part progress are explicit; there is no forced autoplay. |
-| First meaningful action | 8% | 9.2 | Inspecting the Echo Forge is obvious, world-owned and causally connected to the mystery. |
-| Story-to-play transition | 6% | 8.9 | Signal 1 reuses the same Echo Forge 3D world, but the shift into instructional overlays/HUD is still visually noticeable rather than feeling completely seamless. |
+| Beauty / creative hook | 18% | 6.8 | Atmosphere and set dressing are richer, but the scene still reads as procedural prototype art. Primitive geometry, inconsistent object scale and rough silhouettes keep it far below polished-game quality. |
+| Curiosity / wonder / tension | 16% | 8.8 | The broken bridge, silent Forge and duplicate-risk mystery still create strong forward curiosity. |
+| Character/world attachment | 14% | 6.9 | Pip is larger and more detailed, but currently reads as an awkward assembled mannequin rather than a charming expressive character. The final story composition magnifies that weakness. |
+| Causal clarity | 16% | 9.2 | One bridge gear, one prior order, a missing reply and the danger of a second identity remain easy to understand. |
+| Initial cognitive-load control | 12% | 9.1 | Formal jargon stays out of the opening and information is progressively disclosed. |
+| Player pacing/navigation control | 10% | 9.7 | Back, Continue, Replay, Pause/Resume, Skip and progress remain explicit and user-paced. |
+| First meaningful action | 8% | 8.6 | Inspecting the Forge is causally meaningful, but the interaction is still a UI-labelled hit target over a diorama rather than feeling like direct world manipulation. |
+| Story-to-play transition | 6% | 8.4 | The same PlayCanvas runtime persists, but the shift from six Continue beats into labelled action overlays remains visibly interface-driven. |
 
-**Weighted first-touch score: 8.86/10 — FAIL (<9).**
+**Weighted first-touch score: 8.32/10 — FAIL (<9).**
 
-### First-touch blockers / repair targets
+### First-touch blockers / likely quit point
 
-There is no functional navigation blocker, but the quality gate fails numerically. The strongest moment is the story's silence/duplicate dilemma flowing into the first Forge inspection. The weakest moment is visual presence: important actors/actions occupy too little of the phone frame and several scenes rely on the lower-third copy to supply energy the 3D staging should provide. The likely abandonment risk is a player deciding that the world is a polished educational prototype rather than a game worth inhabiting.
+The main blocker is **authored game feel**. The world is technically richer but not yet visually convincing enough for a curious kid, teen or young adult to read it as a game worth inhabiting rather than an educational prototype.
 
-Next repairs should therefore prioritize camera composition, character/object scale and expressiveness, lighting/contrast, visible cause/effect staging and a more magical world response before adding more explanation.
+The likely quit point is around the final story beat / first mission handoff: Pip becomes visually dominant but not expressive, composition is awkward, and the player has still advanced through six Continue beats before getting meaningful agency.
+
+Next repair priorities:
+
+1. move meaningful player agency into the opening before six passive advances;
+2. replace primitive character/set composition with a more coherent reusable visual/archetype pipeline;
+3. improve Pip's silhouette, expression and animation/readability;
+4. use camera composition to stage cause/effect instead of merely enlarging primitive geometry;
+5. make the first Forge interaction feel like operating the world rather than tapping a labelled web target.
 
 ## Whole-chapter game experience
 
 | Area | Weight | Score | Judgment |
 |---|---:|---:|---|
-| Game identity vs website residue | 13% | 7.7 | Signals 1–5 are increasingly direct, but later construction/transfer screens still become panel/workbench-heavy and read too much like a well-themed web tool. |
-| Story-to-play continuity | 13% | 7.9 | Pip, the Forge, tickets and storm logic remain in language, but the fantasy loses visual/character presence as the chapter advances. |
-| Core loop clarity and agency | 14% | 9.1 | Inspection, choosing identity, seeing consequences, rewinding, constructing a route and testing it provide meaningful agency. |
-| Progression / cognitive-load curve | 14% | 9.2 | Identity → changed meaning → expiry → unavailable truth → policy construction → transfer is a strong reasoning progression. |
-| Feedback, consequence and recovery | 12% | 9.1 | The duplicate path, rewind, counterexamples, replayable route execution and save-recovery behavior are causally useful. |
-| Challenge / reasoning quality | 10% | 9.2 | Difficulty rises through uncertainty, policy composition and transfer rather than simply more reading. |
-| Payoff / forward pull | 8% | 8.0 | Seven signals and the transfer challenge form a real arc, but the visual/narrative payoff is not yet strong enough to feel like an earned game finale. |
-| Learning integration | 10% | 9.4 | Retry/idempotency semantics are embodied in choices before formal naming and later transferred into a different incident. |
-| Accessibility / phone readiness | 6% | 8.8 | Mainstream phone portrait, reduced motion, fallbacks and touch are covered, but recent overflow/touch regressions show the presentation still needs hardening and visual inspection. |
+| Game identity vs website residue | 13% | 7.0 | Signal 1 is cleaner, but later construction and transfer still regress toward panels/workbench interaction. |
+| Story-to-play continuity | 13% | 7.5 | The world/runtime persists through Signals 1–6, yet character/fantasy presence weakens sharply as reasoning complexity rises. |
+| Core loop clarity and agency | 14% | 9.0 | Inspection, identity choice, visible consequence, rewind, route construction and testing provide real agency. |
+| Progression / cognitive-load curve | 14% | 9.2 | Identity → changed meaning → expiry → unavailable truth → policy construction → transfer remains a strong reasoning arc. |
+| Feedback, consequence and recovery | 12% | 9.1 | Duplicate failure, rewind and counterexample-driven repair are meaningful and responsive. |
+| Challenge / reasoning quality | 10% | 9.2 | Difficulty rises through uncertainty and policy composition rather than simple repetition. |
+| Payoff / forward pull | 8% | 8.1 | Signal 1's in-world bridge clear is better, but the chapter still lacks a sufficiently strong visual/game payoff across later signals. |
+| Learning integration | 10% | 9.4 | Idempotency/retry semantics remain embodied before formal terminology and later transfer remains strong. |
+| Accessibility / phone readiness | 6% | 8.8 | Touch, narrow screens, reduced motion and fallback behavior are well covered, but visual hierarchy still needs refinement. |
 
-**Weighted whole-chapter game score: 8.71/10 — FAIL (<9).**
+**Weighted whole-chapter game score: 8.56/10 — FAIL (<9).**
 
-### Whole-chapter blockers / repair targets
+### Whole-chapter blocker
 
-The main quality blocker is not correctness: it is **loss of game/world identity as complexity increases**. Signal 6's route builder and the transfer segment are mechanically good but visually become a conventional interface. The fantasy must survive the mechanics rather than disappear when reasoning becomes advanced.
-
-The next bounded revision should keep the world visibly present through construction, make policy execution feel like operating the storm/Forge rather than filling a form, strengthen chapter payoff, and preserve progressive disclosure on phone.
+The decisive blocker is still **loss of game identity as complexity increases**. The mechanics are strong, but the world becomes background while generic UI carries the harder reasoning. A 9+ game must let the player build/test/repair policies *through the game world* rather than switching to a themed workbench.
 
 ## Gate result
 
-- Story critic: **PASS 9.37/10** (story treatment only).
-- First-touch magic: **FAIL 8.86/10**.
-- Whole-chapter game experience: **FAIL 8.71/10**.
-- Learning/transfer critic: **not run yet**; by plan it follows only after both game gates pass.
-- User review: **not requested**.
+- Engineering/runtime/browser verification: **PASS** on exact commit `555d2959...`.
+- First-touch magic: **FAIL 8.32/10**.
+- Whole-chapter game experience: **FAIL 8.56/10**.
+- Fresh rendered story/world critic: **still required before review candidate can pass**; old 9.37 story-treatment score does not automatically carry forward.
+- Learning/transfer critic: **not run as an acceptance gate yet** because both game gates have not passed.
+- User review: **do not request yet**.
 
-Continue implementation. Do not deploy this candidate as the requested review candidate and do not mark `ready_for_user_review`.
+Continue implementation. Do not deploy or mark `ready_for_user_review` until the same exact build clears every >=9/no-blocker gate and the served revision is verified.
