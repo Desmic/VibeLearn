@@ -5,7 +5,7 @@ import {echoForgeWorldSpec} from './echo-forge-world-spec.js';
 
 export const gameWorldManifest=Object.freeze({
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-1',
+  version:'pc-phase1-2',
   engine:'playcanvas',
   specVersion:echoForgeWorldSpec.schemaVersion,
   modes:Object.freeze(['story','mission']),
@@ -54,7 +54,7 @@ export function createGameWorld(host,{reducedMotion=false,mode='story'}={}){
     setMissionState(state){applyMission(state);},
     setPaused(value){engine.setPaused(value);},
     replay(){missionState?applyMission(missionState):applyBeat(beat);},
-    stats(){return{...engine.stats(),mode:currentMode,beat,manifest:gameWorldManifest.id};},
+    stats(){return{...engine.stats(),mode:currentMode,beat,manifest:gameWorldManifest.id,manifestVersion:gameWorldManifest.version};},
     dispose(){engine.dispose();host.classList.remove('vibelearn-playcanvas-ready');}
   };
 }
