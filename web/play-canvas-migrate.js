@@ -6,6 +6,7 @@
   if(!game||game.__playCanvasMigrationV2)return;
   let lastAttempt=null;
   let transferWorld=null,transferHost=null,transferMountToken=0;
+  let migrationQueued=false;
 
   const rootEl=()=>document.querySelector('#rescue-game');
   const levelOf=a=>Number(a?.snapshot?.rescue?.level||0);
@@ -196,6 +197,15 @@
     else if(level===6)migrateBuilder(root,world);
   }
 
+  function queueMigration(){
+    if(migrationQueued)return;
+    migrationQueued=true;
+    queueMicrotask(()=>{
+      migrationQueued=false;
+      migrate(lastAttempt);
+    });
+  }
+
   const previousRender=game.render.bind(game);
   const previousSync=game.sync.bind(game);
   const previousHide=game.hide.bind(game);
@@ -203,7 +213,16 @@
     disposeTransferWorld();
     const result=previousRender(a,...rest);migrate(a);return result;
   };
-  game.sync=(busy,a,...rest)=>{const result=previousSync(busy,a,...rest);lastAttempt=a||lastAttempt;queueMicrotask(()=>migrate(lastAttempt));return result;};
+  game.sync=(busy,a,...rest)=>{const result=previousSync(busy,a,...rest);lastAttempt=a||lastAttempt;queueMigration();return result;};
   game.hide=(...args)=>{disposeTransferWorld();return previousHide(...args);};
+
+  // RescueGame internally rerenders route construction when a slot/block changes,
+  // bypassing the exported render wrapper above. Observe only child-list changes so
+  // those semantic rerenders are re-spatialized without reacting to class/style work.
+  // The migration is idempotent; the queued microtask collapses a rerender burst.
+  const migrationRoot=document.querySelector('#workspace')||document.body;
+  const observer=new MutationObserver(queueMigration);
+  observer.observe(migrationRoot,{childList:true,subtree:true});
+
   game.__playCanvasMigrationV2=true;
 })();
