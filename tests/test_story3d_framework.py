@@ -89,6 +89,39 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn('if(playback.parentElement!==hud)hud.append(playback)', migrate)
         self.assertIn('.play-canvas-storm-outcome .rg-case-detail{display:none!important}', css)
 
+    def test_signal7_transfer_is_a_distinct_playcanvas_world_with_existing_semantic_controls(self):
+        adapter = (ROOT / 'web' / 'rescue-playcanvas-world.js').read_text(encoding='utf-8')
+        migrate = (ROOT / 'web' / 'play-canvas-migrate.js').read_text(encoding='utf-8')
+        rescue = (ROOT / 'web' / 'rescue-game.js').read_text(encoding='utf-8')
+
+        self.assertIn("id:'relay-rescue.export-yard'", adapter)
+        self.assertIn("version:'pc-transfer-1'", adapter)
+        self.assertIn("if(mode==='transfer')return createTransferGameWorld", adapter)
+        self.assertIn("setTransferState(value){apply(value);}", adapter)
+        self.assertIn("'transfer.failure'", adapter)
+        self.assertIn("'transfer.success'", adapter)
+        for entity in (
+            'transfer-worker', 'transfer-service', 'transfer-route-pad-0',
+            'transfer-route-pad-3', 'transfer-duplicate-a', 'transfer-output'
+        ):
+            self.assertIn(entity, adapter)
+
+        # Migration reuses the exact route buttons, assistance declaration and
+        # commit action rendered by rescue-game.js instead of inventing a second
+        # client-side assessment path.
+        self.assertIn("surface.className='play-canvas-transfer-surface play-canvas-target play-canvas-builder-world'", migrate)
+        self.assertIn("mode:'transfer'", migrate)
+        self.assertIn("surface.dataset.playCanvasBackend='playcanvas'", migrate)
+        self.assertNotIn("surface.dataset.playCanvasBackend='dom'", migrate)
+        self.assertIn("bench.querySelector('.rg-slots')?.classList.add('play-canvas-route-nodes')", migrate)
+        self.assertIn("bench.querySelector('.rg-palette')?.classList.add('play-canvas-toolbelt')", migrate)
+        self.assertIn("play-canvas-transfer-run", migrate)
+        self.assertIn("setTransferState?.(transferPresentationState(a))", migrate)
+        self.assertIn("const previousHide=game.hide.bind(game)", migrate)
+        self.assertIn("function programPanel(transfer)", rescue)
+        self.assertIn("id=\"rg-aid\"", rescue)
+        self.assertIn("id=\"rg-run\"", rescue)
+
     def test_world_composition_anchors_seven_lights_and_portrait_cameras(self):
         source = (ROOT / 'web' / 'echo-forge-world-spec.js').read_text(encoding='utf-8')
         self.assertIn('const distantBeaconScale={1:.72,2:.56,3:.66,5:.54,6:.58}', source)
