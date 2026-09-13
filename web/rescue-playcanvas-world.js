@@ -5,11 +5,11 @@ import {echoForgeWorldSpec} from './echo-forge-world-spec.js';
 
 export const gameWorldManifest=Object.freeze({
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-9',
+  version:'pc-phase1-10',
   engine:'playcanvas',
   specVersion:echoForgeWorldSpec.schemaVersion,
   modes:Object.freeze(['story','mission']),
-  capabilities:Object.freeze(['beats','mission-state','pause','replay','stats','fallback','semantic-picking','animated-assets'])
+  capabilities:Object.freeze(['beats','mission-state','pause','replay','stats','fallback','semantic-picking','animated-assets','storm-route-feedback'])
 });
 
 const PIP_LIMBS=['pip-arm-l','pip-arm-r','pip-hand-l','pip-hand-r','pip-leg-l','pip-leg-r','pip-boot-l','pip-boot-r'];
@@ -53,8 +53,10 @@ function storyPresentationPatch(beat){
 }
 
 function missionPatch(state={}){
+  const level=Number(state.level||0);
   const looked=new Set(state.looked||[]);
   const rewound=Number(state.rewinds||0)>0;
+  const routeTested=level===6&&Array.isArray(state.rows)&&state.rows.length>0;
   const knowsForge=looked.has('workshop')||looked.has('ticket')||rewound||Boolean(state.complete)||Boolean(state.failed);
   const patch={
     camera:'mission.forge',
@@ -84,6 +86,17 @@ function missionPatch(state={}){
       'pip':{position:[PIP_SUCCESS_X,.42,.9],rotation:[0,-24,0],scale:[1.02,1.02,1.02]},
       'pip-head':{rotation:[0,-12,0]}
     };
+  }else if(level===6){
+    // Signal 6 is route construction across the valley, not a Forge inspection.
+    // Keep the camera wide so the semantic controls sit over an actual route.
+    patch.camera='mission.choice';
+    if(routeTested){
+      // A failed/counterexample run is visible in the world as a live storm,
+      // while the precise case explanation remains in the accessible HUD.
+      patch.animations.pip='no';
+      patch.hide=patch.hide.filter(id=>id!=='storm-bolt-a'&&id!=='storm-bolt-b');
+      patch.show.push('storm-bolt-a','storm-bolt-b');
+    }
   }else if(rewound||looked.has('ticket')||(state.ticket&&state.ticket!=='order-01')){
     patch.camera='mission.choice';
     patch.animations.pip='no';
@@ -134,7 +147,7 @@ export function createGameWorld(host,{reducedMotion=false,mode='story'}={}){
     setPaused(value){engine.setPaused(value);},
     replay(){missionState?applyMission(missionState):applyBeat(beat);},
     async pickSemanticAt(clientX,clientY){return semanticPickFromSelection(await engine.pickEntityIdsAt(clientX,clientY));},
-    stats(){return{...engine.stats(),mode:currentMode,beat,manifest:gameWorldManifest.id,manifestVersion:gameWorldManifest.version};},
+    stats(){return{...engine.stats(),mode:currentMode,beat,missionLevel:Number(missionState?.level||0),routeTested:Boolean(Number(missionState?.level||0)===6&&missionState?.rows?.length),manifest:gameWorldManifest.id,manifestVersion:gameWorldManifest.version};},
     dispose(){engine.dispose();host.classList.remove('vibelearn-playcanvas-ready');}
   };
 }
