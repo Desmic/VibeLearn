@@ -36,6 +36,8 @@ class RuntimeMigrationTests(unittest.TestCase):
         for legacy_term in ('story3d-runtime.js', 'story3d-world-host.js', 'rescue-story3d.js', 'THREE.'):
             self.assertNotIn(legacy_term, generic)
         self.assertIn("asset.resource.instantiateRenderEntity", backend)
+        self.assertIn("_measureAssetBounds", backend)
+        self.assertIn("assetBounds:Object.fromEntries", backend)
         self.assertIn("value?.resource||value", backend)
         self.assertIn("state.animations", world_spec)
         self.assertIn("safe same-origin root path", world_spec)
@@ -64,7 +66,10 @@ class RuntimeMigrationTests(unittest.TestCase):
             self.assertIn(asset, hosted)
         self.assertIn('playcanvas.mjs', server)
         self.assertIn('playcanvas.mjs', hosted)
-        for asset in ('quaternius-animated-robot.glb', 'QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt'):
+        for asset in (
+            'quaternius-animated-robot.glb', 'QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt',
+            'quaternius-blacksmith.glb', 'QUATERNIUS-BLACKSMITH-LICENSE.txt'
+        ):
             self.assertIn(asset, server)
             self.assertIn(asset, hosted)
         self.assertIn('model/gltf-binary', server)
@@ -76,6 +81,10 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn('8784b36b4a174bfc89a31150b39f1d4fd1853dfa', vendor)
         self.assertIn('401_024', vendor)
         self.assertIn('Public Domain', vendor)
+        self.assertIn('425e0b90b9e151a9f04d83f82ba37439df5c080f', vendor)
+        self.assertIn('83917c55b132d8e51e6c2b969911e14c857956a8', vendor)
+        self.assertIn('670_832', vendor)
+        self.assertIn('quaternius-blacksmith.glb', vendor)
         self.assertIn('CC0 1.0', vendor)
         self.assertIn("tools/vendor_game_assets.py", manage)
         self.assertIn('def _git_blob_sha1', vendor)
