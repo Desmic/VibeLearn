@@ -7,6 +7,8 @@ The Signal 7 help declaration and Clear route now share a responsive HUD row; th
 
 Per the current user instruction, the release gate for this bounded fix is full CI/browser verification and inspection of the exact candidate's desktop and 390px Signal 7 screenshots. Once green and visually reviewable, fast-forward `deploy/render-supabase` to that candidate, deploy manually (auto-deploy remains off), and verify Render's live revision. Only clear blockers belong in this iteration; no broad art/architecture or critic-scoring pass precedes this requested user review.
 
+The next full CI run passed at `dcb8082`, but exact desktop/390px screenshot inspection exposed an unintended full-surface backdrop blur and phone clipping of incident facts. The transparent workbench no longer blurs its backdrop; the compact incident readout now fits all three facts between the controls and route. Browser checks protect this placement and visibility.
+
 **Verification is pending at this source checkpoint. This is not product acceptance. The user's review is the next product gate.** The prior live checkpoint below remains historical context until the new deployment is verified.
 
 ---

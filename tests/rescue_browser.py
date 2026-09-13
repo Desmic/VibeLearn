@@ -92,6 +92,22 @@ def main():
             a,b=boxes
             assert (a['x']+a['width']<=b['x'] or b['x']+b['width']<=a['x'] or
                     a['y']+a['height']<=b['y'] or b['y']+b['height']<=a['y']),boxes
+            # The transparent full-surface workbench must not blur the world or
+            # the incident facts behind it. Facts must fit below the controls
+            # and above the route, including the compact phone layout.
+            assert page.locator('.play-canvas-transfer-surface .rg-workbench').evaluate(
+                "el => getComputedStyle(el).backdropFilter === 'none'")
+            assert page.locator('.play-canvas-transfer-surface').evaluate('''surface => {
+              const incident=surface.querySelector('.rg-incident').getBoundingClientRect();
+              const header=surface.querySelector('.play-canvas-transfer-header').getBoundingClientRect();
+              const nodes=[...surface.querySelectorAll('.rg-slot')].map(el=>el.getBoundingClientRect());
+              return header.bottom<=incident.top && nodes.every(r=>incident.bottom<=r.top) &&
+                [...surface.querySelectorAll('.rg-incident-grid small,.rg-incident-grid b')].every(el=>{
+                  const r=el.getBoundingClientRect();
+                  return r.top>=incident.top && r.bottom<=incident.bottom &&
+                    r.left>=incident.left && r.right<=incident.right;
+                });
+            }'''),'Incident facts are clipped or overlap another HUD region'
         def build(program):
             page.locator('#rg-clear-route').click()
             for block in program:page.locator(f'[data-block="{block}"]').click()
