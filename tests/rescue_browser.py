@@ -240,6 +240,18 @@ def main():
             assert len(state['attempt']['response']['rescue']['moves'])==1
             with page.expect_download() as dl:page.locator('#rg-kit a').click()
             assert dl.value.suggested_filename=='relay-repair-kit.zip'
+            page.set_viewport_size({'width':390,'height':844})
+            completion=page.locator('.play-canvas-transfer-surface .rg-clear')
+            expect(completion.locator('#rg-next')).to_be_enabled()
+            assert completion.evaluate('''el => {
+              const panel=el.getBoundingClientRect();
+              const button=el.querySelector('#rg-next').getBoundingClientRect();
+              return button.top>=panel.top && button.bottom<=panel.bottom &&
+                button.left>=panel.left && button.right<=panel.right;
+            }'''),'Transfer completion clips the return control'
+            page.locator('.play-canvas-transfer-surface').screenshot(path=str(out/'rescue-transfer-after-phone-390.png'))
+            completion.locator('#rg-next').click()
+            expect(page.locator('#rg-launch')).to_be_visible()
             checks.append('Signal 7 changes context into a distinct PlayCanvas export-yard while preserving the exact four route slots, six semantic tools, explicit no-help declaration and sealed server-owned transfer. Route edits stay spatialized through internal rerenders; one lost acknowledgement still cannot duplicate evidence/XP; incident results and the Python repair kit remain post-action evidence outside the live interaction surface')
             result={'result':'passed','browser':b.version,'checks':checks,'page_errors':errors,'independent_critic_score':None,'acceptance':'critic_pending','audience_validation':'No human child/teen playtest; browser checks are not enjoyment evidence.'}
             (out/'rescue-browser.json').write_text(json.dumps(result,indent=2));print(json.dumps(result,indent=2))

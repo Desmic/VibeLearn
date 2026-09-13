@@ -74,13 +74,15 @@
 .play-canvas-transfer-surface .play-canvas-storm-outcome{top:88px!important}
 .play-canvas-transfer-surface .play-canvas-route-tools{backdrop-filter:none!important}
 .play-canvas-transfer-surface .rg-incident{max-height:none!important;overflow:visible!important;padding:8px 10px!important}
+.play-canvas-transfer-surface .rg-clear{max-height:none!important;overflow:visible!important;padding:12px!important}
+.play-canvas-transfer-surface .rg-clear #rg-next{min-height:44px;width:100%}
 .play-canvas-transfer-surface .rg-incident>span{font-size:.58rem;font-weight:800;letter-spacing:.08em}
 .play-canvas-transfer-surface .rg-incident-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:6px}
 .play-canvas-transfer-surface .rg-incident-grid>div{min-width:0}
 .play-canvas-transfer-surface .rg-incident-grid small{display:block;color:#9fbdbf;font-size:.52rem}
 .play-canvas-transfer-surface .rg-incident-grid b{display:block;margin-top:3px;font-size:.7rem;overflow-wrap:anywhere}
 @media(max-width:800px){.play-canvas-transfer-surface .rg-bench-title{display:none!important}}
-@media(max-width:430px){.play-canvas-transfer-surface .rg-incident{left:8px!important;right:8px!important}}
+@media(max-width:430px){.play-canvas-transfer-surface .rg-incident,.play-canvas-transfer-surface .rg-clear{left:8px!important;right:8px!important}}
 
 /* Signal 6 causal playback is part of the game world, not a second report page.
    Case tabs choose the storm; this ribbon shows the observed execution in-place. */
