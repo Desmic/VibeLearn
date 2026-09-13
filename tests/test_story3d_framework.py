@@ -20,12 +20,8 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn('createPlayCanvasWorld', adapter)
         self.assertIn('class GameRuntimeController', runtime)
         self.assertIn("import * as pc from './vendor/playcanvas.mjs'", backend)
-        # PlayCanvas owns data-engine internally; VibeLearn uses a namespaced,
-        # stable marker rather than depending on engine implementation metadata.
         self.assertIn("dataset.vibelearnEngine='playcanvas'", backend)
         self.assertIn("PLAYCANVAS_ENGINE_VERSION='2.22.1'", backend)
-        # A healthy generic backend instance must advertise readiness directly;
-        # adapters and the engine-neutral runtime must not infer it from stats().
         self.assertIn('this.available=true', backend)
         self.assertIn('this.available=false', backend)
         self.assertIn('available:this.available', backend)
@@ -39,7 +35,6 @@ class RuntimeMigrationTests(unittest.TestCase):
             self.assertNotIn(domain_term, generic)
         for legacy_term in ('story3d-runtime.js', 'story3d-world-host.js', 'rescue-story3d.js', 'THREE.'):
             self.assertNotIn(legacy_term, generic)
-        # Asset loading is generic container compilation, not a special-case model loader.
         self.assertIn("asset.resource.instantiateRenderEntity", backend)
         self.assertIn("value?.resource||value", backend)
         self.assertIn("state.animations", world_spec)
@@ -48,9 +43,8 @@ class RuntimeMigrationTests(unittest.TestCase):
     def test_echo_forge_keeps_asset_normalization_and_identity_in_world_spec(self):
         source = (ROOT / 'web' / 'echo-forge-world-spec.js').read_text(encoding='utf-8')
         self.assertIn("version:'pc-phase1-8'", source)
-        self.assertIn("transform:{position:[0,-.08,0],scale:[.90,.90,.90]}", source)
-        # The courier scarf/beacon are successful-asset archetype accessories, not
-        # hidden together with primitive failure geometry when the GLB loads.
+        self.assertIn("transform:{position:[0,-.08,0],scale:[.52,.52,.52]}", source)
+        self.assertIn('Measured source mesh height is ~4.63 units', source)
         fallback_block = source.split('const PIP_FALLBACK=[', 1)[1].split('];', 1)[0]
         self.assertNotIn('pip-scarf', fallback_block)
         self.assertNotIn('pip-beacon', fallback_block)
