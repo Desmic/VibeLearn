@@ -67,9 +67,13 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn('0062ceaa6dd8cda2d2b69cbcc5f80724928543bf', vendor)
         self.assertIn('8784b36b4a174bfc89a31150b39f1d4fd1853dfa', vendor)
         self.assertIn('401_024', vendor)
-        self.assertIn('Public Domain (CC0 1.0)', vendor)
+        self.assertIn('Public Domain', vendor)
+        self.assertIn('CC0 1.0', vendor)
         self.assertIn("tools/vendor_game_assets.py", manage)
-        self.assertIn("hashlib.sha1(b'blob ' + str(len(data)).encode('ascii') + b'\\0' + data)", vendor)
+        self.assertIn('def _git_blob_sha1', vendor)
+        self.assertIn('header = f"blob {len(data)}\\0".encode("ascii")', vendor)
+        self.assertIn('hashlib.sha1(header + data).hexdigest()', vendor)
+        self.assertIn('robot[:4] != b"glTF"', vendor)
 
     def test_legacy_echo_forge_three_path_stays_shared_until_removed(self):
         source = (ROOT / 'web' / 'rescue-story3d.js').read_text(encoding='utf-8')
