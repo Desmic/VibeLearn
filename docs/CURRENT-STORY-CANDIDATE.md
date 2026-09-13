@@ -1,7 +1,9 @@
 # Current story candidate — Relay Rescue: The Echo Forge
 
-**Candidate:** story-v2 / 10 September 2026  
-**Story status:** frozen story treatment; story-only critic previously passed, but the user's rejected first-touch verdict remains authoritative for realized experience.  
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
+**Candidate:** story-v3 / 13 September 2026  
+**Story status:** revised frozen treatment awaiting a fresh story-only critic; no inherited pass. The current deployed experience is user-rejected.  
 **Runtime direction updated:** 12 September 2026 for PlayCanvas Engine + engine-neutral generated-world architecture.  
 **Current generation input:** retry-safety topic/outcomes plus a fixed broad-audience quality target. No personal story-preference profile is used yet.
 
@@ -40,9 +42,11 @@ These are fantasy-facing statements of the retry model, not mechanics that contr
 
 ### 1. The valley of seven lights — hook
 
-Camera glides across floating islands and seven beacon towers. Pip hurries toward the bridge while distant islands begin to glow for evening.
+Camera reveals a small home beyond the crossing: a warm window and a porch light answering Pip’s raised hand. Farther away, storm-damaged towers are dark. Pip carries the last delivery home. The nearest guide lamp flickers out as Pip reaches a fork.
 
-**Pip:** “One more crossing. Easy.”
+A single world marker invites the player: **Light Pip’s way.** Touching the keeper beacon lights the short path. Pip turns, waves directly toward the player and says, “There you are. Thank you!” This is a safe, immediately visible first success, not an assessment or an unexplained promise of powers. The player has helped someone before hearing any rule. The camera follows Pip toward the bridge.
+
+**Pip:** “They left the light on for me. One more crossing. Easy.”
 
 The bridge gives a metallic scream.
 
@@ -66,7 +70,7 @@ The seal is introduced by function: it means *this one job*.
 
 ### 4. The silence — mystery
 
-The finished gear remains visibly inside the Forge. A bright reply starts home. Lightning cuts the signal; the reply vanishes halfway while the gear remains.
+The audience has seen a gear take shape. A bright reply starts home. Lightning cuts the signal; the reply vanishes halfway. Smoke and storm obscure the Forge interior. Pip cannot know whether the order finished. Later inspection establishes the reliable current result rather than pretending the audience never saw the Forge working.
 
 **Pip:** “Forge? …Did you make it?”
 
@@ -74,15 +78,15 @@ The audience should understand without technical vocabulary that silence changed
 
 ### 5. The temptation — stakes
 
-Pip reaches toward a red seal press. The scene previews a second ghost gear forming and another emergency ember dimming. Other damaged towers remain visible in the distance.
+Pip reaches toward a red seal press. A brief, visibly imagined second gear and ember show the cost of another job. Across the gap, one small dark island signals for a repair; the Forge has one reserve ember beside its empty socket. The camera connects the spare ember to that waiting island, then returns to Pip’s hand over the press. The preview never claims that a second job has actually occurred.
 
-**Pip:** “I could just send another order…”
+**Pip:** “Another order? But that island needs the last ember…”
 
 The danger is concrete: another seal could spend another scarce ember on a gear nobody needs while another island stays dark.
 
 ### 6. The first signal — player entry
 
-The old tower beside Pip wakes and threads of light reveal the route lightning hid. Pip turns toward the player/camera.
+The beacon the player lit answers again. Threads of light reveal the route lightning hid, connecting the player’s first small help to the ability needed now. Pip turns toward the player/camera. A single marker identifies the Echo Forge; other tools stay quiet.
 
 **Pip:** “You can see the echoes, can’t you? Help me find out what happened.”
 
@@ -102,7 +106,9 @@ Progression changes the situation rather than repeating lost-reply captions: ide
 
 ## Intended payoff
 
-Restoring the route lights the seven towers in sequence and lets Pip cross. The Echo Forge's remaining embers are preserved for other islands. Pip's small first problem becomes evidence that the player can repair a larger class of uncertain systems.
+Signal 1 has its own complete payoff: recovering the same order seats one gear in the broken crossing, the bridge locks into place, Pip crosses toward the warm home light, and the first tower lights. Pip turns back: “One gear. You got me home.” The neighboring dark island then answers with a signal of its own. The player chooses to continue helping; this first success is not deferred until the end of seven missions.
+
+Later missions progressively restore the valley’s route. Their resolution lights the remaining towers while preserving embers for the islands that need them. The final construction/transfer tests whether the player can carry this reasoning beyond Pip’s first crossing. Game success alone is not evidence of durable mastery.
 
 The ending opens a new possibility: the valley route connects to an unfamiliar real system and asks the player to carry the learned rule beyond the fantasy.
 
@@ -120,7 +126,7 @@ For the current Echo Forge path:
 4. The final story state transitions into Signal 1 using the same compatible PlayCanvas world/runtime instance where possible.
 5. Signal 1 maps authoritative server state into visible world changes instead of opening a separate renderer or deciding correctness on the client.
 6. Signals 2–7 should remain game-native as they become harder; later reasoning/build/transfer must not collapse into a normal themed website.
-7. Touch, keyboard, reduced motion, pause/replay, failure fallback and phone composition are runtime contracts rather than story-specific hacks.
+7. Touch, keyboard, reduced motion, pause/replay, explicit 3D failure recovery and phone composition are runtime contracts rather than story-specific hacks.
 
 The currently checked-in opening UI remains migration material and is **not presumed to satisfy the first-touch gate** merely because the renderer is PlayCanvas. The user's prior 3/10 first-touch verdict remains the baseline until a materially changed verified build is reviewed.
 
@@ -139,3 +145,7 @@ Nothing about Pip, Echo Forge, `order-01`, gears, embers or floating islands may
 An unrelated synthetic world must compile through the same backend without backend-core edits before the seam is considered proved. Later Unity/Unreal/other backends should be able to consume the same semantic specs without changing LearningSpec or AssessmentEvidenceSpec.
 
 Replacing this world later must not change canonical competency IDs or legitimate learner evidence/history.
+
+## Frozen information schedule and entry contract
+
+The opening establishes a warm destination, the player’s helpful role, the broken bridge, a one-gear order, lost reply and concrete reserve-ember stakes. It does not explain retention, payload conflicts, ledgers or all seven lessons. Each later signal introduces its own new complication under GAME-OPENING-PROGRESSION.md. Skip enters the essential Signal 1 tutorial; returning Level 2+ never receives an automatic opening. Explicit replay returns to the prior draft/map unchanged. This treatment is a design target, not a claim that the current code realizes it.

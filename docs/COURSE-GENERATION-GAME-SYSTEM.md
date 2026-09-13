@@ -1,5 +1,7 @@
 # Course generation produces playable teaching systems
 
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 **Current authority — updated 12 September 2026.** Read root `CODEX-IMPLEMENTATION-PLAN.md`, `GAME-RUNTIME-ARCHITECTURE.md`, `STORY-GENERATION-AND-CRITIC.md`, `GAME-AS-COURSE.md`, `GAME-UX-SYSTEM.md`, `GAME-UX-REVIEW.md`, and `STATE.md`.
 
 ## North star
@@ -309,3 +311,13 @@ Custom engine code is an exceptional later extension path, not normal course gen
 Current work remains private Phase 1 architecture/reference refinement.
 
 Immediate work is to define the engine-neutral schemas/compiler boundary, establish PlayCanvas as the first backend, prove spec-driven generation with two small worlds, then port Echo Forge incrementally while preserving existing evidence/save/auth semantics.
+
+## Opening/progression boundary — current amendment
+
+Every generated RuntimeExperienceSpec must carry an opening eligibility/resume/replay policy and a progressive HUD schedule; GameDesignSpec must carry an early success before complexity, the new demand at each level, scaffolding fade and visible payoff. For this delivery WorldSpec must realize the whole game in PlayCanvas 3D, including world-anchored markers and tutorial targets. Validation rejects silent 2D gameplay substitution and replay that mutates progression.
+
+## Foundation: games generated from learning needs and preferences
+
+User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
+
+Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.

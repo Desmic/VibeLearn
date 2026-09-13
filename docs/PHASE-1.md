@@ -1,5 +1,7 @@
 # First slice completion report — 6 September 2026
 
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 
 ## 10 September 2026 current refinement — story is now its own product gate
 
@@ -11,11 +13,11 @@ The active refinement therefore separates the gates: `course topic/outcomes -> s
 
 The replacement story candidate is **Relay Rescue: The Echo Forge**. It treats the opening as one continuous world: Pip's bridge breaks; exactly one gear is needed; Pip sends sealed `order-01` to the Echo Forge; the Forge spends a scarce emergency ember and makes the gear; lightning destroys only the reply; Pip is tempted to send a fresh seal that the Forge could treat as another job; the player awakens as Signal Keeper and is asked to discover the truth before another ember is wasted. Formal retry terminology remains deferred until the concrete model exists.
 
-First-touch UX is now a hard gate: user-paced progression by default, Back/previous, Continue, Pause/Resume for active motion, Skip, replay, visible story position, coherent backward/forward world state, and the same causal meaning under reduced motion. A slower slide deck is still a failure. Important candidates explicitly compare 2D, 2.5D and Three.js 3D realization; 3D may earn its cost through immersion/world attachment/environmental storytelling, never by technology alone.
+Historical first-touch design checkpoint (superseded in rendering choice by GAME-OPENING-PROGRESSION.md): user-paced progression by default, Back/previous, Continue, Pause/Resume for active motion, Skip, replay, visible story position, coherent backward/forward world state, and the same causal meaning under reduced motion. A slower slide deck is still a failure. Important candidates explicitly compare 2D, 2.5D and Three.js 3D realization; 3D may earn its cost through immersion/world attachment/environmental storytelling, never by technology alone.
 
 A story-only critic evaluates exactly one frozen story and ignores code/tests/rendering/curriculum value. `docs/STORY-GENERATION-AND-CRITIC.md` contains the rubric and blockers. The current Echo Forge treatment has a separate internal-tool-assisted story pre-gate record in `docs/CURRENT-STORY-CRITIC.md`; that score does not override the user's 3/10 verdict on the deployed predecessor and does not by itself certify the rendered game.
 
-The current implementation work realizes Echo Forge as a reversible, user-paced story player with a locally pinned Three.js scene plus semantic/CSS fallback, then carries the same vocabulary into Signal 1. Exact runtime CI/deployment evidence belongs in `STATE.md` after the candidate is verified and manually deployed.
+The historical implementation below used Three.js and CSS fallback. Current Phase 1 instead requires the continuous PlayCanvas 3D opening/tutorial/game and explicit recovery with no 2D gameplay fallback. Exact runtime CI/deployment evidence belongs in `STATE.md` after the candidate is verified and manually deployed.
 
 ## Outcome and stopping point
 
@@ -197,7 +199,7 @@ Generation now requires:
 - a separate single-story critic >=9.0 before gameplay realization;
 - future learner story preferences only through an explicit later capability, never inferred today;
 - first-touch Back/Continue/Pause/Skip/Replay/progress and coherent reversible story state;
-- a deliberate 2D vs 2.5D vs Three.js 3D realization decision;
+- a continuous PlayCanvas 3D opening/tutorial/game, with no 2D gameplay fallback;
 - a plain-language chapter goal understandable before specialist jargon;
 - causal story/visual beats whose motion explains the mechanism rather than decorating it;
 - an explicit bridge from intuitive model to formal terminology;

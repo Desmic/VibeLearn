@@ -1,5 +1,7 @@
 # GameRulesSpec — portable deterministic gameplay semantics
 
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 **Status:** authoritative architecture contract · 12 September 2026  
 **Read with:** `GAME-RUNTIME-ARCHITECTURE.md`, root `CODEX-IMPLEMENTATION-PLAN.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `GAME-AS-COURSE.md`, and `STATE.md`.
 
@@ -439,3 +441,7 @@ The gameplay architecture is not portable until we can demonstrate that:
 A perfect rules architecture earns zero story/game/learning critic points.
 
 It exists to make high-quality game generation fast, safe, testable and portable. The rendered game still has to be fun, comprehensible and educational enough to pass the separate >=9 gates and the user's final review.
+
+## Opening/progression boundary — current amendment
+
+Opening navigation, skip and replay are presentation actions; they cannot clear a mission, create evidence or award XP. Starting Level 1 after the opening uses the existing authoritative start command. Returning players and replay retain mission identity, revision and draft. Tutorial support is guided practice and cannot turn into independent mastery by removing visible helpers.

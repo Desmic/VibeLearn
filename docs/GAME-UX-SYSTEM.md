@@ -1,5 +1,7 @@
 # VibeLearn game UX system — the game is the course
 
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 **Active direction · updated 12 September 2026.** Read with `GAME-AS-COURSE.md`, `STORY-GENERATION-AND-CRITIC.md`, `STATE.md`, `GAME-UX-REVIEW.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `PLAY-CANVAS.md`, and `THREE-STORY-FRAMEWORK.md`.
 
 ## Product standard
@@ -20,7 +22,7 @@ Current story selection is topic/outcome-driven. Future explicit learner prefere
 
 The **Play Canvas** is the persistent surface in which story, exploration, missions, visible consequences, progression, building and transfer are staged.
 
-Three.js/2D/2.5D are rendering backends inside it. None is the product shell.
+PlayCanvas Engine renders the fully 3D Phase 1 world. GameRuntime is the persistent orchestration layer.
 
 The game should not feel like:
 
@@ -29,7 +31,7 @@ The game should not feel like:
 - one renderer/canvas lifecycle per lesson;
 - a world that disappears when reasoning becomes difficult.
 
-For compatible states, keep a persistent Play Canvas stage/world/runtime and update state/camera/HUD. Semantic DOM actions/fallback remain essential but support the game surface rather than becoming dashboard-first architecture.
+For compatible states, keep a persistent Play Canvas stage/world/runtime and update state/camera/HUD. Accessible semantic DOM HUD actions remain essential but support the game surface rather than becoming dashboard-first architecture.
 
 ## Attention first, cognition second
 
@@ -91,37 +93,11 @@ Introduce the smallest useful HUD/action dock progressively. Evidence panels, jo
 
 Every input gets acknowledgement. Pending saves prevent duplicate action. Focus/tap targets remain stable through redraws. Navigation must not silently discard work.
 
-## Rendering choice: 2D / 2.5D / Three.js
+## 3D runtime and reusable worlds
 
-For important story/game candidates explicitly compare:
+Current Phase 1 is fully 3D through PlayCanvas Engine. Opening, tutorial, missions, construction and transfer use the persistent GameRuntime and engine-neutral WorldSpec. Three.js code is legacy reference only. There is no 2D/2.5D choice or silent 2D gameplay fallback in this delivery.
 
-1. authored 2D/illustrated animation;
-2. 2.5D/parallax/layered interaction;
-3. interactive Three.js 3D.
-
-Three.js is a serious option for attention, world presence, character attachment, atmosphere, exploration and environmental storytelling—especially for kids/teens/young adults—but earns no automatic quality points.
-
-## Reusable Three.js world framework
-
-The user explicitly requires a **framework that makes future fantasy/story settings easy to integrate**.
-
-When Three.js is chosen:
-
-- Play Canvas remains the higher-level game surface;
-- `story3d-runtime.js` owns generic renderer/camera/lifecycle/device behavior;
-- `story3d-world-host.js` owns package/adapter compatibility;
-- story-specific worlds supply package data/assets/compositions/states/anchors;
-- renderer/world state never decides assessment or evidence.
-
-### Data-first authoring direction
-
-Future generated worlds should increasingly be declarative `WorldPackageSpec`s interpreted by trusted shared code, not arbitrary generated JavaScript.
-
-World packages should describe scene/entity graph, visual states, camera compositions, interaction anchors, approved assets and fallback semantics. Custom adapter code is an exceptional reviewed extension.
-
-A second fantasy should integrate by adding/replacing its world package, not by cloning renderer lifecycle or modifying Play Canvas/runtime/host with story-specific assumptions.
-
-Do not over-generalize speculatively: shared primitives grow from real multi-world needs and remain versioned/story-neutral.
+Generated settings supply validated specs/data, approved assets, camera compositions, semantic interaction anchors and HUD schedules. They do not create a new renderer or game shell. Preserve accessible DOM input semantics over the 3D world. Loading/context failure gets an explicit recoverable screen, not a playable old game.
 
 ## Phone-first target
 
@@ -144,3 +120,9 @@ Observed simulation feedback is guided assistance, not fresh independent predict
 User feedback that changes story, onboarding, progression, rendering strategy, Play Canvas/framework architecture, visual hierarchy, acceptance or course generation must be reflected in the relevant current docs in the same implementation unit.
 
 Current work remains private Phase 1. No new model integration, untrusted runner, external testers, paid provisioning or public rollout without explicit authorization.
+
+## Foundation: games generated from learning needs and preferences
+
+User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
+
+Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.

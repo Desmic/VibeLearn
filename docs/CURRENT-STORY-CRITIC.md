@@ -1,4 +1,39 @@
+# Current story critic — frozen story-v3
+
+13 September 2026. Review method: **independent agent, story-only** (`story_review`). Source: CURRENT-STORY-CANDIDATE.md story-v3 and GAME-OPENING-PROGRESSION.md. This is not a rendered-game score, human/youth playtest or user acceptance. The deployed `16a655e` experience remains user-rejected.
+
+Prior treatment independently scored 8.19/10 and failed: abstract stakes, late player role and no explicit early/Signal 1 success. The revised frozen treatment scores **9.059/10, no story blocker**. No score is rounded up.
+
+| Area | Weight | Score |
+|---|---:|---:|
+| Hook | 15% | 9.2 |
+| Clarity and causality | 15% | 9.1 |
+| Character attachment | 12% | 9.0 |
+| World appeal | 12% | 8.7 |
+| Storytelling | 12% | 9.1 |
+| Pacing and progression | 12% | 9.2 |
+| Stakes and choices | 8% | 9.0 |
+| Payoff and forward pull | 7% | 9.2 |
+| Cross-age engagement | 7% | 9.0 |
+
+Strongest hook: the player lights Pip’s way, receives thanks, then watches the apparently easy crossing fail. A warm answering home light makes the destination matter; a neighboring dark island makes the reserve ember's cost concrete. Signal 1 repairs its own crossing before inviting harder challenges.
+
+Weakest element: familiar floating-island fantasy. Its appeal depends on expressive staging, not additional lore. Likely abandonment point: repeated Continue between the order and Signal 1 if the engine merely presents captions. Next gate must inspect the actual 3D sequence, tutorial and payoff. Further story expansion is not required before realization.
+
+Progression was checked against app/rescue.py: Signal 3 payload, Signal 4 retention plus reconciliation, Signal 5 unavailable record and safe pause. Documentation table corrected accordingly.
+
+Read GAME-OPENING-PROGRESSION.md for the authoritative entry/replay/failure contract. Foundations remain a reusable spec/asset framework informed by learning needs and explicit user preferences.
+
+---
+
+## Historical prior review (superseded)
+
 # Current story critic — Relay Rescue: The Echo Forge
+
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
+**Historical review below:** not a pass for the newly required opening or the rejected deployed experience. New evidence and separate scores are required.
+
 
 **Story candidate reviewed:** `docs/CURRENT-STORY-CANDIDATE.md`, story-v2, 10 September 2026.  
 **Review method:** `internal_tool_assisted` story-only critic using the frozen rubric in `STORY-GENERATION-AND-CRITIC.md`. This is not an independent model/agent and not a child/young-adult human playtest.

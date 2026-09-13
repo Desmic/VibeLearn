@@ -1,5 +1,7 @@
 # Game acceptance contract — story + first touch + whole chapter + learning + user
 
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 **Updated 12 September 2026.** Read `STORY-GENERATION-AND-CRITIC.md`, `GAME-AS-COURSE.md`, `GAME-UX-REVIEW.md`, `PLAY-CANVAS.md`, `THREE-STORY-FRAMEWORK.md`, and `STATE.md`.
 
 ## Current status
@@ -64,7 +66,7 @@ For exact candidates using Play Canvas, machine evidence must separately verify:
 - compatible story/mission modes retain intended stage/world identity;
 - direct actions still issue server-authoritative commands;
 - save/reload/history/reset/isolation/evidence semantics remain intact;
-- phone/touch/text enlargement/reduced motion/fallback are operable;
+- phone/touch/text enlargement/reduced motion/recovery are operable;
 - no duplicate course-specific renderer lifecycle is introduced.
 
 A framework failure can block release even when screenshots look good. Passing this gate earns no automatic game-quality points.
@@ -101,3 +103,7 @@ Allowed statuses include `story_needs_revision`, `needs_revision`, `review_pendi
 ## Scope and rollout
 
 This remains private Phase 1 refinement. The architecture also guides future generation, but does not authorize Phase 2/3 implementation, external testers, paid resources, public rollout, untrusted execution, arbitrary generated client code or new model integrations.
+
+## Required opening regression evidence
+
+Use the exact player-state matrix in GAME-OPENING-PROGRESSION.md: first authenticated entry, skip into tutorial, later Level 1 resume, Level 2+ on empty browser storage, separate accounts, and explicit replay returning to the untouched active draft. Inspect visible 3D events, early success and increasing cognitive load; canvas existence is insufficient. Missing engine/modules/context must never expose a playable 2D substitute.

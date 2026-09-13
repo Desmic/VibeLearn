@@ -1,5 +1,7 @@
 # VibeLearn · game-first learning system
 
+**Current user contract — 13 September 2026:** Read [docs/GAME-OPENING-PROGRESSION.md](docs/GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 VibeLearn is a **general system for turning subjects/courses into source-grounded learning games**, not a course website decorated with XP. The current private Phase 1 reference is **Relay Rescue: The Echo Forge**, a seven-signal reliability adventure.
 
 Start with [`CODEX-IMPLEMENTATION-PLAN.md`](CODEX-IMPLEMENTATION-PLAN.md) and [`docs/STATE.md`](docs/STATE.md). Current product/runtime authority also includes [`docs/STORY-GENERATION-AND-CRITIC.md`](docs/STORY-GENERATION-AND-CRITIC.md), [`docs/GAME-AS-COURSE.md`](docs/GAME-AS-COURSE.md), [`docs/GAME-UX-SYSTEM.md`](docs/GAME-UX-SYSTEM.md), [`docs/COURSE-GENERATION-GAME-SYSTEM.md`](docs/COURSE-GENERATION-GAME-SYSTEM.md), [`docs/PLAY-CANVAS.md`](docs/PLAY-CANVAS.md), and [`docs/THREE-STORY-FRAMEWORK.md`](docs/THREE-STORY-FRAMEWORK.md).
@@ -140,3 +142,9 @@ Open `http://127.0.0.1:8000`. Local mode uses SQLite/browser-scoped development 
 ## Scope
 
 Current work remains private Phase 1. Phase 2+, broad generator implementation, arbitrary generated client code loading, new model/provider integrations, untrusted execution, external testers, paid expansion and public rollout remain gated.
+
+## Foundation: games generated from learning needs and preferences
+
+User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
+
+Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.

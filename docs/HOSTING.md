@@ -1,5 +1,7 @@
 # Private Render + Supabase pilot
 
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 This increment hosts the Phase 1 episode on Render Free + Supabase Free without
 introducing later course generation or collaborative code execution. The hosted
 branch starts from `26acf22d1ceceec4724b9c824065ecee05ea7cac`.
@@ -64,7 +66,7 @@ Render service `vibelearn` is live at:
 `https://vibelearn-4xws.onrender.com`
 
 It deploys from branch `deploy/render-supabase` on the Free plan in Singapore. The
-service builds with `pip install -r requirements.lock` and starts with:
+service builds with `pip install -r requirements.lock && python manage.py vendor` and starts with:
 
 `gunicorn 'app.hosted:create_app()' --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 60`
 
@@ -134,3 +136,7 @@ The pilot remains allowlisted. Full self-service account lifecycle, deletion/exp
 managed backup policy, production monitoring, background jobs, adaptive AI dialogue,
 and Phase 2+ systems are not complete. Render Free may sleep on idle. No production
 readiness claim or paid upgrade is implied by this pilot.
+
+## 13 September 2026 deployment correction
+
+Render previously ran the intended source while `/vendor/playcanvas.mjs` returned 404 because its manually configured build command omitted vendoring. The user corrected the setting; deployment `dep-dajhlre7bikc73c4c40g` became live on exact `16a655e9c5f426a488cae9af0c17f062bae43dbd`. Public engine/model URLs returned 200 with expected MIME types and matching verified bytes. This fixed asset delivery, not the subsequently rejected game experience. Future deploy checks must verify service settings, source SHA, engine/model requests and actual first-entry/resume behavior.

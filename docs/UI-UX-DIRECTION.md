@@ -1,5 +1,7 @@
 # VibeLearn UI/UX direction — story-first commercial game
 
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 **Status:** active direction · updated 12 September 2026. Read `STATE.md`, `STORY-GENERATION-AND-CRITIC.md`, `GAME-UX-SYSTEM.md`, `PLAY-CANVAS.md`, and `THREE-STORY-FRAMEWORK.md`.
 
 ## Product feeling
@@ -51,33 +53,11 @@ During early play, world/action dominates. Evidence panels, analytics, learning 
 
 Saving/recovery should be understandable in player language. Backend/assessment vocabulary should not occupy game chrome unless it is genuinely part of the player's decision.
 
-## Rendering strategy: 2D / 2.5D / Three.js
+## 3D visual framework
 
-For important story/game candidates compare:
+Phase 1 uses PlayCanvas for the full game. WorldSpec defines scenes, characters, locations, camera compositions, semantic markers and state-driven world reactions. RuntimeExperienceSpec defines HUD visibility and progressive tutorial support. Legacy Three.js is not a current design option.
 
-1. authored 2D/illustrated animation;
-2. 2.5D/parallax/layered interaction;
-3. interactive Three.js 3D.
-
-Three.js is a serious candidate for character/world presence, atmosphere, environmental storytelling, discovery, exploration and direct interaction, especially for the kid/teen/young-adult audience. It earns no quality credit merely for existing.
-
-## Reusable world visual framework
-
-When Three.js is chosen, use the shared framework under Play Canvas. Future stories/fantasies should integrate by supplying a **versioned world package**, not by creating a new renderer or game shell.
-
-The long-term visual-authoring target is data-first:
-
-- scene/entity graph;
-- visual states and transitions;
-- camera compositions for portrait/landscape;
-- semantic interaction anchors;
-- approved world-specific assets;
-- semantic/fallback representation;
-- optional reviewed adapter only for genuinely new capabilities.
-
-This lets radically different fantasy styles coexist without one hard-coded VibeLearn look while preserving shared phone/accessibility/runtime behavior.
-
-If a new theme requires story-specific edits to Play Canvas/runtime/host core, first ask whether the missing capability can be generalized/versioned. Do not pollute shared infrastructure with one world's art assumptions.
+A continuous world dominates the frame. The opening sells the world and introduces the player role; dialogue supports visibly staged events. One marked action at a time teaches the interaction grammar. Missing engine/context shows recovery UI rather than a 2D substitute. DOM HUD/subtitles/accessibility remain supported.
 
 ## Phone-first composition
 
@@ -109,7 +89,7 @@ World packages may change:
 - world reactions/rewards;
 - sound/atmosphere where later supported.
 
-They must preserve platform invariants: readable state, accessibility, clear actions, save/recovery, semantic fallback, honest evidence and safe performance.
+They must preserve platform invariants: readable state, accessibility, clear actions, save/recovery, semantic HUD accessibility, honest evidence and safe performance.
 
 ## Animation and feedback
 
@@ -125,7 +105,7 @@ Story/game presentation may be imaginative; competencies, provenance, assessment
 
 ## Accessibility
 
-Required meaning survives reduced motion and sound off. Keyboard/touch, text enlargement, contrast, stable targets, story navigation and meaning-equivalent fallback remain mandatory.
+Required meaning survives reduced motion and sound off. Keyboard/touch, text enlargement, contrast, stable targets, story navigation and honest recovery UI remain mandatory.
 
 ## Explicit non-goals
 

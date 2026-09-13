@@ -1,5 +1,7 @@
 # Capability risk register — Phase 0
 
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 Observed 2026-09-06. These are bounded observations, not production certification.
 
 | Capability | Status | Evidence and limits |
@@ -19,3 +21,7 @@ Phase 1 gate update: real application SQLite write/read, rollback and process-re
 checks passed; the browser suite passed all 10 scenarios. Observed database and
 application-browser capabilities are `observed_working`. Optional WebMCP feature
 presence returned false in the installed Chromium; its live path is unavailable.
+
+## Opening/progression boundary — current amendment
+
+The 3D opening/progression contract is required but not yet verified in a replacement build. Current capability claims must distinguish the engine and browser-tested commands from first-login routing, novice comprehension, world attachment and user acceptance. No automatic introductory sequence at Level 2+; explicit replay remains available without affecting the active attempt.

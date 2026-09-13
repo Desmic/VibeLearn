@@ -1,5 +1,7 @@
 # Learning OS — incremental implementation plan 2.0
 
+**Current user contract — 13 September 2026:** Read [docs/GAME-OPENING-PROGRESSION.md](docs/GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 **12 September 2026 · authoritative active plan**
 
 This file is the current build order. The checksummed `learning-os-design-package-v1.3/` remains immutable historical design. Its detailed phase/security/evidence requirements still apply wherever this plan does not supersede them.
@@ -220,25 +222,17 @@ Desktop polish follows after phone quality is strong.
 
 ## 13. Current execution order
 
-1. update docs/agent instructions to the engine-neutral direction;
-2. stop Three.js framework expansion;
-3. define versioned `GameDesignSpec`, `WorldSpec`, `RuntimeExperienceSpec`, `EngineTargetSpec` and `AssetRef` schemas;
-4. define engine compiler/runtime adapter interfaces;
-5. add a PlayCanvas Engine vendor/build path without runtime CDN dependence;
-6. implement a tiny spec-driven PlayCanvas vertical slice;
-7. prove a second unrelated world from the same specs/backend;
-8. port Echo Forge opening + Signal 1 to PlayCanvas;
-9. preserve existing server-authoritative progression/evidence/save semantics;
-10. test phone, touch, reduced-motion, reload, context/device failure and performance;
-11. compare against the Three.js reference and keep only improvements;
-12. migrate Signals 2-7 through the new runtime architecture;
-13. run first-touch critic until >=9/no blocker;
-14. run whole-chapter critic until >=9/no blocker;
-15. run learning/transfer critic;
-16. deploy the exact verified candidate to Render;
-17. verify served revision and ask the current user for decisive review.
+1. Reconcile active docs with the confirmed GAME-OPENING-PROGRESSION contract; record latest rejection honestly.
+2. Freeze and review the existing Echo Forge story revision and staged information/progression schedule.
+3. Implement the first-authenticated-entry / skip / Level 2+ resume / non-destructive replay state matrix using authoritative progress.
+4. Stage the continuous 3D opening, safe first success, contextual tutorial and Signal 1 payoff; remove 2D gameplay fallback and add honest failure recovery.
+5. Inspect desktop and 360/390/430px opening/tutorial evidence; fix clear composition and interaction blockers.
+6. Verify Signals 2–7 preserve full 3D world/HUD identity and progressively introduce demand without breaking learning semantics.
+7. Run full unit/PostgreSQL/static/browser checks, including real hosted asset delivery and current-player entry paths.
+8. Run exact-candidate story, first-touch, whole-game and learning reviews separately. Historical scores do not pass a new candidate.
+9. Deploy only an exact verified candidate authorized for review; verify Render source and engine/model bytes, then obtain the user's decisive review.
 
-Do not continue polishing the old Three.js world as if it were the target architecture.
+Do not expand into AAA scope, new unrelated stories, or broad engine architecture to avoid fixing the entry and progression experience.
 
 ## 14. Future engine targets
 
@@ -271,3 +265,9 @@ Prefer validated schemas, allowlisted/versioned primitives, immutable artifacts,
 Current work remains private Phase 1 architecture/reference refinement. Do not open external testing, paid infrastructure expansion, untrusted execution, new model/provider integration or public rollout without explicit authorization.
 
 Render serves `deploy/render-supabase`; auto-deploy is disabled. Deploy only an exact verified candidate intended for review, then verify the served revision.
+
+## Foundation: games generated from learning needs and preferences
+
+User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
+
+Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.

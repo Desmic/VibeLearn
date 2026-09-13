@@ -1,5 +1,10 @@
 # Current game critic — PlayCanvas pc-phase1-5
 
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
+**Historical review below:** not a pass for the newly required opening or the rejected deployed experience. New evidence and separate scores are required.
+
+
 **Status: NEEDS REVISION. Not ready for user review.**
 
 **Frozen rendered candidate:** `555d2959b23873661dbcf51a811155bbf45dfd7a` on `phase1/playcanvas-engine`.  
