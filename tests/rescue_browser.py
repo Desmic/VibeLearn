@@ -240,11 +240,14 @@ def main():
             assert state['attempt']['assessment']['independence']=='declared_independent'
             assert state['attempt']['practice_xp']==70
             assert len(state['attempt']['response']['rescue']['moves'])==1
-            with page.expect_response(lambda r:r.url.endswith('/relay-repair-kit.zip')) as kit_response:
-                with page.expect_download() as dl:page.locator('#rg-kit a').click()
-            assert kit_response.value.status==200
+            # Chromium downloads do not emit the page response event. Check the
+            # served asset and the actual clicked download, including its bytes.
+            kit_response=page.request.get(url+page.locator('#rg-kit a').get_attribute('href'))
+            assert kit_response.status==200
+            with page.expect_download() as dl:page.locator('#rg-kit a').click()
             assert dl.value.suggested_filename=='relay-repair-kit.zip'
             assert dl.value.failure() is None
+            assert Path(dl.value.path()).read_bytes()==kit_response.body()
             page.set_viewport_size({'width':390,'height':844})
             completion=page.locator('.play-canvas-transfer-surface .rg-clear')
             expect(completion.locator('#rg-next')).to_be_enabled()
