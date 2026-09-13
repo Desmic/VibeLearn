@@ -140,3 +140,10 @@ readiness claim or paid upgrade is implied by this pilot.
 ## 13 September 2026 deployment correction
 
 Render previously ran the intended source while `/vendor/playcanvas.mjs` returned 404 because its manually configured build command omitted vendoring. The user corrected the setting; deployment `dep-dajhlre7bikc73c4c40g` became live on exact `16a655e9c5f426a488cae9af0c17f062bae43dbd`. Public engine/model URLs returned 200 with expected MIME types and matching verified bytes. This fixed asset delivery, not the subsequently rejected game experience. Future deploy checks must verify service settings, source SHA, engine/model requests and actual first-entry/resume behavior.
+
+
+## Complete runtime asset preparation
+
+The stored Render command is `pip install -r requirements.lock && python manage.py vendor`. `vendor` must prepare every required served runtime asset, including `web/relay-repair-kit.zip`, as well as PlayCanvas, legacy verification dependencies and the two pinned GLBs. Render does not run the Node-based CI `build` command. Generating the kit only in CI caused an uncovered hosted packaging gap; the runtime-assets regression now exercises the actual `vendor` entry point in a clean temporary tree and checks the allowlisted archive bytes.
+
+ZIP container hashes can vary with file timestamps when CI rebuilds the kit. Verify the exact deployed Git SHA, authored source/engine/model hashes, and the package's allowlisted contents; do not equate an incidental archive timestamp with a source revision change.

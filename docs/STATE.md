@@ -49,3 +49,8 @@ For this expressly authorized review checkpoint, the exact candidate must be tec
 ### Verification record location
 
 This source checkpoint records what was known before its exact CI/deployment finished. The current run, exact deployed SHA and rendered evidence are recorded on [PR #8](https://github.com/Desmic/VibeLearn/pull/8); consult that record before claiming this source is live. Product status remains awaiting user review, not accepted. A green run alone does not change that status.
+
+
+### Final hosting audit correction
+
+Candidate `823d5c7` passed CI run34788642080 (129 tests plus the complete browser suite) and exact rendered review, then deployed as `dep-dajj1btg1s2s73auorkg`. The final hosting audit found that the configured Render asset-preparation command omitted the post-transfer repair ZIP, which CI had generated in its separate build step. The subsequent bounded fix makes `manage.py vendor` generate that runtime asset and adds a clean-tree regression. Final review handoff waits for the corrected exact candidate's full CI and manual redeployment; PR #8 carries the current live verification record.

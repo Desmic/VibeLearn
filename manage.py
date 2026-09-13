@@ -19,6 +19,10 @@ def main():
             result = subprocess.call([sys.executable, script], cwd=ROOT)
             if result:
                 return result
+        # Render runs asset preparation without the CI-only JavaScript build.
+        # The post-transfer learning lab is a served runtime asset too.
+        from tools.package_repair import build as package_repair
+        package_repair()
         return 0
     if command == "build":
         from tools.package_repair import build as package_repair
