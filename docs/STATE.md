@@ -3,7 +3,7 @@
 The active target is `phase1/world-transfer` / PR #8, following candidate `44ea1ab0a5a2b8d5a07b2d9260ff2b71b27247f8`.
 The `66340850e5097ef44d420529675d09e811a52109` transition assertion stabilization is retained (15 seconds; no product behavior change).
 
-The Signal 7 help declaration and Clear route now share a responsive HUD row; the incident readout sits below it. The browser journey checks their separate rectangles and pointer targets, and clears/rebuilds the route on a 390px viewport before sealing the transfer. Existing progression, evidence, lost-acknowledgement and persistence checks remain required.
+The Signal 7 help declaration and Clear route now share a responsive HUD row; the incident readout sits below it. The browser journey checks their separate rectangles and pointer targets, and clears/rebuilds the route on a 390px viewport before sealing the transfer. The first full run also exposed a sticky disabled help selector after command completion: button controls were re-enabled centrally, while the select was only ever disabled by sync. The selector now derives its enabled state from the same busy/pending/draft conditions on every sync. Existing progression, evidence, lost-acknowledgement and persistence checks remain required.
 
 Per the current user instruction, the release gate for this bounded fix is full CI/browser verification and inspection of the exact candidate's desktop and 390px Signal 7 screenshots. Once green and visually reviewable, fast-forward `deploy/render-supabase` to that candidate, deploy manually (auto-deploy remains off), and verify Render's live revision. Only clear blockers belong in this iteration; no broad art/architecture or critic-scoring pass precedes this requested user review.
 
