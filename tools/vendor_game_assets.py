@@ -10,10 +10,14 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import time
+import urllib.error
 import urllib.request
 
 ROOT = Path(__file__).resolve().parent.parent
 USER_AGENT = "VibeLearn-pinned-build"
+FETCH_ATTEMPTS = 3
+FETCH_BACKOFF_SECONDS = (0.5, 1.5)
 
 ROBOT_SOURCE_COMMIT = "0062ceaa6dd8cda2d2b69cbcc5f80724928543bf"
 ROBOT_SOURCE_URL = (
@@ -77,15 +81,27 @@ VibeLearn vendors the binary at build time so learner sessions stay same-origin.
 
 
 def _read_url(url: str, limit: int) -> bytes:
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=45) as response:
-        length = response.headers.get("Content-Length")
-        if length and int(length) > limit:
-            raise RuntimeError(f"Pinned game asset exceeded {limit} bytes")
-        data = response.read(limit + 1)
-    if len(data) > limit:
-        raise RuntimeError(f"Pinned game asset exceeded {limit} bytes")
-    return data
+    last_error = None
+    for attempt in range(FETCH_ATTEMPTS):
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        try:
+            with urllib.request.urlopen(request, timeout=45) as response:
+                length = response.headers.get("Content-Length")
+                if length and int(length) > limit:
+                    raise RuntimeError(f"Pinned game asset exceeded {limit} bytes")
+                data = response.read(limit + 1)
+            if len(data) > limit:
+                raise RuntimeError(f"Pinned game asset exceeded {limit} bytes")
+            return data
+        except RuntimeError:
+            # Size/policy violations are deterministic integrity failures, not retries.
+            raise
+        except (urllib.error.URLError, ConnectionError, TimeoutError, OSError) as error:
+            last_error = error
+            if attempt >= FETCH_ATTEMPTS - 1:
+                break
+            time.sleep(FETCH_BACKOFF_SECONDS[min(attempt, len(FETCH_BACKOFF_SECONDS) - 1)])
+    raise RuntimeError(f"Pinned game-asset fetch failed after {FETCH_ATTEMPTS} attempts") from last_error
 
 
 def _git_blob_sha1(data: bytes) -> str:
