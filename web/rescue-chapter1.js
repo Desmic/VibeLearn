@@ -124,7 +124,9 @@
     gameWorldBundle.then(bundle=>{
       // An opening may win the asynchronous mount race. Never move its shared
       // canvas back behind the modal when the map's imports finish later.
-      if(missionHost!==host || !host.isConnected || root.querySelector('#rgi-intro'))return;
+      // Replay owns a separate runtime: let the pending mission finish mounting
+      // behind it so returning immediately after reload retains a live canvas.
+      if(missionHost!==host || !host.isConnected || root.querySelector('#rgi-intro[data-opening-replay="false"]'))return;
       if(!bundle){window.GameWorldStatus?.set(host,'failed');return;}
       gameRuntime=bundle.runtime.getGameRuntime();worldModule=bundle.module;
       missionWorld=gameRuntime.showMission(worldModule,host,visualState(a),{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});

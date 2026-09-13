@@ -22,6 +22,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,onEx
   siblings.forEach(({node})=>node.inert=true);
   const overlay=document.createElement('section');overlay.id='rgi-intro';overlay.className='rgi-overlay';overlay.tabIndex=-1;
   overlay.dataset.openingId=spec.id;
+  overlay.dataset.openingReplay=String(replay);
   overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-labelledby','rgi-title');
   overlay.innerHTML=`<div class="rgi-shell"><div class="rgi-storybar"><span></span><b></b><small id="rgi-step"></small></div>
     <div class="rgi-visual" id="rgi-world"><div class="rgi-markers"></div><div class="rgi-scene-caption"><span class="rgi-kicker"></span><h2 id="rgi-title"></h2><p id="rgi-body"></p><blockquote id="rgi-dialogue"></blockquote><div class="rgi-fact" id="rgi-fact" role="status"></div></div></div>
