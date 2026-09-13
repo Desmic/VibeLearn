@@ -35,10 +35,15 @@ class RuntimeMigrationTests(unittest.TestCase):
         backend = (ROOT / 'web' / 'playcanvas-backend.js').read_text(encoding='utf-8')
         world_spec = (ROOT / 'web' / 'world-spec.js').read_text(encoding='utf-8')
         generic = runtime + backend + world_spec
-        for domain_term in ('Pip', 'Echo Forge', 'order-01', 'bridge gear', 'rescue-01'):
+        for domain_term in ('Pip', 'Echo Forge', 'order-01', 'bridge gear', 'rescue-01', 'Quaternius', 'Animated Robot'):
             self.assertNotIn(domain_term, generic)
         for legacy_term in ('story3d-runtime.js', 'story3d-world-host.js', 'rescue-story3d.js', 'THREE.'):
             self.assertNotIn(legacy_term, generic)
+        # Asset loading is generic container compilation, not a special-case model loader.
+        self.assertIn("asset.resource.instantiateRenderEntity", backend)
+        self.assertIn("value?.resource||value", backend)
+        self.assertIn("state.animations", world_spec)
+        self.assertIn("safe same-origin root path", world_spec)
 
     def test_playcanvas_framework_assets_are_explicitly_served(self):
         server = (ROOT / 'app' / 'server.py').read_text(encoding='utf-8')
@@ -51,6 +56,20 @@ class RuntimeMigrationTests(unittest.TestCase):
             self.assertIn(asset, hosted)
         self.assertIn('playcanvas.mjs', server)
         self.assertIn('playcanvas.mjs', hosted)
+        for asset in ('quaternius-animated-robot.glb', 'QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt'):
+            self.assertIn(asset, server)
+            self.assertIn(asset, hosted)
+        self.assertIn('model/gltf-binary', server)
+
+    def test_game_asset_vendor_is_pinned_and_verified(self):
+        vendor = (ROOT / 'tools' / 'vendor_game_assets.py').read_text(encoding='utf-8')
+        manage = (ROOT / 'manage.py').read_text(encoding='utf-8')
+        self.assertIn('0062ceaa6dd8cda2d2b69cbcc5f80724928543bf', vendor)
+        self.assertIn('8784b36b4a174bfc89a31150b39f1d4fd1853dfa', vendor)
+        self.assertIn('401_024', vendor)
+        self.assertIn('Public Domain (CC0 1.0)', vendor)
+        self.assertIn("tools/vendor_game_assets.py", manage)
+        self.assertIn("hashlib.sha1(b'blob ' + str(len(data)).encode('ascii') + b'\\0' + data)", vendor)
 
     def test_legacy_echo_forge_three_path_stays_shared_until_removed(self):
         source = (ROOT / 'web' / 'rescue-story3d.js').read_text(encoding='utf-8')
