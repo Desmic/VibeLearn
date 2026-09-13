@@ -143,6 +143,8 @@ def create_app(config=None, auth_provider=None):
         if name not in (
             "quaternius-animated-robot.glb",
             "QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt",
+            "quaternius-blacksmith.glb",
+            "QUATERNIUS-BLACKSMITH-LICENSE.txt",
         ):
             raise service.DomainError("NOT_FOUND", "Not found.", 404)
         return send_from_directory(ROOT / "web" / "assets", name)
