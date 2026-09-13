@@ -114,9 +114,9 @@ export const echoForgeWorldSpec=Object.freeze({
   assets:{
     'pip.robot':{
       type:'container',src:'/assets/quaternius-animated-robot.glb',
-      // The source robot is much smaller than the authored Echo Forge character scale.
-      // Normalization belongs to AssetRef, not the PlayCanvas backend or Rescue adapter.
-      transform:{position:[0,-.08,0],scale:[.90,.90,.90]},
+      // Measured source mesh height is ~4.63 units; .52 normalizes Pip to ~2.41
+      // authored world units. Normalization belongs to AssetRef, not the backend.
+      transform:{position:[0,-.08,0],scale:[.52,.52,.52]},
       animations:{
         idle:'RobotArmature|Robot_Idle',standing:'RobotArmature|Robot_Standing',
         wave:'RobotArmature|Robot_Wave',yes:'RobotArmature|Robot_Yes',no:'RobotArmature|Robot_No',
