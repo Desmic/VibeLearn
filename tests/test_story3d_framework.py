@@ -45,6 +45,20 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn("state.animations", world_spec)
         self.assertIn("safe same-origin root path", world_spec)
 
+    def test_echo_forge_keeps_asset_normalization_and_identity_in_world_spec(self):
+        source = (ROOT / 'web' / 'echo-forge-world-spec.js').read_text(encoding='utf-8')
+        self.assertIn("version:'pc-phase1-8'", source)
+        self.assertIn("transform:{position:[0,-.08,0],scale:[.90,.90,.90]}", source)
+        # The courier scarf/beacon are successful-asset archetype accessories, not
+        # hidden together with primitive failure geometry when the GLB loads.
+        fallback_block = source.split('const PIP_FALLBACK=[', 1)[1].split('];', 1)[0]
+        self.assertNotIn('pip-scarf', fallback_block)
+        self.assertNotIn('pip-beacon', fallback_block)
+        self.assertIn("child('pip-scarf'", source)
+        self.assertIn("child('pip-beacon'", source)
+        self.assertIn("asset:'pip.robot'", source)
+        self.assertIn("animation:'idle'", source)
+
     def test_playcanvas_framework_assets_are_explicitly_served(self):
         server = (ROOT / 'app' / 'server.py').read_text(encoding='utf-8')
         hosted = (ROOT / 'app' / 'hosted.py').read_text(encoding='utf-8')
