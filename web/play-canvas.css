@@ -62,3 +62,28 @@
   .play-canvas-route-nodes{top:35%!important;gap:4px!important}.play-canvas-route-nodes .rg-slot span{display:none!important}#rescue-game .play-canvas-route-nodes .rg-slot{min-height:54px!important;max-width:64px!important}
   .play-canvas-toolbelt button{flex-basis:70px!important;font-size:.54rem!important}.play-canvas-storm-outcome{top:44px!important;max-height:108px}
 }
+
+/* Signal 6 causal playback is part of the game world, not a second report page.
+   Case tabs choose the storm; this ribbon shows the observed execution in-place. */
+.play-canvas-storm-outcome .rg-case-detail{display:none!important}
+.play-canvas-route-playback{position:absolute!important;z-index:3;left:50%!important;top:142px!important;width:min(620px,72%)!important;max-height:96px;overflow:hidden;margin:0!important;padding:7px 9px!important;border:1px solid #56777b!important;border-radius:13px!important;background:#081e29e6!important;box-shadow:0 10px 28px #0008!important;backdrop-filter:blur(7px);transform:translateX(-50%);pointer-events:auto}
+.play-canvas-route-playback>strong{display:block;padding-right:96px;color:#f0d295;font-size:.63rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.play-canvas-route-playback .rg-live-lane{display:flex!important;gap:5px!important;margin-top:5px!important;overflow:hidden!important}
+.play-canvas-route-playback .rg-live-node{display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;align-items:center!important;gap:4px!important;flex:1 1 0;min-width:0!important;padding:4px 5px!important;border:1px solid #355861!important;border-radius:9px!important;background:#102f39d8!important}
+.play-canvas-route-playback .rg-live-node b{font-size:.86rem!important;line-height:1;color:#f0cb82}
+.play-canvas-route-playback .rg-live-node span{min-width:0;font-size:.5rem!important;line-height:1.12!important;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.play-canvas-route-playback>p{position:absolute;right:9px;top:8px;margin:0!important;font-size:.52rem!important;color:#9fc1ba}
+.play-canvas-route-playback .rg-replay-case{position:absolute;right:8px;bottom:7px;min-height:28px!important;padding:3px 7px!important;border-radius:999px!important;font-size:.52rem!important;background:#153844e8!important}
+
+@media(max-width:800px){
+  .play-canvas-route-playback{top:146px!important;width:calc(100% - 18px)!important;max-height:82px;padding:6px 7px!important}
+  .play-canvas-route-playback>strong{padding-right:82px;font-size:.56rem}
+  .play-canvas-route-playback .rg-live-node{padding:3px 4px!important}.play-canvas-route-playback .rg-live-node span{display:none}.play-canvas-route-playback .rg-live-node b{font-size:.8rem!important}
+  .play-canvas-route-playback>p{font-size:.48rem!important}.play-canvas-route-playback .rg-replay-case{font-size:.48rem!important}
+  .play-canvas-route-nodes{top:40%!important}
+}
+@media(max-width:430px){
+  .play-canvas-route-playback{top:136px!important;max-height:74px}
+  .play-canvas-route-playback>strong{font-size:.52rem}.play-canvas-route-playback .rg-live-lane{gap:3px!important}
+  .play-canvas-route-nodes{top:39%!important}
+}
