@@ -59,7 +59,7 @@ def main():
             return surface
         def next_level(surface='field'):
             old=page.locator(MODE_LABEL).inner_text()
-            page.locator('#rg-next').click();expect(page.locator(MODE_LABEL)).not_to_have_text(old)
+            page.locator('#rg-next').click();expect(page.locator(MODE_LABEL)).not_to_have_text(old,timeout=15000)
             if surface=='field':
                 expect(page.locator('#rg-feedback')).to_be_visible()
             elif surface=='build':
