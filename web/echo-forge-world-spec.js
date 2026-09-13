@@ -41,7 +41,11 @@ child('pip-scarf','pip','box','red',[.48,1.42,-.02],[.82,.085,.20],{rotation:[0,
 child('pip-antenna','pip','cylinder','dark',[0,2.08,0],[.035,.28,.035],{rotation:[0,0,4]});
 child('pip-beacon','pip','sphere','glass',[0,2.38,0],[.13,.13,.13],{motion:{type:'pulse',amplitude:.12,speed:2.2}});
 
-entities.push({id:'forge',position:[5.3,.15,-.5]});
+const FORGE_FALLBACK=[
+  'forge-body','forge-roof','forge-window-l','forge-window-r','forge-chimney',
+  'forge-chimney-cap','forge-pipe','forge-door'
+];
+entities.push({id:'forge',asset:'forge.blacksmith',fallback:FORGE_FALLBACK,position:[5.3,.15,-.5]});
 child('forge-body','forge','box','forge',[0,1,0],[2.5,1.9,2.15]);
 child('forge-roof','forge','cone','dark',[0,2.48,0],[3.0,1.3,3.0],{rotation:[0,45,0]});
 child('forge-window-l','forge','box','glass',[-.65,1.3,1.1],[.38,.38,.08],{motion:{type:'pulse',amplitude:.05,speed:1.7}});
@@ -109,7 +113,7 @@ beaconPositions.forEach(([x,z],i)=>{
 export const echoForgeWorldSpec=Object.freeze({
   schemaVersion:'1',
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-8',
+  version:'pc-phase1-9',
   environment:{clearColor:'#03111c',ambient:'#294651',exposure:1.18,toneMapping:'aces2',fog:{type:'exp2',color:'#0b2633',density:.018}},
   assets:{
     'pip.robot':{
@@ -123,6 +127,13 @@ export const echoForgeWorldSpec=Object.freeze({
         thumbsUp:'RobotArmature|Robot_ThumbsUp',jump:'RobotArmature|Robot_Jump',run:'RobotArmature|Robot_Running'
       },
       defaultAnimation:'idle'
+    },
+    'forge.blacksmith':{
+      type:'container',src:'/assets/quaternius-blacksmith.glb',
+      // Real PlayCanvas AABB: min[-2.5662,-.0039,-1.6579],
+      // max[1.3238,2.9995,1.6256]. Scale 1.30 yields an authored Forge
+      // ~5.06w x 3.90h x 4.27d; offset centers X/Z and places the base at y=0.
+      transform:{position:[.8076,.0051,.0210],scale:[1.30,1.30,1.30]}
     }
   },
   materials:{
