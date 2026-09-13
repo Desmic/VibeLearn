@@ -100,11 +100,10 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn("setTransferState(value){apply(value);}", adapter)
         self.assertIn("'transfer.failure'", adapter)
         self.assertIn("'transfer.success'", adapter)
-        for entity in (
-            'transfer-worker', 'transfer-service', 'transfer-route-pad-0',
-            'transfer-route-pad-3', 'transfer-duplicate-a', 'transfer-output'
-        ):
+        for entity in ('transfer-worker', 'transfer-service', 'transfer-duplicate-a', 'transfer-output'):
             self.assertIn(entity, adapter)
+        self.assertIn("[-3.2,-1.08,1.08,3.2].forEach", adapter)
+        self.assertIn("`transfer-route-pad-${i}`", adapter)
 
         # Migration reuses the exact route buttons, assistance declaration and
         # commit action rendered by rescue-game.js instead of inventing a second
@@ -118,6 +117,8 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn("play-canvas-transfer-run", migrate)
         self.assertIn("setTransferState?.(transferPresentationState(a))", migrate)
         self.assertIn("const previousHide=game.hide.bind(game)", migrate)
+        self.assertIn("const observer=new MutationObserver(queueMigration)", migrate)
+        self.assertIn("observer.observe(migrationRoot,{childList:true,subtree:true})", migrate)
         self.assertIn("function programPanel(transfer)", rescue)
         self.assertIn("id=\"rg-aid\"", rescue)
         self.assertIn("id=\"rg-run\"", rescue)
