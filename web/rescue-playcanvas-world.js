@@ -5,7 +5,7 @@ import {echoForgeWorldSpec} from './echo-forge-world-spec.js';
 
 export const gameWorldManifest=Object.freeze({
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-7',
+  version:'pc-phase1-8',
   engine:'playcanvas',
   specVersion:echoForgeWorldSpec.schemaVersion,
   modes:Object.freeze(['story','mission']),
@@ -43,8 +43,6 @@ function storyPresentationPatch(beat){
     {pip:{position:[-4.65,.42,1.05],rotation:[0,28,0],scale:[1.02,1.02,1.02]},'pip-head':{rotation:[0,-10,0]}}
   ];
   patch.transforms=poses[index];
-  // The old final close-up magnified the procedural character weaknesses. End
-  // on the whole causal space instead: Pip, broken crossing and Forge together.
   if(index===5)patch.camera='story.0';
   return patch;
 }
@@ -61,8 +59,6 @@ function missionPatch(state={}){
     animations:{pip:'idle'}
   };
 
-  // World truth is deliberately not rendered as learner-visible knowledge until
-  // the player inspects the Forge. The server remains authoritative either way.
   if(knowsForge){
     patch.hide=patch.hide.filter(id=>id!=='new-gear');
     patch.show.push('new-gear');
@@ -77,9 +73,6 @@ function missionPatch(state={}){
   }else if(state.complete){
     patch.camera='mission.success';
     patch.animations.pip='thumbsUp';
-    // Completion is presentation state, not new game truth: install the already
-    // discovered gear into the bridge and place Pip across the gap so success
-    // reads in the world before the textual recap appears.
     patch.transforms={
       ...patch.transforms,
       'new-gear':{position:[0,.58,1.1],rotation:[90,0,0],scale:[1.15,.34,1.15]},
