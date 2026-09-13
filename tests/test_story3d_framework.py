@@ -131,7 +131,7 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn("add(`beacon-island-${i}-top`", source)
         self.assertIn("emissiveIntensity:.85", source)
         self.assertIn("portrait:{position:[-1.3,3.2,14.2],lookAt:[-1.1,1.0,.3],fov:48}", source)
-        self.assertIn("portrait:{position:[4.4,2.4,10.2],lookAt:[5.0,.85,.6],fov:46}", source)
+        self.assertIn("portrait:{position:[1.4,3.0,18.6],lookAt:[1.4,.6,-.6],fov:48}", source)
         self.assertIn("portrait:{position:[4.2,2.45,10.4],lookAt:[5.0,.9,.7],fov:45}", source)
         self.assertIn("portrait:{position:[4.4,2.25,9.8],lookAt:[5.0,.8,.8],fov:44}", source)
 

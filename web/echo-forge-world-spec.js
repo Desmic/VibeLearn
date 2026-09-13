@@ -135,12 +135,13 @@ const beaconPositions=[[-7,2],[-3,-7],[0,-12],[4,-8],[7,2],[10,-10],[-10,-9]];
 const distantBeaconScale={1:.72,2:.56,3:.66,5:.54,6:.58};
 beaconPositions.forEach(([x,z],i)=>{
   const scale=distantBeaconScale[i];
+  const elevation=i===1?2.2:0;
   if(scale){
-    add(`beacon-island-${i}-rock`,'cone','rock',[x,-2.25,z],[4.9*scale,3.4*scale,4.9*scale]);
-    add(`beacon-island-${i}-top`,'cylinder','grass',[x,-.72,z],[4.45*scale,.24,4.45*scale]);
+    add(`beacon-island-${i}-rock`,'cone','rock',[x,-2.25+elevation,z],[4.9*scale,3.4*scale,4.9*scale]);
+    add(`beacon-island-${i}-top`,'cylinder','grass',[x,-.72+elevation,z],[4.45*scale,.24,4.45*scale]);
   }
-  add(`beacon-${i}`,'cylinder','dark',[x,.5,z],[.18,2.3,.18]);
-  add(`beacon-lamp-${i}`,'sphere',i===0?'glass':'beacon',[x,1.78,z],[.42,.42,.42],{motion:{type:'pulse',amplitude:i===0?.14:.08,speed:1.5+i*.07}});
+  add(`beacon-${i}`,'cylinder','dark',[x,.5+elevation,z],[.18,2.3,.18]);
+  add(`beacon-lamp-${i}`,'sphere',i===0?'glass':i===1?'dark':'beacon',[x,1.78+elevation,z],[.42,.42,.42],{motion:{type:'pulse',amplitude:i===0?.14:.08,speed:1.5+i*.07}});
 });
 
 // Reusable authored primitives compose the opening's home, guide light and stakes.
@@ -237,7 +238,7 @@ export const echoForgeWorldSpec=Object.freeze({
     },
     'story.4':{
       position:[3.6,4.2,10.5],lookAt:[4.9,.9,.7],fov:42,
-      portrait:{position:[4.4,2.4,10.2],lookAt:[5.0,.85,.6],fov:46}
+      portrait:{position:[1.4,3.0,18.6],lookAt:[1.4,.6,-.6],fov:48}
     },
     'story.5':{
       position:[-2.4,5.2,12.5],lookAt:[-3.5,1.4,1.2],fov:43,

@@ -118,6 +118,9 @@ def main():
                     page.locator('#rgi-next').click()
                 page.locator('#rgi-next').click()
                 expect(page.locator('#rgi-title')).to_have_text(title)
+                if page.locator('#rgi-intro').get_attribute('data-step')=='4':
+                    expect(page.locator('[data-entity="reserve-ember"]')).to_be_visible()
+                    expect(page.locator('[data-entity="beacon-lamp-1"]')).to_be_visible()
                 page.screenshot(path=str(out/f'onboarding-causal-beat-{page.locator("#rgi-intro").get_attribute("data-step")}.png'),full_page=False)
             expect(page.locator('#rgi-fact')).to_have_text('First move: inspect the Echo Forge.')
             expect(page.locator('#rgi-dialogue')).to_contain_text('Help me find out what happened')
