@@ -7,7 +7,7 @@
 .play-canvas-hud{position:absolute;z-index:14;border:1px solid #628087;border-radius:15px;background:#0b2632e8;box-shadow:0 16px 42px #0009;backdrop-filter:blur(9px);overflow:auto;overscroll-behavior:contain}
 .play-canvas-mission-world{min-height:560px}.play-canvas-mission-hud{right:12px;top:12px;width:min(318px,40%);max-height:calc(100% - 24px);padding:10px}.play-canvas-mission-hud .rg-console{display:block!important}.play-canvas-mission-hud .rg-pip-message{min-height:0;padding:8px 4px 10px}.play-canvas-mission-hud .rg-ticket{margin:8px 0;padding:9px 10px}.play-canvas-mission-hud .rg-observations{margin-top:7px}.play-canvas-mission-hud .rg-tools{gap:6px}.play-canvas-mission-hud .rg-journal{margin-top:9px!important;padding:8px 0!important}.play-canvas-mission-hud .rg-journal>summary{color:#e7cf98;font-weight:800}
 
-/* Signal 6: route construction is now an in-world command deck over the same Play Canvas. */
+/* Signal 6: route construction remains inside the same live PlayCanvas world. */
 .play-canvas-builder-world{min-height:680px}.play-canvas-builder-hud{left:12px;right:12px;bottom:12px;max-height:55%;padding:9px}.play-canvas-builder-hud .rg-workbench{margin:0;border-color:#54747b;background:#102e39e8}.play-canvas-builder-hud .rg-bench-title{padding:9px 11px}.play-canvas-builder-hud .rg-slots{padding:10px 8px;gap:6px}.play-canvas-builder-hud .rg-slots:before{top:55px}.play-canvas-builder-hud .rg-palette{padding:0 8px 8px;gap:6px}.play-canvas-builder-hud .rg-bench-footer{padding:0 8px 7px}.play-canvas-builder-hud .rg-build-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 3px 1px}.play-canvas-builder-hud .rg-run-note{margin:0;font-size:.72rem;line-height:1.35}.play-canvas-builder-hud #rg-run{min-width:148px}.play-canvas-builder-hud .rg-results{margin:8px 0 0;padding-top:8px}.play-canvas-builder-hud .rg-live-route{margin-top:8px}
 
 /* Signal 7 deliberately changes context, but remains one game surface rather than a generic lesson page. */
@@ -24,34 +24,41 @@
    surface. Mission correctness still goes through semantic/server controls. */
 .rgi-overlay .play-canvas-stage,.rgi-overlay .play-canvas-stage canvas{pointer-events:auto}.rgi-overlay .play-canvas-stage canvas{cursor:pointer}
 
-/* Signal 6 route circuit: preserve the exact semantic controls while visually
-   staging them as a circuit and toolbelt over the live world rather than one
-   large themed form. */
-.play-canvas-route-circuit{border:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;overflow:visible!important;padding:0!important;pointer-events:none}
+/* Signal 6 route circuit: the exact tested semantic controls are spatialized
+   over the live valley. Route nodes sit on the bridge path, tools become a slim
+   belt, and storm outcomes appear as a compact world HUD instead of a form card. */
+.play-canvas-route-circuit{inset:0!important;max-height:none!important;border:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;overflow:visible!important;padding:0!important;pointer-events:none}
 .play-canvas-route-circuit button,.play-canvas-route-circuit select,.play-canvas-route-circuit summary{pointer-events:auto}
-.play-canvas-route-tools{margin:0!important;border:0!important;background:transparent!important;overflow:visible!important}
-.play-canvas-route-tools .rg-bench-title{position:absolute;left:4px;bottom:calc(100% + 8px);border:0!important;padding:5px 9px!important;border-radius:999px;background:#071d28d9;color:#f2d69a;box-shadow:0 7px 22px #0008;font-size:.62rem!important;letter-spacing:.08em;text-transform:uppercase;backdrop-filter:blur(5px)}
+.play-canvas-route-tools{position:absolute!important;inset:0!important;margin:0!important;border:0!important;background:transparent!important;overflow:visible!important;pointer-events:none}
+.play-canvas-route-tools button{pointer-events:auto}
+.play-canvas-route-tools .rg-bench-title{position:absolute;left:12px;top:12px;bottom:auto!important;border:0!important;padding:5px 9px!important;border-radius:999px;background:#071d28d9;color:#f2d69a;box-shadow:0 7px 22px #0008;font-size:.62rem!important;letter-spacing:.08em;text-transform:uppercase;backdrop-filter:blur(5px)}
 .play-canvas-route-tools .rg-bench-title>span{display:none!important}
-.play-canvas-route-nodes{position:relative;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;padding:4px 5px 8px!important;background:transparent!important}
-.play-canvas-route-nodes:before{left:8%!important;right:8%!important;top:35px!important;border-top:3px solid #e7bd6eaa!important;filter:drop-shadow(0 0 6px #e7bd6e66)}
-#rescue-game .play-canvas-route-nodes .rg-slot{z-index:1;min-height:64px!important;padding:5px!important;border:2px solid #71948d!important;border-radius:17px!important;background:#0b2934df!important;box-shadow:0 8px 22px #0008,0 0 0 3px #07151d88!important;backdrop-filter:blur(6px)}
-#rescue-game .play-canvas-route-nodes .rg-slot.selected{border-color:#f2cd82!important;background:#183c42e8!important;box-shadow:0 8px 24px #0009,0 0 20px #edca7955!important}
-.play-canvas-route-nodes .rg-slot small{font-size:.5rem!important}.play-canvas-route-nodes .rg-slot b{font-size:1.28rem!important;line-height:1}.play-canvas-route-nodes .rg-slot span{font-size:.59rem!important;line-height:1.15!important}
-.play-canvas-toolbelt{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:5px!important;margin:0 4px!important;padding:6px!important;border:1px solid #496c73!important;border-radius:14px!important;background:#071d28dc!important;box-shadow:0 10px 28px #0009!important;backdrop-filter:blur(7px)}
-#rescue-game .play-canvas-toolbelt button{min-height:48px!important;padding:5px 4px!important;border:0!important;border-radius:10px!important;background:#12313bd6!important;display:grid!important;justify-items:center!important;gap:1px!important;font-size:.56rem!important;line-height:1.08!important}
-.play-canvas-toolbelt b{font-size:1.05rem!important}.play-canvas-route-tools .rg-bench-footer{padding:3px 7px 0!important;background:transparent!important}.play-canvas-route-tools .rg-bench-footer span{font-size:.56rem;color:#a9c3bf}
-.play-canvas-route-run{display:grid!important;grid-template-columns:1fr auto!important;align-items:center!important;gap:7px!important;margin:5px 4px 0!important;padding:0!important}.play-canvas-route-run .rg-run-note{margin:0!important;padding:5px 8px!important;border-radius:9px;background:#071d28c7;font-size:.62rem!important;line-height:1.25!important;color:#adc7c1}.play-canvas-route-run #rg-run{min-width:150px!important;box-shadow:0 7px 22px #0007}
-.play-canvas-storm-outcome{position:absolute;left:4px;right:4px;bottom:calc(100% + 42px);max-height:180px;overflow:auto;margin:0!important;padding:7px!important;border:1px solid #6d7770!important;border-radius:12px!important;background:#0b2530e8!important;box-shadow:0 12px 32px #0009!important;backdrop-filter:blur(7px)}
-.play-canvas-storm-outcome .rg-case-tabs{gap:4px!important}.play-canvas-storm-outcome .rg-case-detail{padding:7px 3px 2px!important;font-size:.68rem!important}.play-canvas-storm-outcome .rg-case-detail ol{margin:6px 0 0!important;gap:6px!important}.play-canvas-storm-outcome .rg-case-detail li{font-size:.6rem!important}
+.play-canvas-route-nodes{position:absolute!important;left:8%!important;right:8%!important;top:40%!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;padding:0!important;background:transparent!important;pointer-events:none}
+.play-canvas-route-nodes:before{left:8%!important;right:8%!important;top:50%!important;border-top:3px solid #e7bd6eaa!important;filter:drop-shadow(0 0 7px #e7bd6e88);transform:translateY(-50%)}
+#rescue-game .play-canvas-route-nodes .rg-slot{pointer-events:auto;z-index:1;min-height:66px!important;padding:5px!important;border:2px solid #71948d!important;border-radius:50%!important;background:#0b2934df!important;box-shadow:0 8px 22px #0008,0 0 0 3px #07151d88!important;backdrop-filter:blur(6px);aspect-ratio:1/1;max-width:82px;justify-self:center}
+#rescue-game .play-canvas-route-nodes .rg-slot:nth-child(1),#rescue-game .play-canvas-route-nodes .rg-slot:nth-child(4){transform:translateY(12px)}
+#rescue-game .play-canvas-route-nodes .rg-slot:nth-child(2),#rescue-game .play-canvas-route-nodes .rg-slot:nth-child(3){transform:translateY(-8px)}
+#rescue-game .play-canvas-route-nodes .rg-slot.selected{border-color:#f2cd82!important;background:#183c42e8!important;box-shadow:0 8px 24px #0009,0 0 24px #edca7977!important}
+.play-canvas-route-nodes .rg-slot small{font-size:.48rem!important}.play-canvas-route-nodes .rg-slot b{font-size:1.35rem!important;line-height:1}.play-canvas-route-nodes .rg-slot span{font-size:.56rem!important;line-height:1.1!important}
+.play-canvas-toolbelt{position:absolute!important;left:10px!important;right:174px!important;bottom:10px!important;display:flex!important;grid-template-columns:none!important;gap:5px!important;margin:0!important;padding:6px!important;border:1px solid #496c73!important;border-radius:14px!important;background:#071d28dc!important;box-shadow:0 10px 28px #0009!important;backdrop-filter:blur(7px);overflow-x:auto!important;overscroll-behavior-x:contain;scrollbar-width:none;pointer-events:auto}
+.play-canvas-toolbelt::-webkit-scrollbar{display:none}
+#rescue-game .play-canvas-toolbelt button{flex:0 0 84px;min-height:48px!important;padding:5px 4px!important;border:0!important;border-radius:10px!important;background:#12313bd6!important;display:grid!important;justify-items:center!important;gap:1px!important;font-size:.56rem!important;line-height:1.08!important}
+.play-canvas-toolbelt b{font-size:1.05rem!important}
+.play-canvas-route-tools .rg-bench-footer{position:absolute!important;right:12px!important;top:12px!important;padding:0!important;background:transparent!important;pointer-events:auto}.play-canvas-route-tools .rg-bench-footer span{display:none!important}.play-canvas-route-tools #rg-clear-route{min-height:32px!important;padding:4px 9px!important;border:1px solid #4c6c72!important;border-radius:999px!important;background:#071d28d9!important;font-size:.58rem!important}
+.play-canvas-route-run{position:absolute!important;right:10px!important;bottom:10px!important;width:154px!important;display:block!important;margin:0!important;padding:0!important}.play-canvas-route-run .rg-run-note{display:none!important}.play-canvas-route-run #rg-run{width:100%!important;min-width:0!important;min-height:54px!important;box-shadow:0 8px 24px #0009}
+.play-canvas-storm-outcome{position:absolute!important;left:50%!important;right:auto!important;top:54px!important;bottom:auto!important;width:min(360px,calc(100% - 24px))!important;max-height:126px;overflow:auto;margin:0!important;padding:7px!important;border:1px solid #6d7770!important;border-radius:12px!important;background:#0b2530e8!important;box-shadow:0 12px 32px #0009!important;backdrop-filter:blur(7px);transform:translateX(-50%);pointer-events:auto}
+.play-canvas-storm-outcome .rg-case-tabs{gap:4px!important;overflow-x:auto;scrollbar-width:none}.play-canvas-storm-outcome .rg-case-tabs::-webkit-scrollbar{display:none}.play-canvas-storm-outcome .rg-case-tabs button{flex:0 0 auto}.play-canvas-storm-outcome .rg-case-detail{padding:6px 3px 1px!important;font-size:.66rem!important}.play-canvas-storm-outcome .rg-case-detail ol{display:none!important}
 
 @media(max-width:800px){
-  .play-canvas-builder-world{min-height:82svh!important}.play-canvas-route-circuit{left:6px!important;right:6px!important;bottom:6px!important;max-height:none!important}
-  .play-canvas-route-nodes{gap:5px!important;padding-inline:1px!important}.play-canvas-route-nodes:before{top:33px!important}
-  #rescue-game .play-canvas-route-nodes .rg-slot{min-height:61px!important;padding:4px 2px!important;border-radius:13px!important}.play-canvas-route-nodes .rg-slot span{font-size:.54rem!important}
-  .play-canvas-toolbelt{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important;padding:5px!important}.play-canvas-toolbelt button{min-height:44px!important}
-  .play-canvas-route-run{grid-template-columns:1fr!important}.play-canvas-route-run .rg-run-note{display:none!important}.play-canvas-route-run #rg-run{width:100%!important;min-width:0!important;min-height:48px!important}
-  .play-canvas-storm-outcome{bottom:calc(100% + 35px);max-height:154px}.play-canvas-storm-outcome .rg-case-detail ol{display:none!important}
+  .play-canvas-builder-world{min-height:82svh!important}.play-canvas-route-circuit{inset:0!important;max-height:none!important}
+  .play-canvas-route-tools .rg-bench-title{left:8px;top:8px;font-size:.55rem!important}.play-canvas-route-tools .rg-bench-footer{right:8px!important;top:8px!important}
+  .play-canvas-route-nodes{left:4%!important;right:4%!important;top:37%!important;gap:5px!important}.play-canvas-route-nodes:before{top:50%!important}
+  #rescue-game .play-canvas-route-nodes .rg-slot{min-height:58px!important;max-width:70px;padding:4px 2px!important}.play-canvas-route-nodes .rg-slot span{font-size:.51rem!important}
+  .play-canvas-toolbelt{left:6px!important;right:6px!important;bottom:68px!important;padding:5px!important}.play-canvas-toolbelt button{flex-basis:76px!important;min-height:44px!important}
+  .play-canvas-route-run{left:6px!important;right:6px!important;bottom:6px!important;width:auto!important}.play-canvas-route-run #rg-run{min-height:52px!important}
+  .play-canvas-storm-outcome{top:48px!important;width:calc(100% - 16px)!important;max-height:118px}.play-canvas-storm-outcome .rg-case-detail{font-size:.62rem!important}
 }
 @media(max-width:430px){
-  .play-canvas-route-tools .rg-bench-title{bottom:calc(100% + 5px);font-size:.55rem!important}.play-canvas-route-nodes{gap:4px!important}.play-canvas-route-nodes .rg-slot span{display:none!important}.play-canvas-toolbelt{grid-template-columns:repeat(3,minmax(0,1fr))!important}.play-canvas-storm-outcome{max-height:138px}
+  .play-canvas-route-nodes{top:35%!important;gap:4px!important}.play-canvas-route-nodes .rg-slot span{display:none!important}#rescue-game .play-canvas-route-nodes .rg-slot{min-height:54px!important;max-width:64px!important}
+  .play-canvas-toolbelt button{flex-basis:70px!important;font-size:.54rem!important}.play-canvas-storm-outcome{top:44px!important;max-height:108px}
 }
