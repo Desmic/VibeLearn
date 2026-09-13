@@ -19,6 +19,8 @@ def main():
         runtime_identity=[None]
         def shot(name):
             page.evaluate('scrollTo(0,0)');page.screenshot(path=str(out/name),full_page=True)
+        def world_shot(name):
+            page.evaluate('scrollTo(0,0)');page.locator('.rg-world.play-canvas-builder-world').screenshot(path=str(out/name))
         def move(action):
             page.locator(f'[data-tool="{action}"]').click()
             expect(page.locator('#rg-feedback')).not_to_have_text('Pip is trying your idea…')
@@ -97,7 +99,13 @@ def main():
             build(['retry','remember','match','reconcile'])
             page.locator('#rg-run').click();expect(page.locator('.rg-case-tabs button')).to_have_count(6)
             expect(page.locator('.play-canvas-storm-outcome')).to_be_visible()
+            expect(page.locator('.play-canvas-route-circuit > .play-canvas-route-playback')).to_be_visible()
             expect(page.locator('#rg-next')).to_have_count(0);shot('rescue-route-failure.png')
+            page.set_viewport_size({'width':390,'height':844});page.wait_for_timeout(180)
+            expect(page.locator('.play-canvas-route-circuit')).to_be_visible()
+            assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1')
+            world_shot('rescue-route-failure-phone-390.png')
+            page.set_viewport_size({'width':1440,'height':1000});page.wait_for_timeout(180)
             build(SAFE)
             page.locator('#rg-map').click();expect(page.locator('#notice')).to_contain_text('Save your current')
             before=draft_probe()
@@ -119,6 +127,12 @@ def main():
             expect(page.locator('[data-slot="0"]')).to_contain_text('Recover the ticket')
             expect(page.locator('[data-slot="3"]')).to_contain_text('Send the request')
             page.locator('#rg-run').click();expect(page.locator('#rg-next')).to_be_enabled();shot('rescue-route-success.png')
+            expect(page.locator('.play-canvas-route-circuit > .play-canvas-route-playback')).to_be_visible()
+            page.set_viewport_size({'width':390,'height':844});page.wait_for_timeout(180)
+            assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1')
+            world_shot('rescue-route-success-phone-390.png')
+            page.set_viewport_size({'width':1440,'height':1000});page.wait_for_timeout(180)
+            checks.append('Signal 6 route playback remains inside the live world and is captured at 390px without horizontal overflow')
             page.locator('.rg-sandbox summary').click();build(['remember','retry'])
             page.locator('#rg-storm-elapsed').fill('1')
             page.locator('#rg-sandbox-run').click();expect(page.locator('.rg-sandbox-result')).to_contain_text('Route holds')
