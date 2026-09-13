@@ -67,9 +67,31 @@ for(let i=0;i<7;i++){
   add(`bridge-left-${i}`,'box','wood',[x,.18,1],[.34,.14,1.05]);
   add(`bridge-right-${i}`,'box','wood',[-x,.18,1],[.34,.14,1.05]);
 }
-add('broken-gear','torus','gold',[0,.58,1.1],[1.15,.34,1.15],{rotation:[90,0,0],motion:{type:'spin',axis:[0,1,0],speed:16}});
-add('new-gear','torus','gold',[4.55,.78,1.15],[1.4,.42,1.4],{enabled:false,rotation:[90,0,0],motion:{type:'spin',axis:[0,1,0],speed:22}});
-add('duplicate-gear','torus','danger',[5.72,.78,1.15],[1.4,.42,1.4],{enabled:false,rotation:[90,0,0],motion:{type:'spin',axis:[0,1,0],speed:-22}});
+// Gears are semantic assemblies rather than oversized smooth rings. The parent
+// remains the stable game entity: children inherit visibility, motion and state.
+const gear=(id,material,position,scale,extra={})=>{
+  add(id,'torus',material,position,scale,{rotation:[90,0,0],...extra});
+  child(`${id}-hub`,id,'cylinder','dark',[0,0,0],[.24,.18,.24]);
+  for(let i=0;i<8;i++){
+    const angle=i*45, radians=angle*Math.PI/180;
+    child(
+      `${id}-tooth-${i}`,id,'box',material,
+      [Math.cos(radians)*.62,0,Math.sin(radians)*.62],
+      [.18,.16,.27],{rotation:[0,-angle,0]}
+    );
+  }
+  for(let i=0;i<4;i++){
+    const angle=22.5+i*45, radians=angle*Math.PI/180;
+    child(
+      `${id}-spoke-${i}`,id,'box','bronze',
+      [Math.cos(radians)*.31,0,Math.sin(radians)*.31],
+      [.31,.10,.075],{rotation:[0,-angle,0]}
+    );
+  }
+};
+gear('broken-gear','gold',[0,.58,1.1],[.95,.30,.95],{motion:{type:'spin',axis:[0,1,0],speed:16}});
+gear('new-gear','gold',[4.55,.72,1.15],[1.02,.32,1.02],{enabled:false,motion:{type:'spin',axis:[0,1,0],speed:22}});
+gear('duplicate-gear','danger',[5.72,.72,1.15],[1.02,.32,1.02],{enabled:false,motion:{type:'spin',axis:[0,1,0],speed:-22}});
 add('order-seal','box','paper',[-4.0,1.72,.12],[.8,.5,.07],{enabled:false,motion:{type:'bob',amplitude:.12,speed:2}});
 add('reply-orb','sphere','glass',[4.2,2.18,.42],[.48,.48,.48],{enabled:false,motion:{type:'bob',amplitude:.18,speed:2.5}});
 add('storm-bolt-a','box','storm',[0,4.6,.2],[.12,2.8,.12],{enabled:false,rotation:[0,0,16]});
@@ -122,7 +144,7 @@ beaconPositions.forEach(([x,z],i)=>{
 export const echoForgeWorldSpec=Object.freeze({
   schemaVersion:'1',
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-11',
+  version:'pc-phase1-12',
   environment:{clearColor:'#03111c',ambient:'#294651',exposure:1.18,toneMapping:'aces2',fog:{type:'exp2',color:'#0b2633',density:.018}},
   assets:{
     'pip.robot':{
@@ -165,16 +187,17 @@ export const echoForgeWorldSpec=Object.freeze({
     bark:{diffuse:'#513d35',gloss:.12},
     leaf:{diffuse:'#2f7163',gloss:.16},
     leafDark:{diffuse:'#235149',gloss:.14},
-    stone:{diffuse:'#36515b',gloss:.12},
-    bronze:{diffuse:'#8b684c',metalness:.28,gloss:.32},
-    lantern:{diffuse:'#ffd481',emissive:'#ffba58',emissiveIntensity:2.6,gloss:.35},
-    smoke:{diffuse:'#72858b',opacity:.24,gloss:.05},
-    starlight:{diffuse:'#d8f3ef',emissive:'#a9efe4',emissiveIntensity:3.0,gloss:.15}
+    stone:{diffuse:'#50646b',gloss:.18},
+    bronze:{diffuse:'#9a6647',metalness:.2,gloss:.28},
+    lantern:{diffuse:'#ffd78a',emissive:'#ffb957',emissiveIntensity:2.2},
+    smoke:{diffuse:'#617681',opacity:.28,blend:true},
+    starlight:{diffuse:'#d5f6ed',emissive:'#d5f6ed',emissiveIntensity:1.8}
   },
   lights:[
-    {id:'moon-light',type:'directional',color:'#bfdcff',intensity:1.05,rotation:[42,-28,0]},
-    {id:'forge-light',type:'omni',color:'#ff9f4d',intensity:3.1,range:12,position:[5.1,2.0,1.3]},
-    {id:'pip-fill',type:'omni',color:'#79e2d2',intensity:.72,range:7,position:[-5.0,2.2,2.4]},
+    {id:'moon-key',type:'directional',color:'#9cc8d5',intensity:1.18,rotation:[48,-28,0]},
+    {id:'forge-light',type:'omni',color:'#ff9e52',intensity:2.1,range:10,position:[5.1,2.3,1.8]},
+    {id:'forge-rim',type:'omni',color:'#efc16f',intensity:.85,range:7,position:[3.9,1.5,-.1]},
+    {id:'beacon-fill',type:'omni',color:'#70dbc8',intensity:.75,range:9,position:[-6.8,2.0,2.3]},
     {id:'bridge-fill',type:'omni',color:'#efc77a',intensity:.58,range:8,position:[0,2.0,3.1]},
     {id:'storm-light',type:'omni',color:'#c7eaff',intensity:.35,range:30,position:[0,8,1]}
   ],
