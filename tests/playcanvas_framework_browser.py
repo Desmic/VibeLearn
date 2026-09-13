@@ -94,6 +94,23 @@ def main():
               const invalidAnimationRejected=badAlias.available===false&&String(badAlias.error||'').includes('unknown alias');
               badAlias.dispose?.();badHost.remove();
 
+              const measureHost=document.createElement('div');
+              Object.assign(measureHost.style,{position:'fixed',left:'0',top:'0',width:'390px',height:'420px',zIndex:'9998'});
+              document.body.append(measureHost);
+              const blacksmithWorld=createPlayCanvasWorld(measureHost,{
+                ...spec,id:'framework-proof.blacksmith-bounds',version:'1',
+                assets:{blacksmith:{type:'container',src:'/assets/quaternius-blacksmith.glb'}},
+                entities:[{id:'blacksmith',asset:'blacksmith'}],
+                states:{seed:{camera:'near'}}
+              },{pixelRatioCap:1,reducedMotion:true});
+              const measureDeadline=performance.now()+5000;
+              while(blacksmithWorld.stats?.().assetsPending>0&&performance.now()<measureDeadline){
+                await new Promise(resolve=>setTimeout(resolve,50));
+              }
+              await new Promise(resolve=>setTimeout(resolve,120));
+              const blacksmithStats=blacksmithWorld.stats?.()||null;
+              blacksmithWorld.dispose?.();measureHost.remove();
+
               const echoModule=await import('/rescue-playcanvas-world.js');
               const echoHost=document.createElement('div');
               echoHost.id='echo-forge-playcanvas-host';
@@ -113,7 +130,7 @@ def main():
                 canvas:echoCanvas?{width:echoCanvas.width,height:echoCanvas.height,clientWidth:echoCanvas.clientWidth,clientHeight:echoCanvas.clientHeight,rect:echoRect?{width:echoRect.width,height:echoRect.height}:null,engine:echoCanvas.dataset.engine||null,vibelearnEngine:echoCanvas.dataset.vibelearnEngine||null}:null
               };
               window.__vibelearnEchoAssetProof={echo,echoHost,echoResult};
-              return {synthetic,echo:echoResult,invalidFogRejected,externalAssetRejected,invalidAnimationRejected};
+              return {synthetic,blacksmith:blacksmithStats,echo:echoResult,invalidFogRejected,externalAssetRejected,invalidAnimationRejected};
             }""")
 
             # Preserve character-composition evidence before any assertion can abort
@@ -153,6 +170,17 @@ def main():
             assert result["invalidFogRejected"] is True, result
             assert result["externalAssetRejected"] is True, result
             assert result["invalidAnimationRejected"] is True, result
+
+            blacksmith = result["blacksmith"]
+            assert blacksmith["available"] is True, result
+            assert blacksmith["assetsPending"] == 0, result
+            assert blacksmith["assetsLoaded"] == 1, result
+            assert blacksmith["assetsFailed"] == 0, result
+            assert blacksmith["assetErrors"] == [], result
+            smith_bounds = blacksmith["assetBounds"].get("blacksmith")
+            assert smith_bounds is not None, result
+            assert all(value > 0 for value in smith_bounds["size"]), result
+            assert max(smith_bounds["size"]) < 100, result
 
             echo = result["echo"]
             assert echo["available"] is True, result
@@ -194,6 +222,7 @@ def main():
                     "story_0_animation": echo["stats"]["activeAnimations"].get("pip"),
                     "story_5_animation": echo["story5Stats"]["activeAnimations"].get("pip"),
                 },
+                "blacksmith_bounds": smith_bounds,
                 "screenshots": [
                     "playcanvas-pip-story0-390.png",
                     "playcanvas-pip-story5-wave-390.png",
@@ -204,7 +233,8 @@ def main():
                     "Unsafe external asset URLs and unknown semantic animation aliases fail closed before asset loading.",
                     "The pinned same-origin Pip GLB loaded through the generic container path with primitive fallback retained for failure.",
                     "Story state changed Pip from semantic idle to wave animation without exposing PlayCanvas track objects to the adapter.",
-                    "Loaded idle and wave character-composition frames are preserved before assertions so visual regressions remain inspectable."
+                    "Loaded idle and wave character-composition frames are preserved before assertions so visual regressions remain inspectable.",
+                    "The pinned Blacksmith loads through the same generic AssetRef path and reports measured imported bounds before world integration."
                 ],
                 "page_errors": errors
             }, indent=2))
