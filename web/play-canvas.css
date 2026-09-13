@@ -87,3 +87,18 @@
   .play-canvas-route-playback>strong{font-size:.52rem}.play-canvas-route-playback .rg-live-lane{gap:3px!important}
   .play-canvas-route-nodes{top:39%!important}
 }
+
+/* Phone Signal 6 density pass: keep reasoning legible without squeezing the valley. */
+@media(max-width:430px){
+  .play-canvas-route-tools .rg-bench-title{display:none!important}
+  .play-canvas-storm-outcome{left:6px!important;right:82px!important;top:6px!important;width:auto!important;max-height:36px!important;padding:3px 4px!important;border-radius:10px!important;transform:none!important;overflow:hidden!important}
+  .play-canvas-storm-outcome .rg-case-tabs{display:flex!important;flex-wrap:nowrap!important;gap:3px!important;overflow-x:auto!important;overflow-y:hidden!important;white-space:nowrap}
+  .play-canvas-storm-outcome .rg-case-tabs button{flex:0 0 auto!important;min-height:28px!important;padding:3px 6px!important;font-size:.49rem!important;white-space:nowrap!important}
+  .play-canvas-route-playback{left:6px!important;right:6px!important;top:48px!important;width:auto!important;max-height:54px!important;padding:4px 6px!important;border-radius:10px!important;transform:none!important}
+  .play-canvas-route-playback>strong{padding-right:74px!important;font-size:.49rem!important;line-height:1.08!important}
+  .play-canvas-route-playback .rg-live-lane{gap:3px!important;margin-top:3px!important}
+  .play-canvas-route-playback .rg-live-node{min-height:22px!important;padding:2px 4px!important;border-radius:7px!important}
+  .play-canvas-route-playback>p{display:none!important}
+  .play-canvas-route-playback .rg-replay-case{right:5px!important;top:4px!important;bottom:auto!important;min-height:22px!important;padding:2px 6px!important;font-size:.46rem!important}
+  .play-canvas-route-nodes{top:34%!important}
+}
