@@ -44,7 +44,7 @@ class RuntimeMigrationTests(unittest.TestCase):
 
     def test_echo_forge_keeps_asset_normalization_and_identity_in_world_spec(self):
         source = (ROOT / 'web' / 'echo-forge-world-spec.js').read_text(encoding='utf-8')
-        self.assertIn("version:'pc-phase1-8'", source)
+        self.assertIn("version:'pc-phase1-9'", source)
         self.assertIn("transform:{position:[0,-.08,0],scale:[.52,.52,.52]}", source)
         self.assertIn('Measured source mesh height is ~4.63 units', source)
         fallback_block = source.split('const PIP_FALLBACK=[', 1)[1].split('];', 1)[0]
@@ -54,6 +54,14 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn("child('pip-beacon'", source)
         self.assertIn("asset:'pip.robot'", source)
         self.assertIn("animation:'idle'", source)
+        self.assertIn("asset:'forge.blacksmith'", source)
+        self.assertIn("src:'/assets/quaternius-blacksmith.glb'", source)
+        self.assertIn("transform:{position:[.8076,.0051,.0210],scale:[1.30,1.30,1.30]}", source)
+        forge_fallback = source.split('const FORGE_FALLBACK=[', 1)[1].split('];', 1)[0]
+        for structural_id in ('forge-body','forge-roof','forge-window-l','forge-window-r','forge-chimney','forge-chimney-cap','forge-pipe','forge-door'):
+            self.assertIn(structural_id, forge_fallback)
+        for semantic_overlay in ('forge-furnace','forge-sign','forge-gear-a','forge-gear-b','forge-door-glow','forge-smoke-1','forge-smoke-2'):
+            self.assertNotIn(semantic_overlay, forge_fallback)
 
     def test_playcanvas_framework_assets_are_explicitly_served(self):
         server = (ROOT / 'app' / 'server.py').read_text(encoding='utf-8')
