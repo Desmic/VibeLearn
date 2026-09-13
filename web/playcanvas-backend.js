@@ -217,7 +217,8 @@ class PlayCanvasWorld {
           const entity=this.entities.get(fallbackId);
           if(entity){entity.enabled=false;this.assetFallbackHidden.add(fallbackId);}
         }
-        this.assetInstances.set(def.id,{asset,instance,fallback});
+        const bounds=this._measureAssetBounds(instance);
+        this.assetInstances.set(def.id,{asset,instance,fallback,bounds});
         this.assetsLoaded+=1;
         this._applyEntityAnimation(def.id,this.desiredAnimations.get(def.id)||def.animation||assetDef.defaultAnimation||null,0);
       }catch(assetError){
@@ -227,6 +228,25 @@ class PlayCanvasWorld {
         try{asset.unload();}catch(_){}
       }
     });
+  }
+
+  _measureAssetBounds(instance){
+    let combined=null;
+    for(const render of instance.findComponents('render')){
+      for(const meshInstance of render.meshInstances||[]){
+        const aabb=meshInstance.aabb;
+        if(!aabb)continue;
+        if(!combined)combined=aabb.clone();else combined.add(aabb);
+      }
+    }
+    if(!combined)return null;
+    const min=combined.getMin(),max=combined.getMax();
+    const round=value=>Math.round(value*10000)/10000;
+    return{
+      min:[round(min.x),round(min.y),round(min.z)],
+      max:[round(max.x),round(max.y),round(max.z)],
+      size:[round(max.x-min.x),round(max.y-min.y),round(max.z-min.z)]
+    };
   }
 
   _bindAssetAnimations(def,assetDef,asset,instance){
@@ -394,6 +414,7 @@ class PlayCanvasWorld {
       assetEntityCount:this.spec.entities.filter(entity=>Boolean(entity.asset)).length,
       assetsPending:this.assetsPending,assetsLoaded:this.assetsLoaded,assetsFailed:this.assetsFailed,
       loadedAssetEntities:[...this.assetInstances.keys()],activeAnimations:Object.fromEntries(this.activeAnimations),
+      assetBounds:Object.fromEntries([...this.assetInstances].map(([id,record])=>[id,record.bounds])),
       assetErrors:[...this.assetErrors],
       deviceType:this.app.graphicsDevice?.deviceType||'unknown',canvasCount:this.host.querySelectorAll('canvas').length,
       canvasCssWidth:Math.round(rect.width),canvasCssHeight:Math.round(rect.height),
