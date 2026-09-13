@@ -56,7 +56,11 @@ def assert_phone_first_touch(browser, url, out, errors, width, height):
     assert replay and replay['height'] >= 44
     assert max(back['y'] + back['height'], nxt['y'] + nxt['height']) <= height + 1
     page.wait_for_function("() => document.querySelector('#rgi-world')?.dataset.worldStatus === 'ready'")
-    page.screenshot(path=str(out / f'onboarding-{"desktop" if width > 820 else "phone"}-{width}.png'), full_page=True)
+    assert page.locator('.rgi-markers').evaluate('''host => {
+      const labels=[...host.querySelectorAll('button:not([hidden])')].map(n=>n.getBoundingClientRect());
+      return labels.every((a,i)=>labels.every((b,j)=>i===j||a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top));
+    }'''), 'Opening markers overlap'
+    page.screenshot(path=str(out / f'onboarding-{"desktop" if width > 820 else "phone"}-{width}.png'), full_page=False)
     ctx.close()
 
 
@@ -84,11 +88,11 @@ def main():
             # Fresh first-touch story is user-paced; it must not move while the player reads.
             page.wait_for_timeout(3600)
             expect(page.locator('#rgi-title')).to_have_text('Pip is almost home.')
-            page.screenshot(path=str(out/'onboarding-echo-forge-01.png'), full_page=True)
+            page.screenshot(path=str(out/'onboarding-echo-forge-01.png'), full_page=False)
 
             page.locator('#rgi-next').click()
             expect(page.locator('#rgi-fact')).to_contain_text('You lit the way')
-            page.screenshot(path=str(out/'onboarding-first-success.png'), full_page=True)
+            page.screenshot(path=str(out/'onboarding-first-success.png'), full_page=False)
 
             # Back/forward is real scene navigation, not a restart-only escape hatch.
             page.locator('#rgi-next').click()
@@ -114,14 +118,14 @@ def main():
                     page.locator('#rgi-next').click()
                 page.locator('#rgi-next').click()
                 expect(page.locator('#rgi-title')).to_have_text(title)
-                page.screenshot(path=str(out/f'onboarding-causal-beat-{page.locator("#rgi-intro").get_attribute("data-step")}.png'),full_page=True)
+                page.screenshot(path=str(out/f'onboarding-causal-beat-{page.locator("#rgi-intro").get_attribute("data-step")}.png'),full_page=False)
             expect(page.locator('#rgi-fact')).to_have_text('First move: inspect the Echo Forge.')
             expect(page.locator('#rgi-dialogue')).to_contain_text('Help me find out what happened')
             expect(page.locator('.rgi-progress .current')).to_have_count(1)
             runtime_id = page.locator('.game-runtime-stage').get_attribute('data-game-runtime-instance')
             canvas_runtime_id = canvas.get_attribute('data-game-runtime-instance')
             assert runtime_id and canvas_runtime_id == runtime_id
-            page.screenshot(path=str(out/'onboarding-echo-forge-06.png'), full_page=True)
+            page.screenshot(path=str(out/'onboarding-echo-forge-06.png'), full_page=False)
             checks.append('The opening stages a lost reply and distinguishes audience observation from reliable current inspection, remains user-paced, and preserves one PlayCanvas runtime/world identity across reversible story states')
             page.locator('#rgi-next').click()
 

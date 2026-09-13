@@ -9,6 +9,7 @@ export function validateOpeningSpec(spec){
   for(const scene of spec.scenes){
     if(typeof scene.title!=='string'||!Number.isInteger(scene.beat))throw Error('Invalid opening scene');
     if(scene.action&&(!scene.action.target||!scene.action.label))throw Error('Invalid opening action');
+    for(const marker of scene.markers||[])if(marker.offset&&(!Array.isArray(marker.offset)||marker.offset.length!==2||!marker.offset.every(Number.isFinite)))throw Error('Invalid marker offset');
   }
   return spec;
 }
@@ -60,6 +61,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,onEx
     const markers=overlay.querySelector('.rgi-markers');markers.replaceChildren();
     for(const marker of s.markers||[]){
       const n=document.createElement('button');n.type='button';n.className=`rgi-marker ${marker.tone||''}`;n.textContent=marker.label;n.dataset.entity=marker.entity;
+      n.dataset.offsetX=String(marker.offset?.[0]||0);n.dataset.offsetY=String(marker.offset?.[1]||0);
       const actionable=s.action&&!actionDone&&marker.target===s.action.target;
       n.disabled=!actionable;n.tabIndex=actionable?0:-1;
       if(actionable){n.classList.add('rgi-target');n.onclick=()=>performAction();}
@@ -82,7 +84,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,onEx
       if(marker.classList.contains('rgi-target'))marker.disabled=!ready();
       const point=world?.projectEntity?.(marker.dataset.entity);
       marker.hidden=!point||!point.visible;
-      if(point){marker.style.left=`${Math.max(60,Math.min(host.clientWidth-60,point.x))}px`;marker.style.top=`${Math.max(70,Math.min(host.clientHeight*.58,point.y-22))}px`;}
+      if(point){marker.style.left=`${Math.max(60,Math.min(host.clientWidth-60,point.x+Number(marker.dataset.offsetX)))}px`;marker.style.top=`${Math.max(70,Math.min(host.clientHeight*.58,point.y-22+Number(marker.dataset.offsetY)))}px`;}
     }
     frame=requestAnimationFrame(updateMarkers);
   };
