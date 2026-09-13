@@ -110,7 +110,7 @@ const INTERACTIVE_SEMANTICS=new Set(['broken-gear','order-seal','signal','signal
 // semantic stage anchors inside the authored phone composition rather than
 // inheriting primitive-era x≈-5 positions that clip the animated character.
 const PIP_LEFT_X=-2.65;
-const PIP_SUCCESS_X=2.75;
+const PIP_SUCCESS_X=.8;
 
 function semanticPick(entityId){
   if(!entityId)return null;
@@ -181,7 +181,7 @@ function missionPatch(state={}){
     patch.transforms={
       ...patch.transforms,
       'new-gear':{position:[0,.58,1.1],scale:[.98,.98,.98]},
-      'pip':{position:[PIP_SUCCESS_X,.42,.9],rotation:[0,-24,0],scale:[1.02,1.02,1.02]},
+      'pip':{position:[PIP_SUCCESS_X,.42,-3.1],rotation:[0,-24,0],scale:[1.02,1.02,1.02]},
       'pip-head':{rotation:[0,-12,0]}
     };
   }else if(level===6){

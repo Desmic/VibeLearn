@@ -6,7 +6,7 @@ Updated 13 September 2026 (14 September IST). **Product status: `user_rejected` 
 
 Read GAME-OPENING-PROGRESSION.md, the root implementation plan, CURRENT-STORY-CANDIDATE.md and the active story/UX/acceptance contracts. Update docs first; then build the confirmed first-entry skippable 3D opening, tutorial/early success, gradual progression and optional replay. Level 2+ resumes without an automatic opening. Remove the 2D gameplay fallback; preserve accessible HUD and honest engine recovery.
 
-The previous Signal 7-only preview exception has completed its purpose and does not waive the current story/first-touch/product requirements.
+The current review candidate must include the newly confirmed opening/progression/foundation requirements. The user still owns the next product review; see the review-checkpoint clarification below.
 
 ## Verified source and deployment
 
@@ -37,3 +37,10 @@ Earlier technical history is preserved in history/STATE-before-opening-review-20
 User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
 
 Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.
+
+
+## Current user review checkpoint
+
+The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
+
+For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.

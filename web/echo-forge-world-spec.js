@@ -153,9 +153,12 @@ add('keeper-glow','sphere','ember',[-1.6,1,1.6],[.48,.48,.48],{enabled:false});
 for(let i=0;i<3;i++)add(`guide-path-${i}`,'sphere','glass',[-2.4+i*.6,.4,1.1],[.13,.13,.13],{enabled:false});
 add('home-island-rock','cone','rock',[0,-2.1,-5],[4,3,4]);
 add('home-island-top','cylinder','grass',[0,-.7,-5],[3.9,.2,3.9]);
-add('pip-home','box','wood',[0,0,-5],[1.6,1.6,1.5]);
-add('pip-home-roof','cone','red',[0,1.25,-5],[2.15,1.2,2.1]);
-add('home-window','box','ember',[0,.45,-4.22],[.48,.55,.06]);
+add('pip-home','box','wood',[0,.48,-5],[2.56,2.56,2.4]);
+add('pip-home-roof','cone','red',[0,2.42,-5],[3.44,1.92,3.36]);
+add('home-window','box','ember',[0,.9,-3.76],[.7,.85,.06]);
+// The repaired crossing leads from Pip's island to the Forge landing, then
+// along this short walkway to home; the success pose uses that destination.
+for(let i=0;i<9;i++)add(`home-walkway-${i}`,'box','wood',[3.6-i*.40,.18,.7-i*.60],[.95,.15,.75],{rotation:[0,34,0]});
 for(let i=0;i<5;i++)add(`echo-path-${i}`,'sphere','glass',[-.6+i*1.0,.55,1.1],[.12,.12,.12],{enabled:false});
 add('reserve-ember','sphere','ember',[3.85,.95,1.8],[.28,.36,.28]);
 export const echoForgeWorldSpec=Object.freeze({
@@ -230,14 +233,14 @@ export const echoForgeWorldSpec=Object.freeze({
     },
     'story.2':{
       position:[1.9,4.9,12.1],lookAt:[2.6,1.2,.2],fov:43,
-      portrait:{position:[1.2,2.65,14.5],lookAt:[1.2,.65,.7],fov:48}
+      portrait:{position:[4.2,3.0,14.5],lookAt:[4.8,.8,.7],fov:48}
     },
     'story.3':{
       position:[1.0,6.1,13.2],lookAt:[1.8,2.0,.4],fov:46,
-      portrait:{position:[2.6,2.7,10.7],lookAt:[2.8,1.1,.6],fov:46}
+      portrait:{position:[1.9,3.7,16],lookAt:[2.1,1.8,.4],fov:46}
     },
     'story.4':{
-      position:[3.6,4.2,10.5],lookAt:[4.9,.9,.7],fov:42,
+      position:[1.4,6.0,18.6],lookAt:[1.4,.6,-.6],fov:48,
       portrait:{position:[1.4,3.0,18.6],lookAt:[1.4,.6,-.6],fov:48}
     },
     'story.5':{
@@ -265,8 +268,8 @@ export const echoForgeWorldSpec=Object.freeze({
       portrait:{position:[4.4,2.25,9.8],lookAt:[5.0,.8,.8],fov:44}
     },
     'mission.success':{
-      position:[0,4.4,11.8],lookAt:[0,.6,1.0],fov:44,
-      portrait:{position:[1.4,3.1,12.5],lookAt:[1.3,.9,1.0],fov:43}
+      position:[1.0,5.0,12.0],lookAt:[.8,.6,-1.0],fov:44,
+      portrait:{position:[.8,3.0,10.5],lookAt:[.5,.9,-2.3],fov:43}
     }
   },
   states:{

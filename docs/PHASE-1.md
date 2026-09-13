@@ -260,3 +260,10 @@ Keep known-compatible code revisions and independent backups.
 **Activation:** private hosted pilot only; broader/public multi-user activation is not claimed.
 
 Current next product increment: verify and deploy the Echo Forge story/game realization, run the story/game gates on exact evidence, then return it to the user only if the critic pre-gates pass. Phase 2 remains closed.
+
+
+## Current user review checkpoint
+
+The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
+
+For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.

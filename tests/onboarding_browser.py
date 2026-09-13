@@ -61,6 +61,16 @@ def assert_phone_first_touch(browser, url, out, errors, width, height):
       return labels.every((a,i)=>labels.every((b,j)=>i===j||a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top));
     }'''), 'Opening markers overlap'
     page.screenshot(path=str(out / f'onboarding-{"desktop" if width > 820 else "phone"}-{width}.png'), full_page=False)
+    # Every authored camera must keep its actual semantic target in view, not
+    # merely offer an equivalent button beneath an off-screen game object.
+    for step in range(1,6):
+        if page.locator('#rgi-next').get_attribute('data-story-action'):
+            expect(page.locator('.rgi-target')).to_be_visible()
+            page.locator('#rgi-next').click()
+        page.locator('#rgi-next').click()
+        expect(page.locator('#rgi-intro')).to_have_attribute('data-step',str(step))
+        for marker in page.locator('.rgi-marker').all():expect(marker).to_be_visible()
+        page.screenshot(path=str(out/f'onboarding-{width}-beat-{step}.png'),full_page=False)
     ctx.close()
 
 

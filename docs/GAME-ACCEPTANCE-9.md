@@ -107,3 +107,10 @@ This remains private Phase 1 refinement. The architecture also guides future gen
 ## Required opening regression evidence
 
 Use the exact player-state matrix in GAME-OPENING-PROGRESSION.md: first authenticated entry, skip into tutorial, later Level 1 resume, Level 2+ on empty browser storage, separate accounts, and explicit replay returning to the untouched active draft. Inspect visible 3D events, early success and increasing cognitive load; canvas existence is insufficient. Missing engine/modules/context must never expose a playable 2D substitute.
+
+
+## Current user review checkpoint
+
+The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
+
+For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.
