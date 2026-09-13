@@ -133,7 +133,7 @@ def main():
               return {synthetic,blacksmith:blacksmithStats,echo:echoResult,invalidFogRejected,externalAssetRejected,invalidAnimationRejected};
             }""")
 
-            # Preserve character-composition evidence before any assertion can abort
+            # Preserve character/environment composition evidence before any assertion can abort
             # the proof. These are diagnostic screenshots, not critic scores.
             page.locator("#echo-forge-playcanvas-host").screenshot(
                 path=str(out / "playcanvas-pip-story0-390.png")
@@ -187,18 +187,21 @@ def main():
             assert echo["stats"]["engine"] == "playcanvas", result
             assert echo["stats"]["backendVersion"] == "2", result
             assert echo["stats"]["worldId"] == "relay-rescue.echo-forge", result
-            assert echo["stats"]["worldVersion"] == "pc-phase1-8", result
+            assert echo["stats"]["worldVersion"] == "pc-phase1-9", result
             assert echo["stats"]["state"] == "story.0", result
             assert echo["stats"]["cameraVariant"] == "portrait", result
             assert echo["stats"]["toneMapping"] == "aces2", result
             assert abs(echo["stats"]["exposure"] - 1.18) < 0.001, result
             assert echo["stats"]["fogType"] == "exp2", result
-            assert echo["stats"]["assetEntityCount"] == 1, result
+            assert echo["stats"]["assetEntityCount"] == 2, result
             assert echo["stats"]["assetsPending"] == 0, result
-            assert echo["stats"]["assetsLoaded"] == 1, result
+            assert echo["stats"]["assetsLoaded"] == 2, result
             assert echo["stats"]["assetsFailed"] == 0, result
             assert echo["stats"]["assetErrors"] == [], result
             assert "pip" in echo["stats"]["loadedAssetEntities"], result
+            assert "forge" in echo["stats"]["loadedAssetEntities"], result
+            forge_bounds = echo["stats"]["assetBounds"].get("forge")
+            assert forge_bounds is not None and all(value > 0 for value in forge_bounds["size"]), result
             assert echo["stats"]["activeAnimations"].get("pip") == "idle", result
             assert echo["story5Stats"]["activeAnimations"].get("pip") == "wave", result
             assert echo["canvas"]["vibelearnEngine"] == "playcanvas", result
@@ -221,8 +224,9 @@ def main():
                     "loaded": echo["stats"]["loadedAssetEntities"],
                     "story_0_animation": echo["stats"]["activeAnimations"].get("pip"),
                     "story_5_animation": echo["story5Stats"]["activeAnimations"].get("pip"),
+                    "forge_bounds": forge_bounds,
                 },
-                "blacksmith_bounds": smith_bounds,
+                "blacksmith_source_bounds": smith_bounds,
                 "screenshots": [
                     "playcanvas-pip-story0-390.png",
                     "playcanvas-pip-story5-wave-390.png",
@@ -233,8 +237,8 @@ def main():
                     "Unsafe external asset URLs and unknown semantic animation aliases fail closed before asset loading.",
                     "The pinned same-origin Pip GLB loaded through the generic container path with primitive fallback retained for failure.",
                     "Story state changed Pip from semantic idle to wave animation without exposing PlayCanvas track objects to the adapter.",
-                    "Loaded idle and wave character-composition frames are preserved before assertions so visual regressions remain inspectable.",
-                    "The pinned Blacksmith loads through the same generic AssetRef path and reports measured imported bounds before world integration."
+                    "Loaded idle and wave character/environment frames are preserved before assertions so visual regressions remain inspectable.",
+                    "The pinned Blacksmith loads through the same generic AssetRef path and now realizes the semantic Forge with structural primitive fallback."
                 ],
                 "page_errors": errors
             }, indent=2))
