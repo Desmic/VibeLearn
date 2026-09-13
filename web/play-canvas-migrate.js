@@ -216,12 +216,20 @@
   game.sync=(busy,a,...rest)=>{const result=previousSync(busy,a,...rest);lastAttempt=a||lastAttempt;queueMigration();return result;};
   game.hide=(...args)=>{disposeTransferWorld();return previousHide(...args);};
 
-  // RescueGame internally rerenders route construction when a slot/block changes,
-  // bypassing the exported render wrapper above. Observe only child-list changes so
-  // those semantic rerenders are re-spatialized without reacting to class/style work.
-  // The migration is idempotent; the queued microtask collapses a rerender burst.
+  // RescueGame internally replaces #rescue-game children when a route slot/block
+  // changes, bypassing the exported render wrapper above. Observe that boundary
+  // only. Reparenting controls into our HUD mutates deeper descendants, which must
+  // not recursively schedule migration again.
   const migrationRoot=document.querySelector('#workspace')||document.body;
-  const observer=new MutationObserver(queueMigration);
+  const observer=new MutationObserver(records=>{
+    const root=rootEl();
+    if(!root)return;
+    const rerendered=records.some(record=>{
+      if(record.target===root)return true;
+      return [...record.addedNodes].some(node=>node===root||node?.id==='rescue-game');
+    });
+    if(rerendered)queueMigration();
+  });
   observer.observe(migrationRoot,{childList:true,subtree:true});
 
   game.__playCanvasMigrationV2=true;
