@@ -1,6 +1,6 @@
-# Current checkpoint — verified PlayCanvas runtime, portable rules, world-quality next
+# Current checkpoint — animated AssetRef pipeline proven, character composition under review
 
-Updated 12 September 2026. **Status: `user_rejected` / `needs_revision`.** The current user's explicit predecessor verdict remains authoritative until a materially changed verified/deployed candidate is reviewed by the user.
+Updated 13 September 2026. **Status: `user_rejected` / `needs_revision`.** The current user's explicit predecessor verdict remains authoritative until a materially changed verified/deployed candidate is reviewed by the user.
 
 ## Latest direction
 
@@ -18,62 +18,83 @@ The durable architecture is engine-neutral and spec-driven:
 
 Read root `CODEX-IMPLEMENTATION-PLAN.md`, `docs/GAME-RUNTIME-ARCHITECTURE.md`, and `docs/GAME-RULES-SPEC.md` as current architecture authority.
 
-## Verified Phase 1 checkpoint
+## Verified Phase 1 checkpoints
 
 Current isolated branch: **`phase1/playcanvas-engine`** · draft PR **#5**.  
-Verified source revision: **`8aaf9243d0289bebf5a5762f89bfe50f9a344734`**.  
-Echo Forge world package: **`pc-phase1-4`**.  
 Pinned engine: **PlayCanvas 2.22.1**, self-hosted/same-origin.
 
-GitHub Actions run **34700489102** is green on that exact revision:
+The last fully green animated-asset integrity checkpoint is source revision **`c7edae1e410eba8ff1a818de16b2e845fee45ca4`**, Echo Forge package **`pc-phase1-7`**, GitHub Actions run **34746048509**.
 
-- pinned PlayCanvas vendoring/SRI verification passed;
+That exact build proved:
+
+- pinned PlayCanvas and game-asset vendoring passed;
 - build passed;
-- **122 unit/backend tests passed**;
+- backend/static tests passed;
 - complete real-browser suite passed;
-- phone evidence is preserved for 360 / 390 / 430 portrait widths;
-- story -> Signal 1 keeps one `GameRuntime` instance and exact PlayCanvas canvas;
-- Signals 1–6 keep the shared runtime/world alive;
-- Signal 7 deliberately exits the fantasy world for sealed transfer;
-- reduced motion, narrow screens, save/reload/process restart, learner isolation and existing evidence semantics remain covered.
+- the pinned CC0 robot GLB loaded through the generic PlayCanvas container path;
+- asset accounting settled at one loaded Pip asset, zero failures and zero asset errors;
+- semantic story animation changed from `idle` to `wave` without exposing PlayCanvas track objects to the world adapter;
+- unsafe external asset URLs and unknown animation aliases fail closed;
+- primitive fallback remains available if the asset fails;
+- direct world picking, Signals 1–6, persistence/auth/isolation and evidence semantics remained intact.
 
-This is the current rollback/integrity checkpoint. **Do not merge or deploy it simply because it is green.**
+A later visual-normalization candidate, **`pc-phase1-8`**, increases Pip's authored asset normalization and keeps courier accessories (scarf / antenna / beacon) as composable semantic child entities rather than hiding them with the procedural body fallback. The first browser run for that candidate reached a healthy runtime result (`assetsLoaded=1`, `assetsFailed=0`, `idle -> wave`) but failed only on a stale test expectation for the previous world-version string. That stale assertion has been corrected.
 
-## What pc-phase1-4 changed visibly
+Current branch head is evolving beyond that candidate to preserve dedicated loaded-character screenshots before assertions. Treat those heads as **under verification**, not as green rollback checkpoints.
 
-Compared with the rejected predecessor and earlier PlayCanvas slices:
+**Do not merge or deploy simply because an engineering run is green.** Product-quality critic gates remain separate.
 
-- phone portrait uses authored camera variants rather than squeezing a landscape shot narrower;
-- the opening no longer tells the learner that the Forge definitely produced a gear after the reply is lost;
-- Signal 1 starts with the gear visually hidden and reveals it only after inspecting the Forge;
-- camera composition follows semantic discovery: Forge -> ticket/Pip -> choice -> duplicate consequence -> success;
-- generic station/readout/key dashboard chrome is removed from the phone Signal 1 play surface;
-- success is realized inside the world: the discovered gear moves into the bridge and Pip appears across the gap;
-- the immediate clear hides journal/evidence panels and gives one compact payoff/CTA (`Secure the crossing ->`) before deeper debrief.
+## AssetRef / character realization now established
 
-These are game-experience improvements only. They do not alter server-authoritative game state or learner evidence truth.
+The first real engine-neutral authored asset path is implemented.
+
+`WorldSpec` can now describe validated container `AssetRef`s with:
+
+- safe same-origin runtime source;
+- portable normalization transform;
+- semantic animation aliases rather than engine-native animation objects;
+- default and per-state animation intent;
+- semantic fallback entity IDs;
+- stable semantic parent identity for picking and world state.
+
+Build-time asset acquisition is separate from learner runtime. The current robot model is pinned to an immutable source commit, exact byte size and Git object identity, with retained license/provenance, then self-hosted under `web/assets`.
+
+The PlayCanvas backend generically:
+
+1. loads container assets asynchronously;
+2. instantiates render hierarchies under the semantic WorldSpec entity;
+3. resolves modern PlayCanvas Animation Asset wrappers to their underlying `AnimTrack` resources;
+4. binds semantic aliases such as `idle`, `wave`, `yes` and `no`;
+5. preserves requested animation state if the asset finishes loading after the world state changed;
+6. maps picks on imported child meshes back to the semantic entity;
+7. hides only declared fallback geometry after successful realization;
+8. leaves game truth unchanged if visual asset realization fails.
+
+Character identity is intentionally compositional. Pip's scarf/beacon/accessories are authored semantic children and should survive regardless of whether the visual body is the imported model or procedural fallback. Do not move Pip-specific assumptions into the generic PlayCanvas backend.
 
 ## Current visual diagnosis
 
-`pc-phase1-4` is materially cleaner and more game-like than the predecessor, but **it is not a >=9 game candidate**.
+The asset pipeline itself is now real, but **successful loading is not visual quality**.
 
-Fresh rendered evidence makes the main blocker unambiguous: **world/art quality now limits first-touch magic more than HUD layout**.
+The first `pc-phase1-7` screenshots exposed an important failure mode: the animated GLB loaded and animated correctly but Pip was effectively too small/unreadable in the authored opening composition. This was caused by asset normalization/composition, not by the loader.
 
-Current weaknesses:
+`pc-phase1-8` addresses that by materially increasing the model normalization and retaining the courier accessory silhouette. Dedicated `story.0` idle and `story.5` wave screenshots are now being preserved before assertions so future failures cannot erase the visual evidence required for review.
 
-- primitive/blockout geometry still reads as a prototype;
-- Pip has little animation/expression/personality in motion;
-- the Echo Forge and islands are sparse and lack environmental storytelling;
-- lighting/atmospheric depth is basic;
-- many frames contain large dead regions rather than authored composition/detail;
-- the opening still asks the player to advance through six Continue beats before meaningful agency;
-- later chapter states still need review for regression into workbench/web-surface interaction.
+Remaining likely quality blockers still include:
 
-Do not keep shaving dashboard pixels and mistake that for a 9/10 game. The next slice must raise the **world itself**: atmosphere, visual hierarchy, character/set composition, effects and earlier player agency.
+- confirm Pip is now readable, correctly oriented and compositionally important across portrait shots;
+- confirm scarf/beacon placement works with the imported skeleton silhouette rather than reading as detached primitive debris;
+- primitive/blockout Forge/island geometry still reads as prototype-grade;
+- environment needs richer authored detail, depth, effects and visual storytelling;
+- the opening still spends too many beats before meaningful agency;
+- later chapter reasoning states still need inspection for regression into web/workbench interaction;
+- the imported stock character is only useful if the final archetype feels like **Pip**, not a generic robot asset.
+
+Do not award critic points for GLB support or animation infrastructure. The rendered experience must earn them.
 
 ## GameRulesSpec implementation
 
-The first renderer-independent rules interpreter now exists and is intentionally isolated from Relay Rescue evidence writes.
+The first renderer-independent rules interpreter exists and is intentionally isolated from Relay Rescue evidence writes.
 
 Implemented/proven:
 
@@ -100,12 +121,14 @@ Next rules work is incremental mapping from the already-tested authoritative Rel
 1. pinned/self-hosted PlayCanvas Engine 2.22.1;
 2. versioned engine-neutral `WorldSpec` validator;
 3. generic `WorldSpec -> PlayCanvas` backend creating real entities/materials/lights/cameras;
-4. unrelated synthetic Star Orchard WorldSpec proven in real Chromium/WebGL2 through the same backend;
-5. persistent engine-neutral `GameRuntime` shell;
-6. Echo Forge authored WorldSpec + PlayCanvas world adapter;
-7. direct opening/mission imports no longer depend on the Three.js adapter or old internal Play Canvas facade;
-8. embedded canvas lifecycle/resize/readiness contract corrected and browser-proven;
-9. server-authoritative progression/auth/isolation/evidence semantics remain unchanged.
+4. portable atmosphere intent (exposure, fog, tone mapping and portrait camera variants);
+5. generic container `AssetRef` realization with animation aliases and fallback;
+6. unrelated synthetic Star Orchard WorldSpec proven in real Chromium/WebGL2 through the same backend;
+7. persistent engine-neutral `GameRuntime` shell;
+8. Echo Forge authored WorldSpec + PlayCanvas world adapter;
+9. direct opening/mission imports no longer depend on the Three.js adapter or old internal Play Canvas facade;
+10. embedded canvas lifecycle/resize/readiness and semantic picking contracts are browser-proven;
+11. server-authoritative progression/auth/isolation/evidence semantics remain unchanged.
 
 Three.js files/tests remain legacy/reference coverage until equivalent PlayCanvas behavior is fully proven and old paths can be removed safely. They must not regain strategic ownership.
 
@@ -131,11 +154,11 @@ Use a genuinely separate critic/agent where available. If only builder/tool-assi
 
 ## Immediate implementation order
 
-1. keep `8aaf924... / pc-phase1-4` frozen as the green rollback checkpoint;
-2. add a small engine-neutral atmosphere/rendering-intent extension to WorldSpec only where PlayCanvas can realize it portably (exposure, fog, camera tone mapping);
-3. materially enrich Echo Forge/Pip/environment composition using reusable primitives/archetype patterns, without making the generic backend Rescue-specific;
-4. verify the richer world across 360 / 390 / 430 portrait evidence and keep phone performance sane;
-5. then move meaningful player agency earlier into the opening instead of six consecutive Continue beats;
+1. keep `c7edae1... / pc-phase1-7` as the latest fully green animated-asset rollback/integrity checkpoint;
+2. finish exact verification and screenshot review of `pc-phase1-8` character normalization/accessory composition;
+3. repair Pip scale/orientation/accessories/camera composition from rendered evidence until the character reads clearly on 360 / 390 / 430 portrait surfaces;
+4. enrich the Forge/environment using reusable assets/archetype composition rather than Rescue-specific backend code;
+5. move meaningful player agency earlier into the opening instead of six consecutive Continue beats;
 6. rerun story/world and first-touch internal diagnostics on the exact rendered candidate and repair until no blocker remains;
 7. continue migrating later chapter mechanics so the fantasy/world survives harder reasoning rather than reverting to a generic workbench;
 8. incrementally bind authoritative service results to GameRulesSpec semantic state/events without weakening persistence/evidence tests;
