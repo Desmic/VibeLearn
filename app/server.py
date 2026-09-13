@@ -136,6 +136,8 @@ def make_server(database, port=8000):
                 "/vendor/PLAYCANVAS-LICENSE.txt": ("vendor/PLAYCANVAS-LICENSE.txt", "text/plain"),
                 "/assets/quaternius-animated-robot.glb": ("assets/quaternius-animated-robot.glb", "model/gltf-binary"),
                 "/assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt": ("assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt", "text/plain"),
+                "/assets/quaternius-blacksmith.glb": ("assets/quaternius-blacksmith.glb", "model/gltf-binary"),
+                "/assets/QUATERNIUS-BLACKSMITH-LICENSE.txt": ("assets/QUATERNIUS-BLACKSMITH-LICENSE.txt", "text/plain"),
             }
             if path in assets:
                 name, mime = assets[path]
