@@ -78,7 +78,21 @@ def main():
               document.body.append(badHost);
               const bad=createPlayCanvasWorld(badHost,{...spec,id:'framework-proof.invalid-fog',environment:{...spec.environment,fog:{type:'mystery'}}});
               const invalidFogRejected=bad.available===false&&String(bad.error||'').includes('unsupported type');
-              bad.dispose?.();badHost.remove();
+              bad.dispose?.();
+              const external=createPlayCanvasWorld(badHost,{
+                ...spec,id:'framework-proof.external-asset',
+                assets:{robot:{type:'container',src:'https://example.com/robot.glb'}},
+                entities:[{id:'robot',asset:'robot'}]
+              });
+              const externalAssetRejected=external.available===false&&String(external.error||'').includes('safe same-origin');
+              external.dispose?.();
+              const badAlias=createPlayCanvasWorld(badHost,{
+                ...spec,id:'framework-proof.bad-animation-alias',
+                assets:{robot:{type:'container',src:'/assets/robot.glb',animations:{idle:'Idle'}}},
+                entities:[{id:'robot',asset:'robot',animation:'missing'}]
+              });
+              const invalidAnimationRejected=badAlias.available===false&&String(badAlias.error||'').includes('unknown alias');
+              badAlias.dispose?.();badHost.remove();
 
               const echoModule=await import('/rescue-playcanvas-world.js');
               const echoHost=document.createElement('div');
@@ -86,17 +100,29 @@ def main():
               Object.assign(echoHost.style,{position:'fixed',left:'0',top:'0',width:'390px',height:'600px',zIndex:'9999'});
               document.body.append(echoHost);
               const echo=echoModule.createGameWorld(echoHost,{reducedMotion:false,mode:'story'});
-              await new Promise(resolve=>setTimeout(resolve,180));
+              const deadline=performance.now()+5000;
+              while(echo.stats?.().assetsPending>0&&performance.now()<deadline){
+                await new Promise(resolve=>setTimeout(resolve,50));
+              }
+              await new Promise(resolve=>setTimeout(resolve,120));
+              const story0Stats=echo.stats?.()||null;
+              echo.setBeat(5);
+              await new Promise(resolve=>setTimeout(resolve,120));
+              const story5Stats=echo.stats?.()||null;
               const echoCanvas=echoHost.querySelector('canvas');
               const echoRect=echoCanvas?.getBoundingClientRect();
-              const echoResult={available:echo.available,error:echo.error||null,stats:echo.stats?.()||null,canvas:echoCanvas?{width:echoCanvas.width,height:echoCanvas.height,clientWidth:echoCanvas.clientWidth,clientHeight:echoCanvas.clientHeight,rect:echoRect?{width:echoRect.width,height:echoRect.height}:null,engine:echoCanvas.dataset.engine||null,vibelearnEngine:echoCanvas.dataset.vibelearnEngine||null}:null};
-              echo.dispose?.();echoHost.remove();
-              return {synthetic,echo:echoResult,invalidFogRejected};
+              const echoResult={
+                available:echo.available,error:echo.error||null,stats:story0Stats,story5Stats,
+                canvas:echoCanvas?{width:echoCanvas.width,height:echoCanvas.height,clientWidth:echoCanvas.clientWidth,clientHeight:echoCanvas.clientHeight,rect:echoRect?{width:echoRect.width,height:echoRect.height}:null,engine:echoCanvas.dataset.engine||null,vibelearnEngine:echoCanvas.dataset.vibelearnEngine||null}:null
+              };
+              window.__vibelearnEchoAssetProof={echo,echoHost};
+              return {synthetic,echo:echoResult,invalidFogRejected,externalAssetRejected,invalidAnimationRejected};
             }""")
             synthetic = result["synthetic"]
             assert synthetic["available"] is True, result
             assert synthetic["engine"] == "playcanvas", result
             assert synthetic["engineVersion"] == "2.22.1", result
+            assert synthetic["backendVersion"] == "2", result
             assert synthetic["worldId"] == "framework-proof.star-orchard", result
             assert synthetic["state"] == "bloom", result
             assert synthetic["entityCount"] == 5, result
@@ -109,21 +135,36 @@ def main():
             assert synthetic["canvasVersion"] == "2.22.1", result
             assert synthetic["canvasRect"]["width"] > 1 and synthetic["canvasRect"]["height"] > 1, result
             assert result["invalidFogRejected"] is True, result
+            assert result["externalAssetRejected"] is True, result
+            assert result["invalidAnimationRejected"] is True, result
 
             echo = result["echo"]
             assert echo["available"] is True, result
             assert echo["stats"]["engine"] == "playcanvas", result
+            assert echo["stats"]["backendVersion"] == "2", result
             assert echo["stats"]["worldId"] == "relay-rescue.echo-forge", result
-            assert echo["stats"]["worldVersion"] == "pc-phase1-5", result
+            assert echo["stats"]["worldVersion"] == "pc-phase1-7", result
             assert echo["stats"]["state"] == "story.0", result
             assert echo["stats"]["cameraVariant"] == "portrait", result
             assert echo["stats"]["toneMapping"] == "aces2", result
             assert abs(echo["stats"]["exposure"] - 1.18) < 0.001, result
             assert echo["stats"]["fogType"] == "exp2", result
+            assert echo["stats"]["assetEntityCount"] == 1, result
+            assert echo["stats"]["assetsPending"] == 0, result
+            assert echo["stats"]["assetsLoaded"] == 1, result
+            assert echo["stats"]["assetsFailed"] == 0, result
+            assert echo["stats"]["assetErrors"] == [], result
+            assert "pip" in echo["stats"]["loadedAssetEntities"], result
+            assert echo["stats"]["activeAnimations"].get("pip") == "idle", result
+            assert echo["story5Stats"]["activeAnimations"].get("pip") == "wave", result
             assert echo["canvas"]["vibelearnEngine"] == "playcanvas", result
             assert echo["canvas"]["rect"]["width"] > 1 and echo["canvas"]["rect"]["height"] > 1, result
 
             page.screenshot(path=str(out / "playcanvas-framework-390.png"), full_page=True)
+            page.evaluate("""() => {
+              const proof=window.__vibelearnEchoAssetProof;
+              proof?.echo?.dispose?.();proof?.echoHost?.remove?.();delete window.__vibelearnEchoAssetProof;
+            }""")
             if errors:
                 raise AssertionError(errors)
             print(json.dumps({
@@ -133,10 +174,17 @@ def main():
                 "synthetic_world": synthetic["worldId"],
                 "echo_world": echo["stats"]["worldId"],
                 "echo_camera_variant": echo["stats"]["cameraVariant"],
+                "echo_asset": {
+                    "loaded": echo["stats"]["loadedAssetEntities"],
+                    "story_0_animation": echo["stats"]["activeAnimations"].get("pip"),
+                    "story_5_animation": echo["story5Stats"]["activeAnimations"].get("pip"),
+                },
                 "checks": [
                     "An unrelated engine-neutral WorldSpec compiled into the real PlayCanvas Engine.",
                     "Portable exposure, fog and camera tone-mapping intent compiled through the generic backend and invalid fog failed closed.",
-                    "The enriched Echo Forge WorldSpec uses the same generic backend and portrait camera path without Rescue-specific renderer code."
+                    "Unsafe external asset URLs and unknown semantic animation aliases fail closed before asset loading.",
+                    "The pinned same-origin Pip GLB loaded through the generic container path with primitive fallback retained for failure.",
+                    "Story state changed Pip from semantic idle to wave animation without exposing PlayCanvas track objects to the adapter."
                 ],
                 "page_errors": errors
             }, indent=2))
