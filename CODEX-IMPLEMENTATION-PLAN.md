@@ -12,7 +12,7 @@ VibeLearn is a **general system for generating effective learning games/worlds f
 
 The durable generation boundary is:
 
-`LearningSpec -> StoryWorldSpec -> GameDesignSpec -> WorldSpec -> RuntimeExperienceSpec -> EngineCompiler -> EngineRuntime`
+`LearningSpec -> StoryWorldSpec -> GameDesignSpec -> GameRulesSpec + WorldSpec -> RuntimeExperienceSpec -> EngineCompiler -> EngineRuntime`
 
 with `AssessmentEvidenceSpec` remaining authoritative and engine-independent throughout.
 
@@ -46,6 +46,12 @@ Owns premise, characters, locations, causal world rules, important resources/obj
 
 Owns actual game design: core loop, player verbs, mechanics, challenge/mission graph, difficulty curve, failure/recovery, rewards/payoff, tutorial/scaffolding policy, information schedule and mappings from play to learning outcomes.
 
+### GameRulesSpec
+
+Owns renderer-independent deterministic gameplay semantics: typed/bounded state, semantic actions, preconditions, transitions/effects, invariants, objectives, semantic events, seeded randomness contracts when required, and deterministic serialization/replay. It contains no engine objects, arbitrary generated code, assessment writes or learner mastery.
+
+The Phase 1 interpreter is already implemented and tested on both retry/idempotency semantics and an unrelated resource loop. Relay Rescue server behavior remains authoritative while equivalent semantic state/events are mapped incrementally.
+
 ### WorldSpec
 
 Owns engine-neutral executable world structure: scenes/zones, entities, semantic components, transforms, assets, physics intent, animation intent, cameras, lights, interactions, triggers, navigation intent, effects, world variables and prefab/archetype references.
@@ -64,7 +70,7 @@ Every engine implementation must sit behind an `EngineCompiler` / runtime adapte
 
 Conceptual build path:
 
-`Specs + AssetManifest + EngineTargetSpec -> validate -> compile -> EngineArtifactBundle -> runtime`
+`Learning/Story/GameDesign + GameRulesSpec + WorldSpec + RuntimeExperienceSpec + AssetManifest + EngineTargetSpec -> validate -> compile -> EngineArtifactBundle -> runtime`
 
 Backend capabilities include approximately:
 
@@ -88,7 +94,7 @@ Backend code never owns canonical competency IDs, assessment rules or learner ma
 
 The desired generation pipeline is:
 
-`course intent -> source grounding -> LearningSpec -> StoryWorldSpec -> story critic -> GameDesignSpec -> WorldSpec + RuntimeExperienceSpec -> capability validation -> engine compile -> runtime verification -> first-touch critic -> whole-game critic -> learning/transfer critic -> user review`
+`course intent -> source grounding -> LearningSpec -> StoryWorldSpec -> story critic -> GameDesignSpec -> GameRulesSpec + WorldSpec + RuntimeExperienceSpec -> capability validation -> engine compile -> runtime verification -> first-touch critic -> whole-game critic -> learning/transfer critic -> user review`
 
 Generated games should mostly be **validated specs/data + assets**.
 
@@ -128,7 +134,7 @@ Do not speculatively build a universal engine. Add versioned primitives when con
 
 WorldSpec references immutable `AssetRef`s rather than engine-native object identity.
 
-Track id/version/hash, provenance/license, semantic role, source format, derived engine variants and performance metadata.
+Track id/version/hash, provenance/license, semantic role, source format, derived engine variants and performance metadata. The implemented PlayCanvas path already pins verified GLB bytes at build time, serves them same-origin, keeps normalization and semantic animation aliases in WorldSpec, maps imported descendants back to semantic entities, retains primitive fallbacks, and reports imported bounds for measured normalization.
 
 Prefer portable interchange formats where practical (for example glTF for 3D assets) so future engine migration is feasible.
 
