@@ -15,8 +15,7 @@ add('island-right-top','cylinder','grass',[5.3,-.75,-.3],[7.2,.45,7.2]);
 
 const PIP_FALLBACK=[
   'pip-body','pip-head','pip-eye-l','pip-eye-r','pip-mouth','pip-arm-l','pip-arm-r',
-  'pip-hand-l','pip-hand-r','pip-leg-l','pip-leg-r','pip-boot-l','pip-boot-r',
-  'pip-pack','pip-scarf','pip-antenna','pip-beacon'
+  'pip-hand-l','pip-hand-r','pip-leg-l','pip-leg-r','pip-boot-l','pip-boot-r','pip-pack'
 ];
 entities.push({
   id:'pip',asset:'pip.robot',animation:'idle',animationBlendTime:.18,fallback:PIP_FALLBACK,
@@ -36,9 +35,11 @@ child('pip-leg-r','pip','cylinder','dark',[.24,.15,0],[.12,.38,.12]);
 child('pip-boot-l','pip','box','red',[-.24,-.17,.12],[.22,.12,.34]);
 child('pip-boot-r','pip','box','red',[.24,-.17,.12],[.22,.12,.34]);
 child('pip-pack','pip','box','forge',[0,.77,-.47],[.48,.52,.24]);
-child('pip-scarf','pip','box','red',[.44,1.18,-.04],[.75,.09,.22],{rotation:[0,-18,-8]});
-child('pip-antenna','pip','cylinder','dark',[0,2.13,0],[.04,.35,.04],{rotation:[0,0,4]});
-child('pip-beacon','pip','sphere','glass',[0,2.47,0],[.14,.14,.14],{motion:{type:'pulse',amplitude:.12,speed:2.2}});
+// Courier identity is an archetype/accessory layer, not asset-failure geometry.
+// These remain visible whether the authored GLB or the primitive fallback renders.
+child('pip-scarf','pip','box','red',[.48,1.42,-.02],[.82,.085,.20],{rotation:[0,-18,-10]});
+child('pip-antenna','pip','cylinder','dark',[0,2.08,0],[.035,.28,.035],{rotation:[0,0,4]});
+child('pip-beacon','pip','sphere','glass',[0,2.38,0],[.13,.13,.13],{motion:{type:'pulse',amplitude:.12,speed:2.2}});
 
 entities.push({id:'forge',position:[5.3,.15,-.5]});
 child('forge-body','forge','box','forge',[0,1,0],[2.5,1.9,2.15]);
@@ -108,12 +109,14 @@ beaconPositions.forEach(([x,z],i)=>{
 export const echoForgeWorldSpec=Object.freeze({
   schemaVersion:'1',
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-7',
+  version:'pc-phase1-8',
   environment:{clearColor:'#03111c',ambient:'#294651',exposure:1.18,toneMapping:'aces2',fog:{type:'exp2',color:'#0b2633',density:.018}},
   assets:{
     'pip.robot':{
       type:'container',src:'/assets/quaternius-animated-robot.glb',
-      transform:{position:[0,0,0],scale:[.32,.32,.32]},
+      // The source robot is much smaller than the authored Echo Forge character scale.
+      // Normalization belongs to AssetRef, not the PlayCanvas backend or Rescue adapter.
+      transform:{position:[0,-.08,0],scale:[.90,.90,.90]},
       animations:{
         idle:'RobotArmature|Robot_Idle',standing:'RobotArmature|Robot_Standing',
         wave:'RobotArmature|Robot_Wave',yes:'RobotArmature|Robot_Yes',no:'RobotArmature|Robot_No',
