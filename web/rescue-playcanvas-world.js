@@ -5,11 +5,11 @@ import {echoForgeWorldSpec} from './echo-forge-world-spec.js';
 
 export const gameWorldManifest=Object.freeze({
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-6',
+  version:'pc-phase1-7',
   engine:'playcanvas',
   specVersion:echoForgeWorldSpec.schemaVersion,
   modes:Object.freeze(['story','mission']),
-  capabilities:Object.freeze(['beats','mission-state','pause','replay','stats','fallback','semantic-picking'])
+  capabilities:Object.freeze(['beats','mission-state','pause','replay','stats','fallback','semantic-picking','animated-assets'])
 });
 
 const PIP_LIMBS=['pip-arm-l','pip-arm-r','pip-hand-l','pip-hand-r','pip-leg-l','pip-leg-r','pip-boot-l','pip-boot-r'];
@@ -32,7 +32,8 @@ function semanticPickFromSelection(ids=[]){
 }
 
 function storyPresentationPatch(beat){
-  const patch={hide:[...PIP_LIMBS],transforms:{}};
+  const index=Math.max(0,Math.min(5,Number(beat)||0));
+  const patch={hide:[...PIP_LIMBS],transforms:{},animations:{pip:['idle','no','yes','no','no','wave'][index]}};
   const poses=[
     {pip:{position:[-5.2,.42,1.2],rotation:[0,18,0],scale:[1.02,1.02,1.02]},'pip-head':{rotation:[0,-8,0]}},
     {pip:{position:[-5.0,.42,1.2],rotation:[0,8,-5],scale:[1.03,1.03,1.03]},'pip-head':{rotation:[0,2,-10]}},
@@ -41,10 +42,10 @@ function storyPresentationPatch(beat){
     {pip:{position:[-4.9,.42,1.12],rotation:[0,18,0],scale:[1.02,1.02,1.02]},'pip-head':{rotation:[0,18,-5]}},
     {pip:{position:[-4.65,.42,1.05],rotation:[0,28,0],scale:[1.02,1.02,1.02]},'pip-head':{rotation:[0,-10,0]}}
   ];
-  patch.transforms=poses[Math.max(0,Math.min(5,Number(beat)||0))];
+  patch.transforms=poses[index];
   // The old final close-up magnified the procedural character weaknesses. End
   // on the whole causal space instead: Pip, broken crossing and Forge together.
-  if(Number(beat)===5)patch.camera='story.0';
+  if(index===5)patch.camera='story.0';
   return patch;
 }
 
@@ -56,7 +57,8 @@ function missionPatch(state={}){
     camera:'mission.forge',
     show:[],
     hide:['new-gear','duplicate-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear',...PIP_LIMBS],
-    transforms:{'pip':{position:[-5.0,.42,1.1],rotation:[0,18,0],scale:[1.02,1.02,1.02]}}
+    transforms:{'pip':{position:[-5.0,.42,1.1],rotation:[0,18,0],scale:[1.02,1.02,1.02]}},
+    animations:{pip:'idle'}
   };
 
   // World truth is deliberately not rendered as learner-visible knowledge until
@@ -68,11 +70,13 @@ function missionPatch(state={}){
 
   if(state.failed){
     patch.camera='mission.failure';
+    patch.animations.pip='no';
     patch.hide=patch.hide.filter(id=>id!=='duplicate-gear');
     patch.show.push('duplicate-gear');
     patch.transforms={...patch.transforms,'pip':{position:[-5.0,.42,1.1],rotation:[0,0,-8],scale:[1.02,1.02,1.02]},'pip-head':{rotation:[10,0,-12]}};
   }else if(state.complete){
     patch.camera='mission.success';
+    patch.animations.pip='thumbsUp';
     // Completion is presentation state, not new game truth: install the already
     // discovered gear into the bridge and place Pip across the gap so success
     // reads in the world before the textual recap appears.
@@ -84,9 +88,11 @@ function missionPatch(state={}){
     };
   }else if(rewound||looked.has('ticket')||(state.ticket&&state.ticket!=='order-01')){
     patch.camera='mission.choice';
+    patch.animations.pip='no';
     patch.transforms={...patch.transforms,'pip-head':{rotation:[0,16,-4]}};
   }else if(looked.has('workshop')){
     patch.camera='mission.ticket';
+    patch.animations.pip='wave';
     patch.transforms={...patch.transforms,'pip-head':{rotation:[0,-16,0]}};
   }
 
