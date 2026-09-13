@@ -143,10 +143,24 @@ beaconPositions.forEach(([x,z],i)=>{
   add(`beacon-lamp-${i}`,'sphere',i===0?'glass':'beacon',[x,1.78,z],[.42,.42,.42],{motion:{type:'pulse',amplitude:i===0?.14:.08,speed:1.5+i*.07}});
 });
 
+// Reusable authored primitives compose the opening's home, guide light and stakes.
+add('restored-crossing','box','wood',[0,.18,1],[.7,.15,1.05],{enabled:false});
+add('first-signal-restored','sphere','ember',[-1.6,1,1.6],[.5,.5,.5],{enabled:false});
+add('keeper-base','cylinder','bronze',[-1.6,.5,1.6],[.2,.8,.2]);
+add('keeper-light','sphere','glass',[-1.6,1,1.6],[.35,.35,.35]);
+add('keeper-glow','sphere','ember',[-1.6,1,1.6],[.48,.48,.48],{enabled:false});
+for(let i=0;i<3;i++)add(`guide-path-${i}`,'sphere','glass',[-2.4+i*.6,.4,1.1],[.13,.13,.13],{enabled:false});
+add('home-island-rock','cone','rock',[0,-2.1,-5],[4,3,4]);
+add('home-island-top','cylinder','grass',[0,-.7,-5],[3.9,.2,3.9]);
+add('pip-home','box','wood',[0,0,-5],[1.6,1.6,1.5]);
+add('pip-home-roof','cone','red',[0,1.25,-5],[2.15,1.2,2.1]);
+add('home-window','box','ember',[0,.45,-4.22],[.48,.55,.06]);
+for(let i=0;i<5;i++)add(`echo-path-${i}`,'sphere','glass',[-.6+i*1.0,.55,1.1],[.12,.12,.12],{enabled:false});
+add('reserve-ember','sphere','ember',[3.85,.95,1.8],[.28,.36,.28]);
 export const echoForgeWorldSpec=Object.freeze({
   schemaVersion:'1',
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-13',
+  version:'pc-phase1-14',
   environment:{clearColor:'#03111c',ambient:'#294651',exposure:1.18,toneMapping:'aces2',fog:{type:'exp2',color:'#0b2633',density:.018}},
   assets:{
     'pip.robot':{
@@ -207,7 +221,7 @@ export const echoForgeWorldSpec=Object.freeze({
   cameras:{
     'story.0':{
       position:[0,7.4,18.6],lookAt:[0,.8,-1.7],fov:46,
-      portrait:{position:[.2,2.35,19.2],lookAt:[.3,.45,.7],fov:48}
+      portrait:{position:[-1.3,3.2,14.2],lookAt:[-1.1,1.0,.3],fov:48}
     },
     'story.1':{
       position:[-1.3,4.7,11.6],lookAt:[-1.5,.7,1],fov:44,
@@ -243,7 +257,7 @@ export const echoForgeWorldSpec=Object.freeze({
     },
     'mission.choice':{
       position:[0,5.0,13.2],lookAt:[0,.9,.7],fov:47,
-      portrait:{position:[.1,3.05,12.6],lookAt:[0,.8,.8],fov:47}
+      portrait:{position:[1.0,4.0,20.5],lookAt:[1.0,.8,.8],fov:47}
     },
     'mission.failure':{
       position:[4.8,3.1,8.5],lookAt:[5.1,.9,1.0],fov:41,
@@ -251,7 +265,7 @@ export const echoForgeWorldSpec=Object.freeze({
     },
     'mission.success':{
       position:[0,4.4,11.8],lookAt:[0,.6,1.0],fov:44,
-      portrait:{position:[0,2.75,10.5],lookAt:[0,.55,1.0],fov:43}
+      portrait:{position:[1.4,3.1,12.5],lookAt:[1.3,.9,1.0],fov:43}
     }
   },
   states:{

@@ -11,7 +11,7 @@ window.RescueGame = (() => {
   function hide(){stageCleanup();stageCleanup=()=>{};if(root)root.hidden=true;document.body.classList.remove('rescue-active');}
   function setResponse(value){log=structuredClone(value||{moves:[],draft:[]});program=[...(log.draft||[])];}
   function response(){return structuredClone(log);}
-  function top(progress,mode){return `<header class="rg-top"><button type="button" id="rg-map" aria-label="Open rescue map">↗ <b>RELAY RESCUE</b></button><span>${esc(mode)}</span><div><span class="rg-progress">${progress} / 7 signals</span><button type="button" id="rg-options" aria-expanded="false">Menu</button></div></header><div id="rg-menu" hidden><button type="button" id="rg-xp">${xp?'Hide':'Show'} practice XP</button><button type="button" id="rg-save">Save current run</button><button type="button" id="rg-exit">Account / sign out</button><button type="button" id="rg-record">Record rehearsal and restart</button><a href="/?play=expedition">Earlier expedition & 3D prototype</a></div>`;}
+  function top(progress,mode){return `<header class="rg-top"><button type="button" id="rg-map" aria-label="Open rescue map">↗ <b>RELAY RESCUE</b></button><span>${esc(mode)}</span><div><span class="rg-progress">${progress} / 7 signals</span><button type="button" id="rg-options" aria-expanded="false">Menu</button></div></header><div id="rg-menu" hidden><button type="button" id="rg-xp">${xp?'Hide':'Show'} practice XP</button><button type="button" id="rg-save">Save current run</button><button type="button" id="rg-exit">Account / sign out</button><button type="button" id="rg-record">Record rehearsal and restart</button></div>`;}
   function bindTop(){
     root.querySelector('#rg-map').onclick=()=>cb.campaign();
     root.querySelector('#rg-options').onclick=e=>{const m=root.querySelector('#rg-menu');m.hidden=!m.hidden;e.currentTarget.setAttribute('aria-expanded',String(!m.hidden));};
@@ -22,23 +22,7 @@ window.RescueGame = (() => {
   }
   function world(s={},done=false){
     const effects=s.visible_effects, failed=s.failed;
-    return `<div class="rg-world ${failed?'rg-world-failed':''} ${done?'rg-world-clear':''}" data-action="${esc(s.trail?.at(-1)?.action||'')}"><svg viewBox="0 0 920 360" role="img" aria-label="${done?'The bridge and signal light are restored.':'Pip and the Echo Forge are on opposite islands. A message route crosses the valley.'}">
-    <defs><linearGradient id="rg-sky" x2="0" y2="1"><stop stop-color="#101e36"/><stop offset="1" stop-color="#41657c"/></linearGradient><linearGradient id="rg-water" x2="1" y2="1"><stop stop-color="#79cec4"/><stop offset="1" stop-color="#276d7e"/></linearGradient><radialGradient id="rg-glow"><stop stop-color="#f8d592" stop-opacity=".75"/><stop offset="1" stop-color="#f8d592" stop-opacity="0"/></radialGradient></defs>
-    <rect width="920" height="360" fill="url(#rg-sky)"/><circle cx="773" cy="66" r="27" fill="#e9e8cd"/>
-    <g fill="#cedad3"><circle cx="85" cy="44" r="2"/><circle cx="228" cy="70" r="1.5"/><circle cx="414" cy="34" r="2"/><circle cx="555" cy="69" r="1.5"/><circle cx="692" cy="32" r="2"/></g>
-    <path d="M0 184L95 99L235 199L373 84L529 193L662 104L825 171L920 126V360H0Z" fill="#2d4d66"/><path d="M0 242L150 154L296 249L464 153L601 247L751 175L920 229V360H0Z" fill="#345e6d"/>
-    <path d="M394 213Q533 244 452 360H672Q525 281 506 213" fill="url(#rg-water)"/>
-    <path d="M15 218L240 165L388 221L367 282L274 337L53 294Z" fill="#1d3444"/><path d="M15 218L240 165L388 221L178 278Z" fill="#709f85"/><path d="M26 218L239 174L361 221L175 267Z" fill="#83b18e"/>
-    <path d="M573 216L749 159L908 212L872 293L664 328L592 281Z" fill="#1d3444"/><path d="M573 216L749 159L908 212L698 270Z" fill="#719b7d"/>
-    <g stroke="#caaf82" fill="none"><path d="M350 218Q475 274 619 221" stroke-width="3" stroke-dasharray="8 7"/>${done?'<path d="M361 247L609 238" stroke="#c89d65" stroke-width="17"/><path d="M364 220L612 211" stroke-width="4"/><path d="M368 218V251M419 222V250M470 220V247M520 217V246M570 214V244M610 210V242" stroke-width="4"/>':'<path d="M351 251L390 249M579 241L619 239" stroke-width="14"/>'}</g>
-    <g class="rg-house"><path d="M718 152L804 165V238L718 225Z" fill="#cbb697"/><path d="M685 175L718 152V225L685 243Z" fill="#b59170"/><path d="M671 181L723 120L826 166L788 181L718 158L695 186Z" fill="#344355"/><path d="M699 209V178L715 173V206" fill="#edcb80"/><path d="M750 220V184L780 190V225" fill="#2a4450"/><path d="M774 144V114L790 119V151" fill="#ac9c83"/><circle cx="707" cy="191" r="51" fill="url(#rg-glow)"/></g>
-    <g transform="translate(${done?588:252} 213)"><ellipse cy="34" rx="27" ry="7" fill="#163747" opacity=".6"/><path d="M-10 15L-16 29M10 15L16 29" stroke="#e8bf79" stroke-width="8" stroke-linecap="round"/><rect x="-17" y="-3" width="34" height="25" rx="7" fill="#ddae64"/><rect x="-23" y="-36" width="46" height="32" rx="11" fill="#f2cf8b"/><rect x="-17" y="-29" width="34" height="17" rx="7" fill="#143a4a"/><circle cx="-7" cy="-21" r="3" fill="#b3e8dd"/><circle cx="7" cy="-21" r="3" fill="#b3e8dd"/><path d="M0-36V-48" stroke="#f2cf8b" stroke-width="3"/><circle cy="-49" r="4" fill="#a4e8d9"/><path d="M-17-6L22-6L13 2L-20 2L-30 13L-37 7Z" fill="#d87b62"/></g>
-    <g transform="translate(164 225)"><path d="M-26 0L1-11L27 1L0 14Z" fill="#d6b884"/><path d="M-26 0V-15L0-2V14M27 1V-14L0-2" fill="#b48e5e"/><path d="M-26-15L0-26L27-14L0-2Z" fill="#edcf94"/></g>
-    <g transform="translate(838 183)"><path d="M-6 22V-53H6V22" fill="#57747a"/><circle cy="-58" r="16" fill="${done?'#f4d383':'#638d8b'}"/>${done?'<circle cy="-58" r="49" fill="url(#rg-glow)"/>':''}</g>
-    <g class="rg-gears" fill="${failed?'#f09a80':'#f2d195'}" stroke="#624d38" stroke-width="3">${Array.from({length:effects===null?0:Math.min(effects||0,2)},(_,i)=>`<g transform="translate(${681+i*49} 240)"><path d="M-6-18H6L9-12L16-11L19 0L13 5L13 14L3 19L-3 14L-12 15L-19 5L-14-2L-17-11L-9-12Z"/><circle r="6" fill="#294755"/></g>`).join('')}</g>
-    <g class="rg-packet"><rect x="298" y="176" width="24" height="17" rx="2" fill="#ffe5a8"/><path d="M298 176L310 185L322 176" stroke="#99754f" fill="none"/></g>
-    <g fill="#244951"><path d="M68 189L93 128L115 191ZM90 204L123 147L144 203ZM835 197L858 144L882 202Z"/></g>
-    </svg><div class="rg-place rg-pip-label">PIP · COURIER</div><div class="rg-place rg-shop-label">ECHO FORGE</div><div class="rg-scene-readout"><span><small>Forge effects</small><b id="rg-effects">${effects===null||effects===undefined?'Not inspected':effects+' gear'+(effects===1?'':'s')}</b></span><span><small>What we know</small><b id="rg-knowledge">${esc(s.knowledge||'Seven signals to restore')}</b></span></div></div>`;
+    return `<div class="rg-world ${failed?'rg-world-failed':''} ${done?'rg-world-clear':''}" data-action="${esc(s.trail?.at(-1)?.action||'')}"><div class="rg-place rg-pip-label">PIP · COURIER</div><div class="rg-place rg-shop-label">ECHO FORGE</div><div class="rg-scene-readout"><span><small>Forge effects</small><b id="rg-effects">${effects===null||effects===undefined?'Not inspected':effects+' gear'+(effects===1?'':'s')}</b></span><span><small>What we know</small><b id="rg-knowledge">${esc(s.knowledge||'Seven signals to restore')}</b></span></div></div>`;
   }
   function map(missions,a,handlers){
     setup(handlers);attempt=a;const n=missions.filter(m=>m.status==='cleared').length;const next=missions.find(m=>m.status==='unlocked')||missions.at(-1);const active=a?.status==='draft';
@@ -81,7 +65,7 @@ window.RescueGame = (() => {
   function setProgram(p){program=p.filter(Boolean).slice(0,4);log.draft=[...program];cb.edit();}
   function record(move){log.moves.push(move);cb.edit();}
   async function act(move,submit=false){
-    if(!attempt||attempt.status!=='draft')return false;
+    if(!attempt||attempt.status!=='draft'||root.querySelector('.game-world-status'))return false;
     if(log.moves.length!==attempt.response.rescue.moves.length){cb.error('Save the pending move before acting again.');return false;}
     retrySubmit=submit;log.draft=[...program];record(move);
     const feedback=root?.querySelector('#rg-feedback');if(feedback)feedback.textContent=submit?'Committing your repair before revealing the result…':'Pip is trying your idea…';

@@ -24,7 +24,11 @@ Active docs contained stale 2D/Three.js choices despite the strategic PlayCanvas
 
 ## Current verification and limits
 
-Documentation reconciliation and story/progression revision are in progress. No new code candidate, rendered score, user acceptance or deployment is claimed. Preserve Supabase auth/RLS, authoritative progression, immutable evidence, assistance semantics and all existing tests. Phase 2 remains closed.
+Documentation reconciliation was committed first at `2bfb776767916ce5f8aad0b896653e7e62b9282e`. Story-v3 passed the separate story-only review at 9.059; this is not a rendered or user pass.
+
+The implementation checkpoint adds a reusable, spec-driven opening controller, separate Echo Forge content, a versioned world package, isolated replay runtime, saved-attempt entry/resume decisions, a world HUD for the first tutorial/success, and explicit 3D recovery in place of SVG gameplay. A materially different Seed Garden opening uses the same controller/backend without copied engine code. Context loss blocks actions; restoration reapplies completed opening actions. Late map mounting cannot steal the opening canvas.
+
+Local opening/replay/hosted-login and recovery checks have passed during iteration. Full exact-candidate CI/PostgreSQL/browser verification is pending. The provisional independent first-touch review scored 7.974/10 before the latest home/route composition repairs; it remains below the gate and is not a final candidate score. Whole-game rendered and learning reviews remain outstanding. No new deployment or user acceptance is claimed. Preserve Supabase auth/RLS, authoritative progression, immutable evidence and assistance semantics. Phase 2 remains closed.
 
 Earlier technical history is preserved in history/STATE-before-opening-review-20260913.md; its current-state labels and preview instructions are historical only.
 

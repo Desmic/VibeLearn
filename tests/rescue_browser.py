@@ -14,7 +14,7 @@ def main():
     out=ROOT/'artifacts';out.mkdir(exist_ok=True);errors=[];checks=[]
     with tempfile.TemporaryDirectory() as tmp,sync_playwright() as p:
         proc,url=start_server(Path(tmp)/'rescue.db');b=p.chromium.launch()
-        ctx=b.new_context(viewport=dict(width=1440,height=1000));ctx.add_init_script(ONBOARDING_DONE);ctx.tracing.start(screenshots=True,snapshots=True,sources=True)
+        ctx=b.new_context(viewport=dict(width=1440,height=1000));ctx.tracing.start(screenshots=True,snapshots=True,sources=True)
         page=ctx.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
         runtime_identity=[None]
         def shot(name):
@@ -123,13 +123,15 @@ def main():
               return {rescue:window.RescueGame?.response?.(),entries};
             }""")
         try:
-            page.goto(url);expect(page.locator('#rg-launch')).to_be_visible()
+            page.goto(url);expect(page.locator('#rgi-intro')).to_be_visible()
             expect(page.locator('[data-mission="rescue-07"]')).to_be_disabled();shot('rescue-map.png')
-            page.locator('#rg-launch').focus();page.keyboard.press('Enter')
-            expect(page.locator('#rg-feedback')).to_be_visible();expect_story_world_continuity();shot('rescue-first.png')
-            assert page.locator('[data-tool="retry"]').bounding_box()['y']<1000
+            page.locator('#rgi-skip').focus();page.keyboard.press('Enter')
+            expect(page.locator('.rgc1-coach')).to_be_visible();expect_story_world_continuity();shot('rescue-first.png')
             expect(page.locator('#rg-effects')).to_have_text('Not inspected')
             page.locator('[data-world-look="workshop"]').click();expect(page.locator('#rg-effects')).to_have_text('1 gear')
+            page.locator('[data-world-look="ticket"]').click()
+            expect(page.locator('[data-tool="retry"]')).to_be_visible()
+            assert page.locator('[data-tool="retry"]').bounding_box()['y']<1000
             move('new');move('retry');expect(page.locator('[data-tool="rewind"]')).to_be_visible();shot('rescue-setback.png')
             move('rewind');move('retry');next_level();expect_story_world_continuity()
             move('retry');expect(page.locator('#rg-effects')).to_have_text('2 gears')

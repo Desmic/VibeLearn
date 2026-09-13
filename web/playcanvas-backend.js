@@ -352,6 +352,13 @@ class PlayCanvasWorld {
     return null;
   }
 
+  projectEntity(id){
+    const entity=this.entities.get(id);
+    if(!entity||!entity.enabled||!this.available)return null;
+    const point=this.camera.camera.worldToScreen(entity.getPosition());
+    const rect=this.canvas.getBoundingClientRect();
+    return {x:point.x,y:point.y,visible:point.z>0};
+  }
   async pickEntityIdsAt(clientX,clientY,{radius=7}={}){
     if(this.disposed||!this.available||!this.camera?.camera)return [];
     const rect=this.canvas.getBoundingClientRect();

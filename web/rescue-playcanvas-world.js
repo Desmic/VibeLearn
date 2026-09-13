@@ -97,7 +97,7 @@ export const transferWorldSpec=Object.freeze({
 
 export const gameWorldManifest=Object.freeze({
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-13',
+  version:'pc-phase1-14',
   engine:'playcanvas',
   specVersion:echoForgeWorldSpec.schemaVersion,
   modes:Object.freeze(['story','mission','transfer']),
@@ -117,7 +117,7 @@ function semanticPick(entityId){
   if(entityId==='broken-gear'||entityId.startsWith('broken-gear-'))return 'broken-gear';
   if(entityId==='order-seal')return 'order-seal';
   if(entityId==='reply-orb'||entityId.startsWith('storm-bolt'))return 'signal';
-  if(entityId==='beacon-0'||entityId==='beacon-lamp-0')return 'signal-tower';
+  if(entityId==='keeper-light'||entityId==='keeper-glow'||entityId==='beacon-0'||entityId==='beacon-lamp-0')return 'signal-tower';
   if(entityId==='pip'||entityId.startsWith('pip-'))return 'pip';
   if(entityId==='forge'||entityId.startsWith('forge-'))return 'forge';
   return entityId;
@@ -130,7 +130,7 @@ function semanticPickFromSelection(ids=[]){
 
 function storyPresentationPatch(beat){
   const index=Math.max(0,Math.min(5,Number(beat)||0));
-  const patch={hide:[...PIP_LIMBS],transforms:{},animations:{pip:['idle','no','yes','no','no','wave'][index]}};
+  const patch={hide:['guide-path-0','guide-path-1','guide-path-2','keeper-glow',...Array.from({length:5},(_,i)=>`echo-path-${i}`),...PIP_LIMBS],transforms:{},animations:{pip:['idle','no','yes','no','no','wave'][index]}};
   const poses=[
     {pip:{position:[PIP_LEFT_X-.10,.42,1.2],rotation:[0,18,0],scale:[1.02,1.02,1.02]},'pip-head':{rotation:[0,-8,0]}},
     {pip:{position:[PIP_LEFT_X,.42,1.2],rotation:[0,8,-5],scale:[1.03,1.03,1.03]},'pip-head':{rotation:[0,2,-10]}},
@@ -139,8 +139,12 @@ function storyPresentationPatch(beat){
     {pip:{position:[PIP_LEFT_X+.10,.42,1.12],rotation:[0,18,0],scale:[1.02,1.02,1.02]},'pip-head':{rotation:[0,18,-5]}},
     {pip:{position:[PIP_LEFT_X+.25,.42,1.05],rotation:[0,28,0],scale:[1.02,1.02,1.02]},'pip-head':{rotation:[0,-10,0]}}
   ];
-  patch.transforms=poses[index];
-  if(index===5)patch.camera='story.0';
+  patch.transforms={...poses[index],...(index>0?{'bridge-left-6':{rotation:[0,0,14]},'bridge-right-6':{rotation:[0,0,-14]}}:{})};
+  if(index===5){
+    patch.camera='mission.choice';
+    patch.show=['keeper-glow','guide-path-0','guide-path-1','guide-path-2',...Array.from({length:5},(_,i)=>`echo-path-${i}`)];
+    patch.hide=patch.hide.filter(id=>!patch.show.includes(id));
+  }
   return patch;
 }
 
@@ -154,7 +158,7 @@ function missionPatch(state={}){
     camera:'mission.forge',
     show:[],
     hide:['new-gear','duplicate-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear',...PIP_LIMBS],
-    transforms:{'pip':{position:[PIP_LEFT_X,.42,1.1],rotation:[0,18,0],scale:[1.02,1.02,1.02]}},
+    transforms:{'bridge-left-6':{rotation:[0,0,14]},'bridge-right-6':{rotation:[0,0,-14]},'pip':{position:[PIP_LEFT_X,.42,1.1],rotation:[0,18,0],scale:[1.02,1.02,1.02]}},
     animations:{pip:'idle'}
   };
 
@@ -170,6 +174,8 @@ function missionPatch(state={}){
     patch.show.push('duplicate-gear');
     patch.transforms={...patch.transforms,'pip':{position:[PIP_LEFT_X,.42,1.1],rotation:[0,0,-8],scale:[1.02,1.02,1.02]},'pip-head':{rotation:[10,0,-12]}};
   }else if(state.complete){
+    patch.show.push('restored-crossing','first-signal-restored');
+    patch.transforms['bridge-left-6']={rotation:[0,0,0]};patch.transforms['bridge-right-6']={rotation:[0,0,0]};
     patch.camera='mission.success';
     patch.animations.pip='thumbsUp';
     patch.transforms={
@@ -268,6 +274,8 @@ export function createGameWorld(host,{reducedMotion=false,mode='story'}={}){
     engine:'playcanvas',
     setMode(value){currentMode=value;},
     setBeat(index){currentMode='story';applyBeat(index);},
+    applyPresentation(patch){engine.applyPatch(patch);},
+    projectEntity(id){return engine.projectEntity(id);},
     setMissionState(state){applyMission(state);},
     setTransferState(){},
     setPaused(value){engine.setPaused(value);},

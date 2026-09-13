@@ -52,6 +52,7 @@
       transferWorld.setTransferState?.(transferPresentationState(a));
       return;
     }
+    window.GameWorldStatus?.set(surface,'loading');
     const token=++transferMountToken;
     transferWorld?.dispose?.();transferWorld=null;transferHost=surface;
     try{
@@ -63,17 +64,23 @@
       });
       if(token!==transferMountToken||!surface.isConnected){world?.dispose?.();return;}
       if(!world?.available){
-        surface.dataset.playCanvasBackend='fallback';
+        surface.dataset.playCanvasBackend='unavailable';
+        window.GameWorldStatus?.set(surface,'failed');
         surface.dataset.playCanvasError=String(world?.error||'PlayCanvas unavailable').slice(0,180);
         return;
       }
       transferWorld=world;transferHost=surface;
       surface.dataset.playCanvasBackend='playcanvas';
+      window.GameWorldStatus?.set(surface,'ready');
+      const canvas=surface.querySelector('canvas');
+      canvas?.addEventListener('webglcontextlost',e=>{e.preventDefault();window.GameWorldStatus?.set(surface,'failed');});
+      canvas?.addEventListener('webglcontextrestored',()=>window.GameWorldStatus?.set(surface,'ready'));
       delete surface.dataset.playCanvasError;
       world.setTransferState?.(transferPresentationState(a));
     }catch(error){
       if(token!==transferMountToken)return;
-      surface.dataset.playCanvasBackend='fallback';
+      surface.dataset.playCanvasBackend='unavailable';
+        window.GameWorldStatus?.set(surface,'failed');
       surface.dataset.playCanvasError=String(error?.message||error).slice(0,180);
     }
   }

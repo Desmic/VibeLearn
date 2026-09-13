@@ -119,7 +119,7 @@ def create_app(config=None, auth_provider=None):
     def asset(asset):
         if asset not in (
             "rescue-game.js", "rescue.js", "rescue.css", "play-canvas.js", "play-canvas-migrate.js", "play-canvas.css",
-            "game-runtime.js", "world-spec.js", "playcanvas-backend.js", "echo-forge-world-spec.js", "rescue-playcanvas-world.js",
+            "game-runtime.js", "game-opening.js", "game-world-status.js", "echo-forge-opening-spec.js", "world-spec.js", "playcanvas-backend.js", "echo-forge-world-spec.js", "rescue-playcanvas-world.js",
             "rescue-intro.js", "rescue-intro.css", "rescue-story3d.js", "story3d-runtime.js", "story3d-world-host.js",
             "rescue-chapter1.js", "rescue-chapter1.css", "auth-game.js", "auth-game.css",
             "progress-controls.js", "progress-controls.css", "phone-first.css",

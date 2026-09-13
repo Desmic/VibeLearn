@@ -102,6 +102,10 @@ def make_server(database, port=8000):
                 "/rescue.css": ("rescue.css", "text/css"),
                 "/play-canvas.js": ("play-canvas.js", "text/javascript"),
                 "/game-runtime.js": ("game-runtime.js", "text/javascript"),
+                "/game-opening.js": ("game-opening.js", "text/javascript"),
+                "/game-world-status.js": ("game-world-status.js", "text/javascript"),
+                "/echo-forge-opening-spec.js": ("echo-forge-opening-spec.js", "text/javascript"),
+
                 "/world-spec.js": ("world-spec.js", "text/javascript"),
                 "/playcanvas-backend.js": ("playcanvas-backend.js", "text/javascript"),
                 "/echo-forge-world-spec.js": ("echo-forge-world-spec.js", "text/javascript"),

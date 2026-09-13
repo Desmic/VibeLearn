@@ -45,6 +45,7 @@ def main():
             "tests.playcanvas_framework_browser",
             "tests.playcanvas_story_interaction_browser",
             "tests.onboarding_browser",
+            "tests.opening_contract_browser",
             "tests.rescue_browser",
         ]:
             result = subprocess.call([sys.executable, "-m", module, *sys.argv[2:]], cwd=ROOT)

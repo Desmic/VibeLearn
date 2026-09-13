@@ -152,6 +152,16 @@ class HostedTests(unittest.TestCase):
                     expect(reset_password).to_have_attribute("type", "password")
                     expect(page.locator("#notice")).to_contain_text("Password updated")
                     expect(page.locator("#sign-in")).to_be_visible()
+                    page.locator("#login-email").fill("owner@example.test")
+                    page.locator("#login-password").fill("test-password")
+                    page.get_by_role("button", name="Enter campaign", exact=True).click()
+                    expect(page.locator("#rgi-intro")).to_be_visible(timeout=15000)
+                    expect(page.locator("#rgi-world .vl-playcanvas-engine")).to_be_visible(timeout=15000)
+                    page.locator("#rgi-skip").click()
+                    expect(page.locator(".rgc1-coach")).to_be_visible(timeout=15000)
+                    page.reload()
+                    expect(page.locator(".rgc1-coach")).to_be_visible(timeout=15000)
+                    expect(page.locator("#rgi-intro")).to_have_count(0)
                 finally:
                     browser.close()
         finally:
