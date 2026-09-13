@@ -11,7 +11,7 @@ The product objective is to **generate high-quality learning games/worlds on dem
 
 The strategic hierarchy is:
 
-`LearningSpec -> StoryWorldSpec -> GameDesignSpec -> WorldSpec -> RuntimeExperienceSpec -> EngineCompiler -> EngineRuntime`
+`LearningSpec -> StoryWorldSpec -> GameDesignSpec -> GameRulesSpec + WorldSpec -> RuntimeExperienceSpec -> EngineCompiler -> EngineRuntime`
 
 The first strategic engine target is **PlayCanvas Engine** because VibeLearn is currently browser/phone-first and needs a real web game engine with entities/components, animation, physics, input, audio, assets and WebGL/WebGPU support.
 
@@ -77,7 +77,23 @@ Owns actual play:
 
 A lesson page with a renderer is not a valid GameDesignSpec.
 
-### 4. WorldSpec
+### 4. GameRulesSpec
+
+Owns deterministic gameplay truth independently of rendering and assessment:
+
+- typed game state and bounded resources;
+- semantic player actions and preconditions;
+- deterministic transitions/effects and branches;
+- invariants and objectives;
+- semantic game events;
+- seeded randomness contracts where needed;
+- serialization/replay/versioning.
+
+GameRulesSpec contains no PlayCanvas/Unity/Unreal objects and no arbitrary generated code. Engine state is a projection of game truth, not the authority for it. `AssessmentEvidenceSpec` may consume validated observations/events but remains a separate authority: winning an engine interaction is not itself evidence of mastery.
+
+The current Phase 1 interpreter already proves this boundary on both retry/idempotency semantics and an unrelated bounded-resource loop. Mature Relay Rescue server semantics remain authoritative and should be mapped incrementally rather than rewritten for architectural purity.
+
+### 5. WorldSpec
 
 Engine-neutral executable world description.
 
@@ -102,7 +118,7 @@ It should describe reusable game primitives such as:
 
 WorldSpec states **what exists and how it behaves**, not how a particular engine API constructs it.
 
-### 5. RuntimeExperienceSpec
+### 6. RuntimeExperienceSpec
 
 Owns cross-engine runtime orchestration:
 
@@ -118,7 +134,7 @@ Owns cross-engine runtime orchestration:
 
 This replaces the old architectural meaning of “Play Canvas.” Existing `play-canvas*.js` names are migration implementation details, not the long-term product abstraction.
 
-### 6. AssessmentEvidenceSpec
+### 7. AssessmentEvidenceSpec
 
 Owns evidence semantics and remains outside engine truth:
 
@@ -140,6 +156,7 @@ Conceptually:
 compile({
   storyWorldSpec,
   gameDesignSpec,
+  gameRulesSpec,
   worldSpec,
   runtimeExperienceSpec,
   engineTarget,
@@ -240,7 +257,7 @@ learning goal
   -> LearningSpec
   -> story/world candidate
   -> GameDesignSpec
-  -> WorldSpec + RuntimeExperienceSpec
+  -> GameRulesSpec + WorldSpec + RuntimeExperienceSpec
   -> validate schemas/capabilities
   -> compile PlayCanvas artifact
   -> run automated mechanic/world checks
@@ -311,6 +328,8 @@ WorldSpec should reference immutable `AssetRef`s with:
 - derived engine variants;
 - size/performance metadata;
 - safety/moderation status where applicable.
+
+The first concrete Phase 1 contract is now implemented for container/glTF assets: build-time acquisition is pinned to immutable upstream bytes and provenance, learner runtime serves the verified artifact same-origin, WorldSpec owns normalization transforms and semantic animation aliases, imported child meshes map back to a stable semantic entity, and declared primitive fallbacks remain available if realization fails. The generic PlayCanvas backend can also report imported render bounds so normalization can be measured rather than guessed. None of this changes game or assessment truth.
 
 Prefer portable interchange formats where practical (for example glTF for 3D) so assets are not permanently locked to one engine.
 
