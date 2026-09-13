@@ -5,7 +5,7 @@ import * as pc from './vendor/playcanvas.mjs';
 import {validateWorldSpec} from './world-spec.js';
 
 export const PLAYCANVAS_ENGINE_VERSION='2.22.1';
-export const PLAYCANVAS_BACKEND_VERSION='1';
+export const PLAYCANVAS_BACKEND_VERSION='2';
 const PORTRAIT_ASPECT_MAX=.9;
 const FOG_TYPES={none:pc.FOG_NONE,linear:pc.FOG_LINEAR,exp:pc.FOG_EXP,exp2:pc.FOG_EXP2};
 const TONE_MAPPINGS={
@@ -54,8 +54,18 @@ class PlayCanvasWorld {
     this.paused=false;
     this.state=null;
     this.entities=new Map();
+    this.entityDefinitions=new Map();
+    this.semanticNodes=new WeakMap();
     this.baseline=new Map();
     this.materials=new Map();
+    this.assetInstances=new Map();
+    this.assetFallbackHidden=new Set();
+    this.desiredAnimations=new Map();
+    this.activeAnimations=new Map();
+    this.assetsPending=0;
+    this.assetsLoaded=0;
+    this.assetsFailed=0;
+    this.assetErrors=[];
     this.elapsed=0;
     this.disposed=false;
     this.cameraVariant='default';
@@ -103,6 +113,7 @@ class PlayCanvasWorld {
     app.root.addChild(this.root);
     for(const definition of this.spec.entities)this._createEntity(definition);
     for(const definition of this.spec.lights||[])this._createLight(definition);
+    for(const definition of this.spec.entities){if(definition.asset)this._loadAssetEntity(definition);}
 
     this.camera=new pc.Entity('vibelearn-camera');
     this.camera.addComponent('camera',{
@@ -154,6 +165,8 @@ class PlayCanvasWorld {
     if(!parent)throw new Error(`WorldSpec parent ${def.parent} must appear before ${def.id}`);
     parent.addChild(entity);
     this.entities.set(def.id,entity);
+    this.entityDefinitions.set(def.id,def);
+    this.semanticNodes.set(entity,def.id);
     this.baseline.set(def.id,{
       enabled:entity.enabled,
       position:[entity.getLocalPosition().x,entity.getLocalPosition().y,entity.getLocalPosition().z],
@@ -176,6 +189,73 @@ class PlayCanvasWorld {
     this.root.addChild(entity);
   }
 
+  _loadAssetEntity(def){
+    const assetDef=this.spec.assets?.[def.asset];
+    const semanticEntity=this.entities.get(def.id);
+    if(!assetDef||!semanticEntity)return;
+    this.assetsPending+=1;
+    this.app.assets.loadFromUrl(assetDef.src,'container',(error,asset)=>{
+      this.assetsPending=Math.max(0,this.assetsPending-1);
+      if(this.disposed){try{asset?.unload();}catch(_){}return;}
+      if(error||!asset?.resource){
+        this.assetsFailed+=1;
+        this.assetErrors.push(`${def.id}: ${error||'container resource unavailable'}`);
+        return;
+      }
+      let instance=null;
+      try{
+        instance=asset.resource.instantiateRenderEntity({
+          castShadows:def.castShadows!==false,
+          receiveShadows:def.receiveShadows!==false
+        });
+        instance.name=`${def.id}:asset`;
+        setTransform(instance,assetDef.transform||{});
+        semanticEntity.addChild(instance);
+        this._bindAssetAnimations(def,assetDef,asset,instance);
+        const fallback=[...(def.fallback||[])];
+        for(const fallbackId of fallback){
+          const entity=this.entities.get(fallbackId);
+          if(entity){entity.enabled=false;this.assetFallbackHidden.add(fallbackId);}
+        }
+        this.assetInstances.set(def.id,{asset,instance,fallback});
+        this.assetsLoaded+=1;
+        this._applyEntityAnimation(def.id,this.desiredAnimations.get(def.id)||def.animation||assetDef.defaultAnimation||null,0);
+      }catch(assetError){
+        try{instance?.destroy();}catch(_){}
+        this.assetsFailed+=1;
+        this.assetErrors.push(`${def.id}: ${assetError instanceof Error?assetError.message:String(assetError)}`);
+        try{asset.unload();}catch(_){}
+      }
+    });
+  }
+
+  _bindAssetAnimations(def,assetDef,asset,instance){
+    const aliases=Object.entries(assetDef.animations||{});
+    if(!aliases.length)return;
+    const tracks=asset.resource.animations||[];
+    const byName=new Map(tracks.map(track=>[track.name,track]));
+    instance.addComponent('anim',{activate:false,speed:this.reducedMotion?0:1});
+    for(const [alias,trackName] of aliases){
+      const track=byName.get(trackName);
+      if(!track)throw new Error(`animation track ${trackName} missing for alias ${alias}`);
+      instance.anim.assignAnimation(alias,track,undefined,1,true);
+    }
+  }
+
+  _applyEntityAnimation(entityId,alias,blendTime){
+    if(!alias)return;
+    this.desiredAnimations.set(entityId,alias);
+    const record=this.assetInstances.get(entityId);
+    const anim=record?.instance?.anim;
+    if(!anim?.baseLayer)return;
+    const def=this.entityDefinitions.get(entityId)||{};
+    const duration=Number.isFinite(blendTime)?blendTime:(Number.isFinite(def.animationBlendTime)?def.animationBlendTime:.18);
+    anim.speed=this.reducedMotion?0:1;
+    anim.baseLayer.transition(alias,this.reducedMotion?0:duration);
+    anim.playing=!this.paused;
+    this.activeAnimations.set(entityId,alias);
+  }
+
   _reset(){
     for(const [id,base] of this.baseline){
       const entity=this.entities.get(id);
@@ -183,6 +263,9 @@ class PlayCanvasWorld {
       entity.setLocalPosition(...base.position);
       entity.setLocalEulerAngles(...base.rotation);
       entity.setLocalScale(...base.scale);
+    }
+    for(const id of this.assetFallbackHidden){
+      const entity=this.entities.get(id);if(entity)entity.enabled=false;
     }
   }
 
@@ -215,6 +298,7 @@ class PlayCanvasWorld {
     for(const [id,transform] of Object.entries(patch.transforms||{})){
       const entity=this.entities.get(id);if(entity)setTransform(entity,transform);
     }
+    for(const [id,alias] of Object.entries(patch.animations||{}))this._applyEntityAnimation(id,alias);
     if(patch.camera)this.setCamera(patch.camera);
   }
 
@@ -222,9 +306,24 @@ class PlayCanvasWorld {
     const state=this.spec.states?.[name];
     if(!state)throw new Error(`Unknown world state ${name}`);
     this._reset();
+    this.desiredAnimations.clear();
+    for(const def of this.spec.entities){
+      if(!def.asset)continue;
+      const alias=def.animation||this.spec.assets?.[def.asset]?.defaultAnimation;
+      if(alias)this.desiredAnimations.set(def.id,alias);
+    }
     this.applyPatch(state);
+    for(const [id,alias] of this.desiredAnimations)this._applyEntityAnimation(id,alias);
     this.state=name;
     this.elapsed=0;
+  }
+
+  _semanticEntityIdForNode(node){
+    for(let current=node;current;current=current.parent){
+      const semanticId=this.semanticNodes.get(current);
+      if(semanticId)return semanticId;
+    }
+    return null;
   }
 
   async pickEntityIdsAt(clientX,clientY,{radius=7}={}){
@@ -243,8 +342,8 @@ class PlayCanvasWorld {
     const selection=await this.picker.getSelectionAsync(left,top,Math.min(width-left,r*2+1),Math.min(height-top,r*2+1));
     const result=[];
     for(const item of selection||[]){
-      const name=item?.node?.name;
-      if(name&&this.entities.has(name)&&!result.includes(name))result.push(name);
+      const semanticId=this._semanticEntityIdForNode(item?.node);
+      if(semanticId&&!result.includes(semanticId))result.push(semanticId);
     }
     return result;
   }
@@ -273,7 +372,10 @@ class PlayCanvasWorld {
     }
   }
 
-  setPaused(value){this.paused=Boolean(value);this.app.timeScale=this.paused?0:1;}
+  setPaused(value){
+    this.paused=Boolean(value);this.app.timeScale=this.paused?0:1;
+    for(const record of this.assetInstances.values())if(record.instance.anim)record.instance.anim.playing=!this.paused;
+  }
   replay(){if(this.state)this.setState(this.state);}
   stats(){
     const rect=this.canvas.getBoundingClientRect();
@@ -283,6 +385,10 @@ class PlayCanvasWorld {
       backendVersion:PLAYCANVAS_BACKEND_VERSION,worldId:this.spec.id,worldVersion:this.spec.version,
       state:this.state,camera:this.cameraName,cameraVariant:this.cameraVariant,toneMapping:this.toneMapping,
       exposure:this.app.scene.exposure,fogType:fog.type,entityCount:this.entities.size,
+      assetEntityCount:this.spec.entities.filter(entity=>Boolean(entity.asset)).length,
+      assetsPending:this.assetsPending,assetsLoaded:this.assetsLoaded,assetsFailed:this.assetsFailed,
+      loadedAssetEntities:[...this.assetInstances.keys()],activeAnimations:Object.fromEntries(this.activeAnimations),
+      assetErrors:[...this.assetErrors],
       deviceType:this.app.graphicsDevice?.deviceType||'unknown',canvasCount:this.host.querySelectorAll('canvas').length,
       canvasCssWidth:Math.round(rect.width),canvasCssHeight:Math.round(rect.height),
       bufferWidth:this.app.graphicsDevice?.width||0,bufferHeight:this.app.graphicsDevice?.height||0
@@ -294,10 +400,14 @@ class PlayCanvasWorld {
     this.resizeObserver?.disconnect();
     try{this.picker?.destroy();}catch(_){}
     this.picker=null;
+    for(const record of this.assetInstances.values()){
+      try{record.asset?.unload();}catch(_){}
+    }
+    this.assetInstances.clear();
     try{this.app.off('update',this._update);}catch(_){}
     try{this.app.destroy();}catch(_){}
     this.canvas?.remove();
-    this.entities.clear();this.materials.clear();
+    this.entities.clear();this.entityDefinitions.clear();this.materials.clear();
   }
 }
 
