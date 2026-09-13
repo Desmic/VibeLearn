@@ -13,7 +13,15 @@ add('island-left-top','cylinder','grass',[-5.2,-.75,0],[7.2,.45,7.2]);
 add('island-right-rock','cone','rock',[5.3,-2.8,-.3],[7.8,4.8,7.8]);
 add('island-right-top','cylinder','grass',[5.3,-.75,-.3],[7.2,.45,7.2]);
 
-entities.push({id:'pip',position:[-5.2,.3,1.2],scale:[1.15,1.15,1.15]});
+const PIP_FALLBACK=[
+  'pip-body','pip-head','pip-eye-l','pip-eye-r','pip-mouth','pip-arm-l','pip-arm-r',
+  'pip-hand-l','pip-hand-r','pip-leg-l','pip-leg-r','pip-boot-l','pip-boot-r',
+  'pip-pack','pip-scarf','pip-antenna','pip-beacon'
+];
+entities.push({
+  id:'pip',asset:'pip.robot',animation:'idle',animationBlendTime:.18,fallback:PIP_FALLBACK,
+  position:[-5.2,.3,1.2],scale:[1.15,1.15,1.15]
+});
 child('pip-body','pip','capsule','pip',[0,.78,0],[.52,.72,.48]);
 child('pip-head','pip','sphere','pip',[0,1.55,0],[.68,.58,.58]);
 child('pip-eye-l','pip','sphere','glass',[-.23,1.62,.49],[.13,.13,.08],{motion:{type:'pulse',amplitude:.06,speed:2.6}});
@@ -100,8 +108,20 @@ beaconPositions.forEach(([x,z],i)=>{
 export const echoForgeWorldSpec=Object.freeze({
   schemaVersion:'1',
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-5',
+  version:'pc-phase1-7',
   environment:{clearColor:'#03111c',ambient:'#294651',exposure:1.18,toneMapping:'aces2',fog:{type:'exp2',color:'#0b2633',density:.018}},
+  assets:{
+    'pip.robot':{
+      type:'container',src:'/assets/quaternius-animated-robot.glb',
+      transform:{position:[0,0,0],scale:[.32,.32,.32]},
+      animations:{
+        idle:'RobotArmature|Robot_Idle',standing:'RobotArmature|Robot_Standing',
+        wave:'RobotArmature|Robot_Wave',yes:'RobotArmature|Robot_Yes',no:'RobotArmature|Robot_No',
+        thumbsUp:'RobotArmature|Robot_ThumbsUp',jump:'RobotArmature|Robot_Jump',run:'RobotArmature|Robot_Running'
+      },
+      defaultAnimation:'idle'
+    }
+  },
   materials:{
     rock:{diffuse:'#203b4b',gloss:.22},
     grass:{diffuse:'#527f6f',gloss:.18},
@@ -187,12 +207,12 @@ export const echoForgeWorldSpec=Object.freeze({
     }
   },
   states:{
-    'story.0':{camera:'story.0',hide:['broken-gear','new-gear','duplicate-gear','order-seal','reply-orb','storm-bolt-a','storm-bolt-b']},
-    'story.1':{camera:'story.1',show:['broken-gear'],hide:['new-gear','duplicate-gear','order-seal','reply-orb','storm-bolt-a','storm-bolt-b'],transforms:{'bridge-left-6':{rotation:[0,0,14]},'bridge-right-6':{rotation:[0,0,-14]}}},
-    'story.2':{camera:'story.2',show:['order-seal'],hide:['new-gear','duplicate-gear','reply-orb','storm-bolt-a','storm-bolt-b','broken-gear']},
-    'story.3':{camera:'story.3',show:['reply-orb','storm-bolt-a','storm-bolt-b'],hide:['new-gear','duplicate-gear','order-seal','broken-gear']},
-    'story.4':{camera:'story.4',show:['duplicate-gear'],hide:['new-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']},
-    'story.5':{camera:'story.5',hide:['new-gear','duplicate-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']},
-    'mission':{camera:'mission.forge',hide:['new-gear','duplicate-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']}
+    'story.0':{camera:'story.0',animations:{pip:'idle'},hide:['broken-gear','new-gear','duplicate-gear','order-seal','reply-orb','storm-bolt-a','storm-bolt-b']},
+    'story.1':{camera:'story.1',animations:{pip:'no'},show:['broken-gear'],hide:['new-gear','duplicate-gear','order-seal','reply-orb','storm-bolt-a','storm-bolt-b'],transforms:{'bridge-left-6':{rotation:[0,0,14]},'bridge-right-6':{rotation:[0,0,-14]}}},
+    'story.2':{camera:'story.2',animations:{pip:'yes'},show:['order-seal'],hide:['new-gear','duplicate-gear','reply-orb','storm-bolt-a','storm-bolt-b','broken-gear']},
+    'story.3':{camera:'story.3',animations:{pip:'no'},show:['reply-orb','storm-bolt-a','storm-bolt-b'],hide:['new-gear','duplicate-gear','order-seal','broken-gear']},
+    'story.4':{camera:'story.4',animations:{pip:'no'},show:['duplicate-gear'],hide:['new-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']},
+    'story.5':{camera:'story.5',animations:{pip:'wave'},hide:['new-gear','duplicate-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']},
+    'mission':{camera:'mission.forge',animations:{pip:'idle'},hide:['new-gear','duplicate-gear','reply-orb','order-seal','storm-bolt-a','storm-bolt-b','broken-gear']}
   }
 });
