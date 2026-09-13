@@ -66,6 +66,7 @@ class RuntimeMigrationTests(unittest.TestCase):
     def test_signal6_route_is_spatialized_over_world_and_drives_storm_feedback(self):
         adapter = (ROOT / 'web' / 'rescue-playcanvas-world.js').read_text(encoding='utf-8')
         css = (ROOT / 'web' / 'play-canvas.css').read_text(encoding='utf-8')
+        migrate = (ROOT / 'web' / 'play-canvas-migrate.js').read_text(encoding='utf-8')
         self.assertIn("version:'pc-phase1-10'", adapter)
         self.assertIn("'storm-route-feedback'", adapter)
         self.assertIn("const routeTested=level===6", adapter)
@@ -78,10 +79,15 @@ class RuntimeMigrationTests(unittest.TestCase):
             '.play-canvas-toolbelt{position:absolute!important',
             '.play-canvas-route-run{position:absolute!important',
             '.play-canvas-storm-outcome{position:absolute!important',
+            '.play-canvas-route-playback{position:absolute!important',
         ):
             self.assertIn(contract, css)
         self.assertIn('top:40%!important', css)
         self.assertIn('overflow-x:auto!important', css)
+        self.assertIn("const playback=root.querySelector('.rg-live-route')", migrate)
+        self.assertIn("playback.classList.add('play-canvas-route-playback')", migrate)
+        self.assertIn('if(playback.parentElement!==hud)hud.append(playback)', migrate)
+        self.assertIn('.play-canvas-storm-outcome .rg-case-detail{display:none!important}', css)
 
     def test_playcanvas_framework_assets_are_explicitly_served(self):
         server = (ROOT / 'app' / 'server.py').read_text(encoding='utf-8')
