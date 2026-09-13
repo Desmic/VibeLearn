@@ -106,18 +106,34 @@ def main():
               }
               await new Promise(resolve=>setTimeout(resolve,120));
               const story0Stats=echo.stats?.()||null;
-              echo.setBeat(5);
-              await new Promise(resolve=>setTimeout(resolve,120));
-              const story5Stats=echo.stats?.()||null;
               const echoCanvas=echoHost.querySelector('canvas');
               const echoRect=echoCanvas?.getBoundingClientRect();
               const echoResult={
-                available:echo.available,error:echo.error||null,stats:story0Stats,story5Stats,
+                available:echo.available,error:echo.error||null,stats:story0Stats,story5Stats:null,
                 canvas:echoCanvas?{width:echoCanvas.width,height:echoCanvas.height,clientWidth:echoCanvas.clientWidth,clientHeight:echoCanvas.clientHeight,rect:echoRect?{width:echoRect.width,height:echoRect.height}:null,engine:echoCanvas.dataset.engine||null,vibelearnEngine:echoCanvas.dataset.vibelearnEngine||null}:null
               };
-              window.__vibelearnEchoAssetProof={echo,echoHost};
+              window.__vibelearnEchoAssetProof={echo,echoHost,echoResult};
               return {synthetic,echo:echoResult,invalidFogRejected,externalAssetRejected,invalidAnimationRejected};
             }""")
+
+            # Preserve character-composition evidence before any assertion can abort
+            # the proof. These are diagnostic screenshots, not critic scores.
+            page.locator("#echo-forge-playcanvas-host").screenshot(
+                path=str(out / "playcanvas-pip-story0-390.png")
+            )
+            page.evaluate("""async () => {
+              const proof=window.__vibelearnEchoAssetProof;
+              proof.echo.setBeat(5);
+              await new Promise(resolve=>setTimeout(resolve,160));
+              proof.echoResult.story5Stats=proof.echo.stats();
+            }""")
+            page.locator("#echo-forge-playcanvas-host").screenshot(
+                path=str(out / "playcanvas-pip-story5-wave-390.png")
+            )
+            result["echo"]["story5Stats"] = page.evaluate(
+                "() => window.__vibelearnEchoAssetProof.echoResult.story5Stats"
+            )
+
             synthetic = result["synthetic"]
             assert synthetic["available"] is True, result
             assert synthetic["engine"] == "playcanvas", result
@@ -160,7 +176,6 @@ def main():
             assert echo["canvas"]["vibelearnEngine"] == "playcanvas", result
             assert echo["canvas"]["rect"]["width"] > 1 and echo["canvas"]["rect"]["height"] > 1, result
 
-            page.screenshot(path=str(out / "playcanvas-framework-390.png"), full_page=True)
             page.evaluate("""() => {
               const proof=window.__vibelearnEchoAssetProof;
               proof?.echo?.dispose?.();proof?.echoHost?.remove?.();delete window.__vibelearnEchoAssetProof;
@@ -179,12 +194,17 @@ def main():
                     "story_0_animation": echo["stats"]["activeAnimations"].get("pip"),
                     "story_5_animation": echo["story5Stats"]["activeAnimations"].get("pip"),
                 },
+                "screenshots": [
+                    "playcanvas-pip-story0-390.png",
+                    "playcanvas-pip-story5-wave-390.png",
+                ],
                 "checks": [
                     "An unrelated engine-neutral WorldSpec compiled into the real PlayCanvas Engine.",
                     "Portable exposure, fog and camera tone-mapping intent compiled through the generic backend and invalid fog failed closed.",
                     "Unsafe external asset URLs and unknown semantic animation aliases fail closed before asset loading.",
                     "The pinned same-origin Pip GLB loaded through the generic container path with primitive fallback retained for failure.",
-                    "Story state changed Pip from semantic idle to wave animation without exposing PlayCanvas track objects to the adapter."
+                    "Story state changed Pip from semantic idle to wave animation without exposing PlayCanvas track objects to the adapter.",
+                    "Loaded idle and wave character-composition frames are preserved before assertions so visual regressions remain inspectable."
                 ],
                 "page_errors": errors
             }, indent=2))
