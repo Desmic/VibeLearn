@@ -71,6 +71,27 @@ def main():
                 expect(page.locator('#rg-run')).to_be_visible()
             else:
                 raise AssertionError(f'unknown rescue surface: {surface}')
+        def expect_transfer_controls():
+            # Geometry and real pointer hit testing catch overlapping controls;
+            # select_option alone would bypass the reported interception defect.
+            controls=['#rg-aid','#rg-clear-route']
+            boxes=[]
+            for selector in controls:
+                control=page.locator(selector)
+                expect(control).to_be_visible()
+                expect(control).to_be_enabled()
+                control.scroll_into_view_if_needed()
+                assert control.evaluate('''el => {
+                  const r=el.getBoundingClientRect();
+                  return [.15,.5,.85].every(x => [.15,.5,.85].every(y => {
+                    const hit=document.elementFromPoint(r.left+r.width*x,r.top+r.height*y);
+                    return hit===el || el.contains(hit);
+                  }));
+                }'''),f'{selector} pointer area is intercepted'
+                boxes.append(control.bounding_box())
+            a,b=boxes
+            assert (a['x']+a['width']<=b['x'] or b['x']+b['width']<=a['x'] or
+                    a['y']+a['height']<=b['y'] or b['y']+b['height']<=a['y']),boxes
         def build(program):
             page.locator('#rg-clear-route').click()
             for block in program:page.locator(f'[data-block="{block}"]').click()
@@ -170,6 +191,7 @@ def main():
             next_level('incident')
             expect(page.locator('.rg-results')).to_have_count(0)
             transfer=expect_transfer_world()
+            expect_transfer_controls()
             build(SAFE)
             # Building the real-world policy rerenders internally too; the player
             # must remain in the export-yard world throughout construction.
@@ -178,6 +200,11 @@ def main():
             shot('rescue-transfer-before.png')
             page.set_viewport_size({'width':390,'height':844});page.wait_for_timeout(180)
             transfer=expect_transfer_world()
+            expect_transfer_controls()
+            build(SAFE)
+            transfer=expect_transfer_world()
+            expect_transfer_controls()
+            page.locator('#rg-aid').select_option('none')
             assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1')
             transfer.screenshot(path=str(out/'rescue-transfer-before-phone-390.png'))
             page.set_viewport_size({'width':1440,'height':1000});page.wait_for_timeout(180)

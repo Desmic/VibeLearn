@@ -24,11 +24,13 @@ jobs:
       TEST_DATABASE_URL: postgresql://postgres:disposable-ci-password@127.0.0.1:5432/vibelearn_test
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Package tracked review source (never runtime data or credentials)
         run: git archive --format=tar HEAD -o /tmp/vibelearn-review-source.tar
       - uses: actions/upload-artifact@v4
         with:
-          name: review-source-${{ github.sha }}
+          name: review-source-${{ github.event.pull_request.head.sha || github.sha }}
           path: /tmp/vibelearn-review-source.tar
           retention-days: 3
       - uses: actions/setup-python@v5
@@ -47,7 +49,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: game-review-evidence-${{ github.sha }}
+          name: game-review-evidence-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             artifacts/*.png
             artifacts/*.json

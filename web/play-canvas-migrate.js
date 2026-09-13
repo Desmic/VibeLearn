@@ -173,6 +173,12 @@
     if(aid&&!clear){
       const select=aid.querySelector('select');
       if(select&&aid.firstChild?.nodeType===Node.TEXT_NODE)aid.firstChild.textContent='Help used?';
+      // These controls share one flow layout: neither may claim the other's
+      // pointer area when the declaration text or viewport size changes.
+      const header=makeLayer(hud,'play-canvas-transfer-header','Transfer route controls');
+      if(aid.parentElement!==header)header.append(aid);
+      const footer=root.querySelector('.rg-bench-footer');
+      if(footer&&footer.parentElement!==header)header.append(footer);
     }
     if(bench){
       const title=bench.querySelector('.rg-bench-title b');

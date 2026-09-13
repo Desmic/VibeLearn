@@ -1,3 +1,16 @@
+# Signal 7 HUD blocker fix — candidate verification
+
+The active target is `phase1/world-transfer` / PR #8, following candidate `44ea1ab0a5a2b8d5a07b2d9260ff2b71b27247f8`.
+The `66340850e5097ef44d420529675d09e811a52109` transition assertion stabilization is retained (15 seconds; no product behavior change).
+
+The Signal 7 help declaration and Clear route now share a responsive HUD row; the incident readout sits below it. The browser journey checks their separate rectangles and pointer targets, and clears/rebuilds the route on a 390px viewport before sealing the transfer. Existing progression, evidence, lost-acknowledgement and persistence checks remain required.
+
+Per the current user instruction, the release gate for this bounded fix is full CI/browser verification and inspection of the exact candidate's desktop and 390px Signal 7 screenshots. Once green and visually reviewable, fast-forward `deploy/render-supabase` to that candidate, deploy manually (auto-deploy remains off), and verify Render's live revision. Only clear blockers belong in this iteration; no broad art/architecture or critic-scoring pass precedes this requested user review.
+
+**Verification is pending at this source checkpoint. This is not product acceptance. The user's review is the next product gate.** The prior live checkpoint below remains historical context until the new deployment is verified.
+
+---
+
 # Current checkpoint — PlayCanvas preview deployed, Signal 6 continuation under verification
 
 Updated 13 September 2026. **Status: `user_rejected` / `needs_revision` / preview available.** The user's predecessor 3/10 verdict remains authoritative until they explicitly review a materially changed candidate. A deployed preview is not an acceptance pass.
