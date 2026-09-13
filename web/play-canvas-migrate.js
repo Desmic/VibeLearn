@@ -137,6 +137,9 @@
     const bench=root.querySelector('.rg-workbench');
     const clear=root.querySelector('.rg-clear');
     const runButton=root.querySelector('#rg-run');
+    const note=root.querySelector('.rg-run-note');
+    const aid=root.querySelector('.rg-help-label');
+    const machineControls=root.querySelector('.rg-machine-controls');
     const actions=runButton?.closest('.rg-build-actions')||root.querySelector('.rg-build-actions');
 
     // The page objective already carries the long prompt. Keep only compact live
@@ -160,27 +163,44 @@
       if(bench.parentElement!==hud)hud.append(bench);
     }
 
-    if(actions){
-      // Keep assistance provenance visible but separate it from the primary action.
-      // Reparent the exact existing controls; no assessment semantics are duplicated.
-      const note=actions.querySelector('.rg-run-note');
-      const aid=actions.querySelector('.rg-help-label');
-      if(incident&&!clear){if(note)incident.append(note);if(aid)incident.append(aid);}
-      if(runButton){
-        let runWrap=hud.querySelector(':scope > .play-canvas-transfer-run');
-        if(!runWrap){
-          runWrap=document.createElement('div');
-          runWrap.className='rg-build-actions play-canvas-route-run play-canvas-transfer-run';
-          hud.append(runWrap);
-        }
-        if(runButton.parentElement!==runWrap)runWrap.append(runButton);
-      }
-      if(actions!==runButton?.parentElement&&!actions.childElementCount)actions.remove();
+    // RescueStage may have already moved these exact semantic controls into its
+    // machine-controls wrapper. Keep the declaration visible, remove duplicated
+    // tutorial prose, and move only the commit action into the world-owned CTA.
+    // This changes presentation only; the same select/button still own evidence.
+    const blockHelp=bench?.querySelector('.rg-block-help');
+    if(blockHelp)blockHelp.hidden=true;
+    if(note)note.hidden=true;
+    if(aid&&!clear){
+      const select=aid.querySelector('select');
+      if(select&&aid.firstChild?.nodeType===Node.TEXT_NODE)aid.firstChild.textContent='Help used?';
     }
+    if(bench){
+      const title=bench.querySelector('.rg-bench-title b');
+      if(title)title.textContent='Worker → export service';
+    }
+    surface.setAttribute('aria-label','Export recovery: resumed worker to external export service');
+    if(runButton){
+      let runWrap=hud.querySelector(':scope > .play-canvas-transfer-run');
+      if(!runWrap){
+        runWrap=document.createElement('div');
+        runWrap.className='rg-build-actions play-canvas-route-run play-canvas-transfer-run';
+        hud.append(runWrap);
+      }
+      if(runButton.parentElement!==runWrap)runWrap.append(runButton);
+    }
+    if(machineControls&&!machineControls.childElementCount)machineControls.remove();
+    if(actions&&actions!==runButton?.parentElement&&!actions.childElementCount)actions.remove();
 
     if(clear){
       clear.hidden=false;
       clear.classList.add('play-canvas-storm-outcome');
+      const passed=a?.assessment?.outcome==='correct';
+      const status=clear.querySelector(':scope > span');
+      const heading=clear.querySelector('h2');
+      const copy=clear.querySelector('p');
+      if(status)status.textContent=passed?'✓ INCIDENT STABLE':'⚠ INCIDENT UNSAFE';
+      if(heading)heading.textContent=passed?'Export recovery holds.':'Incident tests found a counterexample.';
+      if(copy)copy.textContent=passed?'One durable job intent survived worker restart without creating a duplicate file.':'Revise the recovery policy before this worker can safely resume.';
       if(clear.parentElement!==hud)hud.append(clear);
     }
 
