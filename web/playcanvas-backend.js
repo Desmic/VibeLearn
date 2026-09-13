@@ -232,12 +232,18 @@ class PlayCanvasWorld {
   _bindAssetAnimations(def,assetDef,asset,instance){
     const aliases=Object.entries(assetDef.animations||{});
     if(!aliases.length)return;
-    const tracks=asset.resource.animations||[];
+    // Current PlayCanvas ContainerResource.animations contains Animation Asset
+    // wrappers whose .resource is the AnimTrack. Older engine examples exposed
+    // tracks directly, so accept both shapes at this compiler boundary.
+    const tracks=(asset.resource.animations||[]).map(value=>value?.resource||value).filter(Boolean);
     const byName=new Map(tracks.map(track=>[track.name,track]));
-    instance.addComponent('anim',{activate:false,speed:this.reducedMotion?0:1});
+    instance.addComponent('anim',{activate:true,speed:this.reducedMotion?0:1});
     for(const [alias,trackName] of aliases){
       const track=byName.get(trackName);
-      if(!track)throw new Error(`animation track ${trackName} missing for alias ${alias}`);
+      if(!track){
+        const available=[...byName.keys()].filter(Boolean).join(', ')||'(none)';
+        throw new Error(`animation track ${trackName} missing for alias ${alias}; available: ${available}`);
+      }
       instance.anim.assignAnimation(alias,track,undefined,1,true);
     }
   }
