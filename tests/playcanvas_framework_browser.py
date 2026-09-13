@@ -187,7 +187,7 @@ def main():
             assert echo["stats"]["engine"] == "playcanvas", result
             assert echo["stats"]["backendVersion"] == "2", result
             assert echo["stats"]["worldId"] == "relay-rescue.echo-forge", result
-            assert echo["stats"]["worldVersion"] == "pc-phase1-9", result
+            assert echo["stats"]["worldVersion"] == "pc-phase1-13", result
             assert echo["stats"]["state"] == "story.0", result
             assert echo["stats"]["cameraVariant"] == "portrait", result
             assert echo["stats"]["toneMapping"] == "aces2", result

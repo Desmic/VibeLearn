@@ -5,7 +5,7 @@ import {echoForgeWorldSpec} from './echo-forge-world-spec.js';
 
 export const gameWorldManifest=Object.freeze({
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-10',
+  version:'pc-phase1-13',
   engine:'playcanvas',
   specVersion:echoForgeWorldSpec.schemaVersion,
   modes:Object.freeze(['story','mission']),
@@ -22,7 +22,7 @@ const PIP_SUCCESS_X=2.75;
 
 function semanticPick(entityId){
   if(!entityId)return null;
-  if(entityId==='broken-gear')return 'broken-gear';
+  if(entityId==='broken-gear'||entityId.startsWith('broken-gear-'))return 'broken-gear';
   if(entityId==='order-seal')return 'order-seal';
   if(entityId==='reply-orb'||entityId.startsWith('storm-bolt'))return 'signal';
   if(entityId==='beacon-0'||entityId==='beacon-lamp-0')return 'signal-tower';
@@ -82,7 +82,7 @@ function missionPatch(state={}){
     patch.animations.pip='thumbsUp';
     patch.transforms={
       ...patch.transforms,
-      'new-gear':{position:[0,.58,1.1],rotation:[90,0,0],scale:[1.15,.34,1.15]},
+      'new-gear':{position:[0,.58,1.1],scale:[.98,.98,.98]},
       'pip':{position:[PIP_SUCCESS_X,.42,.9],rotation:[0,-24,0],scale:[1.02,1.02,1.02]},
       'pip-head':{rotation:[0,-12,0]}
     };

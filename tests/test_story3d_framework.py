@@ -44,7 +44,7 @@ class RuntimeMigrationTests(unittest.TestCase):
 
     def test_echo_forge_keeps_asset_normalization_and_identity_in_world_spec(self):
         source = (ROOT / 'web' / 'echo-forge-world-spec.js').read_text(encoding='utf-8')
-        self.assertIn("version:'pc-phase1-9'", source)
+        self.assertIn("version:'pc-phase1-13'", source)
         self.assertIn("transform:{position:[0,-.08,0],scale:[.52,.52,.52]}", source)
         self.assertIn('Measured source mesh height is ~4.63 units', source)
         fallback_block = source.split('const PIP_FALLBACK=[', 1)[1].split('];', 1)[0]
@@ -67,7 +67,7 @@ class RuntimeMigrationTests(unittest.TestCase):
         adapter = (ROOT / 'web' / 'rescue-playcanvas-world.js').read_text(encoding='utf-8')
         css = (ROOT / 'web' / 'play-canvas.css').read_text(encoding='utf-8')
         migrate = (ROOT / 'web' / 'play-canvas-migrate.js').read_text(encoding='utf-8')
-        self.assertIn("version:'pc-phase1-10'", adapter)
+        self.assertIn("version:'pc-phase1-13'", adapter)
         self.assertIn("'storm-route-feedback'", adapter)
         self.assertIn("const routeTested=level===6", adapter)
         self.assertIn("patch.camera='mission.choice'", adapter)
@@ -88,6 +88,32 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn("playback.classList.add('play-canvas-route-playback')", migrate)
         self.assertIn('if(playback.parentElement!==hud)hud.append(playback)', migrate)
         self.assertIn('.play-canvas-storm-outcome .rg-case-detail{display:none!important}', css)
+
+    def test_world_composition_anchors_seven_lights_and_portrait_cameras(self):
+        source = (ROOT / 'web' / 'echo-forge-world-spec.js').read_text(encoding='utf-8')
+        self.assertIn('const distantBeaconScale={1:.72,2:.56,3:.66,5:.54,6:.58}', source)
+        self.assertIn("add(`beacon-island-${i}-rock`", source)
+        self.assertIn("add(`beacon-island-${i}-top`", source)
+        self.assertIn("emissiveIntensity:.85", source)
+        self.assertIn("portrait:{position:[.2,2.35,19.2],lookAt:[.3,.45,.7],fov:48}", source)
+        self.assertIn("portrait:{position:[4.4,2.4,10.2],lookAt:[5.0,.85,.6],fov:46}", source)
+        self.assertIn("portrait:{position:[4.2,2.45,10.4],lookAt:[5.0,.9,.7],fov:45}", source)
+        self.assertIn("portrait:{position:[4.4,2.25,9.8],lookAt:[5.0,.8,.8],fov:44}", source)
+
+    def test_semantic_gear_is_multipart_without_changing_game_identity(self):
+        source = (ROOT / 'web' / 'echo-forge-world-spec.js').read_text(encoding='utf-8')
+        adapter = (ROOT / 'web' / 'rescue-playcanvas-world.js').read_text(encoding='utf-8')
+        self.assertIn("const gear=(id,material,position,size=1,extra={})=>", source)
+        self.assertIn("entities.push({id,position,rotation:[90,0,0],scale:[size,size,size],...extra})", source)
+        self.assertIn("`${id}-rim`", source)
+        self.assertIn("`${id}-hub`", source)
+        self.assertIn("`${id}-tooth-${i}`", source)
+        self.assertIn("`${id}-spoke-${i}`", source)
+        self.assertIn("gear('broken-gear','gold'", source)
+        self.assertIn("gear('new-gear','gold'", source)
+        self.assertIn("gear('duplicate-gear','danger'", source)
+        self.assertIn("entityId.startsWith('broken-gear-')", adapter)
+        self.assertIn("'new-gear':{position:[0,.58,1.1],scale:[.98,.98,.98]}", adapter)
 
     def test_playcanvas_framework_assets_are_explicitly_served(self):
         server = (ROOT / 'app' / 'server.py').read_text(encoding='utf-8')

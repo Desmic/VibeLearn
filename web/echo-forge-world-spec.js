@@ -67,9 +67,33 @@ for(let i=0;i<7;i++){
   add(`bridge-left-${i}`,'box','wood',[x,.18,1],[.34,.14,1.05]);
   add(`bridge-right-${i}`,'box','wood',[-x,.18,1],[.34,.14,1.05]);
 }
-add('broken-gear','torus','gold',[0,.58,1.1],[1.15,.34,1.15],{rotation:[90,0,0],motion:{type:'spin',axis:[0,1,0],speed:16}});
-add('new-gear','torus','gold',[4.55,.78,1.15],[1.4,.42,1.4],{enabled:false,rotation:[90,0,0],motion:{type:'spin',axis:[0,1,0],speed:22}});
-add('duplicate-gear','torus','danger',[5.72,.78,1.15],[1.4,.42,1.4],{enabled:false,rotation:[90,0,0],motion:{type:'spin',axis:[0,1,0],speed:-22}});
+// Gears use a transform-only semantic parent so presentation geometry cannot
+// collapse into the old smooth-ring silhouette. The stable parent owns state,
+// visibility and spin; rim / teeth / spokes are presentation-only children.
+const gear=(id,material,position,size=1,extra={})=>{
+  entities.push({id,position,rotation:[90,0,0],scale:[size,size,size],...extra});
+  child(`${id}-rim`,id,'torus',material,[0,0,0],[.72,.20,.72]);
+  child(`${id}-hub`,id,'cylinder','dark',[0,.08,0],[.25,.16,.25]);
+  for(let i=0;i<12;i++){
+    const angle=i*30, radians=angle*Math.PI/180;
+    child(
+      `${id}-tooth-${i}`,id,'box',material,
+      [Math.cos(radians)*.78,.05,Math.sin(radians)*.78],
+      [.14,.14,.24],{rotation:[0,90-angle,0]}
+    );
+  }
+  for(let i=0;i<6;i++){
+    const angle=i*60, radians=angle*Math.PI/180;
+    child(
+      `${id}-spoke-${i}`,id,'box','bronze',
+      [Math.cos(radians)*.34,.07,Math.sin(radians)*.34],
+      [.09,.10,.38],{rotation:[0,90-angle,0]}
+    );
+  }
+};
+gear('broken-gear','gold',[0,.58,1.1],.98,{motion:{type:'spin',axis:[0,1,0],speed:16}});
+gear('new-gear','gold',[4.55,.72,1.15],1.05,{enabled:false,motion:{type:'spin',axis:[0,1,0],speed:22}});
+gear('duplicate-gear','danger',[5.72,.72,1.15],1.05,{enabled:false,motion:{type:'spin',axis:[0,1,0],speed:-22}});
 add('order-seal','box','paper',[-4.0,1.72,.12],[.8,.5,.07],{enabled:false,motion:{type:'bob',amplitude:.12,speed:2}});
 add('reply-orb','sphere','glass',[4.2,2.18,.42],[.48,.48,.48],{enabled:false,motion:{type:'bob',amplitude:.18,speed:2.5}});
 add('storm-bolt-a','box','storm',[0,4.6,.2],[.12,2.8,.12],{enabled:false,rotation:[0,0,16]});
@@ -105,15 +129,24 @@ const tree=(id,x,z,scale=1,material='leaf')=>{
 ].forEach(([x,y,z,s],i)=>add(`star-${i}`,'sphere','starlight',[x,y,z],[s,s,s],{motion:{type:'pulse',amplitude:.16,speed:1+i*.11}}));
 
 const beaconPositions=[[-7,2],[-3,-7],[0,-12],[4,-8],[7,2],[10,-10],[-10,-9]];
+// The campaign is Seven Lights, so the remote beacons need geographic anchors,
+// not floating dots in empty sky. These small distant islands are presentation
+// only; beacon identity and gameplay state remain unchanged.
+const distantBeaconScale={1:.72,2:.56,3:.66,5:.54,6:.58};
 beaconPositions.forEach(([x,z],i)=>{
+  const scale=distantBeaconScale[i];
+  if(scale){
+    add(`beacon-island-${i}-rock`,'cone','rock',[x,-2.25,z],[4.9*scale,3.4*scale,4.9*scale]);
+    add(`beacon-island-${i}-top`,'cylinder','grass',[x,-.72,z],[4.45*scale,.24,4.45*scale]);
+  }
   add(`beacon-${i}`,'cylinder','dark',[x,.5,z],[.18,2.3,.18]);
-  add(`beacon-lamp-${i}`,'sphere',i===0?'glass':'beacon',[x,1.78,z],[.42,.42,.42],{motion:{type:'pulse',amplitude:i===0?.14:.04,speed:1.5+i*.07}});
+  add(`beacon-lamp-${i}`,'sphere',i===0?'glass':'beacon',[x,1.78,z],[.42,.42,.42],{motion:{type:'pulse',amplitude:i===0?.14:.08,speed:1.5+i*.07}});
 });
 
 export const echoForgeWorldSpec=Object.freeze({
   schemaVersion:'1',
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-9',
+  version:'pc-phase1-13',
   environment:{clearColor:'#03111c',ambient:'#294651',exposure:1.18,toneMapping:'aces2',fog:{type:'exp2',color:'#0b2633',density:.018}},
   assets:{
     'pip.robot':{
@@ -152,20 +185,21 @@ export const echoForgeWorldSpec=Object.freeze({
     ember:{diffuse:'#ffa852',emissive:'#ff8b37',emissiveIntensity:2.4},
     water:{diffuse:'#0c4057',gloss:.55},
     moon:{diffuse:'#ffe5b1',emissive:'#ffe5b1',emissiveIntensity:1.5},
-    beacon:{diffuse:'#35545d',emissive:'#35545d',emissiveIntensity:.08},
+    beacon:{diffuse:'#78b8ad',emissive:'#68b9aa',emissiveIntensity:.85,gloss:.35},
     bark:{diffuse:'#513d35',gloss:.12},
     leaf:{diffuse:'#2f7163',gloss:.16},
     leafDark:{diffuse:'#235149',gloss:.14},
-    stone:{diffuse:'#36515b',gloss:.12},
-    bronze:{diffuse:'#8b684c',metalness:.28,gloss:.32},
-    lantern:{diffuse:'#ffd481',emissive:'#ffba58',emissiveIntensity:2.6,gloss:.35},
-    smoke:{diffuse:'#72858b',opacity:.24,gloss:.05},
-    starlight:{diffuse:'#d8f3ef',emissive:'#a9efe4',emissiveIntensity:3.0,gloss:.15}
+    stone:{diffuse:'#50646b',gloss:.18},
+    bronze:{diffuse:'#9a6647',metalness:.2,gloss:.28},
+    lantern:{diffuse:'#ffd78a',emissive:'#ffb957',emissiveIntensity:2.2},
+    smoke:{diffuse:'#617681',opacity:.28,blend:true},
+    starlight:{diffuse:'#d5f6ed',emissive:'#d5f6ed',emissiveIntensity:1.8}
   },
   lights:[
-    {id:'moon-light',type:'directional',color:'#bfdcff',intensity:1.05,rotation:[42,-28,0]},
-    {id:'forge-light',type:'omni',color:'#ff9f4d',intensity:3.1,range:12,position:[5.1,2.0,1.3]},
-    {id:'pip-fill',type:'omni',color:'#79e2d2',intensity:.72,range:7,position:[-5.0,2.2,2.4]},
+    {id:'moon-key',type:'directional',color:'#9cc8d5',intensity:1.18,rotation:[48,-28,0]},
+    {id:'forge-light',type:'omni',color:'#ff9e52',intensity:2.1,range:10,position:[5.1,2.3,1.8]},
+    {id:'forge-rim',type:'omni',color:'#efc16f',intensity:.85,range:7,position:[3.9,1.5,-.1]},
+    {id:'beacon-fill',type:'omni',color:'#70dbc8',intensity:.75,range:9,position:[-6.8,2.0,2.3]},
     {id:'bridge-fill',type:'omni',color:'#efc77a',intensity:.58,range:8,position:[0,2.0,3.1]},
     {id:'storm-light',type:'omni',color:'#c7eaff',intensity:.35,range:30,position:[0,8,1]}
   ],
@@ -173,7 +207,7 @@ export const echoForgeWorldSpec=Object.freeze({
   cameras:{
     'story.0':{
       position:[0,7.4,18.6],lookAt:[0,.8,-1.7],fov:46,
-      portrait:{position:[.3,2.9,17.8],lookAt:[.3,.85,.5],fov:48}
+      portrait:{position:[.2,2.35,19.2],lookAt:[.3,.45,.7],fov:48}
     },
     'story.1':{
       position:[-1.3,4.7,11.6],lookAt:[-1.5,.7,1],fov:44,
@@ -181,15 +215,15 @@ export const echoForgeWorldSpec=Object.freeze({
     },
     'story.2':{
       position:[1.9,4.9,12.1],lookAt:[2.6,1.2,.2],fov:43,
-      portrait:{position:[1.3,3.0,13.8],lookAt:[1.2,.9,.7],fov:48}
+      portrait:{position:[1.2,2.65,14.5],lookAt:[1.2,.65,.7],fov:48}
     },
     'story.3':{
       position:[1.0,6.1,13.2],lookAt:[1.8,2.0,.4],fov:46,
-      portrait:{position:[3.0,3.2,9.5],lookAt:[2.8,1.4,.5],fov:44}
+      portrait:{position:[2.6,2.7,10.7],lookAt:[2.8,1.1,.6],fov:46}
     },
     'story.4':{
       position:[3.6,4.2,10.5],lookAt:[4.9,.9,.7],fov:42,
-      portrait:{position:[4.8,2.6,7.7],lookAt:[5.0,.9,.8],fov:41}
+      portrait:{position:[4.4,2.4,10.2],lookAt:[5.0,.85,.6],fov:46}
     },
     'story.5':{
       position:[-2.4,5.2,12.5],lookAt:[-3.5,1.4,1.2],fov:43,
@@ -201,7 +235,7 @@ export const echoForgeWorldSpec=Object.freeze({
     },
     'mission.forge':{
       position:[4.1,3.3,9.7],lookAt:[5.0,1.15,.7],fov:43,
-      portrait:{position:[4.4,2.7,8.2],lookAt:[5.0,1.1,.8],fov:41}
+      portrait:{position:[4.2,2.45,10.4],lookAt:[5.0,.9,.7],fov:45}
     },
     'mission.ticket':{
       position:[-4.0,3.2,9.6],lookAt:[-4.2,1.2,.7],fov:43,
@@ -213,7 +247,7 @@ export const echoForgeWorldSpec=Object.freeze({
     },
     'mission.failure':{
       position:[4.8,3.1,8.5],lookAt:[5.1,.9,1.0],fov:41,
-      portrait:{position:[4.9,2.35,7.2],lookAt:[5.1,.85,1.0],fov:39}
+      portrait:{position:[4.4,2.25,9.8],lookAt:[5.0,.8,.8],fov:44}
     },
     'mission.success':{
       position:[0,4.4,11.8],lookAt:[0,.6,1.0],fov:44,
