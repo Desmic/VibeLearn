@@ -5,6 +5,7 @@
   const game=window.RescueGame;
   if(!game||game.__playCanvasMigrationV2)return;
   let lastAttempt=null;
+  let transferWorld=null,transferHost=null,transferMountToken=0;
 
   const rootEl=()=>document.querySelector('#rescue-game');
   const levelOf=a=>Number(a?.snapshot?.rescue?.level||0);
@@ -29,6 +30,51 @@
     const summary=document.createElement('summary');summary.textContent='Field journal';
     details.append(summary,...journal.childNodes);
     journal.replaceWith(details);
+  }
+
+  function disposeTransferWorld(){
+    transferMountToken+=1;
+    transferWorld?.dispose?.();
+    transferWorld=null;transferHost=null;
+  }
+
+  function transferPresentationState(a){
+    return {
+      ...(a?.rescue_state||{}),
+      assessmentOutcome:a?.assessment?.outcome||null,
+      status:a?.status||null
+    };
+  }
+
+  async function ensureTransferWorld(surface,a){
+    if(transferWorld&&transferHost===surface){
+      transferWorld.setTransferState?.(transferPresentationState(a));
+      return;
+    }
+    const token=++transferMountToken;
+    transferWorld?.dispose?.();transferWorld=null;transferHost=surface;
+    try{
+      const {createGameWorld}=await import('/rescue-playcanvas-world.js');
+      if(token!==transferMountToken||!surface.isConnected)return;
+      const world=createGameWorld(surface,{
+        reducedMotion:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false,
+        mode:'transfer'
+      });
+      if(token!==transferMountToken||!surface.isConnected){world?.dispose?.();return;}
+      if(!world?.available){
+        surface.dataset.playCanvasBackend='fallback';
+        surface.dataset.playCanvasError=String(world?.error||'PlayCanvas unavailable').slice(0,180);
+        return;
+      }
+      transferWorld=world;transferHost=surface;
+      surface.dataset.playCanvasBackend='playcanvas';
+      delete surface.dataset.playCanvasError;
+      world.setTransferState?.(transferPresentationState(a));
+    }catch(error){
+      if(token!==transferMountToken)return;
+      surface.dataset.playCanvasBackend='fallback';
+      surface.dataset.playCanvasError=String(error?.message||error).slice(0,180);
+    }
   }
 
   function migrateFieldMission(root,world,level){
@@ -65,23 +111,76 @@
     }
   }
 
-  function migrateTransfer(root){
+  function migrateTransfer(root,a){
     const field=root.querySelector('.rg-field');
     if(!field)return;
     let surface=field.querySelector(':scope > .play-canvas-transfer-surface');
     if(!surface){
       surface=document.createElement('section');
-      surface.className='play-canvas-transfer-surface';
-      surface.dataset.playCanvasBackend='dom';
+      surface.className='play-canvas-transfer-surface play-canvas-target play-canvas-builder-world';
       surface.dataset.playCanvasMode='transfer';
-      surface.setAttribute('aria-label','Field transfer mission');
+      surface.setAttribute('aria-label','Export worker field transfer');
       field.prepend(surface);
+    }else{
+      surface.classList.add('play-canvas-target','play-canvas-builder-world');
     }
-    for(const node of [field.querySelector(':scope > .rg-incident'),field.querySelector(':scope > .rg-workbench'),field.querySelector(':scope > .rg-build-actions'),field.querySelector(':scope > .rg-clear'),field.querySelector(':scope > .rg-kit')]){
-      if(node&&node.parentElement!==surface)surface.append(node);
+
+    const hud=makeLayer(surface,'play-canvas-builder-hud','Build and commit the export worker recovery policy');
+    hud.classList.add('play-canvas-route-circuit');
+    const incident=field.querySelector(':scope > .rg-incident');
+    const bench=field.querySelector(':scope > .rg-workbench');
+    const actions=field.querySelector(':scope > .rg-build-actions');
+    const clear=field.querySelector(':scope > .rg-clear');
+
+    // The page objective already carries the long prompt. Keep only compact live
+    // incident facts in-world so the PlayCanvas scene remains the dominant surface.
+    if(incident){
+      incident.querySelector('h2')?.setAttribute('hidden','');
+      incident.querySelector(':scope > p:not(.rg-sealed)')?.setAttribute('hidden','');
+      if(clear){
+        incident.hidden=true;
+      }else{
+        incident.hidden=false;
+        incident.classList.add('play-canvas-storm-outcome');
+        if(incident.parentElement!==hud)hud.append(incident);
+      }
     }
-    const results=root.querySelector(':scope > .rg-encounter > .rg-results');
-    if(results&&results.parentElement!==surface)surface.append(results);
+
+    if(bench){
+      bench.classList.add('play-canvas-route-tools');
+      bench.querySelector('.rg-slots')?.classList.add('play-canvas-route-nodes');
+      bench.querySelector('.rg-palette')?.classList.add('play-canvas-toolbelt');
+      if(bench.parentElement!==hud)hud.append(bench);
+    }
+
+    if(actions){
+      // Keep assistance provenance visible but separate it from the primary action.
+      // Reparent the exact existing controls; no assessment semantics are duplicated.
+      const note=actions.querySelector('.rg-run-note');
+      const aid=actions.querySelector('.rg-help-label');
+      if(incident&&!clear){if(note)incident.append(note);if(aid)incident.append(aid);}
+      const run=actions.querySelector('#rg-run');
+      if(run){
+        let runWrap=hud.querySelector(':scope > .play-canvas-transfer-run');
+        if(!runWrap){
+          runWrap=document.createElement('div');
+          runWrap.className='rg-build-actions play-canvas-route-run play-canvas-transfer-run';
+          hud.append(runWrap);
+        }
+        if(run.parentElement!==runWrap)runWrap.append(run);
+      }
+      if(!actions.childElementCount)actions.remove();
+    }
+
+    if(clear){
+      clear.hidden=false;
+      clear.classList.add('play-canvas-storm-outcome');
+      if(clear.parentElement!==hud)hud.append(clear);
+    }
+
+    // Results and the downloadable repair kit intentionally remain below the live
+    // game surface as post-action evidence/reporting, not as the interaction itself.
+    ensureTransferWorld(surface,a);
   }
 
   function migrate(a=lastAttempt){
@@ -89,7 +188,7 @@
     const root=rootEl();
     if(!root||root.hidden||historical(root)||!lastAttempt?.snapshot?.rescue)return;
     const level=levelOf(lastAttempt);
-    if(level===7){migrateTransfer(root);return;}
+    if(level===7){migrateTransfer(root,lastAttempt);return;}
     const world=root.querySelector('.rg-world');
     if(!world)return;
     world.dataset.playCanvasChapter=String(level);
@@ -99,7 +198,12 @@
 
   const previousRender=game.render.bind(game);
   const previousSync=game.sync.bind(game);
-  game.render=(a,...rest)=>{const result=previousRender(a,...rest);migrate(a);return result;};
+  const previousHide=game.hide.bind(game);
+  game.render=(a,...rest)=>{
+    disposeTransferWorld();
+    const result=previousRender(a,...rest);migrate(a);return result;
+  };
   game.sync=(busy,a,...rest)=>{const result=previousSync(busy,a,...rest);lastAttempt=a||lastAttempt;queueMicrotask(()=>migrate(lastAttempt));return result;};
+  game.hide=(...args)=>{disposeTransferWorld();return previousHide(...args);};
   game.__playCanvasMigrationV2=true;
 })();
