@@ -17,7 +17,7 @@ const INTERACTIVE_SEMANTICS=new Set(['broken-gear','order-seal','signal','signal
 // The GLB silhouette is wider/taller than the old primitive courier. Keep its
 // semantic stage anchors inside the authored phone composition rather than
 // inheriting primitive-era x≈-5 positions that clip the animated character.
-const PIP_LEFT_X=-3.55;
+const PIP_LEFT_X=-2.65;
 const PIP_SUCCESS_X=2.75;
 
 function semanticPick(entityId){
