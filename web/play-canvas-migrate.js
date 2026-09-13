@@ -128,10 +128,16 @@
 
     const hud=makeLayer(surface,'play-canvas-builder-hud','Build and commit the export worker recovery policy');
     hud.classList.add('play-canvas-route-circuit');
-    const incident=field.querySelector(':scope > .rg-incident');
-    const bench=field.querySelector(':scope > .rg-workbench');
-    const actions=field.querySelector(':scope > .rg-build-actions');
-    const clear=field.querySelector(':scope > .rg-clear');
+
+    // Resolve by semantic identity from the whole encounter, not by assuming the
+    // elements are still direct field children. Internal RescueGame route edits
+    // replace the raw encounter DOM, while a repeated migration sees nodes that
+    // may already live in this HUD. Both states must converge to the same layout.
+    const incident=root.querySelector('.rg-incident');
+    const bench=root.querySelector('.rg-workbench');
+    const clear=root.querySelector('.rg-clear');
+    const runButton=root.querySelector('#rg-run');
+    const actions=runButton?.closest('.rg-build-actions')||root.querySelector('.rg-build-actions');
 
     // The page objective already carries the long prompt. Keep only compact live
     // incident facts in-world so the PlayCanvas scene remains the dominant surface.
@@ -160,17 +166,16 @@
       const note=actions.querySelector('.rg-run-note');
       const aid=actions.querySelector('.rg-help-label');
       if(incident&&!clear){if(note)incident.append(note);if(aid)incident.append(aid);}
-      const run=actions.querySelector('#rg-run');
-      if(run){
+      if(runButton){
         let runWrap=hud.querySelector(':scope > .play-canvas-transfer-run');
         if(!runWrap){
           runWrap=document.createElement('div');
           runWrap.className='rg-build-actions play-canvas-route-run play-canvas-transfer-run';
           hud.append(runWrap);
         }
-        if(run.parentElement!==runWrap)runWrap.append(run);
+        if(runButton.parentElement!==runWrap)runWrap.append(runButton);
       }
-      if(!actions.childElementCount)actions.remove();
+      if(actions!==runButton?.parentElement&&!actions.childElementCount)actions.remove();
     }
 
     if(clear){
