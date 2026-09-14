@@ -81,11 +81,23 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,onEx
     next.disabled=!ready();
     overlay.querySelector('#rgi-back').disabled=step===0||!ready();
     overlay.querySelector('#rgi-replay-beat').disabled=!ready();pause.disabled=!ready();
+    const hostRect=host.getBoundingClientRect();
+    const cameraTools=host.querySelector('.game-view-tools')?.getBoundingClientRect();
     for(const marker of overlay.querySelectorAll('.rgi-marker')){
       if(marker.classList.contains('rgi-target'))marker.disabled=!ready();
       const point=world?.projectEntity?.(marker.dataset.entity);
       marker.hidden=!point||!point.visible;
-      if(point){marker.style.left=`${Math.max(60,Math.min(host.clientWidth-60,point.x+Number(marker.dataset.offsetX)))}px`;marker.style.top=`${Math.max(70,Math.min(host.clientHeight*.58,point.y-22+Number(marker.dataset.offsetY)))}px`;}
+      if(point&&point.visible){
+        const halfWidth=marker.offsetWidth/2,height=marker.offsetHeight;
+        let x=Math.max(halfWidth+10,Math.min(host.clientWidth-halfWidth-10,point.x+Number(marker.dataset.offsetX)));
+        const y=Math.max(70,Math.min(host.clientHeight*.58,point.y-22+Number(marker.dataset.offsetY)));
+        // Labels translate by (-50%, -100%). Keep their entire hit targets
+        // inside the world and clear of the freely accessible camera tools.
+        if(cameraTools&&hostRect.top+y>cameraTools.top&&hostRect.top+y-height<cameraTools.bottom&&hostRect.left+x+halfWidth>cameraTools.left-10&&hostRect.left+x-halfWidth<cameraTools.right){
+          x=Math.max(halfWidth+10,cameraTools.left-hostRect.left-halfWidth-10);
+        }
+        marker.style.left=`${x}px`;marker.style.top=`${y}px`;
+      }
     }
     frame=requestAnimationFrame(updateMarkers);
   };

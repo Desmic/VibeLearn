@@ -30,6 +30,8 @@ The local runtime uses Node 24, which removed `--experimental-default-type`. Par
 
 The cloud browser rejects workspace localhost with `ERR_BLOCKED_BY_CLIENT`. Repository browser tests and their screenshots remain available; hands-on cloud-browser review is limited to the hosted candidate. No network-policy workaround is attempted.
 
+Rendered opening review found a concrete collision between the lost-reply action marker and the new camera-help button on phone. The shared opening controller now measures label widths, keeps complete labels inside the viewport and moves intersecting labels clear of the camera toolbar. The onboarding browser gate checks this clearance at every scene on desktop and 360/390/430px. A fresh exact-candidate CI run is required for this runtime correction.
+
 ## Foundations and boundaries
 
 The product goal remains games generated on demand from learning needs and explicit preferences using reusable specs/assets. Echo Forge is the reference. The opening/controller/WorldSpec foundation already exists; this unit extends reusable input, navigation, camera and screen layout. An on-demand generator and preference collection service are not yet implemented.

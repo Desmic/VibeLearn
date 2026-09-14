@@ -33,6 +33,21 @@ def expect_playcanvas_runtime(page):
     return canvas
 
 
+def assert_opening_marker_clearance(page):
+    # Projection is updated on the animation frame after the scene changes.
+    # Wait for that layout, while still failing persistent overlap/clipping.
+    page.wait_for_function('''() => {
+      const host=document.querySelector('#rgi-world');
+      const world=host.getBoundingClientRect();
+      const tools=host.querySelector('.game-view-tools')?.getBoundingClientRect();
+      return [...host.querySelectorAll('.rgi-marker:not([hidden])')].every(el=>{
+        const r=el.getBoundingClientRect();
+        return r.left>=world.left && r.right<=world.right && (!tools ||
+          r.right<=tools.left || r.left>=tools.right || r.bottom<=tools.top || r.top>=tools.bottom);
+      });
+    }''', timeout=5000)
+
+
 def assert_phone_first_touch(browser, url, out, errors, width, height):
     ctx = browser.new_context(viewport={'width': width, 'height': height}, has_touch=True)
     page = ctx.new_page(); page.on('pageerror', lambda e: errors.append(str(e)))
@@ -56,6 +71,7 @@ def assert_phone_first_touch(browser, url, out, errors, width, height):
     assert replay and replay['height'] >= 44
     assert max(back['y'] + back['height'], nxt['y'] + nxt['height']) <= height + 1
     page.wait_for_function("() => document.querySelector('#rgi-world')?.dataset.worldStatus === 'ready'")
+    assert_opening_marker_clearance(page)
     assert page.locator('.rgi-markers').evaluate('''host => {
       const labels=[...host.querySelectorAll('button:not([hidden])')].map(n=>n.getBoundingClientRect());
       return labels.every((a,i)=>labels.every((b,j)=>i===j||a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top));
@@ -70,6 +86,7 @@ def assert_phone_first_touch(browser, url, out, errors, width, height):
         page.locator('#rgi-next').click()
         expect(page.locator('#rgi-intro')).to_have_attribute('data-step',str(step))
         for marker in page.locator('.rgi-marker').all():expect(marker).to_be_visible()
+        assert_opening_marker_clearance(page)
         page.screenshot(path=str(out/f'onboarding-{width}-beat-{step}.png'),full_page=False)
     ctx.close()
 
