@@ -1,32 +1,71 @@
 """Small, reproducible entry points; invoke from the project directory."""
 import compileall
+import argparse
 import json
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+BROWSER_GROUPS = {
+    "foundation": ["tests.browser_check", "tests.expedition_browser_check",
+                   "tests.game_review_browser", "tests.story3d_framework_browser",
+                   "tests.playcanvas_framework_browser", "tests.playcanvas_story_interaction_browser"],
+    "opening": ["tests.onboarding_browser", "tests.opening_contract_browser", "tests.player_controls_browser"],
+    "journey": ["tests.rescue_browser"],
+}
 
 
 def main():
     command = sys.argv[1] if len(sys.argv) > 1 else "serve"
+    if command == "vendor":
+        for script in (
+            "tools/vendor_three.py",
+            "tools/vendor_playcanvas.py",
+            "tools/vendor_game_assets.py",
+        ):
+            result = subprocess.call([sys.executable, script], cwd=ROOT)
+            if result:
+                return result
+        # Render runs asset preparation without the CI-only JavaScript build.
+        # The post-transfer learning lab is a served runtime asset too.
+        from tools.package_repair import build as package_repair
+        package_repair()
+        return 0
     if command == "build":
+        from tools.package_repair import build as package_repair
+        package_repair()
         if not compileall.compile_dir(ROOT / "app", quiet=1):
             return 1
-        if (ROOT / "web" / "app.js").stat().st_size:
-            subprocess.run(["node", "--check", str(ROOT / "web" / "app.js")], check=True)
+        # Browser code includes ES modules. Parse every script with ESM semantics
+        # so engine/runtime imports fail in build rather than only in-browser.
+        for script in sorted((ROOT / "web").glob("*.js")):
+            subprocess.run([
+                "node", "--input-type=module", "--check"
+            ], input=script.read_text(encoding="utf-8"), text=True, check=True)
         from app.manifest import manifest
         (ROOT / "artifacts").mkdir(exist_ok=True)
         (ROOT / "artifacts" / "build-manifest.json").write_text(json.dumps(manifest(), indent=2), encoding="utf-8")
-        print("Build passed: Python compiled; browser JavaScript syntax checked.")
+        print("Build passed: Python compiled; browser JavaScript parsed with ESM semantics.")
+        return 0
+    if command == "browser":
+        parser = argparse.ArgumentParser(description="Run all browser checks or one CI group")
+        parser.add_argument("--group", choices=BROWSER_GROUPS)
+        args, remaining = parser.parse_known_args(sys.argv[2:])
+        modules = BROWSER_GROUPS[args.group] if args.group else [m for group in BROWSER_GROUPS.values() for m in group]
+        for module in modules:
+            print(f"Starting {module}", flush=True)
+            result = subprocess.call([sys.executable, "-m", module, *remaining], cwd=ROOT)
+            if result:
+                return result
+            print(f"Passed {module}", flush=True)
         return 0
     commands = {
         "serve": ["-m", "app.server", *sys.argv[2:]],
         "test": ["-m", "unittest", "discover", "-s", "tests", "-v"],
-        "browser": ["-m", "tests.browser_check", *sys.argv[2:]],
     }
     if command not in commands:
-        print("Usage: python manage.py [build|test|browser|serve --port 8000 --db path]")
+        print("Usage: python manage.py [vendor|build|test|browser|serve --port 8000 --db path]")
         return 2
     return subprocess.call([sys.executable, *commands[command]], cwd=ROOT)
 

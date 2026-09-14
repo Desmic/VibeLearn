@@ -7,3 +7,7 @@ artifacts/
 .env
 .env.*
 !.env.example
+
+web/vendor/
+
+web/relay-repair-kit.zip

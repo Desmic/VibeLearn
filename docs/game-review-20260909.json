@@ -1,0 +1,28 @@
+{
+  "candidate_commit": "620036808c6c558a4a0811e7be2cf9e0a8e74043",
+  "review_method": "internal_tool_assisted",
+  "reviewer": "implementation_agent_separate_critique_pass",
+  "independent_agent": false,
+  "human_or_youth_playtest": false,
+  "evidence_run": 34265834379,
+  "evidence_artifact": 10071821518,
+  "scores": {
+    "game_identity": {"score": 7.0, "weight": 15},
+    "hud": {"score": 7.0, "weight": 15},
+    "core_loop": {"score": 6.5, "weight": 15},
+    "progression": {"score": 6.5, "weight": 15},
+    "feedback": {"score": 6.5, "weight": 12},
+    "cohesion": {"score": 7.5, "weight": 10},
+    "learning_integrity": {"score": 8.8, "weight": 10},
+    "accessibility": {"score": 7.0, "weight": 8}
+  },
+  "weighted_score_unrounded": 7.02,
+  "threshold": 9.0,
+  "younger_player_lens": "needs_revision",
+  "young_adult_lens": "needs_revision",
+  "blocking_findings": ["G1: prescribed exercise loop", "G2: boss preparation gaps", "G3: page-first experience hierarchy", "L1: course-equivalent outcome evidence missing"],
+  "status": "needs_revision",
+  "user_acceptance": "pending",
+  "course_equivalence": "unvalidated",
+  "limits": ["scripted browser journeys plus screenshot/trace/source inspection", "no unrestricted authenticated live-site playthrough", "no physical-device performance claim", "audience verdicts are hypotheses, not measured enjoyment"]
+}

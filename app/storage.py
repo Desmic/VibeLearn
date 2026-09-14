@@ -41,6 +41,9 @@ MIGRATIONS = [
 
 
 def connect(path):
+    if is_postgres(path):
+        from app.postgres import PostgresConnection
+        return PostgresConnection(str(path))
     db = sqlite3.connect(str(path), timeout=10)
     db.row_factory = sqlite3.Row
     db.execute("PRAGMA foreign_keys = ON")
@@ -48,6 +51,12 @@ def connect(path):
 
 
 def migrate(path):
+    if is_postgres(path):
+        with transaction(path) as db:
+            version = db.execute("SELECT max(version) FROM schema_migrations").fetchone()[0]
+            if version != 1:
+                raise RuntimeError("Apply the reviewed PostgreSQL migrations before starting this version.")
+        return
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     with transaction(path) as db:
         version = db.execute("PRAGMA user_version").fetchone()[0]
@@ -66,10 +75,13 @@ def migrate(path):
 
 
 @contextmanager
-def transaction(path):
+def transaction(path, learner=None, lock=False):
     db = connect(path)
     try:
-        db.execute("BEGIN IMMEDIATE")
+        if is_postgres(path):
+            db.begin(learner, lock)
+        else:
+            db.execute("BEGIN IMMEDIATE")
         yield db
         db.commit()
     except BaseException:
@@ -77,3 +89,12 @@ def transaction(path):
         raise
     finally:
         db.close()
+
+
+def is_postgres(path):
+    return str(path).startswith(("postgresql://", "postgres://"))
+
+
+def family_evidence(db, learner, family):
+    expression = "capsule::jsonb #>> '{snapshot,family_id}'" if getattr(db, "postgres", False) else "json_extract(capsule, '$.snapshot.family_id')"
+    return db.execute(f"SELECT id FROM evidence WHERE learner_id=? AND {expression}=? LIMIT 1", (learner, family)).fetchone()
