@@ -34,6 +34,8 @@ Rendered opening review found a concrete collision between the lost-reply action
 
 Landscape screenshot review also found the movement-stick label clipped at the bottom edge. Reserve bottom safe-area space for the label and exercise the visible movement stick in landscape as well as portrait; the controls gate now checks the label bounds. These are bounded HUD corrections, not a new design pass.
 
+The complete local journey then exposed a Signal 6 interaction blocker: legacy storm results/playback overlap the global header/objective, and the optional storm playground cannot be clicked. Group these existing controls in a scrollable world panel below the objective and above route construction, preserving all experiment and assessment semantics. Check panel bounds and real pointer access on desktop and phone. Split the existing ten browser modules into foundation, opening and journey CI groups on the same exact SHA; retain every module and all PostgreSQL/unit checks. Deployment remains blocked until the complete candidate passes and fresh screenshots are inspected.
+
 ## Foundations and boundaries
 
 The product goal remains games generated on demand from learning needs and explicit preferences using reusable specs/assets. Echo Forge is the reference. The opening/controller/WorldSpec foundation already exists; this unit extends reusable input, navigation, camera and screen layout. An on-demand generator and preference collection service are not yet implemented.

@@ -1,11 +1,19 @@
 """Small, reproducible entry points; invoke from the project directory."""
 import compileall
+import argparse
 import json
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+BROWSER_GROUPS = {
+    "foundation": ["tests.browser_check", "tests.expedition_browser_check",
+                   "tests.game_review_browser", "tests.story3d_framework_browser",
+                   "tests.playcanvas_framework_browser", "tests.playcanvas_story_interaction_browser"],
+    "opening": ["tests.onboarding_browser", "tests.opening_contract_browser", "tests.player_controls_browser"],
+    "journey": ["tests.rescue_browser"],
+}
 
 
 def main():
@@ -41,21 +49,16 @@ def main():
         print("Build passed: Python compiled; browser JavaScript parsed with ESM semantics.")
         return 0
     if command == "browser":
-        for module in [
-            "tests.browser_check",
-            "tests.expedition_browser_check",
-            "tests.game_review_browser",
-            "tests.story3d_framework_browser",
-            "tests.playcanvas_framework_browser",
-            "tests.playcanvas_story_interaction_browser",
-            "tests.onboarding_browser",
-            "tests.opening_contract_browser",
-            "tests.player_controls_browser",
-            "tests.rescue_browser",
-        ]:
-            result = subprocess.call([sys.executable, "-m", module, *sys.argv[2:]], cwd=ROOT)
+        parser = argparse.ArgumentParser(description="Run all browser checks or one CI group")
+        parser.add_argument("--group", choices=BROWSER_GROUPS)
+        args, remaining = parser.parse_known_args(sys.argv[2:])
+        modules = BROWSER_GROUPS[args.group] if args.group else [m for group in BROWSER_GROUPS.values() for m in group]
+        for module in modules:
+            print(f"Starting {module}", flush=True)
+            result = subprocess.call([sys.executable, "-m", module, *remaining], cwd=ROOT)
             if result:
                 return result
+            print(f"Passed {module}", flush=True)
         return 0
     commands = {
         "serve": ["-m", "app.server", *sys.argv[2:]],

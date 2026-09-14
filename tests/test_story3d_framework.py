@@ -86,7 +86,8 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn('overflow-x:auto!important', css)
         self.assertIn("const playback=root.querySelector('.rg-live-route')", migrate)
         self.assertIn("playback.classList.add('play-canvas-route-playback')", migrate)
-        self.assertIn('if(playback.parentElement!==hud)hud.append(playback)', migrate)
+        self.assertIn("makeLayer(hud,'play-canvas-storm-lab'", migrate)
+        self.assertIn('if(playback.parentElement!==lab)lab.append(playback)', migrate)
         self.assertIn('.play-canvas-storm-outcome .rg-case-detail{display:none!important}', css)
 
     def test_signal7_transfer_is_a_distinct_playcanvas_world_with_existing_semantic_controls(self):

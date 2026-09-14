@@ -80,3 +80,12 @@ body.game-screen-active #rescue-game .rg-objective h1{display:block;white-space:
  body.game-screen-active #rescue-game .rg-objective>span{display:none}
  body.game-screen-active #rescue-game .rg-objective h1{font-size:1rem!important;margin:0!important}
 }
+/* Signal 6 feedback occupies a bounded region between objective and route nodes. */
+body.game-screen-active #rescue-game .play-canvas-storm-lab{position:absolute;z-index:12;top:calc(220px + var(--screen-top));left:18px;width:min(620px,calc(100% - 94px));max-height:calc(43dvh - 232px - var(--screen-top));overflow:auto;overscroll-behavior:contain;pointer-events:auto;border-radius:12px;background:#09242fe8;padding:8px}
+body.game-screen-active #rescue-game .play-canvas-storm-lab :is(.play-canvas-storm-outcome,.play-canvas-route-playback){position:relative!important;inset:auto!important;transform:none!important;width:100%!important;max-width:none!important;max-height:none!important;overflow:visible!important;margin:0 0 8px!important}
+body.game-screen-active #rescue-game .play-canvas-storm-lab .rg-case-tabs{flex-wrap:wrap!important;overflow:visible!important}
+body.game-screen-active #rescue-game .play-canvas-storm-lab .rg-sandbox{margin:0!important;padding:8px!important}
+body.game-screen-active #rescue-game .play-canvas-storm-lab .rg-sandbox summary{font-size:.72rem;min-height:36px}
+body.game-screen-active #rescue-game .play-canvas-builder-world:not(.play-canvas-transfer-surface) .rg-bench-title{display:none!important}
+@media(max-width:800px){body.game-screen-active #rescue-game .play-canvas-storm-lab{left:10px;width:calc(100% - 76px)}}
+@media(max-height:540px) and (min-width:600px){body.game-screen-active #rescue-game .play-canvas-storm-lab{top:70px;left:50%;width:calc(50% - 70px);max-height:calc(43dvh - 82px)}}

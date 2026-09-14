@@ -21,6 +21,24 @@ def main():
             page.evaluate('scrollTo(0,0)');page.screenshot(path=str(out/name),full_page=True)
         def world_shot(name):
             page.evaluate('scrollTo(0,0)');page.locator('.rg-world.play-canvas-builder-world').screenshot(path=str(out/name))
+        def expect_storm_controls():
+            panel=page.locator('.play-canvas-storm-lab')
+            expect(panel).to_be_visible()
+            assert panel.evaluate("""el => {
+                const r=el.getBoundingClientRect();
+                const objective=document.querySelector('.rg-objective').getBoundingClientRect();
+                const nodes=document.querySelector('.play-canvas-route-nodes').getBoundingClientRect();
+                return r.top >= objective.bottom && r.bottom <= nodes.top && r.left >= 0 && r.right <= innerWidth;
+            }""")
+            for selector in ['.rg-case-tabs button', '#rg-replay-case', '.rg-sandbox summary']:
+                control=panel.locator(selector).first
+                control.scroll_into_view_if_needed()
+                assert control.evaluate("""el => {
+                    const r=el.getBoundingClientRect();
+                    const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+                    return hit === el || el.contains(hit);
+                }"""), selector
+            panel.evaluate('el => {el.scrollTop=0}')
         def move(action):
             page.locator(f'[data-tool="{action}"]').click()
             expect(page.locator('#rg-feedback')).not_to_have_text('Pip is trying your idea…')
@@ -156,12 +174,12 @@ def main():
             expect(page.locator('.play-canvas-route-nodes .rg-slot')).to_have_count(4)
             page.locator('#rg-run').click();expect(page.locator('.rg-case-tabs button')).to_have_count(6)
             expect(page.locator('.play-canvas-storm-outcome')).to_be_visible()
-            expect(page.locator('.play-canvas-route-circuit > .play-canvas-route-playback')).to_be_visible()
-            expect(page.locator('#rg-next')).to_have_count(0);shot('rescue-route-failure.png')
+            expect(page.locator('.play-canvas-storm-lab > .play-canvas-route-playback')).to_be_visible()
+            expect(page.locator('#rg-next')).to_have_count(0);expect_storm_controls();shot('rescue-route-failure.png')
             page.set_viewport_size({'width':390,'height':844});page.wait_for_timeout(180)
             expect(page.locator('.play-canvas-route-circuit')).to_be_visible()
             assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1')
-            world_shot('rescue-route-failure-phone-390.png')
+            expect_storm_controls();world_shot('rescue-route-failure-phone-390.png')
             page.set_viewport_size({'width':1440,'height':1000});page.wait_for_timeout(180)
             build(SAFE)
             expect(page.locator('.play-canvas-route-circuit')).to_be_visible()
@@ -185,10 +203,10 @@ def main():
             expect(page.locator('[data-slot="0"]')).to_contain_text('Recover the ticket')
             expect(page.locator('[data-slot="3"]')).to_contain_text('Send the request')
             page.locator('#rg-run').click();expect(page.locator('#rg-next')).to_be_enabled();shot('rescue-route-success.png')
-            expect(page.locator('.play-canvas-route-circuit > .play-canvas-route-playback')).to_be_visible()
+            expect(page.locator('.play-canvas-storm-lab > .play-canvas-route-playback')).to_be_visible()
             page.set_viewport_size({'width':390,'height':844});page.wait_for_timeout(180)
             assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1')
-            world_shot('rescue-route-success-phone-390.png')
+            expect_storm_controls();world_shot('rescue-route-success-phone-390.png')
             page.set_viewport_size({'width':1440,'height':1000});page.wait_for_timeout(180)
             checks.append('Signal 6 route playback remains inside the live world and is captured at 390px without horizontal overflow')
             page.locator('.rg-sandbox summary').click();build(['remember','retry'])

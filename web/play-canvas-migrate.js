@@ -109,6 +109,8 @@
     const actions=runButton?.closest('.rg-build-actions')||runButton?.parentElement||root.querySelector('.rg-build-actions');
     const results=root.querySelector('.rg-results');
     const playback=root.querySelector('.rg-live-route');
+    const sandbox=root.querySelector('.rg-sandbox');
+    const lab=makeLayer(hud,'play-canvas-storm-lab','Storm tests and optional experiments');
     if(bench){
       bench.classList.add('play-canvas-route-tools');
       bench.querySelector('.rg-slots')?.classList.add('play-canvas-route-nodes');
@@ -116,13 +118,14 @@
       if(bench.parentElement!==hud)hud.append(bench);
     }
     if(actions){actions.classList.add('play-canvas-route-run');if(actions.parentElement!==hud)hud.append(actions);}
-    if(results){results.classList.add('play-canvas-storm-outcome');if(results.parentElement!==hud)hud.append(results);}
+    if(results){results.classList.add('play-canvas-storm-outcome');if(results.parentElement!==lab)lab.append(results);}
     // RescueStage creates the animated causal playback after the workbench. It is
     // part of Signal 6 gameplay, not a second report below the game world.
     if(playback){
       playback.classList.add('play-canvas-route-playback');
-      if(playback.parentElement!==hud)hud.append(playback);
+      if(playback.parentElement!==lab)lab.append(playback);
     }
+    if(sandbox&&sandbox.parentElement!==lab)lab.append(sandbox);
   }
 
   function migrateTransfer(root,a){
