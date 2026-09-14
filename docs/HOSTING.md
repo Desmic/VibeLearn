@@ -1,5 +1,7 @@
 # Private Render + Supabase pilot
 
+**Current review amendment — 14 September 2026:** The next verified deployment must include the shared camera/input and 3D entry assets in both hosted/local allowlists. Keep vendor generation of engine, models and repair ZIP, auto-deploy OFF, exact SHA verification and existing Supabase configuration. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
 
 This increment hosts the Phase 1 episode on Render Free + Supabase Free without

@@ -1,5 +1,7 @@
 # Learning OS — incremental implementation plan 2.0
 
+**Current review amendment — 14 September 2026:** Next bounded unit: reusable third-person movement/orbit camera, consistent 3D login, full-viewport mobile HUD and optional browser fullscreen. Then hands-on browser review, exact complete CI and manual verified deployment. Read [GAME-CAMERA-INPUT.md](docs/GAME-CAMERA-INPUT.md).
+
 **Current user contract — 13 September 2026:** Read [docs/GAME-OPENING-PROGRESSION.md](docs/GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
 
 **12 September 2026 · authoritative active plan**

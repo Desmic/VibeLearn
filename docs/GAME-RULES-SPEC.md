@@ -1,5 +1,7 @@
 # GameRulesSpec — portable deterministic gameplay semantics
 
+**Current review amendment — 14 September 2026:** Exploratory movement, camera and fullscreen actions do not alter authoritative mission state or assessment. Navigation bounds are presentation constraints. Any later learning-critical spatial mechanic requires an explicit authoritative rules/evidence contract. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
 
 **Status:** authoritative architecture contract · 12 September 2026  

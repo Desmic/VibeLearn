@@ -1,5 +1,7 @@
 # Game runtime architecture — engine-neutral world/game compiler
 
+**Current review amendment — 14 September 2026:** WorldSpec carries avatar/spawn, walkable regions, obstacles and camera limits. Shared input/navigation/camera and viewport HUD compile that data. Position and view are presentation state in this reference; preserve them across same-level redraws and isolate cinematic replay. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
 
 **Status:** authoritative strategic architecture · 12 September 2026  

@@ -1,5 +1,7 @@
 # VibeLearn · game-first learning system
 
+**Current review amendment — 14 September 2026:** Current refinement adds third-person exploration, free camera controls, consistent 3D entry and full-screen mobile play to the reusable learning-game foundation. See the current contract and verification status; implementation is not accepted merely because it deploys. Read [GAME-CAMERA-INPUT.md](docs/GAME-CAMERA-INPUT.md).
+
 **Current user contract — 13 September 2026:** Read [docs/GAME-OPENING-PROGRESSION.md](docs/GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
 
 VibeLearn is a **general system for turning subjects/courses into source-grounded learning games**, not a course website decorated with XP. The current private Phase 1 reference is **Relay Rescue: The Echo Forge**, a seven-signal reliability adventure.

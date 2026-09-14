@@ -1,5 +1,7 @@
 # VibeLearn game UX system — the game is the course
 
+**Current review amendment — 14 September 2026:** Default exploration to a third-person player with independent orbit/zoom/recenter. Phone gameplay fills the dynamic viewport with safe-area HUD and movement/look controls; long secondary content scrolls inside bounded panels. Login uses the same 3D world and visual language. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
 
 **Active direction · updated 12 September 2026.** Read with `GAME-AS-COURSE.md`, `STORY-GENERATION-AND-CRITIC.md`, `STATE.md`, `GAME-UX-REVIEW.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `PLAY-CANVAS.md`, and `THREE-STORY-FRAMEWORK.md`.

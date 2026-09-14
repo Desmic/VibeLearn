@@ -1,5 +1,7 @@
 # Current game critic — opening framework revision
 
+**Current review amendment — 14 September 2026:** The eab1614 user review requests another revision for camera agency, third-person view, login consistency and full-screen mobile. Existing numeric critic scores are historical diagnostics, not approval of the requested control changes. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
 Status: **review checkpoint in progress**, not product acceptance. The separate story-v3 review passed at 9.059; architecture/test success earns no game-quality points.
 
 Independent critic `/root/story_review` reviewed the in-progress opening and Signal 1 screenshots on 14 September UTC. Provisional first-touch score: **7.974/10**, below the required 9. The first-choice screenshot was excluded because its camera was stale. This is not an exact-commit, whole-game, learning or user pass.

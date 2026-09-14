@@ -1,5 +1,7 @@
 # Critic handoff — story first, then first touch, whole chapter, then learning
 
+**Current review amendment — 14 September 2026:** Review the next candidate specifically for third-person agency, orbit/zoom/recenter, mobile full-screen HUD/control separation, consistent login, retained story/pacing and no 2D gameplay fallback. Use exact rendered evidence and report concrete blockers without inventing user acceptance. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
 
 **Updated 12 September 2026.** Read `STORY-GENERATION-AND-CRITIC.md`, `GAME-AS-COURSE.md`, `GAME-ACCEPTANCE-9.md`, `GAME-UX-REVIEW.md`, `PLAY-CANVAS.md`, `THREE-STORY-FRAMEWORK.md`, and latest `STATE.md`.

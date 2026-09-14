@@ -1,58 +1,29 @@
-# Current state — user-rejected; 3D opening/progression revision
+# Current state — third-person camera and full-screen mobile revision
 
-Updated 13 September 2026 (14 September IST). **Product status: `user_rejected` / `needs_revision`.** The user reviewed the deployed experience and rejected its world/story onboarding, HUD/game feel and progression. No new numeric rating was supplied. Historical critic scores and green CI do not override this verdict.
+Updated 14 September 2026. **User review: changes requested / needs_revision.** The user reviewed `eab1614` and asked for free camera movement, third-person view for most games, an appealing consistent login, removal of any 2D gameplay fallback, hands-on computer/browser verification, and full-screen mobile play. No numeric user score or product acceptance was supplied.
 
-## Authoritative next work
+## Current source and verified deployment
 
-Read GAME-OPENING-PROGRESSION.md, the root implementation plan, CURRENT-STORY-CANDIDATE.md and the active story/UX/acceptance contracts. Update docs first; then build the confirmed first-entry skippable 3D opening, tutorial/early success, gradual progression and optional replay. Level 2+ resumes without an automatic opening. Remove the 2D gameplay fallback; preserve accessible HUD and honest engine recovery.
+Development: `phase1/world-transfer`, draft PR #8, repository Desmic/VibeLearn. Baseline `eab1614d2033ee9c65d05742ca0961bdb25b874e` passed Actions run `34790907513`: all 130 tests and the complete browser journey. Exact desktop/390px opening, first-success and Signal 7 screenshots were inspected. This is technical history, not acceptance of the newly requested controls.
 
-The current review candidate must include the newly confirmed opening/progression/foundation requirements. The user still owns the next product review; see the review-checkpoint clarification below.
+Render service `vibelearn` (`srv-daf7dhuq1p3s73c122cg`, workspace `tea-daf75lad0e5s73b4cgvg`) serves `deploy/render-supabase`, auto-deploy OFF. Deployment `dep-dajjomgae00c73a8cvsg` was verified live on that exact baseline at 2026-09-14 00:15 UTC. Public URL: https://vibelearn-4xws.onrender.com/. No newer source/deployment is claimed by this documentation checkpoint.
 
-## Verified source and deployment
+The hosted build command is `pip install -r requirements.lock && python manage.py vendor`. Vendor prepares pinned engine/models and the downloadable repair ZIP. Keep that packaging correction and the Signal 6→7 15-second assertion stabilization.
 
-Development: `phase1/world-transfer` / PR #8. Last deployed source: `16a655e9c5f426a488cae9af0c17f062bae43dbd`.
+## Next implementation and verification
 
-CI run `34783724257` passed 129 unit/PostgreSQL/static tests and the complete browser journey. Exact Signal 7 desktop/390px before/after screenshots were inspected. The help selector overlap, stuck disabled state and HUD clipping were fixed; the 15-second Signal 6→7 transition verification stabilization was retained.
+Read GAME-CAMERA-INPUT.md and GAME-OPENING-PROGRESSION.md. Documentation is updated first. Add shared spec-driven third-person avatar/navigation/camera controls, a consistent 3D login and a full-viewport mobile game shell with safe-area controls and optional browser fullscreen. Preserve story-first introduction, skip, gradual tutorial progression, later-level resume and isolated replay.
 
-Render service `vibelearn` (`srv-daf7dhuq1p3s73c122cg`, workspace `tea-daf75lad0e5s73b4cgvg`) serves `deploy/render-supabase`, auto-deploy OFF. Manual deployment `dep-dajhlre7bikc73c4c40g` is live on the SHA above at https://vibelearn-4xws.onrender.com.
+Use actual browser/computer interaction to verify login, camera/movement and mobile play; inspect screenshots and retain all unit/PostgreSQL/static/full-browser gates. No 2D gameplay fallback may become playable on engine failure. No new deployment is authorized until the exact candidate is green and visually reviewable.
 
-The first deployment omitted `python manage.py vendor`, causing PlayCanvas 404 and a silent 2D fallback. The user saved the corrected build command; the second deployment verified engine and both GLB URLs at HTTP 200 with matching verified bytes. Asset delivery success did not establish the intended game experience.
+## Foundations and boundaries
 
-## Why another revision is required
+The product goal remains games generated on demand from learning needs and explicit preferences using reusable specs/assets. Echo Forge is the reference. The opening/controller/WorldSpec foundation already exists; this unit extends reusable input, navigation, camera and screen layout. An on-demand generator and preference collection service are not yet implemented.
 
-Active docs contained stale 2D/Three.js choices despite the strategic PlayCanvas decision. First-touch tests used fresh local contexts and did not establish the real learner's authenticated/resumed entry. The intro used a browser-wide seen flag, and explicit replay could launch a mission. Missing renderer assets were allowed to become a playable old 2D game. Technical availability was reported too broadly as readiness.
+Keep server-authoritative progression, Supabase auth/RLS and learner isolation, immutable evidence, assistance and unknown semantics. Camera/position are presentation state in this reference. Phase 2 remains closed.
 
-## Current verification and limits
+## Review record
 
-Documentation reconciliation was committed first at `2bfb776767916ce5f8aad0b896653e7e62b9282e`. Story-v3 passed the separate story-only review at 9.059; this is not a rendered or user pass.
+The last independent story-only score was 9.059/10 and first-touch score 8.528/10. Those scores apply to their historical reviewed scope and do not certify the new camera/login/mobile work. The user owns the next product gate; CI is not acceptance. Follow the user's bounded revision/review instruction without another unrelated broad architecture/art pass.
 
-The implementation checkpoint adds a reusable, spec-driven opening controller, separate Echo Forge content, a versioned world package, isolated replay runtime, saved-attempt entry/resume decisions, a world HUD for the first tutorial/success, and explicit 3D recovery in place of SVG gameplay. A materially different Seed Garden opening uses the same controller/backend without copied engine code. Context loss blocks actions; restoration reapplies completed opening actions. Late map mounting cannot steal the opening canvas.
-
-Local opening/replay/hosted-login and recovery checks have passed during iteration. Full exact-candidate CI/PostgreSQL/browser verification is pending. Independent first-touch review progressed from 7.974 to 8.528/10 after bounded framing, marker and home-path repairs. The `203c72d` frames had no identified concrete first-touch blocker; this is not a full acceptance score. The later lifecycle patch fixes a fast reload/replay race found by the existing return-to-game assertion. Whole-game rendered and learning reviews remain outstanding. No new deployment or user acceptance is claimed. Preserve Supabase auth/RLS, authoritative progression, immutable evidence and assistance semantics. Phase 2 remains closed.
-
-Earlier technical history is preserved in history/STATE-before-opening-review-20260913.md; its current-state labels and preview instructions are historical only.
-
-## Foundation: games generated from learning needs and preferences
-
-User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
-
-Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.
-
-
-## Current user review checkpoint
-
-The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
-
-For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.
-
-
-### Verification record location
-
-This source checkpoint records what was known before its exact CI/deployment finished. The current run, exact deployed SHA and rendered evidence are recorded on [PR #8](https://github.com/Desmic/VibeLearn/pull/8); consult that record before claiming this source is live. Product status remains awaiting user review, not accepted. A green run alone does not change that status.
-
-
-### Final hosting audit correction
-
-Candidate `823d5c7` passed CI run34788642080 (129 tests plus the complete browser suite) and exact rendered review, then deployed as `dep-dajj1btg1s2s73auorkg`. The final hosting audit found that the configured Render asset-preparation command omitted the post-transfer repair ZIP, which CI had generated in its separate build step. The subsequent bounded fix makes `manage.py vendor` generate that runtime asset and adds a clean-tree regression. Final review handoff waits for the corrected exact candidate's full CI and manual redeployment; PR #8 carries the current live verification record.
-
-The first packaging verification run (`34789826510`, candidate `7eb426d`) passed 130 tests but exposed an incorrect browser assertion: Chromium completed the anchor download without emitting a page response event. A focused reproduction confirmed HTTP 200, successful download and identical ZIP bytes. The corrected gate checks the link's HTTP response directly, then requires the real browser download to complete and match those bytes; it does not relax the asset-delivery requirement.
+The exact candidate CI, rendered evidence and final live SHA are recorded on [PR #8](https://github.com/Desmic/VibeLearn/pull/8) once verification completes, so this source checkpoint does not falsely anticipate its own deployment. Earlier history is retained in Git and docs/history/.

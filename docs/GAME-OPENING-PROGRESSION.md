@@ -1,5 +1,7 @@
 # 3D opening, tutorial and progression — current product contract
 
+**Current review amendment — 14 September 2026:** Keep the skippable first-entry opening, later-level resume and non-destructive replay. After the opening, teach third-person movement/look briefly and introduce task controls progressively. Story framing is recoverable; gameplay uses player-controlled camera movement. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
 Confirmed by the user on 13 September 2026 (14 September IST). This contract supersedes conflicting active 2D/2.5D/Three.js-selection and gameplay-fallback guidance. The deployed `16a655e` experience is **user_rejected / needs_revision**; no new numeric user score was supplied. Its passing tests and successful deployment remain engineering evidence only.
 
 ## Required experience

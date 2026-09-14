@@ -1,5 +1,7 @@
 # VibeLearn game critic — active dual 9/10 gate
 
+**Current review amendment — 14 September 2026:** The user reviewed eab1614 and requested third-person/free-camera play, consistent login and full-screen phones. Prior scores do not certify these changes. Require hands-on movement, camera, login, mobile HUD, replay and recovery evidence alongside the complete tests. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
 
 **Latest authority · updated 12 September 2026.** Read root `CODEX-IMPLEMENTATION-PLAN.md`, `STORY-GENERATION-AND-CRITIC.md`, `GAME-AS-COURSE.md`, `PLAY-CANVAS.md`, `THREE-STORY-FRAMEWORK.md`, and `STATE.md`.
