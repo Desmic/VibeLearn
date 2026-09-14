@@ -29,7 +29,11 @@ def main():
                 page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
                 try:
                     page.goto(url)
-                    expect(page.locator('#rgi-world')).to_have_attribute('data-world-status','ready')
+                    # Each viewport is a cold browser context. Engine imports and
+                    # software-rendered startup on CI can exceed Playwright's
+                    # default 5 seconds; keep a bounded readiness gate, separate
+                    # from the interaction assertions below.
+                    expect(page.locator('#rgi-world')).to_have_attribute('data-world-status','ready',timeout=15000)
                     story_before=page.locator('#rgi-fact').inner_text()
                     point=exposed_canvas_point(page)
                     page.mouse.move(**point);page.mouse.down();page.mouse.move(point['x']+40,point['y']+8,steps=8);page.mouse.up()

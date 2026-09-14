@@ -22,6 +22,14 @@ The docs-first amendment is commit `9b9d520d80d5f6ce984e1d957586c335cd035507`. T
 
 Local automated browser checks and screenshot inspection are in progress; the first pass exposed and repaired an invisible avatar, clipped objective and legacy login palette. The 130-test local suite passed with six PostgreSQL checks skipped because a local PostgreSQL service is unavailable; full PostgreSQL verification remains required in CI. The cloud computer-use browser cannot access the workspace local server (`ERR_BLOCKED_BY_CLIENT`); no bypass is attempted. Hands-on verification therefore remains required on the verified Render candidate, separately from automated local/CI browser evidence. Production still serves the prior verified baseline.
 
+## Continuation verification — 14 September 2026
+
+Remote head `3937a289f3b7aa1d3fff0cd872d479ff2d7be826` contains the camera/mobile implementation and follow-up entry/landscape corrections. Actions run `34827438167` passed build and all unit/PostgreSQL tests, then failed the player-control browser gate at desktop cold startup: the default five-second readiness assertion expired before the opening appeared. Its failure screenshot shows the rendered opening, and the 390/360/430px control journeys had already completed. Keep all behavior assertions and use the existing fifteen-second transition allowance for this cold-start readiness check. This is a functional test allowance, not a measured phone performance claim.
+
+The local runtime uses Node 24, which removed `--experimental-default-type`. Parse each browser file through `--input-type=module --check` on stdin so syntax verification works with both CI's Node 22 and Node 24. Full candidate verification and deployment are pending; production remains on `eab1614` until those checks pass.
+
+The cloud browser rejects workspace localhost with `ERR_BLOCKED_BY_CLIENT`. Repository browser tests and their screenshots remain available; hands-on cloud-browser review is limited to the hosted candidate. No network-policy workaround is attempted.
+
 ## Foundations and boundaries
 
 The product goal remains games generated on demand from learning needs and explicit preferences using reusable specs/assets. Echo Forge is the reference. The opening/controller/WorldSpec foundation already exists; this unit extends reusable input, navigation, camera and screen layout. An on-demand generator and preference collection service are not yet implemented.

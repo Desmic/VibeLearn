@@ -33,8 +33,8 @@ def main():
         # so engine/runtime imports fail in build rather than only in-browser.
         for script in sorted((ROOT / "web").glob("*.js")):
             subprocess.run([
-                "node", "--experimental-default-type=module", "--check", str(script)
-            ], check=True)
+                "node", "--input-type=module", "--check"
+            ], input=script.read_text(encoding="utf-8"), text=True, check=True)
         from app.manifest import manifest
         (ROOT / "artifacts").mkdir(exist_ok=True)
         (ROOT / "artifacts" / "build-manifest.json").write_text(json.dumps(manifest(), indent=2), encoding="utf-8")
