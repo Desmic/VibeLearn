@@ -68,7 +68,7 @@ body.game-screen-active #rescue-game .play-canvas-route-nodes{top:43%!important;
  body.game-screen-active #rescue-game .rg-objective{top:65px;left:14px;right:auto;width:44%!important;max-height:95px}
  body.game-screen-active #rescue-game .rgc1-coach{top:165px!important;max-width:38%!important}
  body.game-screen-active #rescue-game .rgc1-dock,body.game-screen-active #rescue-game .play-canvas-mission-hud{left:auto!important;right:68px!important;bottom:12px!important;transform:none;width:42%;max-height:50%}
- .game-view-tools{top:72px;right:10px}.game-move-stick{bottom:14px;width:100px;height:100px}
+ .game-view-tools{top:72px;right:10px}.game-move-stick{bottom:calc(24px + var(--screen-bottom,0px));width:100px;height:100px}
  body.game-screen-active #rescue-game .play-canvas-transfer-header{top:70px;left:auto;right:70px;max-width:44%}body.game-screen-active #rescue-game .play-canvas-transfer-surface .rg-incident{top:150px!important;left:auto!important;right:70px!important;width:40%!important}
 }
 body.game-screen-active #rescue-game .rg-objective h1{max-width:none!important;width:auto!important}

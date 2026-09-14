@@ -66,8 +66,10 @@ def main():
                     page.locator('#rgi-skip').click()
                     assert player(page)['position']==moved['position'],'Replay changed player position'
                     expect(page.locator('[data-world-look="ticket"]')).to_be_enabled()
-                    if width<800:
+                    if page.locator('.game-move-stick').is_visible():
                         stick=page.locator('.game-move-stick').bounding_box();assert stick
+                        label=page.locator('.game-stick-label').bounding_box();assert label
+                        assert label['y']+label['height']<=height,'Movement label is clipped at the bottom edge'
                         page.mouse.move(stick['x']+stick['width']/2,stick['y']+12);page.mouse.down();page.wait_for_timeout(300);page.mouse.up()
                         assert player(page)['position']!=moved['position'],'Movement stick does not move avatar'
                     page.screenshot(path=str(out/f'player-controls-{width}x{height}.png'))

@@ -32,6 +32,8 @@ The cloud browser rejects workspace localhost with `ERR_BLOCKED_BY_CLIENT`. Repo
 
 Rendered opening review found a concrete collision between the lost-reply action marker and the new camera-help button on phone. The shared opening controller now measures label widths, keeps complete labels inside the viewport and moves intersecting labels clear of the camera toolbar. The onboarding browser gate checks this clearance at every scene on desktop and 360/390/430px. A fresh exact-candidate CI run is required for this runtime correction.
 
+Landscape screenshot review also found the movement-stick label clipped at the bottom edge. Reserve bottom safe-area space for the label and exercise the visible movement stick in landscape as well as portrait; the controls gate now checks the label bounds. These are bounded HUD corrections, not a new design pass.
+
 ## Foundations and boundaries
 
 The product goal remains games generated on demand from learning needs and explicit preferences using reusable specs/assets. Echo Forge is the reference. The opening/controller/WorldSpec foundation already exists; this unit extends reusable input, navigation, camera and screen layout. An on-demand generator and preference collection service are not yet implemented.
