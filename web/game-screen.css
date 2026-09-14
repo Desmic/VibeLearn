@@ -73,3 +73,10 @@ body.game-screen-active #rescue-game .play-canvas-route-nodes{top:43%!important;
 }
 body.game-screen-active #rescue-game .rg-objective h1{max-width:none!important;width:auto!important}
 body.game-screen-active #rescue-game .play-canvas-builder-world:not(.play-canvas-transfer-surface) .rg-bench-footer{top:calc(176px + var(--screen-top))!important;right:75px!important}
+body.game-screen-active #rescue-game .rg-objective{display:block!important;min-width:0;overflow:auto}
+body.game-screen-active #rescue-game .rg-objective>span{display:block;min-width:0;max-width:100%;white-space:normal!important;overflow-wrap:anywhere}
+body.game-screen-active #rescue-game .rg-objective h1{display:block;white-space:normal!important;overflow-wrap:anywhere}
+@media(max-height:540px) and (min-width:600px){
+ body.game-screen-active #rescue-game .rg-objective>span{display:none}
+ body.game-screen-active #rescue-game .rg-objective h1{font-size:1rem!important;margin:0!important}
+}

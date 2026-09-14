@@ -41,6 +41,7 @@ def main():
                     world=page.locator('.rg-world').bounding_box()
                     assert all(abs(world[k]-v)<2 for k,v in [('x',0),('y',0),('width',width),('height',height)]),world
                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth && document.documentElement.scrollHeight<=innerHeight'), 'Document scrolls during play'
+                    assert page.locator('.rg-objective h1').evaluate('el=>{const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return r.width>0&&r.height>0&&r.right<=p.right&&r.bottom<=p.bottom;}'), 'Primary objective is clipped'
                     before=page.evaluate('JSON.stringify(RescueGame.response())')
                     point=exposed_canvas_point(page)
                     page.mouse.move(**point);page.mouse.down();page.mouse.move(point['x']+54,point['y']+12,steps=8);page.mouse.up()

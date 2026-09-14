@@ -13,12 +13,13 @@
     const root=document.querySelector('#rescue-game');
     document.body.classList.toggle('game-screen-active',Boolean(root&&!root.hidden));
     if(!root||root.hidden)return;
+    root.dataset.gameInputBlocked=String(Boolean(root.querySelector('#rg-menu:not([hidden])')));
     if(document.fullscreenEnabled&&!root.querySelector('#game-fullscreen')){
-      const button=document.createElement('button');button.type='button';button.id='game-fullscreen';button.innerHTML='<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m6 0h6v-6"/></svg>';button.setAttribute('aria-label','Enter fullscreen');button.onclick=()=>fullscreen(button);root.querySelector('.rg-top>div')?.append(button);
+      const button=document.createElement('button');button.type='button';button.id='game-fullscreen';button.innerHTML='<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m6 0h6v-6"/></svg>';button.setAttribute('aria-label',document.fullscreenElement?'Exit fullscreen':'Enter fullscreen');button.onclick=()=>fullscreen(button);root.querySelector('.rg-top>div')?.append(button);
     }
     const intro=root.querySelector('.rgi-storybar');
     if(intro&&document.fullscreenEnabled&&!intro.querySelector('.opening-fullscreen')){
-      const button=document.createElement('button');button.type='button';button.className='opening-fullscreen';button.innerHTML='<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m6 0h6v-6"/></svg>';button.setAttribute('aria-label','Enter fullscreen');button.onclick=()=>fullscreen(button);intro.append(button);
+      const button=document.createElement('button');button.type='button';button.className='opening-fullscreen';button.innerHTML='<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m6 0h6v-6"/></svg>';button.setAttribute('aria-label',document.fullscreenElement?'Exit fullscreen':'Enter fullscreen');button.onclick=()=>fullscreen(button);intro.append(button);
     }
     // Long secondary records remain available without turning active play into
     // a scrolling document. Opening a drawer uses the existing semantic nodes.

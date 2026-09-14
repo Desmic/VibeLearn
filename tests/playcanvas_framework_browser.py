@@ -77,7 +77,7 @@ def main():
               world.restorePlayerView({...originalView,position:[99,0,99]});
               if(world.getPlayerView().position[0]!==1)throw Error('Out-of-bounds restore accepted');
               const {validatePlayerProfile}=await import('/player-controls.js');
-              for(const change of [{entity:'missing'},{limbs:['missing']},{speed:99},{surfaces:[{bounds:[2,-2,0,1],height:0}]}]){
+              for(const change of [{entity:'missing'},{spawn:[99,0,99]},{limbs:['missing']},{speed:99},{surfaces:[{bounds:[2,-2,0,1],height:0}]}]){
                 let rejected=false;try{validatePlayerProfile({...spec.player,...change},new Set(spec.entities.map(e=>e.id)));}catch(_){rejected=true;}
                 if(!rejected)throw Error('Invalid player profile accepted');
               }

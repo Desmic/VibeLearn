@@ -49,3 +49,15 @@ body:has(.auth-game-screen:not([hidden])) main{max-width:none!important;width:10
  .auth-game-screen .auth-access-panel h2{font-size:1.5rem}
  .auth-game-screen .auth-access-panel .auth-brand{margin-bottom:12px}
 }
+@media(max-width:700px){
+ /* Give the valley a visible opening above a compact account HUD. */
+ #sign-in.auth-game-screen,#password-reset.auth-game-screen{padding-top:calc(330px + env(safe-area-inset-top))!important}
+ .auth-game-screen .auth-world{height:440px;bottom:auto}
+ .auth-game-screen .auth-stage-copy h1{font-size:1.9rem;max-width:14ch}
+ .auth-game-screen .auth-stage-copy p{font-size:.73rem;max-width:30ch}
+ .auth-game-screen .auth-access-panel>.auth-brand,.auth-game-screen .auth-access-panel>.eyebrow,.auth-game-screen .auth-access-panel>p:not(.muted){display:none}
+ .auth-game-screen .auth-access-panel h2{font-size:1.4rem;margin:0 0 10px}
+ .auth-game-screen .auth-access-panel form{margin-top:0}
+ .auth-game-screen .auth-access-panel label{margin:0!important}
+ .auth-game-screen .auth-access-panel .muted{margin-top:12px}
+}

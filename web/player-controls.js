@@ -16,6 +16,7 @@ export function validatePlayerProfile(profile,ids){
     if(surface.whenVisible&&!ids.has(surface.whenVisible))fail('surface visibility entity is invalid');
   }
   for(const box of profile.obstacles||[])if(!vector(box,6)||box[0]>=box[3]||box[1]>=box[4]||box[2]>=box[5])fail('obstacle bounds are invalid');
+  if(!profile.surfaces.some(s=>!s.whenVisible&&profile.spawn[0]>=s.bounds[0]&&profile.spawn[0]<=s.bounds[1]&&profile.spawn[2]>=s.bounds[2]&&profile.spawn[2]<=s.bounds[3]&&Math.abs(profile.spawn[1]-s.height)<.1))fail('spawn must be on an initially walkable surface');
   const c=profile.camera;
   if(!c||![c.yaw,c.pitch,c.distance,c.minDistance,c.maxDistance,c.targetHeight].every(Number.isFinite)||c.minDistance<1||c.maxDistance>40||c.minDistance>=c.maxDistance||c.distance<c.minDistance||c.distance>c.maxDistance||c.pitch<5||c.pitch>70)fail('camera limits are invalid');
   return profile;
@@ -27,7 +28,7 @@ export function createPlayerControls(host,profile,adapter){
   let stick=[0,0],stickPointer=null,lastFacing=0,disposed=false;
   const keys=new Set(),cleanups=[];
   const listen=(target,event,fn,options)=>{target.addEventListener(event,fn,options);cleanups.push(()=>target.removeEventListener(event,fn,options));};
-  const blocked=()=>paused||!host.isConnected||!host.getClientRects().length||host.closest('[inert]')||host.closest('[data-world-status="failed"],[data-world-status="loading"]')||document.querySelector('#rg-menu:not([hidden]),.game-records[open]');
+  const blocked=()=>paused||!host.isConnected||!host.getClientRects().length||host.closest('[inert]')||host.closest('[data-world-status="failed"],[data-world-status="loading"]')||host.closest('[data-game-input-blocked="true"]');
   const surfaceAt=(x,z)=>profile.surfaces.find(s=>(!s.whenVisible||adapter.isEntityEnabled(s.whenVisible))&&x>=s.bounds[0]&&x<=s.bounds[1]&&z>=s.bounds[2]&&z<=s.bounds[3]);
   const solidAt=(x,y,z)=> (profile.obstacles||[]).some(b=>x>b[0]-.2&&x<b[3]+.2&&z>b[2]-.2&&z<b[5]+.2&&y+1.6>b[1]&&y<b[4]);
   const overlay=document.createElement('div');overlay.className='game-player-controls';
