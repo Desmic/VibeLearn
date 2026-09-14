@@ -36,6 +36,8 @@ Landscape screenshot review also found the movement-stick label clipped at the b
 
 The complete local journey then exposed a Signal 6 interaction blocker: legacy storm results/playback overlap the global header/objective, and the optional storm playground cannot be clicked. Group these existing controls in a scrollable world panel below the objective and above route construction, preserving all experiment and assessment semantics. Check panel bounds and real pointer access on desktop and phone. Split the existing ten browser modules into foundation, opening and journey CI groups on the same exact SHA; retain every module and all PostgreSQL/unit checks. Deployment remains blocked until the complete candidate passes and fresh screenshots are inspected.
 
+The repaired full local journey passed through all seven signals, including storm experiments, saved draft recovery, lost-acknowledgement retry without duplicate evidence/XP, and the downloaded repair ZIP. Desktop/phone inspection found two remaining legacy text positions: put the Signal 6 block hint above its toolbelt and suppress the redundant builder title behind the global header in both builder worlds. These are presentation-only corrections; the final exact-source CI and hosted review remain pending.
+
 ## Foundations and boundaries
 
 The product goal remains games generated on demand from learning needs and explicit preferences using reusable specs/assets. Echo Forge is the reference. The opening/controller/WorldSpec foundation already exists; this unit extends reusable input, navigation, camera and screen layout. An on-demand generator and preference collection service are not yet implemented.

@@ -86,6 +86,8 @@ body.game-screen-active #rescue-game .play-canvas-storm-lab :is(.play-canvas-sto
 body.game-screen-active #rescue-game .play-canvas-storm-lab .rg-case-tabs{flex-wrap:wrap!important;overflow:visible!important}
 body.game-screen-active #rescue-game .play-canvas-storm-lab .rg-sandbox{margin:0!important;padding:8px!important}
 body.game-screen-active #rescue-game .play-canvas-storm-lab .rg-sandbox summary{font-size:.72rem;min-height:36px}
-body.game-screen-active #rescue-game .play-canvas-builder-world:not(.play-canvas-transfer-surface) .rg-bench-title{display:none!important}
+body.game-screen-active #rescue-game .play-canvas-builder-world .rg-bench-title{display:none!important}
 @media(max-width:800px){body.game-screen-active #rescue-game .play-canvas-storm-lab{left:10px;width:calc(100% - 76px)}}
 @media(max-height:540px) and (min-width:600px){body.game-screen-active #rescue-game .play-canvas-storm-lab{top:70px;left:50%;width:calc(50% - 70px);max-height:calc(43dvh - 82px)}}
+
+body.game-screen-active #rescue-game .play-canvas-route-tools .rg-block-help{position:absolute;left:18px;right:18px;bottom:calc(146px + var(--screen-bottom));max-width:660px;max-height:80px;min-height:0;overflow:auto;padding:6px 9px;border-radius:8px;background:#09242fe8;pointer-events:auto}
