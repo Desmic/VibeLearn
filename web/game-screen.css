@@ -1,0 +1,75 @@
+/* Full-viewport play with bounded HUD regions, on desktop and phones. */
+body.game-screen-active{overflow:hidden;overscroll-behavior:none}
+body.game-screen-active .shell{max-width:none!important;padding:0!important;margin:0!important}
+body.game-screen-active #workspace{height:100dvh;overflow:hidden}
+#rescue-game{--screen-top:env(safe-area-inset-top,0px);--screen-bottom:env(safe-area-inset-bottom,0px)}
+body.game-screen-active #rescue-game{position:fixed;inset:0;height:100dvh;min-height:0;overflow:hidden;background:#04131e}
+body.game-screen-active #rescue-game .rg-top{position:absolute;z-index:40;top:0;left:0;right:0;margin:0;padding:calc(10px + var(--screen-top)) max(18px,env(safe-area-inset-right)) 10px max(18px,env(safe-area-inset-left));min-height:64px;border:0;background:linear-gradient(#03141df2,#03141d99,transparent);gap:12px}
+#rescue-game .rg-top>div{display:flex;align-items:center;gap:9px}#rescue-game #game-fullscreen{min-width:44px;min-height:44px;padding:6px}
+body.game-screen-active #rescue-game .rg-objective{position:absolute;z-index:18;top:calc(70px + var(--screen-top));left:max(18px,env(safe-area-inset-left));right:18px;width:auto!important;max-width:660px;padding:10px 14px!important;border:1px solid #72958a55;border-radius:13px;background:#081f2ad9;pointer-events:none}
+body.game-screen-active #rescue-game .rg-objective>span{font-size:.72rem!important;line-height:1.35}body.game-screen-active #rescue-game .rg-objective h1{font-size:1.3rem!important;line-height:1.15!important;margin:6px 0 0!important}
+body.game-screen-active #rescue-game :is(.rg-encounter,.rg-arena,.rg-field,.rg-map){position:static;display:block;margin:0;padding:0;min-height:0}
+body.game-screen-active #rescue-game :is(.rg-world,.play-canvas-transfer-surface){position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+body.game-screen-active #rescue-game :is(.rg-place,.rg-station,.rg-scene-readout,.rgc1-world-key){display:none!important}
+body.game-screen-active #rescue-game .rg-world-targets{position:absolute!important;inset:0!important;pointer-events:none}
+body.game-screen-active #rescue-game .rg-world-target{pointer-events:auto;max-width:140px}
+body.game-screen-active #rescue-game .rgc1-coach{top:calc(166px + var(--screen-top))!important;left:18px!important;right:auto!important;width:350px!important;max-width:calc(100% - 84px)!important;padding:11px 13px}
+body.game-screen-active #rescue-game .rgc1-dock{bottom:calc(18px + var(--screen-bottom))!important;left:50%!important;right:auto!important;width:min(610px,calc(100% - 36px));transform:translateX(-50%);max-height:29%;padding:10px 12px;border:1px solid #648d85;border-radius:15px;background:#09242fe8;overflow:auto}
+body.game-screen-active #rescue-game .rgc1-dock .rg-ticket{padding:6px 8px!important;margin:4px 0!important;font-size:.75rem}
+body.game-screen-active #rescue-game .rgc1-dock .rg-pip-message{min-height:0;padding:0;font-size:.72rem}.rgc1-dock .rg-pip-message .rg-face{display:none}.rgc1-dock .rg-pip-message p{margin:3px 0;line-height:1.3}
+body.game-screen-active #rescue-game .rg-arena>.rg-console{display:none!important}
+body.game-screen-active #rescue-game .play-canvas-mission-hud{top:auto!important;right:18px!important;bottom:calc(18px + var(--screen-bottom))!important;max-height:38%;width:340px}
+body.game-screen-active #rescue-game .rgc1-finale,body.game-screen-active #rescue-game .rg-field>.rg-clear{position:absolute;z-index:20;left:50%;right:auto;bottom:calc(20px + var(--screen-bottom));transform:translateX(-50%);width:min(610px,calc(100% - 36px));max-height:37%;overflow:auto;background:#09242fef;border:1px solid #759e8d;border-radius:15px;padding:16px}
+#rescue-game #rg-menu{position:absolute;z-index:65;right:max(14px,env(safe-area-inset-right));top:calc(66px + var(--screen-top));width:min(340px,calc(100% - 28px));max-height:calc(100dvh - 95px);overflow:auto;background:#0b2835f7;border:1px solid #79998a;border-radius:14px;padding:14px;box-shadow:0 15px 40px #0009}
+#rescue-game #rg-menu button{display:block;width:100%;text-align:left;margin:5px 0}
+#rescue-game #rg-save-recovery{position:absolute;z-index:95;inset:25% 12%;background:#183440;border:2px solid #efc885;border-radius:16px;padding:22px}
+.game-records{position:absolute;z-index:45;right:18px;bottom:calc(12px + var(--screen-bottom));max-width:calc(100% - 36px);color:#d9e9df}
+.game-records>summary{padding:9px 13px;min-height:40px;background:#0a2835;border:1px solid #627d77;border-radius:10px;cursor:pointer;font-size:.7rem}
+.game-records[open]{left:18px;right:18px;bottom:18px;max-width:none;background:#0b2735f7;border:1px solid #7a9e91;border-radius:14px;box-shadow:0 0 0 100vmax #0008}
+.game-records-content{max-height:65dvh;overflow:auto;padding:15px}.game-records-content pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.7rem}.game-records-content #rg-kit{margin:0;background:transparent}.game-records-content #rg-kit h3{color:#f1d69a}
+#rescue-game #rg-menu .game-records{position:static;max-width:none;box-shadow:none;margin-top:10px}#rescue-game #rg-menu .game-records-content{max-height:48dvh;padding:8px}
+.rg-world-target[data-world-pinned='true']::after{content:' ↗';color:#f4d189}
+#rescue-game .rg-map-brief{position:absolute;z-index:20;left:24px;bottom:150px;width:min(430px,calc(100% - 48px));padding:20px;border:1px solid #668b7e;border-radius:17px;background:#0a2732e8}
+#rescue-game .rg-map-brief h1{font-size:2rem}#rescue-game .rg-map-brief p{font-size:.8rem}#rescue-game .rg-route{position:absolute;z-index:21;left:24px;right:24px;bottom:50px;display:flex;gap:7px;overflow:auto}#rescue-game .rg-route button{flex:1 0 100px;min-height:75px;background:#0a2835e8}#rescue-game .rg-map-note{display:none}
+/* Input overlays stay inside the world runtime, so isolated replay is isolated. */
+.game-player-controls{position:absolute;z-index:30;inset:0;pointer-events:none}
+.game-view-tools{position:absolute;right:max(14px,env(safe-area-inset-right));top:35%;display:grid;gap:6px;pointer-events:auto}
+.game-view-tools button,#rescue-game .game-view-tools button{width:44px;height:44px;min-height:44px;padding:0;border:1px solid #638b86;border-radius:50%;background:#0a2935d9;color:#e9d6a5;font:700 1.25rem/1 system-ui;box-shadow:0 3px 14px #0006}
+.game-move-stick{position:absolute;left:max(20px,env(safe-area-inset-left));bottom:calc(33% + var(--screen-bottom,0px));width:108px;height:108px;border:1px solid #a8d6be88;border-radius:50%;background:#092a365c;box-shadow:inset 0 0 0 9px #94c9c311;touch-action:none;pointer-events:auto;display:none}
+.game-stick-knob{position:absolute;left:35px;top:35px;width:36px;height:36px;border-radius:50%;border:1px solid #d9c489;background:#aac6b433;pointer-events:none}.game-stick-label{position:absolute;top:calc(100% + 5px);left:0;width:100%;text-align:center;color:#d7dfcd;font-size:.6rem;letter-spacing:.13em;pointer-events:none}
+.game-move-stick button,#rescue-game .game-move-stick button{position:absolute;min-height:32px;width:32px;height:32px;padding:0;border:0;border-radius:50%;background:transparent;color:#dfecd6;font-size:.95rem;line-height:1;box-shadow:none}
+.game-move-stick [data-step='forward']{top:0;left:38px}.game-move-stick [data-step='back']{bottom:0;left:38px}.game-move-stick [data-step='left']{left:0;top:38px}.game-move-stick [data-step='right']{right:0;top:38px}
+.game-controls-help{position:absolute;z-index:40;left:50%;top:32%;transform:translateX(-50%);width:min(360px,calc(100% - 90px));max-height:45%;overflow:auto;margin:0;padding:18px;border:1px solid #8caa91;border-radius:13px;background:#0b2936f7;color:#d2e1d6;font-size:.85rem;line-height:1.6;pointer-events:auto}.game-controls-help strong,.game-controls-help span{display:block;margin-bottom:8px}.game-controls-help[hidden]{display:none}
+.game-player-controls[data-control-mode='orbit'] .game-move-stick{display:none!important}.rgi-overlay .game-view-tools{top:80px}.rgi-storybar .opening-fullscreen{margin-left:8px;min-height:40px;min-width:40px;padding:3px;background:#14323cd9;color:#eacb86;border:1px solid #6d8c81;border-radius:8px;font-size:1.2rem}
+/* Route construction is a world HUD; reserves a separate movement band. */
+body.game-screen-active #rescue-game .play-canvas-transfer-header{top:calc(174px + var(--screen-top));left:18px;right:75px;justify-content:flex-start;max-width:520px}
+body.game-screen-active #rescue-game .play-canvas-transfer-surface .rg-incident{top:calc(240px + var(--screen-top))!important;left:18px!important;right:auto!important;transform:none!important;width:300px!important;max-width:calc(100% - 90px)}
+body.game-screen-active #rescue-game .play-canvas-transfer-surface .rg-clear{top:auto!important;bottom:calc(68px + var(--screen-bottom))!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(600px,calc(100% - 36px))!important;max-height:36%!important;overflow:auto!important}
+body.game-screen-active #rescue-game .play-canvas-toolbelt{bottom:calc(74px + var(--screen-bottom))!important;right:18px!important;left:18px!important;max-width:660px}
+body.game-screen-active #rescue-game .play-canvas-route-run{bottom:calc(16px + var(--screen-bottom))!important;left:18px!important;right:18px!important;width:auto!important;max-width:660px}
+body.game-screen-active #rescue-game .play-canvas-route-nodes{top:43%!important;left:16%!important;right:16%!important}
+@media(max-width:800px),(pointer:coarse){.game-move-stick{display:block}}
+@media(max-width:800px){
+ body.game-screen-active #rescue-game .rg-top{padding:calc(8px + var(--screen-top)) 10px 8px;gap:6px;min-height:60px}.rg-top .rg-progress{display:none}body.game-screen-active #rescue-game .rg-top>span{font-size:.62rem;letter-spacing:.03em}#rescue-game .rg-top>button{font-size:.6rem}#rescue-game .rg-top>div{gap:4px}#rescue-game #rg-options{padding:8px!important;min-width:48px}
+ body.game-screen-active #rescue-game .rg-objective{top:calc(62px + var(--screen-top));left:10px;right:10px;padding:9px 11px!important;max-height:108px;overflow:auto;pointer-events:auto}
+ body.game-screen-active #rescue-game .rg-objective>span{font-size:.65rem!important}body.game-screen-active #rescue-game .rg-objective h1{font-size:1.08rem!important}
+ body.game-screen-active #rescue-game .rgc1-coach{top:calc(174px + var(--screen-top))!important;left:10px!important;max-width:calc(100% - 74px)!important;padding:9px 11px}.rgc1-coach strong{font-size:.9rem}.rgc1-coach small{font-size:.67rem}
+ body.game-screen-active #rescue-game .rgc1-dock{width:calc(100% - 20px);bottom:calc(10px + var(--screen-bottom))!important;max-height:28%;padding:8px}
+ body.game-screen-active #rescue-game .play-canvas-mission-hud{left:10px!important;right:10px!important;width:auto;bottom:calc(10px + var(--screen-bottom))!important;max-height:29%}
+ body.game-screen-active #rescue-game .play-canvas-transfer-header{top:calc(176px + var(--screen-top));left:10px;right:66px;gap:5px}.play-canvas-transfer-header .rg-help-label{font-size:.65rem;flex-basis:180px}.play-canvas-transfer-header #rg-aid{font-size:.65rem!important}
+ body.game-screen-active #rescue-game .play-canvas-transfer-surface .rg-incident{top:calc(244px + var(--screen-top))!important;left:10px!important;width:calc(100% - 76px)!important}
+ body.game-screen-active #rescue-game .play-canvas-route-nodes{top:43%!important;left:5%!important;right:5%!important}
+ .game-view-tools{right:10px;top:calc(177px + var(--screen-top,0px))}.game-move-stick{bottom:33%;left:18px}
+ .game-records{right:10px;bottom:calc(10px + var(--screen-bottom));max-width:calc(100% - 20px)}.game-records>summary{font-size:.6rem;padding:7px;min-height:34px}
+ #rescue-game:has(.rgc1-dock)>.game-records,#rescue-game:has(.play-canvas-mission-hud)>.game-records{bottom:31%}
+ #rescue-game .rg-map-brief{left:14px;bottom:155px;width:calc(100% - 28px);padding:15px}#rescue-game .rg-map-brief h1{font-size:1.55rem}#rescue-game .rg-route{left:14px;right:14px}.rg-route button small{display:none}
+}
+@media(max-height:540px) and (min-width:600px){
+ body.game-screen-active #rescue-game .rg-objective{top:65px;left:14px;right:auto;width:44%!important;max-height:95px}
+ body.game-screen-active #rescue-game .rgc1-coach{top:165px!important;max-width:38%!important}
+ body.game-screen-active #rescue-game .rgc1-dock,body.game-screen-active #rescue-game .play-canvas-mission-hud{left:auto!important;right:68px!important;bottom:12px!important;transform:none;width:42%;max-height:50%}
+ .game-view-tools{top:72px;right:10px}.game-move-stick{bottom:14px;width:100px;height:100px}
+ body.game-screen-active #rescue-game .play-canvas-transfer-header{top:70px;left:auto;right:70px;max-width:44%}body.game-screen-active #rescue-game .play-canvas-transfer-surface .rg-incident{top:150px!important;left:auto!important;right:70px!important;width:40%!important}
+}
+body.game-screen-active #rescue-game .rg-objective h1{max-width:none!important;width:auto!important}
+body.game-screen-active #rescue-game .play-canvas-builder-world:not(.play-canvas-transfer-surface) .rg-bench-footer{top:calc(176px + var(--screen-top))!important;right:75px!important}

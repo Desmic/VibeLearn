@@ -1,6 +1,7 @@
 /* Phase 1 authored WorldSpec for Relay Rescue / Echo Forge.
    Data semantics are engine-neutral; PlayCanvas is only the current compiler target. */
 'use strict';
+import {keeperCharacter,keeperMaterials,keeperProfile} from './game-character-spec.js';
 
 const entities=[];
 const add=(id,primitive,material,position,scale,extra={})=>entities.push({id,primitive,material,position,scale,...extra});
@@ -164,7 +165,14 @@ add('reserve-ember','sphere','ember',[3.85,.95,1.8],[.28,.36,.28]);
 export const echoForgeWorldSpec=Object.freeze({
   schemaVersion:'1',
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-14',
+  version:'pc-phase1-15',
+  player:keeperProfile({spawn:[-5.2,-.50,2],surfaces:[
+    {bounds:[-7.5,-3,-2,2.6],height:-.5},
+    {bounds:[-3,-.45,.55,1.45],height:.27},
+    {bounds:[-.45,.45,.55,1.45],height:.27,whenVisible:'restored-crossing'},
+    {bounds:[.45,3,.55,1.45],height:.27},
+    {bounds:[3,7.5,-2.3,2.3],height:-.5}
+  ],obstacles:[[3.1,-.5,-2.2,7.1,4,.3]]}),
   environment:{clearColor:'#03111c',ambient:'#294651',exposure:1.18,toneMapping:'aces2',fog:{type:'exp2',color:'#0b2633',density:.018}},
   assets:{
     'pip.robot':{
@@ -188,6 +196,7 @@ export const echoForgeWorldSpec=Object.freeze({
     }
   },
   materials:{
+    ...keeperMaterials,
     rock:{diffuse:'#203b4b',gloss:.22},
     grass:{diffuse:'#527f6f',gloss:.18},
     wood:{diffuse:'#9d704e',gloss:.22},
@@ -221,7 +230,7 @@ export const echoForgeWorldSpec=Object.freeze({
     {id:'bridge-fill',type:'omni',color:'#efc77a',intensity:.58,range:8,position:[0,2.0,3.1]},
     {id:'storm-light',type:'omni',color:'#c7eaff',intensity:.35,range:30,position:[0,8,1]}
   ],
-  entities,
+  entities:[...entities,...keeperCharacter()],
   cameras:{
     'story.0':{
       position:[0,7.4,18.6],lookAt:[0,.8,-1.7],fov:46,

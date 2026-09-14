@@ -2,6 +2,7 @@
 'use strict';
 import {createPlayCanvasWorld} from './playcanvas-backend.js';
 import {echoForgeWorldSpec} from './echo-forge-world-spec.js';
+import {keeperCharacter,keeperMaterials,keeperProfile} from './game-character-spec.js';
 
 /*
  * Signal 7 deliberately changes context. It keeps the same engine-neutral
@@ -55,9 +56,11 @@ tadd('transfer-success','sphere','successLight',[4.15,1.55,-1.35],[.28,.28,.28],
 export const transferWorldSpec=Object.freeze({
   schemaVersion:'1',
   id:'relay-rescue.export-yard',
-  version:'pc-transfer-1',
+  version:'pc-transfer-2',
+  player:keeperProfile({spawn:[0,.02,2.0],surfaces:[{bounds:[-4,4,-2.1,2.4],height:.02}],camera:{yaw:0,pitch:24,distance:6.8}}),
   environment:{clearColor:'#050c16',ambient:'#183748',exposure:1.22,toneMapping:'aces2',fog:{type:'exp2',color:'#071522',density:.023}},
   materials:{
+    ...keeperMaterials,
     deck:{diffuse:'#142c39',metalness:.18,gloss:.28},
     deckGlow:{diffuse:'#183947',emissive:'#174b5d',emissiveIntensity:.45,gloss:.22},
     trace:{diffuse:'#31525c',emissive:'#274f59',emissiveIntensity:.36},
@@ -83,7 +86,7 @@ export const transferWorldSpec=Object.freeze({
     {id:'transfer-service-light',type:'omni',color:'#b79be9',intensity:1.25,range:9,position:[5.4,2.8,2.1]},
     {id:'transfer-route-light',type:'omni',color:'#edc77d',intensity:.8,range:9,position:[0,2.3,2.4]}
   ],
-  entities:transferEntities,
+  entities:[...transferEntities,...keeperCharacter()],
   cameras:{
     transfer:{position:[0,7.0,13.6],lookAt:[0,.55,-.15],fov:47,portrait:{position:[0,4.25,15.1],lookAt:[0,.55,.15],fov:49}},
     'transfer.result':{position:[1.2,5.8,11.2],lookAt:[2.2,.7,-.55],fov:45,portrait:{position:[.8,3.8,13.0],lookAt:[2.5,.7,-.7],fov:47}}
@@ -97,7 +100,7 @@ export const transferWorldSpec=Object.freeze({
 
 export const gameWorldManifest=Object.freeze({
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-14',
+  version:'pc-phase1-15',
   engine:'playcanvas',
   specVersion:echoForgeWorldSpec.schemaVersion,
   modes:Object.freeze(['story','mission','transfer']),
@@ -230,6 +233,8 @@ function createTransferGameWorld(host,{reducedMotion=false}={}){
   const apply=value=>{
     state=value||{};
     engine.setState(transferStateName(state));
+    engine.applyPatch({show:['keeper']});
+    engine.setControlMode('third-person','transfer');
   };
   apply({});
   host.classList.add('vibelearn-playcanvas-ready');
@@ -240,6 +245,8 @@ function createTransferGameWorld(host,{reducedMotion=false}={}){
     setBeat(){},
     setMissionState(){},
     setTransferState(value){apply(value);},
+    getPlayerView(){return engine.getPlayerView();},
+    restorePlayerView(value){engine.restorePlayerView(value);},
     setPaused(value){engine.setPaused(value);},
     replay(){apply(state);},
     async pickSemanticAt(){return null;},
@@ -253,17 +260,26 @@ export function createGameWorld(host,{reducedMotion=false,mode='story'}={}){
   const engine=createPlayCanvasWorld(host,echoForgeWorldSpec,{reducedMotion,pixelRatioCap:1.5});
   if(!engine.available)return engine;
   let currentMode=mode,beat=0,missionState=null;
+  engine.bindMarkers(()=>{
+    if(currentMode!=='mission')return null;
+    const surface=host.closest('.rg-world');if(!surface)return null;
+    const aliases={workshop:'forge',ticket:'pip',journal:'pip',parcel:'pip',book:'forge'};
+    return {markers:[...surface.querySelectorAll('[data-world-look]')].map(element=>({element,entity:aliases[element.dataset.worldLook]||'pip'})),avoid:[...surface.querySelectorAll('.rgc1-coach,.rgc1-dock,.game-move-stick,.game-view-tools,.play-canvas-mission-hud')]};
+  });
 
   const applyBeat=index=>{
     beat=Math.max(0,Math.min(5,Number(index)||0));
     missionState=null;
     engine.setState(`story.${beat}`);
     engine.applyPatch(storyPresentationPatch(beat));
+    engine.setControlMode('orbit',`story-${beat}`);
   };
   const applyMission=state=>{
     currentMode='mission';missionState=state||{};
     engine.setState('mission');
     engine.applyPatch(missionPatch(missionState));
+    engine.applyPatch({show:['keeper']});
+    engine.setControlMode('third-person',`mission-${missionState.level||1}`);
   };
 
   if(mode==='mission')applyMission({});else applyBeat(0);
@@ -277,6 +293,8 @@ export function createGameWorld(host,{reducedMotion=false,mode='story'}={}){
     applyPresentation(patch){engine.applyPatch(patch);},
     projectEntity(id){return engine.projectEntity(id);},
     setMissionState(state){applyMission(state);},
+    getPlayerView(){return engine.getPlayerView();},
+    restorePlayerView(value){engine.restorePlayerView(value);},
     setTransferState(){},
     setPaused(value){engine.setPaused(value);},
     replay(){missionState?applyMission(missionState):applyBeat(beat);},

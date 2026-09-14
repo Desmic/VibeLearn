@@ -102,6 +102,8 @@
       dock=document.createElement('section'); dock.className='rgc1-dock'; dock.setAttribute('aria-label','Signal 1 action dock');
       world.append(dock);
     }
+    const message=root.querySelector('.rg-pip-message');
+    if(message&&message.parentElement!==dock)dock.prepend(message);
     const memory=root.querySelector('.rgc1-memory');
     const ticket=root.querySelector('.rg-ticket');
     const tools=root.querySelector('.rg-tools');
@@ -178,7 +180,7 @@
     }
     const step=readStep(); root.dataset.tutorialStage=String(step);
     if (step<=0) {
-      coach.querySelector('span').textContent='FIRST: FIND THE PART'; coach.querySelector('strong').textContent='Where would the bridge gear have been made?'; coach.querySelector('small').textContent='Tap ECHO FORGE. Nothing else matters yet.';
+      coach.querySelector('span').textContent='YOU ARE THE SIGNAL KEEPER'; coach.querySelector('strong').textContent='Where would the bridge gear have been made?'; coach.querySelector('small').textContent='Drag to look. Move with WASD or the stick. First, tap ECHO FORGE to help Pip.';
       enableOnly(root,'workshop'); return;
     }
     if (step===1) {

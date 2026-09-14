@@ -6,6 +6,7 @@
   if(!game||game.__playCanvasMigrationV2)return;
   let lastAttempt=null;
   let transferWorld=null,transferHost=null,transferMountToken=0;
+  let transferView=null,transferAttempt=null;
   let migrationQueued=false;
 
   const rootEl=()=>document.querySelector('#rescue-game');
@@ -35,6 +36,7 @@
 
   function disposeTransferWorld(){
     transferMountToken+=1;
+    transferView=transferWorld?.getPlayerView?.()||transferView;
     transferWorld?.dispose?.();
     transferWorld=null;transferHost=null;
   }
@@ -54,6 +56,7 @@
     }
     window.GameWorldStatus?.set(surface,'loading');
     const token=++transferMountToken;
+    transferView=transferWorld?.getPlayerView?.()||transferView;
     transferWorld?.dispose?.();transferWorld=null;transferHost=surface;
     try{
       const {createGameWorld}=await import('/rescue-playcanvas-world.js');
@@ -77,6 +80,9 @@
       canvas?.addEventListener('webglcontextrestored',()=>window.GameWorldStatus?.set(surface,'ready'));
       delete surface.dataset.playCanvasError;
       world.setTransferState?.(transferPresentationState(a));
+      if(transferAttempt===a?.id)world.restorePlayerView?.(transferView);
+      else transferView=null;
+      transferAttempt=a?.id;
     }catch(error){
       if(token!==transferMountToken)return;
       surface.dataset.playCanvasBackend='unavailable';
@@ -252,7 +258,7 @@
     const result=previousRender(a,...rest);migrate(a);return result;
   };
   game.sync=(busy,a,...rest)=>{const result=previousSync(busy,a,...rest);lastAttempt=a||lastAttempt;queueMigration();return result;};
-  game.hide=(...args)=>{disposeTransferWorld();return previousHide(...args);};
+  game.hide=(...args)=>{disposeTransferWorld();transferView=null;transferAttempt=null;return previousHide(...args);};
 
   // RescueGame internally replaces #rescue-game children when a route slot/block
   // changes, bypassing the exported render wrapper above. Observe that boundary

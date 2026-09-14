@@ -90,7 +90,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,onEx
     frame=requestAnimationFrame(updateMarkers);
   };
   host.addEventListener('pointerup',async event=>{
-    if(closed||paused||picking||actionDone||!scene().action||event.target.closest('.rgi-scene-caption,.rgi-marker,.game-world-status'))return;
+    if(closed||paused||picking||actionDone||!scene().action||event.target.closest('.rgi-scene-caption,.rgi-marker,.game-world-status,.game-player-controls'))return;
     const s=scene();picking=true;
     try{const target=await world?.pickSemanticAt?.(event.clientX,event.clientY);if(!closed&&s===scene()&&target===s.action.target)performAction();}finally{picking=false;}
   });

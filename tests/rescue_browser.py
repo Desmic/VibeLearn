@@ -229,7 +229,8 @@ def main():
             def lose_ack(route):route.fetch();route.abort('failed')
             page.route('**/api/commands/submit',lose_ack,times=1)
             page.locator('#rg-run').click();expect(page.locator('#rg-retry-save')).to_be_visible()
-            page.locator('#rg-retry-save').click();expect(page.locator('#rg-kit')).to_be_visible()
+            page.locator('#rg-retry-save').click()
+            expect(page.locator('.play-canvas-transfer-surface .rg-clear')).to_be_visible()
             expect(page.locator('.rg-case-tabs button')).to_have_count(6)
             expect(page.locator('.play-canvas-transfer-surface')).to_be_visible()
             expect(page.locator('.play-canvas-transfer-surface .vl-playcanvas-engine')).to_be_visible()
@@ -242,12 +243,16 @@ def main():
             assert len(state['attempt']['response']['rescue']['moves'])==1
             # Chromium downloads do not emit the page response event. Check the
             # served asset and the actual clicked download, including its bytes.
+            page.locator('#rg-options').click()
+            page.locator('.game-records > summary').click()
+            expect(page.locator('#rg-kit')).to_be_visible()
             kit_response=page.request.get(url+page.locator('#rg-kit a').get_attribute('href'))
             assert kit_response.status==200
             with page.expect_download() as dl:page.locator('#rg-kit a').click()
             assert dl.value.suggested_filename=='relay-repair-kit.zip'
             assert dl.value.failure() is None
             assert Path(dl.value.path()).read_bytes()==kit_response.body()
+            page.locator('#rg-options').click()
             page.set_viewport_size({'width':390,'height':844})
             completion=page.locator('.play-canvas-transfer-surface .rg-clear')
             expect(completion.locator('#rg-next')).to_be_enabled()

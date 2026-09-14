@@ -34,6 +34,7 @@ def main():
                 schemaVersion:'1',
                 id:'framework-proof.star-orchard',
                 version:'1',
+                player:{version:'1',entity:'star',spawn:[0,0,0],speed:2,surfaces:[{bounds:[-2,2,-2,2],height:0}],obstacles:[],camera:{yaw:0,pitch:25,distance:6,minDistance:2,maxDistance:10,targetHeight:1}},
                 environment:{
                   clearColor:'#101022',ambient:'#40405a',exposure:1.12,toneMapping:'aces',
                   fog:{type:'linear',color:'#202638',start:2,end:18}
@@ -68,6 +69,18 @@ def main():
               world.setState('bloom');
               await new Promise(resolve=>setTimeout(resolve,180));
               const stats=world.stats();
+              world.setControlMode('third-person','orchard');
+              const originalView=world.getPlayerView();
+              world.restorePlayerView({...originalView,position:[1,0,1],yaw:35});
+              const orchardPlayer=world.getPlayerView();
+              if(orchardPlayer.position[0]!==1||orchardPlayer.yaw!==35)throw Error('Unrelated world cannot reuse player profile');
+              world.restorePlayerView({...originalView,position:[99,0,99]});
+              if(world.getPlayerView().position[0]!==1)throw Error('Out-of-bounds restore accepted');
+              const {validatePlayerProfile}=await import('/player-controls.js');
+              for(const change of [{entity:'missing'},{limbs:['missing']},{speed:99},{surfaces:[{bounds:[2,-2,0,1],height:0}]}]){
+                let rejected=false;try{validatePlayerProfile({...spec.player,...change},new Set(spec.entities.map(e=>e.id)));}catch(_){rejected=true;}
+                if(!rejected)throw Error('Invalid player profile accepted');
+              }
               const canvas=host.querySelector('canvas');
               const rect=canvas?.getBoundingClientRect();
               const synthetic={...stats,canvasEngine:canvas?.dataset.engine||null,canvasVersion:canvas?.dataset.playcanvasEngine||null,canvasRect:rect?{width:rect.width,height:rect.height}:null};
@@ -187,7 +200,7 @@ def main():
             assert echo["stats"]["engine"] == "playcanvas", result
             assert echo["stats"]["backendVersion"] == "2", result
             assert echo["stats"]["worldId"] == "relay-rescue.echo-forge", result
-            assert echo["stats"]["worldVersion"] == "pc-phase1-14", result
+            assert echo["stats"]["worldVersion"] == "pc-phase1-15", result
             assert echo["stats"]["state"] == "story.0", result
             assert echo["stats"]["cameraVariant"] == "portrait", result
             assert echo["stats"]["toneMapping"] == "aces2", result
