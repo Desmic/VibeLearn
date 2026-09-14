@@ -38,6 +38,8 @@ The complete local journey then exposed a Signal 6 interaction blocker: legacy s
 
 The repaired full local journey passed through all seven signals, including storm experiments, saved draft recovery, lost-acknowledgement retry without duplicate evidence/XP, and the downloaded repair ZIP. Desktop/phone inspection found two remaining legacy text positions: put the Signal 6 block hint above its toolbelt and suppress the redundant builder title behind the global header in both builder worlds. These are presentation-only corrections; the final exact-source CI and hosted review remain pending.
 
+The isolated CI journey also hit the default five-second opening startup limit before any gameplay. Apply the same bounded fifteen-second cold-start allowance already used by the camera gate to the journey's first opening assertion. Keep every subsequent interaction, persistence and evidence assertion unchanged; this does not establish a device performance claim.
+
 ## Foundations and boundaries
 
 The product goal remains games generated on demand from learning needs and explicit preferences using reusable specs/assets. Echo Forge is the reference. The opening/controller/WorldSpec foundation already exists; this unit extends reusable input, navigation, camera and screen layout. An on-demand generator and preference collection service are not yet implemented.

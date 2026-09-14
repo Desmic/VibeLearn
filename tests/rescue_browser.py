@@ -141,7 +141,7 @@ def main():
               return {rescue:window.RescueGame?.response?.(),entries};
             }""")
         try:
-            page.goto(url);expect(page.locator('#rgi-intro')).to_be_visible()
+            page.goto(url);expect(page.locator('#rgi-intro')).to_be_visible(timeout=15000)
             expect(page.locator('[data-mission="rescue-07"]')).to_be_disabled();shot('rescue-map.png')
             page.locator('#rgi-skip').focus();page.keyboard.press('Enter')
             expect(page.locator('.rgc1-coach')).to_be_visible();expect_story_world_continuity();shot('rescue-first.png')
