@@ -31,6 +31,8 @@ def main():
             canvas = page.locator(".vl-playcanvas-engine")
             expect(canvas).to_be_visible()
 
+            page.locator('#rgi-next').click()
+            expect(page.locator('#rgi-fact')).to_contain_text('You lit the way')
             # Establish the world, then the first causal discovery must be a real
             # renderer interaction rather than six consecutive Continue clicks.
             page.locator("#rgi-next").click()
@@ -41,6 +43,8 @@ def main():
             box = canvas.bounding_box()
             assert box and box["width"] > 1 and box["height"] > 1, box
             page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] * .43)
+            expect(page.locator("#rgi-fact")).to_contain_text("Found it")
+            page.locator("#rgi-next").click()
             expect(page.locator("#rgi-title")).to_have_text("Pip sends one promise.")
             expect(page.locator("#rgi-intro")).to_have_attribute("data-last-world-action", "broken-gear")
             expect(page.locator("#rgi-next")).to_have_attribute("data-story-action", "forge")
@@ -49,6 +53,8 @@ def main():
             # Keyboard/touch accessibility fallback remains fully usable.
             page.locator("#rgi-next").focus()
             page.keyboard.press("Enter")
+            expect(page.locator("#rgi-fact")).to_contain_text("The Forge wakes")
+            page.locator("#rgi-next").click()
             expect(page.locator("#rgi-title")).to_have_text("Lightning takes the answer.")
             expect(page.locator("#rgi-next")).to_have_attribute("data-story-action", "signal")
             expect(page.locator("#rgi-next")).to_contain_text("Trace the lost reply")

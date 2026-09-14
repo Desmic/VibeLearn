@@ -1,5 +1,9 @@
 # VibeLearn game critic — active dual 9/10 gate
 
+**Current review amendment — 14 September 2026:** The user reviewed eab1614 and requested third-person/free-camera play, consistent login and full-screen phones. Prior scores do not certify these changes. Require hands-on movement, camera, login, mobile HUD, replay and recovery evidence alongside the complete tests. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 **Latest authority · updated 12 September 2026.** Read root `CODEX-IMPLEMENTATION-PLAN.md`, `STORY-GENERATION-AND-CRITIC.md`, `GAME-AS-COURSE.md`, `PLAY-CANVAS.md`, `THREE-STORY-FRAMEWORK.md`, and `STATE.md`.
 
 The current user permits available-tool/internal criticism while a genuinely separate critic is unavailable. Record `internal_tool_assisted`; never misrepresent it as an independent model/agent or human/youth playtest.
@@ -16,7 +20,7 @@ Before first-touch/whole-chapter scoring:
 
 1. exact frozen story candidate has passed the separate story-only gate >=9/no blocker;
 2. exact rendered build has passed its required machine/integrity checks;
-3. if the game uses Play Canvas/Three.js, lifecycle/fallback/accessibility behavior is verified on that exact build;
+3. if the game uses GameRuntime/PlayCanvas, lifecycle/fallback/accessibility behavior is verified on that exact build;
 4. evidence comes from the rendered candidate, not source-only review.
 
 Engineering/framework checks are prerequisites, **not score bonuses**. A reusable Three.js framework earns zero delight points by existing.
@@ -78,7 +82,7 @@ Any of these fails regardless of average:
 | Challenge / reasoning quality | 10% | Difficulty rises through reasoning/transfer/trade-offs/reduced scaffolding. |
 | Payoff / forward pull | 8% | Resolution feels earned and creates strong reason to continue. |
 | Learning integration | 10% | Concepts are embodied in play then bridged accurately to real terminology/transfer. |
-| Accessibility / phone readiness | 6% | Required actions/meaning survive touch, mainstream phone portrait, text enlargement, reduced motion and fallback. |
+| Accessibility / phone readiness | 6% | Required actions/meaning survive touch, mainstream phone portrait, text enlargement, reduced motion and failure recovery. |
 
 Record strongest/weakest segment, cognitive-load jumps, whether fantasy survives mechanics and whether next chapter feels earned.
 
@@ -95,7 +99,7 @@ Record strongest/weakest segment, cognitive-load jumps, whether fantasy survives
 - learner/evidence boundaries violated;
 - XP/self-report changes learning truth;
 - `unknown`, assistance and prior exposure collapse;
-- required action/meaning inaccessible on touch/narrow/reduced-motion/fallback;
+- required action/meaning inaccessible on touch/narrow/reduced-motion/recovery;
 - guided exercise claimed as durable mastery without evidence.
 
 ## First-chapter comprehension check
@@ -135,7 +139,7 @@ Inspect:
 - camera readability on phone;
 - environmental storytelling and visible cause/effect;
 - touch/hit testing;
-- performance/resize/context loss/fallback/reduced motion;
+- performance/resize/context loss/recovery/reduced motion;
 - whether 3D is active game storytelling rather than wallpaper.
 
 The reusable Story3D/world-package framework is reviewed separately for engineering quality. Do not inflate game scores because a second adapter can mount or package schemas are elegant.
@@ -158,7 +162,7 @@ Retain exact-build evidence for:
 - previous-chapter review without corrupting active progress;
 - reset confirmation;
 - text enlargement/reduced motion;
-- 3D fallback/context loss;
+- 3D failure recovery/context loss;
 - learner isolation/evidence semantics;
 - transfer/boss applicable to reference.
 
@@ -171,3 +175,7 @@ A chapter can be a 9+ game and still fail learning. Every promised capability ne
 ## Current acceptance authority
 
 Consult `STATE.md` for newest user verdict. The current user rating remains **3/10** for the rejected predecessor until they review a materially changed verified/deployed candidate. Historical critic results never carry forward automatically.
+
+## Required opening regression evidence
+
+Use the exact player-state matrix in GAME-OPENING-PROGRESSION.md: first authenticated entry, skip into tutorial, later Level 1 resume, Level 2+ on empty browser storage, separate accounts, and explicit replay returning to the untouched active draft. Inspect visible 3D events, early success and increasing cognitive load; canvas existence is insufficient. Missing engine/modules/context must never expose a playable 2D substitute.

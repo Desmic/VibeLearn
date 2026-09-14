@@ -1,5 +1,9 @@
 # Game acceptance contract — story + first touch + whole chapter + learning + user
 
+**Current review amendment — 14 September 2026:** The new review requires third-person/free-camera agency, coherent 3D login, full-screen mobile controls and hands-on browser evidence. Previous first-touch scores do not carry over; the user remains the next review gate for the bounded verified candidate. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 **Updated 12 September 2026.** Read `STORY-GENERATION-AND-CRITIC.md`, `GAME-AS-COURSE.md`, `GAME-UX-REVIEW.md`, `PLAY-CANVAS.md`, `THREE-STORY-FRAMEWORK.md`, and `STATE.md`.
 
 ## Current status
@@ -64,7 +68,7 @@ For exact candidates using Play Canvas, machine evidence must separately verify:
 - compatible story/mission modes retain intended stage/world identity;
 - direct actions still issue server-authoritative commands;
 - save/reload/history/reset/isolation/evidence semantics remain intact;
-- phone/touch/text enlargement/reduced motion/fallback are operable;
+- phone/touch/text enlargement/reduced motion/recovery are operable;
 - no duplicate course-specific renderer lifecycle is introduced.
 
 A framework failure can block release even when screenshots look good. Passing this gate earns no automatic game-quality points.
@@ -101,3 +105,14 @@ Allowed statuses include `story_needs_revision`, `needs_revision`, `review_pendi
 ## Scope and rollout
 
 This remains private Phase 1 refinement. The architecture also guides future generation, but does not authorize Phase 2/3 implementation, external testers, paid resources, public rollout, untrusted execution, arbitrary generated client code or new model integrations.
+
+## Required opening regression evidence
+
+Use the exact player-state matrix in GAME-OPENING-PROGRESSION.md: first authenticated entry, skip into tutorial, later Level 1 resume, Level 2+ on empty browser storage, separate accounts, and explicit replay returning to the untouched active draft. Inspect visible 3D events, early success and increasing cognitive load; canvas existence is insufficient. Missing engine/modules/context must never expose a playable 2D substitute.
+
+
+## Current user review checkpoint
+
+The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
+
+For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.

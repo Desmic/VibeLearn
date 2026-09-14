@@ -1,5 +1,9 @@
 # First slice completion report — 6 September 2026
 
+**Current review amendment — 14 September 2026:** The eab1614 review is complete with changes requested. Implement the camera/input/login/mobile contract next, preserving all seven signals and authoritative assessment. Verify with actual computer/browser interaction plus full CI before manual deployment. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 
 ## 10 September 2026 current refinement — story is now its own product gate
 
@@ -11,11 +15,11 @@ The active refinement therefore separates the gates: `course topic/outcomes -> s
 
 The replacement story candidate is **Relay Rescue: The Echo Forge**. It treats the opening as one continuous world: Pip's bridge breaks; exactly one gear is needed; Pip sends sealed `order-01` to the Echo Forge; the Forge spends a scarce emergency ember and makes the gear; lightning destroys only the reply; Pip is tempted to send a fresh seal that the Forge could treat as another job; the player awakens as Signal Keeper and is asked to discover the truth before another ember is wasted. Formal retry terminology remains deferred until the concrete model exists.
 
-First-touch UX is now a hard gate: user-paced progression by default, Back/previous, Continue, Pause/Resume for active motion, Skip, replay, visible story position, coherent backward/forward world state, and the same causal meaning under reduced motion. A slower slide deck is still a failure. Important candidates explicitly compare 2D, 2.5D and Three.js 3D realization; 3D may earn its cost through immersion/world attachment/environmental storytelling, never by technology alone.
+Historical first-touch design checkpoint (superseded in rendering choice by GAME-OPENING-PROGRESSION.md): user-paced progression by default, Back/previous, Continue, Pause/Resume for active motion, Skip, replay, visible story position, coherent backward/forward world state, and the same causal meaning under reduced motion. A slower slide deck is still a failure. Important candidates explicitly compare 2D, 2.5D and Three.js 3D realization; 3D may earn its cost through immersion/world attachment/environmental storytelling, never by technology alone.
 
 A story-only critic evaluates exactly one frozen story and ignores code/tests/rendering/curriculum value. `docs/STORY-GENERATION-AND-CRITIC.md` contains the rubric and blockers. The current Echo Forge treatment has a separate internal-tool-assisted story pre-gate record in `docs/CURRENT-STORY-CRITIC.md`; that score does not override the user's 3/10 verdict on the deployed predecessor and does not by itself certify the rendered game.
 
-The current implementation work realizes Echo Forge as a reversible, user-paced story player with a locally pinned Three.js scene plus semantic/CSS fallback, then carries the same vocabulary into Signal 1. Exact runtime CI/deployment evidence belongs in `STATE.md` after the candidate is verified and manually deployed.
+The historical implementation below used Three.js and CSS fallback. Current Phase 1 instead requires the continuous PlayCanvas 3D opening/tutorial/game and explicit recovery with no 2D gameplay fallback. Exact runtime CI/deployment evidence belongs in `STATE.md` after the candidate is verified and manually deployed.
 
 ## Outcome and stopping point
 
@@ -197,7 +201,7 @@ Generation now requires:
 - a separate single-story critic >=9.0 before gameplay realization;
 - future learner story preferences only through an explicit later capability, never inferred today;
 - first-touch Back/Continue/Pause/Skip/Replay/progress and coherent reversible story state;
-- a deliberate 2D vs 2.5D vs Three.js 3D realization decision;
+- a continuous PlayCanvas 3D opening/tutorial/game, with no 2D gameplay fallback;
 - a plain-language chapter goal understandable before specialist jargon;
 - causal story/visual beats whose motion explains the mechanism rather than decorating it;
 - an explicit bridge from intuitive model to formal terminology;
@@ -258,3 +262,10 @@ Keep known-compatible code revisions and independent backups.
 **Activation:** private hosted pilot only; broader/public multi-user activation is not claimed.
 
 Current next product increment: verify and deploy the Echo Forge story/game realization, run the story/game gates on exact evidence, then return it to the user only if the critic pre-gates pass. Phase 2 remains closed.
+
+
+## Current user review checkpoint
+
+The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
+
+For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.

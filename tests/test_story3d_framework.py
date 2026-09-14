@@ -44,7 +44,7 @@ class RuntimeMigrationTests(unittest.TestCase):
 
     def test_echo_forge_keeps_asset_normalization_and_identity_in_world_spec(self):
         source = (ROOT / 'web' / 'echo-forge-world-spec.js').read_text(encoding='utf-8')
-        self.assertIn("version:'pc-phase1-13'", source)
+        self.assertIn("version:'pc-phase1-15'", source)
         self.assertIn("transform:{position:[0,-.08,0],scale:[.52,.52,.52]}", source)
         self.assertIn('Measured source mesh height is ~4.63 units', source)
         fallback_block = source.split('const PIP_FALLBACK=[', 1)[1].split('];', 1)[0]
@@ -67,7 +67,7 @@ class RuntimeMigrationTests(unittest.TestCase):
         adapter = (ROOT / 'web' / 'rescue-playcanvas-world.js').read_text(encoding='utf-8')
         css = (ROOT / 'web' / 'play-canvas.css').read_text(encoding='utf-8')
         migrate = (ROOT / 'web' / 'play-canvas-migrate.js').read_text(encoding='utf-8')
-        self.assertIn("version:'pc-phase1-13'", adapter)
+        self.assertIn("version:'pc-phase1-15'", adapter)
         self.assertIn("'storm-route-feedback'", adapter)
         self.assertIn("const routeTested=level===6", adapter)
         self.assertIn("patch.camera='mission.choice'", adapter)
@@ -86,8 +86,44 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn('overflow-x:auto!important', css)
         self.assertIn("const playback=root.querySelector('.rg-live-route')", migrate)
         self.assertIn("playback.classList.add('play-canvas-route-playback')", migrate)
-        self.assertIn('if(playback.parentElement!==hud)hud.append(playback)', migrate)
+        self.assertIn("makeLayer(hud,'play-canvas-storm-lab'", migrate)
+        self.assertIn('if(playback.parentElement!==lab)lab.append(playback)', migrate)
         self.assertIn('.play-canvas-storm-outcome .rg-case-detail{display:none!important}', css)
+
+    def test_signal7_transfer_is_a_distinct_playcanvas_world_with_existing_semantic_controls(self):
+        adapter = (ROOT / 'web' / 'rescue-playcanvas-world.js').read_text(encoding='utf-8')
+        migrate = (ROOT / 'web' / 'play-canvas-migrate.js').read_text(encoding='utf-8')
+        rescue = (ROOT / 'web' / 'rescue-game.js').read_text(encoding='utf-8')
+
+        self.assertIn("id:'relay-rescue.export-yard'", adapter)
+        self.assertIn("version:'pc-transfer-2'", adapter)
+        self.assertIn("if(mode==='transfer')return createTransferGameWorld", adapter)
+        self.assertIn("setTransferState(value){apply(value);}", adapter)
+        self.assertIn("'transfer.failure'", adapter)
+        self.assertIn("'transfer.success'", adapter)
+        for entity in ('transfer-worker', 'transfer-service', 'transfer-duplicate-a', 'transfer-output'):
+            self.assertIn(entity, adapter)
+        self.assertIn("[-3.2,-1.08,1.08,3.2].forEach", adapter)
+        self.assertIn("`transfer-route-pad-${i}`", adapter)
+
+        # Migration reuses the exact route buttons, assistance declaration and
+        # commit action rendered by rescue-game.js instead of inventing a second
+        # client-side assessment path.
+        self.assertIn("surface.className='play-canvas-transfer-surface play-canvas-target play-canvas-builder-world'", migrate)
+        self.assertIn("mode:'transfer'", migrate)
+        self.assertIn("surface.dataset.playCanvasBackend='playcanvas'", migrate)
+        self.assertNotIn("surface.dataset.playCanvasBackend='dom'", migrate)
+        self.assertIn("bench.querySelector('.rg-slots')?.classList.add('play-canvas-route-nodes')", migrate)
+        self.assertIn("bench.querySelector('.rg-palette')?.classList.add('play-canvas-toolbelt')", migrate)
+        self.assertIn("play-canvas-transfer-run", migrate)
+        self.assertIn("setTransferState?.(transferPresentationState(a))", migrate)
+        self.assertIn("const previousHide=game.hide.bind(game)", migrate)
+        self.assertIn("const observer=new MutationObserver(records=>", migrate)
+        self.assertIn("if(record.target===root)return true", migrate)
+        self.assertIn("observer.observe(migrationRoot,{childList:true,subtree:true})", migrate)
+        self.assertIn("function programPanel(transfer)", rescue)
+        self.assertIn("id=\"rg-aid\"", rescue)
+        self.assertIn("id=\"rg-run\"", rescue)
 
     def test_world_composition_anchors_seven_lights_and_portrait_cameras(self):
         source = (ROOT / 'web' / 'echo-forge-world-spec.js').read_text(encoding='utf-8')
@@ -95,8 +131,8 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn("add(`beacon-island-${i}-rock`", source)
         self.assertIn("add(`beacon-island-${i}-top`", source)
         self.assertIn("emissiveIntensity:.85", source)
-        self.assertIn("portrait:{position:[.2,2.35,19.2],lookAt:[.3,.45,.7],fov:48}", source)
-        self.assertIn("portrait:{position:[4.4,2.4,10.2],lookAt:[5.0,.85,.6],fov:46}", source)
+        self.assertIn("portrait:{position:[-1.3,3.2,14.2],lookAt:[-1.1,1.0,.3],fov:48}", source)
+        self.assertIn("portrait:{position:[1.4,3.0,18.6],lookAt:[1.4,.6,-.6],fov:48}", source)
         self.assertIn("portrait:{position:[4.2,2.45,10.4],lookAt:[5.0,.9,.7],fov:45}", source)
         self.assertIn("portrait:{position:[4.4,2.25,9.8],lookAt:[5.0,.8,.8],fov:44}", source)
 
@@ -119,7 +155,7 @@ class RuntimeMigrationTests(unittest.TestCase):
         server = (ROOT / 'app' / 'server.py').read_text(encoding='utf-8')
         hosted = (ROOT / 'app' / 'hosted.py').read_text(encoding='utf-8')
         for asset in (
-            'game-runtime.js', 'world-spec.js', 'playcanvas-backend.js',
+            'game-runtime.js', 'game-opening.js', 'game-world-status.js', 'echo-forge-opening-spec.js', 'world-spec.js', 'playcanvas-backend.js',
             'echo-forge-world-spec.js', 'rescue-playcanvas-world.js'
         ):
             self.assertIn(asset, server)

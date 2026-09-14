@@ -1,6 +1,7 @@
 /* Phase 1 authored WorldSpec for Relay Rescue / Echo Forge.
    Data semantics are engine-neutral; PlayCanvas is only the current compiler target. */
 'use strict';
+import {keeperCharacter,keeperMaterials,keeperProfile} from './game-character-spec.js';
 
 const entities=[];
 const add=(id,primitive,material,position,scale,extra={})=>entities.push({id,primitive,material,position,scale,...extra});
@@ -135,18 +136,43 @@ const beaconPositions=[[-7,2],[-3,-7],[0,-12],[4,-8],[7,2],[10,-10],[-10,-9]];
 const distantBeaconScale={1:.72,2:.56,3:.66,5:.54,6:.58};
 beaconPositions.forEach(([x,z],i)=>{
   const scale=distantBeaconScale[i];
+  const elevation=i===1?2.2:0;
   if(scale){
-    add(`beacon-island-${i}-rock`,'cone','rock',[x,-2.25,z],[4.9*scale,3.4*scale,4.9*scale]);
-    add(`beacon-island-${i}-top`,'cylinder','grass',[x,-.72,z],[4.45*scale,.24,4.45*scale]);
+    add(`beacon-island-${i}-rock`,'cone','rock',[x,-2.25+elevation,z],[4.9*scale,3.4*scale,4.9*scale]);
+    add(`beacon-island-${i}-top`,'cylinder','grass',[x,-.72+elevation,z],[4.45*scale,.24,4.45*scale]);
   }
-  add(`beacon-${i}`,'cylinder','dark',[x,.5,z],[.18,2.3,.18]);
-  add(`beacon-lamp-${i}`,'sphere',i===0?'glass':'beacon',[x,1.78,z],[.42,.42,.42],{motion:{type:'pulse',amplitude:i===0?.14:.08,speed:1.5+i*.07}});
+  add(`beacon-${i}`,'cylinder','dark',[x,.5+elevation,z],[.18,2.3,.18]);
+  add(`beacon-lamp-${i}`,'sphere',i===0?'glass':i===1?'dark':'beacon',[x,1.78+elevation,z],[.42,.42,.42],{motion:{type:'pulse',amplitude:i===0?.14:.08,speed:1.5+i*.07}});
 });
 
+// Reusable authored primitives compose the opening's home, guide light and stakes.
+add('restored-crossing','box','wood',[0,.18,1],[.7,.15,1.05],{enabled:false});
+add('first-signal-restored','sphere','ember',[-1.6,1,1.6],[.5,.5,.5],{enabled:false});
+add('keeper-base','cylinder','bronze',[-1.6,.5,1.6],[.2,.8,.2]);
+add('keeper-light','sphere','glass',[-1.6,1,1.6],[.35,.35,.35]);
+add('keeper-glow','sphere','ember',[-1.6,1,1.6],[.48,.48,.48],{enabled:false});
+for(let i=0;i<3;i++)add(`guide-path-${i}`,'sphere','glass',[-2.4+i*.6,.4,1.1],[.13,.13,.13],{enabled:false});
+add('home-island-rock','cone','rock',[0,-2.1,-5],[4,3,4]);
+add('home-island-top','cylinder','grass',[0,-.7,-5],[3.9,.2,3.9]);
+add('pip-home','box','wood',[0,.48,-5],[2.56,2.56,2.4]);
+add('pip-home-roof','cone','red',[0,2.42,-5],[3.44,1.92,3.36]);
+add('home-window','box','ember',[0,.9,-3.76],[.7,.85,.06]);
+// The repaired crossing leads from Pip's island to the Forge landing, then
+// along this short walkway to home; the success pose uses that destination.
+for(let i=0;i<9;i++)add(`home-walkway-${i}`,'box','wood',[3.6-i*.40,.18,.7-i*.60],[.95,.15,.75],{rotation:[0,34,0]});
+for(let i=0;i<5;i++)add(`echo-path-${i}`,'sphere','glass',[-.6+i*1.0,.55,1.1],[.12,.12,.12],{enabled:false});
+add('reserve-ember','sphere','ember',[3.85,.95,1.8],[.28,.36,.28]);
 export const echoForgeWorldSpec=Object.freeze({
   schemaVersion:'1',
   id:'relay-rescue.echo-forge',
-  version:'pc-phase1-13',
+  version:'pc-phase1-15',
+  player:keeperProfile({spawn:[-5.2,-.50,2],surfaces:[
+    {bounds:[-7.5,-3,-2,2.6],height:-.5},
+    {bounds:[-3,-.45,.55,1.45],height:.27},
+    {bounds:[-.45,.45,.55,1.45],height:.27,whenVisible:'restored-crossing'},
+    {bounds:[.45,3,.55,1.45],height:.27},
+    {bounds:[3,7.5,-2.3,2.3],height:-.5}
+  ],obstacles:[[3.1,-.5,-2.2,7.1,4,.3]]}),
   environment:{clearColor:'#03111c',ambient:'#294651',exposure:1.18,toneMapping:'aces2',fog:{type:'exp2',color:'#0b2633',density:.018}},
   assets:{
     'pip.robot':{
@@ -170,6 +196,7 @@ export const echoForgeWorldSpec=Object.freeze({
     }
   },
   materials:{
+    ...keeperMaterials,
     rock:{diffuse:'#203b4b',gloss:.22},
     grass:{diffuse:'#527f6f',gloss:.18},
     wood:{diffuse:'#9d704e',gloss:.22},
@@ -203,11 +230,11 @@ export const echoForgeWorldSpec=Object.freeze({
     {id:'bridge-fill',type:'omni',color:'#efc77a',intensity:.58,range:8,position:[0,2.0,3.1]},
     {id:'storm-light',type:'omni',color:'#c7eaff',intensity:.35,range:30,position:[0,8,1]}
   ],
-  entities,
+  entities:[...entities,...keeperCharacter()],
   cameras:{
     'story.0':{
       position:[0,7.4,18.6],lookAt:[0,.8,-1.7],fov:46,
-      portrait:{position:[.2,2.35,19.2],lookAt:[.3,.45,.7],fov:48}
+      portrait:{position:[-1.3,3.2,14.2],lookAt:[-1.1,1.0,.3],fov:48}
     },
     'story.1':{
       position:[-1.3,4.7,11.6],lookAt:[-1.5,.7,1],fov:44,
@@ -215,15 +242,15 @@ export const echoForgeWorldSpec=Object.freeze({
     },
     'story.2':{
       position:[1.9,4.9,12.1],lookAt:[2.6,1.2,.2],fov:43,
-      portrait:{position:[1.2,2.65,14.5],lookAt:[1.2,.65,.7],fov:48}
+      portrait:{position:[4.2,3.0,14.5],lookAt:[4.8,.8,.7],fov:48}
     },
     'story.3':{
       position:[1.0,6.1,13.2],lookAt:[1.8,2.0,.4],fov:46,
-      portrait:{position:[2.6,2.7,10.7],lookAt:[2.8,1.1,.6],fov:46}
+      portrait:{position:[1.9,3.7,16],lookAt:[2.1,1.8,.4],fov:46}
     },
     'story.4':{
-      position:[3.6,4.2,10.5],lookAt:[4.9,.9,.7],fov:42,
-      portrait:{position:[4.4,2.4,10.2],lookAt:[5.0,.85,.6],fov:46}
+      position:[1.4,6.0,18.6],lookAt:[1.4,.6,-.6],fov:48,
+      portrait:{position:[1.4,3.0,18.6],lookAt:[1.4,.6,-.6],fov:48}
     },
     'story.5':{
       position:[-2.4,5.2,12.5],lookAt:[-3.5,1.4,1.2],fov:43,
@@ -243,15 +270,15 @@ export const echoForgeWorldSpec=Object.freeze({
     },
     'mission.choice':{
       position:[0,5.0,13.2],lookAt:[0,.9,.7],fov:47,
-      portrait:{position:[.1,3.05,12.6],lookAt:[0,.8,.8],fov:47}
+      portrait:{position:[1.0,4.0,20.5],lookAt:[1.0,.8,.8],fov:47}
     },
     'mission.failure':{
       position:[4.8,3.1,8.5],lookAt:[5.1,.9,1.0],fov:41,
       portrait:{position:[4.4,2.25,9.8],lookAt:[5.0,.8,.8],fov:44}
     },
     'mission.success':{
-      position:[0,4.4,11.8],lookAt:[0,.6,1.0],fov:44,
-      portrait:{position:[0,2.75,10.5],lookAt:[0,.55,1.0],fov:43}
+      position:[1.0,5.0,12.0],lookAt:[.8,.6,-1.0],fov:44,
+      portrait:{position:[.8,3.0,10.5],lookAt:[.5,.9,-2.3],fov:43}
     }
   },
   states:{

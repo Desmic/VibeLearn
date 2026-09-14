@@ -19,7 +19,7 @@ class GameRuntimeController{
     this.stage.dataset.gameRuntimeVersion=GAME_RUNTIME_VERSION;
     this.world=null;this.worldKey=null;this.module=null;this.target=null;this.mode=null;this.contextLost=false;
     this.boundContextLost=e=>{e.preventDefault();this.contextLost=true;this._syncTargetState();};
-    this.boundContextRestored=()=>{this.contextLost=false;this._syncTargetState();this.world?.replay?.();};
+    this.boundContextRestored=()=>{this.contextLost=false;this._syncTargetState();this.world?.replay?.();this.target?.dispatchEvent(new Event('game-runtime-restored'));};
   }
   _key(module){
     const m=module?.gameWorldManifest;
@@ -48,6 +48,7 @@ class GameRuntimeController{
     const ready=Boolean(this.world.available&&!this.contextLost);
     this.target.classList.toggle('play-canvas-ready',ready);
     this.target.classList.toggle('play-canvas-failed',!ready);
+    window.GameWorldStatus?.set(this.target,ready?'ready':'failed');
     if(!ready)this.target.classList.remove('rgc1-three-ready','rg-three-continuity-ready');
   }
   _attach(target,mode){
@@ -109,3 +110,5 @@ class GameRuntimeController{
 
 export function getGameRuntime(){return singleton||(singleton=new GameRuntimeController());}
 export function resetGameRuntime(){if(singleton){singleton.dispose();singleton=null;}}
+
+export function createGameRuntime(){return new GameRuntimeController();}

@@ -3,6 +3,7 @@
 'use strict';
 import * as pc from './vendor/playcanvas.mjs';
 import {validateWorldSpec} from './world-spec.js';
+import {createPlayerControls} from './player-controls.js';
 
 export const PLAYCANVAS_ENGINE_VERSION='2.22.1';
 export const PLAYCANVAS_BACKEND_VERSION='2';
@@ -46,7 +47,7 @@ function makeMaterial(def={}){
 }
 
 class PlayCanvasWorld {
-  constructor(host,spec,{reducedMotion=false,pixelRatioCap=1.5}={}){
+  constructor(host,spec,{reducedMotion=false,pixelRatioCap=1.5,interactive=true}={}){
     this.host=host;
     this.spec=validateWorldSpec(spec);
     this.available=true;
@@ -149,6 +150,18 @@ class PlayCanvasWorld {
     const initial=Object.keys(this.spec.states||{})[0];
     if(initial)this.setState(initial);
     else this.setCamera(Object.keys(this.spec.cameras)[0]);
+    if(this.spec.player&&interactive){
+      this.controls=createPlayerControls(host,this.spec.player,{
+        isEntityEnabled:id=>Boolean(this.entities.get(id)?.enabled),
+        setAvatar:(position,yaw)=>{const entity=this.entities.get(this.spec.player.entity);entity?.setLocalPosition(...position);entity?.setLocalEulerAngles(0,yaw,0);},
+        setCamera:(position,target,fov)=>{this.camera.setPosition(...position);this.camera.lookAt(...target);if(fov)this.camera.camera.fov=fov;},
+        setMoving:value=>{this.playerMoving=value;}
+      });
+      this.controls.setShot(this._cameraShot(this.cameraName).shot);
+      canvas.style.pointerEvents='auto';canvas.style.touchAction='none';host.tabIndex=0;
+      canvas.addEventListener('webglcontextlost',()=>this.controls?.setPaused(true));
+      canvas.addEventListener('webglcontextrestored',()=>this.controls?.setPaused(this.paused));
+    }
   }
 
   _createEntity(def){
@@ -168,7 +181,9 @@ class PlayCanvasWorld {
     this.entityDefinitions.set(def.id,def);
     this.semanticNodes.set(entity,def.id);
     this.baseline.set(def.id,{
-      enabled:entity.enabled,
+      // Entity.enabled includes ancestor visibility. Preserve authored local
+      // intent so children of a hidden archetype appear when it is revealed.
+      enabled:def.enabled!==false,
       position:[entity.getLocalPosition().x,entity.getLocalPosition().y,entity.getLocalPosition().z],
       rotation:[entity.getLocalEulerAngles().x,entity.getLocalEulerAngles().y,entity.getLocalEulerAngles().z],
       scale:[entity.getLocalScale().x,entity.getLocalScale().y,entity.getLocalScale().z],
@@ -316,6 +331,7 @@ class PlayCanvasWorld {
     this.cameraName=name;
     this.cameraVariant=variant;
     this.toneMapping=toneName;
+    this.controls?.setShot(shot);
   }
 
   applyPatch(patch={}){
@@ -342,6 +358,34 @@ class PlayCanvasWorld {
     for(const [id,alias] of this.desiredAnimations)this._applyEntityAnimation(id,alias);
     this.state=name;
     this.elapsed=0;
+    this.controls?.restoreAvatar();
+  }
+
+  setControlMode(mode,key){this.controls?.setMode(mode,key);}
+  getPlayerView(){return this.controls?.snapshot()||null;}
+  restorePlayerView(value){this.controls?.restore(value);}
+  bindMarkers(provider){this.markerProvider=provider;}
+  _updateMarkers(){
+    const binding=this.markerProvider?.();if(!binding)return;
+    const rect=this.canvas.getBoundingClientRect(),placed=[];
+    const obstacles=(binding.avoid||[]).filter(n=>n&&n.getClientRects().length).map(n=>n.getBoundingClientRect());
+    for(const {element,entity} of binding.markers||[]){
+      if(!element?.getClientRects().length)continue;
+      const point=this.projectEntity(entity),w=element.offsetWidth,h=element.offsetHeight;
+      const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+      const initial={x:point?.x||rect.width/2,y:(point?.y||rect.height/2)-h-16};
+      let x=clamp(initial.x-w/2,10,rect.width-w-66),y=clamp(initial.y,rect.height*.36,rect.height*.65-h);
+      const hits=()=>[...obstacles,...placed].some(b=>x+rect.left<b.right+8&&x+w+rect.left>b.left-8&&y+rect.top<b.bottom+8&&y+h+rect.top>b.top-8);
+      if(hits()){
+        let found=false;
+        for(let row=rect.height*.38;row<rect.height*.66-h&&!found;row+=h+12)for(let col=10;col<rect.width-w-60;col+=w+12){x=col;y=row;if(!hits()){found=true;break;}}
+      }
+      element.style.left=`${x}px`;element.style.top=`${y}px`;element.style.right='auto';element.style.bottom='auto';element.style.transform='none';
+      const pinned=!point?.visible||Math.abs(x+w/2-initial.x)>40||Math.abs(y-initial.y)>40;
+      element.dataset.worldPinned=String(pinned);
+      element.title=pinned?'Object is outside this clear view. Drag the world to look around; this action stays available.':'Interact with this world object';
+      placed.push({left:x+rect.left,right:x+w+rect.left,top:y+rect.top,bottom:y+h+rect.top});
+    }
   }
 
   _semanticEntityIdForNode(node){
@@ -352,6 +396,13 @@ class PlayCanvasWorld {
     return null;
   }
 
+  projectEntity(id){
+    const entity=this.entities.get(id);
+    if(!entity||!entity.enabled||!this.available)return null;
+    const point=this.camera.camera.worldToScreen(entity.getPosition());
+    const rect=this.canvas.getBoundingClientRect();
+    return {x:point.x,y:point.y,visible:point.z>0&&point.x>=0&&point.x<=rect.width&&point.y>=0&&point.y<=rect.height};
+  }
   async pickEntityIdsAt(clientX,clientY,{radius=7}={}){
     if(this.disposed||!this.available||!this.camera?.camera)return [];
     const rect=this.canvas.getBoundingClientRect();
@@ -379,8 +430,14 @@ class PlayCanvasWorld {
   }
 
   _tick(dt){
-    if(this.paused||this.reducedMotion)return;
+    if(this.paused)return;
+    this.controls?.update(dt);
+    this._updateMarkers();
+    if(this.reducedMotion)return;
     this.elapsed+=dt;
+    if(this.spec.player?.limbs){
+      this.spec.player.limbs.forEach((id,i)=>this.entities.get(id)?.setLocalEulerAngles(this.playerMoving?Math.sin(this.elapsed*11+(i%2)*Math.PI)*24:0,0,0));
+    }
     for(const [id,base] of this.baseline){
       const motion=base.motion;
       const entity=this.entities.get(id);
@@ -400,6 +457,7 @@ class PlayCanvasWorld {
 
   setPaused(value){
     this.paused=Boolean(value);this.app.timeScale=this.paused?0:1;
+    this.controls?.setPaused(value);
     for(const record of this.assetInstances.values())if(record.instance.anim)record.instance.anim.playing=!this.paused;
   }
   replay(){if(this.state)this.setState(this.state);}
@@ -416,6 +474,7 @@ class PlayCanvasWorld {
       loadedAssetEntities:[...this.assetInstances.keys()],activeAnimations:Object.fromEntries(this.activeAnimations),
       assetBounds:Object.fromEntries([...this.assetInstances].map(([id,record])=>[id,record.bounds])),
       assetErrors:[...this.assetErrors],
+      player:this.controls?.stats()||null,
       deviceType:this.app.graphicsDevice?.deviceType||'unknown',canvasCount:this.host.querySelectorAll('canvas').length,
       canvasCssWidth:Math.round(rect.width),canvasCssHeight:Math.round(rect.height),
       bufferWidth:this.app.graphicsDevice?.width||0,bufferHeight:this.app.graphicsDevice?.height||0
@@ -425,6 +484,7 @@ class PlayCanvasWorld {
     if(this.disposed)return;this.disposed=true;
     this.available=false;
     this.resizeObserver?.disconnect();
+    this.controls?.dispose();
     try{this.picker?.destroy();}catch(_){}
     this.picker=null;
     for(const record of this.assetInstances.values()){

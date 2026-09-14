@@ -1,5 +1,9 @@
 # The game is the course
 
+**Current review amendment — 14 September 2026:** The current player-control requirement adds third-person exploration and free camera movement. Preserve gradual cognitive load and accessible semantic task actions; movement is not extra mastery evidence or a mandatory navigation puzzle. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 **Active user amendment · updated 12 September 2026.** The current user is the sole real product reviewer during private refinement; their explicit verdict overrides critic/agent/automation scores.
 
 VibeLearn is a game whose meaningful play is intended to deliver useful course outcomes, ideally better than an ordinary course. Experience is part of the product, not optional polish.
@@ -44,17 +48,13 @@ The **Play Canvas** is the persistent game surface/orchestrator. Story, explorat
 
 For compatible story/mission states, preserve the same stage/world/runtime and change camera/state/HUD instead of remounting merely because a lesson changed.
 
-Accessible semantic DOM actions/fallback remain required but support the game surface and server-authoritative commands.
+Accessible semantic DOM HUD actions remain required but support the game surface and server-authoritative commands.
 
-## Reusable Three.js framework supports many worlds
+## Reusable engine-neutral worlds
 
-Three.js is one optional renderer backend inside Play Canvas. When chosen, use the reusable Story3D framework rather than a course-specific renderer.
+PlayCanvas is the Phase 1 3D backend behind GameRuntime. Future settings provide versioned StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec and RuntimeExperienceSpec data/assets. New settings must not require a new renderer or coupling to canonical learning identity. Three.js is legacy migration infrastructure.
 
-The user's explicit direction is that future stories/fantasy settings should be **easy to integrate**. Long term, generated Three.js worlds should primarily be versioned data-first world packages containing scene/entity data, visual states, camera compositions, interaction anchors, approved assets and semantic fallback.
-
-A custom adapter is an exceptional reviewed extension, not the default generated output. New stories should not require story-specific edits to Play Canvas/runtime/host core; genuinely new reusable capabilities are generalized/versioned first.
-
-This infrastructure earns no automatic game-quality points. It exists so many different worlds can be generated safely without coupling them to learning/evidence identity.
+The current fully 3D game requirement includes all seven signals, world markers, contextual helpers and progressive HUD visibility. There is no 2D gameplay fallback. Accessible semantic HUD controls remain required; engine failure must preserve progress and offer honest recovery.
 
 ## Independent product gates
 
@@ -103,3 +103,9 @@ World/rendering state is presentation, not learning evidence merely because an a
 ## Scope
 
 Current work remains private Phase 1 reference refinement. The general generator/world-package direction describes future phases but does not authorize broad Phase 2+, arbitrary generated code loading, new model integrations, external testers, paid resources or public rollout.
+
+## Foundation: games generated from learning needs and preferences
+
+User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
+
+Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.

@@ -1,5 +1,9 @@
 # Critic handoff — story first, then first touch, whole chapter, then learning
 
+**Current review amendment — 14 September 2026:** Review the next candidate specifically for third-person agency, orbit/zoom/recenter, mobile full-screen HUD/control separation, consistent login, retained story/pacing and no 2D gameplay fallback. Use exact rendered evidence and report concrete blockers without inventing user acceptance. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 **Updated 12 September 2026.** Read `STORY-GENERATION-AND-CRITIC.md`, `GAME-AS-COURSE.md`, `GAME-ACCEPTANCE-9.md`, `GAME-UX-REVIEW.md`, `PLAY-CANVAS.md`, `THREE-STORY-FRAMEWORK.md`, and latest `STATE.md`.
 
 The current user permits review with available tools while a genuinely separate critic is unavailable. A builder-operated fallback must be labeled `internal_tool_assisted`; it is not an independent agent/model or human/youth playtest. Never let a critic override the user's verdict.
@@ -40,11 +44,11 @@ Temporal UX belongs in story/first-touch review: Back, user-paced Continue, Paus
 
 Before game scoring, freeze an exact build/world-package revision and verify its required behavior.
 
-When Play Canvas/Three.js applies, engineering evidence should cover:
+When GameRuntime/PlayCanvas applies, engineering evidence should cover:
 
 - expected same-stage/world/runtime continuity across compatible modes;
 - no accidental duplicate renderer lifecycle;
-- phone/touch/reduced-motion/fallback/context-loss behavior;
+- phone/touch/reduced-motion/recovery/context-loss behavior;
 - server-authoritative actions/save/reload/history/reset/isolation/evidence;
 - unrelated synthetic-world Story3D seam where applicable.
 
@@ -85,7 +89,7 @@ Target unrounded **>=9/no blocker**.
 
 Three.js earns points only if the **rendered result** is more compelling/clear because of it.
 
-Inspect camera framing, actor/object scale, character expression, environmental storytelling, cause/effect staging, touch anchors, performance and fallback.
+Inspect camera framing, actor/object scale, character expression, environmental storytelling, cause/effect staging, touch anchors, performance and failure recovery.
 
 Do not award game points because:
 
@@ -139,3 +143,14 @@ A source-only review cannot certify story performance/gameplay. Machine success 
 ## Environment/scope boundaries
 
 Use disposable test state. Never use production credentials/learner data, bypass Auth/RLS/allowlists, relax CSP, provision paid resources, recruit external testers, execute untrusted generated code or open later phases merely to run a critic.
+
+## Required opening regression evidence
+
+Use the exact player-state matrix in GAME-OPENING-PROGRESSION.md: first authenticated entry, skip into tutorial, later Level 1 resume, Level 2+ on empty browser storage, separate accounts, and explicit replay returning to the untouched active draft. Inspect visible 3D events, early success and increasing cognitive load; canvas existence is insufficient. Missing engine/modules/context must never expose a playable 2D substitute.
+
+
+## Current user review checkpoint
+
+The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
+
+For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.

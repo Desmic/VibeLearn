@@ -1,196 +1,53 @@
-# Current checkpoint — PlayCanvas preview deployed, Signal 6 continuation under verification
+# Current state — third-person camera and full-screen mobile revision
 
-Updated 13 September 2026. **Status: `user_rejected` / `needs_revision` / preview available.** The user's predecessor 3/10 verdict remains authoritative until they explicitly review a materially changed candidate. A deployed preview is not an acceptance pass.
+Updated 14 September 2026. **User review: changes requested / needs_revision.** The user reviewed `eab1614` and asked for free camera movement, third-person view for most games, an appealing consistent login, removal of any 2D gameplay fallback, hands-on computer/browser verification, and full-screen mobile play. No numeric user score or product acceptance was supplied.
 
-## Product direction
+## Current source and verified deployment
 
-VibeLearn's objective is to generate **effective learning games/worlds for arbitrary concepts and subjects**, not course pages decorated with game UI.
+Development: `phase1/world-transfer`, draft PR #8, repository Desmic/VibeLearn. Baseline `eab1614d2033ee9c65d05742ca0961bdb25b874e` passed Actions run `34790907513`: all 130 tests and the complete browser journey. Exact desktop/390px opening, first-success and Signal 7 screenshots were inspected. This is technical history, not acceptance of the newly requested controls.
 
-The durable architecture is engine-neutral and spec-driven:
+Render service `vibelearn` (`srv-daf7dhuq1p3s73c122cg`, workspace `tea-daf75lad0e5s73b4cgvg`) serves `deploy/render-supabase`, auto-deploy OFF. Deployment `dep-dajjomgae00c73a8cvsg` was verified live on that exact baseline at 2026-09-14 00:15 UTC. Public URL: https://vibelearn-4xws.onrender.com/. No newer source/deployment is claimed by this documentation checkpoint.
 
-`LearningSpec -> StoryWorldSpec -> GameDesignSpec -> GameRulesSpec + WorldSpec -> RuntimeExperienceSpec -> EngineCompiler -> EngineRuntime`
+The hosted build command is `pip install -r requirements.lock && python manage.py vendor`. Vendor prepares pinned engine/models and the downloadable repair ZIP. Keep that packaging correction and the Signal 6→7 15-second assertion stabilization.
 
-`AssessmentEvidenceSpec` stays separate from game-success truth and renderer truth.
+## Next implementation and verification
 
-PlayCanvas Engine is the first strategic backend. Three.js remains migration/reference infrastructure only.
+Read GAME-CAMERA-INPUT.md and GAME-OPENING-PROGRESSION.md. Documentation is updated first. Add shared spec-driven third-person avatar/navigation/camera controls, a consistent 3D login and a full-viewport mobile game shell with safe-area controls and optional browser fullscreen. Preserve story-first introduction, skip, gradual tutorial progression, later-level resume and isolated replay.
 
-Architecture authority:
+Use actual browser/computer interaction to verify login, camera/movement and mobile play; inspect screenshots and retain all unit/PostgreSQL/static/full-browser gates. No 2D gameplay fallback may become playable on engine failure. No new deployment is authorized until the exact candidate is green and visually reviewable.
 
-- `CODEX-IMPLEMENTATION-PLAN.md`
-- `docs/GAME-RUNTIME-ARCHITECTURE.md`
-- `docs/GAME-RULES-SPEC.md`
+## Implementation checkpoint
 
-## Live preview checkpoint
+The docs-first amendment is commit `9b9d520d80d5f6ce984e1d957586c335cd035507`. The following code increment adds a shared validated player profile, navigation/orbit controller, primitive Signal Keeper archetype, projected accessible markers, same-attempt transfer view restoration, a dynamic full-viewport HUD with a user-initiated fullscreen icon, and the same PlayCanvas valley at account entry. Long records live under Menu → Journal & repair kit. Rendering children of an initially hidden archetype now preserves their authored local visibility. No game/evidence commands originate in movement or camera code.
 
-The user explicitly asked to inspect the current work before the >=9 quality gates are complete.
+Local automated browser checks and screenshot inspection are in progress; the first pass exposed and repaired an invisible avatar, clipped objective and legacy login palette. The 130-test local suite passed with six PostgreSQL checks skipped because a local PostgreSQL service is unavailable; full PostgreSQL verification remains required in CI. The cloud computer-use browser cannot access the workspace local server (`ERR_BLOCKED_BY_CLIENT`); no bypass is attempted. Hands-on verification therefore remains required on the verified Render candidate, separately from automated local/CI browser evidence. Production still serves the prior verified baseline.
 
-The Render service is currently serving exact source revision:
+## Continuation verification — 14 September 2026
 
-**`912f7a360dc67a277f0af222cdc6544e2afe29af`**
+Remote head `3937a289f3b7aa1d3fff0cd872d479ff2d7be826` contains the camera/mobile implementation and follow-up entry/landscape corrections. Actions run `34827438167` passed build and all unit/PostgreSQL tests, then failed the player-control browser gate at desktop cold startup: the default five-second readiness assertion expired before the opening appeared. Its failure screenshot shows the rendered opening, and the 390/360/430px control journeys had already completed. Keep all behavior assertions and use the existing fifteen-second transition allowance for this cold-start readiness check. This is a functional test allowance, not a measured phone performance claim.
 
-URL: `https://vibelearn-4xws.onrender.com/`
+The local runtime uses Node 24, which removed `--experimental-default-type`. Parse each browser file through `--input-type=module --check` on stdin so syntax verification works with both CI's Node 22 and Node 24. Full candidate verification and deployment are pending; production remains on `eab1614` until those checks pass.
 
-Render deploy id: `dep-daj8kiuk1f9s73cmcbt0`  
-Render status at deployment verification: `live`  
-Render service branch: `deploy/render-supabase`  
-Auto-deploy: disabled.
+The cloud browser rejects workspace localhost with `ERR_BLOCKED_BY_CLIENT`. Repository browser tests and their screenshots remain available; hands-on cloud-browser review is limited to the hosted candidate. No network-policy workaround is attempted.
 
-`deploy/render-supabase` was fast-forwarded to the exact preview revision without force. That fast-forward caused draft PR #5 to be recorded by GitHub as merged at the same exact revision. This was done to make the user-requested preview available; it must **not** be interpreted as product acceptance.
+Rendered opening review found a concrete collision between the lost-reply action marker and the new camera-help button on phone. The shared opening controller now measures label widths, keeps complete labels inside the viewport and moves intersecting labels clear of the camera toolbar. The onboarding browser gate checks this clearance at every scene on desktop and 360/390/430px. A fresh exact-candidate CI run is required for this runtime correction.
 
-The preview stays pinned while development continues on `phase1/playcanvas-engine`.
+Landscape screenshot review also found the movement-stick label clipped at the bottom edge. Reserve bottom safe-area space for the label and exercise the visible movement stick in landscape as well as portrait; the controls gate now checks the label bounds. These are bounded HUD corrections, not a new design pass.
 
-## Current development branch
+The complete local journey then exposed a Signal 6 interaction blocker: legacy storm results/playback overlap the global header/objective, and the optional storm playground cannot be clicked. Group these existing controls in a scrollable world panel below the objective and above route construction, preserving all experiment and assessment semantics. Check panel bounds and real pointer access on desktop and phone. Split the existing ten browser modules into foundation, opening and journey CI groups on the same exact SHA; retain every module and all PostgreSQL/unit checks. Deployment remains blocked until the complete candidate passes and fresh screenshots are inspected.
 
-Branch: **`phase1/playcanvas-engine`**  
-Current continuation PR: **#6 — `Phase 1 continuation: world-owned Signal 6`**  
-Base: deployed preview branch `deploy/render-supabase` at `912f7a3...`.
+The repaired full local journey passed through all seven signals, including storm experiments, saved draft recovery, lost-acknowledgement retry without duplicate evidence/XP, and the downloaded repair ZIP. Desktop/phone inspection found two remaining legacy text positions: put the Signal 6 block hint above its toolbelt and suppress the redundant builder title behind the global header in both builder worlds. These are presentation-only corrections; the final exact-source CI and hosted review remain pending.
 
-At the time of this checkpoint, the current development slice advances beyond the preview with:
+The isolated CI journey also hit the default five-second opening startup limit before any gameplay. Apply the same bounded fifteen-second cold-start allowance already used by the camera gate to the journey's first opening assertion. Keep every subsequent interaction, persistence and evidence assertion unchanged; this does not establish a device performance claim.
 
-- adapter package `pc-phase1-10` over the same `pc-phase1-9` authored WorldSpec;
-- Signal 6 wide-valley camera instead of Forge-closeup framing;
-- failed/counterexample route tests driving visible PlayCanvas storm bolts and Pip reaction;
-- the exact four semantic route slots spatialized over the bridge path;
-- six unchanged semantic blocks presented as a compact horizontal toolbelt;
-- `Run the storm` separated as the primary game action;
-- route-test results staged as a compact world HUD rather than a page-sized workbench result panel;
-- server/game/evidence semantics unchanged.
+## Foundations and boundaries
 
-Exact rendered verification of this continuation slice is still required before any critic rescore.
+The product goal remains games generated on demand from learning needs and explicit preferences using reusable specs/assets. Echo Forge is the reference. The opening/controller/WorldSpec foundation already exists; this unit extends reusable input, navigation, camera and screen layout. An on-demand generator and preference collection service are not yet implemented.
 
-## Verified technical checkpoints
+Keep server-authoritative progression, Supabase auth/RLS and learner isolation, immutable evidence, assistance and unknown semantics. Camera/position are presentation state in this reference. Phase 2 remains closed.
 
-### Animated Pip / character composition
+## Review record
 
-`d6e5f5ee53c10f9cf18b2bd8ce7f27fe05c4b4d8` passed its complete verification run.
+The last independent story-only score was 9.059/10 and first-touch score 8.528/10. Those scores apply to their historical reviewed scope and do not certify the new camera/login/mobile work. The user owns the next product gate; CI is not acceptance. Follow the user's bounded revision/review instruction without another unrelated broad architecture/art pass.
 
-Evidence established:
-
-- pinned CC0 Quaternius robot loads through generic `WorldSpec.assets` / PlayCanvas container realization;
-- semantic animation aliases work (`idle`, `wave`, `yes`, `no`, `thumbsUp`, etc.);
-- fallback remains available on asset failure;
-- imported child picking resolves to the semantic `pip` entity;
-- Pip's measured normalization and left/right stage anchors keep the full animated silhouette inside the 390px portrait composition;
-- scarf / antenna / beacon stay composable semantic children rather than backend-specific character code.
-
-### Blacksmith / Forge asset path
-
-The pinned CC0 Quaternius Blacksmith was measured in real PlayCanvas before world integration.
-
-Measured AABB:
-
-- min `[-2.5662, -0.0039, -1.6579]`
-- max `[1.3238, 2.9995, 1.6256]`
-- size `[3.89, 3.0034, 3.2835]`
-
-The authored Forge AssetRef uses scale `1.30`, producing roughly `5.06w x 3.90h x 4.27d`, with an explicit local recenter/base offset derived from those bounds.
-
-The imported Blacksmith replaces only Forge structural blockout geometry. Dynamic semantic overlays remain independent:
-
-- furnace glow;
-- sign;
-- spinning gears;
-- door glow;
-- smoke;
-- duplicate/new gear consequences.
-
-If the imported model fails, structural primitives remain the fallback without changing game truth.
-
-### Generic AssetRef/runtime contracts
-
-The PlayCanvas backend now generically supports:
-
-1. same-origin validated container AssetRefs;
-2. portable normalization transforms;
-3. semantic animation aliases;
-4. async load with requested-state preservation;
-5. semantic parent identity for imported child picking;
-6. declared primitive fallback;
-7. imported render-bounds diagnostics;
-8. asset load/error accounting;
-9. engine-neutral atmosphere/camera intent;
-10. cleanup/replay/pause/reduced-motion behavior.
-
-The unrelated Star Orchard browser proof continues to protect the backend from becoming an Echo Forge/Pip renderer.
-
-## GameRulesSpec
-
-The renderer-independent deterministic rules interpreter exists and remains intentionally isolated from Relay Rescue evidence writes.
-
-Proven behavior includes:
-
-- allowlisted typed state;
-- structured expressions instead of `eval`;
-- deterministic branches/effects;
-- bounds and invariants;
-- semantic events/objectives;
-- deterministic replay/serialization;
-- fail-closed invalid actions/specs;
-- unrelated bounded-resource mechanics using the same interpreter.
-
-Mature Relay Rescue server/evidence semantics remain authoritative. Integration is incremental; do not rewrite the server model merely for architectural purity.
-
-## First-touch / story progress
-
-Several blockers from the old `pc-phase1-5` critic are now materially stale and must not be copied forward without rerendering:
-
-- the opening is **not** six consecutive passive Continue presses anymore;
-- after the establishing beat the player directly manipulates rendered PlayCanvas geometry to inspect the broken gear, send `order-01` to the Forge, and trace the lost reply;
-- direct world picking is browser-proven while the primary button remains the keyboard/screen-reader fallback;
-- Pip is now a real animated asset rather than the old assembled primitive mannequin;
-- the Forge now has a real authored Blacksmith structural asset rather than only boxes/cones.
-
-These are implementation improvements, **not automatic critic score increases**. The exact rendered candidate must earn new scores.
-
-## Current product-quality diagnosis
-
-Known remaining risks/blockers:
-
-- confirm the integrated Blacksmith orientation, framing and semantic overlays are visually coherent across opening and mission phone shots;
-- continue improving environment art direction/depth so the islands/bridge do not make the authored character/building feel pasted into prototype scenery;
-- confirm Pip accessories read as intentional courier identity during animation rather than detached primitives;
-- Signal 6 must keep harder reasoning inside the game world rather than allowing HUD/workbench UI to dominate;
-- later payoff and whole-chapter world identity still need fresh rendered review;
-- learning/transfer acceptance has not yet been formally rerun as a >=9 gate on the current realization;
-- no child/teen/young-adult human playtest has been performed; automated browser checks are behavior evidence, not enjoyment evidence.
-
-## Acceptance protocol
-
-Do not equate engineering success, deployment or architecture with game/learning quality.
-
-The **same exact rendered build** must pass:
-
-1. story/world >=9.0, no blocker;
-2. first-touch gameplay >=9.0, no blocker;
-3. whole-game gameplay >=9.0, no blocker;
-4. learning/transfer >=9.0, no blocker;
-5. architecture/runtime/security/persistence hard gate.
-
-Architecture contributes zero automatic score to story/gameplay/learning.
-
-Use a genuinely separate critic/agent where available. If only builder/tool-assisted review is available, label it `internal_tool_assisted`, never independent/human/youth testing. The user's verdict remains final.
-
-## Immediate implementation order
-
-1. keep deployed preview `912f7a3...` stable while the user inspects it;
-2. complete exact CI/browser verification and rendered screenshot review for PR #6 Signal 6 spatialization/storm feedback;
-3. repair any Signal 6 composition/interaction regression without changing its tested server semantics;
-4. inspect current `pc-phase1-9` Blacksmith/Pip opening and Signal 1 evidence for orientation/overlay/art-direction issues;
-5. improve reusable environment/archetype composition where the rendered evidence still looks prototype-grade;
-6. run a fresh story/world + first-touch `internal_tool_assisted` critic only on one exact green rendered candidate;
-7. continue whole-chapter game-world integration until the harder reasoning no longer regresses into a website/workbench experience;
-8. run whole-game and learning/transfer gates on that same exact candidate;
-9. run final architecture/security/persistence verification;
-10. only then deploy an acceptance candidate, verify the served revision, and ask the user for the decisive review.
-
-## Deployment state
-
-Render service: `vibelearn`  
-URL: `https://vibelearn-4xws.onrender.com/`  
-Region: Singapore  
-Plan: free  
-Auto-deploy: disabled.
-
-The currently live preview is intentionally behind the continuing feature branch. New commits on `phase1/playcanvas-engine` must not change the live preview unless another explicit deployment is requested or the acceptance protocol is satisfied.
-
-Hosted auth, learner isolation, server-authoritative progression/evidence, immutable submitted evidence, assistance/exposure semantics, reset confirmation and historical review remain in force.
+The exact candidate CI, rendered evidence and final live SHA are recorded on [PR #8](https://github.com/Desmic/VibeLearn/pull/8) once verification completes, so this source checkpoint does not falsely anticipate its own deployment. Earlier history is retained in Git and docs/history/.

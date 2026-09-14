@@ -3,8 +3,7 @@
 'use strict';
 (() => {
   const ROOT_ID = '#rescue-game';
-  const STEP_KEY = 'vibelearn.relay-rescue.signal1-guide.v3';
-  const DONE_KEY = 'vibelearn.relay-rescue.signal1-guide.done.v3';
+  let guideStep=0,guideDone=false,guideAttempt=null;
   const rootEl = () => document.querySelector(ROOT_ID);
   const gameWorldBundle=Promise.all([import('/game-runtime.js'),import('/rescue-playcanvas-world.js')]).then(([runtime,module])=>({runtime,module})).catch(()=>null);
   let gameRuntime=null, missionWorld=null, missionHost=null, worldModule=null;
@@ -17,10 +16,10 @@
     gameRuntime?.disposeWorld?.();
     gameRuntime=null;missionWorld=null;worldModule=null;
   };
-  const readStep = () => { try { return Number(localStorage.getItem(STEP_KEY) || 0); } catch (_) { return 0; } };
-  const writeStep = value => { try { localStorage.setItem(STEP_KEY,String(value)); } catch (_) {} };
-  const done = () => { try { return localStorage.getItem(DONE_KEY)==='yes'; } catch (_) { return false; } };
-  const markDone = () => { try { localStorage.setItem(DONE_KEY,'yes'); } catch (_) {} };
+  const readStep=()=>guideStep;
+  const writeStep=value=>{guideStep=value;};
+  const done=()=>guideDone;
+  const markDone=()=>{guideDone=true;};
 
   function isSignalOne(root) {
     if (!root || root.hidden) return false;
@@ -38,7 +37,8 @@
   function isHistorical(root) { return Boolean(root?.querySelector('.rg-review-banner')); }
 
   function syncStepFromAttempt(a) {
-    if (done() || a?.snapshot?.rescue?.level !== 1 || !a?.rescue_state) return;
+    if(a?.id!==guideAttempt){guideAttempt=a?.id;guideDone=false;guideStep=0;}
+    if (a?.snapshot?.rescue?.level !== 1 || !a?.rescue_state) return;
     const s=a.rescue_state, looked=new Set(s.looked || []);
     if (s.rewinds > 0 && !s.failed) writeStep(2);
     else if (s.ticket && s.ticket !== 'order-01') writeStep(3);
@@ -100,8 +100,10 @@
     let dock=field.querySelector('.rgc1-dock');
     if (!dock) {
       dock=document.createElement('section'); dock.className='rgc1-dock'; dock.setAttribute('aria-label','Signal 1 action dock');
-      world.after(dock);
+      world.append(dock);
     }
+    const message=root.querySelector('.rg-pip-message');
+    if(message&&message.parentElement!==dock)dock.prepend(message);
     const memory=root.querySelector('.rgc1-memory');
     const ticket=root.querySelector('.rg-ticket');
     const tools=root.querySelector('.rg-tools');
@@ -120,8 +122,14 @@
     const readyClass=level===1?'rgc1-three-ready':'rg-three-continuity-ready';
     const failedClass=level===1?'rgc1-three-failed':'rg-three-continuity-failed';
     missionHost=host;
+    window.GameWorldStatus?.set(host,'loading');
     gameWorldBundle.then(bundle=>{
-      if(missionHost!==host || !host.isConnected || !bundle) return;
+      // An opening may win the asynchronous mount race. Never move its shared
+      // canvas back behind the modal when the map's imports finish later.
+      // Replay owns a separate runtime: let the pending mission finish mounting
+      // behind it so returning immediately after reload retains a live canvas.
+      if(missionHost!==host || !host.isConnected || root.querySelector('#rgi-intro[data-opening-replay="false"]'))return;
+      if(!bundle){window.GameWorldStatus?.set(host,'failed');return;}
       gameRuntime=bundle.runtime.getGameRuntime();worldModule=bundle.module;
       missionWorld=gameRuntime.showMission(worldModule,host,visualState(a),{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
       // Temporary style aliases; runtime identity is PlayCanvas and is asserted separately.
@@ -139,10 +147,13 @@
     const clearTitle=clear.querySelector(':scope > h2');
     const clearCopy=clear.querySelector(':scope > p');
     if(clearLabel) clearLabel.textContent='✦ BRIDGE ONLINE';
-    if(clearTitle) clearTitle.textContent='Pip can cross.';
-    if(clearCopy) clearCopy.textContent='You recovered the same promise instead of creating another one.';
+    if(clearTitle) clearTitle.textContent='You got Pip home.';
+    if(clearCopy) clearCopy.textContent='One gear. One crossing restored. A light answers from the next island.';
     const recap=document.createElement('section'); recap.className='rgc1-recap';
     recap.innerHTML=`<span>FIELD SKILL UNLOCKED</span><h3>One intent → one safe result.</h3><div class="rgc1-causal-strip" aria-label="What made the recovery safe"><div><small>1 · KEEP</small><b>order-01</b><span>the same job identity</span></div><i aria-hidden="true">→</i><div><small>2 · RETRY</small><b>same promise</b><span>not a fresh order</span></div><i aria-hidden="true">→</i><div><small>3 · RESULT</small><b>one gear</b><span>the bridge moves</span></div></div><div class="rgc1-formal"><small>ENGINEERS CALL THIS</small><strong>Idempotent retry</strong><p>Retrying the same intent safely still produces one effect.</p></div><details class="rgc1-debrief"><summary>What you figured out</summary><div class="rgc1-recap-grid"><p><b>Pip</b> is the courier who needs the bridge.</p><p><b>The Echo Forge</b> shapes the replacement gear.</p><p><b>The gear</b> makes the bridge mechanism move.</p><p><b>order-01</b> tells the Echo Forge “this is the same job.”</p><p><b>The missing reply</b> created uncertainty, not proof of failure.</p><p><b>Why it matters</b>: a brand-new order could make a duplicate.</p></div></details>`;
+    const detail=document.createElement('details');detail.className='rgc1-learned';
+    const summary=document.createElement('summary');summary.textContent='What you learned';detail.append(summary,...recap.childNodes);recap.append(detail);
+    root.querySelector('.rg-world')?.append(clear);
     const next=clear.querySelector('#rg-next');
     if(next){next.textContent='Secure the crossing →';clear.insertBefore(recap,next);}else clear.append(recap);
     markDone(); writeStep(4);
@@ -169,7 +180,7 @@
     }
     const step=readStep(); root.dataset.tutorialStage=String(step);
     if (step<=0) {
-      coach.querySelector('span').textContent='FIRST: FIND THE PART'; coach.querySelector('strong').textContent='Where would the bridge gear have been made?'; coach.querySelector('small').textContent='Tap ECHO FORGE. Nothing else matters yet.';
+      coach.querySelector('span').textContent='YOU ARE THE SIGNAL KEEPER'; coach.querySelector('strong').textContent='Where would the bridge gear have been made?'; coach.querySelector('small').textContent='Drag to look. Move with WASD or the stick. First, tap ECHO FORGE to help Pip.';
       enableOnly(root,'workshop'); return;
     }
     if (step===1) {
@@ -190,7 +201,7 @@
   function decorateMenu(root) {
     const menu=root?.querySelector('#rg-menu'); if(!menu || menu.querySelector('#rg-replay-signal1')) return;
     const button=document.createElement('button'); button.type='button'; button.id='rg-replay-signal1'; button.textContent='Replay Signal 1 tutorial';
-    button.onclick=()=>{ try{localStorage.removeItem(DONE_KEY);localStorage.setItem(STEP_KEY,'0');}catch(_){} updateGuidance(root); };
+    button.onclick=()=>{ guideDone=false;guideStep=0; updateGuidance(root); };
     menu.prepend(button);
   }
 
@@ -202,6 +213,8 @@
 
   const game=window.RescueGame;
   if (game && !game.__signalOneGuideV4) {
+    const previousMap=game.map.bind(game);
+    game.map=(missions,a,...rest)=>{clearMissionHost();const result=previousMap(missions,a,...rest);mountMissionWorld(rootEl(),{snapshot:{rescue:{level:1}},rescue_state:a?.rescue_state||{}});return result;};
     const previousRender=game.render.bind(game);
     const previousSync=game.sync.bind(game);
     const previousHide=game.hide.bind(game);

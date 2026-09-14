@@ -1,5 +1,6 @@
 /* Engine-neutral WorldSpec validation for Phase 1 generated-game runtime. */
 'use strict';
+import {validatePlayerProfile} from './player-controls.js';
 
 export const WORLD_SPEC_VERSION = '1';
 const PRIMITIVES = new Set(['box','sphere','cone','cylinder','plane','torus','capsule']);
@@ -148,5 +149,6 @@ export function validateWorldSpec(spec){
       }
     }
   }
+  if(spec.player)validatePlayerProfile(spec.player,ids);
   return spec;
 }

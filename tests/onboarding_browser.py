@@ -33,6 +33,21 @@ def expect_playcanvas_runtime(page):
     return canvas
 
 
+def assert_opening_marker_clearance(page):
+    # Projection is updated on the animation frame after the scene changes.
+    # Wait for that layout, while still failing persistent overlap/clipping.
+    page.wait_for_function('''() => {
+      const host=document.querySelector('#rgi-world');
+      const world=host.getBoundingClientRect();
+      const tools=host.querySelector('.game-view-tools')?.getBoundingClientRect();
+      return [...host.querySelectorAll('.rgi-marker:not([hidden])')].every(el=>{
+        const r=el.getBoundingClientRect();
+        return r.left>=world.left && r.right<=world.right && (!tools ||
+          r.right<=tools.left || r.left>=tools.right || r.bottom<=tools.top || r.top>=tools.bottom);
+      });
+    }''', timeout=5000)
+
+
 def assert_phone_first_touch(browser, url, out, errors, width, height):
     ctx = browser.new_context(viewport={'width': width, 'height': height}, has_touch=True)
     page = ctx.new_page(); page.on('pageerror', lambda e: errors.append(str(e)))
@@ -55,7 +70,24 @@ def assert_phone_first_touch(browser, url, out, errors, width, height):
     assert nxt and nxt['height'] >= 44
     assert replay and replay['height'] >= 44
     assert max(back['y'] + back['height'], nxt['y'] + nxt['height']) <= height + 1
-    page.screenshot(path=str(out / f'onboarding-phone-{width}.png'), full_page=True)
+    page.wait_for_function("() => document.querySelector('#rgi-world')?.dataset.worldStatus === 'ready'")
+    assert_opening_marker_clearance(page)
+    assert page.locator('.rgi-markers').evaluate('''host => {
+      const labels=[...host.querySelectorAll('button:not([hidden])')].map(n=>n.getBoundingClientRect());
+      return labels.every((a,i)=>labels.every((b,j)=>i===j||a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top));
+    }'''), 'Opening markers overlap'
+    page.screenshot(path=str(out / f'onboarding-{"desktop" if width > 820 else "phone"}-{width}.png'), full_page=False)
+    # Every authored camera must keep its actual semantic target in view, not
+    # merely offer an equivalent button beneath an off-screen game object.
+    for step in range(1,6):
+        if page.locator('#rgi-next').get_attribute('data-story-action'):
+            expect(page.locator('.rgi-target')).to_be_visible()
+            page.locator('#rgi-next').click()
+        page.locator('#rgi-next').click()
+        expect(page.locator('#rgi-intro')).to_have_attribute('data-step',str(step))
+        for marker in page.locator('.rgi-marker').all():expect(marker).to_be_visible()
+        assert_opening_marker_clearance(page)
+        page.screenshot(path=str(out/f'onboarding-{width}-beat-{step}.png'),full_page=False)
     ctx.close()
 
 
@@ -68,6 +100,7 @@ def main():
         try:
             for width, height in PHONE_VIEWPORTS:
                 assert_phone_first_touch(browser, url, out, errors, width, height)
+            assert_phone_first_touch(browser, url, out, errors, 1440, 1000)
             checks.append('First touch keeps the real PlayCanvas world dominant, story copy readable, and controls touchable across representative 360–430px portrait sizes')
 
             ctx = browser.new_context(viewport={'width':390,'height':844}, has_touch=True)
@@ -82,7 +115,11 @@ def main():
             # Fresh first-touch story is user-paced; it must not move while the player reads.
             page.wait_for_timeout(3600)
             expect(page.locator('#rgi-title')).to_have_text('Pip is almost home.')
-            page.screenshot(path=str(out/'onboarding-echo-forge-01.png'), full_page=True)
+            page.screenshot(path=str(out/'onboarding-echo-forge-01.png'), full_page=False)
+
+            page.locator('#rgi-next').click()
+            expect(page.locator('#rgi-fact')).to_contain_text('You lit the way')
+            page.screenshot(path=str(out/'onboarding-first-success.png'), full_page=False)
 
             # Back/forward is real scene navigation, not a restart-only escape hatch.
             page.locator('#rgi-next').click()
@@ -104,16 +141,22 @@ def main():
                 'The storm wakes something for you.',
             ]
             for title in titles:
+                if page.locator('#rgi-next').get_attribute('data-story-action'):
+                    page.locator('#rgi-next').click()
                 page.locator('#rgi-next').click()
                 expect(page.locator('#rgi-title')).to_have_text(title)
+                if page.locator('#rgi-intro').get_attribute('data-step')=='4':
+                    expect(page.locator('[data-entity="reserve-ember"]')).to_be_visible()
+                    expect(page.locator('[data-entity="beacon-lamp-1"]')).to_be_visible()
+                page.screenshot(path=str(out/f'onboarding-causal-beat-{page.locator("#rgi-intro").get_attribute("data-step")}.png'),full_page=False)
             expect(page.locator('#rgi-fact')).to_have_text('First move: inspect the Echo Forge.')
             expect(page.locator('#rgi-dialogue')).to_contain_text('Help me find out what happened')
             expect(page.locator('.rgi-progress .current')).to_have_count(1)
             runtime_id = page.locator('.game-runtime-stage').get_attribute('data-game-runtime-instance')
             canvas_runtime_id = canvas.get_attribute('data-game-runtime-instance')
             assert runtime_id and canvas_runtime_id == runtime_id
-            page.screenshot(path=str(out/'onboarding-echo-forge-06.png'), full_page=True)
-            checks.append('The opening establishes a missing reply without revealing the Forge outcome, remains user-paced, and preserves one PlayCanvas runtime/world identity across reversible story states')
+            page.screenshot(path=str(out/'onboarding-echo-forge-06.png'), full_page=False)
+            checks.append('The opening stages a lost reply and distinguishes audience observation from reliable current inspection, remains user-paced, and preserves one PlayCanvas runtime/world identity across reversible story states')
             page.locator('#rgi-next').click()
 
             coach = page.locator('.rgc1-coach')
@@ -185,6 +228,22 @@ def main():
             overflow = horizontal_overflow(page)
             (out/'signal1-phone-overflow-diagnostic.json').write_text(json.dumps(overflow, indent=2), encoding='utf-8')
             assert overflow['scrollWidth'] <= overflow['innerWidth'], overflow
+            page.locator('#rg-next').click()
+            expect(page.locator('.rg-top')).to_contain_text('SIGNAL 2', timeout=15000)
+            page.evaluate('localStorage.clear()')
+            page.reload()
+            expect(page.locator('.rg-top')).to_contain_text('SIGNAL 2', timeout=15000)
+            expect(page.locator('#rgi-intro')).to_have_count(0)
+            before = page.evaluate('JSON.stringify(RescueGame.response())')
+            page.locator('#rg-options').click()
+            page.locator('#rg-replay-story').click()
+            expect(page.locator('#rgi-intro')).to_be_visible()
+            page.locator('#rgi-skip').click()
+            expect(page.locator('#rgi-intro')).to_have_count(0)
+            expect(page.locator('.rg-top')).to_contain_text('SIGNAL 2')
+            assert page.evaluate('JSON.stringify(RescueGame.response())') == before
+            expect_playcanvas_runtime(page)
+            checks.append('Level 2 resumes with empty browser storage; explicit opening replay returns without changing the draft or level')
             ctx.close()
 
             reduced = browser.new_context(viewport={'width':390,'height':844}, has_touch=True, reduced_motion='reduce')
@@ -193,7 +252,9 @@ def main():
             expect_playcanvas_runtime(r)
             expect(r.locator('#rgi-pause')).to_be_hidden()
             expect(r.locator('#rgi-back')).to_be_disabled()
-            for _ in range(5): r.locator('#rgi-next').click()
+            for _ in range(5):
+                if r.locator('#rgi-next').get_attribute('data-story-action'): r.locator('#rgi-next').click()
+                r.locator('#rgi-next').click()
             expect(r.locator('#rgi-title')).to_have_text('The storm wakes something for you.')
             expect(r.locator('#rgi-fact')).to_have_text('First move: inspect the Echo Forge.')
             r.locator('#rgi-back').click(); expect(r.locator('#rgi-title')).to_have_text('A second seal could mean a second gear.')

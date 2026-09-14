@@ -1,5 +1,7 @@
 # Story generation and story critic — mandatory pre-game gate
 
+**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 **Active user direction · updated 12 September 2026.** Read with `STATE.md`, `GAME-AS-COURSE.md`, `GAME-UX-SYSTEM.md`, `GAME-UX-REVIEW.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `PLAY-CANVAS.md`, and `THREE-STORY-FRAMEWORK.md`.
 
 ## Why this exists
@@ -92,26 +94,13 @@ For first-run narrative/cinematic experiences:
 
 A beautiful cinematic with poor temporal control still fails first touch.
 
-## From story to Play Canvas realization
+## From story to 3D game realization
 
-Only after the story gate does `GameExperienceSpec` choose how the story becomes play inside the **Play Canvas**.
+After the frozen story passes its separate gate, GameDesignSpec and RuntimeExperienceSpec stage a continuous 3D PlayCanvas opening/tutorial/game. Do not reopen 2D versus 3D selection for this Phase 1 brief.
 
-For important candidates compare authored 2D, 2.5D/parallax and interactive Three.js. Choose the medium because it improves world presence, clarity, interaction or audience engagement—not because 3D itself scores points.
+The opening must make the world desirable and its causal situation understandable, then give a safe first interaction/success before demanding a consequential choice. Zelda/Witcher are references for staged introduction and progression, not a scope or asset-copy requirement.
 
-If Three.js is chosen, StoryWorldSpec semantics map into a versioned world package under `THREE-STORY-FRAMEWORK.md`. The story generator should not emit renderer lifecycle boilerplate.
-
-### Relationship to future generated world packages
-
-Long term, story/world semantics should compile/map cleanly into a validated data-first `WorldPackageSpec` containing scene/entity data, visual states, camera compositions, interaction anchors, approved assets and semantic fallback.
-
-This separation matters because:
-
-- one StoryWorldSpec could be realized differently (2D/2.5D/3D);
-- a future StoryPreferenceProfile can regenerate presentation without rewriting learning identity;
-- framework/platform code remains stable across fantasy settings;
-- the generator does not need arbitrary client JavaScript to express most worlds.
-
-A custom adapter extension may exist when a genuinely new engine capability is required, but it is not the default story-generation output.
+GameWorldSpec/WorldSpec owns reusable scene/entity/camera/interaction data. Engine-neutral semantic state stays separate from canonical assessment. Generation must supply first-entry, skip, later-level resume and explicit replay rules under GAME-OPENING-PROGRESSION.md. A story-only pass cannot certify the rendered opening.
 
 ## Relationship to later gates
 
@@ -126,3 +115,9 @@ Passing story does not prove the game is fun. Passing game does not prove durabl
 Relay Rescue: The Echo Forge remains the current story treatment. It should be realized as a continuous world inside the persistent Play Canvas, with formal retry terminology deferred until the concrete model exists.
 
 Do not repair a weak realization by only changing timers or adding more captions. The implementation must make the story feel lived through character behavior, environmental change, direct interaction, visible cause/effect and world response.
+
+## Foundation: games generated from learning needs and preferences
+
+User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
+
+Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.

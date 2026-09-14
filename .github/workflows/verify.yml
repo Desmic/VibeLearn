@@ -8,6 +8,10 @@ permissions:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [foundation, opening, journey]
     services:
       postgres:
         image: postgres:17
@@ -24,11 +28,15 @@ jobs:
       TEST_DATABASE_URL: postgresql://postgres:disposable-ci-password@127.0.0.1:5432/vibelearn_test
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Package tracked review source (never runtime data or credentials)
+        if: matrix.suite == 'foundation'
         run: git archive --format=tar HEAD -o /tmp/vibelearn-review-source.tar
       - uses: actions/upload-artifact@v4
+        if: matrix.suite == 'foundation'
         with:
-          name: review-source-${{ github.sha }}
+          name: review-source-${{ github.event.pull_request.head.sha || github.sha }}
           path: /tmp/vibelearn-review-source.tar
           retention-days: 3
       - uses: actions/setup-python@v5
@@ -42,12 +50,13 @@ jobs:
       - run: python manage.py vendor
       - run: python manage.py build
       - run: python manage.py test
-      - run: python manage.py browser
+        if: matrix.suite == 'foundation'
+      - run: python manage.py browser --group ${{ matrix.suite }}
       - name: Preserve browser evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: game-review-evidence-${{ github.sha }}
+          name: game-review-evidence-${{ github.event.pull_request.head.sha || github.sha }}-${{ matrix.suite }}
           path: |
             artifacts/*.png
             artifacts/*.json

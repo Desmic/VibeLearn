@@ -1,5 +1,9 @@
 # vibeLearn
 
+**Current review amendment — 14 September 2026:** Implement the current third-person/free-camera and full-screen mobile review requirements before the next handoff. Update docs first, keep reusable spec-driven input/navigation, and verify actual UI with computer/browser use. Read [GAME-CAMERA-INPUT.md](docs/GAME-CAMERA-INPUT.md).
+
+**Current user contract — 13 September 2026:** Read [docs/GAME-OPENING-PROGRESSION.md](docs/GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+
 **Read `CODEX-IMPLEMENTATION-PLAN.md` first**, then `docs/STATE.md`, `docs/GAME-RUNTIME-ARCHITECTURE.md`, `docs/GAME-RULES-SPEC.md`, `docs/STORY-GENERATION-AND-CRITIC.md`, `docs/GAME-AS-COURSE.md`, `docs/GAME-UX-SYSTEM.md`, `docs/GAME-UX-REVIEW.md`, and `docs/COURSE-GENERATION-GAME-SYSTEM.md` before substantial product work.
 
 The active implementation plan controls build order. User feedback that changes product direction, generation assumptions, engine/runtime architecture, quality gates or the meaning of done must update the plan and materially affected current docs before or in the same bounded implementation unit as code.
@@ -87,7 +91,7 @@ PlayCanvas is infrastructure, not proof of game quality. A technically correct e
 
 ## Migration/build order
 
-1. keep docs aligned with the engine-neutral/rules-neutral direction;
+1. reconcile active docs with `docs/GAME-OPENING-PROGRESSION.md`, freeze/review story and progression before realization;
 2. keep generic Three.js expansion frozen;
 3. make the persistent direct PlayCanvas opening -> Signal 1 runtime/browser gate green;
 4. inspect fresh 360/390/430 portrait evidence and improve world-first composition/agency;
@@ -131,4 +135,21 @@ Build in bounded, testable increments and do not weaken tests/critic rubrics to 
 
 ## Scope/deployment
 
-Current work remains private Phase 1 architecture/reference refinement. Production Render serves `deploy/render-supabase`; auto-deploy is disabled. Active PlayCanvas work is isolated on `phase1/playcanvas-engine` / draft PR #5. Verify exact revision before saying work is live or ready for review.
+Current work remains private Phase 1 architecture/reference refinement. Production Render serves `deploy/render-supabase`; auto-deploy is disabled. Active PlayCanvas work continues on `phase1/world-transfer` / PR #8. Verify exact revision before saying work is live or ready for review.
+
+## Opening and review enforcement
+
+Read `docs/GAME-OPENING-PROGRESSION.md`. First login must introduce the 3D world and stakes before tutorial/Level 1; Skip remains available. Level 2+ must never auto-replay an opening. Explicit menu replay returns to the untouched prior context. Remove the 2D gameplay fallback, not keyboard/screen-reader HUD semantics. Verify actual learner entry and hosted asset delivery, not only synthetic fresh contexts or canvas tags. Update every materially affected active doc before code. The latest rejection supersedes the previous bounded Signal 7 preview exception.
+
+## Foundation: games generated from learning needs and preferences
+
+User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
+
+Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.
+
+
+## Current user review checkpoint
+
+The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
+
+For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.
