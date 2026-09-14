@@ -111,7 +111,7 @@ def main():
               Object.assign(measureHost.style,{position:'fixed',left:'0',top:'0',width:'390px',height:'420px',zIndex:'9998'});
               document.body.append(measureHost);
               const blacksmithWorld=createPlayCanvasWorld(measureHost,{
-                ...spec,id:'framework-proof.blacksmith-bounds',version:'1',
+                ...spec,id:'framework-proof.blacksmith-bounds',version:'1',player:null,
                 assets:{blacksmith:{type:'container',src:'/assets/quaternius-blacksmith.glb'}},
                 entities:[{id:'blacksmith',asset:'blacksmith'}],
                 states:{seed:{camera:'near'}}
