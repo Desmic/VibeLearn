@@ -47,7 +47,11 @@ def main():
             expect(page.locator('#rgi-intro')).to_be_visible(timeout=15000)
             expect(page.locator('#rgi-next')).to_be_enabled(timeout=15000)
             instance = stats(page)['instanceId']
+            wait_until(page, '()=>!WordMachineReview.runtime.world.animating')
+            courier_before=page.evaluate("async()=> (await import('/game-runtime.js')).getGameRuntime().world.projectEntity('robot')")
             page.locator('#rgi-next').click()
+            courier_after=page.evaluate("async()=> (await import('/game-runtime.js')).getGameRuntime().world.projectEntity('robot')")
+            assert abs(courier_after['x']-courier_before['x'])<2 and abs(courier_after['y']-courier_before['y'])<2,'Waking the machine moved the courier backwards'
             expect(page.locator('#rgi-fact')).to_contain_text('machine is awake')
             page.screenshot(path=str(out / 'word-machine-opening-390.png'))
             page.locator('#rgi-next').click()

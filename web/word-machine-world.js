@@ -72,6 +72,6 @@ export const openingSpec={id:'word-machine.arrival.v1',title:'HOW LLMS WORK · T
   beat:0,kicker:'MIRA IS WAITING AT THE GARDEN',title:'A flower. A robot. No route.',
   body:'You run the message machine. The robot follows what it writes.',
   markers:[{entity:'garden-sign',label:'Mira · Garden'},{entity:'library-sign',label:'Library'},{entity:'keeper-hood',label:'You'},{entity:'machine-button',target:'machine-button',label:'Wake the machine',hideWhenDone:true}],
-  action:{target:'machine-button',label:'Wake the machine',patch:{show:['machine-core','machine-ring'],animations:{robot:'wave'}}},
+  action:{target:'machine-button',label:'Wake the machine',patch:{show:['machine-core','machine-ring'],transforms:{robot:{position:robotHome}},animations:{robot:'wave'}}},
   success:{fact:'The machine is awake. Build the robot’s route, one piece at a time.'}
 }]};

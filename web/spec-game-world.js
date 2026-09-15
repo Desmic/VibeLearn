@@ -48,7 +48,7 @@ export function makeWorldPackage(spec,present){
         setPaused(value){paused=Boolean(value);engine.setPaused(value);},
         projectEntity:id=>engine.projectEntity(id),pickSemanticAt:(x,y)=>engine.pickEntityAt(x,y),
         getPlayerView:()=>engine.getPlayerView(),restorePlayerView:value=>engine.restorePlayerView(value),
-        replay(){if(previous)update(previous);},
+        replay(){if(previous!==null)update(previous);},
         stats:()=>({...engine.stats(),packageAdapter:'world-spec',animating:Boolean(transition)}),
         dispose(){resize.disconnect();cancelAnimationFrame(frame);engine.dispose();}
       };
