@@ -23,7 +23,8 @@ const entities=[
   {id:'recipient-head',parent:'recipient',primitive:'sphere',material:'gold',position:[0,1.12,0],scale:[.33,.33,.33]},
   {id:'recipient-note',parent:'recipient',primitive:'box',material:'paper',position:[.3,.9,.2],scale:[.45,.32,.06]},
   ...deliveryParcel('carried','robot',[0,.85,.7]),
-  ...deliveryParcel('received','recipient',[.6,0,.1]),
+  ...deliveryParcel('received','recipient',[-.6,0,.1]),
+  {id:'robot-label',parent:'robot',position:[0,2.4,0]},
   {id:'success-light',primitive:'torus',material:'mint',position:[3.1,.1,-1.25],scale:[1.5,.12,1.5],enabled:false},
   {id:'wrong-light',primitive:'torus',material:'coral',position:[-3.1,.1,-1.25],scale:[1.5,.12,1.5],enabled:false},
 ];
@@ -55,7 +56,7 @@ function presentation(state,previous){
   if(typeof state==='number')return {show:['carried','carried-flower'],hide:['received','carried-book','machine-core','machine-ring','success-light','wrong-light',...Array.from({length:3},(_,i)=>`output-piece-${i}`)],transforms:{robot:{position:robotHome},recipient:{position:[3.2,0,-1.85]}},animations:{robot:'run'},transition:{entity:'robot',from:[1.7,0,-1.6],to:robotHome,duration:1600,finish:{animations:{robot:'idle'}}}};
   const s=state||{pieces:0,status:'building',round:0,destination:'Library'};
   const atDoor=s.status==='wrong'||s.status==='success';
-  const x=s.destination==='Garden'?3.1:-3.1,position=atDoor?[x,0,-1.2]:robotHome;
+  const x=s.destination==='Garden'?3.1:-3.1,position=atDoor?[x+.8,0,-1.2]:robotHome;
   const parcel=s.round===1?'book':'flower',other=s.round===1?'flower':'book';
   const patch={show:['machine-core','machine-ring',`carried-${parcel}`,`received-${parcel}`,s.status==='success'?'received':'carried'],hide:['success-light','wrong-light',`carried-${other}`,`received-${other}`,s.status==='success'?'carried':'received'],transforms:{
     robot:{position},
