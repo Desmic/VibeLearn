@@ -60,6 +60,14 @@ def main():
                     page.locator('#rg-options').click()
                     page.locator('[data-world-look="workshop"]').click()
                     expect(page.locator('[data-world-look="ticket"]')).to_be_enabled()
+                    # Saved inspections must leave the persistent controls usable.
+                    for control in ['in','out','recenter']:
+                        expect(page.locator(f'[data-view="{control}"]')).to_be_enabled()
+                    saved_distance=player(page)['distance']
+                    page.locator('[data-view="in"]').click()
+                    assert player(page)['distance']<saved_distance,'Zoom stopped working after saved inspection'
+                    page.locator('[data-view="out"]').click()
+                    page.locator('[data-view="recenter"]').click()
                     assert player(page)['position']==moved['position'],'HUD update reset player position'
                     assert player(page)['yaw']==moved['yaw'],'HUD update reset camera'
                     page.locator('#rg-options').click();page.locator('#rg-replay-story').click();expect(page.locator('#rgi-intro')).to_be_visible()

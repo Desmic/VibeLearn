@@ -4,7 +4,7 @@
 
 **Current user contract — 13 September 2026:** Read [docs/GAME-OPENING-PROGRESSION.md](docs/GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
 
-**12 September 2026 · authoritative active plan**
+**15 September 2026 · authoritative active plan (critic reset and LLM-series direction)**
 
 This file is the current build order. The checksummed `learning-os-design-package-v1.3/` remains immutable historical design. Its detailed phase/security/evidence requirements still apply wherever this plan does not supersede them.
 
@@ -202,17 +202,7 @@ First-run narrative progression is user-paced by default. Back/previous, Continu
 
 ## 11. Quality gates
 
-Do not blend scores.
-
-Required order:
-
-`story critic >=9 -> first-touch magic >=9 -> whole-chapter game >=9 -> learning/transfer >=9 -> user review`
-
-All applicable scores are unrounded and require no blocker.
-
-Engine/framework quality earns zero automatic game-quality points. A technically elegant PlayCanvas build can still fail badly as a game or as learning.
-
-The current user's explicit verdict remains final.
+Follow [docs/CRITIC-POLICY.md](docs/CRITIC-POLICY.md). Review written design for feasibility, then inspect rendered story, first touch, the full playable chapter and learning/transfer even when an earlier part fails. Each criterion needs observed evidence and an anchored integer; readiness requires every criterion >=9, no blocker and complete applicable checks. No weighted averages or inherited scores. User-requested previews are not readiness or acceptance. The current user is the sole human product critic and final authority.
 
 ## 12. Phone-first target
 
@@ -224,17 +214,15 @@ Desktop polish follows after phone quality is strong.
 
 ## 13. Current execution order
 
-1. Reconcile active docs with the confirmed GAME-OPENING-PROGRESSION contract; record latest rejection honestly.
-2. Freeze and review the existing Echo Forge story revision and staged information/progression schedule.
-3. Implement the first-authenticated-entry / skip / Level 2+ resume / non-destructive replay state matrix using authoritative progress.
-4. Stage the continuous 3D opening, safe first success, contextual tutorial and Signal 1 payoff; remove 2D gameplay fallback and add honest failure recovery.
-5. Inspect desktop and 360/390/430px opening/tutorial evidence; fix clear composition and interaction blockers.
-6. Verify Signals 2–7 preserve full 3D world/HUD identity and progressively introduce demand without breaking learning semantics.
-7. Run full unit/PostgreSQL/static/browser checks, including real hosted asset delivery and current-player entry paths.
-8. Run exact-candidate story, first-touch, whole-game and learning reviews separately. Historical scores do not pass a new candidate.
-9. Deploy only an exact verified candidate authorized for review; verify Render source and engine/model bytes, then obtain the user's decisive review.
+**Implementation authorized 15 September:** GitHub research and reuse inventory are in `docs/REUSE-RESEARCH-20260915.md`; execute the bounded first-episode contract in `docs/LLM-EPISODE-1-IMPLEMENTATION.md`.
 
-Do not expand into AAA scope, new unrelated stories, or broad engine architecture to avoid fixing the entry and progression experience.
+1. Keep the deployed retry reference and learner history intact; preserve the September 15 browser findings as the baseline.
+2. Apply the critic-policy reset and validate its evidence record before recommending another candidate.
+3. Use [docs/NEXT-TEACHING-DESIGN.md](docs/NEXT-TEACHING-DESIGN.md): the user selected an appealing ongoing How LLMs Work series. Freeze the first episode's narrow learning contract and toy-model limits. The series is a content roadmap, not Phase 2 authorization.
+4. Implement one reusable, continuous Episode 1 opening/action/result path with new learning identities, using existing PlayCanvas and authoritative semantic actions. No new model provider, general engine or broad series implementation is required.
+5. Actually play the path on desktop and 360/390/430, including failure, recovery, post-save controls and fresh transfer. Repair concrete clarity/HUD/control blockers before extending it.
+6. Run applicable storage/build/browser checks and record exact revision, evidence and limitations. Existing retry acceptance tests remain intact.
+7. Present the honest candidate and internal recommendation for the current user's final verdict. Deployment requires applicable authorization and exact technical verification; critic scores do not authorize it.
 
 ## 14. Future engine targets
 
@@ -277,6 +265,4 @@ Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabili
 
 ## Current user review checkpoint
 
-The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
-
-For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.
+**15 September 2026:** [docs/CRITIC-POLICY.md](docs/CRITIC-POLICY.md) controls review. The user may inspect a draft at any time; a preview is not an internal ready recommendation, acceptance or deployment authorization. The current user is the sole human product critic and final authority.

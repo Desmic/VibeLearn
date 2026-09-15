@@ -1,5 +1,7 @@
 # 3D opening, tutorial and progression — current product contract
 
+**Current authority — 15 September 2026:** [CRITIC-POLICY.md](CRITIC-POLICY.md) supersedes older score formulas, gate order and review-preview exceptions below. The sole human product critic is the current user. Review the whole playable candidate, use observed evidence and hard blockers, and keep preview/readiness/user acceptance distinct. The user selected an ongoing How LLMs Work series; see [NEXT-TEACHING-DESIGN.md](NEXT-TEACHING-DESIGN.md). Preserve existing retry evidence; the new topic needs new learning identities.
+
 **Current review amendment — 14 September 2026:** Keep the skippable first-entry opening, later-level resume and non-destructive replay. After the opening, teach third-person movement/look briefly and introduce task controls progressively. Story framing is recoverable; gameplay uses player-controlled camera movement. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
 
 Confirmed by the user on 13 September 2026 (14 September IST). This contract supersedes conflicting active 2D/2.5D/Three.js-selection and gameplay-fallback guidance. The deployed `16a655e` experience is **user_rejected / needs_revision**; no new numeric user score was supplied. Its passing tests and successful deployment remain engineering evidence only.
@@ -86,6 +88,4 @@ Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabili
 
 ## Current user review checkpoint
 
-The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
-
-For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.
+**15 September 2026:** [CRITIC-POLICY.md](CRITIC-POLICY.md) controls review. The user may inspect a draft at any time; a preview is not an internal ready recommendation, acceptance or deployment authorization. The current user is the sole human product critic and final authority.

@@ -13,6 +13,7 @@ BROWSER_GROUPS = {
                    "tests.playcanvas_framework_browser", "tests.playcanvas_story_interaction_browser"],
     "opening": ["tests.onboarding_browser", "tests.opening_contract_browser", "tests.player_controls_browser"],
     "journey": ["tests.rescue_browser"],
+    "word-machine": ["tests.word_machine_browser"],
 }
 
 

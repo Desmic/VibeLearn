@@ -1,156 +1,17 @@
-# Critic handoff — story first, then first touch, whole chapter, then learning
+# Critic handoff
 
-**Current review amendment — 14 September 2026:** Review the next candidate specifically for third-person agency, orbit/zoom/recenter, mobile full-screen HUD/control separation, consistent login, retained story/pacing and no 2D gameplay fallback. Use exact rendered evidence and report concrete blockers without inventing user acceptance. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+**15 September 2026.** Read [CRITIC-POLICY.md](CRITIC-POLICY.md), [STATE.md](STATE.md), [PLAYTEST-20260915.md](PLAYTEST-20260915.md) and [NEXT-TEACHING-DESIGN.md](NEXT-TEACHING-DESIGN.md) first.
 
-**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+## Instructions to the reviewer
 
-**Updated 12 September 2026.** Read `STORY-GENERATION-AND-CRITIC.md`, `GAME-AS-COURSE.md`, `GAME-ACCEPTANCE-9.md`, `GAME-UX-REVIEW.md`, `PLAY-CANVAS.md`, `THREE-STORY-FRAMEWORK.md`, and latest `STATE.md`.
+Review one exact candidate. Declare internal_tool_assisted or independent_agent honestly; neither is human audience validation. Record prior design/source knowledge and assistance. Do not call yourself a fresh novice if you already know the solution.
 
-The current user permits review with available tools while a genuinely separate critic is unavailable. A builder-operated fallback must be labeled `internal_tool_assisted`; it is not an independent agent/model or human/youth playtest. Never let a critic override the user's verdict.
+Play from fresh disposable state without a walkthrough. Write what the opening actually communicated before interpreting the intended story. Inspect the whole chapter, including error/recovery, post-save movement/camera controls, later construction, transfer and replay. Record where you needed a reload or explanation. Mark blocked/unobserved states rather than filling them from source code.
 
-## Current authority
+List concrete failures and likely quit points first. Apply the policy's criteria and integer anchors; cite observed evidence, limitations and a repair/retest condition. A 9+ requires a recorded counterexample attempt. No average may compensate for unclear world, intrusive text, offscreen consequences, stale state, broken controls or copied transfer. Unchecked is unassessed.
 
-The predecessor Relay Rescue first touch remains user-rejected at **3/10** until the user reviews a materially changed verified/deployed candidate.
+Use the JSON record format and checker in CRITIC-POLICY. Never carry a historical review onto a changed candidate. The checker verifies consistency, not honesty or fun. Separate technical verification, internal recommendation and the user's actual verdict.
 
-VibeLearn is a general learning-game generation system. Relay Rescue/Echo Forge is the current reference, not the product schema.
+There is one human critic: the current user. They may inspect drafts at any time and are the final authority. Do not invent approval, recruit other testers or deploy merely because a critic recommends review. Phase 2 remains closed.
 
-Current story generation is topic/outcome-driven. Future explicit StoryPreferenceProfile input is planned but must not be inferred today.
-
-## Critic 1 — story only
-
-Freeze exactly one StoryWorldSpec/story candidate.
-
-Judge:
-
-- hook/immediate curiosity;
-- clarity/causality;
-- character attachment;
-- world/fantasy appeal;
-- storytelling through events/action/dialogue/discovery;
-- pacing/progression;
-- stakes/tension;
-- payoff/forward pull;
-- cross-age engagement.
-
-Use `STORY-GENERATION-AND-CRITIC.md`. Target unrounded **>=9/no blocker**.
-
-Do not award story points for course usefulness, source quality, code/tests, Play Canvas, Three.js, framework reuse, browser reliability or learning evidence.
-
-Record exact StoryWorldSpec/version, current preference assumptions, scores, strongest hook, weakest beat, likely abandonment point and revisions.
-
-Temporal UX belongs in story/first-touch review: Back, user-paced Continue, Pause/Resume while motion runs, Skip, Replay, progress, coherent back/forward state and reduced-motion equivalent.
-
-## Engineering freeze before rendered game critics
-
-Before game scoring, freeze an exact build/world-package revision and verify its required behavior.
-
-When GameRuntime/PlayCanvas applies, engineering evidence should cover:
-
-- expected same-stage/world/runtime continuity across compatible modes;
-- no accidental duplicate renderer lifecycle;
-- phone/touch/reduced-motion/recovery/context-loss behavior;
-- server-authoritative actions/save/reload/history/reset/isolation/evidence;
-- unrelated synthetic-world Story3D seam where applicable.
-
-This is a release/integrity gate, not a game-quality score.
-
-## Critic 2A — first-touch magic
-
-Use `GAME-UX-REVIEW.md` on fresh first 60–90 seconds.
-
-Question: would a curious kid/non-specialist or teen/young adult voluntarily continue with XP hidden?
-
-Inspect beauty/hook, curiosity, attachment, causality, cognitive-load control, narrative controls, first action and story-to-play transition.
-
-Pay particular attention to whether Play Canvas feels continuous. If story and first mission share a world, a needless visible exit/remount is a deduction/blocker even when both screens individually look good.
-
-Target unrounded **>=9/no blocker**.
-
-## Critic 2B — whole-chapter game experience
-
-Only after first touch passes, review the complete chapter.
-
-Inspect:
-
-- story/world continuity through actual mechanics;
-- agency and consistent rules;
-- progressive cognitive load;
-- meaningful failure/consequence/recovery;
-- reasoning/challenge quality;
-- payoff/forward pull;
-- learning integration;
-- phone/accessibility quality.
-
-Explicitly inspect later build/combination/transfer states. Penalize any regression into a themed website/workbench when the GameExperienceSpec intends in-world play.
-
-Target unrounded **>=9/no blocker**.
-
-## Three.js/world-package review inside game criticism
-
-Three.js earns points only if the **rendered result** is more compelling/clear because of it.
-
-Inspect camera framing, actor/object scale, character expression, environmental storytelling, cause/effect staging, touch anchors, performance and failure recovery.
-
-Do not award game points because:
-
-- runtime code is reusable;
-- a declarative package schema exists;
-- Star Orchard mounts;
-- test coverage is large.
-
-Those are engineering evidence only.
-
-## Framework engineering review
-
-Separately ask whether a future world can be integrated easily/safely:
-
-- Does the world mostly change package data/assets/compositions rather than core runtime?
-- Is Play Canvas/runtime/host free of current story nouns?
-- Are generic capabilities versioned rather than smuggled from one story?
-- Can incompatible versions fail closed?
-- Is the long-term path data-first `WorldPackageSpec` rather than arbitrary generated JS?
-- Can replacing a package leave competencies/evidence/history unchanged?
-
-Framework failure may block release/Phase 3 readiness but does not change story/game scores upward.
-
-## Critic 3 — learning / real-world transfer
-
-Only after both game gates pass, evaluate declared LearningSpec outcomes.
-
-Use outcome->mechanic->assessment coverage. Check purposeful practice, fresh transfer, delayed retrieval where claimed, authentic implementation/design work where promised, assistance/exposure semantics and evidence limits.
-
-Do not rate story completion, participation, XP, memorized sequences or revealed practice feedback as mastery.
-
-Target applicable unrounded **>=9/no blocker**.
-
-## Evidence record
-
-Every review record states:
-
-- exact commit/build/world-package version;
-- reviewer method;
-- environment/viewports;
-- routes/actions inspected;
-- screenshots/traces/artifacts;
-- directly observed vs inferred evidence;
-- raw scores;
-- blockers/likely quit point;
-- reason to continue without XP;
-- limitations/no human playtest.
-
-A source-only review cannot certify story performance/gameplay. Machine success cannot prove delight or learning efficacy.
-
-## Environment/scope boundaries
-
-Use disposable test state. Never use production credentials/learner data, bypass Auth/RLS/allowlists, relax CSP, provision paid resources, recruit external testers, execute untrusted generated code or open later phases merely to run a critic.
-
-## Required opening regression evidence
-
-Use the exact player-state matrix in GAME-OPENING-PROGRESSION.md: first authenticated entry, skip into tutorial, later Level 1 resume, Level 2+ on empty browser storage, separate accounts, and explicit replay returning to the untouched active draft. Inspect visible 3D events, early success and increasing cognitive load; canvas existence is insufficient. Missing engine/modules/context must never expose a playable 2D substitute.
-
-
-## Current user review checkpoint
-
-The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
-
-For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.
+Older handoff is retained in [history/20260914-CRITIC-HANDOFF.md](history/20260914-CRITIC-HANDOFF.md).

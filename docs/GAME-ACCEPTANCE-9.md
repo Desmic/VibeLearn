@@ -1,118 +1,21 @@
-# Game acceptance contract — story + first touch + whole chapter + learning + user
+# Game acceptance — the user's verdict is final
 
-**Current review amendment — 14 September 2026:** The new review requires third-person/free-camera agency, coherent 3D login, full-screen mobile controls and hands-on browser evidence. Previous first-touch scores do not carry over; the user remains the next review gate for the bounded verified candidate. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+**15 September 2026.** The active contract is [CRITIC-POLICY.md](CRITIC-POLICY.md).
 
-**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+## Current verdict
 
-**Updated 12 September 2026.** Read `STORY-GENERATION-AND-CRITIC.md`, `GAME-AS-COURSE.md`, `GAME-UX-REVIEW.md`, `PLAY-CANVAS.md`, `THREE-STORY-FRAMEWORK.md`, and `STATE.md`.
+Deployed candidate `337db573d87c417aca42f55894a2c6e807df21ed` is **needs_revision** after the user's qualitative concerns and the observed seven-signal playthrough. No new numeric user rating or acceptance was supplied. Historical predecessor rating 3/10 and agent treatment/game scores stay attached to their historical scope.
 
-## Current status
+## Readiness and acceptance are separate
 
-The current Relay Rescue predecessor remains **`user_rejected` / `needs_revision`**. The user's latest explicit first-touch/story rating is **3/10**. Historical internal scores cannot keep a changed/rejected candidate in `ready_for_user_review`.
+- Design review can support building a prototype; it cannot pass rendered story quality.
+- Inspect rendered story, first touch, the whole chapter and learning/transfer on one exact candidate. Do not stop reviewing later play merely because the opening fails.
+- An internal ready_for_user_review recommendation requires every policy criterion >=9, no blocker, complete required evidence and applicable technical verification. No rounding, weighted average or historical carry-forward.
+- The current user may request and inspect a draft at any time, including below 9. Label it a preview with failures disclosed. This is not a ready recommendation or deployment authorization.
+- **Only the current user's explicit verdict establishes user acceptance.** They are currently the sole human product critic. Their rejection overrides internal readiness; their acceptance does not manufacture missing technical evidence or authorize later phases.
 
-## Acceptance pipeline
+CI checks, source hashes and the review-record checker do not judge appeal or comprehension. Runtime integrity, server authority, immutable evidence, authentication, allowlists, isolation and applicable storage/browser checks remain separate requirements.
 
-Required order:
+No production change is made by this policy revision. The old review-deployment exception is superseded by the explicit preview/readiness/acceptance distinction above. Private Phase 1 remains the scope; no new model service, paid resource, external testers or public rollout.
 
-`StoryWorldSpec -> story critic >=9 -> GameExperienceSpec/Play Canvas realization -> first-touch magic >=9 -> whole-chapter game >=9 -> learning/transfer >=9 where applicable -> ready_for_user_review -> explicit user acceptance -> user_accepted`
-
-All critic thresholds are unrounded with no blocker. The current user's explicit verdict can reject a candidate at any point and overrides every critic/automation result.
-
-## Story gate
-
-For every course/subject, create a strong story/fantasy/world before gameplay realization. Evaluate one frozen StoryWorldSpec at a time using `STORY-GENERATION-AND-CRITIC.md`.
-
-Story critic judges hook, causality, attachment, world appeal, storytelling, pacing/progression, stakes, payoff/forward pull and cross-age engagement. It does not award points for learning value, code/tests, Play Canvas, Three.js, framework reuse or implementation effort.
-
-Pass: **>=9.0/no blocker**.
-
-## First-touch game gate
-
-The fresh first 60–90 seconds independently need **>=9.0/no blocker**.
-
-Requirements include:
-
-- beauty/creative hook;
-- curiosity/wonder/tension;
-- character/world attachment;
-- causal clarity understandable to a bright child;
-- low initial cognitive load;
-- Back/Continue/Skip/Replay/progress and Pause/Resume while motion runs;
-- obvious first meaningful world-owned action;
-- continuous story-to-play transition.
-
-A rushed slideshow, missing back navigation, clear-but-unengaging exposition, dense dashboard or needless story→mission surface break fails first touch.
-
-## Whole-chapter game gate
-
-The full chapter independently needs **>=9.0/no blocker**.
-
-Judge story/world continuity, agency, progressive cognitive load, reasoning quality, feedback/recovery, payoff, forward pull, game identity, learning integration and phone/accessibility quality.
-
-A later build/policy phase that turns into a conventional themed web workbench is a failure even if the opening is beautiful.
-
-## Learning/real-world-transfer gate
-
-The intended game should deliver the useful outcomes of its declared LearningSpec. Require explicit outcome->mechanic->assessment coverage, varied practice, fresh transfer and delayed retrieval where claimed.
-
-No course-equivalence/mastery claim from story completion, XP, participation or immediately repeated guided practice.
-
-Pass applicable learning/transfer review at **>=9.0/no blocker** before user review under the current process.
-
-## Play Canvas engineering gate
-
-Game quality scoring does not replace runtime integrity.
-
-For exact candidates using Play Canvas, machine evidence must separately verify:
-
-- compatible story/mission modes retain intended stage/world identity;
-- direct actions still issue server-authoritative commands;
-- save/reload/history/reset/isolation/evidence semantics remain intact;
-- phone/touch/text enlargement/reduced motion/recovery are operable;
-- no duplicate course-specific renderer lifecycle is introduced.
-
-A framework failure can block release even when screenshots look good. Passing this gate earns no automatic game-quality points.
-
-## Reusable Three.js framework gate
-
-When Three.js is used, the implementation must consume the shared Story3D runtime/host/world-package boundary.
-
-The user explicitly requires future story/fantasy settings to be easy to integrate. Therefore:
-
-- runtime/host/Play Canvas remain story-neutral;
-- world-specific scene/assets/states/cameras/anchors live in replaceable packages;
-- new stories normally do not modify core infrastructure;
-- synthetic unrelated-world tests prove mechanical genericity;
-- future generator maturity requires a materially different real world to integrate without story-specific core edits;
-- long-term generated worlds should prefer validated declarative WorldPackageSpec data over arbitrary generated JavaScript.
-
-The full arbitrary package loader is not a Phase 1 acceptance requirement and must not be built by weakening CSP/security.
-
-## Three.js/rendering direction
-
-For important candidates compare 2D, 2.5D and interactive Three.js. Choose the medium that serves the story/audience/device budget.
-
-3D itself never earns acceptance. If used, preserve pinned local assets, same-origin runtime, touch/keyboard, reduced motion, fallback and realistic phone performance.
-
-## Review record
-
-Every gate record includes exact story/build/package version, reviewer method, raw scores, evidence, blockers, limitations, likely abandonment points, changes since prior candidate and status.
-
-Never reuse a historical score for a changed build/world/package.
-
-Allowed statuses include `story_needs_revision`, `needs_revision`, `review_pending`, `ready_for_user_review`, `user_rejected`, and `user_accepted`.
-
-## Scope and rollout
-
-This remains private Phase 1 refinement. The architecture also guides future generation, but does not authorize Phase 2/3 implementation, external testers, paid resources, public rollout, untrusted execution, arbitrary generated client code or new model integrations.
-
-## Required opening regression evidence
-
-Use the exact player-state matrix in GAME-OPENING-PROGRESSION.md: first authenticated entry, skip into tutorial, later Level 1 resume, Level 2+ on empty browser storage, separate accounts, and explicit replay returning to the untouched active draft. Inspect visible 3D events, early success and increasing cognitive load; canvas existence is insufficient. Missing engine/modules/context must never expose a playable 2D substitute.
-
-
-## Current user review checkpoint
-
-The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
-
-For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.
+Historical contract: [history/20260914-GAME-ACCEPTANCE-9.md](history/20260914-GAME-ACCEPTANCE-9.md).

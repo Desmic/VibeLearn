@@ -1,5 +1,7 @@
 # vibeLearn
 
+**Current authority — 15 September 2026:** [docs/CRITIC-POLICY.md](docs/CRITIC-POLICY.md) supersedes older score formulas, gate order and review-preview exceptions below. The sole human product critic is the current user. Review the whole playable candidate, use observed evidence and hard blockers, and keep preview/readiness/user acceptance distinct. The user selected an ongoing How LLMs Work series; see [docs/NEXT-TEACHING-DESIGN.md](docs/NEXT-TEACHING-DESIGN.md). Preserve existing retry evidence; the new topic needs new learning identities.
+
 **Current review amendment — 14 September 2026:** Implement the current third-person/free-camera and full-screen mobile review requirements before the next handoff. Update docs first, keep reusable spec-driven input/navigation, and verify actual UI with computer/browser use. Read [GAME-CAMERA-INPUT.md](docs/GAME-CAMERA-INPUT.md).
 
 **Current user contract — 13 September 2026:** Read [docs/GAME-OPENING-PROGRESSION.md](docs/GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
@@ -111,9 +113,9 @@ Difficulty rises through reasoning, transfer, uncertainty, trade-offs and reduce
 
 World first, HUD second: the primary phone frame should feel like inhabiting/operating a game world, not a website surrounding a small renderer.
 
-Required gate order:
+Required review coverage (not a restriction on when the user can inspect):
 
-`story/world critic >=9 -> first-touch gameplay >=9 -> whole-game gameplay >=9 -> learning/transfer >=9 -> user review`
+`design feasibility -> observe rendered story + first touch + whole chapter + learning/transfer -> fix blockers -> internal recommendation -> explicit user verdict`
 
 Architecture/security/runtime are additional hard gates and earn zero automatic critic points.
 
@@ -150,6 +152,4 @@ Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabili
 
 ## Current user review checkpoint
 
-The user's execution instruction remains: fix clear blockers, verify the complete exact candidate and its rendered desktop/phone evidence, deploy the verified candidate manually, then let the user review it. Do not start another broad art/architecture pass merely to raise an internal score before that review. The later opening/progression/foundation feedback changes what this candidate must contain; it does not turn CI or a critic score into user acceptance.
-
-For this expressly authorized review checkpoint, the exact candidate must be technically green, visually reviewable, and free of identified concrete interaction/causal blockers. Report internal critic scores honestly as diagnostics. The >=9 story/first-touch/whole-game/learning gates remain the full product acceptance target; they must not be claimed passed or used to imply Phase 2 authorization. A deployed review candidate is not an accepted product. This clarification supersedes statements that revoked the user's bounded review instruction solely because the opening requirements changed.
+**15 September 2026:** [docs/CRITIC-POLICY.md](docs/CRITIC-POLICY.md) controls review. The user may inspect a draft at any time; a preview is not an internal ready recommendation, acceptance or deployment authorization. The current user is the sole human product critic and final authority.

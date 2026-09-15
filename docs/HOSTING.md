@@ -149,3 +149,7 @@ Render previously ran the intended source while `/vendor/playcanvas.mjs` returne
 The stored Render command is `pip install -r requirements.lock && python manage.py vendor`. `vendor` must prepare every required served runtime asset, including `web/relay-repair-kit.zip`, as well as PlayCanvas, legacy verification dependencies and the two pinned GLBs. Render does not run the Node-based CI `build` command. Generating the kit only in CI caused an uncovered hosted packaging gap; the runtime-assets regression now exercises the actual `vendor` entry point in a clean temporary tree and checks the allowlisted archive bytes.
 
 ZIP container hashes can vary with file timestamps when CI rebuilds the kit. Verify the exact deployed Git SHA, authored source/engine/model hashes, and the package's allowlisted contents; do not equate an incidental archive timestamp with a source revision change.
+
+## 15 September 2026 local AI prototype
+
+The `/word-machine` page, entry loader, world package, props and adapter are allowlisted in both local and hosted applications. They use the same engine/model vendor preparation and strict CSP. No database migration or production configuration change was made. Local/fixture tests of these routes do not establish live Supabase Auth or hosted PostgreSQL behavior. The live Render deployment is still the previously verified `337db573d87c417aca42f55894a2c6e807df21ed`; this increment has not been pushed or deployed.

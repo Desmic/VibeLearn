@@ -1,5 +1,7 @@
 # VibeLearn game UX system — the game is the course
 
+**Current authority — 15 September 2026:** [CRITIC-POLICY.md](CRITIC-POLICY.md) supersedes older score formulas, gate order and review-preview exceptions below. The sole human product critic is the current user. Review the whole playable candidate, use observed evidence and hard blockers, and keep preview/readiness/user acceptance distinct. The user selected an ongoing How LLMs Work series; see [NEXT-TEACHING-DESIGN.md](NEXT-TEACHING-DESIGN.md). Preserve existing retry evidence; the new topic needs new learning identities.
+
 **Current review amendment — 14 September 2026:** Default exploration to a third-person player with independent orbit/zoom/recenter. Phone gameplay fills the dynamic viewport with safe-area HUD and movement/look controls; long secondary content scrolls inside bounded panels. Login uses the same 3D world and visual language. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
 
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
@@ -71,9 +73,9 @@ Longer timers do not fix weak storytelling. Tell story through scenes, character
 
 A great story with boring play fails. Fun play with shallow learning fails. Rigorous learning nobody wants to continue also fails the product.
 
-Required sequence:
+Required review coverage:
 
-`story >=9 -> first-touch >=9 -> whole chapter >=9 -> learning/transfer >=9 -> user review`
+`design feasibility -> observe rendered story + first touch + whole chapter + learning/transfer -> fix blockers -> internal recommendation -> explicit user verdict`
 
 ## Game design invariants
 

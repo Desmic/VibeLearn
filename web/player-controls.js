@@ -19,6 +19,7 @@ export function validatePlayerProfile(profile,ids){
   if(!profile.surfaces.some(s=>!s.whenVisible&&profile.spawn[0]>=s.bounds[0]&&profile.spawn[0]<=s.bounds[1]&&profile.spawn[2]>=s.bounds[2]&&profile.spawn[2]<=s.bounds[3]&&Math.abs(profile.spawn[1]-s.height)<.1))fail('spawn must be on an initially walkable surface');
   const c=profile.camera;
   if(!c||![c.yaw,c.pitch,c.distance,c.minDistance,c.maxDistance,c.targetHeight].every(Number.isFinite)||c.minDistance<1||c.maxDistance>40||c.minDistance>=c.maxDistance||c.distance<c.minDistance||c.distance>c.maxDistance||c.pitch<5||c.pitch>70)fail('camera limits are invalid');
+  if(c.portraitDistance!==undefined&&(!Number.isFinite(c.portraitDistance)||c.portraitDistance<c.minDistance||c.portraitDistance>c.maxDistance))fail('portrait camera distance is invalid');
   return profile;
 }
 
@@ -36,8 +37,9 @@ export function createPlayerControls(host,profile,adapter){
   host.append(overlay);
   const stickEl=overlay.querySelector('.game-move-stick'),knob=overlay.querySelector('.game-stick-knob'),help=overlay.querySelector('.game-controls-help');
   function release(){keys.clear();stick=[0,0];stickPointer=null;drag=null;knob.style.transform='translate(0,0)';}
+  const defaultDistance=()=>host.clientWidth/Math.max(1,host.clientHeight)<.9?(profile.camera.portraitDistance??profile.camera.distance):profile.camera.distance;
   function recenter(){
-    if(mode==='third-person'){yaw=profile.camera.yaw;pitch=profile.camera.pitch;distance=profile.camera.distance;}
+    if(mode==='third-person'){yaw=profile.camera.yaw;pitch=profile.camera.pitch;distance=defaultDistance();}
     else if(shot)setShot(shot);
     draw();
   }
@@ -126,7 +128,7 @@ export function createPlayerControls(host,profile,adapter){
     setShot,
     setMode(value,nextKey){
       const changed=mode!==value||key!==nextKey;mode=value;key=nextKey;
-      if(changed){release();if(value==='third-person'){position=[...profile.spawn];adapter.setAvatar(position,0);yaw=profile.camera.yaw;pitch=profile.camera.pitch;distance=profile.camera.distance;}}
+      if(changed){release();if(value==='third-person'){position=[...profile.spawn];adapter.setAvatar(position,0);yaw=profile.camera.yaw;pitch=profile.camera.pitch;distance=defaultDistance();}}
       overlay.dataset.controlMode=mode;draw();
     },
     restoreAvatar(){if(mode==='third-person')adapter.setAvatar(position,lastFacing);},

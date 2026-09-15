@@ -1,5 +1,7 @@
 # Course generation produces playable teaching systems
 
+**Current authority — 15 September 2026:** [CRITIC-POLICY.md](CRITIC-POLICY.md) supersedes older score formulas, gate order and review-preview exceptions below. The sole human product critic is the current user. Review the whole playable candidate, use observed evidence and hard blockers, and keep preview/readiness/user acceptance distinct. The user selected an ongoing How LLMs Work series; see [NEXT-TEACHING-DESIGN.md](NEXT-TEACHING-DESIGN.md). Preserve existing retry evidence; the new topic needs new learning identities.
+
 **Current review amendment — 14 September 2026:** Generated exploration games should provide reusable avatar/navigation/camera profiles and full-screen device HUD rules as specs. Third person is the preferred current default for most games; other future mechanics may justify another declared camera mode. Learning outcomes remain independent of the view. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
 
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
@@ -195,7 +197,7 @@ Preference changes may regenerate story/game/world specs but must not silently a
 
 Generate one frozen story candidate at a time under `STORY-GENERATION-AND-CRITIC.md`.
 
-Story critic must reach unrounded **>=9.0/10 with no blocker** before game realization.
+Review the written premise for contradictions and staging risks before realization. It cannot earn a rendered-story pass. Use `CRITIC-POLICY.md` for observed integer criterion ratings, hard blockers and readiness.
 
 A failed story is revised as story. Do not hide weak storytelling under rendering sophistication or curriculum correctness.
 
@@ -248,7 +250,7 @@ Explicitly penalize reverting to course-site UI when reasoning becomes harder.
 
 ### Learning / transfer >=9
 
-After game gates pass, verify that meaningful play actually teaches/assesses LearningSpec through purposeful practice, misconception handling, unassisted success, hint dependence, fresh transfer and delayed retrieval where claimed.
+Even if a game gate fails, inspect whether meaningful play supports LearningSpec through purposeful practice, misconception handling, unassisted success, hint dependence, fresh transfer and delayed retrieval where claimed.
 
 Critic scores never override direct user rejection.
 

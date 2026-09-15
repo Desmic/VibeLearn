@@ -97,6 +97,13 @@ def make_server(database, port=8000):
                 except sqlite3.Error:
                     return self.send(503, {"error": "STORAGE_UNAVAILABLE", "message": "The database is unavailable. Retry shortly."})
             assets = {
+                "/word-machine": ("word-machine.html", "text/html"),
+                "/word-machine.js": ("word-machine.js", "text/javascript"),
+                "/word-machine-boot.js": ("word-machine-boot.js", "text/javascript"),
+                "/word-machine.css": ("word-machine.css", "text/css"),
+                "/word-machine-world.js": ("word-machine-world.js", "text/javascript"),
+                "/workshop-props.js": ("workshop-props.js", "text/javascript"),
+                "/spec-game-world.js": ("spec-game-world.js", "text/javascript"),
                 "/rescue-game.js": ("rescue-game.js", "text/javascript"),
                 "/rescue.js": ("rescue.js", "text/javascript"),
                 "/rescue.css": ("rescue.css", "text/css"),

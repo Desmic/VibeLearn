@@ -258,7 +258,9 @@ async function send(action, extra = {}) {
   const actionFocus = document.activeElement?.dataset?.action;
   busy = true;
   clearError();
-  document.querySelectorAll("button").forEach(button => { button.disabled = true; });
+  // Navigation is presentation-only and may be reparented during a save.
+  // Keep those persistent controls usable while learner commands are pending.
+  document.querySelectorAll("button").forEach(button => { if (!button.closest(".game-player-controls")) button.disabled = true; });
   const body = { command_id: crypto.randomUUID(), expected_revision: action === "start" ? 0 : attempt?.revision || 0, ...extra };
   if (action !== "start") { body.attempt_id = attempt.id; body.response = response(); retainDraft(); }
   Expedition.sync(true, attempt);
@@ -446,6 +448,10 @@ async function boot() {
   try {
     const config = await api("/api/config"); hosted = config.hosted;
     state = await api("/api/session", {}); attempt = state.attempt;
+    if(attempt?.snapshot?.word_machine){
+      if(attempt.status==='draft'){location.assign('/word-machine');return true;}
+      attempt=null;
+    }
     $("#sign-in").hidden = true;
     $("#sign-out").hidden = !hosted;
     campaignView = !attempt || (attempt.status === "submitted" && (!LEGACY_VIEW || !attempt.snapshot.mission));

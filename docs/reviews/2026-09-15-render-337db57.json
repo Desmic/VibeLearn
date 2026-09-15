@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "candidate_sha": "337db573d87c417aca42f55894a2c6e807df21ed",
+  "method": "internal_tool_assisted",
+  "environment": "Exact Render source exported locally; SQLite disposable learner; browser desktop 1280x720 and main journey 390x844; selected duplicate views 360x800 and 430x932.",
+  "limitations": "No actual child/young-adult study or physical-phone test. Some source/docs were known before play. Local PostgreSQL and hosted sign-in were not retested. Ratings are whole-number internal diagnostic judgments, not user ratings. Full local browser suite passed but did not catch observed controls failure.",
+  "prior_context": "Reviewer read product docs and knew the retry contract before play; cannot claim a blind novice test. Workarounds and reloads are recorded.",
+  "user_authority": "The current user is the sole human product critic and final authority. They requested changes; no new numeric user rating or acceptance was supplied.",
+  "design_direction": "User selected an ongoing How LLMs Work series. No episode of that series has yet been played or scored.",
+  "review_date": "2026-09-15",
+  "technical_status": "not_checked",
+  "technical_evidence": [
+    "docs/PLAYTEST-20260915.md"
+  ],
+  "criteria": {
+    "world_role_stakes": {
+      "rating": 3,
+      "reason": "World geography, player identity and immediate stakes depend on explanatory captions.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/opening-phone.png"
+      ]
+    },
+    "visible_causality": {
+      "rating": 4,
+      "reason": "The first duplicate consequence is offscreen in default phone framing; text supplies the result.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/duplicate-phone.png"
+      ]
+    },
+    "attachment_pull": {
+      "rating": 4,
+      "reason": "Pip reaching home offers a concrete payoff, but repeated exposition weakens the visible motivation. Audience appeal is an internal judgment.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/opening-desktop.png"
+      ]
+    },
+    "orientation_action": {
+      "rating": 3,
+      "reason": "The active Forge target is largely outside the first mission frame; marker placement/direction is confusing.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/signal1-phone.png"
+      ]
+    },
+    "hud_readability": {
+      "rating": 3,
+      "reason": "Stacked and duplicated instructions obscure the game; the narrow objective area needs its own scrolling.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/duplicate-360.png"
+      ]
+    },
+    "controls": {
+      "rating": 4,
+      "reason": "Camera/movement buttons stay disabled after saved inspection. A reload restores them; direct camera drag still works.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/controls-after-inspect.txt"
+      ]
+    },
+    "meaningful_agency": {
+      "rating": 5,
+      "reason": "Distinct choices and recoverable errors exist, but later tasks often resolve through the console and generic verdicts.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/signal6-phone.png"
+      ]
+    },
+    "progression_recovery": {
+      "rating": 4,
+      "reason": "The middle signals change technical conditions mostly through prose; the same four-block recipe clears the later transfer.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/signal7-phone.png"
+      ]
+    },
+    "world_continuity": {
+      "rating": 4,
+      "reason": "The 3D world persists through the early signals, but later large construction panels dominate the play area.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/signal6-phone.png"
+      ]
+    },
+    "concept_fidelity": {
+      "rating": 6,
+      "reason": "Authoritative retry semantics have substance, but a stale payload panel contradicts the changed request and visible consequences are weak.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "fresh_transfer": {
+      "rating": 4,
+      "reason": "The export task changes names/context but accepts the immediately rehearsed four-block sequence. Independent learning was not established.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/signal7-phone.png"
+      ]
+    }
+  },
+  "coverage": {
+    "fresh_entry": {
+      "status": "observed",
+      "note": "See the actual played actions and limitations in the report.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "first_action": {
+      "status": "observed",
+      "note": "See the actual played actions and limitations in the report.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "mistake": {
+      "status": "observed",
+      "note": "See the actual played actions and limitations in the report.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "recovery": {
+      "status": "observed",
+      "note": "See the actual played actions and limitations in the report.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "later_challenge": {
+      "status": "observed",
+      "note": "See the actual played actions and limitations in the report.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "payoff": {
+      "status": "observed",
+      "note": "See the actual played actions and limitations in the report.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "transfer": {
+      "status": "observed",
+      "note": "See the actual played actions and limitations in the report.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "replay": {
+      "status": "observed",
+      "note": "See the actual played actions and limitations in the report.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "save_resume": {
+      "status": "observed",
+      "note": "See the actual played actions and limitations in the report.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "controls_after_save": {
+      "status": "blocked",
+      "note": "Buttons remain disabled after inspection; a reload is required for button controls.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "desktop": {
+      "status": "observed",
+      "note": "See the actual played actions and limitations in the report.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "phone_360": {
+      "status": "not_checked",
+      "note": "Duplicate state inspected, but the complete first-entry/action/whole-chapter matrix was not played at this width.",
+      "evidence": []
+    },
+    "phone_390": {
+      "status": "observed",
+      "note": "See the actual played actions and limitations in the report.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    "phone_430": {
+      "status": "not_checked",
+      "note": "Duplicate state inspected, but the complete first-entry/action/whole-chapter matrix was not played at this width.",
+      "evidence": []
+    },
+    "touch": {
+      "status": "not_checked",
+      "note": "Portrait mouse/pointer browser interaction was used; no independent touch-device play was performed.",
+      "evidence": []
+    },
+    "keyboard": {
+      "status": "not_checked",
+      "note": "No complete manual keyboard-only journey was performed.",
+      "evidence": []
+    },
+    "enlarged_text": {
+      "status": "not_checked",
+      "note": "Not manually reviewed for this current critic record.",
+      "evidence": []
+    },
+    "reduced_motion": {
+      "status": "not_checked",
+      "note": "Not manually reviewed for this current critic record; automated baseline coverage is not a perceptual pass.",
+      "evidence": []
+    }
+  },
+  "blockers": [
+    {
+      "finding": "Opening scene/world/role require too much explanatory reading.",
+      "retest": "Play a fresh opening; identify role, world, need and action from visible events with concise accessible cues.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/opening-phone.png"
+      ]
+    },
+    {
+      "finding": "Required target and duplicate consequence leave the default phone frame.",
+      "retest": "Repeat first action and duplicate/recovery at 360/390/430; inspect both cause and consequence.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/duplicate-phone.png"
+      ]
+    },
+    {
+      "finding": "HUD panels duplicate instructions and obscure the game.",
+      "retest": "Inspect every immediate action without overlapping text/controls or nested required reading.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/duplicate-360.png"
+      ]
+    },
+    {
+      "finding": "Post-save camera/movement buttons remain disabled.",
+      "retest": "Inspect, wait for Saved, then use all movement/camera controls without reload.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/controls-after-inspect.txt"
+      ]
+    },
+    {
+      "finding": "Changed-request payload prose and the ticket panel disagree.",
+      "retest": "Replay Signal 3 with changed payload; ensure object, ticket, objective and feedback agree.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md"
+      ]
+    },
+    {
+      "finding": "Current transfer can reuse the just-rehearsed policy recipe.",
+      "retest": "Attempt a novel counterexample before feedback with faded scaffolding and explicit exposure limits.",
+      "evidence": [
+        "docs/PLAYTEST-20260915.md",
+        "docs/playtest-20260915/signal7-phone.png"
+      ]
+    }
+  ]
+}

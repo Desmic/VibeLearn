@@ -115,9 +115,14 @@ def create_app(config=None, auth_provider=None):
     def index():
         return send_from_directory(ROOT / "web", "index.html")
 
+    @app.get("/word-machine")
+    def word_machine_page():
+        return send_from_directory(ROOT / "web", "word-machine.html")
+
     @app.get("/<asset>")
     def asset(asset):
         if asset not in (
+            "word-machine.js", "word-machine-boot.js", "word-machine.css", "word-machine-world.js", "workshop-props.js", "spec-game-world.js",
             "rescue-game.js", "rescue.js", "rescue.css", "play-canvas.js", "play-canvas-migrate.js", "play-canvas.css",
             "game-runtime.js", "game-opening.js", "game-world-status.js", "echo-forge-opening-spec.js", "world-spec.js", "playcanvas-backend.js", "echo-forge-world-spec.js", "rescue-playcanvas-world.js",
             "player-controls.js", "game-character-spec.js", "game-screen.js", "game-screen.css",

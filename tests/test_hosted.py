@@ -192,6 +192,19 @@ class HostedTests(unittest.TestCase):
         response = self.client.post("/api/session", json={}, base_url=self.config["APP_ORIGIN"], headers={"Origin": "https://attacker.test", "X-Learning-Command": "1"})
         self.assertEqual(response.status_code, 403)
 
+    def test_word_machine_assets_and_authenticated_commands(self):
+        for path in ['/word-machine','/word-machine-boot.js','/word-machine.js','/word-machine-world.js','/workshop-props.js','/spec-game-world.js']:
+            response=self.client.get(path,base_url=self.config['APP_ORIGIN'])
+            self.assertEqual(response.status_code,200,path)
+            self.assertIn("script-src 'self'",response.headers['Content-Security-Policy'])
+        body={'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':'ai-01-context'}
+        self.assertEqual(self.post('/api/commands/start',body).status_code,401)
+        self.login()
+        response=self.post('/api/commands/start',body)
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.json['snapshot']['mission']['id'],'ai-01-context')
+        self.assertEqual(response.json['word_machine_state']['pieces'],0)
+
     def test_login_scope_and_secure_cookies(self):
         self.assertEqual(self.post("/api/auth/login", {"email": "stranger@example.test", "password": "test-password"}).status_code, 401)
         response = self.login()

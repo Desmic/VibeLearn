@@ -9,7 +9,7 @@ from app.content import MODES, freeze, digest, presented, campaign_catalog
 from app.storage import transaction, family_evidence
 from app.assessment import evaluate, parse_prediction, review_need
 from app.expedition import validate_game, empty_game, replay
-from app import rescue
+from app import rescue, word_machine
 
 EMPTY_RESPONSE = {"prediction": "", "diagnosis": "", "aid_declaration": "unknown"}
 
@@ -48,7 +48,7 @@ def resolve_session(path, token):
 
 
 def check_response(value):
-    if not isinstance(value, dict) or set(value) not in (set(EMPTY_RESPONSE), set(EMPTY_RESPONSE) | {"game"}, set(EMPTY_RESPONSE) | {"rescue"}):
+    if not isinstance(value, dict) or set(value) not in (set(EMPTY_RESPONSE), set(EMPTY_RESPONSE) | {"game"}, set(EMPTY_RESPONSE) | {"rescue"}, set(EMPTY_RESPONSE) | {"word_machine"}):
         raise DomainError("INVALID_RESPONSE", "The response has an invalid structure.")
     if any(not isinstance(value[k], str) for k in EMPTY_RESPONSE):
         raise DomainError("INVALID_RESPONSE", "Answer fields must be text.")
@@ -64,6 +64,11 @@ def check_response(value):
     if "rescue" in value:
         try:
             rescue.validate(value["rescue"])
+        except ValueError as error:
+            raise DomainError("INVALID_RESPONSE", str(error))
+    if "word_machine" in value:
+        try:
+            word_machine.validate(value["word_machine"])
         except ValueError as error:
             raise DomainError("INVALID_RESPONSE", str(error))
     return value
@@ -85,8 +90,8 @@ def seal(db, row, response, kind, stamp):
     return checkpoint_id, history
 
 
-def campaign_progress(db, learner, expedition=False, rescue_mode=False):
-    catalog = campaign_catalog(expedition, rescue_mode)
+def campaign_progress(db, learner, expedition=False, rescue_mode=False, word_machine_mode=False):
+    catalog = campaign_catalog(expedition, rescue_mode, word_machine_mode)
     cleared = set()
     for row in db.execute("SELECT capsule, result FROM evidence WHERE learner_id=? ORDER BY created_at", (learner,)):
         result = json.loads(row["result"])
@@ -114,6 +119,8 @@ def attempt_view(db, row):
         result["game_state"] = replay(snapshot, result["response"].get("game"))
     if "rescue" in snapshot:
         result["rescue_state"] = rescue.replay(snapshot, result["response"].get("rescue"), reveal=row["status"] == "submitted")
+    if "word_machine" in snapshot:
+        result["word_machine_state"] = word_machine.replay(snapshot, result["response"].get("word_machine"))
     history = assistance_view(db, row["learner_id"], row["id"])
     result["assistance"] = history
     result["hints"] = [event["detail"]["text"] for event in history if event["kind"] == "hint"]
@@ -148,7 +155,7 @@ def state(path, learner):
             "learner_id": learner,
             "profile": json.loads(profile[0]),
             "attempt": attempt_view(db, row),
-            "course": {"title": "Reliable agent execution", "episode_count": 4, "campaign": campaign_progress(db, learner), "expedition": campaign_progress(db, learner, True), "rescue": campaign_progress(db, learner, rescue_mode=True)},
+            "course": {"title": "Reliable agent execution", "episode_count": 4, "campaign": campaign_progress(db, learner), "expedition": campaign_progress(db, learner, True), "rescue": campaign_progress(db, learner, rescue_mode=True), "word_machine": campaign_progress(db, learner, word_machine_mode=True)},
             "modes": MODES,
         }
 
@@ -195,7 +202,7 @@ def command(path, learner, action, body):
                 raise DomainError("ACTIVE_ATTEMPT", "Resume your existing attempt first.", 409)
             mission_id = body.get("mission_id")
             if mission_id:
-                progress = {item["id"]: item for item in campaign_progress(db, learner) + campaign_progress(db, learner, True) + campaign_progress(db, learner, rescue_mode=True)}
+                progress = {item["id"]: item for item in campaign_progress(db, learner) + campaign_progress(db, learner, True) + campaign_progress(db, learner, rescue_mode=True) + campaign_progress(db, learner, word_machine_mode=True)}
                 if mission_id not in progress:
                     raise DomainError("NOT_FOUND", "Unknown mission.", 404)
                 if progress[mission_id]["status"] == "locked":
@@ -204,7 +211,7 @@ def command(path, learner, action, body):
                 snapshot = freeze(body["mode"], mission_id)
             except ValueError as error:
                 raise DomainError("MISSION_RULE", str(error), 400)
-            initial_response = EMPTY_RESPONSE | ({"rescue": rescue.empty()} if "rescue" in snapshot else {"game": empty_game()} if "expedition" in snapshot else {})
+            initial_response = EMPTY_RESPONSE | ({"word_machine": word_machine.empty()} if "word_machine" in snapshot else {"rescue": rescue.empty()} if "rescue" in snapshot else {"game": empty_game()} if "expedition" in snapshot else {})
             attempt_id = str(uuid4())
             db.execute("INSERT INTO attempts (id, learner_id, revision, status, mode, response, snapshot, snapshot_digest, created_at, updated_at) VALUES (?, ?, 1, 'draft', ?, ?, ?, ?, ?, ?)", (attempt_id, learner, body["mode"], encode(initial_response), encode(snapshot), digest(snapshot), stamp, stamp))
             prior = family_evidence(db, learner, snapshot["family_id"])
@@ -225,6 +232,22 @@ def command(path, learner, action, body):
                 raise DomainError("ALREADY_SUBMITTED", "A submitted answer is immutable.", 409)
             response = check_response(body["response"])
             snapshot = json.loads(row["snapshot"])
+            if "word_machine" in snapshot:
+                if "word_machine" not in response:
+                    raise DomainError("INVALID_RESPONSE", "This activity needs its machine action log.")
+                old_moves = json.loads(row["response"])["word_machine"]["moves"]
+                new_moves = response["word_machine"]["moves"]
+                if new_moves[:len(old_moves)] != old_moves or not len(old_moves) <= len(new_moves) <= len(old_moves) + 1:
+                    raise DomainError("INVALID_RESPONSE", "Saved actions cannot be rewritten. Use Rewind to experiment again.")
+                try:
+                    word_machine.replay(snapshot, response["word_machine"])
+                except (ValueError, KeyError, TypeError) as error:
+                    raise DomainError("INVALID_RESPONSE", str(error))
+                if new_moves and not any(e["kind"] == "simulation_feedback" for e in assistance_view(db, learner, attempt_id)):
+                    seal(db, row, json.loads(row["response"]), "before_simulation_feedback", stamp)
+                    add_assistance(db, learner, attempt_id, "simulation_feedback", {"text": "Toy-model predictions and consequences were revealed. This is guided practice, not independent evidence."}, stamp)
+            elif "word_machine" in response:
+                raise DomainError("INVALID_RESPONSE", "This activity does not accept a machine action log.")
             if "rescue" in snapshot:
                 if "rescue" not in response:
                     raise DomainError("INVALID_RESPONSE", "This incident requires a rescue log.")
@@ -283,9 +306,11 @@ def command(path, learner, action, body):
                     add_assistance(db, learner, attempt_id, "worked_example", {"text": snapshot["hints"][-1]}, stamp)
                 db.execute("UPDATE attempts SET mode=? WHERE id=? AND learner_id=?", (body["mode"], attempt_id, learner))
             if action == "submit":
+                if "word_machine" in snapshot and not word_machine.replay(snapshot, response["word_machine"])["complete"]:
+                    raise DomainError("INVALID_ANSWER", "Finish both context experiments before saving the episode result.")
                 count = len(snapshot["trace"])
                 diagnosis_required = mission.get("requires_diagnosis", True)
-                if ("rescue" not in snapshot and "expedition" not in snapshot and (parse_prediction(response["prediction"], count) is None or (diagnosis_required and not response["diagnosis"].strip()))) or ("expedition" in snapshot and not response.get("game", {}).get("moves")) or ("rescue" in snapshot and not response["rescue"]["moves"]):
+                if ("word_machine" not in snapshot and "rescue" not in snapshot and "expedition" not in snapshot and (parse_prediction(response["prediction"], count) is None or (diagnosis_required and not response["diagnosis"].strip()))) or ("expedition" in snapshot and not response.get("game", {}).get("moves")) or ("rescue" in snapshot and not response["rescue"]["moves"]):
                     unit = "number" if count == 1 else "comma-separated numbers"
                     suffix = " and a written diagnosis" if diagnosis_required else ""
                     raise DomainError("INVALID_ANSWER", f"Choose {count} valid {unit}{suffix} before locking in your answer.")

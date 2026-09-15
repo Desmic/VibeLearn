@@ -248,11 +248,13 @@ from app.expedition import make_campaign
 EXPEDITION = make_campaign(CONTENT)
 from app.rescue import build_campaign
 RESCUE = build_campaign(CONTENT)
-MISSION_INDEX = {item["mission"]["id"]: item for item in CAMPAIGN + EXPEDITION + RESCUE}
+from app.word_machine import build_content as build_word_machine
+WORD_MACHINE = [build_word_machine(CONTENT)]
+MISSION_INDEX = {item["mission"]["id"]: item for item in CAMPAIGN + EXPEDITION + RESCUE + WORD_MACHINE}
 
 
-def campaign_catalog(expedition=False, rescue=False):
-    return [deepcopy(item["mission"] | {"title": item["title"], "family_id": item["family_id"]}) for item in (RESCUE if rescue else EXPEDITION if expedition else CAMPAIGN)]
+def campaign_catalog(expedition=False, rescue=False, word_machine=False):
+    return [deepcopy(item["mission"] | {"title": item["title"], "family_id": item["family_id"]}) for item in (WORD_MACHINE if word_machine else RESCUE if rescue else EXPEDITION if expedition else CAMPAIGN)]
 
 
 def campaign_overview():

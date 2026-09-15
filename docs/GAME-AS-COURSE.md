@@ -1,5 +1,7 @@
 # The game is the course
 
+**Current authority — 15 September 2026:** [CRITIC-POLICY.md](CRITIC-POLICY.md) supersedes older score formulas, gate order and review-preview exceptions below. The sole human product critic is the current user. Review the whole playable candidate, use observed evidence and hard blockers, and keep preview/readiness/user acceptance distinct. The user selected an ongoing How LLMs Work series; see [NEXT-TEACHING-DESIGN.md](NEXT-TEACHING-DESIGN.md). Preserve existing retry evidence; the new topic needs new learning identities.
+
 **Current review amendment — 14 September 2026:** The current player-control requirement adds third-person exploration and free camera movement. Preserve gradual cognitive load and accessible semantic task actions; movement is not extra mastery evidence or a mandatory navigation puzzle. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
 
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
@@ -18,7 +20,7 @@ Learning/evidence identity remains independent of Pip, gears, fantasy names, ren
 
 ## Story before gameplay realization
 
-For every course/subject, first create a **good story/fantasy/world premise** capable of carrying the learning experience. Story is a first-class artifact with its own >=9 critic gate; see `STORY-GENERATION-AND-CRITIC.md`.
+For every course/subject, first create a **good story/fantasy/world premise** capable of carrying the learning experience. Review the written premise for feasibility and staging risks, then judge the rendered story using `CRITIC-POLICY.md`; a treatment score cannot pass the game.
 
 The predecessor Relay Rescue first touch was rejected by the user at **3/10**. The failure was not merely timing: storytelling was lazy/unclear and slide-like, Back navigation was missing, progression was too fast, and the opening failed to create enough attachment/curiosity/beauty for kids or young adults.
 
@@ -64,7 +66,7 @@ The current fully 3D game requirement includes all seven signals, world markers,
 4. **Learning outcomes:** intended capabilities have purposeful practice and defensible assessment/transfer evidence, scoring >=9 where applicable.
 5. **Current user:** explicitly accepts the candidate.
 
-Do not average gates. A great story with weak play fails. Delightful play with shallow learning fails. Rigorous learning nobody wants to continue also fails.
+Inspect all gates even if an earlier one fails. Use the policy criteria and their minimums, not a single weighted score. Do not average gates. A great story with weak play fails. Delightful play with shallow learning fails. Rigorous learning nobody wants to continue also fails.
 
 ## Course-to-game coverage contract
 

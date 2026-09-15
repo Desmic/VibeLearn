@@ -14,7 +14,7 @@ export function validateOpeningSpec(spec){
   return spec;
 }
 
-export function openGameOpening({root,spec,runtime,worldModule,replay=false,onExit=()=>{}}){
+export function openGameOpening({root,spec,runtime,worldModule,replay=false,reducedMotion=null,onExit=()=>{}}){
   validateOpeningSpec(spec);
   const previousFocus=document.activeElement;
   document.documentElement.classList.add('game-opening-active');
@@ -33,7 +33,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,onEx
   const progress=overlay.querySelector('.rgi-progress');
   spec.scenes.forEach(()=>progress.append(document.createElement('i')));
   const host=overlay.querySelector('#rgi-world'),next=overlay.querySelector('#rgi-next'),pause=overlay.querySelector('#rgi-pause');
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced=typeof reducedMotion==='boolean'?reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches;
   let step=0,closed=false,paused=false,world=null,actionDone=false,picking=false,frame=0;
   const completed=new Set();
   const gate=window.GameWorldStatus;
@@ -61,6 +61,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,onEx
     next.disabled=!ready();
     const markers=overlay.querySelector('.rgi-markers');markers.replaceChildren();
     for(const marker of s.markers||[]){
+      if(actionDone&&marker.hideWhenDone)continue;
       const n=document.createElement('button');n.type='button';n.className=`rgi-marker ${marker.tone||''}`;n.textContent=marker.label;n.dataset.entity=marker.entity;
       n.dataset.offsetX=String(marker.offset?.[0]||0);n.dataset.offsetY=String(marker.offset?.[1]||0);
       const actionable=s.action&&!actionDone&&marker.target===s.action.target;

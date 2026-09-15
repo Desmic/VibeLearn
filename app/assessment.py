@@ -43,6 +43,9 @@ def independence_label(response, assistance):
 
 
 def evaluate(snapshot, response, assistance):
+    if snapshot["policies"]["assessment"] == "word-machine-v1":
+        from app.word_machine import evaluate as evaluate_word_machine
+        return evaluate_word_machine(snapshot, response, independence_label(response, assistance))
     if snapshot["policies"]["assessment"] == "rescue-v1":
         from app.rescue import evaluate as evaluate_rescue
         return evaluate_rescue(snapshot, response, independence_label(response, assistance))
@@ -90,7 +93,7 @@ def review_need(snapshot, result, as_of):
         "competency": snapshot["competency"],
         "due_at": (datetime.fromisoformat(as_of) + timedelta(days=days)).isoformat(),
         "policy": snapshot["policies"]["retrieval"],
-        "reason": "Try a fresh trace without help after a delay. One practice episode cannot establish durable understanding.",
+        "reason": "Try a new context problem after a delay. Guided play does not establish durable understanding." if "word_machine" in snapshot else "Try a fresh trace without help after a delay. One practice episode cannot establish durable understanding.",
         "content_status": "needs_fresh_activity",
         "activity_id": None,
     }
