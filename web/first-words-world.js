@@ -25,6 +25,21 @@ for(let i=0;i<5;i++){
   const a=starPoints[i],b=starPoints[(i+2)%5],dx=b[0]-a[0],dy=b[1]-a[1];
   part(`star-mark-line-${i}`,'box','glow',[(a[0]+b[0])/2,(a[1]+b[1])/2,-.015],[Math.hypot(dx,dy),.055,.035],{parent:'star-mark',rotation:[0,0,Math.atan2(dy,dx)*180/Math.PI]});
 }
+// The transfer context now lives in the city. Each route board is a tangible
+// world object with a world-anchored accessible control; the list dialog remains
+// only as a fallback for players who prefer not to hunt the boards visually.
+function routeBoard(id,position,rotation,material,accent){
+  e.push({id,position,rotation:[0,rotation,0]});
+  part(id+'-post','cylinder','wood',[0,.72,0],[.11,1.45,.11],{parent:id});
+  part(id+'-board','box',material,[0,1.55,0],[2.2,1.15,.14],{parent:id});
+  part(id+'-cap','box',accent,[0,2.08,.08],[2.25,.13,.12],{parent:id});
+  part(id+'-pin-a','sphere','gold',[-.82,1.55,.16],[.08,.08,.05],{parent:id});
+  part(id+'-pin-b','sphere','gold',[.82,1.55,.16],[.08,.08,.05],{parent:id});
+  e.push({id:id+'-label',parent:id,position:[0,2.45,0]});
+}
+routeBoard('notice-old',[-5.25,0,-2.25],24,'wood','gold');
+routeBoard('notice-parade',[5.2,0,-2.05],-24,'rose','pinkGlow');
+routeBoard('notice-today',[2.15,0,-5.25],-14,'teal','mint');
 part('cell-back','box','indigo',[-2.5,1.3,-3.2],[2.5,2.6,.2]);
 for(const side of [-1,1])part('cell-side'+side,'box','stone',[-2.5+side*1.35,1.2,-2.3],[.16,2.4,1.8]);
 part('cell-moon','torus','glow',[-2.5,2,-3.04],[.8,.09,.8],{rotation:[90,0,0]});
@@ -91,7 +106,7 @@ export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'
   states:{arrival:{camera:'home'}},
   player:keeperProfile({spawn:[-2,0,3.6],surfaces:[{bounds:[-8,8,-8,6.8],height:0}],obstacles:[[-1.1,0,.9,.9,2.6,2.4],[-3.9,0,-3.5,-1.1,4,-1.7],[-7.6,0,-.3,-4.8,4,2.2],[4.8,0,-1,7.6,4,1.3]],camera:{yaw:-8,pitch:39,distance:13,portraitDistance:18,minDistance:7,maxDistance:26,targetHeight:1.2}})};
 
-const base=()=>({show:['zip','singer','our-lantern'],hide:['warden','stolen-voice','singer-cage','wrong-ring','reunion-ring','route-glow','zip-voice','socket-core','socket-ring',...Array.from({length:4},(_,i)=>`words-piece-${i}`)],transforms:{'moon-door':{position:[0,0,0]},'sun-door':{position:[0,0,0]},'star-door':{position:[0,0,0]},zip:{position:[-2.5,0,-2.4]},singer:{position:[4,0,1.7]},'our-lantern':{position:[1,1,3]}},animations:{zip:'idle',singer:'wave'}});
+const base=()=>({show:['zip','singer','our-lantern'],hide:['warden','stolen-voice','singer-cage','wrong-ring','reunion-ring','route-glow','notice-old','notice-parade','notice-today','zip-voice','socket-core','socket-ring',...Array.from({length:4},(_,i)=>`words-piece-${i}`)],transforms:{'moon-door':{position:[0,0,0]},'sun-door':{position:[0,0,0]},'star-door':{position:[0,0,0]},zip:{position:[-2.5,0,-2.4]},singer:{position:[4,0,1.7]},'our-lantern':{position:[1,1,3]}},animations:{zip:'idle',singer:'wave'}});
 function opening(beat){
   const p=base();p.camera=beat<1?'home':beat<2?'capture':'cell';
   p.show.push('zip-voice','singer-voice');
@@ -114,6 +129,7 @@ function present(s,prev){
   for(let i=0;i<(s.pieces||0);i++)p.show.push(`words-piece-${i}`);
   const freed=s.round===1||s.status==='success';
   if(freed){p.transforms['moon-door']={position:[0,4.6,0]};p.transforms.zip={position:[-1.4,0,2]};p.transforms['our-lantern']={position:[-1.1,1,2.2]};p.show.push('zip-voice');}
+  if(s.round===1&&s.status!=='success')p.show.push('notice-old','notice-parade','notice-today');
   if(s.status==='wrong'){
     p.show.push('wrong-ring');p.animations.zip='no';
     p.transforms['wrong-ring']={position:s.round===1?[-2.5,.12,-.8]:[3,.12,-1.5]};
