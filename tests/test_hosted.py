@@ -97,8 +97,7 @@ class HostedTests(unittest.TestCase):
         with transaction(self.path) as db:
             self.assertEqual(db.execute("SELECT count(*) FROM hosted_sessions").fetchone()[0], 0)
 
-    def test_password_toggle_in_real_browser(self):
-        # Real HTTPS/Flask/browser + disposable SQLite; AuthFixture is simulated.
+    def test_bellweather_login_password_recovery_and_direct_level1_route_in_real_browser(self):
         import threading
         from werkzeug.serving import make_server
         from playwright.sync_api import sync_playwright, expect
@@ -113,70 +112,51 @@ class HostedTests(unittest.TestCase):
                 try:
                     page = browser.new_page(ignore_https_errors=True, viewport={"width": 390, "height": 844})
                     page.goto(origin)
-                    expect(page.locator('#sign-in .auth-game-stage')).to_have_attribute('data-engine','playcanvas')
-                    expect(page.locator('#sign-in .vl-playcanvas-engine')).to_be_visible()
+                    expect(page.locator('#auth-world')).to_have_attribute('data-engine','playcanvas',timeout=20000)
+                    expect(page.locator('#auth-world .vl-playcanvas-engine')).to_be_visible()
+                    self.assertEqual(page.locator('#rescue-game').count(),0)
+                    self.assertEqual(page.locator('svg').count(),0)
                     artifacts=Path(__file__).resolve().parents[1]/'artifacts';artifacts.mkdir(exist_ok=True)
-                    page.wait_for_timeout(800)
-                    page.screenshot(path=str(artifacts/'login-3d-phone-390.png'),full_page=True)
-                    page.set_viewport_size({'width':1440,'height':1000});page.wait_for_timeout(300)
-                    page.screenshot(path=str(artifacts/'login-3d-desktop.png'))
+                    page.screenshot(path=str(artifacts/'login-bellweather-phone-390.png'))
+                    page.set_viewport_size({'width':1440,'height':1000});page.screenshot(path=str(artifacts/'login-bellweather-desktop.png'))
                     page.set_viewport_size({'width':390,'height':844})
-                    password = page.locator("#login-password")
-                    page.locator("#login-email").fill("owner@example.test")
-                    password.fill("wrong-disposable-password")
-                    toggle = page.locator("#toggle-password")
-                    toggle.focus()
-                    page.keyboard.press("Enter")
-                    expect(password).to_have_attribute("type", "text")
-                    expect(toggle).to_have_attribute("aria-pressed", "true")
-                    expect(password).to_have_value("wrong-disposable-password")
-                    page.get_by_role("button", name="Hide password", exact=True).click()
-                    expect(password).to_have_attribute("type", "password")
-                    page.get_by_role("button", name="Show password", exact=True).click()
-                    page.get_by_role("button", name="Enter campaign", exact=True).click()
-                    expect(page.locator("#notice")).to_contain_text("Reference:")
-                    expect(password).to_have_attribute("type", "password")
-                    expect(password).to_have_value("wrong-disposable-password")
-                    expect(page.get_by_role("button", name="Enter campaign", exact=True)).to_be_enabled()
-                    self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), 390)
-                    page.get_by_role("button", name="Forgot password?", exact=True).click()
-                    expect(page.locator("#notice")).to_contain_text("reset link")
-                    page.goto("about:blank")
-                    page.goto(origin + "/#type=recovery&access_token=test-recovery&refresh_token=test-refresh")
-                    expect(page.locator("#password-reset")).to_be_visible()
-                    self.assertNotIn("access_token", page.url)
-                    reset_password = page.locator("#new-password")
-                    reset_password.fill("new-disposable-password")
-                    reset_toggle = page.locator("#toggle-reset-password")
-                    reset_toggle.focus()
-                    page.keyboard.press("Enter")
-                    expect(reset_password).to_have_attribute("type", "text")
-                    expect(reset_toggle).to_have_attribute("aria-pressed", "true")
-                    expect(reset_password).to_have_value("new-disposable-password")
-                    page.get_by_role("button", name="Hide password", exact=True).click()
-                    expect(reset_password).to_have_attribute("type", "password")
-                    page.get_by_role("button", name="Show password", exact=True).click()
-                    page.get_by_role("button", name="Save new password", exact=True).click()
-                    expect(reset_password).to_have_attribute("type", "password")
-                    expect(page.locator("#notice")).to_contain_text("Password updated")
-                    expect(page.locator("#sign-in")).to_be_visible()
-                    page.locator("#login-email").fill("owner@example.test")
-                    page.locator("#login-password").fill("test-password")
-                    page.get_by_role("button", name="Enter campaign", exact=True).click()
-                    expect(page.locator("#rgi-intro")).to_be_visible(timeout=15000)
-                    expect(page.locator('#sign-in .vl-playcanvas-engine')).to_have_count(0)
-                    expect(page.locator("#rgi-world .vl-playcanvas-engine")).to_be_visible(timeout=15000)
-                    page.locator("#rgi-skip").click()
-                    expect(page.locator(".rgc1-coach")).to_be_visible(timeout=15000)
-                    page.reload()
-                    expect(page.locator(".rgc1-coach")).to_be_visible(timeout=15000)
-                    expect(page.locator("#rgi-intro")).to_have_count(0)
+
+                    password=page.locator('#login-password');password.fill('wrong-disposable-password')
+                    page.locator('#login-email').fill('owner@example.test')
+                    toggle=page.locator('[data-password-toggle="login-password"]')
+                    toggle.click();expect(password).to_have_attribute('type','text');expect(toggle).to_have_attribute('aria-pressed','true')
+                    toggle.click();expect(password).to_have_attribute('type','password')
+                    page.get_by_role('button',name=re.compile('Continue to The First Words')).click()
+                    expect(page.locator('#entry-status')).to_contain_text('Reference:')
+                    expect(page.get_by_role('button',name=re.compile('Continue to The First Words'))).to_be_enabled()
+                    self.assertLessEqual(page.evaluate('document.documentElement.scrollWidth'),390)
+                    page.get_by_role('button',name='Forgot password?',exact=True).click()
+                    expect(page.locator('#entry-status')).to_contain_text('reset link')
+
+                    page.goto(origin+'/#type=recovery&access_token=test-recovery&refresh_token=test-refresh')
+                    expect(page.locator('#password-reset')).to_be_visible();self.assertNotIn('access_token',page.url)
+                    reset=page.locator('#new-password');reset.fill('new-disposable-password')
+                    reset_toggle=page.locator('[data-password-toggle="new-password"]')
+                    reset_toggle.click();expect(reset).to_have_attribute('type','text')
+                    reset_toggle.click();expect(reset).to_have_attribute('type','password')
+                    page.get_by_role('button',name=re.compile('Restore access')).click()
+                    expect(page.locator('#sign-in')).to_be_visible()
+                    expect(page.locator('#entry-status')).to_contain_text('Password updated')
+
+                    page.locator('#login-email').fill('owner@example.test');page.locator('#login-password').fill('test-password')
+                    page.get_by_role('button',name=re.compile('Continue to The First Words')).click()
+                    page.wait_for_url('**/first-words',timeout=15000)
+                    expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000)
+                    expect(page.locator('#rgi-world .vl-playcanvas-engine')).to_be_visible()
+                    self.assertEqual(page.locator('#rescue-game').count(),0);self.assertEqual(page.locator('svg').count(),0)
+                    page.get_by_role('button',name='Skip opening',exact=True).click()
+                    expect(page.locator('#engine')).to_be_visible(timeout=15000)
+                    expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible()
+                    page.reload();expect(page.locator('#engine')).to_be_visible(timeout=15000);expect(page.locator('#rgi-intro')).to_have_count(0)
                 finally:
                     browser.close()
         finally:
-            server.shutdown()
-            thread.join(timeout=5)
-            server.server_close()
+            server.shutdown();thread.join(timeout=5);server.server_close()
 
     def test_no_anonymous_session_or_cookie_forgery(self):
         self.assertEqual(self.post("/api/session", {}).status_code, 401)
@@ -192,17 +172,20 @@ class HostedTests(unittest.TestCase):
         response = self.client.post("/api/session", json={}, base_url=self.config["APP_ORIGIN"], headers={"Origin": "https://attacker.test", "X-Learning-Command": "1"})
         self.assertEqual(response.status_code, 403)
 
-    def test_word_machine_assets_and_authenticated_commands(self):
-        for path in ['/word-machine','/word-machine-boot.js','/word-machine.js','/word-machine-world.js','/workshop-props.js','/spec-game-world.js']:
+    def test_active_level1_assets_and_authenticated_commands(self):
+        for path in ['/first-words','/first-words-boot.js','/first-words.js','/first-words-world.js','/workshop-props.js','/spec-game-world.js','/vendor/playcanvas.mjs']:
             response=self.client.get(path,base_url=self.config['APP_ORIGIN'])
             self.assertEqual(response.status_code,200,path)
             self.assertIn("script-src 'self'",response.headers['Content-Security-Policy'])
-        body={'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':'ai-01-context'}
+        self.assertEqual(self.client.get('/word-machine',base_url=self.config['APP_ORIGIN'],follow_redirects=False).status_code,302)
+        for retired in ['/word-machine.js','/rescue-game.js','/play-canvas-migrate.js','/vendor/three.module.min.js']:
+            self.assertEqual(self.client.get(retired,base_url=self.config['APP_ORIGIN']).status_code,404,retired)
+        body={'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':'ai-01-first-words'}
         self.assertEqual(self.post('/api/commands/start',body).status_code,401)
-        self.login()
+        login=self.login();self.assertEqual(login.json['next'],'/first-words')
         response=self.post('/api/commands/start',body)
         self.assertEqual(response.status_code,200)
-        self.assertEqual(response.json['snapshot']['mission']['id'],'ai-01-context')
+        self.assertEqual(response.json['snapshot']['mission']['id'],'ai-01-first-words')
         self.assertEqual(response.json['word_machine_state']['pieces'],0)
 
     def test_login_scope_and_secure_cookies(self):
@@ -226,129 +209,65 @@ class HostedTests(unittest.TestCase):
         self.assertEqual(resumed["response"], body["response"])
 
     def test_phase1_hosted_acceptance_contract_survives_app_restart(self):
-        # Mirrors the machine-verifiable parts of docs/PHASE-1.md in one continuous flow.
         self.login()
         started = self.post("/api/commands/start", {"command_id": str(uuid4()), "expected_revision": 0, "mode": "LEARN"}).json
         answer = self.answer("1, 1, 1")
-        saved = self.post("/api/commands/save", {
-            "command_id": str(uuid4()), "expected_revision": started["revision"],
-            "attempt_id": started["id"], "response": answer,
-        }).json
-        self.assertEqual(saved["status"], "draft")
-        self.assertEqual(saved["response"], answer)
-
+        saved = self.post("/api/commands/save", {"command_id": str(uuid4()), "expected_revision": started["revision"], "attempt_id": started["id"], "response": answer}).json
+        self.assertEqual(saved["status"], "draft");self.assertEqual(saved["response"], answer)
         session_cookie = self.client.get_cookie(COOKIE, domain="pilot.example.test").value
         access_cookie = self.client.get_cookie(ACCESS_COOKIE, domain="pilot.example.test").value
-        restarted_app = create_app(self.config, self.auth)
-        restarted = restarted_app.test_client()
-        restarted.set_cookie(COOKIE, session_cookie, domain="pilot.example.test")
-        restarted.set_cookie(ACCESS_COOKIE, access_cookie, domain="pilot.example.test")
+        restarted_app = create_app(self.config, self.auth);restarted = restarted_app.test_client()
+        restarted.set_cookie(COOKIE, session_cookie, domain="pilot.example.test");restarted.set_cookie(ACCESS_COOKIE, access_cookie, domain="pilot.example.test")
         resumed = self.post_with(restarted, "/api/session", {}).json["attempt"]
-        self.assertEqual(resumed["id"], started["id"])
-        self.assertEqual(resumed["response"], answer)
-
-        current = self.post_with(restarted, "/api/commands/hint", {
-            "command_id": str(uuid4()), "expected_revision": resumed["revision"],
-            "attempt_id": resumed["id"], "response": answer,
-        }).json
-        self.assertEqual(len(current["hints"]), 1)
-        self.assertEqual(current["checkpoints"][0]["response"], answer)
-
-        current = self.post_with(restarted, "/api/commands/mode", {
-            "command_id": str(uuid4()), "expected_revision": current["revision"],
-            "attempt_id": current["id"], "response": answer, "mode": "PAIR",
-        }).json
-        current = self.post_with(restarted, "/api/commands/source", {
-            "command_id": str(uuid4()), "expected_revision": current["revision"],
-            "attempt_id": current["id"], "response": answer,
-        }).json
+        self.assertEqual(resumed["id"], started["id"]);self.assertEqual(resumed["response"], answer)
+        current = self.post_with(restarted, "/api/commands/hint", {"command_id": str(uuid4()), "expected_revision": resumed["revision"], "attempt_id": resumed["id"], "response": answer}).json
+        self.assertEqual(len(current["hints"]), 1);self.assertEqual(current["checkpoints"][0]["response"], answer)
+        current = self.post_with(restarted, "/api/commands/mode", {"command_id": str(uuid4()), "expected_revision": current["revision"], "attempt_id": current["id"], "response": answer, "mode": "PAIR"}).json
+        current = self.post_with(restarted, "/api/commands/source", {"command_id": str(uuid4()), "expected_revision": current["revision"], "attempt_id": current["id"], "response": answer}).json
         self.assertTrue(current["source"]["url"].startswith("https://aws.amazon.com/"))
-
         final_answer = self.answer()
-        submitted = self.post_with(restarted, "/api/commands/submit", {
-            "command_id": str(uuid4()), "expected_revision": current["revision"],
-            "attempt_id": current["id"], "response": final_answer,
-        }).json
-        self.assertEqual(submitted["status"], "submitted")
-        self.assertEqual(submitted["assessment"]["outcome"], "correct")
-        self.assertEqual(submitted["assessment"]["independence"], "assisted")
-        self.assertIsNotNone(submitted["evidence"])
-        self.assertIsNotNone(submitted["review"])
-        self.assertGreaterEqual(len(submitted["checkpoints"]), 2)
-        self.assertEqual(submitted["reward"], 10)
-        self.assertEqual(submitted["practice_xp"], 10)
-
-        replay_session = restarted.get_cookie(COOKIE, domain="pilot.example.test").value
-        replay_access = restarted.get_cookie(ACCESS_COOKIE, domain="pilot.example.test").value
+        submitted = self.post_with(restarted, "/api/commands/submit", {"command_id": str(uuid4()), "expected_revision": current["revision"], "attempt_id": current["id"], "response": final_answer}).json
+        self.assertEqual(submitted["status"], "submitted");self.assertEqual(submitted["assessment"]["outcome"], "correct")
+        self.assertEqual(submitted["assessment"]["independence"], "assisted");self.assertIsNotNone(submitted["evidence"]);self.assertIsNotNone(submitted["review"])
+        self.assertGreaterEqual(len(submitted["checkpoints"]), 2);self.assertEqual(submitted["reward"], 10);self.assertEqual(submitted["practice_xp"], 10)
+        replay_session = restarted.get_cookie(COOKIE, domain="pilot.example.test").value;replay_access = restarted.get_cookie(ACCESS_COOKIE, domain="pilot.example.test").value
         self.assertEqual(self.post_with(restarted, "/api/auth/logout", {}).status_code, 200)
-        restarted.set_cookie(COOKIE, replay_session, domain="pilot.example.test")
-        restarted.set_cookie(ACCESS_COOKIE, replay_access, domain="pilot.example.test")
+        restarted.set_cookie(COOKIE, replay_session, domain="pilot.example.test");restarted.set_cookie(ACCESS_COOKIE, replay_access, domain="pilot.example.test")
         self.assertEqual(self.post_with(restarted, "/api/session", {}).status_code, 401)
-
         with transaction(self.path) as db:
-            self.assertEqual(db.execute("SELECT COUNT(*) FROM evidence").fetchone()[0], 1)
-            self.assertEqual(db.execute("SELECT COUNT(*) FROM rewards").fetchone()[0], 1)
-            self.assertEqual(db.execute("SELECT COUNT(*) FROM reviews").fetchone()[0], 1)
-            self.assertEqual(db.execute("SELECT COUNT(*) FROM hosted_sessions").fetchone()[0], 0)
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM evidence").fetchone()[0], 1);self.assertEqual(db.execute("SELECT COUNT(*) FROM rewards").fetchone()[0], 1)
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM reviews").fetchone()[0], 1);self.assertEqual(db.execute("SELECT COUNT(*) FROM hosted_sessions").fetchone()[0], 0)
 
     def test_two_authorized_learners_are_isolated(self):
         class MultiUserAuth:
             def __init__(self):
-                self.identities = {
-                    "owner@example.test": {"id": str(uuid4()), "email": "owner@example.test"},
-                    "peer@example.test": {"id": str(uuid4()), "email": "peer@example.test"},
-                }
-
+                self.identities = {"owner@example.test": {"id": str(uuid4()), "email": "owner@example.test"}, "peer@example.test": {"id": str(uuid4()), "email": "peer@example.test"}}
             def login(self, email, password):
-                if password != "test-password" or email not in self.identities:
-                    raise service.DomainError("UNAUTHENTICATED", "Invalid credentials", 401)
+                if password != "test-password" or email not in self.identities: raise service.DomainError("UNAUTHENTICATED", "Invalid credentials", 401)
                 return f"access:{email}", 3600
-
             def user(self, token):
                 email = token.removeprefix("access:") if token.startswith("access:") else None
-                if email not in self.identities:
-                    raise service.DomainError("UNAUTHENTICATED", "Invalid token", 401)
+                if email not in self.identities: raise service.DomainError("UNAUTHENTICATED", "Invalid token", 401)
                 return self.identities[email]
-
-        auth = MultiUserAuth()
-        config = self.config | {"ALLOWED_EMAILS": "owner@example.test,peer@example.test"}
-        app = create_app(config, auth)
-        owner = app.test_client()
-        peer = app.test_client()
+        auth = MultiUserAuth();config = self.config | {"ALLOWED_EMAILS": "owner@example.test,peer@example.test"};app = create_app(config, auth);owner = app.test_client();peer = app.test_client()
         self.assertEqual(self.post_with(owner, "/api/auth/login", {"email": "owner@example.test", "password": "test-password"}, config).status_code, 200)
         self.assertEqual(self.post_with(peer, "/api/auth/login", {"email": "peer@example.test", "password": "test-password"}, config).status_code, 200)
-
         owner_attempt = self.post_with(owner, "/api/commands/start", {"command_id": str(uuid4()), "expected_revision": 0, "mode": "LEARN"}, config).json
-        owner_saved = self.post_with(owner, "/api/commands/save", {
-            "command_id": str(uuid4()), "expected_revision": owner_attempt["revision"],
-            "attempt_id": owner_attempt["id"], "response": self.answer(),
-        }, config).json
-        self.assertEqual(owner_saved["response"], self.answer())
-        self.assertIsNone(self.post_with(peer, "/api/session", {}, config).json["attempt"])
-
-        cross_write = self.post_with(peer, "/api/commands/save", {
-            "command_id": str(uuid4()), "expected_revision": owner_saved["revision"],
-            "attempt_id": owner_saved["id"], "response": self.answer("0, 0, 0"),
-        }, config)
-        self.assertEqual(cross_write.status_code, 404)
-        self.assertEqual(self.post_with(owner, "/api/session", {}, config).json["attempt"]["response"], self.answer())
+        owner_saved = self.post_with(owner, "/api/commands/save", {"command_id": str(uuid4()), "expected_revision": owner_attempt["revision"], "attempt_id": owner_attempt["id"], "response": self.answer()}, config).json
+        self.assertEqual(owner_saved["response"], self.answer());self.assertIsNone(self.post_with(peer, "/api/session", {}, config).json["attempt"])
+        cross_write = self.post_with(peer, "/api/commands/save", {"command_id": str(uuid4()), "expected_revision": owner_saved["revision"], "attempt_id": owner_saved["id"], "response": self.answer("0, 0, 0")}, config)
+        self.assertEqual(cross_write.status_code, 404);self.assertEqual(self.post_with(owner, "/api/session", {}, config).json["attempt"]["response"], self.answer())
 
     def test_logout_revokes_replayed_cookie_pair(self):
-        self.login()
-        session = self.client.get_cookie(COOKIE, domain="pilot.example.test").value
-        access = self.client.get_cookie(ACCESS_COOKIE, domain="pilot.example.test").value
+        self.login();session = self.client.get_cookie(COOKIE, domain="pilot.example.test").value;access = self.client.get_cookie(ACCESS_COOKIE, domain="pilot.example.test").value
         self.assertEqual(self.post("/api/auth/logout", {}).status_code, 200)
-        self.client.set_cookie(COOKIE, session, domain="pilot.example.test")
-        self.client.set_cookie(ACCESS_COOKIE, access, domain="pilot.example.test")
+        self.client.set_cookie(COOKIE, session, domain="pilot.example.test");self.client.set_cookie(ACCESS_COOKIE, access, domain="pilot.example.test")
         self.assertEqual(self.post("/api/session", {}).status_code, 401)
 
     def test_changed_identity_cannot_use_another_session(self):
-        self.login()
-        self.auth.identity = self.auth.identity | {"id": str(uuid4())}
-        self.assertEqual(self.post("/api/session", {}).status_code, 401)
+        self.login();self.auth.identity = self.auth.identity | {"id": str(uuid4())};self.assertEqual(self.post("/api/session", {}).status_code, 401)
 
     def test_expired_session_cannot_resume(self):
         self.login()
-        with transaction(self.path) as db:
-            db.execute("UPDATE hosted_sessions SET expires_at='2000-01-01T00:00:00+00:00'")
+        with transaction(self.path) as db: db.execute("UPDATE hosted_sessions SET expires_at='2000-01-01T00:00:00+00:00'")
         self.assertEqual(self.post("/api/session", {}).status_code, 401)
