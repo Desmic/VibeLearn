@@ -37,10 +37,6 @@ MIGRATIONS = [
     CREATE TRIGGER immutable_assistance BEFORE UPDATE ON assistance BEGIN SELECT RAISE(ABORT, 'Assistance is immutable'); END;
     """,
 
-    """
-    DROP INDEX IF EXISTS idx_attempts_one_draft;
-    CREATE INDEX idx_attempts_drafts ON attempts(learner_id, updated_at) WHERE status='draft';
-    """,
 ]
 
 
