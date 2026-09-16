@@ -9,6 +9,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 BROWSER_GROUPS = {
     "foundation": ["tests.level1_entry_browser"],
+    "first-words-opening": ["tests.first_words_opening_browser"],
+    "first-words-controls": ["tests.level1_controls_browser"],
+    "first-words-chapter": ["tests.first_words_browser"],
+    "first-words-readability": ["tests.first_words_readability_browser"],
+    # Keep the combined command as the final integrated Level 1 regression.
     "first-words": ["tests.first_words_opening_browser", "tests.level1_controls_browser", "tests.first_words_browser", "tests.first_words_readability_browser"],
     "legacy-foundation": ["tests.browser_check", "tests.expedition_browser_check",
                           "tests.game_review_browser", "tests.story3d_framework_browser",
@@ -17,6 +22,7 @@ BROWSER_GROUPS = {
     "legacy-journey": ["tests.rescue_browser"],
     "legacy-word-machine": ["tests.word_machine_browser"],
 }
+ACTIVE_LEVEL1_GROUPS = ["first-words-opening", "first-words-controls", "first-words-chapter", "first-words-readability"]
 
 
 def main():
