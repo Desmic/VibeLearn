@@ -20,12 +20,13 @@ def main():
             log('Opening: navigate');page.goto(url+'/first-words')
             expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000)
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            expect(page.get_by_role('button',name='ZIP',exact=True)).to_be_visible()
             page.screenshot(path=str(out/'opening-home-390.png'),timeout=15000)
             log('Opening: friendship action');page.get_by_role('button',name='Give Zip a hand tap',exact=True).click()
             expect(page.locator('#rgi-fact')).to_contain_text('Best team')
             until(page,"()=>FirstWordsReview.audio.ready && FirstWordsReview.audio.version==='bellweather-score-v2' && FirstWordsReview.audio.scheduledBars>0")
             assert page.evaluate("FirstWordsReview.audio.phase")=='home'
-            log('Opening: capture');page.get_by_role('button',name='Continue →',exact=True).click()
+            log('Opening: capture');page.get_by_role('button',name='Continue →',exact=True).click();expect(page.get_by_role('button',name='WARDEN',exact=True)).to_be_visible()
             until(page,"()=>FirstWordsReview.audio.phase==='danger'")
             page.get_by_role('button',name='Pause story motion').click()
             until(page,"()=>FirstWordsReview.audio.state==='suspended'")
@@ -35,7 +36,7 @@ def main():
             page.get_by_role('button',name='Toggle opening sound').click()
             assert page.evaluate('FirstWordsReview.audio.preferences.muted')
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
-            log('Opening: Zip capture');page.get_by_role('button',name='Continue →',exact=True).click()
+            log('Opening: Zip capture');page.get_by_role('button',name='Continue →',exact=True).click();expect(page.get_by_role('button',name='ZIP',exact=True)).to_be_visible()
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
             page.screenshot(path=str(out/'opening-zip-captured-390.png'),timeout=15000)
             instance=page.evaluate('FirstWordsReview.runtime.instanceId')
@@ -50,14 +51,16 @@ def main():
             page.get_by_role('button',name='Return to game',exact=True).click()
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
             page.reload();expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000);expect(page.locator('#rgi-intro')).to_have_count(0)
-            checks.append('Animated friendship/capture/Zip capture, Bellweather score v2 lifecycle, pause and mute, same-runtime handoff into tutorial step 1, replay preserves draft and returning learner resumes without opening.')
+            checks.append('Animated friendship/capture/Zip capture with explicit Zip/Warden identity markers, Bellweather score v2 lifecycle, pause and mute, same-runtime handoff into tutorial step 1, replay preserves draft and returning learner resumes without opening.')
             for width,height in [(360,800),(430,932),(1280,800)]:
                 log(f'Opening: fresh reduced-motion {width}')
                 ctx=browser.new_context(viewport={'width':width,'height':height},reduced_motion='reduce',has_touch=width<500)
                 q=ctx.new_page();q.set_default_timeout(15000);q.on('pageerror',lambda e:errors.append(str(e)));q.goto(url+'/first-words')
+                expect(q.get_by_role('button',name='ZIP',exact=True)).to_be_visible(timeout=20000)
                 expect(q.get_by_role('button',name='Give Zip a hand tap',exact=True)).to_be_enabled(timeout=20000)
                 q.get_by_role('button',name='Give Zip a hand tap',exact=True).click()
-                q.get_by_role('button',name='Continue →',exact=True).click();q.get_by_role('button',name='Continue →',exact=True).click()
+                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.get_by_role('button',name='WARDEN',exact=True)).to_be_visible()
+                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.get_by_role('button',name='ZIP',exact=True)).to_be_visible()
                 expect(q.get_by_role('button',name='Help Zip →',exact=True)).to_be_enabled()
                 assert q.evaluate('document.documentElement.scrollWidth<=innerWidth && document.documentElement.scrollHeight<=innerHeight')
                 for selector in ['#rgi-title','#rgi-body','#rgi-next','#rgi-skip']:
@@ -65,7 +68,7 @@ def main():
                 q.screenshot(path=str(out/f'opening-reduced-{width}.png'),timeout=15000)
                 q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000);ctx.close()
             assert not errors,errors
-            checks.append('Fresh 360/430/desktop reduced-motion still conveys final causal states and skips safely into the same simple tutorial; caption/control bounds and no page overflow.')
+            checks.append('Fresh 360/430/desktop reduced-motion keeps Zip/Warden identities explicit, conveys final causal states and skips safely into the same simple tutorial; caption/control bounds and no page overflow.')
             (out/'first-words-opening-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'scope':'Opening only. Audio lifecycle and phase changes are automated; subjective mix/appeal, physical-phone feel and human acceptance remain unassessed.'},indent=2))
             log('Opening gate passed')
         finally:
