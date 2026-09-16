@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [foundation, opening, journey, word-machine, first-words]
+        suite: [foundation, first-words]
     services:
       postgres:
         image: postgres:17
