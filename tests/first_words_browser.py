@@ -17,7 +17,7 @@ def until(page,expression,seconds=25):
     raise AssertionError(expression)
 
 def action(page,name):
-    local_choices={'Read the route notices','Check the route notices','Predict the gate','What goes into the next step?'}
+    local_choices={'Read the route notices','Re-check the route notices','Predict Zip’s gate','Predict the next input'}
     if name in local_choices:
         page.get_by_role('button',name=name,exact=True).click()
         expect(page.locator('#choice')).to_be_visible()
@@ -27,8 +27,8 @@ def action(page,name):
         assert saved.value.ok, saved.value.status
         expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
 
-def generate(page):
-    action(page,'Make the first piece')
+def generate(page,first='Make the first piece'):
+    action(page,first)
     for _ in range(3):action(page,'Make the next piece')
     action(page,'Speak to the gate →')
 
@@ -42,6 +42,8 @@ def check_missing_assets(browser,url):
         except Exception:
             print(q.locator('body').inner_text(),flush=True)
             q.screenshot(path=str(ROOT/'artifacts/first-words-assets-failure.png'));raise
+        assert q.locator('svg').count()==0
+        assert q.locator('#rescue-game').count()==0
         assert not commands;ctx.close()
 
 def main(*,rescue_only=False,assets_only=False):
@@ -67,12 +69,18 @@ def main(*,rescue_only=False,assets_only=False):
             expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
             assert page.evaluate('FirstWordsReview.runtime.instanceId')==instance
             checks.append('Three animated opening beats, pause/resume audio, same runtime into saved Level 1.')
-            action(page,'Connect the power lead');action(page,'Make the first piece')
+
+            # The first problem now has a genuine choice: inspect useful context
+            # before generation, or generate from the insufficient input and recover.
+            action(page,'Connect the power lead')
+            expect(page.get_by_role('button',name='Generate from this input',exact=True)).to_be_visible()
+            expect(page.get_by_role('button',name='Inspect Zip’s Moon plaque',exact=True)).to_be_visible()
+            action(page,'Generate from this input')
             expect(page.locator('#context')).to_contain_text('Open a gate. Open')
             page.reload();expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
             expect(page.locator('#rgi-intro')).to_have_count(0)
             for _ in range(3):action(page,'Make the next piece')
-            action(page,'Speak to the gate →');expect(page.locator('#goal')).to_contain_text('wrong gate')
+            action(page,'Speak to the gate →');expect(page.locator('#goal')).to_contain_text('wrong way')
             expect(page.locator('#world')).to_have_attribute('aria-label',re.compile('Zip is behind the Moon gate'))
             page.screenshot(path=str(out/'first-words-wrong-390.png'))
             for width,height in [(360,800),(390,844),(430,932),(1280,800)]:
@@ -88,7 +96,7 @@ def main(*,rescue_only=False,assets_only=False):
                 page.get_by_role('button',name='Zoom camera out',exact=True).click()
                 page.screenshot(path=str(out/f'first-words-framing-{width}.png'))
             page.set_viewport_size({'width':390,'height':844});page.get_by_role('button',name='Recenter camera',exact=True).click()
-            action(page,'Scan Zip’s Moon plaque');action(page,'Make the first piece');action(page,'Make the next piece')
+            action(page,'Inspect Zip’s Moon plaque');action(page,'Make the first piece');action(page,'Make the next piece')
             page.get_by_role('button',name='Inspect the speech engine').click();expect(page.get_by_label('Moon illustrative score')).to_have_attribute('value','90')
             page.get_by_role('button',name='Close inspection').click()
             action(page,'Make the next piece');action(page,'Make the next piece');action(page,'Speak to the gate →')
@@ -97,63 +105,75 @@ def main(*,rescue_only=False,assets_only=False):
             expect(page.locator('#world')).to_have_attribute('aria-label',re.compile('Zip is free'))
             expect(page.locator('#scene-description')).to_have_text(re.compile(r'^Zip is free\.'))
             page.screenshot(path=str(out/'first-words-reunion-390.png'))
-            checks.append('Power, growing input survives reload, wrong hatch, scan changes scores, animated reunion; post-save camera controls at four viewport sizes.')
+            checks.append('Player can inspect first or fail safely; growing input survives reload; wrong hatch, context repair, scores and reunion remain causal.')
             if rescue_only:
                 page.reload();expect(page.locator('#goal')).to_contain_text('Zip is free',timeout=15000)
                 expect(page.locator('#scene-description')).to_have_text(re.compile(r'^Zip is free\.'))
                 assert not errors,errors
                 (out/'first-words-rescue-report.json').write_text(json.dumps({'result':'passed','checks':checks+['Accessible reunion description survives reload.'],'page_errors':errors},indent=2))
                 return
+
             action(page,'Head for the tower →')
             expect(page.locator('[data-anchor=star-label]')).to_be_visible()
             action(page,'Read the route notices')
             page.get_by_role('button',name='Old sign · “Take the Moon gate.”',exact=True).click()
             expect(page.locator('#saved')).to_have_text('Saved')
-            action(page,'Predict the gate');page.get_by_role('button',name='Moon',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved')
-            action(page,'What goes into the next step?');page.get_by_role('button',name='The original input, unchanged',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved')
-            generate(page);expect(page.locator('#goal')).to_contain_text('wrong gate')
-            action(page,'Check the route notices');page.get_by_role('button',name='Today’s notice · “Moon route closed. Use the Star gate.”',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved')
+            action(page,'Predict Zip’s gate');page.get_by_role('button',name='Moon',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved')
+            action(page,'Predict the next input');page.get_by_role('button',name='The original input, unchanged',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved')
+            generate(page);expect(page.locator('#goal')).to_contain_text('wrong way')
+            action(page,'Re-check the route notices');page.get_by_role('button',name='Today’s notice · “Moon route closed. The tower bell answers the five-point lantern mark.”',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved')
             before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
             page.get_by_role('button',name='Open game menu').click();page.get_by_role('button',name='Replay the opening',exact=True).click();page.get_by_role('button',name='Return to game',exact=True).click()
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
             generate(page);until(page,'()=>!FirstWordsReview.runtime.world.animating')
             page.get_by_role('button',name='Finish Level 1 →',exact=True).click()
-            expect(page.locator('#ending')).to_be_visible(timeout=15000)
-            expect(page.locator('#reflection')).to_contain_text('first choice used a stale')
-            expect(page.locator('#reflection')).to_contain_text('does not start again')
+            expect(page.locator('#ending')).not_to_be_visible()
+            expect(page.locator('#goal')).to_contain_text('tower is open',timeout=15000)
+            expect(page.get_by_role('button',name='Look toward the printing loft',exact=True)).to_be_visible()
+            page.screenshot(path=str(out/'first-words-ending-world-390.png'))
+            page.get_by_role('button',name='Look toward the printing loft',exact=True).click()
+            expect(page.locator('#ending')).to_be_visible()
+            expect(page.locator('#reflection')).to_contain_text('first context choice was stale')
+            expect(page.locator('#reflection')).to_contain_text('growing input')
             page.screenshot(path=str(out/'first-words-ending-390.png'))
             page.get_by_role('button',name='Stay in Bellweather',exact=True).click()
-            page.reload();expect(page.locator('#ending')).to_be_visible(timeout=15000)
-            page.get_by_role('button',name='Stay in Bellweather',exact=True).click()
-            checks.append('Exit predictions before feedback, wrong-context repair preserves first answers, isolated replay, completion and reload.')
+            page.reload();expect(page.locator('#goal')).to_contain_text('tower is open',timeout=15000)
+            expect(page.locator('#ending')).not_to_be_visible()
+            checks.append('Changed-context predictions precede feedback, wrong-context repair preserves first answers, completion remains in the world and epilogue is optional.')
+
             page.get_by_role('button',name='Open game menu').click();page.get_by_label('Music',exact=True).uncheck();page.get_by_label('Sound effects',exact=True).uncheck();page.get_by_label('Reduced motion',exact=True).check()
             page.get_by_role('button',name='Close game menu').click()
             assert page.evaluate('FirstWordsReview.audio.preferences.music') is False
             assert page.evaluate('FirstWordsReview.audio.preferences.effects') is False
-            page.reload();expect(page.locator('#ending')).to_be_visible(timeout=15000);page.get_by_role('button',name='Stay in Bellweather',exact=True).click()
+            page.reload();expect(page.locator('#goal')).to_contain_text('tower is open',timeout=15000)
             assert page.evaluate('FirstWordsReview.audio.preferences.music') is False
             checks.append('Separate remembered music/effects controls; reduced-motion rebuild retains completed progress.')
-            for width in [360,430]:
+
+            # Fresh reduced-motion runs prove both first-problem routes remain viable.
+            for width,inspect_first in [(360,True),(430,False)]:
                 phone=browser.new_context(viewport={'width':width,'height':844},has_touch=True,reduced_motion='reduce')
                 q=phone.new_page();q.on('pageerror',lambda e:errors.append(str(e)));q.goto(url+'/first-words')
                 q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved',timeout=15000)
-                action(q,'Connect the power lead');generate(q);action(q,'Scan Zip’s Moon plaque');generate(q);action(q,'Head for the tower →');action(q,'Read the route notices')
-                q.get_by_role('button',name='Today’s notice · “Moon route closed. Use the Star gate.”',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved')
-                action(q,'Predict the gate');q.get_by_role('button',name='Star',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved')
-                action(q,'What goes into the next step?');q.get_by_role('button',name='The input plus the new piece “Open”',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved')
-                generate(q);q.get_by_role('button',name='Finish Level 1 →',exact=True).click();expect(q.locator('#ending')).to_be_visible(timeout=15000)
-                expect(q.locator('#reflection')).to_contain_text('current route notice');phone.close()
-            checks.append('Fresh 360/430 reduced-motion learners finish the entire level with correct first predictions.')
+                action(q,'Connect the power lead')
+                if inspect_first:
+                    action(q,'Inspect Zip’s Moon plaque');generate(q)
+                else:
+                    generate(q,'Generate from this input');action(q,'Inspect Zip’s Moon plaque');generate(q)
+                action(q,'Head for the tower →');action(q,'Read the route notices')
+                q.get_by_role('button',name='Today’s notice · “Moon route closed. The tower bell answers the five-point lantern mark.”',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved')
+                action(q,'Predict Zip’s gate');q.get_by_role('button',name='Star',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved')
+                action(q,'Predict the next input');q.get_by_role('button',name='The input plus the new piece “Open”',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved')
+                generate(q);q.get_by_role('button',name='Finish Level 1 →',exact=True).click();expect(q.locator('#goal')).to_contain_text('tower is open',timeout=15000)
+                phone.close()
+            checks.append('Fresh 360/430 reduced-motion learners can inspect-first or recover-from-error, then solve the changed-context exit.')
             context.close()
             check_missing_assets(browser,url)
             assert not errors,errors
             (out/'first-words-browser-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'limits':'Temporary SQLite; Chromium viewport/touch emulation, not physical devices or human acceptance. Audio lifecycle checked; perceived mix needs listening review.'},indent=2))
         except Exception:
-            if not assets_only and not page.is_closed():page.screenshot(path=str(out/'first-words-browser-failure.png'))
+            if not assets_only and 'page' in locals() and not page.is_closed():page.screenshot(path=str(out/'first-words-browser-failure.png'))
             raise
         finally:
             browser.close();stop_server(proc)
 
 if __name__=='__main__':main()
-
-
