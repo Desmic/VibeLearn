@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 from tests.browser_check import start_server, stop_server
-from tests.first_words_browser import action
+from tests.level1_chapter_browser import action
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -30,45 +30,30 @@ def main():
             page=ctx.new_page();page.goto(url+'/first-words')
             page.get_by_role('button',name='Skip opening',exact=True).click()
             expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
-            action(page,'Connect the power lead')
+            action(page,'Connect power lead')
             page.reload();expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
             expect(page.locator('.game-move-stick')).to_be_visible()
 
-            # Keyboard movement is a real state change after reload, not just a key listener.
             start=position(page)
             page.keyboard.down('KeyW');page.wait_for_timeout(450);page.keyboard.up('KeyW');page.wait_for_timeout(120)
-            after_key=position(page)
-            assert distance(start,after_key)>.08,(start,after_key)
+            after_key=position(page);assert distance(start,after_key)>.08,(start,after_key)
 
-            # Accessible directional controls still work after the save/reload boundary.
             page.get_by_role('button',name='Move right',exact=True).focus();page.keyboard.press('Enter');page.wait_for_timeout(120)
-            after_button=position(page)
-            assert distance(after_key,after_button)>.02,(after_key,after_button)
+            after_button=position(page);assert distance(after_key,after_button)>.02,(after_key,after_button)
 
-            # Use Chromium's touch-input pipeline rather than fabricated PointerEvents;
-            # pointer capture only succeeds for a browser-recognized active contact.
-            cdp=ctx.new_cdp_session(page)
-            stick=page.locator('.game-move-stick');box=stick.bounding_box();assert box
-            cx=box['x']+box['width']/2;cy=box['y']+box['height']/2
-            before_touch=position(page)
+            cdp=ctx.new_cdp_session(page);stick=page.locator('.game-move-stick');box=stick.bounding_box();assert box
+            cx=box['x']+box['width']/2;cy=box['y']+box['height']/2;before_touch=position(page)
             touch(cdp,'touchStart',cx,cy-28);page.wait_for_timeout(450);touch(cdp,'touchEnd');page.wait_for_timeout(120)
-            after_touch=position(page)
-            assert distance(before_touch,after_touch)>.08,(before_touch,after_touch)
+            after_touch=position(page);assert distance(before_touch,after_touch)>.08,(before_touch,after_touch)
 
-            # Real touch drag on the world changes camera yaw; zoom/recenter stay usable.
-            world=page.locator('#world');world_box=world.bounding_box();assert world_box
-            yaw_before=page.evaluate('FirstWordsReview.runtime.world.player.yaw')
+            world=page.locator('#world');world_box=world.bounding_box();assert world_box;yaw_before=page.evaluate('FirstWordsReview.runtime.world.player.yaw')
             x=world_box['x']+world_box['width']*.55;y=world_box['y']+world_box['height']*.45
             touch(cdp,'touchStart',x,y);page.wait_for_timeout(80);touch(cdp,'touchMove',x+70,y+10);page.wait_for_timeout(80);touch(cdp,'touchEnd');page.wait_for_timeout(120)
-            yaw_after=page.evaluate('FirstWordsReview.runtime.world.player.yaw')
-            assert abs(yaw_after-yaw_before)>2,(yaw_before,yaw_after)
-            dist_before=page.evaluate('FirstWordsReview.runtime.world.player.distance')
-            page.get_by_role('button',name='Zoom camera in',exact=True).click();page.wait_for_timeout(80)
+            yaw_after=page.evaluate('FirstWordsReview.runtime.world.player.yaw');assert abs(yaw_after-yaw_before)>2,(yaw_before,yaw_after)
+            dist_before=page.evaluate('FirstWordsReview.runtime.world.player.distance');page.get_by_role('button',name='Zoom camera in',exact=True).click();page.wait_for_timeout(80)
             assert page.evaluate('FirstWordsReview.runtime.world.player.distance')<dist_before
             page.get_by_role('button',name='Recenter camera',exact=True).click();page.wait_for_timeout(80)
-            page.screenshot(path=str(out/'level1-controls-after-save-390.png'))
-            print('Level 1 post-save keyboard/touch/camera controls passed')
-            ctx.close()
+            page.screenshot(path=str(out/'level1-controls-after-save-390.png'));print('Level 1 post-save keyboard/touch/camera controls passed');ctx.close()
         finally:
             browser.close();stop_server(proc)
 
