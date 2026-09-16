@@ -9,11 +9,11 @@ from tests.first_words_browser import until
 ROOT=Path(__file__).resolve().parents[1]
 
 
-def action(page,name):
+def action(page,name,saved_text='Saved'):
     with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
         page.get_by_role('button',name=name,exact=True).click()
     assert saved.value.ok,saved.value.status
-    expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+    expect(page.locator('#saved')).to_have_text(saved_text,timeout=15000)
 
 
 def choose(page,open_label,choice):
@@ -73,7 +73,7 @@ def main():
             expect(page.locator('#context')).to_contain_text('five-point lantern mark')
             generate(page);until(page,'()=>!FirstWordsReview.runtime.world.animating')
             expect(page.locator('#goal')).to_have_text('Route found.')
-            action(page,'Finish Level 1 →');expect(page.locator('#goal')).to_have_text('The tower is open.',timeout=15000)
+            action(page,'Finish Level 1 →','Level saved · practice recorded');expect(page.locator('#goal')).to_have_text('The tower is open.',timeout=15000)
             expect(page.locator('#ending')).not_to_be_visible();page.screenshot(path=str(out/'level1-ending-world-390.png'))
             page.get_by_role('button',name='Look toward the printing loft',exact=True).click();expect(page.locator('#ending')).to_be_visible()
             expect(page.locator('#reflection')).to_contain_text('first context choice was stale')
@@ -86,7 +86,7 @@ def main():
                 q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved',timeout=15000)
                 complete_guided_rescue(q);action(q,'Continue with Zip →')
                 choose(q,'Check route signs','Today’s notice · “Moon route closed. The tower bell answers the five-point lantern mark.”')
-                choose(q,'Predict the gate','Star');generate(q);action(q,'Finish Level 1 →');expect(q.locator('#goal')).to_have_text('The tower is open.',timeout=15000)
+                choose(q,'Predict the gate','Star');generate(q);action(q,'Finish Level 1 →','Level saved · practice recorded');expect(q.locator('#goal')).to_have_text('The tower is open.',timeout=15000)
                 assert q.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 q.screenshot(path=str(out/f'level1-complete-{width}-reduced.png'));ctx.close()
             checks.append('360/430 reduced-motion players follow the same tutorial and solve transfer without requiring camera or movement skill.')
