@@ -45,6 +45,11 @@ const fragment=new URLSearchParams(location.hash.slice(1));
 let recovery=fragment.get('type')==='recovery'?{access_token:fragment.get('access_token'),refresh_token:fragment.get('refresh_token')}:null;
 if(fragment.has('access_token')||fragment.has('error'))history.replaceState(null,'',location.pathname);
 
+// Recovery is an entry-state, not a 3D loading state. Reveal it synchronously so
+// a cold GPU/asset path can never delay the password form or leave the old login visible.
+if(recovery){$('#sign-in').hidden=true;$('#password-reset').hidden=false;}
+else if(fragment.has('error'))setStatus('That recovery link is invalid or expired. Request a new one.',true);
+
 async function routeExistingSession(){
   try{await api('/api/state');location.replace('/first-words');return true;}
   catch(error){if(error.status!==401)throw error;return false;}
@@ -76,12 +81,13 @@ $('#reset-form').addEventListener('submit',async event=>{
 });
 
 async function boot(){
-  mountWorld();
+  // The 3D city is decorative to authentication semantics and must never block the
+  // auth/recovery controls. Start it independently after synchronous entry-state setup.
+  void mountWorld();
   try{
     const config=await api('/api/config');
     if(!config.hosted){location.replace('/first-words');return;}
-    if(recovery){$('#sign-in').hidden=true;$('#password-reset').hidden=false;return;}
-    if(fragment.has('error'))setStatus('That recovery link is invalid or expired. Request a new one.',true);
+    if(recovery)return;
     await routeExistingSession();
   }catch(error){setStatus(`Could not open Bellweather: ${error.message}`,true);}
 }
