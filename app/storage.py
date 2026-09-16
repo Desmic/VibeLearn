@@ -22,13 +22,11 @@ MIGRATIONS = [
     CREATE INDEX idx_evidence_learner ON evidence(learner_id);
     CREATE TABLE reviews (learner_id TEXT NOT NULL, frame_id TEXT NOT NULL, frame_revision INTEGER NOT NULL, evidence_id TEXT NOT NULL REFERENCES evidence(id), intent TEXT NOT NULL, PRIMARY KEY(learner_id, frame_id, frame_revision));
     """,
-
     """
     CREATE TABLE assistance (id TEXT PRIMARY KEY, learner_id TEXT NOT NULL REFERENCES learners(id), attempt_id TEXT NOT NULL REFERENCES attempts(id), kind TEXT NOT NULL, detail TEXT NOT NULL, affects_independence INTEGER NOT NULL, created_at TEXT NOT NULL);
     CREATE INDEX idx_assistance_attempt ON assistance(learner_id, attempt_id);
     CREATE TABLE rewards (learner_id TEXT NOT NULL, family_id TEXT NOT NULL, attempt_id TEXT NOT NULL REFERENCES attempts(id), xp INTEGER NOT NULL CHECK(xp=10), policy TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(learner_id, family_id));
     """,
-
     """
     CREATE TRIGGER immutable_snapshot BEFORE UPDATE OF snapshot, snapshot_digest, learner_id ON attempts BEGIN SELECT RAISE(ABORT, 'Attempt context is immutable'); END;
     CREATE TRIGGER immutable_submission BEFORE UPDATE OF response ON attempts WHEN OLD.status='submitted' BEGIN SELECT RAISE(ABORT, 'Submitted response is immutable'); END;
@@ -36,7 +34,14 @@ MIGRATIONS = [
     CREATE TRIGGER immutable_evidence BEFORE UPDATE ON evidence BEGIN SELECT RAISE(ABORT, 'Evidence is immutable'); END;
     CREATE TRIGGER immutable_assistance BEFORE UPDATE ON assistance BEGIN SELECT RAISE(ABORT, 'Assistance is immutable'); END;
     """,
-
+    """
+    -- Preserve unfinished historical games without letting them block the active
+    -- Level 1. A learner may have at most one draft for a given mission identity.
+    DROP INDEX IF EXISTS idx_attempts_one_draft;
+    CREATE UNIQUE INDEX idx_attempts_one_draft_per_mission
+      ON attempts(learner_id, json_extract(snapshot, '$.mission.id'))
+      WHERE status='draft';
+    """,
 ]
 
 
