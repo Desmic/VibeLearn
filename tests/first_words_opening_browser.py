@@ -40,7 +40,7 @@ def main():
             page.screenshot(path=str(out/'opening-zip-captured-390.png'),timeout=15000)
             instance=page.evaluate('FirstWordsReview.runtime.instanceId')
             log('Opening: tutorial handoff');page.get_by_role('button',name='Help Zip →',exact=True).click()
-            expect(page.get_by_role('button',name='Connect power lead',exact=True)).to_be_visible(timeout=15000)
+            expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
             expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 1/3')
             expect(page.locator('#saved')).to_have_text('Saved')
             until(page,"()=>FirstWordsReview.audio.phase==='repair'")
@@ -49,7 +49,7 @@ def main():
             log('Opening: replay preserves draft');page.get_by_role('button',name='Open game menu').click();page.get_by_role('button',name='Replay the opening',exact=True).click()
             page.get_by_role('button',name='Return to game',exact=True).click()
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
-            page.reload();expect(page.get_by_role('button',name='Connect power lead',exact=True)).to_be_visible(timeout=15000);expect(page.locator('#rgi-intro')).to_have_count(0)
+            page.reload();expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000);expect(page.locator('#rgi-intro')).to_have_count(0)
             checks.append('Animated friendship/capture/Zip capture, Bellweather score v2 lifecycle, pause and mute, same-runtime handoff into tutorial step 1, replay preserves draft and returning learner resumes without opening.')
             for width,height in [(360,800),(430,932),(1280,800)]:
                 log(f'Opening: fresh reduced-motion {width}')
@@ -63,7 +63,7 @@ def main():
                 for selector in ['#rgi-title','#rgi-body','#rgi-next','#rgi-skip']:
                     b=q.locator(selector).bounding_box();assert b and b['x']>=0 and b['y']>=0 and b['x']+b['width']<=width+1 and b['y']+b['height']<=height+1,(selector,b)
                 q.screenshot(path=str(out/f'opening-reduced-{width}.png'),timeout=15000)
-                q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.get_by_role('button',name='Connect power lead',exact=True)).to_be_visible(timeout=15000);ctx.close()
+                q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000);ctx.close()
             assert not errors,errors
             checks.append('Fresh 360/430/desktop reduced-motion still conveys final causal states and skips safely into the same simple tutorial; caption/control bounds and no page overflow.')
             (out/'first-words-opening-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'scope':'Opening only. Audio lifecycle and phase changes are automated; subjective mix/appeal, physical-phone feel and human acceptance remain unassessed.'},indent=2))
