@@ -17,7 +17,7 @@ def until(page,expression,seconds=25):
     raise AssertionError(expression)
 
 def action(page,name):
-    local_choices={'Read the route notices','Re-check the route notices','Predict Zip’s gate','Predict the next input'}
+    local_choices={'List the route signs','Predict Zip’s gate','Predict the next input'}
     if name in local_choices:
         page.get_by_role('button',name=name,exact=True).click()
         expect(page.locator('#choice')).to_be_visible()
@@ -26,6 +26,15 @@ def action(page,name):
             page.get_by_role('button',name=name,exact=True).click()
         assert saved.value.ok, saved.value.status
         expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+
+def world_action(page,accessible_name):
+    marker=page.get_by_role('button',name=accessible_name,exact=True)
+    expect(marker).to_be_visible(timeout=10000)
+    with page.expect_response(lambda response:'/api/commands/' in response.url and response.request.method=='POST') as saved:
+        marker.click()
+    assert saved.value.ok,saved.value.status
+    expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+    return marker
 
 def generate(page,first='Make the first piece'):
     action(page,first)
@@ -70,8 +79,8 @@ def main(*,rescue_only=False,assets_only=False):
             assert page.evaluate('FirstWordsReview.runtime.instanceId')==instance
             checks.append('Three animated opening beats, pause/resume audio, same runtime into saved Level 1.')
 
-            # The first problem now has a genuine choice: inspect useful context
-            # before generation, or generate from the insufficient input and recover.
+            # The first problem has a real choice: inspect useful context before
+            # generation, or generate from insufficient input and recover.
             action(page,'Connect the power lead')
             expect(page.get_by_role('button',name='Generate from this input',exact=True)).to_be_visible()
             expect(page.get_by_role('button',name='Inspect Zip’s Moon plaque',exact=True)).to_be_visible()
@@ -113,15 +122,24 @@ def main(*,rescue_only=False,assets_only=False):
                 (out/'first-words-rescue-report.json').write_text(json.dumps({'result':'passed','checks':checks+['Accessible reunion description survives reload.'],'page_errors':errors},indent=2))
                 return
 
+            # Changed-context transfer now happens in Bellweather rather than in a
+            # menu. The stale board is intentionally plausible, then the player must
+            # recover via the current board and connect its five-point clue to the gate.
             action(page,'Head for the tower →')
-            expect(page.locator('[data-anchor=star-label]')).to_be_visible()
-            action(page,'Read the route notices')
-            page.get_by_role('button',name='Old sign · “Take the Moon gate.”',exact=True).click()
-            expect(page.locator('#saved')).to_have_text('Saved')
+            page.get_by_role('button',name='Recenter camera',exact=True).click();page.wait_for_timeout(250)
+            expect(page.locator('[data-anchor=star-label]')).to_be_visible(timeout=10000)
+            expect(page.get_by_role('button',name="Scan the old route sign into Zip's speech engine",exact=True)).to_be_visible(timeout=10000)
+            expect(page.get_by_role('button',name="Scan today's route notice into Zip's speech engine",exact=True)).to_be_visible(timeout=10000)
+            page.screenshot(path=str(out/'first-words-route-boards-390.png'))
+            old=world_action(page,"Scan the old route sign into Zip's speech engine")
+            expect(old).to_have_class(re.compile('chosen'))
+            expect(page.locator('#context')).to_contain_text('Old route: take the Moon gate.')
             action(page,'Predict Zip’s gate');page.get_by_role('button',name='Moon',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved')
             action(page,'Predict the next input');page.get_by_role('button',name='The original input, unchanged',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved')
             generate(page);expect(page.locator('#goal')).to_contain_text('wrong way')
-            action(page,'Re-check the route notices');page.get_by_role('button',name='Today’s notice · “Moon route closed. The tower bell answers the five-point lantern mark.”',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved')
+            current=world_action(page,"Scan today's route notice into Zip's speech engine")
+            expect(current).to_have_class(re.compile('chosen'))
+            expect(page.locator('#context')).to_contain_text('five-point lantern mark')
             before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
             page.get_by_role('button',name='Open game menu').click();page.get_by_role('button',name='Replay the opening',exact=True).click();page.get_by_role('button',name='Return to game',exact=True).click()
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
@@ -139,7 +157,7 @@ def main(*,rescue_only=False,assets_only=False):
             page.get_by_role('button',name='Stay in Bellweather',exact=True).click()
             page.reload();expect(page.locator('#goal')).to_contain_text('tower is open',timeout=15000)
             expect(page.locator('#ending')).not_to_be_visible()
-            checks.append('Changed-context predictions precede feedback, wrong-context repair preserves first answers, completion remains in the world and epilogue is optional.')
+            checks.append('Route context is selected from tangible Bellweather boards; changed-context predictions precede feedback, wrong-context recovery preserves first answers, completion remains in the world and epilogue is optional.')
 
             page.get_by_role('button',name='Open game menu').click();page.get_by_label('Music',exact=True).uncheck();page.get_by_label('Sound effects',exact=True).uncheck();page.get_by_label('Reduced motion',exact=True).check()
             page.get_by_role('button',name='Close game menu').click()
@@ -150,6 +168,8 @@ def main(*,rescue_only=False,assets_only=False):
             checks.append('Separate remembered music/effects controls; reduced-motion rebuild retains completed progress.')
 
             # Fresh reduced-motion runs prove both first-problem routes remain viable.
+            # This path deliberately uses the accessible route-list fallback so the
+            # same learning choice is available when world-marker discovery is hard.
             for width,inspect_first in [(360,True),(430,False)]:
                 phone=browser.new_context(viewport={'width':width,'height':844},has_touch=True,reduced_motion='reduce')
                 q=phone.new_page();q.on('pageerror',lambda e:errors.append(str(e)));q.goto(url+'/first-words')
@@ -159,17 +179,17 @@ def main(*,rescue_only=False,assets_only=False):
                     action(q,'Inspect Zip’s Moon plaque');generate(q)
                 else:
                     generate(q,'Generate from this input');action(q,'Inspect Zip’s Moon plaque');generate(q)
-                action(q,'Head for the tower →');action(q,'Read the route notices')
+                action(q,'Head for the tower →');action(q,'List the route signs')
                 q.get_by_role('button',name='Today’s notice · “Moon route closed. The tower bell answers the five-point lantern mark.”',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved')
                 action(q,'Predict Zip’s gate');q.get_by_role('button',name='Star',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved')
                 action(q,'Predict the next input');q.get_by_role('button',name='The input plus the new piece “Open”',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved')
                 generate(q);q.get_by_role('button',name='Finish Level 1 →',exact=True).click();expect(q.locator('#goal')).to_contain_text('tower is open',timeout=15000)
                 phone.close()
-            checks.append('Fresh 360/430 reduced-motion learners can inspect-first or recover-from-error, then solve the changed-context exit.')
+            checks.append('Fresh 360/430 reduced-motion learners can inspect-first or recover-from-error, and the route-list fallback preserves the changed-context exit.')
             context.close()
             check_missing_assets(browser,url)
             assert not errors,errors
-            (out/'first-words-browser-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'limits':'Temporary SQLite; Chromium viewport/touch emulation, not physical devices or human acceptance. Audio lifecycle checked; perceived mix needs listening review.'},indent=2))
+            (out/'first-words-browser-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'limits':'Temporary SQLite; Chromium viewport/touch emulation, not physical devices or human acceptance. Audio lifecycle checked; perceived mix still needs listening review.'},indent=2))
         except Exception:
             if not assets_only and 'page' in locals() and not page.is_closed():page.screenshot(path=str(out/'first-words-browser-failure.png'))
             raise
