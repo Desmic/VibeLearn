@@ -30,12 +30,12 @@ function tutorialStage(s,complete){
   if(complete)return['LEVEL 1 · COMPLETE','The tower is open.','Zip is beside you. Explore Bellweather, or open the short ending when you are ready.'];
   if(s.round===0){
     if(!s.powered)return['TUTORIAL · 1/3','Power Zip’s voice.','Tap “Connect the power lead.” The socket will light up when it works.'];
-    if(s.status==='success')return['FIRST RESCUE · COMPLETE','Zip is free.','Nice. You gave Zip useful context, built the sentence, and opened the right gate.'];
+    if(s.status==='success')return['FIRST RESCUE · COMPLETE','Zip is free.','Nice. Zip can speak again.'];
     if(s.clue==='none')return['TUTORIAL · 2/3','Scan the Moon plaque.','The glowing Moon plaque says where Zip is. Put that clue into the speech engine.'];
-    return['TUTORIAL · 3/3','Build Zip’s sentence.','Tap “Next word.” Watch each new word join the input before the next word is chosen.'];
+    return['TUTORIAL · 3/3','Build Zip’s sentence.','Tap “Make first word,” then “Next word.” Watch each new word join the input.'];
   }
   if(s.status==='success')return['TOWER ROUTE · COMPLETE','Route found.','The changed route worked. Finish Level 1 when you are ready.'];
-  if(s.status==='wrong')return['TOWER ROUTE · TRY AGAIN','Wrong route.','Nothing is lost. Choose a different sign and run the sentence again.'];
+  if(s.status==='wrong')return['TOWER ROUTE · TRY AGAIN','Wrong route.','Nothing is lost. Check the signs and choose again.'];
   if(s.clue==='none')return['TOWER ROUTE · CHALLENGE','Choose a route sign.','One sign is current, one is old, and one is unrelated. Choose what Zip gets to see.'];
   if(s.prediction==='none')return['TOWER ROUTE · CHALLENGE','Predict the gate.','Before running the engine, guess which gate your chosen context will produce.'];
   return['TOWER ROUTE · CHALLENGE','Build the route sentence.','Use the same word-by-word loop you just learned.'];
@@ -63,16 +63,17 @@ function render(){
   $('#output').replaceChildren();for(let i=0;i<4;i++){const span=document.createElement('span');span.textContent=s.output[i]||'·';if(!s.output[i])span.className='empty';$('#output').append(span);}
   text('#context',s.context.join(' ')||'Waiting for power.');
   text('#engine-label',complete?'ZIP’S FIRST WORDS · RESTORED':s.round===1?'ZIP’S SPEECH ENGINE · TOWER ROUTE':'ZIP’S SPEECH ENGINE');
+  $('#inspect').hidden=s.round===0;
   $('#actions').replaceChildren();
   if(complete){button('Look toward the printing loft','ending');button('Play Level 1 again','again',false);}
   else if(!s.powered)button('Connect the power lead','connect');
   else if(s.status==='success')button(s.round===0?'Continue with Zip →':'Finish Level 1 →',s.round===0?'next':'finish');
-  else if(s.status==='wrong')button(s.round===0?'Scan Zip’s Moon plaque':'Choose another route sign',s.round===0?'scan-moon':'notices');
+  else if(s.status==='wrong')button(s.round===0?'Scan Zip’s Moon plaque':'Check route signs',s.round===0?'scan-moon':'notices');
   else if(s.round===0&&s.clue==='none')button('Scan Zip’s Moon plaque','scan-moon');
-  else if(s.round===1&&s.clue==='none')button('List route signs','notices',false);
+  else if(s.round===1&&s.clue==='none')button('Check route signs','notices');
   else if(s.round===1&&s.prediction==='none'){button('Predict the gate','predict');button('Ask Zip for a hint','hint',false);}
   else if(s.round===1&&!s.available_actions?.includes('step')&&s.loop_prediction==='none'&&s.available_actions?.some(a=>a.startsWith('loop-')))button('Continue saved run','loop');
-  else{button(s.pieces===0?'Make first word':s.pieces<4?'Next word':'Speak to gate →',s.pieces<4?'step':'send');if(s.round===1&&s.pieces===0)button('List route signs','notices',false);}
+  else{button(s.pieces===0?'Make first word':s.pieces<4?'Next word':'Speak to gate →',s.pieces<4?'step':'send');if(s.round===1&&s.pieces===0)button('Check route signs','notices',false);}
   $('#rewind').hidden=complete||!s.powered||s.status==='success'||s.pieces===0;
   text('#saved',session.busy?'Saving…':session.pending?'Not saved · retry available':complete?'Level saved · practice recorded':'Saved');
   let scene;
@@ -92,7 +93,7 @@ function choices(title,detail,items){
 async function act(action){
   if(blocked())return;
   await audio.unlock().catch(()=>{});
-  if(action==='notices')return choices('Route signs in Bellweather','These are the same three boards standing in the square. Choose one to scan into Zip’s speech engine.',[
+  if(action==='notices')return choices('Route signs','Choose one sign to put into Zip’s speech engine. The boards in Bellweather are optional shortcuts to the same choice.',[
     ['Old sign · “Take the Moon gate.”','scan-moon'],['Parade poster · “Lantern parade at sunset.”','scan-parade'],['Today’s notice · “Moon route closed. The tower bell answers the five-point lantern mark.”','scan-star']]);
   if(action==='predict')return choices('Which gate will Zip say?','Predict the output from only the context you chose. Your first prediction is saved before the machine runs.',[['Moon','predict-moon'],['Star','predict-star'],['Sun','predict-sun']]);
   if(action==='loop')return choices('One saved run used an older tutorial step.','Choose what happens to the input so this existing draft can continue.',[
@@ -130,7 +131,7 @@ $('#inspect').onclick=()=>{
   dialog('#inspection');
 };
 function syncAudio(){for(const name of ['music','effects'])$('#'+name).checked=audio.preferences[name];$('#mute').setAttribute('aria-pressed',String(audio.preferences.muted));$('#mute').setAttribute('aria-label',audio.preferences.muted?'Unmute sound':'Mute all sound');text('#mute',audio.preferences.muted?'♪̸':'♫');}
-for(const name of ['music','effects'])$('#'+name).onchange=e=>{audio.setPreference(name,e.target.checked);syncAudio();};
+for(const name of ['music','effects'])$('#'+name].onchange=e=>{audio.setPreference(name,e.target.checked);syncAudio();};
 $('#mute').onclick=()=>{audio.setPreference('muted',!audio.preferences.muted);syncAudio();};syncAudio();
 $('#reduced').checked=reduced;
 $('#reduced').onchange=e=>{reduced=e.target.checked;const camera=world.getPlayerView();runtime.disposeWorld({keepStage:true});world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced});world.restorePlayerView(camera);presented=null;render();};
