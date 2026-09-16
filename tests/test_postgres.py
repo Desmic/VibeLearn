@@ -19,10 +19,12 @@ class PostgresTests(unittest.TestCase):
         parts = urlsplit(DSN)
         if parts.hostname not in ("127.0.0.1", "localhost") or not parts.path.endswith("_test"):
             raise RuntimeError("PostgreSQL tests require a disposable local *_test database")
+        root=Path(__file__).resolve().parents[1]
         with psycopg.connect(DSN) as db:
             db.execute("CREATE ROLE anon NOLOGIN")
             db.execute("CREATE ROLE authenticated NOLOGIN")
-            db.execute((Path(__file__).resolve().parents[1] / "db/hosted-schema.sql").read_text())
+            db.execute((root / "db/hosted-schema.sql").read_text())
+            db.execute((root / "db/draft-per-mission.sql").read_text())
 
     def setUp(self):
         migrate(DSN)
@@ -44,6 +46,20 @@ class PostgresTests(unittest.TestCase):
         self.assertEqual(results[0]["assessment"]["outcome"], "correct")
         with transaction(DSN, learner=self.learner) as db:
             self.assertEqual(db.execute("SELECT count(*) FROM evidence WHERE learner_id=?", (self.learner,)).fetchone()[0], 1)
+
+    def test_mission_scoped_drafts_preserve_historical_run(self):
+        level1=service.command(DSN,self.learner,"start",{
+            "command_id":str(uuid4()),"expected_revision":0,"mode":"LEARN","mission_id":"ai-01-first-words"})
+        self.assertEqual(level1["snapshot"]["mission"]["id"],"ai-01-first-words")
+        with transaction(DSN, learner=self.learner) as db:
+            drafts=db.execute("SELECT id, snapshot FROM attempts WHERE learner_id=? AND status='draft' ORDER BY rowid",(self.learner,)).fetchall()
+            self.assertEqual(len(drafts),2)
+            self.assertEqual(drafts[0]["id"],self.attempt["id"])
+            self.assertEqual(drafts[1]["id"],level1["id"])
+        with self.assertRaises(service.DomainError) as error:
+            service.command(DSN,self.learner,"start",{
+                "command_id":str(uuid4()),"expected_revision":0,"mode":"LEARN","mission_id":"ai-01-first-words"})
+        self.assertEqual(error.exception.code,"ACTIVE_ATTEMPT")
 
     def test_save_resume_and_stale_write(self):
         body = self.body()
@@ -83,3 +99,6 @@ class PostgresTests(unittest.TestCase):
         with self.assertRaises(psycopg.errors.CheckViolation):
             with transaction(DSN, learner=self.learner) as db:
                 db.execute("UPDATE attempts SET response='{}' WHERE id=?", (result["id"],))
+
+if __name__ == "__main__":
+    unittest.main()
