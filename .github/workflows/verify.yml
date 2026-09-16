@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [foundation, first-words-opening, first-words-controls, first-words-chapter, first-words-readability]
+        suite: [foundation, first-words-opening, first-words-controls, first-words-chapter, first-words-readability, first-words-lifecycle]
     services:
       postgres:
         image: postgres:17
