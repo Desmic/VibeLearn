@@ -48,7 +48,7 @@ class HttpTests(unittest.TestCase):
     def test_manifest_identifies_running_source_and_schema(self):
         status, headers, health = self.request("GET", "/api/health")
         self.assertEqual(status, 200)
-        self.assertEqual(health["schema_version"], 5)
+        self.assertEqual(health["schema_version"], 6)
         self.assertEqual(len(health["source_digest"]), 64)
         self.assertIn("web/app.js", health["files"])
         self.assertEqual(health["user_acceptance"], "pending")
