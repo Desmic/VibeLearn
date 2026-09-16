@@ -3,11 +3,29 @@
 Read `AGENTS.md` and the active checkpoint in `docs/STATE.md`. Detailed architecture,
 story and critic policy live in linked docs; this file defines how work proceeds.
 
+## Active product boundary
+
+**Level 1 begins at the first URL the player opens.** Entry/auth, loading, the opening
+scene, tutorial, encounters, recovery, transfer and ending are one ordered product
+surface. Do not polish a later chunk while `/`, login, routing or the opening still
+belongs to an older game. The current active path is Bellweather -> `/first-words`.
+
+The retired Relay Rescue and Word Machine implementations are historical source and
+regression material only. They must not be the default route, login world, fallback,
+or player recovery destination. The active game is PlayCanvas-only: when required 3D
+cannot load, show an explicit retry/error state. **Never render the old illustrated/
+SVG 2D game while waiting for or recovering from 3D.** Do not reintroduce Three.js or
+a 2D gameplay fallback into the active Level 1 path.
+
+No Level 2/later-level feature work begins before the complete Level 1 gate passes the
+critic policy and the user reviews the resulting candidate.
+
 ## One active chunk
 
-Choose chunk size and boundaries at your discretion. A chunk is one coherent
-player experience and may include simultaneous story, visual, control and sound
-work when that makes sense. Verify the combined result before extending it.
+Choose chunk size and boundaries at your discretion, but only inside the next unresolved
+part of the ordered Level 1 journey. A chunk is one coherent player experience and may
+include simultaneous story, visual, control and sound work when that makes sense. Verify
+the combined result before extending it.
 
 1. **Define:** state the player-visible outcome, scope, dependencies, likely failure
    modes and observable pass conditions. Update the current plan before coding.
@@ -29,20 +47,25 @@ work when that makes sense. Verify the combined result before extending it.
 
 ## Sequence and coordination
 
-Opening story/attention gate -> first action/tutorial -> one encounter and recovery
--> next encounter -> complete-level playtest and integrated regression -> user review.
+Entry/login/loading -> opening story/attention gate -> first action/tutorial -> first
+encounter and recovery -> transfer encounter -> world payoff/ending -> complete-level
+playtest and integrated regression -> critic gate -> user review.
+
 Never treat existing ahead-of-gate code as verified or use it to skip this sequence.
-Keep completed chunks as regression checks. Stop at Level 1 until the user reviews.
+Keep completed chunks as regression checks. Historical prototype suites may be run when
+needed, but they do not count as active Level 1 progress and must not delay fixing an
+active Level 1 blocker.
 
-Independent research, asset evaluation or test preparation may run in parallel at
-our discretion; dependent gameplay and later-level sound/features wait. Keep changes
-small enough to identify and recover from failures without debugging a whole level.
+Independent research, asset evaluation or test preparation may run in parallel at our
+discretion; dependent gameplay and later-level sound/features wait. Keep changes small
+enough to identify and recover from failures without debugging a whole level.
 
-Give brief updates at chunk boundaries and during sustained work: what passed,
-what play revealed, what needs repair and what comes next. Use evidence to reduce
-risk; do not promise that a plan or score guarantees consumer success.
+Give brief updates at chunk boundaries and during sustained work: what passed, what play
+revealed, what needs repair and what comes next. Use evidence to reduce risk; do not
+promise that a plan or score guarantees consumer success.
 
-At the complete-level gate run build, full tests and browser suites, then play the
-whole level. Deploy only when authorized and verify the served revision. Current
-instruction: continue locally, and deploy the latest verified checkpoint to the
-existing private Render service at <=10% five-hour allowance remaining.
+At the complete-level gate run build, full application tests, the active entry + Level 1
+browser suites, then play the whole level from `/` through the ending. Apply
+`docs/CRITIC-POLICY.md`: every required criterion must be >=9 with no blocker before an
+internal `ready_for_user_review` recommendation. Only then present the candidate to the
+user for their final judgment.
