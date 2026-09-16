@@ -6,7 +6,7 @@ import * as chapter from './first-words-world.js';
 
 const $=s=>document.querySelector(s),runtime=getGameRuntime(),audio=createGameAudio(),host=$('#world');
 const initial={round:0,pieces:0,status:'building',powered:false,output:[],context:[],moves:0};
-let reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,paused=false,inOpening=false,ready=false,presented=null,lastCue=null,endingShown=false;
+let reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,paused=false,inOpening=false,ready=false,presented=null,lastCue=null;
 let world=runtime.showMission(chapter,host,initial,{reducedMotion:reduced});
 const session=createLearningSession(render);
 const ours=()=>session.attempt?.snapshot?.word_machine?.version==='first-words-1';
@@ -23,10 +23,10 @@ function button(label,action,primary=true){const b=document.createElement('butto
 function render(){
   const s=view(),a=session.attempt,complete=ours()&&a.status==='submitted';
   $('#welcome').hidden=ours();$('#engine').hidden=!ours();$('.mission').classList.toggle('playing',ours());
-  $('#error').hidden=!session.error;if(session.error)text('#error',session.error.code==='ACTIVE_ATTEMPT'?'Another adventure is unfinished. Resume it below; your progress has not been overwritten.':session.error.message);
+  $('#error').hidden=!session.error;if(session.error)text('#error',session.error.code==='ACTIVE_ATTEMPT'?'A previous prototype run is still unfinished. Its history is preserved; finish or reset that run before starting this Level 1 build.':session.error.message);
   $('#retry').hidden=!session.pending||session.busy;
   const other=a?.status==='draft'&&!ours();$('#resume-other').hidden=!other;
-  if(other){$('#resume-other').href=a.snapshot?.word_machine?'/word-machine':'/';$('#start').disabled=true;text('#start','Another adventure is saved');}
+  if(other){$('#resume-other').hidden=true;$('#start').disabled=false;text('#start','Start The First Words →');}
   if(!ours())return;
   const key=a.id+':'+a.revision;
   if(!inOpening&&presented!==key){
@@ -39,27 +39,29 @@ function render(){
     }
     lastCue=key;
   }
-  text('#stage-name',complete?'THE FIRST WORDS · COMPLETE':s.round===0?'THE LANTERN GATE':'THE WAY TO THE TOWER');
-  text('#goal',complete?'Two friends. Together again.':!s.powered?'Help Zip find their voice.':s.status==='success'?(s.round===0?'You did it. Zip is free!':'The way ahead is open.'):s.status==='wrong'?'A real sentence. The wrong gate.':s.round===0?'Help Zip speak. Open the gate.':'Find the way up. Together.');
-  text('#detail',complete?'The printing loft is calling.':!s.powered?'Connect the loose lead to the repair socket.':s.status==='success'?(s.round===0?'Your friend is back by your side.':'Zip is waiting at the tower steps.'):s.status==='wrong'?(s.round===0?'Zip is behind the Moon gate. Did that reach the engine?':'The old route won’t get you to the tower. Check the notices.'):s.hinted?'Use today’s route notice. Each new piece joins the next input.':s.round===1?'The route has changed. Check what the engine receives.':'Build Zip’s command one piece at a time.');
+  text('#stage-name',complete?'LEVEL 1 · COMPLETE':s.round===0?'THE LANTERN GATE':'THE WAY TO THE TOWER');
+  text('#goal',complete?'Zip is beside you. The tower is open.':!s.powered?'Help Zip find their voice.':s.status==='success'?(s.round===0?'Zip is free. Go together.':'You opened the way to the tower.'):s.status==='wrong'?'That sentence opened the wrong way.':s.round===0?'Help Zip speak. Decide what the engine should know.':'Find the route from the context you choose.');
+  text('#detail',complete?'Stay in Bellweather, then look toward the printing loft when you are ready.':!s.powered?'Connect the loose lead to the repair socket.':s.status==='success'?(s.round===0?'Your friend is back by your side.':'Zip is waiting at the tower steps.'):s.status==='wrong'?(s.round===0?'The engine followed its input. Inspect Zip’s Moon plaque or try another hypothesis.':'Your chosen context led somewhere real, but not to the tower. Re-check the notices.'):s.hinted?'Look for the current clue that identifies the route. Each new piece joins the next input.':s.round===1?'The route changed. Choose what the engine gets to see, then predict before running it.':'Generate now from the current input, or inspect Zip’s Moon plaque first.');
   $('#output').replaceChildren();for(let i=0;i<4;i++){const span=document.createElement('span');span.textContent=s.output[i]||'·';if(!s.output[i])span.className='empty';$('#output').append(span);}
   text('#context',s.context.join(' ')||'Waiting for power.');
-  text('#engine-label',complete?'FIRST WORDS RESTORED':s.round===1?'ZIP’S SPEECH ENGINE · EXIT CHALLENGE':'ZIP’S SPEECH ENGINE');
+  text('#engine-label',complete?'ZIP’S FIRST WORDS · RESTORED':s.round===1?'ZIP’S SPEECH ENGINE · EXIT CHALLENGE':'ZIP’S SPEECH ENGINE');
   $('#actions').replaceChildren();
-  if(complete){button('Our next adventure','ending');button('Play Level 1 again','again',false);}
+  if(complete){button('Look toward the printing loft','ending');button('Play Level 1 again','again',false);}
   else if(!s.powered)button('Connect the power lead','connect');
   else if(s.status==='success')button(s.round===0?'Head for the tower →':'Finish Level 1 →',s.round===0?'next':'finish');
-  else if(s.status==='wrong'){button(s.round===0?'Scan Zip’s Moon plaque':'Check the route notices',s.round===0?'scan-moon':'notices');}
+  else if(s.status==='wrong'){button(s.round===0?'Inspect Zip’s Moon plaque':'Re-check the route notices',s.round===0?'scan-moon':'notices');}
+  else if(s.round===0&&s.pieces===0&&s.clue==='none'){
+    button('Generate from this input','step');button('Inspect Zip’s Moon plaque','scan-moon',false);
+  }
   else if(s.round===1&&s.clue==='none')button('Read the route notices','notices');
-  else if(s.round===1&&s.prediction==='none'){button('Predict the gate','predict');button('Ask Zip for a hint','hint',false);}
-  else if(s.round===1&&s.loop_prediction==='none')button('What goes into the next step?','loop');
+  else if(s.round===1&&s.prediction==='none'){button('Predict Zip’s gate','predict');button('Ask Zip for a hint','hint',false);}
+  else if(s.round===1&&s.loop_prediction==='none')button('Predict the next input','loop');
   else{button(s.pieces===0?'Make the first piece':s.pieces<4?'Make the next piece':'Speak to the gate →',s.pieces<4?'step':'send');if(s.round===1&&s.pieces===0)button('Change the scanned notice','notices',false);}
   $('#rewind').hidden=complete||!s.powered||s.status==='success'||s.pieces===0;
   text('#saved',session.busy?'Saving…':session.pending?'Not saved · retry available':complete?'Level saved · practice recorded':'Saved');
-  const scene=s.round===0&&s.status!=='success'?'Zip is behind the Moon gate; the Sun hatch is nearby.':'Zip is free. The Star gate leads to the tower.';
+  const scene=complete?'Zip stands beside you at the open Star gate. Bellweather continues beyond the tower.':s.round===0&&s.status!=='success'?'Zip is behind the Moon gate; the Sun hatch is nearby.':'Zip is free. The Star gate leads to the tower.';
   host.setAttribute('aria-label',`Bellweather, a lantern city above the clouds. ${scene}`);
-  text('#scene-description',`${scene} ${$('#goal').textContent} Input: ${s.context.join(' ')}. Output: ${s.output.join(' ')||'none'}.`);
-  if(complete&&!endingShown){endingShown=true;showEnding();}
+  text('#scene-description',`${scene} ${$('#goal').textContent} ${$('#detail').textContent} Input: ${s.context.join(' ')}. Output: ${s.output.join(' ')||'none'}.`);
 }
 function choices(title,detail,items){
   text('#choice-kicker','THE WAY TO THE TOWER');text('#choice-title',title);text('#choice-detail',detail);$('#choices').replaceChildren();
@@ -70,18 +72,18 @@ async function act(action){
   if(blocked())return;
   await audio.unlock().catch(()=>{});
   if(action==='notices')return choices('What should Zip read?','Scan one notice into the speech engine. The city can see all three; the engine receives only your choice.',[
-    ['Old sign · “Take the Moon gate.”','scan-moon'],['Parade poster · “Lantern parade at sunset.”','scan-parade'],['Today’s notice · “Moon route closed. Use the Star gate.”','scan-star']]);
-  if(action==='predict')return choices('Which gate will Zip say?','Predict the output using the notice you scanned. Your first prediction is saved before the machine runs.',[['Moon','predict-moon'],['Star','predict-star'],['Sun','predict-sun']]);
-  if(action==='loop')return choices('After Zip makes “Open”…','What does the engine receive to choose the next piece?',[
+    ['Old sign · “Take the Moon gate.”','scan-moon'],['Parade poster · “Lantern parade at sunset.”','scan-parade'],['Today’s notice · “Moon route closed. The tower bell answers the five-point lantern mark.”','scan-star']]);
+  if(action==='predict')return choices('Which gate will Zip say?','Predict the output from only the context you chose. Your first prediction is saved before the machine runs.',[['Moon','predict-moon'],['Star','predict-star'],['Sun','predict-sun']]);
+  if(action==='loop')return choices('After Zip makes “Open”…','Predict what the engine receives before choosing the next piece.',[
     ['The original input, unchanged','loop-same'],['The input plus the new piece “Open”','loop-grows']]);
   if(action==='ending')return showEnding();
-  if(action==='start'||action==='again'){endingShown=false;await session.start('ai-01-first-words');return;}
+  if(action==='start'||action==='again'){await session.start('ai-01-first-words');return;}
   if(action!=='finish'&&!view().available_actions?.includes(action))return;
   await session.action(action);
 }
 function showEnding(){
   const result=session.attempt?.assessment?.transfer_observations;
-  text('#reflection',result?`${result.relevant_context?'You chose the current route notice.':'Your first choice used a stale or unrelated notice; you repaired it.'} ${result.loop_correct?'You predicted that each piece joins the next input.':'Each new piece joins the input; it does not start again with the original alone.'}`:'');
+  text('#reflection',result?`${result.relevant_context?'You chose the current clue and mapped it to the five-point Star marker.':'Your first context choice was stale or unrelated; you recovered without erasing it.'} ${result.loop_correct?'You predicted that each generated piece joins the next input.':'The next prediction receives the growing input, not the original input alone.'}`:'');
   dialog('#ending');
 }
 $('#start').onclick=()=>act('start');$('#rewind').onclick=()=>act('rewind');$('#retry').onclick=()=>session.retry();
@@ -129,7 +131,7 @@ host.addEventListener('click',async e=>{
   if(blocked()||e.target.closest('button,.game-player-controls'))return;
   const target=await world.pickSemanticAt(e.clientX,e.clientY),s=view();
   if(target==='loose-plug'||target?.startsWith('socket')){if(!s.powered)act('connect');else if(s.available_actions?.includes('step'))act('step');}
-  if(target?.startsWith('moon')&&s.status==='wrong'&&s.round===0)act('scan-moon');
+  if(target?.startsWith('moon')&&s.available_actions?.includes('scan-moon'))act('scan-moon');
   if(target?.startsWith('friend-'))choices('A very companionable cube.','Someone has painted a heart on a spare power cube. Zip insists it is part of the team.',[]);
 });
 async function boot(){
@@ -139,7 +141,7 @@ async function boot(){
     if(!ours()&&state.attempt?.status!=='draft')opening();
   }catch(error){
     if(!ready){window.dispatchEvent(new CustomEvent('game-entry-failed',{detail:error.message+' Your saved progress is safe.'}));return;}
-    text('#start','Sign in to continue');$('#start').disabled=false;$('#start').onclick=()=>{sessionStorage.setItem('vibelearn-return','/first-words');location.assign('/');};text('#error',error.message);$('#error').hidden=false;
+    text('#start','Sign in to continue');$('#start').disabled=false;$('#start').onclick=()=>{location.assign('/');};text('#error',error.message);$('#error').hidden=false;
   }
 }
 window.FirstWordsReview={get state(){return view();},get runtime(){return runtime.stats();},get audio(){return audio.stats();}};
