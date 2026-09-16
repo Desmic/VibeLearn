@@ -25,12 +25,26 @@ RULES = {
         'status': enum(['building', 'wrong', 'success'], 'building'),
         'clue': enum(['none', 'moon', 'star', 'parade'], 'none'),
         'prediction': enum(['none', 'moon', 'star', 'sun'], 'none'),
+        # Retained for immutable first-words-1 snapshot compatibility. New Level 1
+        # runs demonstrate the growing input visually instead of forcing a second
+        # quiz before the learner has enjoyed their first success.
         'loop_prediction': enum(['none', 'grows', 'same'], 'none'),
         'hinted': {'type': 'boolean', 'initial': False},
         'saw_wrong': {'type': 'boolean', 'initial': False},
     }, 'invariants': [], 'actions': {
         'connect': {'when': eq('powered', False), 'effects': [set_to('powered', True)], 'emits': ['voice-powered']},
-        'step': {'when': both(READY, {'op': 'lt', 'left': field('pieces'), 'right': 4}, either(eq('round', 0), both({'op': 'ne', 'left': field('prediction'), 'right': 'none'}, {'op': 'ne', 'left': field('loop_prediction'), 'right': 'none'}))), 'effects': [{'op': 'add', 'field': 'pieces', 'value': 1}], 'emits': ['piece-appended']},
+        # Tutorial round: scan the obvious Moon clue first, then make words. The
+        # changed-context round is the first place where a wrong hypothesis is a
+        # normal part of play. This keeps Level 1 easy to enter without reducing
+        # the depth available in later episodes.
+        'step': {'when': both(
+            READY,
+            {'op': 'lt', 'left': field('pieces'), 'right': 4},
+            either(
+                both(eq('round', 0), eq('clue', 'moon')),
+                both(eq('round', 1), {'op': 'ne', 'left': field('prediction'), 'right': 'none'}),
+            ),
+        ), 'effects': [{'op': 'add', 'field': 'pieces', 'value': 1}], 'emits': ['piece-appended']},
         'send': {'when': both(READY, eq('pieces', 4)), 'branches': [
             {'when': CORRECT, 'effects': [set_to('status', 'success')], 'emits': ['gate-opened']},
             {'when': {'op': 'not', 'arg': CORRECT}, 'effects': [set_to('status', 'wrong'), set_to('saw_wrong', True)], 'emits': ['wrong-gate']},
@@ -42,17 +56,26 @@ RULES = {
 }
 for clue in ('moon', 'star', 'parade'):
     RULES['actions']['scan-' + clue] = {
-        # Round 0 deliberately permits proactive Moon inspection. A player may
-        # discover the relevant context before making the plausible-but-wrong Sun
-        # continuation; choosing to generate first still produces the recoverable
-        # failure path. Round 1 accepts all notices so relevance must be judged.
-        'when': both(eq('powered', True), {'op': 'ne', 'left': field('status'), 'right': 'success'}, either(both(eq('round', 0), clue == 'moon'), eq('round', 1))),
-        'effects': [set_to('clue', clue), set_to('pieces', 0), set_to('status', 'building')], 'emits': ['context-changed'],
+        'when': both(
+            eq('powered', True),
+            {'op': 'ne', 'left': field('status'), 'right': 'success'},
+            either(both(eq('round', 0), clue == 'moon'), eq('round', 1)),
+        ),
+        'effects': [set_to('clue', clue), set_to('pieces', 0), set_to('status', 'building')],
+        'emits': ['context-changed'],
     }
 for prediction in ('moon', 'star', 'sun'):
-    RULES['actions']['predict-' + prediction] = {'when': both(eq('round', 1), eq('prediction', 'none'), {'op': 'ne', 'left': field('clue'), 'right': 'none'}, eq('pieces', 0)), 'effects': [set_to('prediction', prediction)], 'emits': ['prediction-recorded']}
+    RULES['actions']['predict-' + prediction] = {
+        'when': both(eq('round', 1), eq('prediction', 'none'), {'op': 'ne', 'left': field('clue'), 'right': 'none'}, eq('pieces', 0)),
+        'effects': [set_to('prediction', prediction)], 'emits': ['prediction-recorded']
+    }
+# Legacy first-words-1 drafts may already contain this optional prediction. Keep
+# accepting/replaying it, but new UI does not require it to continue.
 for prediction in ('grows', 'same'):
-    RULES['actions']['loop-' + prediction] = {'when': both(eq('round', 1), eq('loop_prediction', 'none'), {'op': 'ne', 'left': field('prediction'), 'right': 'none'}, eq('pieces', 0)), 'effects': [set_to('loop_prediction', prediction)], 'emits': ['loop-prediction-recorded']}
+    RULES['actions']['loop-' + prediction] = {
+        'when': both(eq('round', 1), eq('loop_prediction', 'none'), {'op': 'ne', 'left': field('prediction'), 'right': 'none'}, eq('pieces', 0)),
+        'effects': [set_to('loop_prediction', prediction)], 'emits': ['loop-prediction-recorded']
+    }
 
 CASES = [
     {'base': 'Open a gate.', 'target': 'Moon', 'notes': {'moon': 'Zip is behind the Moon gate.'}, 'prior': [{'piece': 'Sun', 'chance': 75}, {'piece': 'Moon', 'chance': 25}]},
@@ -68,13 +91,20 @@ def build_content(template):
     for name in ('activity', 'frame', 'binding', 'rubric'):
         item[name]['id'] = identity('ai.first-words.' + name)
     item['family_id'] = identity('ai.first-words.family')
-    item['frame'].update(name='Predict continuation and context growth in a changed gate problem', coverage='Guided rescue plus a changed-context prediction before feedback')
+    item['frame'].update(
+        name='Choose context and predict a continuation in a changed gate problem',
+        coverage='Guided first success followed by one changed-context prediction before feedback',
+    )
     item['rubric']['criteria'][0]['coverage'] = 'Chapter completion; transfer observations reported separately, never mastery.'
-    item.update(title='The First Words', intro='The Warden has taken Zip’s voice. Help your friend speak and escape.', prompt='Repair Zip’s words. Check what reaches the engine.',
-                hints=['The engine only receives the text you scan.', 'Which current clue identifies the route without simply naming the answer? New output joins the next input.'])
+    item.update(
+        title='The First Words',
+        intro='The Warden has taken Zip’s voice. Help your friend speak and escape.',
+        prompt='Repair Zip’s words. Give the engine the clue it needs.',
+        hints=['Scan the clue that describes the route now.', 'The engine only receives the context you choose.'],
+    )
     item['mission'].update(id=MISSION_ID, title='The First Words', objective='Free Zip and reach the tower', plain_objective='Help Zip speak. Open the gate.')
     item['policies']['assessment'] = VERSION
-    item['validation'].update(scope='Authored rescue and changed-context exit experiment', basis='Pending exact-build checks and user review.')
+    item['validation'].update(scope='Guided rescue and changed-context exit experiment', basis='Pending exact-build checks and user review.')
     item['word_machine'] = {'version': VERSION, 'rules': deepcopy(RULES), 'cases': deepcopy(CASES)}
     return item
 
@@ -123,13 +153,20 @@ def evaluate(snapshot, response, independence):
     moves = response['word_machine']['moves']
     prediction_index = next((i for i, move in enumerate(moves) if move.startswith('predict-')), len(moves))
     helped = 'hint' in moves[:prediction_index]
-    transfer = {'context_choice': s['prediction_input'], 'relevant_context': s['prediction_input'] == 'star',
-                'predicted_destination': s['prediction'], 'prediction_matches_supplied_context': s['prediction'].title() == prediction_destination,
-                'loop_prediction': s['loop_prediction'], 'loop_correct': s['loop_prediction'] == 'grows',
-                'hint_before_prediction': helped, 'scope': 'First responses on a changed task after guided practice; not independent mastery.'}
+    loop_prediction = s.get('loop_prediction', 'none')
+    transfer = {
+        'context_choice': s['prediction_input'],
+        'relevant_context': s['prediction_input'] == 'star',
+        'predicted_destination': s['prediction'],
+        'prediction_matches_supplied_context': s['prediction'].title() == prediction_destination,
+        'loop_prediction': loop_prediction,
+        'loop_correct': None if loop_prediction == 'none' else loop_prediction == 'grows',
+        'hint_before_prediction': helped,
+        'scope': 'First context/gate prediction on a changed task after guided practice; not independent mastery.',
+    }
     return {'outcome': 'correct' if s['complete'] else 'not_observed', 'score': 1 if s['complete'] else None,
             'correct_count': int(s['complete']), 'total_count': 1, 'criterion': 'context_practice',
             'rows': [{'run': 'Rescue Zip and exit', 'actual': 'complete' if s['complete'] else 'unfinished', 'expected': 'complete', 'correct': s['complete'], 'reason': 'Authoritative action replay opens both required gates.'}],
             'independence': independence, 'mastery': 'unknown', 'transfer_observations': transfer,
-            'reasoning': {'outcome': 'not_observed', 'score': None, 'message': 'Bounded predictions are recorded separately; free explanation and delayed recall are unassessed.'},
-            'scope': 'Guided toy practice and bounded transfer observations. Completion is not mastery.', 'validation': snapshot['validation']}
+            'reasoning': {'outcome': 'not_observed', 'score': None, 'message': 'The changed-context prediction is bounded; free explanation and delayed recall are unassessed.'},
+            'scope': 'Guided toy practice and one bounded transfer observation. Completion is not mastery.', 'validation': snapshot['validation']}
