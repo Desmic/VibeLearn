@@ -57,6 +57,26 @@ class FirstWordsTests(unittest.TestCase):
         self.assertFalse(result['relevant_context']);self.assertFalse(result['loop_correct'])
         self.assertTrue(result['prediction_matches_supplied_context'])
 
+    def test_historical_draft_does_not_block_bellweather_level1(self):
+        _,learner=service.create_session(self.path)
+        legacy=service.command(self.path,learner,'start',{
+            'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':'rescue-01'})
+        self.assertEqual(legacy['snapshot']['mission']['id'],'rescue-01')
+        level1=service.command(self.path,learner,'start',{
+            'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':first_words.MISSION_ID})
+        self.assertEqual(level1['snapshot']['mission']['id'],first_words.MISSION_ID)
+        self.assertEqual(service.state(self.path,learner)['attempt']['id'],level1['id'])
+        with transaction(self.path) as db:
+            rows=db.execute("SELECT id, status, snapshot, response FROM attempts WHERE learner_id=? AND status='draft' ORDER BY rowid",(learner,)).fetchall()
+            self.assertEqual(len(rows),2)
+            self.assertEqual(json.loads(rows[0]['snapshot'])['mission']['id'],'rescue-01')
+            self.assertEqual(json.loads(rows[0]['response']),legacy['response'])
+            self.assertEqual(json.loads(rows[1]['snapshot'])['mission']['id'],first_words.MISSION_ID)
+        with self.assertRaises(service.DomainError) as error:
+            service.command(self.path,learner,'start',{
+                'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':first_words.MISSION_ID})
+        self.assertEqual(error.exception.code,'ACTIVE_ATTEMPT')
+
     def test_predictions_required_and_cannot_be_rewritten(self):
         for move in FIRST+['next','scan-star']:self.action(move)
         with self.assertRaises(service.DomainError):self.action('step')
