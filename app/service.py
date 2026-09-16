@@ -197,10 +197,14 @@ def command(path, learner, action, body):
         if action == "start":
             if body["expected_revision"] != 0:
                 raise DomainError("INVALID_COMMAND", "New attempts start at revision zero.")
-            existing = db.execute("SELECT id FROM attempts WHERE learner_id=? AND status='draft'", (learner,)).fetchone()
-            if existing:
-                raise DomainError("ACTIVE_ATTEMPT", "Resume your existing attempt first.", 409)
             mission_id = body.get("mission_id")
+            drafts = db.execute("SELECT id, snapshot FROM attempts WHERE learner_id=? AND status='draft' ORDER BY rowid DESC", (learner,)).fetchall()
+            if mission_id:
+                existing = next((row for row in drafts if json.loads(row["snapshot"]).get("mission", {}).get("id") == mission_id), None)
+            else:
+                existing = drafts[0] if drafts else None
+            if existing:
+                raise DomainError("ACTIVE_ATTEMPT", "Resume this mission's existing attempt first." if mission_id else "Resume your existing attempt first.", 409)
             if mission_id:
                 progress = {item["id"]: item for item in campaign_progress(db, learner) + campaign_progress(db, learner, True) + campaign_progress(db, learner, rescue_mode=True) + campaign_progress(db, learner, word_machine_mode=True) + campaign_progress(db, learner, first_words_mode=True)}
                 if mission_id not in progress:
