@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 BROWSER_GROUPS = {
     "foundation": ["tests.level1_entry_browser"],
-    "first-words": ["tests.first_words_opening_browser", "tests.first_words_browser", "tests.first_words_readability_browser"],
+    "first-words": ["tests.first_words_opening_browser", "tests.level1_controls_browser", "tests.first_words_browser", "tests.first_words_readability_browser"],
     "legacy-foundation": ["tests.browser_check", "tests.expedition_browser_check",
                           "tests.game_review_browser", "tests.story3d_framework_browser",
                           "tests.playcanvas_framework_browser", "tests.playcanvas_story_interaction_browser"],
