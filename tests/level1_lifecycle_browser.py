@@ -1,4 +1,5 @@
 """Hosted Bellweather lifecycle gate: reset and sign-out must remain usable in-game."""
+import re
 import tempfile
 import threading
 from pathlib import Path
@@ -24,10 +25,10 @@ def main():
                 browser=p.chromium.launch()
                 try:
                     page=browser.new_page(ignore_https_errors=True,viewport={'width':390,'height':844});page.goto(origin)
-                    page.locator('#login-email').fill('owner@example.test');page.locator('#login-password').fill('test-password');page.get_by_role('button',name='Continue to The First Words →',exact=True).click()
+                    page.locator('#login-email').fill('owner@example.test');page.locator('#login-password').fill('test-password');page.get_by_role('button',name=re.compile('Continue to The First Words')).click()
                     page.wait_for_url('**/first-words',timeout=15000);expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000)
-                    page.get_by_role('button',name='Skip opening',exact=True).click();expect(page.get_by_role('button',name='Connect power lead',exact=True)).to_be_visible(timeout=15000)
-                    page.get_by_role('button',name='Connect power lead',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+                    page.get_by_role('button',name='Skip opening',exact=True).click();expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
+                    page.get_by_role('button',name='Connect the power lead',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
 
                     page.get_by_role('button',name='Open game menu').click();expect(page.get_by_role('button',name='Reset game progress',exact=True)).to_be_visible();expect(page.get_by_role('button',name='Sign out',exact=True)).to_be_visible()
                     page.get_by_role('button',name='Reset game progress',exact=True).click();expect(page.locator('#reset-confirm')).to_be_visible();expect(page.locator('#reset-confirm')).to_contain_text('clears your saved game attempts')
@@ -35,7 +36,7 @@ def main():
                     state=page.request.get(origin+'/api/state');assert state.status==200;assert state.json()['attempt'] is None,state.json()
                     page.screenshot(path=str(out/'level1-reset-restarts-opening-390.png'))
 
-                    page.get_by_role('button',name='Skip opening',exact=True).click();expect(page.get_by_role('button',name='Connect power lead',exact=True)).to_be_visible(timeout=15000)
+                    page.get_by_role('button',name='Skip opening',exact=True).click();expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
                     page.get_by_role('button',name='Open game menu').click();page.get_by_role('button',name='Sign out',exact=True).click();page.wait_for_url(origin+'/',timeout=15000);expect(page.locator('#sign-in')).to_be_visible();expect(page.locator('#login-submit')).to_be_visible()
                     state=page.request.get(origin+'/api/state');assert state.status==401,state.status
                     page.screenshot(path=str(out/'level1-logout-back-to-auth-390.png'))
