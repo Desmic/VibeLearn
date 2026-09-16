@@ -16,6 +16,11 @@ def distance(a,b):
     return ((a[0]-b[0])**2+(a[2]-b[2])**2)**.5
 
 
+def touch(session,kind,x=None,y=None):
+    points=[] if kind=='touchEnd' else [{'x':x,'y':y,'radiusX':4,'radiusY':4,'force':1,'id':1}]
+    session.send('Input.dispatchTouchEvent',{'type':kind,'touchPoints':points})
+
+
 def main():
     out=ROOT/'artifacts';out.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory() as temp,sync_playwright() as p:
@@ -40,25 +45,21 @@ def main():
             after_button=position(page)
             assert distance(after_key,after_button)>.02,(after_key,after_button)
 
-            # Touch stick: hold off-centre long enough for multiple animation frames.
+            # Use Chromium's touch-input pipeline rather than fabricated PointerEvents;
+            # pointer capture only succeeds for a browser-recognized active contact.
+            cdp=ctx.new_cdp_session(page)
             stick=page.locator('.game-move-stick');box=stick.bounding_box();assert box
             cx=box['x']+box['width']/2;cy=box['y']+box['height']/2
             before_touch=position(page)
-            stick.dispatch_event('pointerdown',{'pointerId':41,'pointerType':'touch','isPrimary':True,'clientX':cx,'clientY':cy-28,'button':0,'buttons':1})
-            page.wait_for_timeout(450)
-            stick.dispatch_event('pointerup',{'pointerId':41,'pointerType':'touch','isPrimary':True,'clientX':cx,'clientY':cy-28,'button':0,'buttons':0})
-            page.wait_for_timeout(120)
+            touch(cdp,'touchStart',cx,cy-28);page.wait_for_timeout(450);touch(cdp,'touchEnd');page.wait_for_timeout(120)
             after_touch=position(page)
             assert distance(before_touch,after_touch)>.08,(before_touch,after_touch)
 
-            # Dragging the actual world changes camera yaw; zoom/recenter stay usable.
+            # Real touch drag on the world changes camera yaw; zoom/recenter stay usable.
             world=page.locator('#world');world_box=world.bounding_box();assert world_box
             yaw_before=page.evaluate('FirstWordsReview.runtime.world.player.yaw')
             x=world_box['x']+world_box['width']*.55;y=world_box['y']+world_box['height']*.45
-            world.dispatch_event('pointerdown',{'pointerId':52,'pointerType':'touch','isPrimary':True,'clientX':x,'clientY':y,'button':0,'buttons':1})
-            world.dispatch_event('pointermove',{'pointerId':52,'pointerType':'touch','isPrimary':True,'clientX':x+70,'clientY':y+10,'button':0,'buttons':1})
-            world.dispatch_event('pointerup',{'pointerId':52,'pointerType':'touch','isPrimary':True,'clientX':x+70,'clientY':y+10,'button':0,'buttons':0})
-            page.wait_for_timeout(120)
+            touch(cdp,'touchStart',x,y);page.wait_for_timeout(80);touch(cdp,'touchMove',x+70,y+10);page.wait_for_timeout(80);touch(cdp,'touchEnd');page.wait_for_timeout(120)
             yaw_after=page.evaluate('FirstWordsReview.runtime.world.player.yaw')
             assert abs(yaw_after-yaw_before)>2,(yaw_before,yaw_after)
             dist_before=page.evaluate('FirstWordsReview.runtime.world.player.distance')
