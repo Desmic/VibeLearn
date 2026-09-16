@@ -29,7 +29,7 @@ async function command(path,body={}){
 function tutorialStage(s,complete){
   if(complete)return['LEVEL 1 · COMPLETE','The tower is open.','Zip is beside you. Explore Bellweather, or open the short ending when you are ready.'];
   if(s.round===0){
-    if(!s.powered)return['TUTORIAL · 1/3','Power Zip’s voice.','Tap “Connect power lead.” The socket will light up when it works.'];
+    if(!s.powered)return['TUTORIAL · 1/3','Power Zip’s voice.','Tap “Connect the power lead.” The socket will light up when it works.'];
     if(s.status==='success')return['FIRST RESCUE · COMPLETE','Zip is free.','Nice. You gave Zip useful context, built the sentence, and opened the right gate.'];
     if(s.clue==='none')return['TUTORIAL · 2/3','Scan the Moon plaque.','The glowing Moon plaque says where Zip is. Put that clue into the speech engine.'];
     return['TUTORIAL · 3/3','Build Zip’s sentence.','Tap “Next word.” Watch each new word join the input before the next word is chosen.'];
@@ -65,7 +65,7 @@ function render(){
   text('#engine-label',complete?'ZIP’S FIRST WORDS · RESTORED':s.round===1?'ZIP’S SPEECH ENGINE · TOWER ROUTE':'ZIP’S SPEECH ENGINE');
   $('#actions').replaceChildren();
   if(complete){button('Look toward the printing loft','ending');button('Play Level 1 again','again',false);}
-  else if(!s.powered)button('Connect power lead','connect');
+  else if(!s.powered)button('Connect the power lead','connect');
   else if(s.status==='success')button(s.round===0?'Continue with Zip →':'Finish Level 1 →',s.round===0?'next':'finish');
   else if(s.status==='wrong')button(s.round===0?'Scan Zip’s Moon plaque':'Choose another route sign',s.round===0?'scan-moon':'notices');
   else if(s.round===0&&s.clue==='none')button('Scan Zip’s Moon plaque','scan-moon');
