@@ -3,7 +3,7 @@ import {worldSpec} from './first-words-world.js';
 
 const $=selector=>document.querySelector(selector);
 const status=$('#entry-status');
-let world=null;
+let world=null,recovery=null;
 
 function setStatus(message,error=false){status.textContent=message||'';status.dataset.error=String(Boolean(error));}
 function togglePassword(button){
@@ -41,14 +41,22 @@ async function mountWorld(){
   }
 }
 
-const fragment=new URLSearchParams(location.hash.slice(1));
-let recovery=fragment.get('type')==='recovery'?{access_token:fragment.get('access_token'),refresh_token:fragment.get('refresh_token')}:null;
-if(fragment.has('access_token')||fragment.has('error'))history.replaceState(null,'',location.pathname);
-
-// Recovery is an entry-state, not a 3D loading state. Reveal it synchronously so
-// a cold GPU/asset path can never delay the password form or leave the old login visible.
-if(recovery){$('#sign-in').hidden=true;$('#password-reset').hidden=false;}
-else if(fragment.has('error'))setStatus('That recovery link is invalid or expired. Request a new one.',true);
+function applyEntryFragment(){
+  const fragment=new URLSearchParams(location.hash.slice(1));
+  recovery=fragment.get('type')==='recovery'?{access_token:fragment.get('access_token'),refresh_token:fragment.get('refresh_token')}:null;
+  if(fragment.has('access_token')||fragment.has('error'))history.replaceState(null,'',location.pathname);
+  if(recovery){
+    $('#sign-in').hidden=true;$('#password-reset').hidden=false;$('#reset-status').textContent='';
+  }else{
+    $('#password-reset').hidden=true;$('#sign-in').hidden=false;
+    if(fragment.has('error'))setStatus('That recovery link is invalid or expired. Request a new one.',true);
+  }
+}
+// Recovery is an entry-state, not a 3D loading state. Apply it before any async work,
+// and also support a reset link opening in the current tab (hash navigation alone does
+// not reload an ES module document).
+applyEntryFragment();
+window.addEventListener('hashchange',applyEntryFragment);
 
 async function routeExistingSession(){
   try{await api('/api/state');location.replace('/first-words');return true;}
@@ -81,8 +89,6 @@ $('#reset-form').addEventListener('submit',async event=>{
 });
 
 async function boot(){
-  // The 3D city is decorative to authentication semantics and must never block the
-  // auth/recovery controls. Start it independently after synchronous entry-state setup.
   void mountWorld();
   try{
     const config=await api('/api/config');
