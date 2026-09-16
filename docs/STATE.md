@@ -1,3 +1,26 @@
+# Active worktree notice — 16 September 2026
+
+**Current instruction:** continue locally; deploy the latest verified checkpoint
+to the existing private Render service when the five-hour allowance reaches <=10%
+remaining. See the active worktree state for the conditional deployment monitor. Work in
+`E:/Projects/VibeLearn/artifacts/critic-evidence-reset` and read its `docs/STATE.md`.
+The rescue opening and Level 1 now exist as uncommitted working code at
+http://127.0.0.1:8002/first-words. The opening's dedicated verification passed;
+manual review continues one chunk at a time, currently Moon repair/Zip reunion.
+`AGENTS.md` and `CODEX.md` define the required build -> test -> play -> repair loop.
+Finish Level 1 locally, then stop for the sole current user's review. The entries
+below describe older checkpoints and do not authorize deployment or skipping gates.
+
+**Latest user feedback:** the Word Machine interface improved but its story needs revision. The user requests a robot-friend rescue, progressively restored speech/LLM abilities, a beautiful captivating world, cultural references and music/sounds. Active worktree docs now include [the rescue treatment](../artifacts/critic-evidence-reset/docs/LLM-RESCUE-STORY.md), [atmosphere/audio brief](../artifacts/critic-evidence-reset/docs/WORLD-ATMOSPHERE-AND-AUDIO.md) and [story research](../artifacts/critic-evidence-reset/docs/STORY-INSPIRATION-20260915.md). This update is design/policy only; the preview still shows the workshop prototype and remains needs_revision.
+
+The current user authorized a How LLMs Work series and asked to use the reusable framework after GitHub research. The active implementation is in **E:/Projects/VibeLearn/artifacts/critic-evidence-reset**, branch `codex/critic-evidence-reset`, final application commit `31025192a4c01dee04fcd621c1e4a52887b4efcb`. Read that worktree's `docs/STATE.md`, `docs/LLM-EPISODE-1-PLAYTEST.md`, `docs/LLM-EPISODE-1-VERIFICATION.md` and `docs/REUSABLE-ASSETS.md` before continuing. This original checkout is intentionally preserved.
+
+Episode 1 is a local playable prototype at http://127.0.0.1:8001/word-machine while its loopback preview server runs. Build passed; 147 tests ran with six PostgreSQL skips; all 11 browser modules passed. The strict internal review says **needs_revision**, not accepted. The current user is the sole human critic and final authority. Stop at the Phase 1 human checkpoint; episodes 2–8 are planned, with no live model integration or Phase 2 work.
+
+Live Render remains the previously verified `337db573d87c417aca42f55894a2c6e807df21ed`; the new code has not been pushed or deployed. Existing retry evidence and learner data were preserved. The older checkpoint below is historical.
+
+---
+
 # Current checkpoint — private hosted pilot preparation
 
 The user selected Render Free + Supabase Free and authorized use of the existing

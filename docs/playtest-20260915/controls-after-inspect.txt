@@ -1,0 +1,38 @@
+Browser tab: 1, Title: "vibeLearn · Reliable agents", URL: "http://127.0.0.1:8000/".
+1 AXWebArea vibeLearn · Reliable agents, URL: 127.0.0.1:8000/
+	2 link Description: Skip to mission, Value: 127.0.0.1:8000/#workspace
+	3 container rescue-game
+		4 container
+			5 button Description: Open rescue map, ID: rg-map
+				6 text ↗ 
+				7 text RELAY RESCUE
+			8 text Saved
+			9 button (collapsed) Menu, ID: rg-options, Secondary Actions: Expand
+			10 button Description: Enter fullscreen, ID: game-fullscreen
+		11 container
+			12 text The Forge accepted order-01 before lightning cut the reply. One rare ember may already be gone. Find the truth before Pip sends another seal.
+			13 heading Find Pip’s one bridge gear without ordering a second., Value: 1
+				14 text Find Pip’s one bridge gear without ordering a second.
+			15 container
+				16 container
+					17 container Camera controls
+						18 button (disabled) Recenter camera
+						19 button (disabled) Zoom camera in
+						20 button (disabled) Zoom camera out
+						21 button (disabled, collapsed) Description: Movement controls, Secondary Actions: Expand
+					22 container Move player
+						23 text MOVE
+						24 button (disabled) Move forward
+						25 button (disabled) Move left
+						26 button (disabled) Move backward
+						27 button (disabled) Move right
+				28 button Description: Inspect ticket in the scene, Help: Object is outside this clear view. Drag the world to look around; this action stays available.
+					29 text Ticket
+					30 text  ↗
+				31 button (disabled) Description: Inspect echo forge in the scene, Help: Object is outside this clear view. Drag the world to look around; this action stays available.
+					32 text Echo Forge  ↗
+				33 text GOOD. ONE MORE CLUE
+				34 text Which order did Pip already send?
+				35 text Tap TICKET and look for its label.
+
+The focused UI element is 1 AXWebArea vibeLearn · Reliable agents, URL: 127.0.0.1:8000/
