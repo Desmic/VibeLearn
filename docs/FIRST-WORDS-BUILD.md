@@ -1,30 +1,70 @@
-# The First Words — local build and verification
+# The First Words — Level 1 build and verification
 
-## Latest instruction — 16 September 2026
+## Active correction — 16 September 2026
 
-Deploy the latest verified checkpoint only at <=10% five-hour allowance remaining. Use `../CODEX.md`'s small-chunk
-loop. Opening verification is recorded in `FIRST-WORDS-OPENING-VERIFICATION.md`;
-next verify the first-words/wrong-hatch/Moon-repair/reunion chunk, then the existing
-tower exit challenge, then the complete-level integrated gate. Each chunk needs
-focused checks plus hands-on play and repair before advancing. Do not expand
-later-level audio or features. Earlier deployment authorization below is historical.
+Level 1 is not `/first-words` in isolation. It begins at `/`: loading, login/recovery,
+transition into Bellweather, opening story, first action, wrong/safe recovery path,
+reunion, changed-context tower challenge and ending are one ordered experience.
 
-## Corrected execution order — 16 September 2026
+The active player path is now Bellweather -> `/first-words`. Relay Rescue and Word
+Machine are historical prototypes only. They must not be default/player recovery
+routes. `/word-machine` redirects to `/first-words`; the root must not load the retired
+Relay Rescue scripts/world. Active hosted assets exclude the retired SVG/DOM gameplay
+stack and Three.js runtime.
 
-The user explicitly reiterated that the opening must be completed and tested first, followed by the entire Level 1. Some level code was built ahead of this gate; it remains unaccepted working code. Freeze level extension and deployment while completing the opening.
+**No 2D gameplay fallback.** The active game uses PlayCanvas. During loading the player
+sees loading state only; on required-engine/asset failure the game fails closed with a
+clear retry. Never display the old illustrated/SVG world underneath or before 3D.
 
-1. Finish the opening's friendship, capture, voice loss and reachable repair staging. Verify animation/sound synchronization, coherent phone composition and muted comprehension.
-2. Run a dedicated opening browser gate and manual opening play: fresh entry, each beat/action, pause, sound controls, skip, reduced motion, desktop/360/390/430 framing, replay and unchanged saved progress. Record the observed limits and repair failures before proceeding.
-3. Only then resume complete Level 1 play and integrated storage/browser checks. The later levels remain planned. Deploy the completed verified Level 1 afterward for the current user's review.
+Follow `../CODEX.md` strictly in this order:
 
-15 September 2026. The user said the story/progression seems good and explicitly asked to build/deploy the world, complete Episode 1, and notify them for review. This authorizes the existing private Render pilot deployment of the verified candidate and the necessary GitHub branch update. Stop before Episode 2. This supersedes prior design-only/no-deploy wording for this bounded task; no public rollout or paid resources.
+1. entry/login/loading consistency and direct Level 1 routing;
+2. opening friendship -> capture -> voice loss -> reachable repair;
+3. first action and rescue mechanic, including inspect-first and plausible mistake paths;
+4. visible mistake/recovery -> Moon repair -> Zip reunion;
+5. changed-context tower challenge with predictions before feedback;
+6. world-first completion/ending, save/reload/replay/accessibility;
+7. complete `/` -> ending playthrough, active CI, critic policy, then user review.
 
-Implement `/first-words` with a new mission/content identity and pinned `first-words-1` rules. Preserve `/word-machine` and old immutable snapshots. No database migration. Shared server receipts/revisions/session/auth and GameRulesEngine remain authoritative.
+Do not implement Level 2 or later-series features before this full gate passes. Existing
+later code is not evidence that an earlier gate is complete.
 
-Frozen behavior: opening home -> Warden takes singer -> Zip saves player and is captured -> repair socket. First action powers Zip. Generate four whole-word pieces (`Open the Sun gate`) one at a time; output joins context. The wrong maintenance hatch opens harmlessly. Scan the Moon cell plaque, compare and generate the new command; the cell opens and Zip reunites. Continue to the tower exit; choose among old Moon note, current Star route notice and unrelated parade notice. Record a destination prediction before generating. Record a second prediction about whether generated pieces join the next input. A locally recoverable wrong choice gets feedback; first predictions/hints remain in the append-only log. A correct exit opens the path and shows Episode 2 as planned.
+## Frozen Level 1 learning behavior
 
-Assessment: assisted chapter completion, plus separately reported first predictions before simulation feedback in the exit challenge. No independent mastery/retention claim. Correct gate opening and cutscene never establish understanding. Hints remain available and recorded. Version changed activity/frame/rubric and preserve canonical AI competency.
+Use mission/content identity `ai-01-first-words` and pinned `first-words-1` rules.
+Preserve old immutable snapshots/evidence. No model provider or general generator is
+needed for this bounded level.
 
-Shared presentation work: timeline transitions in the existing WorldSpec adapter (pause/reduced motion/cleanup); reusable gate, lantern and tower props; small original score/cue adapter with independent music/effects, mute and deduplicated event playback. No model provider or generator.
+Opening: Bellweather home -> Warden captures a friend and steals speech engines -> Zip
+saves the player and loses their voice -> reachable repair socket. The reduced-motion,
+muted and replay paths communicate the same causal story.
 
-Verify rules and evidence through real temporary SQLite; old version replay; illegal/rewritten logs, stale/idempotent commands and saved transfer predictions; actual browser opening through full completion, reload/replay, post-save controls, phone framing, reduced motion, audio controls and missing-asset recovery. Run integrated build/tests/browser gates. Play manually before exact-commit deployment, inspect served revision/assets/health, retain prior Render commit as recovery. Report remaining critic weaknesses honestly; the user is the final critic.
+First rescue: power Zip's speech engine. From `Open a gate.` the toy continuation favors
+Sun. The player may generate immediately and see a plausible wrong hatch, or inspect
+Zip's Moon plaque first and change what the engine receives. Each generated whole-word
+piece joins the next input. The Moon context raises Moon and the correct command visibly
+frees Zip. Both approaches remain valid learning paths; error is recoverable rather than
+required.
+
+Transfer: after reunion, the route to the tower changes. The player selects what context
+enters the engine from an old Moon sign, unrelated parade notice, or the current clue.
+The current clue must require mapping visible world information to the five-point Star
+marker rather than literally saying the answer. Record destination and input-growth
+predictions before generation/feedback. Preserve wrong first predictions through repair.
+
+Assessment remains bounded: guided chapter completion plus separately reported first
+predictions on the changed task. No independent mastery, retention or audience-learning
+claim follows from completion.
+
+## Verification gate
+
+Use disposable storage. Run focused rules/storage checks after behavior changes, then the
+active browser suites. Verify desktop and 360/390/430 portrait, save/reload, camera and
+movement after save, reduced motion, sound controls, text enlargement, missing required
+assets, opening replay without progress mutation and explicit no-2D-fallback behavior.
+
+At the full gate run build, full application tests, `python manage.py browser`, then play
+the complete experience from `/` through the world ending. Apply `CRITIC-POLICY.md` to
+the exact candidate. Every required story/first-touch/chapter/learning criterion must be
+>=9 with no blocker before internally marking `ready_for_user_review`. The user's review
+remains final.
