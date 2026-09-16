@@ -14,3 +14,11 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 .first-opening .rgi-shell{display:block;height:100dvh;min-height:0;padding:0}.first-opening .rgi-visual{height:100%;min-height:0}.first-opening .rgi-scene-caption{bottom:auto}.first-opening .rgi-progress{position:absolute;left:25px;right:25px;bottom:143px;height:3px;padding:0;z-index:8}.first-opening .rgi-controls{z-index:10}.first-opening .rgi-storybar{padding:0;background:none;font-size:10px}.first-opening .rgi-nav{display:grid}.first-opening .rgi-utilities{display:grid;grid-template-columns:repeat(3,1fr)}
 .first-opening .rgi-utilities{grid-template-columns:repeat(4,1fr)}
 .first-opening .game-view-tools{left:12px!important;right:auto!important}.first-opening .game-controls-help{left:68px!important;right:auto!important}
+/* Text enlargement must preserve a playable world instead of letting top/bottom HUD
+   surfaces consume the viewport. At normal text these caps are inert; when text grows,
+   the HUD itself scrolls while its semantic content and controls remain reachable. */
+@media(max-width:700px){
+  .masthead{max-height:74px;overflow:hidden}
+  .mission,.mission.playing{max-height:25dvh;overflow-y:auto;overscroll-behavior:contain;pointer-events:auto;touch-action:pan-y;padding-right:6px;scrollbar-width:thin}
+  .console{max-height:34dvh;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+}
