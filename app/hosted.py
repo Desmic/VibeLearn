@@ -11,7 +11,7 @@ from urllib.parse import urlsplit, parse_qs
 from uuid import UUID
 
 import psycopg
-from flask import Flask, jsonify, request, send_from_directory, g
+from flask import Flask, jsonify, request, send_from_directory, g, redirect
 from werkzeug.exceptions import HTTPException
 from app import service
 from app.auth import SupabaseAuth
@@ -58,7 +58,7 @@ def create_app(config=None, auth_provider=None):
         token = request.cookies.get(ACCESS_COOKIE)
         local_token = request.cookies.get(COOKIE)
         if not token or not local_token:
-            raise service.DomainError("UNAUTHENTICATED", "Sign in to open your workspace.", 401)
+            raise service.DomainError("UNAUTHENTICATED", "Sign in to open Bellweather.", 401)
         user = auth_provider.user(token)
         if user["email"] not in allowed:
             raise service.DomainError("FORBIDDEN", "This account does not have access to this private pilot.", 403)
@@ -115,9 +115,11 @@ def create_app(config=None, auth_provider=None):
     def index():
         return send_from_directory(ROOT / "web", "index.html")
 
+    # The workshop prototype is historical implementation evidence, not a player
+    # destination. Keep its source in Git, but never route a current player into it.
     @app.get("/word-machine")
     def word_machine_page():
-        return send_from_directory(ROOT / "web", "word-machine.html")
+        return redirect("/first-words", code=302)
 
     @app.get('/first-words')
     def first_words_page():
@@ -126,26 +128,18 @@ def create_app(config=None, auth_provider=None):
     @app.get("/<asset>")
     def asset(asset):
         if asset not in (
-            'first-words.js', 'first-words-boot.js', 'first-words.css', 'first-words-world.js', 'rescue-world-props.js', 'game-audio.js', 'learning-session.js',
-            "word-machine.js", "word-machine-boot.js", "word-machine.css", "word-machine-world.js", "workshop-props.js", "spec-game-world.js",
-            "rescue-game.js", "rescue.js", "rescue.css", "play-canvas.js", "play-canvas-migrate.js", "play-canvas.css",
-            "game-runtime.js", "game-opening.js", "game-world-status.js", "echo-forge-opening-spec.js", "world-spec.js", "playcanvas-backend.js", "echo-forge-world-spec.js", "rescue-playcanvas-world.js",
-            "player-controls.js", "game-character-spec.js", "game-screen.js", "game-screen.css",
-            "rescue-intro.js", "rescue-intro.css", "rescue-story3d.js", "story3d-runtime.js", "story3d-world-host.js",
-            "rescue-chapter1.js", "rescue-chapter1.css", "auth-game.js", "auth-game.css",
-            "progress-controls.js", "progress-controls.css", "phone-first.css",
-            "relay-repair-kit.zip", "app.js", "style.css", "premium.css", "game.css",
-            "expedition.js", "expedition.css", "valley3d.js"
+            'first-words.js', 'first-words-boot.js', 'first-words.css', 'first-words-world.js',
+            'rescue-world-props.js', 'game-audio.js', 'learning-session.js', 'workshop-props.js', 'spec-game-world.js',
+            'game-runtime.js', 'game-opening.js', 'world-spec.js', 'playcanvas-backend.js', 'player-controls.js',
+            'game-character-spec.js', 'game-screen.css', 'rescue-intro.css', 'play-canvas.css',
+            'auth-game.js', 'auth-game.css'
         ):
             raise service.DomainError("NOT_FOUND", "Not found.", 404)
         return send_from_directory(ROOT / "web", asset)
 
     @app.get("/vendor/<name>")
     def vendor_asset(name):
-        if name not in (
-            "three.module.min.js", "three.core.min.js", "THREE-LICENSE.txt",
-            "playcanvas.mjs", "PLAYCANVAS-LICENSE.txt"
-        ):
+        if name not in ("playcanvas.mjs", "PLAYCANVAS-LICENSE.txt"):
             raise service.DomainError("NOT_FOUND", "Not found.", 404)
         return send_from_directory(ROOT / "web" / "vendor", name)
 
@@ -162,7 +156,7 @@ def create_app(config=None, auth_provider=None):
 
     @app.get("/api/config")
     def configuration():
-        return jsonify(hosted=True, auth="supabase", sign_in_required=True)
+        return jsonify(hosted=True, auth="supabase", sign_in_required=True, entry="first-words")
 
     @app.get("/api/health")
     def health():
@@ -192,7 +186,7 @@ def create_app(config=None, auth_provider=None):
                 db.execute("DELETE FROM hosted_sessions WHERE token_hash=? AND learner_id=?", (service.token_hash(old), learner))
             db.execute("DELETE FROM hosted_sessions WHERE learner_id=? AND expires_at<=?", (learner, service.now()))
             db.execute("INSERT INTO hosted_sessions (token_hash, learner_id, expires_at) VALUES (?, ?, ?)", (service.token_hash(local_token), learner, expires))
-        result = jsonify(ok=True)
+        result = jsonify(ok=True, next="/first-words")
         for name, value in ((COOKIE, local_token), (ACCESS_COOKIE, access)):
             result.set_cookie(name, value, max_age=ttl, secure=True, httponly=True, samesite="Strict", path="/")
         return result
@@ -239,7 +233,7 @@ def create_app(config=None, auth_provider=None):
                 snapshot = json.loads(row["snapshot"])
                 if "rescue" in snapshot and snapshot.get("mission", {}).get("id") == mission_id:
                     return jsonify(service.attempt_view(db, row))
-        raise service.DomainError("NOT_FOUND", "No completed run exists for that signal.", 404)
+        raise service.DomainError("NOT_FOUND", "No completed historical run exists for that signal.", 404)
 
     @app.post("/api/progress/reset")
     def reset_progress():
