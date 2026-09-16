@@ -17,6 +17,22 @@ not internal readiness, acceptance, or permission to skip the remaining quality 
 Development continues on `game/level1-quality-gate`; later commits do not change that
 live preview until another explicit deploy.
 
+## Latest user correction
+
+The preview exposed two product regressions that must be treated as Level-1 blockers:
+
+- **game lifecycle regressed:** logout and game reset disappeared from the Bellweather
+  game UI even though hosted backend endpoints still existed;
+- **the game is too convoluted:** a first-time player is being asked to understand too
+  many choices/quiz steps before they have learned how to play or enjoyed a success.
+
+The binding direction is the existing progression contract: **easy to play, hard to
+master**. The tutorial shows the player exactly how the loop works, lets them succeed,
+then fades scaffolding. Difficulty across this and future How-LLMs-Work episodes comes
+from deeper concepts, competing context, transfer and reduced help—not extra UI friction.
+See `GAME-OPENING-PROGRESSION.md`, `COURSE-GENERATION-GAME-SYSTEM.md` and
+`FIRST-WORDS-BUILD.md`.
+
 ## Blockers found before this branch
 
 - `/` and hosted login still belonged to Relay Rescue/Echo Forge.
@@ -26,10 +42,11 @@ live preview until another explicit deploy.
 - `/word-machine` remained an active player route despite being a superseded prototype.
 - CI spent active matrix time on historical opening/journey/Word Machine browser suites
   rather than treating entry + First Words as the ordered product gate.
-- First Words' first rescue forced the wrong-output path before Moon inspection instead
-  of permitting a meaningful inspect-first choice.
+- First Words initially front-loaded a plausible failure before the learner had a clean
+  success and then stacked a second input-growth prediction onto the tower challenge.
 - the transfer notice literally named the Star answer.
 - completion opened a text dialog automatically over the 3D payoff.
+- reset/logout existed server-side but were missing from the active game menu.
 
 ## Repairs completed or under exact-head regression
 
@@ -40,27 +57,41 @@ live preview until another explicit deploy.
 - `/word-machine` redirects to `/first-words`.
 - explicit browser assertion: if PlayCanvas/required assets fail, show retry/error and
   never reveal SVG/Relay Rescue/2D gameplay.
-- active CI order reduced to entry/foundation then full First Words Level 1.
-- first rescue permits generate-first mistake or inspect-first success.
+- active CI is split into entry/foundation, opening, controls, chapter, readability and
+  hosted lifecycle gates so a regression is localized quickly.
+- the first rescue is now a three-step tutorial: power -> scan the obvious Moon clue ->
+  generate word by word. New runs cannot intentionally fail before freeing Zip.
+- the former required `Predict the next input` quiz is removed from new runs. The growing
+  input is shown through the word-by-word mechanic. Legacy saved drafts remain resumable.
+- the first normal wrong route now appears only after the player has succeeded and moved
+  into the changed-context tower challenge.
 - transfer current clue maps a five-point lantern mark to an environmental mark on the
   exit gate instead of copying the Star answer from prose; accessible descriptions must
   preserve the same information boundary.
 - world completion remains visible; optional epilogue opens only on player action.
 - historical drafts are preserved but no longer block or skip First Words; Supabase and
-  SQLite now enforce at most one draft per learner **per mission**.
-- enlarged text is constrained so the objective/engine HUD cannot consume the whole
-  phone viewport.
-- the Bellweather score is being upgraded from a short oscillator loop to original
-  procedural `bellweather-score-v2`: plucked motif, restrained hand percussion,
-  wind/workshop ambience, danger thinning, reunion resolution, and distinct semantic
-  effects. Technical lifecycle checks do not substitute for actual listening review.
+  SQLite enforce at most one draft per learner **per mission**.
+- **Reset game progress** and **Sign out** are restored to the active game menu. Reset is
+  explicitly confirmed and returns the learner to the Level-1 opening; sign out revokes
+  the hosted session and returns to account entry. A dedicated hosted browser gate now
+  protects both behaviors.
+- phone HUD is being compressed into a small objective card plus bottom engine console;
+  200% text must preserve a large usable world band rather than merely avoid overflow.
+- the Bellweather score is upgraded toward original procedural `bellweather-score-v2`:
+  plucked motif, restrained hand percussion, wind/workshop ambience, danger thinning,
+  reunion resolution, and distinct semantic effects. Technical lifecycle checks do not
+  substitute for actual listening review.
 
 ## Gate still required
 
-Run the branch through build, full application tests and active browser suites. Inspect
-new screenshots/traces and repair any regression. Then play the whole experience from
-`/` through completion and score every required `CRITIC-POLICY.md` criterion on the
-exact frozen candidate. Any criterion below 9 or any blocker means `needs_revision`.
-Sound-on/muted appeal still requires actual listening; automation can only prove audio
-lifecycle and state behavior. Do not present the level as complete to the user until the
-internal gate is satisfied.
+Run the current exact head through build, full application tests and every active browser
+suite. Inspect new screenshots/traces and repair any regression. In particular verify
+that the simplified tutorial is immediately understandable, the first rescue feels like
+a win rather than a test, reset/logout work on hosted auth, and the compact phone HUD is
+actually readable at normal and enlarged text.
+
+Then play the whole experience from `/` through completion and score every required
+`CRITIC-POLICY.md` criterion on the exact frozen candidate. Any criterion below 9 or any
+blocker means `needs_revision`. Sound-on/muted appeal still requires actual listening;
+automation can only prove audio lifecycle and state behavior. Do not present the level
+as complete to the user until the internal gate is satisfied.
