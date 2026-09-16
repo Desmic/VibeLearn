@@ -24,7 +24,7 @@ def main():
             log('Opening: friendship action');page.get_by_role('button',name='Give Zip a hand tap',exact=True).click()
             expect(page.locator('#rgi-fact')).to_contain_text('Best team')
             until(page,"()=>FirstWordsReview.audio.ready && FirstWordsReview.audio.version==='bellweather-score-v2' && FirstWordsReview.audio.scheduledBars>0")
-            assert page.evaluate("FirstWordsReview.audio.phase")==='home'
+            assert page.evaluate("FirstWordsReview.audio.phase")=='home'
             log('Opening: capture');page.get_by_role('button',name='Continue →',exact=True).click()
             until(page,"()=>FirstWordsReview.audio.phase==='danger'")
             page.get_by_role('button',name='Pause story motion').click()
