@@ -42,7 +42,11 @@ RULES = {
 }
 for clue in ('moon', 'star', 'parade'):
     RULES['actions']['scan-' + clue] = {
-        'when': both(eq('powered', True), {'op': 'ne', 'left': field('status'), 'right': 'success'}, either(both(eq('round', 0), eq('saw_wrong', True), clue == 'moon'), eq('round', 1))),
+        # Round 0 deliberately permits proactive Moon inspection. A player may
+        # discover the relevant context before making the plausible-but-wrong Sun
+        # continuation; choosing to generate first still produces the recoverable
+        # failure path. Round 1 accepts all notices so relevance must be judged.
+        'when': both(eq('powered', True), {'op': 'ne', 'left': field('status'), 'right': 'success'}, either(both(eq('round', 0), clue == 'moon'), eq('round', 1))),
         'effects': [set_to('clue', clue), set_to('pieces', 0), set_to('status', 'building')], 'emits': ['context-changed'],
     }
 for prediction in ('moon', 'star', 'sun'):
@@ -52,7 +56,11 @@ for prediction in ('grows', 'same'):
 
 CASES = [
     {'base': 'Open a gate.', 'target': 'Moon', 'notes': {'moon': 'Zip is behind the Moon gate.'}, 'prior': [{'piece': 'Sun', 'chance': 75}, {'piece': 'Moon', 'chance': 25}]},
-    {'base': 'Open the route to the tower.', 'target': 'Star', 'notes': {'moon': 'Old route: take the Moon gate.', 'star': 'TODAY: Moon route closed. Use the Star gate.', 'parade': 'The lantern parade starts at sunset.'}, 'prior': [{'piece': 'Moon', 'chance': 70}, {'piece': 'Star', 'chance': 30}]},
+    {'base': 'Open the route to the tower.', 'target': 'Star', 'notes': {
+        'moon': 'Old route: take the Moon gate.',
+        'star': 'TODAY: Moon route closed. The tower bell answers the five-point lantern mark.',
+        'parade': 'The lantern parade starts at sunset.'
+    }, 'prior': [{'piece': 'Moon', 'chance': 70}, {'piece': 'Star', 'chance': 30}]},
 ]
 
 def build_content(template):
@@ -60,13 +68,13 @@ def build_content(template):
     for name in ('activity', 'frame', 'binding', 'rubric'):
         item[name]['id'] = identity('ai.first-words.' + name)
     item['family_id'] = identity('ai.first-words.family')
-    item['frame'].update(name='Predict continuation and context growth in a changed gate problem', coverage='Guided practice with two recorded transfer predictions')
+    item['frame'].update(name='Predict continuation and context growth in a changed gate problem', coverage='Guided rescue plus a changed-context prediction before feedback')
     item['rubric']['criteria'][0]['coverage'] = 'Chapter completion; transfer observations reported separately, never mastery.'
     item.update(title='The First Words', intro='The Warden has taken Zip’s voice. Help your friend speak and escape.', prompt='Repair Zip’s words. Check what reaches the engine.',
-                hints=['The engine only receives the text you scan.', 'Which notice describes the route today? New output joins the next input.'])
+                hints=['The engine only receives the text you scan.', 'Which current clue identifies the route without simply naming the answer? New output joins the next input.'])
     item['mission'].update(id=MISSION_ID, title='The First Words', objective='Free Zip and reach the tower', plain_objective='Help Zip speak. Open the gate.')
     item['policies']['assessment'] = VERSION
-    item['validation'].update(scope='Authored rescue and exit experiments', basis='Pending exact-build checks and user review.')
+    item['validation'].update(scope='Authored rescue and changed-context exit experiment', basis='Pending exact-build checks and user review.')
     item['word_machine'] = {'version': VERSION, 'rules': deepcopy(RULES), 'cases': deepcopy(CASES)}
     return item
 
