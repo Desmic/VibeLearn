@@ -36,14 +36,19 @@ def main():
     if command == "build":
         from tools.package_repair import build as package_repair
         package_repair()
+        # Parse both application code and browser gates before paying the cost of
+        # starting Chromium. A malformed gate is a build failure, not a late
+        # browser failure; this keeps chunk feedback fast and deterministic.
         if not compileall.compile_dir(ROOT / "app", quiet=1):
+            return 1
+        if not compileall.compile_dir(ROOT / "tests", quiet=1):
             return 1
         for script in sorted((ROOT / "web").glob("*.js")):
             subprocess.run(["node", "--input-type=module", "--check"], input=script.read_text(encoding="utf-8"), text=True, check=True)
         from app.manifest import manifest
         (ROOT / "artifacts").mkdir(exist_ok=True)
         (ROOT / "artifacts" / "build-manifest.json").write_text(json.dumps(manifest(), indent=2), encoding="utf-8")
-        print("Build passed: Python compiled; browser JavaScript parsed with ESM semantics.")
+        print("Build passed: application/test Python compiled; browser JavaScript parsed with ESM semantics.")
         return 0
     if command == "browser":
         parser = argparse.ArgumentParser(description="Run all active browser checks or one group")
