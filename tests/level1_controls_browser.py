@@ -30,7 +30,7 @@ def main():
             page=ctx.new_page();page.goto(url+'/first-words')
             page.get_by_role('button',name='Skip opening',exact=True).click()
             expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
-            action(page,'Connect power lead')
+            action(page,'Connect the power lead')
             page.reload();expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
             expect(page.locator('.game-move-stick')).to_be_visible()
 
