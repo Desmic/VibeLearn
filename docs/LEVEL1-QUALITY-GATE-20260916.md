@@ -1,97 +1,94 @@
-# Level 1 quality gate — 16 September 2026
+# Level 1 quality gate — The First Words
 
-Status: **in development / needs review**. This record exists to prevent recurrence of
-the sequencing mistake where later game chunks were refined while the actual player
-entry still loaded an older game.
+**Updated:** 17 September 2026 IST  
+**Branch:** `game/level1-quality-gate`  
+**Verified behavioral candidate:** `64c4334b8a4ab3937031704140086560a9d27b04`
 
-Candidate branch: `game/level1-quality-gate`.
+Status: **automated/technical Level 1 gate passed; qualitative review and user acceptance pending.**
 
-## User-requested preview checkpoint
+This gate exists to prevent the project from refining later content while the actual player entry, lifecycle or first learning loop is broken. `../CODEX.md`, `CRITIC-POLICY.md` and `GAME-OPENING-PROGRESSION.md` remain authoritative for execution/review method.
 
-The user explicitly requested a Render preview before the internal Level 1 gate was
-finished and said they would not judge the product from that state. The Render-facing
-`deploy/render-supabase` branch was therefore fast-forwarded to
-`987e4773a231a9172634d8aa58e47f0b0996cb75` and deploy
-`dep-dalcfum5vjqs73et1ir0` reached `live`. Treat this as a **preview snapshot only**,
-not internal readiness, acceptance, or permission to skip the remaining quality gate.
-Development continues on `game/level1-quality-gate`; later commits do not change that
-live preview until another explicit deploy.
+## User-requested live preview
+
+The private Render service currently runs preview commit
+`987e4773a231a9172634d8aa58e47f0b0996cb75`, deploy
+`dep-dalcfum5vjqs73et1ir0`.
+
+That preview was intentionally deployed before this quality gate was finished. It is not the current development candidate and does **not** contain all repairs below. Auto-deploy is off. A live preview, green CI or internal rating is never user acceptance.
 
 ## Latest user correction
 
-The preview exposed two product regressions that must be treated as Level-1 blockers:
+The preview exposed two Level 1 blockers:
 
-- **game lifecycle regressed:** logout and game reset disappeared from the Bellweather
-  game UI even though hosted backend endpoints still existed;
-- **the game is too convoluted:** a first-time player is being asked to understand too
-  many choices/quiz steps before they have learned how to play or enjoyed a success.
+- logout and game reset had disappeared from the active Bellweather UI;
+- the game was too convoluted/unclear before a new player had learned how to play or experienced success.
 
-The binding direction is the existing progression contract: **easy to play, hard to
-master**. The tutorial shows the player exactly how the loop works, lets them succeed,
-then fades scaffolding. Difficulty across this and future How-LLMs-Work episodes comes
-from deeper concepts, competing context, transfer and reduced help—not extra UI friction.
-See `GAME-OPENING-PROGRESSION.md`, `COURSE-GENERATION-GAME-SYSTEM.md` and
-`FIRST-WORDS-BUILD.md`.
+The binding product rule is **easy to play, hard to master**. Teach the basic interaction loop through a tutorial and immediate success. Add difficulty later through deeper reasoning, competing context, transfer, uncertainty and fading help — not more controls, quizzes or camera friction.
 
-## Blockers found before this branch
+## Current repaired player path
 
-- `/` and hosted login still belonged to Relay Rescue/Echo Forge.
-- successful login entered the old campaign shell instead of the current Level 1.
-- the root loaded the retired DOM/SVG Rescue stack and PlayCanvas migration, allowing the
-  old illustrated world to exist underneath the 3D migration path.
-- `/word-machine` remained an active player route despite being a superseded prototype.
-- CI spent active matrix time on historical opening/journey/Word Machine browser suites
-  rather than treating entry + First Words as the ordered product gate.
-- First Words initially front-loaded a plausible failure before the learner had a clean
-  success and then stacked a second input-growth prediction onto the tower challenge.
-- the transfer notice literally named the Star answer.
-- completion opened a text dialog automatically over the 3D payoff.
-- reset/logout existed server-side but were missing from the active game menu.
+`opening -> power Zip -> scan obvious Moon clue -> generate word by word -> free Zip -> tower context challenge -> recoverable wrong route -> current five-point clue -> Star route -> completion`
 
-## Repairs completed or under exact-head regression
+Key constraints now enforced:
 
-- Bellweather PlayCanvas entry/login shell at `/`; authenticated players route directly
-  to `/first-words`.
-- active server allowlist exposes only Bellweather/First Words and shared PlayCanvas
-  runtime assets. Historical source remains in Git but is not a player fallback.
-- `/word-machine` redirects to `/first-words`.
-- explicit browser assertion: if PlayCanvas/required assets fail, show retry/error and
-  never reveal SVG/Relay Rescue/2D gameplay.
-- active CI is split into entry/foundation, opening, controls, chapter, readability and
-  hosted lifecycle gates so a regression is localized quickly.
-- the first rescue is now a three-step tutorial: power -> scan the obvious Moon clue ->
-  generate word by word. New runs cannot intentionally fail before freeing Zip.
-- the former required `Predict the next input` quiz is removed from new runs. The growing
-  input is shown through the word-by-word mechanic. Legacy saved drafts remain resumable.
-- the first normal wrong route now appears only after the player has succeeded and moved
-  into the changed-context tower challenge.
-- transfer current clue maps a five-point lantern mark to an environmental mark on the
-  exit gate instead of copying the Star answer from prose; accessible descriptions must
-  preserve the same information boundary.
-- world completion remains visible; optional epilogue opens only on player action.
-- historical drafts are preserved but no longer block or skip First Words; Supabase and
-  SQLite enforce at most one draft per learner **per mission**.
-- **Reset game progress** and **Sign out** are restored to the active game menu. Reset is
-  explicitly confirmed and returns the learner to the Level-1 opening; sign out revokes
-  the hosted session and returns to account entry. A dedicated hosted browser gate now
-  protects both behaviors.
-- phone HUD is being compressed into a small objective card plus bottom engine console;
-  200% text must preserve a large usable world band rather than merely avoid overflow.
-- the Bellweather score is upgraded toward original procedural `bellweather-score-v2`:
-  plucked motif, restrained hand percussion, wind/workshop ambience, danger thinning,
-  reunion resolution, and distinct semantic effects. Technical lifecycle checks do not
-  substitute for actual listening review.
+- no intentional round-0 failure for fresh Level 1 runs;
+- optional model inspection stays out of the tutorial and appears after the first rescue;
+- the former required second input-growth prediction is removed from new runs;
+- input growth is demonstrated by the mechanic itself;
+- `Check route signs` is the guaranteed simple path into tower context selection;
+- physical route boards remain optional world interactions;
+- movement/camera skill is not a prerequisite for Level 1 concept comprehension;
+- reset and logout are visible in-game lifecycle controls, not merely backend endpoints;
+- completion remains visible in the 3D world before any optional reflection dialog;
+- no 2D gameplay fallback is permitted.
 
-## Gate still required
+## Technical gate result
 
-Run the current exact head through build, full application tests and every active browser
-suite. Inspect new screenshots/traces and repair any regression. In particular verify
-that the simplified tutorial is immediately understandable, the first rescue feels like
-a win rather than a test, reset/logout work on hosted auth, and the compact phone HUD is
-actually readable at normal and enlarged text.
+GitHub Actions run `35137170056` passed every active Level 1 job on the exact behavioral candidate:
 
-Then play the whole experience from `/` through completion and score every required
-`CRITIC-POLICY.md` criterion on the exact frozen candidate. Any criterion below 9 or any
-blocker means `needs_revision`. Sound-on/muted appeal still requires actual listening;
-automation can only prove audio lifecycle and state behavior. Do not present the level
-as complete to the user until the internal gate is satisfied.
+| Gate | Result | What it protects |
+|---|---|---|
+| foundation | passed | build, full application suite, entry, historical-draft continuity, no 2D fallback |
+| application tests | **152 passed** | rules, storage, PostgreSQL behavior, auth/session, evidence/isolation contracts |
+| first-words-opening | passed | opening beats, pause/sound, skip/replay, reduced motion, tutorial handoff |
+| first-words-controls | passed | keyboard/touch/camera controls after persisted action + reload |
+| first-words-readability | passed | 200% text at 360/390/430 with usable world area |
+| first-words-lifecycle | passed | hosted reset/restart and sign-out/auth boundary |
+| first-words-chapter | passed | tutorial first win, mistake/recovery, completion/reload, 360/430 reduced-motion completion |
+
+The chapter browser report has no page errors. Fresh exact-head opening/chapter screenshots were inspected in addition to DOM assertions.
+
+## Observed presentation checkpoint
+
+The current opening uses three causal beats rather than a lesson stack:
+
+1. interact with Zip as a friend;
+2. see the Warden and voice theft;
+3. see Zip trapped/voiceless and continue through one primary `Help Zip` action.
+
+The tutorial then exposes one immediate action at a time and ends in `Zip is free.` before the tower challenge introduces a normal mistake.
+
+The tower mistake state has one primary recovery action (`Check route signs`). The completed 390px state leaves the Star gate open and Zip visible in the world; the ending/reflection is optional rather than automatically covering the payoff.
+
+This is an improvement over the reviewed preview, not a claim that a novice or the user has accepted it.
+
+## Remaining quality gate
+
+The remaining gate is qualitative rather than another feature pass:
+
+1. review the full rendered experience under `CRITIC-POLICY.md`;
+2. write concrete failures and likely abandonment points before assigning any internal criterion ratings;
+3. keep subjective sound quality unassessed unless it is actually listened to;
+4. keep physical-device and novice/young-player limitations explicit;
+5. repair only observed Level 1 blockers and rerun affected gates;
+6. present a bounded candidate to the current user, whose verdict remains final.
+
+The internal >=9 aspiration still applies criterion-by-criterion; there is no weighted average and no automatic pass from CI. Missing subjective evidence remains unknown rather than being invented.
+
+## Scope boundary
+
+Do **not** implement Level 2 yet. Do not deploy the newer development candidate merely because the technical gate passed. No new model service, paid resource, public rollout or external tester is authorized by this checkpoint.
+
+No new Supabase schema migration was required for the current Level 1 correction. Preserve hosted auth, learner isolation, immutable evidence and explicit assisted/unknown mastery semantics.
+
+Detailed technical evidence is recorded in [FIRST-WORDS-CHUNK-REVIEW.md](FIRST-WORDS-CHUNK-REVIEW.md); current deployment/work status is in [STATE.md](STATE.md).
