@@ -14,8 +14,17 @@ part('square-inlay','torus','gold',[0,.08,1],[8.5,.045,8.5]);
 for(let i=0;i<10;i++)part('path-'+i,'box','paper',[0,.04,3-i],[2,.08,.68]);
 e.push(...tower('bell-tower',[0,0,-10],{scale:1.1}),...tower('west-tower',[-7,0,-8],{scale:.7,color:'rose'}),...tower('east-tower',[7,0,-8],{scale:.8,color:'teal'}));
 e.push(...gate('moon',[-2.5,0,-1.5]),...gate('sun',[3,0,-2.8],{width:1.5,height:2.5}),...gate('star',[0,0,-7],{width:2.7,height:4.1}));
-// Keep the distant exit marker on the doorway, below the phone goal area.
-e.find(entity=>entity.id==='star-label').position=[0,1.8,.2];
+// The changed-context exit must be solvable from the world rather than from a
+// text answer key. Put a glowing five-point mark on the Star gate and anchor the
+// minimal HUD glyph low enough to remain visible between the phone HUD bands.
+e.find(entity=>entity.id==='star-label').position=[0,1.5,.35];
+e.push({id:'star-mark',parent:'star',position:[0,1.55,.38]});
+const starPoints=Array.from({length:5},(_,i)=>{const a=-Math.PI/2+i*Math.PI*2/5;return[Math.cos(a)*.55,Math.sin(a)*.55];});
+for(const [i,[x,y]] of starPoints.entries())part(`star-mark-point-${i}`,'sphere','glow',[x,y,0],[.13,.13,.07],{parent:'star-mark'});
+for(let i=0;i<5;i++){
+  const a=starPoints[i],b=starPoints[(i+2)%5],dx=b[0]-a[0],dy=b[1]-a[1];
+  part(`star-mark-line-${i}`,'box','glow',[(a[0]+b[0])/2,(a[1]+b[1])/2,-.015],[Math.hypot(dx,dy),.055,.035],{parent:'star-mark',rotation:[0,0,Math.atan2(dy,dx)*180/Math.PI]});
+}
 part('cell-back','box','indigo',[-2.5,1.3,-3.2],[2.5,2.6,.2]);
 for(const side of [-1,1])part('cell-side'+side,'box','stone',[-2.5+side*1.35,1.2,-2.3],[.16,2.4,1.8]);
 part('cell-moon','torus','glow',[-2.5,2,-3.04],[.8,.09,.8],{rotation:[90,0,0]});
