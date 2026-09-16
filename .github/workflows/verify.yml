@@ -5,6 +5,9 @@ on:
     branches: [main, deploy/render-supabase]
 permissions:
   contents: read
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   tests:
     runs-on: ubuntu-latest
