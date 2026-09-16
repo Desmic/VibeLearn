@@ -23,10 +23,10 @@ function button(label,action,primary=true){const b=document.createElement('butto
 function render(){
   const s=view(),a=session.attempt,complete=ours()&&a.status==='submitted';
   $('#welcome').hidden=ours();$('#engine').hidden=!ours();$('.mission').classList.toggle('playing',ours());
-  $('#error').hidden=!session.error;if(session.error)text('#error',session.error.code==='ACTIVE_ATTEMPT'?'A previous prototype run is still unfinished. Its history is preserved; finish or reset that run before starting this Level 1 build.':session.error.message);
+  $('#error').hidden=!session.error;if(session.error)text('#error',session.error.code==='ACTIVE_ATTEMPT'?'This Level 1 run is already active. Reload to resume it.':session.error.message);
   $('#retry').hidden=!session.pending||session.busy;
-  const other=a?.status==='draft'&&!ours();$('#resume-other').hidden=!other;
-  if(other){$('#resume-other').hidden=true;$('#start').disabled=false;text('#start','Start The First Words →');}
+  const other=a?.status==='draft'&&!ours();$('#resume-other').hidden=true;
+  if(other){$('#start').disabled=false;text('#start','Enter Bellweather →');}
   if(!ours())return;
   const key=a.id+':'+a.revision;
   if(!inOpening&&presented!==key){
@@ -138,7 +138,7 @@ async function boot(){
   try{
     if(!world.available)throw Error('The 3D world could not open.');await world.whenReady();ready=true;$('#loading').hidden=true;frame();
     const state=await session.load();text('#start','Enter Bellweather →');$('#start').disabled=false;render();
-    if(!ours()&&state.attempt?.status!=='draft')opening();
+    if(!ours())opening();
   }catch(error){
     if(!ready){window.dispatchEvent(new CustomEvent('game-entry-failed',{detail:error.message+' Your saved progress is safe.'}));return;}
     text('#start','Sign in to continue');$('#start').disabled=false;$('#start').onclick=()=>{location.assign('/');};text('#error',error.message);$('#error').hidden=false;
