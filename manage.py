@@ -11,18 +11,26 @@ BROWSER_GROUPS = {
     "foundation": ["tests.level1_entry_browser"],
     "first-words-opening": ["tests.first_words_opening_browser"],
     "first-words-controls": ["tests.level1_controls_browser"],
-    "first-words-chapter": ["tests.first_words_browser"],
+    "first-words-chapter": ["tests.level1_chapter_browser"],
     "first-words-readability": ["tests.first_words_readability_browser"],
+    "first-words-lifecycle": ["tests.level1_lifecycle_browser"],
     # Keep the combined command as the final integrated Level 1 regression.
-    "first-words": ["tests.first_words_opening_browser", "tests.level1_controls_browser", "tests.first_words_browser", "tests.first_words_readability_browser"],
+    "first-words": [
+        "tests.first_words_opening_browser",
+        "tests.level1_controls_browser",
+        "tests.level1_chapter_browser",
+        "tests.first_words_readability_browser",
+        "tests.level1_lifecycle_browser",
+    ],
     "legacy-foundation": ["tests.browser_check", "tests.expedition_browser_check",
                           "tests.game_review_browser", "tests.story3d_framework_browser",
                           "tests.playcanvas_framework_browser", "tests.playcanvas_story_interaction_browser"],
     "legacy-opening": ["tests.onboarding_browser", "tests.opening_contract_browser", "tests.player_controls_browser"],
     "legacy-journey": ["tests.rescue_browser"],
     "legacy-word-machine": ["tests.word_machine_browser"],
+    "legacy-first-words-complex": ["tests.first_words_browser"],
 }
-ACTIVE_LEVEL1_GROUPS = ["first-words-opening", "first-words-controls", "first-words-chapter", "first-words-readability"]
+ACTIVE_LEVEL1_GROUPS = ["first-words-opening", "first-words-controls", "first-words-chapter", "first-words-readability", "first-words-lifecycle"]
 
 
 def main():
@@ -42,9 +50,6 @@ def main():
     if command == "build":
         from tools.package_repair import build as package_repair
         package_repair()
-        # Parse both application code and browser gates before paying the cost of
-        # starting Chromium. A malformed gate is a build failure, not a late
-        # browser failure; this keeps chunk feedback fast and deterministic.
         if not compileall.compile_dir(ROOT / "app", quiet=1):
             return 1
         if not compileall.compile_dir(ROOT / "tests", quiet=1):
