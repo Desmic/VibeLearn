@@ -31,7 +31,7 @@ def generate(page):
 
 
 def complete_guided_rescue(page):
-    action(page,'Connect power lead')
+    action(page,'Connect the power lead')
     expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 2/3')
     expect(page.get_by_role('button',name='Scan Zip’s Moon plaque',exact=True)).to_be_visible()
     expect(page.get_by_role('button',name='Generate from this input',exact=True)).to_have_count(0)
@@ -76,8 +76,6 @@ def main():
             page.get_by_role('button',name='Stay in Bellweather',exact=True).click();page.reload();expect(page.locator('#goal')).to_have_text('The tower is open.',timeout=15000)
             checks.append('Changed-context challenge permits a normal wrong choice, preserves it, then recovers through an in-world current sign.')
 
-            # Fresh phone/reduced-motion runs keep the simple golden path while the
-            # route-list control remains an equivalent accessibility fallback.
             for width in (360,430):
                 ctx=browser.new_context(viewport={'width':width,'height':844},has_touch=True,reduced_motion='reduce');q=ctx.new_page();q.goto(url+'/first-words')
                 q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved',timeout=15000)
