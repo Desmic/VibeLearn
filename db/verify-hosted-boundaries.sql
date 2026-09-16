@@ -6,6 +6,8 @@ DECLARE
     learner_a text := gen_random_uuid()::text;
     learner_b text := gen_random_uuid()::text;
     attempt_a text := gen_random_uuid()::text;
+    attempt_level1 text := gen_random_uuid()::text;
+    attempt_duplicate text := gen_random_uuid()::text;
     checkpoint_a text := gen_random_uuid()::text;
     evidence_a text := gen_random_uuid()::text;
     stamp text := now()::text;
@@ -13,7 +15,21 @@ BEGIN
     PERFORM set_config('app.learner_id', learner_a, true);
     INSERT INTO learners(id, profile, created_at) VALUES (learner_a, '{}', stamp);
     INSERT INTO attempts(id,learner_id,revision,status,mode,response,snapshot,snapshot_digest,created_at,updated_at)
-    VALUES(attempt_a,learner_a,1,'draft','LEARN','{}','{}','test-digest',stamp,stamp);
+    VALUES(attempt_a,learner_a,1,'draft','LEARN','{}','{"mission":{"id":"rescue-01"}}','test-digest',stamp,stamp);
+
+    -- Historical and active missions may coexist as drafts.
+    INSERT INTO attempts(id,learner_id,revision,status,mode,response,snapshot,snapshot_digest,created_at,updated_at)
+    VALUES(attempt_level1,learner_a,1,'draft','LEARN','{}','{"mission":{"id":"ai-01-first-words"}}','level1-digest',stamp,stamp);
+    IF (SELECT count(*) FROM attempts WHERE learner_id=learner_a AND status='draft') <> 2 THEN
+        RAISE EXCEPTION 'Mission-scoped draft coexistence failed';
+    END IF;
+    BEGIN
+        INSERT INTO attempts(id,learner_id,revision,status,mode,response,snapshot,snapshot_digest,created_at,updated_at)
+        VALUES(attempt_duplicate,learner_a,1,'draft','LEARN','{}','{"mission":{"id":"ai-01-first-words"}}','duplicate-digest',stamp,stamp);
+        RAISE EXCEPTION 'Duplicate draft for same mission was permitted';
+    EXCEPTION WHEN unique_violation THEN NULL;
+    END;
+
     INSERT INTO checkpoints(id,learner_id,attempt_id,kind,response,mode,assistance,snapshot_digest,created_at)
     VALUES(checkpoint_a,learner_a,attempt_a,'submission','{}','LEARN','[]','test-digest',stamp);
     INSERT INTO evidence(id,learner_id,attempt_id,checkpoint_id,frame_id,frame_revision,capsule,result,created_at)
