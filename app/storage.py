@@ -20,13 +20,13 @@ MIGRATIONS = [
     CREATE INDEX idx_checkpoints_attempt ON checkpoints(learner_id, attempt_id);
     CREATE TABLE evidence (id TEXT PRIMARY KEY, learner_id TEXT NOT NULL REFERENCES learners(id), attempt_id TEXT NOT NULL UNIQUE REFERENCES attempts(id), checkpoint_id TEXT NOT NULL REFERENCES checkpoints(id), frame_id TEXT NOT NULL, frame_revision INTEGER NOT NULL, capsule TEXT NOT NULL, result TEXT NOT NULL, created_at TEXT NOT NULL);
     CREATE INDEX idx_evidence_learner ON evidence(learner_id);
-    CREATE TABLE reviews (learner_id TEXT NOT NULL REFERENCES learners(id), frame_id TEXT NOT NULL, frame_revision INTEGER NOT NULL, evidence_id TEXT NOT NULL REFERENCES evidence(id), intent TEXT NOT NULL, PRIMARY KEY(learner_id, frame_id, frame_revision));
+    CREATE TABLE reviews (learner_id TEXT NOT NULL, frame_id TEXT NOT NULL, frame_revision INTEGER NOT NULL, evidence_id TEXT NOT NULL REFERENCES evidence(id), intent TEXT NOT NULL, PRIMARY KEY(learner_id, frame_id, frame_revision));
     """,
 
     """
     CREATE TABLE assistance (id TEXT PRIMARY KEY, learner_id TEXT NOT NULL REFERENCES learners(id), attempt_id TEXT NOT NULL REFERENCES attempts(id), kind TEXT NOT NULL, detail TEXT NOT NULL, affects_independence INTEGER NOT NULL, created_at TEXT NOT NULL);
     CREATE INDEX idx_assistance_attempt ON assistance(learner_id, attempt_id);
-    CREATE TABLE rewards (learner_id TEXT NOT NULL REFERENCES learners(id), family_id TEXT NOT NULL, attempt_id TEXT NOT NULL REFERENCES attempts(id), xp INTEGER NOT NULL CHECK(xp=10), policy TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(learner_id, family_id));
+    CREATE TABLE rewards (learner_id TEXT NOT NULL, family_id TEXT NOT NULL, attempt_id TEXT NOT NULL REFERENCES attempts(id), xp INTEGER NOT NULL CHECK(xp=10), policy TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(learner_id, family_id));
     """,
 
     """
@@ -37,6 +37,10 @@ MIGRATIONS = [
     CREATE TRIGGER immutable_assistance BEFORE UPDATE ON assistance BEGIN SELECT RAISE(ABORT, 'Assistance is immutable'); END;
     """,
 
+    """
+    DROP INDEX IF EXISTS idx_attempts_one_draft;
+    CREATE INDEX idx_attempts_drafts ON attempts(learner_id, updated_at) WHERE status='draft';
+    """,
 ]
 
 
