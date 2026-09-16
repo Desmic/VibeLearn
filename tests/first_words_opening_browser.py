@@ -23,7 +23,10 @@ def main():
             page.screenshot(path=str(out/'opening-home-390.png'),timeout=15000)
             log('Opening: friendship action');page.get_by_role('button',name='Give Zip a hand tap',exact=True).click()
             expect(page.locator('#rgi-fact')).to_contain_text('Best team')
+            until(page,"()=>FirstWordsReview.audio.ready && FirstWordsReview.audio.version==='bellweather-score-v2' && FirstWordsReview.audio.scheduledBars>0")
+            assert page.evaluate("FirstWordsReview.audio.phase")==='home'
             log('Opening: capture');page.get_by_role('button',name='Continue →',exact=True).click()
+            until(page,"()=>FirstWordsReview.audio.phase==='danger'")
             page.get_by_role('button',name='Pause story motion').click()
             until(page,"()=>FirstWordsReview.audio.state==='suspended'")
             assert page.get_by_role('button',name='Continue →',exact=True).is_disabled()
@@ -39,13 +42,14 @@ def main():
             log('Opening: tutorial handoff');page.get_by_role('button',name='Help Zip →',exact=True).click()
             expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
             expect(page.locator('#saved')).to_have_text('Saved')
+            until(page,"()=>FirstWordsReview.audio.phase==='repair'")
             assert page.evaluate('FirstWordsReview.runtime.instanceId')==instance
             before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
             log('Opening: replay preserves draft');page.get_by_role('button',name='Open game menu').click();page.get_by_role('button',name='Replay the opening',exact=True).click()
             page.get_by_role('button',name='Return to game',exact=True).click()
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
             page.reload();expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000);expect(page.locator('#rgi-intro')).to_have_count(0)
-            checks.append('Animated friendship/capture/Zip capture, pause and mute, same-runtime tutorial handoff, replay preserves draft and returning learner resumes without opening.')
+            checks.append('Animated friendship/capture/Zip capture, Bellweather score v2 lifecycle, pause and mute, same-runtime tutorial handoff, replay preserves draft and returning learner resumes without opening.')
             for width,height in [(360,800),(430,932),(1280,800)]:
                 log(f'Opening: fresh reduced-motion {width}')
                 ctx=browser.new_context(viewport={'width':width,'height':height},reduced_motion='reduce',has_touch=width<500)
@@ -61,7 +65,7 @@ def main():
                 q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000);ctx.close()
             assert not errors,errors
             checks.append('Fresh 360/430/desktop reduced-motion still conveys final causal states and skips safely into tutorial; caption/control bounds and no page overflow.')
-            (out/'first-words-opening-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'scope':'Opening only. No complete-level, subjective sound quality, physical-phone or human-acceptance claim.'},indent=2))
+            (out/'first-words-opening-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'scope':'Opening only. Audio lifecycle and phase changes are automated; subjective mix/appeal, physical-phone feel and human acceptance remain unassessed.'},indent=2))
             log('Opening gate passed')
         finally:
             browser.close();stop_server(proc)
