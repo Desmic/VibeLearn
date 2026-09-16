@@ -8,8 +8,8 @@ from app import service, word_machine, first_words
 from app.content import freeze
 from app.storage import migrate, transaction
 
-FIRST=['connect']+['step']*4+['send','scan-moon']+['step']*4+['send']
-EXIT=['next','scan-star','predict-star','loop-grows']+['step']*4+['send']
+FIRST=['connect','scan-moon']+['step']*4+['send']
+EXIT=['next','scan-star','predict-star']+['step']*4+['send']
 
 class FirstWordsTests(unittest.TestCase):
     def setUp(self):
@@ -32,29 +32,32 @@ class FirstWordsTests(unittest.TestCase):
         body=self.action('finish');result=self.attempt['assessment']
         self.assertEqual(result['mastery'],'unknown');self.assertEqual(result['independence'],'assisted')
         self.assertTrue(result['transfer_observations']['relevant_context'])
-        self.assertTrue(result['transfer_observations']['loop_correct'])
+        self.assertIsNone(result['transfer_observations']['loop_correct'])
         self.assertEqual(service.command(self.path,self.learner,'submit',body),self.attempt)
         with transaction(self.path) as db:
             self.assertEqual(db.execute('SELECT count(*) FROM evidence').fetchone()[0],1)
             self.assertEqual(db.execute('SELECT count(*) FROM rewards').fetchone()[0],1)
             with self.assertRaises(Exception):db.execute("UPDATE evidence SET result='{}'")
 
-    def test_first_rescue_can_inspect_before_making_the_plausible_mistake(self):
-        for move in ['connect','scan-moon']+['step']*4+['send']:self.action(move)
+    def test_first_rescue_is_a_guided_success_before_normal_failure(self):
+        self.action('connect')
+        with self.assertRaises(service.DomainError):self.action('step')
+        self.action('scan-moon')
+        for move in ['step']*4+['send']:self.action(move)
         state=self.attempt['word_machine_state']
         self.assertEqual(state['status'],'success')
         self.assertFalse(state['saw_wrong'])
         self.assertEqual(state['output'],['Open','the','Moon','gate'])
         self.assertIn('Zip is behind the Moon gate.',state['input'])
 
-    def test_first_predictions_survive_wrong_choice_repair_and_reload(self):
-        for move in FIRST+['next','scan-moon','predict-moon','loop-same']+['step']*4+['send']:self.action(move)
+    def test_first_prediction_survives_wrong_context_repair_and_reload(self):
+        for move in FIRST+['next','scan-moon','predict-moon']+['step']*4+['send']:self.action(move)
         self.assertEqual(self.attempt['word_machine_state']['status'],'wrong')
         for move in ['scan-star']+['step']*4+['send']:self.action(move)
         self.attempt=service.state(self.path,self.learner)['attempt'];self.action('finish')
         result=self.attempt['assessment']['transfer_observations']
         self.assertEqual(result['context_choice'],'moon')
-        self.assertFalse(result['relevant_context']);self.assertFalse(result['loop_correct'])
+        self.assertFalse(result['relevant_context']);self.assertIsNone(result['loop_correct'])
         self.assertTrue(result['prediction_matches_supplied_context'])
 
     def test_historical_draft_does_not_block_bellweather_level1(self):
@@ -77,21 +80,21 @@ class FirstWordsTests(unittest.TestCase):
                 'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':first_words.MISSION_ID})
         self.assertEqual(error.exception.code,'ACTIVE_ATTEMPT')
 
-    def test_predictions_required_and_cannot_be_rewritten(self):
+    def test_gate_prediction_required_but_second_quiz_is_not(self):
         for move in FIRST+['next','scan-star']:self.action(move)
         with self.assertRaises(service.DomainError):self.action('step')
         self.action('predict-star')
         with self.assertRaises(service.DomainError):self.action('predict-moon')
-        with self.assertRaises(service.DomainError):self.action('step')
-        self.action('loop-grows');self.action('step')
+        self.action('step')
         self.assertIn('Open',self.attempt['word_machine_state']['context'])
         response=copy.deepcopy(self.attempt['response']);response['word_machine']['moves']=[]
         with self.assertRaises(service.DomainError):service.command(self.path,self.learner,'save',{'command_id':str(uuid4()),'expected_revision':self.attempt['revision'],'attempt_id':self.attempt['id'],'response':response})
 
     def test_hints_and_unrelated_notice_do_not_claim_transfer(self):
-        for move in FIRST+['next','scan-parade','hint','predict-star','loop-grows']+['step']*4+['send','scan-star']+['step']*4+['send']:self.action(move)
+        for move in FIRST+['next','scan-parade','hint','predict-star']+['step']*4+['send','scan-star']+['step']*4+['send']:self.action(move)
         self.action('finish');result=self.attempt['assessment']['transfer_observations']
         self.assertTrue(result['hint_before_prediction']);self.assertFalse(result['relevant_context']);self.assertFalse(result['prediction_matches_supplied_context'])
+        self.assertIsNone(result['loop_correct'])
 
     def test_old_content_and_rules_remain_pinned(self):
         old=freeze('LEARN',word_machine.MISSION_ID)
