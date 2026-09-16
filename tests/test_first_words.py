@@ -39,6 +39,14 @@ class FirstWordsTests(unittest.TestCase):
             self.assertEqual(db.execute('SELECT count(*) FROM rewards').fetchone()[0],1)
             with self.assertRaises(Exception):db.execute("UPDATE evidence SET result='{}'")
 
+    def test_first_rescue_can_inspect_before_making_the_plausible_mistake(self):
+        for move in ['connect','scan-moon']+['step']*4+['send']:self.action(move)
+        state=self.attempt['word_machine_state']
+        self.assertEqual(state['status'],'success')
+        self.assertFalse(state['saw_wrong'])
+        self.assertEqual(state['output'],['Open','the','Moon','gate'])
+        self.assertIn('Zip is behind the Moon gate.',state['input'])
+
     def test_first_predictions_survive_wrong_choice_repair_and_reload(self):
         for move in FIRST+['next','scan-moon','predict-moon','loop-same']+['step']*4+['send']:self.action(move)
         self.assertEqual(self.attempt['word_machine_state']['status'],'wrong')
