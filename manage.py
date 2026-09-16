@@ -8,13 +8,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 BROWSER_GROUPS = {
-    "foundation": ["tests.browser_check", "tests.expedition_browser_check",
-                   "tests.game_review_browser", "tests.story3d_framework_browser",
-                   "tests.playcanvas_framework_browser", "tests.playcanvas_story_interaction_browser"],
-    "opening": ["tests.onboarding_browser", "tests.opening_contract_browser", "tests.player_controls_browser"],
-    "journey": ["tests.rescue_browser"],
-    "word-machine": ["tests.word_machine_browser"],
+    # Active product gate: entry/auth continuity first, then the complete Level 1.
+    "foundation": ["tests.level1_entry_browser"],
     "first-words": ["tests.first_words_opening_browser", "tests.first_words_browser", "tests.first_words_readability_browser"],
+    # Historical suites remain callable for archaeology/regression work but are not
+    # allowed to displace Level 1 verification in the active CI sequence.
+    "legacy-foundation": ["tests.browser_check", "tests.expedition_browser_check",
+                          "tests.game_review_browser", "tests.story3d_framework_browser",
+                          "tests.playcanvas_framework_browser", "tests.playcanvas_story_interaction_browser"],
+    "legacy-opening": ["tests.onboarding_browser", "tests.opening_contract_browser", "tests.player_controls_browser"],
+    "legacy-journey": ["tests.rescue_browser"],
+    "legacy-word-machine": ["tests.word_machine_browser"],
 }
 
 
@@ -29,8 +33,6 @@ def main():
             result = subprocess.call([sys.executable, script], cwd=ROOT)
             if result:
                 return result
-        # Render runs asset preparation without the CI-only JavaScript build.
-        # The post-transfer learning lab is a served runtime asset too.
         from tools.package_repair import build as package_repair
         package_repair()
         return 0
@@ -39,8 +41,6 @@ def main():
         package_repair()
         if not compileall.compile_dir(ROOT / "app", quiet=1):
             return 1
-        # Browser code includes ES modules. Parse every script with ESM semantics
-        # so engine/runtime imports fail in build rather than only in-browser.
         for script in sorted((ROOT / "web").glob("*.js")):
             subprocess.run([
                 "node", "--input-type=module", "--check"
@@ -51,10 +51,14 @@ def main():
         print("Build passed: Python compiled; browser JavaScript parsed with ESM semantics.")
         return 0
     if command == "browser":
-        parser = argparse.ArgumentParser(description="Run all browser checks or one CI group")
+        parser = argparse.ArgumentParser(description="Run all active browser checks or one group")
         parser.add_argument("--group", choices=BROWSER_GROUPS)
         args, remaining = parser.parse_known_args(sys.argv[2:])
-        modules = BROWSER_GROUPS[args.group] if args.group else [m for group in BROWSER_GROUPS.values() for m in group]
+        if args.group:
+            modules=BROWSER_GROUPS[args.group]
+        else:
+            # Default means the current product, not every historical prototype.
+            modules=BROWSER_GROUPS["foundation"]+BROWSER_GROUPS["first-words"]
         for module in modules:
             print(f"Starting {module}", flush=True)
             result = subprocess.call([sys.executable, "-m", module, *remaining], cwd=ROOT)
