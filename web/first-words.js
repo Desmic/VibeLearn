@@ -59,7 +59,12 @@ function render(){
   else{button(s.pieces===0?'Make the first piece':s.pieces<4?'Make the next piece':'Speak to the gate →',s.pieces<4?'step':'send');if(s.round===1&&s.pieces===0)button('Change the scanned notice','notices',false);}
   $('#rewind').hidden=complete||!s.powered||s.status==='success'||s.pieces===0;
   text('#saved',session.busy?'Saving…':session.pending?'Not saved · retry available':complete?'Level saved · practice recorded':'Saved');
-  const scene=complete?'Zip stands beside you at the open Star gate. Bellweather continues beyond the tower.':s.round===0&&s.status!=='success'?'Zip is behind the Moon gate; the Sun hatch is nearby.':'Zip is free. The Star gate leads to the tower.';
+  let scene;
+  if(complete)scene='Zip stands beside you at the open Star gate. Bellweather continues beyond the tower.';
+  else if(s.round===0&&s.status!=='success')scene='Zip is behind the Moon gate; the Sun hatch is nearby.';
+  else if(s.round===0)scene='Zip is free beside you. The route toward the tower is ahead.';
+  else if(s.status==='success')scene='Zip stands at the open Star gate on the way to the tower.';
+  else scene='Zip is free. Several route gates face the tower. A glowing five-point lantern mark is visible on one gate.';
   host.setAttribute('aria-label',`Bellweather, a lantern city above the clouds. ${scene}`);
   text('#scene-description',`${scene} ${$('#goal').textContent} ${$('#detail').textContent} Input: ${s.context.join(' ')}. Output: ${s.output.join(' ')||'none'}.`);
 }
