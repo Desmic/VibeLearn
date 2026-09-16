@@ -2,8 +2,7 @@
 
 **Checkpoint date:** 17 September 2026 IST  
 **Behavioral candidate:** `6fea8287aa5f078a5836902478320699e54571a9`  
-**Branch:** `game/level1-quality-gate`  
-**CI run:** `35138788244`
+**Exact CI run:** `35138788244`
 
 This review records observed/automated Level 1 behavior after the user's reminder that lifecycle controls regressed and that the preview was too convoluted. It does **not** establish user acceptance, novice engagement, subjective sound quality or learning mastery.
 
@@ -17,7 +16,7 @@ The active opening is a continuous Bellweather PlayCanvas scene:
 
 The exact-head opening browser gate passed fresh entry, identity-marker visibility, pause/resume, sound toggle, skip, replay preserving an active draft, returning-learner resume, and 360/430/desktop reduced-motion paths.
 
-Fresh screenshots were inspected, not only DOM assertions. The identity labels sit on the characters rather than adding another explanation panel. The three beats now communicate friend -> Warden/voice theft -> trapped Zip/next action. Emotional pull and sound mix still require human judgment.
+Fresh screenshots were inspected, not only DOM assertions. The identity labels sit on the characters rather than adding another explanation panel. The three beats communicate friend -> Warden/voice theft -> trapped Zip/next action.
 
 ## 2. Tutorial and first success
 
@@ -79,7 +78,7 @@ The completed chapter remains guided practice. Assessment reports bounded first-
 
 The user reported that logout and game reset disappeared from the preview even though backend routes still existed. They are restored as first-class in-game menu controls.
 
-Dedicated hosted-browser verification now exercises the real UI and session boundary:
+Dedicated hosted-browser verification exercises the real UI and session boundary:
 
 - sign in through the Bellweather auth surface;
 - start Level 1 and persist progress;
@@ -114,22 +113,46 @@ GitHub Actions run `35138788244` passed all active Level 1 jobs on `6fea8287aa5f
 
 The chapter gate completes the 390px mistake/recovery path and two additional fresh reduced-motion phone runs; it finished successfully rather than being shortened to make CI faster.
 
-## 8. Deployment and review boundary
+## 8. Internal qualitative gate
 
-The verified development candidate is **not live**.
+The exact rendered artifacts were then reviewed under `CRITIC-POLICY.md`. Concrete previous abandonment risks were checked before ratings, and each 9+ criterion records a counterexample attempt.
 
-The current private Render preview remains commit `987e4773a231a9172634d8aa58e47f0b0996cb75`, deploy `dep-dalcfum5vjqs73et1ir0`. It predates the lifecycle/tutorial/identity simplification above. Auto-deploy remains off.
+Review record: `docs/reviews/2026-09-17-level1-6fea828.json`  
+Detailed review: `docs/LEVEL1-FINAL-CRITIC-20260917.md`
 
-Do not infer that the live preview contains these repairs, and do not deploy the newer candidate solely because automated gates are green.
+The repository checker returns `ready_for_user_review` with gate minimums:
 
-## Remaining limitations / next action
+- rendered story — **9**;
+- first touch — **9**;
+- whole chapter — **9**;
+- learning — **9**.
 
-Still unverified:
+All required coverage is observed and no internally identified blocker remains. This does not establish user acceptance.
+
+## 9. Live review deployment
+
+The private Render review service now runs commit `6de1f0ccb234507c1db2dccbe007c7cabfaf397e`, deploy `dep-daleugf40ujc73dphuo0`, at:
+
+`https://vibelearn-4xws.onrender.com/`
+
+That commit contains the exact verified `6fea828...` game runtime plus review/documentation commits only. Render reports the deployment as live, health/startup requests returned HTTP 200, and no error/critical logs were present after deployment when checked.
+
+Auto-deploy remains off.
+
+## Remaining limitations for the user's final review
+
+Still intentionally left to human judgment:
 
 - actual listening judgment of the Bellweather music/effects mix;
-- physical phone behavior/performance;
-- novice or young-player comprehension/engagement;
+- physical-phone behavior/performance and ergonomics;
+- novice/young-player comprehension/engagement;
 - delayed retention or independent mastery;
-- the current user's acceptance of this newer build.
+- the current user's product taste and acceptance.
 
-Next action is the qualitative whole-Level-1 review under `CRITIC-POLICY.md`, with failures/likely abandonment points written before ratings. Repair only concrete Level 1 findings, then present the bounded candidate to the user. **Do not start Level 2 yet.**
+The internal environment verified audio lifecycle/scheduling/phase/mute behavior but cannot literally listen to the mix. Chromium touch/viewport emulation is not a physical-device study.
+
+## Next action
+
+**Hand Level 1 to the current user for final review and feedback.**
+
+Do not start Level 2 yet. Any user-reported Level 1 blocker should be repaired and retested before progression work resumes.
