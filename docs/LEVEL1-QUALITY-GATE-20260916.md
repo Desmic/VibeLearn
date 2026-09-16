@@ -2,7 +2,7 @@
 
 **Updated:** 17 September 2026 IST  
 **Branch:** `game/level1-quality-gate`  
-**Verified behavioral candidate:** `64c4334b8a4ab3937031704140086560a9d27b04`
+**Verified behavioral candidate:** `6fea8287aa5f078a5836902478320699e54571a9`
 
 Status: **automated/technical Level 1 gate passed; qualitative review and user acceptance pending.**
 
@@ -31,6 +31,7 @@ The binding product rule is **easy to play, hard to master**. Teach the basic in
 
 Key constraints now enforced:
 
+- Zip and the Warden are explicitly identified on their world characters during the opening; identity clarity is solved spatially rather than by another explanation card;
 - no intentional round-0 failure for fresh Level 1 runs;
 - optional model inspection stays out of the tutorial and appears after the first rescue;
 - the former required second input-growth prediction is removed from new runs;
@@ -44,27 +45,27 @@ Key constraints now enforced:
 
 ## Technical gate result
 
-GitHub Actions run `35137170056` passed every active Level 1 job on the exact behavioral candidate:
+GitHub Actions run `35138788244` passed every active Level 1 job on the exact behavioral candidate:
 
 | Gate | Result | What it protects |
 |---|---|---|
 | foundation | passed | build, full application suite, entry, historical-draft continuity, no 2D fallback |
 | application tests | **152 passed** | rules, storage, PostgreSQL behavior, auth/session, evidence/isolation contracts |
-| first-words-opening | passed | opening beats, pause/sound, skip/replay, reduced motion, tutorial handoff |
+| first-words-opening | passed | opening beats, explicit Zip/Warden identity, pause/sound, skip/replay, reduced motion, tutorial handoff |
 | first-words-controls | passed | keyboard/touch/camera controls after persisted action + reload |
 | first-words-readability | passed | 200% text at 360/390/430 with usable world area |
 | first-words-lifecycle | passed | hosted reset/restart and sign-out/auth boundary |
 | first-words-chapter | passed | tutorial first win, mistake/recovery, completion/reload, 360/430 reduced-motion completion |
 
-The chapter browser report has no page errors. Fresh exact-head opening/chapter screenshots were inspected in addition to DOM assertions.
+The opening and chapter browser reports have no page errors. Fresh exact-head screenshots were inspected in addition to DOM assertions.
 
 ## Observed presentation checkpoint
 
 The current opening uses three causal beats rather than a lesson stack:
 
-1. interact with Zip as a friend;
-2. see the Warden and voice theft;
-3. see Zip trapped/voiceless and continue through one primary `Help Zip` action.
+1. interact with the visibly labelled Zip as a friend;
+2. see the visibly labelled Warden and voice theft;
+3. see Zip labelled behind the gate, voiceless, and continue through one primary `Help Zip` action.
 
 The tutorial then exposes one immediate action at a time and ends in `Zip is free.` before the tower challenge introduces a normal mistake.
 

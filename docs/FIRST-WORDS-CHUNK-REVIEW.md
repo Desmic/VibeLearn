@@ -1,9 +1,9 @@
 # The First Words — Level 1 chunk review
 
 **Checkpoint date:** 17 September 2026 IST  
-**Behavioral candidate:** `64c4334b8a4ab3937031704140086560a9d27b04`  
+**Behavioral candidate:** `6fea8287aa5f078a5836902478320699e54571a9`  
 **Branch:** `game/level1-quality-gate`  
-**CI run:** `35137170056`
+**CI run:** `35138788244`
 
 This review records observed/automated Level 1 behavior after the user's reminder that lifecycle controls regressed and that the preview was too convoluted. It does **not** establish user acceptance, novice engagement, subjective sound quality or learning mastery.
 
@@ -11,13 +11,13 @@ This review records observed/automated Level 1 behavior after the user's reminde
 
 The active opening is a continuous Bellweather PlayCanvas scene:
 
-1. friendship: Zip and the player share a lantern and the player performs a simple hand-tap interaction;
-2. threat: the Warden arrives and visibly takes speech engines;
-3. consequence: Zip pushes the player clear, is left behind the gate without a voice, and the primary continuation is `Help Zip ->`.
+1. friendship: Zip and the player share a lantern; a world-anchored `ZIP` marker identifies the companion and the player performs a simple hand-tap interaction;
+2. threat: the Warden arrives, is identified in-world as `WARDEN`, and visibly takes speech engines;
+3. consequence: Zip pushes the player clear, is left behind the gate without a voice, is explicitly labelled `ZIP`, and the primary continuation is `Help Zip ->`.
 
-The exact-head opening browser gate passed fresh entry, pause/resume, sound toggle, skip, replay preserving an active draft, returning-learner resume, and 360/430/desktop reduced-motion paths.
+The exact-head opening browser gate passed fresh entry, identity-marker visibility, pause/resume, sound toggle, skip, replay preserving an active draft, returning-learner resume, and 360/430/desktop reduced-motion paths.
 
-Fresh screenshots were inspected, not only DOM assertions. The three beats now communicate friend -> Warden/voice theft -> trapped Zip/next action without adding another explanation screen. This is technically and visually clearer than the prior preview, but emotional pull and sound mix still require human judgment.
+Fresh screenshots were inspected, not only DOM assertions. The identity labels sit on the characters rather than adding another explanation panel. The three beats now communicate friend -> Warden/voice theft -> trapped Zip/next action. Emotional pull and sound mix still require human judgment.
 
 ## 2. Tutorial and first success
 
@@ -102,23 +102,23 @@ Default play is intentionally simpler than the earlier preview: the immediate go
 
 ## 7. Integrated technical gate
 
-GitHub Actions run `35137170056` passed all active Level 1 jobs on `64c4334b8a4ab3937031704140086560a9d27b04`:
+GitHub Actions run `35138788244` passed all active Level 1 jobs on `6fea8287aa5f078a5836902478320699e54571a9`:
 
 - foundation / entry / no 2D fallback — **passed**;
 - full application suite — **152 tests passed**;
-- opening — **passed**;
+- opening, including explicit Zip/Warden identity markers — **passed**;
 - controls after save/reload — **passed**;
 - readability / 200% text — **passed**;
 - hosted lifecycle reset/logout — **passed**;
 - whole chapter — **passed**.
 
-The chapter gate took longer because it completes the 390px mistake/recovery path and two additional fresh reduced-motion phone runs; it finished successfully rather than being shortened to make CI faster.
+The chapter gate completes the 390px mistake/recovery path and two additional fresh reduced-motion phone runs; it finished successfully rather than being shortened to make CI faster.
 
 ## 8. Deployment and review boundary
 
 The verified development candidate is **not live**.
 
-The current private Render preview remains commit `987e4773a231a9172634d8aa58e47f0b0996cb75`, deploy `dep-dalcfum5vjqs73et1ir0`. It predates the lifecycle/tutorial simplification above. Auto-deploy remains off.
+The current private Render preview remains commit `987e4773a231a9172634d8aa58e47f0b0996cb75`, deploy `dep-dalcfum5vjqs73et1ir0`. It predates the lifecycle/tutorial/identity simplification above. Auto-deploy remains off.
 
 Do not infer that the live preview contains these repairs, and do not deploy the newer candidate solely because automated gates are green.
 

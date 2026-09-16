@@ -5,13 +5,13 @@
 Status: **Level 1 technical gate passed; qualitative/user review still pending.**
 
 Active development branch: `game/level1-quality-gate` (draft PR #11).
-Verified behavioral candidate: `64c4334b8a4ab3937031704140086560a9d27b04`.
-GitHub Actions run: `35137170056` (`Verify hosted pilot`, run 802).
+Verified behavioral candidate: `6fea8287aa5f078a5836902478320699e54571a9`.
+GitHub Actions run: `35138788244` (`Verify hosted pilot`, run 804).
 
 All six active Level 1 gates passed on that exact commit:
 
 - `foundation`: build passed, the full application suite ran **152 tests successfully**, and the Level 1 entry/no-2D-fallback browser gate passed;
-- `first-words-opening`: fresh opening, skip, replay, reduced-motion and tutorial handoff passed;
+- `first-words-opening`: fresh opening, explicit Zip/Warden identity markers, skip, replay, pause/sound lifecycle, reduced-motion and tutorial handoff passed;
 - `first-words-controls`: movement/camera controls remained usable after a persisted action and reload;
 - `first-words-readability`: 200% text kept a usable 3D world band at 360/390/430 CSS-pixel widths;
 - `first-words-lifecycle`: hosted sign-in -> reset -> opening restart and sign-out -> auth were exercised in a real browser and passed;
@@ -34,6 +34,7 @@ Implemented current flow:
 
 Important simplifications now protected by tests:
 
+- the opening explicitly labels `ZIP` on the friendship and trapped beats and `WARDEN` on the threat beat, so the first relationship/action is grounded in the world instead of another explanation card;
 - new runs cannot intentionally fail before the first rescue;
 - the optional engine inspector is hidden during the tutorial and appears only after the first win;
 - the old required `Predict the next input` quiz is removed from new runs; input growth is learned by watching generated words join the next input;
@@ -53,7 +54,7 @@ The live private Render preview remains:
 - service `srv-daf7dhuq1p3s73c122cg`;
 - auto-deploy is off.
 
-That live preview predates the lifecycle/tutorial simplification and must not be confused with the verified development candidate. Do not deploy the newer candidate merely because CI is green; deployment/user review remain explicit checkpoints.
+That live preview predates the lifecycle/tutorial/identity simplification and must not be confused with the verified development candidate. Do not deploy the newer candidate merely because CI is green; deployment/user review remain explicit checkpoints.
 
 No new Supabase schema migration was required for this revision. Preserve the existing hosted auth/data boundary, learner isolation and immutable evidence behavior.
 
@@ -61,7 +62,7 @@ No new Supabase schema migration was required for this revision. Preserve the ex
 
 Fresh exact-head screenshots/reports show:
 
-- a three-beat 3D opening ending on one primary `Help Zip` action;
+- a three-beat 3D opening where Zip and the Warden are identified on their actual world characters and the final beat ends on one primary `Help Zip` action;
 - a compact first-success state with Zip free and one `Continue with Zip` action;
 - a recoverable tower mistake whose primary action is `Check route signs`;
 - an in-world completion state with Zip present and the Star gate open before any optional ending dialog;
