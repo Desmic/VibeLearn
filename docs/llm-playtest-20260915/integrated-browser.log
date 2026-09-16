@@ -1,0 +1,188 @@
+Starting tests.browser_check
+{
+  "phase": "game-story-campaign-v2",
+  "browser": "138.0.7204.23",
+  "checks": [
+    "fresh campaign begins with a concrete shopping story, plain goal, one easy mission and visible future path",
+    "locked future missions are enforced on the server",
+    "HUD save stays available and browser reload resumes exact Level 1 progress",
+    "easy clear gives immediate XP, keeps undeclared no-help state unknown, and focuses the newly unlocked next level",
+    "Level 2 preserves declared no-help independence and automatically focuses Level 3",
+    "secondary help/source controls live in HUD drawers and preserve aid semantics",
+    "HUD decisions and diagnosis survive actual process restart",
+    "Level 3 combines prior rules, records actual source help as assisted, and focuses the boss",
+    "HUD story/game shell survives keyboard, 390px viewport and 200% text",
+    "boss clear retries lost acknowledgement without duplicate evidence or XP",
+    "full chapter progression reaches four clears and leaves the highest completed node selected",
+    "fresh second browser has isolated campaign progression and cannot cross-write",
+    "reduced-motion preference disables game transitions"
+  ],
+  "result": "passed",
+  "page_errors": [],
+  "fault_injection": "One dropped response after a real HTTP commit; one actual process restart; no successful API mocks.",
+  "screenshots": [
+    "game-campaign.png",
+    "game-level1.png",
+    "game-boss-mobile.png",
+    "game-boss-clear.png"
+  ]
+}
+Passed tests.browser_check
+Starting tests.expedition_browser_check
+{
+  "result": "passed",
+  "browser": "138.0.7204.23",
+  "checks": [
+    "keyboard launch; direct send changes the scene; truth and courier knowledge differ; XP hidden without disabling play",
+    "save, reload and actual process restart preserve move and knowledge; clearing unlocks only the next stop",
+    "new worker identity causes a visible duplicate; rewind preserves failure history and allows safe recovery",
+    "retry-forever fails four counterexamples; safe rule passes seven; bridge ending changes the world and unlocks real detour",
+    "detour has two-hour memory and actually absent initial order; dropped acknowledgement retries one command without duplicating moves",
+    "fresh isolated touch sessions at 390px and 320px; reduced motion; enlarged root text; no horizontal overflow"
+  ],
+  "page_errors": [],
+  "independent_critic_score": null,
+  "acceptance": "independent_critic_pending",
+  "audience_validation": "No child or young-adult playtest; machine checks are not enjoyment evidence."
+}
+Passed tests.expedition_browser_check
+Starting tests.game_review_browser
+{
+  "result": "passed",
+  "method": "builder-directed automated browser probes and later screenshot/trace review; not a separate agent or youth playtest",
+  "browser": "138.0.7204.23",
+  "renderer": {
+    "revision": "180",
+    "drawCalls": 62,
+    "geometries": 4,
+    "pixelRatio": 1,
+    "contextLost": false
+  },
+  "checks": [
+    "Pinned Three.js rendered; selecting the send-post mesh commits one real action; uncertain knowledge remains distinct.",
+    "Journal object restores durable intent; keyboard focus follows the next meaningful action.",
+    "Numbered boss rules stay ordered; unsaved choice survives map attempt/reload; ending precedes optional technical postmortem.",
+    "Actual WebGL context loss restores the illustrated scene; detour remains playable without 3D.",
+    "All learner-session network requests remain same-origin; no runtime CDN dependency.",
+    "Renderer-load failure leaves a readable, touch-operable narrow-screen fallback."
+  ],
+  "page_errors": [],
+  "game_score": null,
+  "educational_equivalence": "unvalidated"
+}
+Passed tests.game_review_browser
+Starting tests.story3d_framework_browser
+{
+  "result": "passed",
+  "checks": [
+    "An unrelated Star Orchard adapter mounts through the same versioned host and generic Three.js runtime as Echo Forge.",
+    "The adapter can select a beat, use shared camera/runtime policy, pause, report runtime version, and dispose its canvas without Relay Rescue code.",
+    "The host fails closed for an unsupported mode, incompatible adapter version, and incomplete instance contract; incomplete instances are disposed."
+  ],
+  "synthetic_world": "framework-proof.star-orchard",
+  "page_errors": []
+}
+Passed tests.story3d_framework_browser
+Starting tests.playcanvas_framework_browser
+{
+  "result": "passed",
+  "engine": "playcanvas",
+  "engine_version": "2.22.1",
+  "synthetic_world": "framework-proof.star-orchard",
+  "echo_world": "relay-rescue.echo-forge",
+  "echo_camera_variant": "portrait",
+  "echo_asset": {
+    "loaded": [
+      "pip",
+      "forge"
+    ],
+    "story_0_animation": "idle",
+    "story_5_animation": "wave",
+    "forge_bounds": {
+      "min": [
+        2.7715,
+        0.15,
+        -2.6342
+      ],
+      "max": [
+        7.8286,
+        4.0544,
+        1.6343
+      ],
+      "size": [
+        5.057,
+        3.9044,
+        4.2685
+      ]
+    }
+  },
+  "blacksmith_source_bounds": {
+    "min": [
+      -2.5662,
+      -0.0039,
+      -1.6579
+    ],
+    "max": [
+      1.3238,
+      2.9995,
+      1.6256
+    ],
+    "size": [
+      3.89,
+      3.0034,
+      3.2835
+    ]
+  },
+  "screenshots": [
+    "playcanvas-pip-story0-390.png",
+    "playcanvas-pip-story5-wave-390.png"
+  ],
+  "checks": [
+    "An unrelated engine-neutral WorldSpec compiled into the real PlayCanvas Engine.",
+    "Portable exposure, fog and camera tone-mapping intent compiled through the generic backend and invalid fog failed closed.",
+    "Unsafe external asset URLs and unknown semantic animation aliases fail closed before asset loading.",
+    "The pinned same-origin Pip GLB loaded through the generic container path with primitive fallback retained for failure.",
+    "Story state changed Pip from semantic idle to wave animation without exposing PlayCanvas track objects to the adapter.",
+    "Loaded idle and wave character/environment frames are preserved before assertions so visual regressions remain inspectable.",
+    "The pinned Blacksmith loads through the same generic AssetRef path and now realizes the semantic Forge with structural primitive fallback."
+  ],
+  "page_errors": []
+}
+Passed tests.playcanvas_framework_browser
+Starting tests.playcanvas_story_interaction_browser
+{
+  "result": "passed",
+  "browser": "138.0.7204.23",
+  "checks": [
+    "The first causal inspection advances by tapping rendered PlayCanvas geometry.",
+    "Story actions expose semantic target ids without making renderer state authoritative.",
+    "The same action remains keyboard-operable through the accessible primary-button fallback."
+  ],
+  "page_errors": [],
+  "review_method": "automated interaction evidence; not a delight or youth-playtest score"
+}
+Passed tests.playcanvas_story_interaction_browser
+Starting tests.onboarding_browser
+Passed tests.onboarding_browser
+Starting tests.opening_contract_browser
+Passed tests.opening_contract_browser
+Starting tests.player_controls_browser
+Passed tests.player_controls_browser
+Starting tests.rescue_browser
+{
+  "result": "passed",
+  "browser": "138.0.7204.23",
+  "checks": [
+    "Signals 1-6 keep one PlayCanvas GameRuntime identity alive as reasoning grows; Signal 6 stages the unchanged four-node route and six semantic tools as an in-world circuit rather than a separate workbench page",
+    "Signal 6 route playback remains inside the live world and is captured at 390px without horizontal overflow",
+    "Direct scene inspection; causal route playback; player-created quick/expired storms change the outcome without granting a boss clear; stale-result navigation remains invalidated",
+    "Signal 7 changes context into a distinct PlayCanvas export-yard while preserving the exact four route slots, six semantic tools, explicit no-help declaration and sealed server-owned transfer. Route edits stay spatialized through internal rerenders; one lost acknowledgement still cannot duplicate evidence/XP; incident results and the Python repair kit remain post-action evidence outside the live interaction surface"
+  ],
+  "page_errors": [],
+  "independent_critic_score": null,
+  "acceptance": "critic_pending",
+  "audience_validation": "No human child/teen playtest; browser checks are not enjoyment evidence."
+}
+Passed tests.rescue_browser
+Starting tests.word_machine_browser
+Passed tests.word_machine_browser

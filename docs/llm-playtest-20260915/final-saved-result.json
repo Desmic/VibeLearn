@@ -1,0 +1,31 @@
+{
+  "status": "submitted",
+  "revision": 22,
+  "moves": [
+    "step",
+    "step",
+    "step",
+    "send",
+    "add-garden",
+    "step",
+    "step",
+    "step",
+    "send",
+    "next",
+    "add-garden",
+    "step",
+    "step",
+    "step",
+    "send",
+    "add-library",
+    "step",
+    "step",
+    "step",
+    "send"
+  ],
+  "evidence_count": 1,
+  "reward_count": 1,
+  "mastery": "unknown",
+  "independence": "assisted",
+  "outcome": "correct"
+}

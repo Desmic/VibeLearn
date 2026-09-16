@@ -1,0 +1,12 @@
+{
+  "result": "passed",
+  "checks": [
+    "390x844: full viewport; exposed world; orbit/zoom/recenter; movement; evidence isolation; menu release; same-level/replay preservation",
+    "360x800: full viewport; exposed world; orbit/zoom/recenter; movement; evidence isolation; menu release; same-level/replay preservation",
+    "430x932: full viewport; exposed world; orbit/zoom/recenter; movement; evidence isolation; menu release; same-level/replay preservation",
+    "1440x1000: full viewport; exposed world; orbit/zoom/recenter; movement; evidence isolation; menu release; same-level/replay preservation",
+    "844x390: full viewport; exposed world; orbit/zoom/recenter; movement; evidence isolation; menu release; same-level/replay preservation"
+  ],
+  "page_errors": [],
+  "review_method": "automated Chromium interaction; not a physical-device or user acceptance test"
+}

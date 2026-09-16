@@ -1,0 +1,330 @@
+test_invalid_is_unobserved_not_a_zero_score (test_assessment.AssessmentTests.test_invalid_is_unobserved_not_a_zero_score) ... ok
+test_reasoning_text_does_not_determine_prediction_score (test_assessment.AssessmentTests.test_reasoning_text_does_not_determine_prediction_score) ... ok
+test_retention_boundary_and_distinct_identity (test_assessment.AssessmentTests.test_retention_boundary_and_distinct_identity) ... ok
+test_review_is_deterministic_and_assistance_shortens_delay (test_assessment.AssessmentTests.test_review_is_deterministic_and_assistance_shortens_delay) ... ok
+test_provider_failure_is_classified_without_secrets (test_auth_logging.AuthLoggingTests.test_provider_failure_is_classified_without_secrets) ... ok
+test_reset_requires_verified_allowlisted_identity (test_auth_logging.AuthLoggingTests.test_reset_requires_verified_allowlisted_identity) ... ok
+test_unknown_provider_code_does_not_leak (test_auth_logging.AuthLoggingTests.test_unknown_provider_code_does_not_leak) ... ok
+test_campaign_evidence_and_historical_phase1_activity_stay_distinct (test_campaign.CampaignTests.test_campaign_evidence_and_historical_phase1_activity_stay_distinct) ... ok
+test_campaign_starts_easy_and_locks_future_levels (test_campaign.CampaignTests.test_campaign_starts_easy_and_locks_future_levels) ... ok
+test_progression_teaches_one_mechanic_then_unlocks_the_boss (test_campaign.CampaignTests.test_progression_teaches_one_mechanic_then_unlocks_the_boss) ... ok
+test_story_first_revision_maps_plain_scenario_to_same_assessed_mechanic (test_campaign.CampaignTests.test_story_first_revision_maps_plain_scenario_to_same_assessed_mechanic) ... ok
+test_xp_does_not_unlock_a_level_until_the_mission_is_correct (test_campaign.CampaignTests.test_xp_does_not_unlock_a_level_until_the_mission_is_correct) ... ok
+test_acceptance_cannot_be_forged_in_internal_record (test_critic_review.CriticReviewTests.test_acceptance_cannot_be_forged_in_internal_record) ... ok
+test_beauty_cannot_average_away_bad_clarity (test_critic_review.CriticReviewTests.test_beauty_cannot_average_away_bad_clarity) ... ok
+test_blocker_overrides_perfect_scores (test_critic_review.CriticReviewTests.test_blocker_overrides_perfect_scores) ... ok
+test_fractional_or_boolean_score_is_rejected (test_critic_review.CriticReviewTests.test_fractional_or_boolean_score_is_rejected) ... ok
+test_high_score_requires_counterexample (test_critic_review.CriticReviewTests.test_high_score_requires_counterexample) ... ok
+test_missing_and_external_evidence_are_rejected (test_critic_review.CriticReviewTests.test_missing_and_external_evidence_are_rejected) ... ok
+test_missing_coverage_and_technical_checks_cannot_pass (test_critic_review.CriticReviewTests.test_missing_coverage_and_technical_checks_cannot_pass) ... ok
+test_ready_is_never_user_acceptance (test_critic_review.CriticReviewTests.test_ready_is_never_user_acceptance) ... ok
+test_stale_revision_is_rejected (test_critic_review.CriticReviewTests.test_stale_revision_is_rejected) ... ok
+test_unknown_is_incomplete_not_zero (test_critic_review.CriticReviewTests.test_unknown_is_incomplete_not_zero) ... ok
+test_all_commands_enforce_learner_scope (test_episode.EpisodeTests.test_all_commands_enforce_learner_scope) ... ok
+test_build_worked_example_and_switch_back_are_assisted (test_episode.EpisodeTests.test_build_worked_example_and_switch_back_are_assisted) ... ok
+test_concurrent_duplicate_submit_commits_once (test_episode.EpisodeTests.test_concurrent_duplicate_submit_commits_once) ... ok
+test_duplicate_save_and_conflicting_command_id (test_episode.EpisodeTests.test_duplicate_save_and_conflicting_command_id) ... ok
+test_duplicate_submission_is_idempotent (test_episode.EpisodeTests.test_duplicate_submission_is_idempotent) ... ok
+test_evaluator_failure_is_unknown_and_preserves_draft (test_episode.EpisodeTests.test_evaluator_failure_is_unknown_and_preserves_draft) ... ok
+test_explicit_external_help_is_assisted_without_relabeling_unknown (test_episode.EpisodeTests.test_explicit_external_help_is_assisted_without_relabeling_unknown) ... ok
+test_hints_are_progressive_deduplicated_and_bounded (test_episode.EpisodeTests.test_hints_are_progressive_deduplicated_and_bounded) ... ok
+test_historical_context_is_immutable_in_database (test_episode.EpisodeTests.test_historical_context_is_immutable_in_database) ... ok
+test_invalid_command_never_changes_state (test_episode.EpisodeTests.test_invalid_command_never_changes_state) ... ok
+test_invalid_submission_keeps_saved_draft_and_unknown_distinct_from_failure (test_episode.EpisodeTests.test_invalid_submission_keeps_saved_draft_and_unknown_distinct_from_failure) ... ok
+test_learner_cannot_read_or_write_another_attempt (test_episode.EpisodeTests.test_learner_cannot_read_or_write_another_attempt) ... ok
+test_newer_database_is_not_silently_downgraded (test_episode.EpisodeTests.test_newer_database_is_not_silently_downgraded) ... ok
+test_pre_hint_checkpoint_is_separate_from_assisted_submission (test_episode.EpisodeTests.test_pre_hint_checkpoint_is_separate_from_assisted_submission) ... ok
+test_reward_cap_and_prior_exposure_survive_a_new_attempt (test_episode.EpisodeTests.test_reward_cap_and_prior_exposure_survive_a_new_attempt) ... ok
+test_reward_storage_failure_rolls_back_entire_submission (test_episode.EpisodeTests.test_reward_storage_failure_rolls_back_entire_submission) ... ok
+test_save_resume_pins_content_without_private_profile (test_episode.EpisodeTests.test_save_resume_pins_content_without_private_profile) ... ok
+test_source_after_submit_never_rewrites_response_or_evidence (test_episode.EpisodeTests.test_source_after_submit_never_rewrites_response_or_evidence) ... ok
+test_source_gate_and_mode_changes_never_erase_assistance (test_episode.EpisodeTests.test_source_gate_and_mode_changes_never_erase_assistance) ... ok
+test_stale_save_preserves_committed_answer (test_episode.EpisodeTests.test_stale_save_preserves_committed_answer) ... ok
+test_submission_records_evidence_and_course_independent_review (test_episode.EpisodeTests.test_submission_records_evidence_and_course_independent_review) ... ok
+test_unknown_external_aids_do_not_claim_independence (test_episode.EpisodeTests.test_unknown_external_aids_do_not_claim_independence) ... ok
+test_changed_policy_must_be_tested_again (test_expedition.ExpeditionModelTests.test_changed_policy_must_be_tested_again) ... ok
+test_direct_routes_collect_exactly_one_gear (test_expedition.ExpeditionModelTests.test_direct_routes_collect_exactly_one_gear) ... ok
+test_expired_same_ticket_is_not_infinite_deduplication (test_expedition.ExpeditionModelTests.test_expired_same_ticket_is_not_infinite_deduplication) ... ok
+test_five_distinct_families_do_not_rewrite_historical_content (test_expedition.ExpeditionModelTests.test_five_distinct_families_do_not_rewrite_historical_content) ... ok
+test_missing_evidence_is_not_failure (test_expedition.ExpeditionModelTests.test_missing_evidence_is_not_failure) ... ok
+test_new_identity_duplicates_and_rewind_retains_history (test_expedition.ExpeditionModelTests.test_new_identity_duplicates_and_rewind_retains_history) ... ok
+test_only_safe_policy_passes_exhaustive_option_matrix (test_expedition.ExpeditionModelTests.test_only_safe_policy_passes_exhaustive_option_matrix) ... ok
+test_remix_changes_memory_and_missing_request_not_just_story (test_expedition.ExpeditionModelTests.test_remix_changes_memory_and_missing_request_not_just_story) ... ok
+test_retry_forever_fails_even_with_correct_legacy_counts (test_expedition.ExpeditionModelTests.test_retry_forever_fails_even_with_correct_legacy_counts) ... ok
+test_unknown_moves_and_impossible_sequences_fail_closed (test_expedition.ExpeditionModelTests.test_unknown_moves_and_impossible_sequences_fail_closed) ... ok
+test_world_truth_is_not_courier_knowledge (test_expedition.ExpeditionModelTests.test_world_truth_is_not_courier_knowledge) ... ok
+test_lost_ack_replays_one_move_and_submits_one_reward (test_expedition.ExpeditionPersistenceTests.test_lost_ack_replays_one_move_and_submits_one_reward) ... ok
+test_real_sequential_progress_and_server_locks (test_expedition.ExpeditionPersistenceTests.test_real_sequential_progress_and_server_locks) ... ok
+test_resume_and_feedback_semantics_are_persisted (test_expedition.ExpeditionPersistenceTests.test_resume_and_feedback_semantics_are_persisted) ... ok
+test_saved_moves_cannot_be_erased_even_by_a_forged_request (test_expedition.ExpeditionPersistenceTests.test_saved_moves_cannot_be_erased_even_by_a_forged_request) ... ok
+test_second_learner_cannot_read_or_change_game (test_expedition.ExpeditionPersistenceTests.test_second_learner_cannot_read_or_change_game) ... ok
+test_wrong_result_can_earn_practice_xp_but_never_unlocks (test_expedition.ExpeditionPersistenceTests.test_wrong_result_can_earn_practice_xp_but_never_unlocks) ... ok
+test_candidate_state_bounds_are_checked_before_commit (test_game_rules.GameRulesTests.test_candidate_state_bounds_are_checked_before_commit) ... ok
+test_invalid_action_fails_closed_without_mutating_input (test_game_rules.GameRulesTests.test_invalid_action_fails_closed_without_mutating_input) ... ok
+test_materially_different_resource_loop_uses_same_interpreter (test_game_rules.GameRulesTests.test_materially_different_resource_loop_uses_same_interpreter) ... ok
+test_replay_is_deterministic_and_serializable (test_game_rules.GameRulesTests.test_replay_is_deterministic_and_serializable) ... ok
+test_safe_retry_and_duplicate_use_same_renderer_free_interpreter (test_game_rules.GameRulesTests.test_safe_retry_and_duplicate_use_same_renderer_free_interpreter) ... ok
+test_unknown_fields_and_expression_ops_are_rejected_at_compile_time (test_game_rules.GameRulesTests.test_unknown_fields_and_expression_ops_are_rejected_at_compile_time) ... ok
+test_changed_identity_cannot_use_another_session (test_hosted.HostedTests.test_changed_identity_cannot_use_another_session) ... {"event": "request_completed", "request_id": "29b4d5d45c06bec3", "endpoint": "login", "status": 200, "duration_ms": 42}
+ok
+test_expired_session_cannot_resume (test_hosted.HostedTests.test_expired_session_cannot_resume) ... {"event": "request_completed", "request_id": "8a756bc2942437dd", "endpoint": "login", "status": 200, "duration_ms": 29}
+ok
+test_host_and_origin_are_checked_even_with_forwarded_headers (test_hosted.HostedTests.test_host_and_origin_are_checked_even_with_forwarded_headers) ... {"event": "request_completed", "request_id": "afd714ef2522095b", "endpoint": "login", "status": 403, "duration_ms": 0}
+ok
+test_hosted_configuration_fails_closed (test_hosted.HostedTests.test_hosted_configuration_fails_closed) ... ok
+test_login_error_reference_matches_safe_request_log (test_hosted.HostedTests.test_login_error_reference_matches_safe_request_log) ... ok
+test_login_scope_and_secure_cookies (test_hosted.HostedTests.test_login_scope_and_secure_cookies) ... {"event": "request_completed", "request_id": "7c1c96c4bb47b6a6", "endpoint": "login", "status": 401, "duration_ms": 17}
+{"event": "request_completed", "request_id": "7553bc647b2a3722", "endpoint": "login", "status": 200, "duration_ms": 12}
+ok
+test_logout_revokes_replayed_cookie_pair (test_hosted.HostedTests.test_logout_revokes_replayed_cookie_pair) ... {"event": "request_completed", "request_id": "ac993af8f4e958f8", "endpoint": "login", "status": 200, "duration_ms": 8}
+{"event": "request_completed", "request_id": "b69794028bd34567", "endpoint": "logout", "status": 200, "duration_ms": 10}
+ok
+test_no_anonymous_session_or_cookie_forgery (test_hosted.HostedTests.test_no_anonymous_session_or_cookie_forgery) ... ok
+test_password_toggle_in_real_browser (test_hosted.HostedTests.test_password_toggle_in_real_browser) ... 127.0.0.1 - - [15/Sep/2026 20:59:13] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /play-canvas.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /rescue-intro.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /rescue-chapter1.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /auth-game.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /progress-controls.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /phone-first.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /game-screen.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /premium.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /game.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /expedition.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /rescue.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /expedition.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /game-world-status.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /rescue-game.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /rescue.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /rescue-intro.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /rescue-chapter1.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /play-canvas-migrate.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /auth-game.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /progress-controls.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /game-screen.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /app.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /game-runtime.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /rescue-playcanvas-world.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /api/config HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /playcanvas-backend.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /echo-forge-world-spec.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /game-character-spec.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "POST /api/session HTTP/1.1" 401 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /vendor/playcanvas.mjs HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /world-spec.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:13] "GET /player-controls.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:15] "GET /assets/quaternius-animated-robot.glb HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:15] "GET /assets/quaternius-blacksmith.glb HTTP/1.1" 200 -
+{"event": "request_completed", "request_id": "dd252742f51a2cbf", "endpoint": "login", "status": 401, "duration_ms": 0}
+127.0.0.1 - - [15/Sep/2026 20:59:33] "POST /api/auth/login HTTP/1.1" 401 -
+{"event": "request_completed", "request_id": "1e6576ab5fa08e2b", "endpoint": "request_reset", "status": 200, "duration_ms": 0}
+127.0.0.1 - - [15/Sep/2026 20:59:35] "POST /api/auth/request-reset HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /play-canvas.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /rescue-intro.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /rescue-chapter1.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /auth-game.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /progress-controls.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /phone-first.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /game-screen.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /premium.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /game.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /expedition.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /rescue.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /expedition.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /game-world-status.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /rescue-game.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /rescue.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /rescue-intro.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /rescue-chapter1.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /play-canvas-migrate.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /auth-game.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /progress-controls.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /game-screen.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /app.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /rescue-playcanvas-world.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /game-runtime.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /playcanvas-backend.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /echo-forge-world-spec.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /game-character-spec.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:35] "GET /vendor/playcanvas.mjs HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:36] "GET /world-spec.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:36] "GET /player-controls.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:36] "GET /assets/quaternius-animated-robot.glb HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:36] "GET /assets/quaternius-blacksmith.glb HTTP/1.1" 200 -
+{"event": "request_completed", "request_id": "d6f5aa5bf835def0", "endpoint": "reset_password", "status": 200, "duration_ms": 3}
+127.0.0.1 - - [15/Sep/2026 20:59:39] "POST /api/auth/reset-password HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:39] "GET /api/config HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:39] "POST /api/session HTTP/1.1" 401 -
+127.0.0.1 - - [15/Sep/2026 20:59:40] "GET /assets/quaternius-animated-robot.glb HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:40] "GET /assets/quaternius-blacksmith.glb HTTP/1.1" 200 -
+{"event": "request_completed", "request_id": "ef83333b9e78287e", "endpoint": "login", "status": 200, "duration_ms": 8}
+127.0.0.1 - - [15/Sep/2026 20:59:43] "POST /api/auth/login HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:43] "GET /api/config HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:43] "POST /api/session HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:43] "GET /game-opening.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:43] "GET /api/health HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:43] "GET /assets/quaternius-animated-robot.glb HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:43] "GET /assets/quaternius-blacksmith.glb HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:45] "GET /echo-forge-opening-spec.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:47] "POST /api/commands/start HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /play-canvas.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /rescue-intro.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /rescue-chapter1.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /auth-game.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /progress-controls.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /phone-first.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /game-screen.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /premium.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /game.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /expedition.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /rescue.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /expedition.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /game-world-status.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /rescue-game.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /rescue.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /rescue-intro.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /rescue-chapter1.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /play-canvas-migrate.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /auth-game.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /progress-controls.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /game-screen.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /app.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /rescue-playcanvas-world.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /game-runtime.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /api/config HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /playcanvas-backend.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /echo-forge-world-spec.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /game-character-spec.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "POST /api/session HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /vendor/playcanvas.mjs HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /world-spec.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /player-controls.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /api/health HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /assets/quaternius-animated-robot.glb HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:48] "GET /assets/quaternius-blacksmith.glb HTTP/1.1" 200 -
+ok
+test_phase1_hosted_acceptance_contract_survives_app_restart (test_hosted.HostedTests.test_phase1_hosted_acceptance_contract_survives_app_restart) ... {"event": "request_completed", "request_id": "b32215e631fa39ff", "endpoint": "login", "status": 200, "duration_ms": 6}
+{"event": "request_completed", "request_id": "7bc92163d7d5fc05", "endpoint": "logout", "status": 200, "duration_ms": 8}
+ok
+test_reset_scope_validation_and_session_revocation (test_hosted.HostedTests.test_reset_scope_validation_and_session_revocation) ... {"event": "request_completed", "request_id": "8a7d496215c4328f", "endpoint": "request_reset", "status": 200, "duration_ms": 0}
+{"event": "request_completed", "request_id": "37698307d877626f", "endpoint": "request_reset", "status": 200, "duration_ms": 0}
+{"event": "request_completed", "request_id": "11f11f3d8ff3c8dc", "endpoint": "login", "status": 200, "duration_ms": 5}
+{"event": "request_completed", "request_id": "adc1c00a119eda03", "endpoint": "reset_password", "status": 400, "duration_ms": 0}
+ok
+test_saved_answer_survives_relogin (test_hosted.HostedTests.test_saved_answer_survives_relogin) ... {"event": "request_completed", "request_id": "7e4f3e1ec8bb373a", "endpoint": "login", "status": 200, "duration_ms": 6}
+{"event": "request_completed", "request_id": "6456aaee5c683b4b", "endpoint": "logout", "status": 200, "duration_ms": 8}
+{"event": "request_completed", "request_id": "25f1f72d81569e21", "endpoint": "login", "status": 200, "duration_ms": 6}
+ok
+test_two_authorized_learners_are_isolated (test_hosted.HostedTests.test_two_authorized_learners_are_isolated) ... {"event": "request_completed", "request_id": "e3a41c8d56a7098b", "endpoint": "login", "status": 200, "duration_ms": 7}
+{"event": "request_completed", "request_id": "a5d8191163314ea0", "endpoint": "login", "status": 200, "duration_ms": 29}
+ok
+test_word_machine_assets_and_authenticated_commands (test_hosted.HostedTests.test_word_machine_assets_and_authenticated_commands) ... E:\Projects\VibeLearn\artifacts\critic-evidence-reset\tests\test_hosted.py:197: ResourceWarning: unclosed file <_io.BufferedReader name='E:\\Projects\\VibeLearn\\artifacts\\critic-evidence-reset\\web/word-machine.html'>
+  response=self.client.get(path,base_url=self.config['APP_ORIGIN'])
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\Projects\VibeLearn\artifacts\critic-evidence-reset\tests\test_hosted.py:197: ResourceWarning: unclosed file <_io.BufferedReader name='E:\\Projects\\VibeLearn\\artifacts\\critic-evidence-reset\\web/word-machine-boot.js'>
+  response=self.client.get(path,base_url=self.config['APP_ORIGIN'])
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\Projects\VibeLearn\artifacts\critic-evidence-reset\tests\test_hosted.py:197: ResourceWarning: unclosed file <_io.BufferedReader name='E:\\Projects\\VibeLearn\\artifacts\\critic-evidence-reset\\web/word-machine.js'>
+  response=self.client.get(path,base_url=self.config['APP_ORIGIN'])
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\Projects\VibeLearn\artifacts\critic-evidence-reset\tests\test_hosted.py:197: ResourceWarning: unclosed file <_io.BufferedReader name='E:\\Projects\\VibeLearn\\artifacts\\critic-evidence-reset\\web/word-machine-world.js'>
+  response=self.client.get(path,base_url=self.config['APP_ORIGIN'])
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+E:\Projects\VibeLearn\artifacts\critic-evidence-reset\tests\test_hosted.py:197: ResourceWarning: unclosed file <_io.BufferedReader name='E:\\Projects\\VibeLearn\\artifacts\\critic-evidence-reset\\web/workshop-props.js'>
+  response=self.client.get(path,base_url=self.config['APP_ORIGIN'])
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+{"event": "request_completed", "request_id": "5b8d8520d4ad0008", "endpoint": "login", "status": 200, "duration_ms": 18}
+E:\Projects\VibeLearn\artifacts\critic-evidence-reset\tests\test_hosted.py:203: ResourceWarning: unclosed file <_io.BufferedReader name='E:\\Projects\\VibeLearn\\artifacts\\critic-evidence-reset\\web/spec-game-world.js'>
+  response=self.post('/api/commands/start',body)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_host_origin_and_command_boundary (test_http.HttpTests.test_host_origin_and_command_boundary) ... 127.0.0.1 - - [15/Sep/2026 20:59:54] "POST /api/session HTTP/1.1" 403 -
+127.0.0.1 - - [15/Sep/2026 20:59:54] "POST /api/session HTTP/1.1" 403 -
+127.0.0.1 - - [15/Sep/2026 20:59:54] "POST /api/session HTTP/1.1" 403 -
+127.0.0.1 - - [15/Sep/2026 20:59:54] "POST /api/session HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:54] "GET /api/state HTTP/1.1" 401 -
+127.0.0.1 - - [15/Sep/2026 20:59:54] "GET /api/state HTTP/1.1" 200 -
+127.0.0.1 - - [15/Sep/2026 20:59:54] "GET /../data/learning.sqlite3 HTTP/1.1" 404 -
+127.0.0.1 - - [15/Sep/2026 20:59:54] "POST /api/session HTTP/1.1" 400 -
+127.0.0.1 - - [15/Sep/2026 20:59:55] "POST /api/commands/start HTTP/1.1" 400 -
+ok
+test_manifest_identifies_running_source_and_schema (test_http.HttpTests.test_manifest_identifies_running_source_and_schema) ... 127.0.0.1 - - [15/Sep/2026 20:59:55] "GET /api/health HTTP/1.1" 200 -
+ok
+test_phase1b_history_survives_phase1c_upgrade (test_migrations.MigrationTests.test_phase1b_history_survives_phase1c_upgrade) ... ok
+test_partial_environment_configuration_fails_closed (test_pilot_auth.PilotAuthTests.test_partial_environment_configuration_fails_closed) ... ok
+test_test_account_reset_is_noop_but_normal_reset_delegates (test_pilot_auth.PilotAuthTests.test_test_account_reset_is_noop_but_normal_reset_delegates) ... ok
+test_test_identity_is_signed_and_does_not_hit_supabase_provider (test_pilot_auth.PilotAuthTests.test_test_identity_is_signed_and_does_not_hit_supabase_provider) ... ok
+test_wrong_test_password_fails_and_normal_identity_still_delegates (test_pilot_auth.PilotAuthTests.test_wrong_test_password_fails_and_normal_identity_still_delegates) ... ok
+test_concurrent_submit_and_reward_deduplication (test_postgres.PostgresTests.test_concurrent_submit_and_reward_deduplication) ... skipped 'TEST_DATABASE_URL not set; real PostgreSQL application gate pending'
+test_database_and_service_learner_isolation (test_postgres.PostgresTests.test_database_and_service_learner_isolation) ... skipped 'TEST_DATABASE_URL not set; real PostgreSQL application gate pending'
+test_hints_pin_checkpoint_and_assistance (test_postgres.PostgresTests.test_hints_pin_checkpoint_and_assistance) ... skipped 'TEST_DATABASE_URL not set; real PostgreSQL application gate pending'
+test_history_and_reward_permissions (test_postgres.PostgresTests.test_history_and_reward_permissions) ... skipped 'TEST_DATABASE_URL not set; real PostgreSQL application gate pending'
+test_invalid_answer_rolls_back (test_postgres.PostgresTests.test_invalid_answer_rolls_back) ... skipped 'TEST_DATABASE_URL not set; real PostgreSQL application gate pending'
+test_save_resume_and_stale_write (test_postgres.PostgresTests.test_save_resume_and_stale_write) ... skipped 'TEST_DATABASE_URL not set; real PostgreSQL application gate pending'
+test_reset_requires_confirmation_and_keeps_account_session (test_progress_controls.ProgressControlTests.test_reset_requires_confirmation_and_keeps_account_session) ... {"event": "request_completed", "request_id": "715c9f808fd3bb6e", "endpoint": "login", "status": 200, "duration_ms": 8}
+{"event": "request_completed", "request_id": "bfde6d7c1425413d", "endpoint": "reset_progress", "status": 400, "duration_ms": 0}
+{"event": "request_completed", "request_id": "45a34e13f6ba84c6", "endpoint": "reset_progress", "status": 200, "duration_ms": 12}
+ok
+test_test_player_can_review_previous_signal_while_newer_signal_is_active (test_progress_controls.ProgressControlTests.test_test_player_can_review_previous_signal_while_newer_signal_is_active) ... {"event": "request_completed", "request_id": "19f1cd03ae55d6f1", "endpoint": "login", "status": 200, "duration_ms": 7}
+ok
+test_all_five_field_routes_complete_with_one_or_no_new_effect (test_rescue.RescueModelTests.test_all_five_field_routes_complete_with_one_or_no_new_effect) ... ok
+test_arbitrary_code_and_impossible_actions_fail_closed (test_rescue.RescueModelTests.test_arbitrary_code_and_impossible_actions_fail_closed) ... ok
+test_edited_program_does_not_reuse_old_passing_test (test_rescue.RescueModelTests.test_edited_program_does_not_reuse_old_passing_test) ... ok
+test_expiry_cannot_be_fixed_by_restoring_ticket (test_rescue.RescueModelTests.test_expiry_cannot_be_fixed_by_restoring_ticket) ... ok
+test_historical_ids_and_new_families_remain_distinct (test_rescue.RescueModelTests.test_historical_ids_and_new_families_remain_distinct) ... ok
+test_missing_data_is_not_a_zero_grade (test_rescue.RescueModelTests.test_missing_data_is_not_a_zero_grade) ... ok
+test_multiple_valid_program_orders_support_real_construction (test_rescue.RescueModelTests.test_multiple_valid_program_orders_support_real_construction) ... ok
+test_new_ticket_then_retry_visibly_duplicates (test_rescue.RescueModelTests.test_new_ticket_then_retry_visibly_duplicates) ... ok
+test_player_cannot_assume_unknown_equals_no_effect (test_rescue.RescueModelTests.test_player_cannot_assume_unknown_equals_no_effect) ... ok
+test_program_is_executed_in_order_and_stops_at_send (test_rescue.RescueModelTests.test_program_is_executed_in_order_and_stops_at_send) ... ok
+test_reference_repair_kit_passes_its_nine_external_service_tests (test_rescue.RescueModelTests.test_reference_repair_kit_passes_its_nine_external_service_tests) ... ok
+test_rewind_preserves_history_but_resets_rehearsal (test_rescue.RescueModelTests.test_rewind_preserves_history_but_resets_rehearsal) ... ok
+test_safe_pause_does_not_earn_missing_delivery_clear (test_rescue.RescueModelTests.test_safe_pause_does_not_earn_missing_delivery_clear) ... ok
+test_transfer_cannot_run_unlimited_trial_programs_in_one_attempt (test_rescue.RescueModelTests.test_transfer_cannot_run_unlimited_trial_programs_in_one_attempt) ... ok
+test_transfer_does_not_expose_results_before_commit (test_rescue.RescueModelTests.test_transfer_does_not_expose_results_before_commit) ... ok
+test_unavailable_record_must_be_resolved_before_retry (test_rescue.RescueModelTests.test_unavailable_record_must_be_resolved_before_retry) ... ok
+test_wrong_parcel_needs_conflict_not_another_id (test_rescue.RescueModelTests.test_wrong_parcel_needs_conflict_not_another_id) ... ok
+test_duplicate_submission_is_one_evidence_and_one_reward (test_rescue.RescuePersistenceTests.test_duplicate_submission_is_one_evidence_and_one_reward) ... ok
+test_feedback_seals_original_unknown_before_assisted_result (test_rescue.RescuePersistenceTests.test_feedback_seals_original_unknown_before_assisted_result) ... ok
+test_hint_is_recorded_before_transfer_result (test_rescue.RescuePersistenceTests.test_hint_is_recorded_before_transfer_result) ... ok
+test_isolation_and_submitted_immutability (test_rescue.RescuePersistenceTests.test_isolation_and_submitted_immutability) ... ok
+test_locks_and_separate_history (test_rescue.RescuePersistenceTests.test_locks_and_separate_history) ... ok
+test_moves_cannot_be_forged_away (test_rescue.RescuePersistenceTests.test_moves_cannot_be_forged_away) ... ok
+test_passing_training_cannot_claim_fresh_transfer (test_rescue.RescuePersistenceTests.test_passing_training_cannot_claim_fresh_transfer) ... ok
+test_saved_draft_does_not_run_a_program (test_rescue.RescuePersistenceTests.test_saved_draft_does_not_run_a_program) ... ok
+test_transfer_first_commit_and_replay_exposure_are_distinct (test_rescue.RescuePersistenceTests.test_transfer_first_commit_and_replay_exposure_are_distinct) ... ok
+test_ranges_and_pinned_capability_fail_closed (test_rescue_playground.PlaygroundTests.test_ranges_and_pinned_capability_fail_closed) ... ok
+test_recording_untested_revision_is_unknown_not_a_clear (test_rescue_playground.PlaygroundTests.test_recording_untested_revision_is_unknown_not_a_clear) ... ok
+test_same_route_changes_outcome_without_unlocking (test_rescue_playground.PlaygroundTests.test_same_route_changes_outcome_without_unlocking) ... ok
+test_vendor_prepares_downloadable_lab_without_ci_build (test_runtime_assets.RuntimeAssetsTests.test_vendor_prepares_downloadable_lab_without_ci_build) ... ok
+test_committed_write_survives_new_connection_and_migration (test_storage.StorageTests.test_committed_write_survives_new_connection_and_migration) ... ok
+test_failed_transaction_is_rolled_back (test_storage.StorageTests.test_failed_transaction_is_rolled_back) ... ok
+test_schema_one_fixture_migrates_without_losing_prior_data (test_storage.StorageTests.test_schema_one_fixture_migrates_without_losing_prior_data) ... ok
+test_echo_forge_keeps_asset_normalization_and_identity_in_world_spec (test_story3d_framework.RuntimeMigrationTests.test_echo_forge_keeps_asset_normalization_and_identity_in_world_spec) ... ok
+test_echo_forge_story_and_mission_route_to_real_playcanvas_backend (test_story3d_framework.RuntimeMigrationTests.test_echo_forge_story_and_mission_route_to_real_playcanvas_backend) ... ok
+test_game_asset_vendor_is_pinned_and_verified (test_story3d_framework.RuntimeMigrationTests.test_game_asset_vendor_is_pinned_and_verified) ... ok
+test_generic_playcanvas_runtime_has_no_relay_rescue_or_three_assumptions (test_story3d_framework.RuntimeMigrationTests.test_generic_playcanvas_runtime_has_no_relay_rescue_or_three_assumptions) ... ok
+test_legacy_echo_forge_three_path_stays_shared_until_removed (test_story3d_framework.RuntimeMigrationTests.test_legacy_echo_forge_three_path_stays_shared_until_removed) ... ok
+test_legacy_three_runtime_keeps_failure_and_cleanup_contract_during_migration (test_story3d_framework.RuntimeMigrationTests.test_legacy_three_runtime_keeps_failure_and_cleanup_contract_during_migration) ... ok
+test_playcanvas_framework_assets_are_explicitly_served (test_story3d_framework.RuntimeMigrationTests.test_playcanvas_framework_assets_are_explicitly_served) ... ok
+test_semantic_gear_is_multipart_without_changing_game_identity (test_story3d_framework.RuntimeMigrationTests.test_semantic_gear_is_multipart_without_changing_game_identity) ... ok
+test_signal6_route_is_spatialized_over_world_and_drives_storm_feedback (test_story3d_framework.RuntimeMigrationTests.test_signal6_route_is_spatialized_over_world_and_drives_storm_feedback) ... ok
+test_signal7_transfer_is_a_distinct_playcanvas_world_with_existing_semantic_controls (test_story3d_framework.RuntimeMigrationTests.test_signal7_transfer_is_a_distinct_playcanvas_world_with_existing_semantic_controls) ... ok
+test_world_composition_anchors_seven_lights_and_portrait_cameras (test_story3d_framework.RuntimeMigrationTests.test_world_composition_anchors_seven_lights_and_portrait_cameras) ... ok
+test_sealed_transfer_stays_world_first_and_context_correct (test_transfer_presentation.TransferPresentationTests.test_sealed_transfer_stays_world_first_and_context_correct) ... ok
+test_completed_evidence_is_immutable_and_not_mastery (test_word_machine.WordMachineTests.test_completed_evidence_is_immutable_and_not_mastery) ... ok
+test_context_changes_prediction_and_second_case_defeats_first_answer (test_word_machine.WordMachineTests.test_context_changes_prediction_and_second_case_defeats_first_answer) ... ok
+test_illegal_step_and_rewriting_history_do_not_persist (test_word_machine.WordMachineTests.test_illegal_step_and_rewriting_history_do_not_persist) ... ok
+test_new_learning_identity_preserves_retry_families (test_word_machine.WordMachineTests.test_new_learning_identity_preserves_retry_families) ... ok
+test_pinned_rules_and_context_are_replayed_not_client_results (test_word_machine.WordMachineTests.test_pinned_rules_and_context_are_replayed_not_client_results) ... ok
+test_receipt_replay_restart_stale_revision_and_isolation (test_word_machine.WordMachineTests.test_receipt_replay_restart_stale_revision_and_isolation) ... ok
+
+----------------------------------------------------------------------
+Ran 147 tests in 70.185s
+
+OK (skipped=6)

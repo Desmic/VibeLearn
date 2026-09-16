@@ -1,0 +1,277 @@
+"""Rendered phone-first Echo Forge/Signal-1 contract; machine UX evidence, not a youth playtest."""
+import json
+import re
+import tempfile
+from pathlib import Path
+from playwright.sync_api import sync_playwright, expect
+from tests.browser_check import start_server, stop_server
+
+ROOT = Path(__file__).resolve().parents[1]
+PHONE_VIEWPORTS = ((360, 800), (390, 844), (430, 932))
+
+
+def horizontal_overflow(page):
+    return page.evaluate("""() => ({
+      innerWidth, scrollWidth: document.documentElement.scrollWidth,
+      offenders: [...document.querySelectorAll('body *')].map(el => {
+        const r = el.getBoundingClientRect();
+        return {tag: el.tagName, id: el.id, cls: String(el.className || '').slice(0,160), left: Math.round(r.left), right: Math.round(r.right), width: Math.round(r.width), scrollWidth: el.scrollWidth};
+      }).filter(x => x.right > innerWidth + 1 || x.left < -1).sort((a,b) => b.right-a.right).slice(0,30)
+    })""")
+
+
+def expect_playcanvas_runtime(page):
+    expect(page.locator('.game-runtime-stage')).to_have_count(1)
+    expect(page.locator('.game-runtime-stage')).to_have_attribute('data-game-runtime-version', '1')
+    canvas = page.locator('.vl-playcanvas-engine')
+    expect(canvas).to_be_visible()
+    expect(canvas).to_have_attribute('data-vibelearn-engine', 'playcanvas')
+    expect(canvas).to_have_attribute('data-playcanvas-engine', '2.22.1')
+    expect(canvas).to_have_attribute('data-game-runtime-version', '1')
+    box = canvas.bounding_box()
+    assert box and box['width'] > 1 and box['height'] > 1, box
+    return canvas
+
+
+def assert_opening_marker_clearance(page):
+    # Projection is updated on the animation frame after the scene changes.
+    # Wait for that layout, while still failing persistent overlap/clipping.
+    page.wait_for_function('''() => {
+      const host=document.querySelector('#rgi-world');
+      const world=host.getBoundingClientRect();
+      const tools=host.querySelector('.game-view-tools')?.getBoundingClientRect();
+      return [...host.querySelectorAll('.rgi-marker:not([hidden])')].every(el=>{
+        const r=el.getBoundingClientRect();
+        return r.left>=world.left && r.right<=world.right && (!tools ||
+          r.right<=tools.left || r.left>=tools.right || r.bottom<=tools.top || r.top>=tools.bottom);
+      });
+    }''', timeout=5000)
+
+
+def assert_phone_first_touch(browser, url, out, errors, width, height):
+    ctx = browser.new_context(viewport={'width': width, 'height': height}, has_touch=True)
+    page = ctx.new_page(); page.on('pageerror', lambda e: errors.append(str(e)))
+    page.goto(url)
+    expect(page.locator('#rgi-intro')).to_be_visible()
+    expect_playcanvas_runtime(page)
+    expect(page.locator('#rgi-title')).to_have_text('Pip is almost home.')
+    expect(page.locator('#rgi-body')).to_be_visible()
+    expect(page.locator('#rgi-dialogue')).to_be_visible()
+    expect(page.locator('#rgi-next')).to_be_visible()
+    expect(page.locator('#rgi-back')).to_be_visible()
+    expect(page.locator('#rgi-replay-beat')).to_be_visible()
+    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+    world = page.locator('#rgi-world').bounding_box()
+    back = page.locator('#rgi-back').bounding_box()
+    nxt = page.locator('#rgi-next').bounding_box()
+    replay = page.locator('#rgi-replay-beat').bounding_box()
+    assert world and world['height'] >= height * .50
+    assert back and back['height'] >= 44
+    assert nxt and nxt['height'] >= 44
+    assert replay and replay['height'] >= 44
+    assert max(back['y'] + back['height'], nxt['y'] + nxt['height']) <= height + 1
+    page.wait_for_function("() => document.querySelector('#rgi-world')?.dataset.worldStatus === 'ready'")
+    assert_opening_marker_clearance(page)
+    assert page.locator('.rgi-markers').evaluate('''host => {
+      const labels=[...host.querySelectorAll('button:not([hidden])')].map(n=>n.getBoundingClientRect());
+      return labels.every((a,i)=>labels.every((b,j)=>i===j||a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top));
+    }'''), 'Opening markers overlap'
+    page.screenshot(path=str(out / f'onboarding-{"desktop" if width > 820 else "phone"}-{width}.png'), full_page=False)
+    # Every authored camera must keep its actual semantic target in view, not
+    # merely offer an equivalent button beneath an off-screen game object.
+    for step in range(1,6):
+        if page.locator('#rgi-next').get_attribute('data-story-action'):
+            expect(page.locator('.rgi-target')).to_be_visible()
+            page.locator('#rgi-next').click()
+        page.locator('#rgi-next').click()
+        expect(page.locator('#rgi-intro')).to_have_attribute('data-step',str(step))
+        for marker in page.locator('.rgi-marker').all():expect(marker).to_be_visible()
+        assert_opening_marker_clearance(page)
+        page.screenshot(path=str(out/f'onboarding-{width}-beat-{step}.png'),full_page=False)
+    ctx.close()
+
+
+def main():
+    out = ROOT / 'artifacts'; out.mkdir(exist_ok=True)
+    errors, checks = [], []
+    with tempfile.TemporaryDirectory() as tmp, sync_playwright() as p:
+        proc, url = start_server(Path(tmp) / 'onboarding.db')
+        browser = p.chromium.launch()
+        try:
+            for width, height in PHONE_VIEWPORTS:
+                assert_phone_first_touch(browser, url, out, errors, width, height)
+            assert_phone_first_touch(browser, url, out, errors, 1440, 1000)
+            checks.append('First touch keeps the real PlayCanvas world dominant, story copy readable, and controls touchable across representative 360–430px portrait sizes')
+
+            ctx = browser.new_context(viewport={'width':390,'height':844}, has_touch=True)
+            page = ctx.new_page(); page.on('pageerror', lambda e: errors.append(str(e)))
+            page.goto(url)
+            expect(page.locator('#rgi-intro')).to_be_visible()
+            expect(page.locator('#rgi-title')).to_have_text('Pip is almost home.')
+            expect(page.locator('#rgi-back')).to_be_disabled()
+            expect(page.locator('#rgi-next')).to_be_enabled()
+            canvas = expect_playcanvas_runtime(page)
+            expect(page.locator('#rgi-world')).to_have_attribute('data-game-engine', 'playcanvas')
+            # Fresh first-touch story is user-paced; it must not move while the player reads.
+            page.wait_for_timeout(3600)
+            expect(page.locator('#rgi-title')).to_have_text('Pip is almost home.')
+            page.screenshot(path=str(out/'onboarding-echo-forge-01.png'), full_page=False)
+
+            page.locator('#rgi-next').click()
+            expect(page.locator('#rgi-fact')).to_contain_text('You lit the way')
+            page.screenshot(path=str(out/'onboarding-first-success.png'), full_page=False)
+
+            # Back/forward is real scene navigation, not a restart-only escape hatch.
+            page.locator('#rgi-next').click()
+            expect(page.locator('#rgi-title')).to_have_text('One tiny gear stops everything.')
+            expect(page.locator('#rgi-back')).to_be_enabled()
+            page.locator('#rgi-back').click()
+            expect(page.locator('#rgi-title')).to_have_text('Pip is almost home.')
+            page.locator('#rgi-next').click()
+            page.locator('#rgi-pause').click()
+            expect(page.locator('#rgi-pause')).to_have_text('Resume')
+            expect(page.locator('#rgi-pause')).to_have_attribute('aria-label', 'Resume story motion')
+            page.locator('#rgi-pause').click()
+            expect(page.locator('#rgi-pause')).to_have_text('Pause')
+
+            titles = [
+                'Pip sends one promise.',
+                'Lightning takes the answer.',
+                'A second seal could mean a second gear.',
+                'The storm wakes something for you.',
+            ]
+            for title in titles:
+                if page.locator('#rgi-next').get_attribute('data-story-action'):
+                    page.locator('#rgi-next').click()
+                page.locator('#rgi-next').click()
+                expect(page.locator('#rgi-title')).to_have_text(title)
+                if page.locator('#rgi-intro').get_attribute('data-step')=='4':
+                    expect(page.locator('[data-entity="reserve-ember"]')).to_be_visible()
+                    expect(page.locator('[data-entity="beacon-lamp-1"]')).to_be_visible()
+                page.screenshot(path=str(out/f'onboarding-causal-beat-{page.locator("#rgi-intro").get_attribute("data-step")}.png'),full_page=False)
+            expect(page.locator('#rgi-fact')).to_have_text('First move: inspect the Echo Forge.')
+            expect(page.locator('#rgi-dialogue')).to_contain_text('Help me find out what happened')
+            expect(page.locator('.rgi-progress .current')).to_have_count(1)
+            runtime_id = page.locator('.game-runtime-stage').get_attribute('data-game-runtime-instance')
+            canvas_runtime_id = canvas.get_attribute('data-game-runtime-instance')
+            assert runtime_id and canvas_runtime_id == runtime_id
+            page.screenshot(path=str(out/'onboarding-echo-forge-06.png'), full_page=False)
+            checks.append('The opening stages a lost reply and distinguishes audience observation from reliable current inspection, remains user-paced, and preserves one PlayCanvas runtime/world identity across reversible story states')
+            page.locator('#rgi-next').click()
+
+            coach = page.locator('.rgc1-coach')
+            expect(coach).to_be_visible()
+            expect(coach).to_contain_text('Where would the bridge gear have been made?')
+            expect(page.locator('.rg-observations')).to_have_count(0)
+            expect(page.locator('[data-world-look="workshop"]')).to_be_enabled()
+            expect(page.locator('[data-world-look="workshop"]')).to_have_text('Echo Forge')
+            expect(page.locator('[data-world-look="ticket"]')).to_be_disabled()
+            expect(page.locator('[data-tool="retry"]')).to_be_disabled()
+            mission_canvas = expect_playcanvas_runtime(page)
+            expect(page.locator('.game-runtime-stage')).to_have_attribute('data-game-runtime-instance', runtime_id)
+            expect(mission_canvas).to_have_attribute('data-game-runtime-instance', runtime_id)
+            expect(page.locator('.play-canvas-stage')).to_have_count(1)
+            expect(page.locator('.play-canvas-webgl')).to_have_count(1)
+            expect(page.locator('.rg-world')).to_have_attribute('data-game-engine', 'playcanvas')
+            expect(page.locator('.rg-world')).to_have_class(re.compile(r'(^|\s)play-canvas-ready(\s|$)'))
+            expect(page.locator('.rg-console')).to_be_hidden()
+            expect(page.locator('.rg-scene-readout')).to_be_hidden()
+            expect(page.locator('.rg-station')).to_be_hidden()
+            expect(page.locator('.rgc1-world-key')).to_be_hidden()
+            forge_target = page.locator('[data-world-look="workshop"]').bounding_box()
+            assert forge_target and forge_target['height'] >= 44 and forge_target['width'] >= 96
+            page.screenshot(path=str(out/'signal1-echo-forge-first-action.png'), full_page=True)
+            checks.append('Signal 1 begins with world truth visually hidden until the player inspects the Forge, while retaining the same GameRuntime stage and exact PlayCanvas canvas from the story')
+
+            page.locator('[data-world-look="workshop"]').click()
+            expect(page.locator('#rg-effects')).to_have_text('1 gear')
+            expect(coach).to_contain_text('Which order did Pip already send?')
+            expect(page.locator('[data-world-look="ticket"]')).to_be_enabled()
+            page.locator('[data-world-look="ticket"]').click()
+            expect(coach).to_contain_text('The Echo Forge may already have made the gear.')
+            expect(page.locator('[data-tool="retry"]')).to_be_enabled()
+            expect(page.locator('[data-tool="new"]')).to_be_enabled()
+            expect(page.locator('.rgc1-dock')).to_be_visible()
+            expect(page.locator('.rgc1-dock .rg-ticket')).to_be_visible()
+            expect(page.locator('.rgc1-dock .rg-tools')).to_be_visible()
+            expect(page.locator('.rg-scene-readout')).to_be_hidden()
+            expect(page.locator('.rg-station')).to_be_hidden()
+            expect(page.locator('.rgc1-world-key')).to_be_hidden()
+            expect(page.locator('.rg-console')).to_be_hidden()
+            expect(page.locator('.rg-evidence')).to_be_hidden()
+            page.screenshot(path=str(out/'signal1-echo-forge-first-choice.png'), full_page=True)
+            checks.append('Signal 1 reveals the gear through inspection, shifts attention to durable identity, then opens the first meaningful retry-vs-new-ticket choice')
+
+            page.locator('[data-tool="new"]').click()
+            expect(coach).to_contain_text('A NEW TICKET')
+            page.locator('[data-tool="retry"]').click()
+            expect(page.locator('[data-tool="rewind"]')).to_be_visible()
+            expect(coach).to_contain_text('Two gears')
+            page.screenshot(path=str(out/'signal1-echo-forge-visible-mistake.png'), full_page=True)
+            page.locator('[data-tool="rewind"]').click()
+            page.locator('[data-tool="retry"]').click()
+            expect(page.locator('.rgc1-recap')).to_be_visible()
+            expect(page.locator('.rgc1-finale')).to_contain_text('BRIDGE ONLINE')
+            expect(page.locator('.rgc1-recap')).to_contain_text('FIELD SKILL UNLOCKED')
+            expect(page.locator('.rgc1-recap')).to_contain_text('One intent → one safe result')
+            expect(page.locator('.rgc1-recap')).to_contain_text('Idempotent retry')
+            expect(page.locator('.rgc1-recap')).to_contain_text('Echo Forge')
+            expect(page.locator('.rgc1-recap')).to_contain_text('missing reply')
+            expect(page.locator('#rescue-game')).to_have_class(re.compile(r'(^|\s)rgc1-victory(\s|$)'))
+            expect(page.locator('.rg-console')).to_be_hidden()
+            expect(page.locator('.rg-evidence')).to_be_hidden()
+            expect(page.locator('.rg-scene-readout')).to_be_hidden()
+            expect(page.locator('#rg-next')).to_have_text('Secure the crossing →')
+            expect_playcanvas_runtime(page)
+            checks.append('Wrong identity visibly creates the second gear, rewind recovers, and success becomes an in-world bridge payoff with journal/evidence deferred behind the clear')
+            page.screenshot(path=str(out/'signal1-echo-forge-post-success.png'), full_page=True)
+            overflow = horizontal_overflow(page)
+            (out/'signal1-phone-overflow-diagnostic.json').write_text(json.dumps(overflow, indent=2), encoding='utf-8')
+            assert overflow['scrollWidth'] <= overflow['innerWidth'], overflow
+            page.locator('#rg-next').click()
+            expect(page.locator('.rg-top')).to_contain_text('SIGNAL 2', timeout=15000)
+            page.evaluate('localStorage.clear()')
+            page.reload()
+            expect(page.locator('.rg-top')).to_contain_text('SIGNAL 2', timeout=15000)
+            expect(page.locator('#rgi-intro')).to_have_count(0)
+            before = page.evaluate('JSON.stringify(RescueGame.response())')
+            page.locator('#rg-options').click()
+            page.locator('#rg-replay-story').click()
+            expect(page.locator('#rgi-intro')).to_be_visible()
+            page.locator('#rgi-skip').click()
+            expect(page.locator('#rgi-intro')).to_have_count(0)
+            expect(page.locator('.rg-top')).to_contain_text('SIGNAL 2')
+            assert page.evaluate('JSON.stringify(RescueGame.response())') == before
+            expect_playcanvas_runtime(page)
+            checks.append('Level 2 resumes with empty browser storage; explicit opening replay returns without changing the draft or level')
+            ctx.close()
+
+            reduced = browser.new_context(viewport={'width':390,'height':844}, has_touch=True, reduced_motion='reduce')
+            r = reduced.new_page(); r.on('pageerror', lambda e: errors.append(str(e))); r.goto(url)
+            expect(r.locator('#rgi-intro')).to_be_visible()
+            expect_playcanvas_runtime(r)
+            expect(r.locator('#rgi-pause')).to_be_hidden()
+            expect(r.locator('#rgi-back')).to_be_disabled()
+            for _ in range(5):
+                if r.locator('#rgi-next').get_attribute('data-story-action'): r.locator('#rgi-next').click()
+                r.locator('#rgi-next').click()
+            expect(r.locator('#rgi-title')).to_have_text('The storm wakes something for you.')
+            expect(r.locator('#rgi-fact')).to_have_text('First move: inspect the Echo Forge.')
+            r.locator('#rgi-back').click(); expect(r.locator('#rgi-title')).to_have_text('A second seal could mean a second gear.')
+            assert r.evaluate('document.documentElement.scrollWidth<=innerWidth')
+            checks.append('Reduced-motion players keep the same reversible causal story with no forced motion or lost meaning')
+            reduced.close()
+
+            assert errors == [], errors
+            (out/'onboarding-browser-report.json').write_text(json.dumps({
+                'result':'passed','browser':browser.version,'checks':checks,'page_errors':errors,
+                'engine':'playcanvas','engine_version':'2.22.1',
+                'phone_viewports':[{'width':w,'height':h} for w,h in PHONE_VIEWPORTS],
+                'review_method':'automated browser evidence; not child/young-adult enjoyment validation'
+            }, indent=2), encoding='utf-8')
+        finally:
+            browser.close(); stop_server(proc)
+
+
+if __name__ == '__main__':
+    main()

@@ -7,3 +7,10 @@ artifacts/
 .env
 .env.*
 !.env.example
+
+web/vendor/
+
+web/relay-repair-kit.zip
+
+# Downloaded models and license notices are reproduced by manage.py vendor.
+web/assets/

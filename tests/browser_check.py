@@ -1,16 +1,21 @@
 """Real browser + real HTTP process + real temporary DB. Never uses learner data."""
 import json
+import os
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
 def start_server(database, port=0):
-    process = subprocess.Popen([sys.executable, "-u", "-m", "app.server", "--db", str(database), "--port", str(port)], cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, encoding="utf-8")
+    process = subprocess.Popen(
+        [sys.executable, "-u", "-m", "app.server", "--db", str(database), "--port", str(port)],
+        cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, encoding="utf-8",
+    )
     line = process.stdout.readline().strip()
     if "http://" not in line:
         process.terminate()
@@ -23,6 +28,18 @@ def stop_server(process):
         process.terminate()
         process.wait(timeout=10)
     process.stdout.close()
+
+
+def select_outcome(page, run, charges):
+    page.get_by_role("button", name=f"{run}: {charges} total charge{'s' if charges != 1 else ''}", exact=True).click()
+
+
+def launch(page, mission_id, mode=None):
+    page.locator(f'[data-mission-id="{mission_id}"]').click()
+    if mode:
+        page.locator("#start-mode").select_option(mode)
+    page.get_by_role("button", name="Launch mission", exact=True).click()
+    expect(page.locator("#episode")).to_be_visible()
 
 
 def main():
@@ -39,153 +56,226 @@ def main():
             page = context.new_page()
             page_errors = []
             page.on("pageerror", lambda error: page_errors.append(str(error)))
-            page.goto(url)
+            page.goto(url + "/?legacy=1")
             expect(page).to_have_title("vibeLearn · Reliable agents")
-            page.get_by_role("button", name="Begin investigation").click()
-            expect(page.locator("#prediction")).to_be_visible()
-            expect(page.locator("#source")).to_be_disabled()
-            assert not page.locator("#source-link").get_attribute("href")
-            page.get_by_role("button", name="Submit & reflect").click()
-            expect(page.locator("#notice")).to_contain_text("Enter three comma-separated")
-            expect(page.locator("#recap")).to_be_hidden()
-            checks.append("missing answer rejected without feedback")
-            page.locator("#prediction").fill("1, 1, 1")
-            page.locator("#diagnosis").fill("Persist an intent key across worker restarts. Bind its payload and reconcile after retention.")
-            page.locator("#aid-declaration").select_option("none")
-            page.get_by_role("button", name="Save draft", exact=True).click()
-            expect(page.locator("#save-status")).to_have_text("Saved to local database")
-            page.reload()
-            expect(page.locator("#prediction")).to_have_value("1, 1, 1")
-            expect(page.locator("#diagnosis")).to_have_value("Persist an intent key across worker restarts. Bind its payload and reconcile after retention.")
-            checks.append("real database save and browser reload")
 
-            # Keep typing while a real save request is in flight.
-            def edit_during_save(route):
-                page.locator("#diagnosis").fill("A newer edit typed while the database save is in flight.")
-                route.continue_()
-            page.route("**/api/commands/save", edit_during_save, times=1)
-            page.get_by_role("button", name="Save draft", exact=True).click()
-            expect(page.locator("#save-status")).to_have_text("New edits retained · save again when ready")
-            expect(page.locator("#diagnosis")).to_have_value("A newer edit typed while the database save is in flight.")
-            checks.append("typing during an in-flight save is not overwritten by its response")
+            # Fresh player sees a concrete story, clear goal, and true progression path.
+            expect(page.locator("#entry")).to_be_visible()
+            expect(page.locator(".campaign-story-copy")).to_contain_text("5 kg dumbbell")
+            expect(page.locator(".campaign-goal")).to_contain_text("one request from you never becomes two purchases or two charges")
+            expect(page.locator(".mission-node")).to_have_count(4)
+            expect(page.locator('[data-mission-id="retry-01-replay"]')).to_have_attribute("data-status", "unlocked")
+            for mission in ("retry-02-identity", "retry-03-retention", "retry-04-boss"):
+                expect(page.locator(f'[data-mission-id="{mission}"]')).to_be_disabled()
+            expect(page.locator("#campaign-clear-count")).to_have_text("0 / 4 cleared")
+            expect(page.locator("#campaign-xp")).to_contain_text("0 XP")
+            page.screenshot(path=str(artifacts / "game-campaign.png"), full_page=True)
+            checks.append("fresh campaign begins with a concrete shopping story, plain goal, one easy mission and visible future path")
 
-            # A real stopped server, not a fake successful API response.
-            port = int(url.rsplit(":", 1)[1])
-            stop_server(process)
-            page.locator("#diagnosis").fill("This edit must survive a failed request and restart.")
-            page.get_by_role("button", name="Save draft", exact=True).click()
-            expect(page.locator("#save-status")).to_have_text("Not saved · answer retained")
-            expect(page.locator("#diagnosis")).to_have_value("This edit must survive a failed request and restart.")
-            process, _ = start_server(database, port)
-            page.reload()
-            expect(page.locator("#diagnosis")).to_have_value("This edit must survive a failed request and restart.")
-            expect(page.locator("#notice")).to_contain_text("Recovered an unsaved answer")
-            page.get_by_role("button", name="Save draft", exact=True).click()
-            expect(page.locator("#save-status")).to_have_text("Saved to local database")
-            checks.append("failed real request preserves draft across restart and reload")
-
-            # Source restriction verified through actual HTTP as well as disabled UI.
-            denial = page.evaluate("""async () => {
-                const state = await (await fetch('/api/state')).json();
-                const response = await fetch('/api/commands/source', {method:'POST', headers:{'Content-Type':'application/json','X-Learning-Command':'1'}, body:JSON.stringify({command_id:crypto.randomUUID(), expected_revision:state.attempt.revision, attempt_id:state.attempt.id, response:state.attempt.response})});
+            # Server-side lock, not merely a disabled map node.
+            forged = page.evaluate("""async () => {
+                const response = await fetch('/api/commands/start', {method:'POST', headers:{'Content-Type':'application/json','X-Learning-Command':'1'}, body:JSON.stringify({command_id:crypto.randomUUID(), expected_revision:0, mode:'LEARN', mission_id:'retry-03-retention'})});
                 return {status:response.status, body:await response.json()};
             }""")
-            assert denial["status"] == 403 and denial["body"]["error"] == "AID_RESTRICTED"
-            page.get_by_role("button", name="Reveal hint 1 of 3", exact=True).click()
-            expect(page.locator("#hints li")).to_have_count(1)
-            saved = page.evaluate("async () => await (await fetch('/api/state')).json()")
-            assert saved["attempt"]["checkpoints"][0]["response"]["prediction"] == "1, 1, 1"
-            assert saved["attempt"]["checkpoints"][0]["assistance"] == []
-            assert "assessment" not in saved["attempt"]["checkpoints"][0]
-            page.get_by_role("button", name="Reveal hint 2 of 3", exact=True).focus()
-            page.keyboard.press("Enter")
-            expect(page.locator("#hints li")).to_have_count(2)
+            assert forged["status"] == 403 and forged["body"]["error"] == "MISSION_LOCKED"
+            checks.append("locked future missions are enforced on the server")
+
+            # Level 1: one mechanic, one decision, story causality, no advanced tool complexity.
+            launch(page, "retry-01-replay")
+            expect(page.locator("#hud-level")).to_have_text("LV 1")
+            expect(page.locator("#hud-difficulty")).to_have_text("Tutorial")
+            expect(page.locator("#hud-mission-title")).to_contain_text("one charge")
+            expect(page.locator("#storyboard .story-beat")).to_have_count(5)
+            expect(page.locator("#storyboard")).to_contain_text("Buy one 5 kg dumbbell")
+            expect(page.locator("#storyboard")).to_contain_text("Receipt vanishes")
+            expect(page.locator("#prediction-board .decision-row")).to_have_count(1)
+            expect(page.locator("#diagnosis-wrap")).to_be_hidden()
+            expect(page.locator("#dock-source")).to_be_hidden()
+            expect(page.locator("#dock-mode")).to_be_disabled()
+            expect(page.locator("#dock-save")).to_be_enabled()
+            expect(page.locator("#hud-save-value")).to_have_text("Synced")
+            select_outcome(page, "A", 1)
+            expect(page.get_by_role("button", name="A: 1 total charge", exact=True)).to_have_attribute("aria-pressed", "true")
+            expect(page.locator("#hud-save-value")).to_have_text("Unsaved")
+            expect(page.locator("#dock-save")).to_be_enabled()
+            page.screenshot(path=str(artifacts / "game-level1.png"), full_page=True)
+
+            # HUD Save -> real database -> full browser reload -> exact decision restored.
+            page.get_by_role("button", name="Save", exact=True).click()
+            expect(page.locator("#save-status")).to_have_text("Progress saved to local database")
+            expect(page.locator("#hud-save-value")).to_have_text("Synced")
+            expect(page.locator("#dock-save")).to_be_enabled()
+            page.reload()
+            expect(page.locator("#hud-level")).to_have_text("LV 1")
+            expect(page.get_by_role("button", name="A: 1 total charge", exact=True)).to_have_attribute("aria-pressed", "true")
+            checks.append("HUD save stays available and browser reload resumes exact Level 1 progress")
+
+            page.get_by_role("button", name="Lock in answer", exact=True).click()
+            expect(page.locator("#recap-kicker")).to_have_text("MISSION CLEAR")
+            expect(page.locator("#recap-title")).to_have_text("1 of 1 outcomes correct")
+            expect(page.locator("#evidence-condition")).to_have_text("unknown")
+            expect(page.locator("#reward-message")).to_contain_text("+10 XP")
+            expect(page.locator("#hud-xp-value")).to_have_text("10")
+            page.locator("#repeat").click()
+            expect(page.locator('[data-mission-id="retry-01-replay"]')).to_have_attribute("data-status", "cleared")
+            expect(page.locator('[data-mission-id="retry-02-identity"]')).to_have_attribute("data-status", "unlocked")
+            expect(page.locator('[data-mission-id="retry-02-identity"]')).to_have_class("mission-node selected")
+            expect(page.locator("#entry-title")).to_have_text("A new ticket, a second charge")
+            expect(page.locator('[data-mission-id="retry-03-retention"]')).to_be_disabled()
+            checks.append("easy clear gives immediate XP, keeps undeclared no-help state unknown, and focuses the newly unlocked next level")
+
+            # Level 2: contrasting identity failure, still one decision and LEARN-only.
+            launch(page, "retry-02-identity")
+            expect(page.locator("#hud-level")).to_have_text("LV 2")
+            expect(page.locator("#prediction-board .decision-row")).to_have_count(1)
+            expect(page.locator("#dock-source")).to_be_hidden()
+            expect(page.locator("#dock-mode")).to_be_disabled()
+            page.locator("#integrity-wrap summary").click()
+            page.locator("#aid-declaration").select_option("none")
+            select_outcome(page, "A", 2)
+            page.get_by_role("button", name="Lock in answer", exact=True).click()
+            expect(page.locator("#recap-kicker")).to_have_text("MISSION CLEAR")
+            expect(page.locator("#evidence-condition")).to_have_text("declared independent")
+            expect(page.locator("#hud-xp-value")).to_have_text("20")
+            page.locator("#repeat").click()
+            expect(page.locator('[data-mission-id="retry-03-retention"]')).to_have_attribute("data-status", "unlocked")
+            expect(page.locator('[data-mission-id="retry-03-retention"]')).to_have_class("mission-node selected")
+            expect(page.locator("#entry-title")).to_have_text("The store forgot")
+            expect(page.locator('[data-mission-id="retry-04-boss"]')).to_be_disabled()
+            checks.append("Level 2 preserves declared no-help independence and automatically focuses Level 3")
+
+            # Level 3: two decisions + first short explanation + optional assisted tools.
+            launch(page, "retry-03-retention")
+            expect(page.locator("#hud-level")).to_have_text("LV 3")
+            expect(page.locator("#prediction-board .decision-row")).to_have_count(2)
+            expect(page.locator("#diagnosis-wrap")).to_be_visible()
+            expect(page.locator("#dock-source")).to_be_visible()
+            expect(page.locator("#dock-mode")).to_be_enabled()
+            select_outcome(page, "A", 1)
+            select_outcome(page, "B", 2)
+            page.locator("#diagnosis").fill("The same purchase ticket protects the retry only while the store still remembers it.")
+
+            # Intel is present in HUD but gated in LEARN; PAIR unlocks it and records assistance.
+            page.locator("#dock-source").click()
+            expect(page.locator("#source")).to_be_disabled()
+            page.get_by_role("button", name="Close intel panel", exact=True).click()
+            page.locator("#dock-mode").click()
             page.locator("#working-mode").select_option("PAIR")
-            page.get_by_role("button", name="Apply mode", exact=True).click()
+            page.get_by_role("button", name="Apply style", exact=True).click()
             expect(page.locator("#mode-label")).to_have_text("PAIR")
-            page.get_by_role("button", name="Open source companion").click()
+            page.locator("#dock-source").click()
+            expect(page.locator("#source")).to_be_enabled()
+            page.get_by_role("button", name="Reveal intel source", exact=True).click()
             expect(page.locator("#source-link")).to_have_attribute("href", "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/")
-            checks.append("pre-hint checkpoint, progressive help and server-enforced source gate")
-            page.locator("#working-mode").select_option("LEARN")
-            page.get_by_role("button", name="Apply mode", exact=True).click()
-            expect(page.locator("#mode-label")).to_have_text("LEARN")
-            expect(page.locator("#assistance-status")).to_contain_text("Assisted practice")
-            page.locator("#prediction").fill("2, 1, 2")
-            page.locator("#diagnosis").fill("Persist the business intent key, bind the payload, and reconcile uncertain calls after the retention window.")
-            page.locator("#prediction").focus()
+            page.get_by_role("button", name="Close intel panel", exact=True).click()
+            checks.append("secondary help/source controls live in HUD drawers and preserve aid semantics")
+
+            # Saved Level 3 progress survives an actual server process restart.
+            page.locator("#dock-save").click()
+            expect(page.locator("#hud-save-value")).to_have_text("Synced")
+            port = int(url.rsplit(":", 1)[1])
+            stop_server(process)
+            process, _ = start_server(database, port)
+            page.reload()
+            expect(page.locator("#hud-level")).to_have_text("LV 3")
+            expect(page.get_by_role("button", name="A: 1 total charge", exact=True)).to_have_attribute("aria-pressed", "true")
+            expect(page.get_by_role("button", name="B: 2 total charges", exact=True)).to_have_attribute("aria-pressed", "true")
+            expect(page.locator("#diagnosis")).to_have_value("The same purchase ticket protects the retry only while the store still remembers it.")
+            checks.append("HUD decisions and diagnosis survive actual process restart")
+
+            page.get_by_role("button", name="Lock in answer", exact=True).click()
+            expect(page.locator("#recap-kicker")).to_have_text("MISSION CLEAR")
+            expect(page.locator("#evidence-condition")).to_have_text("assisted")
+            page.locator("#repeat").click()
+            expect(page.locator('[data-mission-id="retry-04-boss"]')).to_have_attribute("data-status", "unlocked")
+            expect(page.locator('[data-mission-id="retry-04-boss"]')).to_have_class("mission-node selected")
+            expect(page.locator("#entry-title")).to_contain_text("Boss")
+            checks.append("Level 3 combines prior rules, records actual source help as assisted, and focuses the boss")
+
+            # Boss recombines all mechanics and requires the full architecture diagnosis.
+            launch(page, "retry-04-boss", "LEARN")
+            expect(page.locator("#hud-level")).to_have_text("BOSS")
+            expect(page.locator("#prediction-board .decision-row")).to_have_count(3)
+            select_outcome(page, "A", 2)
+            select_outcome(page, "B", 1)
+            select_outcome(page, "C", 2)
+            page.locator("#diagnosis").fill("Persist one purchase-intent ID across retries, bind it to the item and quantity, and reconcile uncertain late retries after the store forgets the old ID.")
+
+            # Keyboard, narrow mobile, 200% text, and reduced motion all remain viable.
+            page.locator("#diagnosis").focus()
             page.keyboard.press("Tab")
-            expect(page.locator("#diagnosis")).to_be_focused()
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
             page.set_viewport_size({"width": 390, "height": 844})
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
-            page.evaluate("scrollTo(0,0)")
-            page.screenshot(path=str(artifacts / "phase1-mobile.png"), full_page=True)
+            page.screenshot(path=str(artifacts / "game-boss-mobile.png"), full_page=True)
             page.evaluate("document.documentElement.style.fontSize='200%'")
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
             page.evaluate("document.documentElement.style.fontSize=''")
             page.set_viewport_size({"width": 1440, "height": 1000})
-            page.evaluate("document.activeElement.blur(); scrollTo(0,0)")
-            page.screenshot(path=str(artifacts / "phase1-workspace.png"), full_page=True)
-            checks.append("keyboard Tab/Enter, 390px layout and 200% text enlargement")
+            checks.append("HUD story/game shell survives keyboard, 390px viewport and 200% text")
 
-            # Drop an acknowledgement AFTER a real backend commit, then retry.
+            # Drop the submit acknowledgement after a real commit, then retry the same command.
             def lose_ack(route):
                 route.fetch()
                 route.abort("failed")
             page.route("**/api/commands/submit", lose_ack, times=1)
-            page.get_by_role("button", name="Submit & reflect").click()
+            page.get_by_role("button", name="Lock in answer", exact=True).click()
             expect(page.locator("#save-status")).to_have_text("Not saved · answer retained")
-            expect(page.locator("#diagnosis")).to_have_value("Persist the business intent key, bind the payload, and reconcile uncertain calls after the retention window.")
-            page.get_by_role("button", name="Submit & reflect").click()
-            expect(page.locator("#recap-title")).to_have_text("3 of 3 trace predictions match")
-            expect(page.locator("#evidence-condition")).to_have_text("assisted")
-            expect(page.locator("#reward-message")).to_contain_text("+10 practice XP")
-            expect(page.locator("#reasoning-status")).to_contain_text("not been graded")
+            expect(page.locator("#diagnosis")).to_have_value("Persist one purchase-intent ID across retries, bind it to the item and quantity, and reconcile uncertain late retries after the store forgets the old ID.")
+            page.get_by_role("button", name="Lock in answer", exact=True).click()
+            expect(page.locator("#recap-title")).to_have_text("3 of 3 outcomes correct")
+            expect(page.locator("#recap-kicker")).to_have_text("MISSION CLEAR")
+            expect(page.locator("#hud-xp-value")).to_have_text("40")
             page.locator("#checkpoint-details summary").click()
-            expect(page.locator("#checkpoint-list")).to_contain_text("declared_independent")
+            expect(page.locator("#checkpoint-list")).to_contain_text("submission")
             page.locator("#evidence-details summary").click()
             expect(page.locator("#evidence-json")).to_contain_text("snapshot_digest")
-            page.locator("#evidence-details summary").click()
-            checks.append("real commit with lost acknowledgement retries without duplicate submission or XP")
-            stop_server(process)
-            process, _ = start_server(database, port)
-            page.reload()
-            expect(page.locator("#recap-title")).to_have_text("3 of 3 trace predictions match")
-            expect(page.locator("#practice-label")).to_contain_text("10 practice XP")
-            expect(page.locator("#review-due")).to_contain_text("Review after")
-            page.locator("#recap").scroll_into_view_if_needed()
-            page.screenshot(path=str(artifacts / "phase1-recap.png"))
-            checks.append("evidence, reward and future review survive actual process restart")
+            page.screenshot(path=str(artifacts / "game-boss-clear.png"), full_page=True)
+            checks.append("boss clear retries lost acknowledgement without duplicate evidence or XP")
 
-            # Another browser session resolves a different learner on the server.
+            page.locator("#repeat").click()
+            expect(page.locator("#campaign-clear-count")).to_have_text("4 / 4 cleared")
+            expect(page.locator("#campaign-xp")).to_contain_text("40 XP")
+            expect(page.locator('[data-mission-id="retry-04-boss"]')).to_have_class("mission-node selected")
+            checks.append("full chapter progression reaches four clears and leaves the highest completed node selected")
+
+            # A separate browser remains a fresh learner and cannot mutate the first learner's state.
+            first_state = page.evaluate("async () => await (await fetch('/api/state')).json()")
             other = browser.new_context(viewport={"width": 390, "height": 844})
             other_page = other.new_page()
-            other_page.goto(url)
-            other_page.locator("#start-mode").select_option("BUILD")
-            other_page.get_by_role("button", name="Begin investigation").click()
-            expect(other_page.locator("#worked-example")).to_contain_text("A commits twice")
-            expect(other_page.locator("#prediction")).to_have_value("")
-            a_state = page.evaluate("async () => await (await fetch('/api/state')).json()")
-            b_state = other_page.evaluate("async () => await (await fetch('/api/state')).json()")
-            assert a_state["learner_id"] != b_state["learner_id"]
-            assert b_state["attempt"]["practice_xp"] == 0
+            other_page.goto(url + "/?legacy=1")
+            expect(other_page.locator("#campaign-clear-count")).to_have_text("0 / 4 cleared")
+            expect(other_page.locator('[data-mission-id="retry-02-identity"]')).to_be_disabled()
+            other_state = other_page.evaluate("async () => await (await fetch('/api/state')).json()")
+            assert first_state["learner_id"] != other_state["learner_id"]
             cross = other_page.evaluate("""async (attempt) => {
-                const response = await fetch('/api/commands/save', {method:'POST', headers:{'Content-Type':'application/json','X-Learning-Command':'1'}, body:JSON.stringify({command_id:crypto.randomUUID(), expected_revision:attempt.revision, attempt_id:attempt.id, response:attempt.response})}); return response.status;
-            }""", a_state["attempt"])
+                const response = await fetch('/api/commands/save', {method:'POST', headers:{'Content-Type':'application/json','X-Learning-Command':'1'}, body:JSON.stringify({command_id:crypto.randomUUID(), expected_revision:attempt.revision, attempt_id:attempt.id, response:attempt.response})});
+                return response.status;
+            }""", first_state["attempt"])
             assert cross == 404
             assert other_page.evaluate("document.documentElement.scrollWidth <= innerWidth")
             other.close()
-            checks.append("separate real browser learner and BUILD disclosure; cross-learner command rejected")
+            checks.append("fresh second browser has isolated campaign progression and cannot cross-write")
 
-            page.get_by_role("button", name="Revisit this trace").click()
-            expect(page.locator("#prediction")).to_have_value("")
-            page.locator("#prediction").fill("2,1,2")
-            page.locator("#diagnosis").fill("This familiar trace cannot be independent evidence again.")
-            page.get_by_role("button", name="Submit & reflect").click()
-            expect(page.locator("#reward-message")).to_have_text("Familiar practice, retained for reflection")
-            expect(page.locator("#practice-label")).to_contain_text("10 practice XP")
-            checks.append("repeat practice retains history without extra reward or clean evidence")
+            reduced = browser.new_context(viewport={"width": 390, "height": 844}, reduced_motion="reduce")
+            reduced_page = reduced.new_page()
+            reduced_page.goto(url + "/?legacy=1")
+            assert reduced_page.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches")
+            transition = reduced_page.locator(".mission-node").first.evaluate("node => getComputedStyle(node).transitionDuration")
+            assert transition in ("0s", "0ms")
+            reduced.close()
+            checks.append("reduced-motion preference disables game transitions")
+
             assert page_errors == [], page_errors
-            report = {"phase": "1C", "browser": browser.version, "checks": checks, "result": "passed", "page_errors": page_errors, "fault_injection": "One dropped response after real HTTP commit; actual stopped server for outage test. No successful API mocks.", "webmcp": "unavailable in Chromium 138; optional support not live-verified"}
+            report = {
+                "phase": "game-story-campaign-v2",
+                "browser": browser.version,
+                "checks": checks,
+                "result": "passed",
+                "page_errors": page_errors,
+                "fault_injection": "One dropped response after a real HTTP commit; one actual process restart; no successful API mocks.",
+                "screenshots": ["game-campaign.png", "game-level1.png", "game-boss-mobile.png", "game-boss-clear.png"],
+            }
             (artifacts / "browser-report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
             print(json.dumps(report, indent=2))
         finally:
