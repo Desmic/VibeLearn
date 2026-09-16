@@ -2,86 +2,89 @@
 
 ## Active checkpoint — 17 September 2026 IST
 
-Status: **Level 1 technical gate passed; qualitative/user review still pending.**
+Status: **internally ready for the user's final Level 1 review.**
 
-Active development branch: `game/level1-quality-gate` (draft PR #11).
-Verified behavioral candidate: `6fea8287aa5f078a5836902478320699e54571a9`.
-GitHub Actions run: `35138788244` (`Verify hosted pilot`, run 804).
+Verified game candidate: `6fea8287aa5f078a5836902478320699e54571a9`.
+Exact GitHub Actions run: `35138788244` (`Verify hosted pilot`, run 804).
+Private Render review deployment: commit `6de1f0ccb234507c1db2dccbe007c7cabfaf397e`, deploy `dep-daleugf40ujc73dphuo0`, service `srv-daf7dhuq1p3s73c122cg`.
 
-All six active Level 1 gates passed on that exact commit:
+The Render commit differs from the verified game candidate only by review/documentation commits; the runtime game code is the verified `6fea828...` candidate.
 
-- `foundation`: build passed, the full application suite ran **152 tests successfully**, and the Level 1 entry/no-2D-fallback browser gate passed;
-- `first-words-opening`: fresh opening, explicit Zip/Warden identity markers, skip, replay, pause/sound lifecycle, reduced-motion and tutorial handoff passed;
-- `first-words-controls`: movement/camera controls remained usable after a persisted action and reload;
-- `first-words-readability`: 200% text kept a usable 3D world band at 360/390/430 CSS-pixel widths;
-- `first-words-lifecycle`: hosted sign-in -> reset -> opening restart and sign-out -> auth were exercised in a real browser and passed;
-- `first-words-chapter`: guided first success, changed-context mistake/recovery, completion/reload, and fresh 360/430 reduced-motion completions passed with no page errors.
+## Internal gate result
 
-This establishes the current **technical behavior**, not audience enjoyment, mastery, novice comprehension or user acceptance.
+All active Level 1 gates passed on the exact game candidate:
 
-## User direction that controls the current revision
+- foundation / entry / no 2D fallback — passed;
+- full application suite — **152 tests passed**;
+- opening, including explicit `ZIP` / `WARDEN` identity markers — passed;
+- controls after persisted action + reload — passed;
+- 200% text/readability at 360/390/430 — passed;
+- hosted reset/logout lifecycle — passed;
+- whole chapter: tutorial first win -> changed-context mistake -> recovery -> completion/reload, plus fresh 360/430 reduced-motion completions — passed with no page errors.
 
-The last Render preview exposed two blockers:
+The executable internal critic record in `docs/reviews/2026-09-17-level1-6fea828.json` validates as `ready_for_user_review` for candidate `6fea828...` with criterion minimums:
 
-1. logout and game reset had regressed from the active Bellweather UI;
-2. Level 1 was too convoluted and unclear before the player had learned how to play.
+- rendered story: **9**;
+- first touch: **9**;
+- whole chapter: **9**;
+- learning: **9**.
 
-The binding design rule is **easy to play, hard to master**. Level 1 teaches the interaction loop, gives a clean success, then introduces normal failure/recovery. Future How-LLMs-Work episodes should gain difficulty through deeper reasoning, ambiguity, competing context and reduced scaffolding — not through extra UI friction or prerequisite camera skill.
+Every required coverage item is recorded as observed and there is no remaining internally identified blocker. See `LEVEL1-FINAL-CRITIC-20260917.md` for the exact observations and counterexample attempts.
 
-Implemented current flow:
+This is an internal recommendation for user review, **not user acceptance**.
 
-`opening -> connect Zip's power -> scan obvious Moon context -> generate word-by-word -> free Zip -> changed-context tower challenge -> recoverable wrong route -> correct current context -> open Star route -> Level 1 complete`
+## Current player path
+
+The binding product rule is **easy to play, hard to master**.
+
+Current Level 1 flow:
+
+`opening -> connect Zip's power -> scan obvious Moon context -> generate word-by-word -> free Zip -> changed-context tower challenge -> recoverable wrong route -> current five-point clue -> open Star route -> Level 1 complete`
 
 Important simplifications now protected by tests:
 
-- the opening explicitly labels `ZIP` on the friendship and trapped beats and `WARDEN` on the threat beat, so the first relationship/action is grounded in the world instead of another explanation card;
-- new runs cannot intentionally fail before the first rescue;
-- the optional engine inspector is hidden during the tutorial and appears only after the first win;
-- the old required `Predict the next input` quiz is removed from new runs; input growth is learned by watching generated words join the next input;
-- `Check route signs` is the guaranteed Level 1 context-selection path; physical boards remain optional world interactions rather than a camera-hunting requirement;
-- `Reset game progress` and `Sign out` are first-class in-game lifecycle controls again.
+- the opening identifies Zip and the Warden directly in the world instead of adding another explanation card;
+- fresh Level 1 runs cannot intentionally fail before the first rescue;
+- optional engine inspection is hidden during the tutorial and appears only after the first win;
+- the former required `Predict the next input` quiz is removed from new runs; input growth is learned through the generation loop itself;
+- `Check route signs` is the guaranteed Level 1 context-selection path; physical boards are optional world shortcuts rather than a camera-hunting requirement;
+- movement/camera skill is available but not required to comprehend the Level 1 concept;
+- `Reset game progress` and `Sign out` are first-class in-game controls again;
+- completion remains in the 3D world before any optional reflection dialog;
+- no 2D gameplay fallback is allowed.
 
-See [FIRST-WORDS-BUILD.md](FIRST-WORDS-BUILD.md), [LEVEL1-QUALITY-GATE-20260916.md](LEVEL1-QUALITY-GATE-20260916.md), [FIRST-WORDS-CHUNK-REVIEW.md](FIRST-WORDS-CHUNK-REVIEW.md), [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) and [CRITIC-POLICY.md](CRITIC-POLICY.md).
+## Live review deployment
 
-## Deployment state
+The private Render service is now live at:
 
-The current development candidate above is **not deployed**.
+`https://vibelearn-4xws.onrender.com/`
 
-The live private Render preview remains:
+Render deployment `dep-daleugf40ujc73dphuo0` reached `live` on commit `6de1f0ccb234507c1db2dccbe007c7cabfaf397e`. Render's startup/health traffic received HTTP 200 and no error/critical logs were present after deployment.
 
-- commit `987e4773a231a9172634d8aa58e47f0b0996cb75`;
-- deploy `dep-dalcfum5vjqs73et1ir0`;
-- service `srv-daf7dhuq1p3s73c122cg`;
-- auto-deploy is off.
+Auto-deploy remains off. Do not start Level 2 until the current user reviews this Level 1 candidate and provides feedback.
 
-That live preview predates the lifecycle/tutorial/identity simplification and must not be confused with the verified development candidate. Do not deploy the newer candidate merely because CI is green; deployment/user review remain explicit checkpoints.
+## What remains specifically for the user's final review
 
-No new Supabase schema migration was required for this revision. Preserve the existing hosted auth/data boundary, learner isolation and immutable evidence behavior.
+The internal environment cannot replace the user's judgment on:
 
-## Evidence and limits
-
-Fresh exact-head screenshots/reports show:
-
-- a three-beat 3D opening where Zip and the Warden are identified on their actual world characters and the final beat ends on one primary `Help Zip` action;
-- a compact first-success state with Zip free and one `Continue with Zip` action;
-- a recoverable tower mistake whose primary action is `Check route signs`;
-- an in-world completion state with Zip present and the Star gate open before any optional ending dialog;
-- functional 200% text at phone widths without turning the experience into a full-screen reading surface.
-
-Still **unverified / not claimed**:
-
-- subjective audio mix and musical appeal by listening;
-- physical-device feel and performance;
-- novice/young-player engagement or comprehension;
+- subjective music/effects mix and musical appeal by actual listening;
+- physical-phone feel/performance and ergonomics;
+- genuine newcomer/young-player engagement and comprehension;
 - delayed learning/retention;
-- user acceptance of this newer candidate.
+- overall product taste and whether Level 1 feels fun enough to continue.
 
-The user's most recent product verdict applies to the earlier preview and remains `needs_revision` until they review a newer candidate. Green CI does not change that verdict.
+Chromium touch/viewport emulation, audio lifecycle checks and internal criticism are evidence, not substitutes for those human judgments.
 
-## Next gate
+## Next action
 
-Do not start Level 2.
+**User final review and feedback on Level 1.**
 
-Next work is the qualitative whole-Level-1 review under [CRITIC-POLICY.md](CRITIC-POLICY.md): inspect the exact rendered opening/tutorial/challenge/payoff, record concrete remaining clarity or engagement blockers before scores, keep sound/physical-device limitations explicit, repair only observed Level 1 problems, then present a bounded candidate for the user's review. The user remains the final product critic.
+Do not implement Level 2 yet. Any user-reported Level 1 blocker should be repaired and retested before progression work continues.
 
-Historical September 14 state is preserved under `docs/history/`; older local-worktree/deployment checkpoints are historical and no longer current instructions.
+Relevant evidence:
+
+- `docs/LEVEL1-FINAL-CRITIC-20260917.md`
+- `docs/reviews/2026-09-17-level1-6fea828.json`
+- `docs/FIRST-WORDS-CHUNK-REVIEW.md`
+- `docs/LEVEL1-QUALITY-GATE-20260916.md`
+- `docs/CRITIC-POLICY.md`
