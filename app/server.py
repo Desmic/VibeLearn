@@ -33,6 +33,13 @@ def make_server(database, port=8000):
             self.end_headers()
             self.wfile.write(payload)
 
+        def redirect(self, location):
+            self.send_response(302)
+            self.send_header("Location", location)
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
         def allowed_host(self):
             return self.headers.get("Host") in (f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}")
 
@@ -85,7 +92,7 @@ def make_server(database, port=8000):
                 return self.send(403, {"error": "FORBIDDEN"})
             path = urlsplit(self.path).path
             if path == "/api/config":
-                return self.send(200, {"hosted": False, "sign_in_required": False})
+                return self.send(200, {"hosted": False, "sign_in_required": False, "entry": "first-words"})
             if path == "/api/health":
                 return self.send(200, {"status": "ok", **running_manifest})
             if path == "/api/state":
@@ -96,6 +103,8 @@ def make_server(database, port=8000):
                     return self.send(200, service.state(database, learner))
                 except sqlite3.Error:
                     return self.send(503, {"error": "STORAGE_UNAVAILABLE", "message": "The database is unavailable. Retry shortly."})
+            if path == "/word-machine":
+                return self.redirect("/first-words")
             assets = {
                 '/first-words': ('first-words.html', 'text/html'),
                 '/first-words.js': ('first-words.js', 'text/javascript'),
@@ -105,66 +114,30 @@ def make_server(database, port=8000):
                 '/rescue-world-props.js': ('rescue-world-props.js', 'text/javascript'),
                 '/game-audio.js': ('game-audio.js', 'text/javascript'),
                 '/learning-session.js': ('learning-session.js', 'text/javascript'),
-                "/word-machine": ("word-machine.html", "text/html"),
-                "/word-machine.js": ("word-machine.js", "text/javascript"),
-                "/word-machine-boot.js": ("word-machine-boot.js", "text/javascript"),
-                "/word-machine.css": ("word-machine.css", "text/css"),
-                "/word-machine-world.js": ("word-machine-world.js", "text/javascript"),
-                "/workshop-props.js": ("workshop-props.js", "text/javascript"),
-                "/spec-game-world.js": ("spec-game-world.js", "text/javascript"),
-                "/rescue-game.js": ("rescue-game.js", "text/javascript"),
-                "/rescue.js": ("rescue.js", "text/javascript"),
-                "/rescue.css": ("rescue.css", "text/css"),
-                "/play-canvas.js": ("play-canvas.js", "text/javascript"),
-                "/game-runtime.js": ("game-runtime.js", "text/javascript"),
-                "/player-controls.js": ("player-controls.js", "text/javascript"),
-                "/game-character-spec.js": ("game-character-spec.js", "text/javascript"),
-                "/game-screen.js": ("game-screen.js", "text/javascript"),
-                "/game-screen.css": ("game-screen.css", "text/css"),
-                "/game-opening.js": ("game-opening.js", "text/javascript"),
-                "/game-world-status.js": ("game-world-status.js", "text/javascript"),
-                "/echo-forge-opening-spec.js": ("echo-forge-opening-spec.js", "text/javascript"),
-
-                "/world-spec.js": ("world-spec.js", "text/javascript"),
-                "/playcanvas-backend.js": ("playcanvas-backend.js", "text/javascript"),
-                "/echo-forge-world-spec.js": ("echo-forge-world-spec.js", "text/javascript"),
-                "/rescue-playcanvas-world.js": ("rescue-playcanvas-world.js", "text/javascript"),
-                "/play-canvas-migrate.js": ("play-canvas-migrate.js", "text/javascript"),
-                "/play-canvas.css": ("play-canvas.css", "text/css"),
-                "/rescue-intro.js": ("rescue-intro.js", "text/javascript"),
-                "/rescue-intro.css": ("rescue-intro.css", "text/css"),
-                "/rescue-story3d.js": ("rescue-story3d.js", "text/javascript"),
-                "/story3d-runtime.js": ("story3d-runtime.js", "text/javascript"),
-                "/story3d-world-host.js": ("story3d-world-host.js", "text/javascript"),
-                "/rescue-chapter1.js": ("rescue-chapter1.js", "text/javascript"),
-                "/rescue-chapter1.css": ("rescue-chapter1.css", "text/css"),
-                "/auth-game.js": ("auth-game.js", "text/javascript"),
-                "/auth-game.css": ("auth-game.css", "text/css"),
-                "/progress-controls.js": ("progress-controls.js", "text/javascript"),
-                "/progress-controls.css": ("progress-controls.css", "text/css"),
-                "/phone-first.css": ("phone-first.css", "text/css"),
-                "/relay-repair-kit.zip": ("relay-repair-kit.zip", "application/zip"),
-                "/": ("index.html", "text/html"),
-                "/app.js": ("app.js", "text/javascript"),
-                "/style.css": ("style.css", "text/css"),
-                "/premium.css": ("premium.css", "text/css"),
-                "/game.css": ("game.css", "text/css"),
-                "/expedition.js": ("expedition.js", "text/javascript"),
-                "/expedition.css": ("expedition.css", "text/css"),
-                "/valley3d.js": ("valley3d.js", "text/javascript"),
-                "/vendor/three.module.min.js": ("vendor/three.module.min.js", "text/javascript"),
-                "/vendor/three.core.min.js": ("vendor/three.core.min.js", "text/javascript"),
-                "/vendor/THREE-LICENSE.txt": ("vendor/THREE-LICENSE.txt", "text/plain"),
-                "/vendor/playcanvas.mjs": ("vendor/playcanvas.mjs", "text/javascript"),
-                "/vendor/PLAYCANVAS-LICENSE.txt": ("vendor/PLAYCANVAS-LICENSE.txt", "text/plain"),
-                "/assets/quaternius-animated-robot.glb": ("assets/quaternius-animated-robot.glb", "model/gltf-binary"),
-                "/assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt": ("assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt", "text/plain"),
-                "/assets/quaternius-blacksmith.glb": ("assets/quaternius-blacksmith.glb", "model/gltf-binary"),
-                "/assets/QUATERNIUS-BLACKSMITH-LICENSE.txt": ("assets/QUATERNIUS-BLACKSMITH-LICENSE.txt", "text/plain"),
+                '/workshop-props.js': ('workshop-props.js', 'text/javascript'),
+                '/spec-game-world.js': ('spec-game-world.js', 'text/javascript'),
+                '/game-runtime.js': ('game-runtime.js', 'text/javascript'),
+                '/game-opening.js': ('game-opening.js', 'text/javascript'),
+                '/world-spec.js': ('world-spec.js', 'text/javascript'),
+                '/playcanvas-backend.js': ('playcanvas-backend.js', 'text/javascript'),
+                '/player-controls.js': ('player-controls.js', 'text/javascript'),
+                '/game-character-spec.js': ('game-character-spec.js', 'text/javascript'),
+                '/game-screen.css': ('game-screen.css', 'text/css'),
+                '/rescue-intro.css': ('rescue-intro.css', 'text/css'),
+                '/play-canvas.css': ('play-canvas.css', 'text/css'),
+                '/auth-game.js': ('auth-game.js', 'text/javascript'),
+                '/auth-game.css': ('auth-game.css', 'text/css'),
+                '/': ('index.html', 'text/html'),
+                '/vendor/playcanvas.mjs': ('vendor/playcanvas.mjs', 'text/javascript'),
+                '/vendor/PLAYCANVAS-LICENSE.txt': ('vendor/PLAYCANVAS-LICENSE.txt', 'text/plain'),
+                '/assets/quaternius-animated-robot.glb': ('assets/quaternius-animated-robot.glb', 'model/gltf-binary'),
+                '/assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt': ('assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt', 'text/plain'),
+                '/assets/quaternius-blacksmith.glb': ('assets/quaternius-blacksmith.glb', 'model/gltf-binary'),
+                '/assets/QUATERNIUS-BLACKSMITH-LICENSE.txt': ('assets/QUATERNIUS-BLACKSMITH-LICENSE.txt', 'text/plain'),
             }
             if path in assets:
                 name, mime = assets[path]
-                content_type = mime if mime in ("application/zip", "model/gltf-binary") else mime + "; charset=utf-8"
+                content_type = mime if mime in ("model/gltf-binary",) else mime + "; charset=utf-8"
                 return self.send(200, (ROOT / "web" / name).read_bytes(), content_type)
             return self.send(404, {"error": "NOT_FOUND"})
 
