@@ -1,5 +1,7 @@
 # Episode 1 implementation contract
 
+**Superseded story scope — 15 September 2026:** the workshop below describes the implemented prototype at `31025192a4c01dee04fcd621c1e4a52887b4efcb`. The user requested story revision. The next bounded implementation follows [LLM-RESCUE-STORY.md](LLM-RESCUE-STORY.md) and [WORLD-ATMOSPHERE-AND-AUDIO.md](WORLD-ATMOSPHERE-AND-AUDIO.md): arrival/capture/repair/reunion, followed by changed-context transfer. Preserve the existing learning safeguards and receipts; version changed content/rules/assessment fixtures rather than reinterpret saved attempts. Do not build later episodes before the Phase 1 human checkpoint.
+
 15 September 2026. User authorized beginning after GitHub research, with the reusable framework actually used. See REUSE-RESEARCH-20260915.md and NEXT-TEACHING-DESIGN.md.
 
 ## Bounded complete path

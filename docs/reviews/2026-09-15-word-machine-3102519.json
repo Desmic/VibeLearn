@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "candidate_sha": "31025192a4c01dee04fcd621c1e4a52887b4efcb",
+  "method": "internal_tool_assisted",
+  "review_date": "2026-09-15",
+  "environment": "Frozen local application candidate, fresh disposable SQLite final-3102519 learner; direct 390px browser play and additional 360/430/desktop inspections plus real Chromium regression suite.",
+  "limitations": "Implementer review, not audience validation. No enlarged-text or physical/native-touch test, live Supabase sign-in, PostgreSQL connection, retention result or user acceptance. The six PostgreSQL unit checks are skipped locally.",
+  "prior_context": "Reviewer read docs/source, authored the implementation and knew the solutions. Earlier iteration checks are explicitly scoped to unchanged code; the final candidate was also played from fresh state through both wrong routes, both repairs and saved completion.",
+  "user_authority": "The current user is the sole human product critic and final authority. No numeric user score or acceptance has been supplied.",
+  "technical_status": "passed",
+  "technical_evidence": [
+    "docs/LLM-EPISODE-1-VERIFICATION.md",
+    "docs/llm-playtest-20260915/verification-summary.json"
+  ],
+  "criteria": {
+    "world_role_stakes": {
+      "rating": 7,
+      "reason": "Workshop, operator, courier and recipient are visible; personal stakes are slight.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "visible_causality": {
+      "rating": 8,
+      "reason": "Wake, wrong route and corrected handoffs are visible; the result sentence leads a brief travel animation.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "attachment_pull": {
+      "rating": 5,
+      "reason": "Coherent errands, but little characterization or surprise gives the player a reason to care.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "orientation_action": {
+      "rating": 8,
+      "reason": "One goal and contextual action; the second goal fades the destination answer.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "hud_readability": {
+      "rating": 7,
+      "reason": "Sparse labels and a bounded action tray fit inspected states. Enlarged text is not verified.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "controls": {
+      "rating": 8,
+      "reason": "Saved actions leave camera/movement usable; pause/replay/reduced motion work. Physical devices are untested.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "meaningful_agency": {
+      "rating": 6,
+      "reason": "Clues affect the route, but repeated generation clicks are predetermined.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "progression_recovery": {
+      "rating": 6,
+      "reason": "Copying the first clue fails and recovery teaches context; reasoning depth increases only modestly.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "world_continuity": {
+      "rating": 7,
+      "reason": "The courtyard persists across deliveries and handoffs. Recipients remain visually simple.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "concept_fidelity": {
+      "rating": 7,
+      "reason": "Generated pieces join context and clues change continuations. Authored whole-word scores need a clearer later bridge to learned models.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "fresh_transfer": {
+      "rating": 5,
+      "reason": "The changed case is guided by an explicit note. There is no independent prediction/explanation probe or retention evidence.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    }
+  },
+  "coverage": {
+    "fresh_entry": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "first_action": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "mistake": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "recovery": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "later_challenge": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "payoff": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "transfer": {
+      "status": "observed",
+      "note": "Observed the changed-context second case and deliberate copied-clue error; this is guided practice, not an independent transfer assessment.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "replay": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "save_resume": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "controls_after_save": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "desktop": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "phone_360": {
+      "status": "observed",
+      "note": "Final automated fresh opening and both deliveries to completion; manual narrow-screen ending/replay checks. No physical-phone claim.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "phone_390": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "phone_430": {
+      "status": "observed",
+      "note": "Final automated fresh opening and both deliveries to completion; manual changed-case screenshot. No physical-phone claim.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "touch": {
+      "status": "not_checked",
+      "note": "Touch-enabled Chromium layouts and mouse/pointer control of the on-screen stick were exercised. A physical touch device or dedicated native touch-event sequence was not verified.",
+      "evidence": []
+    },
+    "keyboard": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    },
+    "enlarged_text": {
+      "status": "not_checked",
+      "note": "Browser/OS text enlargement has not been verified. Do not infer it from viewport resizing.",
+      "evidence": []
+    },
+    "reduced_motion": {
+      "status": "observed",
+      "note": "Direct play and/or the final real-browser suite, with method and scope limitations in the episode report.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    }
+  },
+  "blockers": [
+    {
+      "finding": "The chapter has no independent prediction/explanation probe beyond two explicitly guided context errands; it cannot support the required fresh-transfer readiness claim.",
+      "retest": "After the Phase 1 user checkpoint, design and observe a novel context/sequence decision with an attempt before feedback, and assess its learning evidence separately from delivery success.",
+      "evidence": [
+        "docs/LLM-EPISODE-1-PLAYTEST.md"
+      ]
+    }
+  ]
+}

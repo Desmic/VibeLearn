@@ -1,5 +1,7 @@
 # Inside the Word Machine — an ongoing How LLMs Work series
 
+**Story revision — 15 September 2026:** the user found the workshop story weak despite technical/interface improvements. [LLM-RESCUE-STORY.md](LLM-RESCUE-STORY.md) now owns the next story, opening and season progression: rescue Zip, restore the speech engine, ascend the tower and bring friends home. [WORLD-ATMOSPHERE-AND-AUDIO.md](WORLD-ATMOSPHERE-AND-AUDIO.md) owns atmosphere, music and humor. The workshop premise/opening below describes the superseded prototype design; the narrow learning outcomes, toy-model limits, sources and evidence safeguards remain applicable. No rescue build or later episode is implemented by this documentation revision.
+
 **Selected by the user's direction, 15 September 2026.** Teach AI, especially how LLMs work, as an appealing ongoing game series. This supersedes the provisional circuits choice. The series below is a concrete content/design plan; no new episode or live model integration is implemented by this change.
 
 ## The promise

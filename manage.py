@@ -14,6 +14,7 @@ BROWSER_GROUPS = {
     "opening": ["tests.onboarding_browser", "tests.opening_contract_browser", "tests.player_controls_browser"],
     "journey": ["tests.rescue_browser"],
     "word-machine": ["tests.word_machine_browser"],
+    "first-words": ["tests.first_words_opening_browser", "tests.first_words_browser", "tests.first_words_readability_browser"],
 }
 
 

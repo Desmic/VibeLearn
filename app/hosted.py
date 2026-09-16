@@ -119,9 +119,14 @@ def create_app(config=None, auth_provider=None):
     def word_machine_page():
         return send_from_directory(ROOT / "web", "word-machine.html")
 
+    @app.get('/first-words')
+    def first_words_page():
+        return send_from_directory(ROOT / 'web', 'first-words.html')
+
     @app.get("/<asset>")
     def asset(asset):
         if asset not in (
+            'first-words.js', 'first-words-boot.js', 'first-words.css', 'first-words-world.js', 'rescue-world-props.js', 'game-audio.js', 'learning-session.js',
             "word-machine.js", "word-machine-boot.js", "word-machine.css", "word-machine-world.js", "workshop-props.js", "spec-game-world.js",
             "rescue-game.js", "rescue.js", "rescue.css", "play-canvas.js", "play-canvas-migrate.js", "play-canvas.css",
             "game-runtime.js", "game-opening.js", "game-world-status.js", "echo-forge-opening-spec.js", "world-spec.js", "playcanvas-backend.js", "echo-forge-world-spec.js", "rescue-playcanvas-world.js",

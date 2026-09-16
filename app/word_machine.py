@@ -112,7 +112,9 @@ def validate(value):
     if not isinstance(value, dict) or set(value) != {"moves"}:
         raise ValueError("This activity needs a semantic action log.")
     moves = value["moves"]
-    if not isinstance(moves, list) or len(moves) > 240 or any(not isinstance(m, str) or m not in RULES["actions"] for m in moves):
+    from app.first_words import RULES as RESCUE_RULES
+    allowed = set(RULES['actions']) | set(RESCUE_RULES['actions'])
+    if not isinstance(moves, list) or len(moves) > 240 or any(not isinstance(m, str) or m not in allowed for m in moves):
         raise ValueError("The action log is invalid or full.")
 
 
@@ -120,6 +122,9 @@ def replay(snapshot, value=None):
     value = empty() if value is None else value
     validate(value)
     config = snapshot["word_machine"]
+    if config['version'] == 'first-words-1':
+        from app.first_words import replay as replay_rescue
+        return replay_rescue(snapshot, value)
     if config["version"] != VERSION:
         raise ValueError("Unsupported pinned word-machine version")
     engine = GameRulesEngine(config["rules"])

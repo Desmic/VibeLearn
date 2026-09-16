@@ -448,8 +448,13 @@ async function boot() {
   try {
     const config = await api("/api/config"); hosted = config.hosted;
     state = await api("/api/session", {}); attempt = state.attempt;
+    const requestedReturn=sessionStorage.getItem('vibelearn-return');
+    if(requestedReturn==='/first-words'){
+      sessionStorage.removeItem('vibelearn-return');
+      if(attempt?.status!=='draft'){location.assign('/first-words');return true;}
+    }
     if(attempt?.snapshot?.word_machine){
-      if(attempt.status==='draft'){location.assign('/word-machine');return true;}
+      if(attempt.status==='draft'){location.assign(attempt.snapshot.word_machine.version==='first-words-1'?'/first-words':'/word-machine');return true;}
       attempt=null;
     }
     $("#sign-in").hidden = true;

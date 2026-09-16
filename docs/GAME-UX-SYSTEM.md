@@ -1,5 +1,7 @@
 # VibeLearn game UX system — the game is the course
 
+**15 September 2026 atmosphere amendment:** build an inhabited, visually coherent world with readable landmarks, expressive characters, quiet exploration and audible action/payoff. Follow [WORLD-ATMOSPHERE-AND-AUDIO.md](WORLD-ATMOSPHERE-AND-AUDIO.md). Decoration must preserve player/target/result visibility on phones. Keep one current goal, contextual controls and optional detail; references and humor never replace essential cues. Provide separate music/effects controls and equivalent muted comprehension. The rescue treatment in [LLM-RESCUE-STORY.md](LLM-RESCUE-STORY.md) controls the next LLM revision.
+
 **Current authority — 15 September 2026:** [CRITIC-POLICY.md](CRITIC-POLICY.md) supersedes older score formulas, gate order and review-preview exceptions below. The sole human product critic is the current user. Review the whole playable candidate, use observed evidence and hard blockers, and keep preview/readiness/user acceptance distinct. The user selected an ongoing How LLMs Work series; see [NEXT-TEACHING-DESIGN.md](NEXT-TEACHING-DESIGN.md). Preserve existing retry evidence; the new topic needs new learning identities.
 
 **Current review amendment — 14 September 2026:** Default exploration to a third-person player with independent orbit/zoom/recenter. Phone gameplay fills the dynamic viewport with safe-area HUD and movement/look controls; long secondary content scrolls inside bounded panels. Login uses the same 3D world and visual language. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).

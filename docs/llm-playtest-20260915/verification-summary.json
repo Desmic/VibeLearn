@@ -1,0 +1,30 @@
+{
+  "candidate_sha": "31025192a4c01dee04fcd621c1e4a52887b4efcb",
+  "source_digest": "1c95729fa969241d521f0dce66ae1dd60507aa0c3fa1b2376355a125683968a9",
+  "build": "passed",
+  "application_tests": {
+    "total": 147,
+    "passed": 141,
+    "skipped": 6,
+    "reason": "Local PostgreSQL unavailable; existing PostgreSQL CI gate was not run remotely."
+  },
+  "browser_modules": [
+    "tests.browser_check",
+    "tests.expedition_browser_check",
+    "tests.game_review_browser",
+    "tests.story3d_framework_browser",
+    "tests.playcanvas_framework_browser",
+    "tests.playcanvas_story_interaction_browser",
+    "tests.onboarding_browser",
+    "tests.opening_contract_browser",
+    "tests.player_controls_browser",
+    "tests.rescue_browser",
+    "tests.word_machine_browser"
+  ],
+  "final_affected_browser_gate": "passed on final candidate",
+  "limitations": [
+    "Local SQLite; hosted tests use explicitly simulated AuthFixture, not live Supabase.",
+    "No remote CI run or deployment.",
+    "Desktop Chromium and browser viewport emulation, not physical-device or audience validation."
+  ]
+}

@@ -1,5 +1,7 @@
 # Current story candidate — Relay Rescue: The Echo Forge
 
+**15 September 2026 scope clarification:** this file retains the retry episode's story. The active LLM rescue revision is [LLM-RESCUE-STORY.md](LLM-RESCUE-STORY.md), following the user's rejection of the workshop story. Do not apply this legacy candidate or its prior scores to the new series. Existing retry content/evidence remain intact.
+
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
 
 **Candidate:** story-v3 / 13 September 2026  

@@ -1,5 +1,30 @@
 # Learning OS — incremental implementation plan 2.0
 
+**Latest instruction — 16 September 2026:** continue locally; deploy the latest verified
+checkpoint when the five-hour allowance reaches <=10% remaining. Follow the
+concise loop in `CODEX.md`: one playable chunk, immediate focused tests and
+hands-on computer/browser play, repair and recheck, then proceed. Opening is the
+first gate. Its dedicated checkpoint is recorded; next manually verify the Moon
+repair/reunion before the existing tower challenge. Existing later code and
+passing broad tests do not substitute for chunk review. No later-level/audio
+expansion. Finish local Level 1 verification, then stop for the user's review.
+This supersedes deployment and broad implementation ordering below.
+
+**16 September 2026 explicit execution gate:** the user authorized the completed Level 1 deployment, and reiterated that the opening must be completed and tested first. Follow `docs/FIRST-WORDS-BUILD.md`: finish and verify the opening, repair its observed failures, then complete full Level 1 checks, then deploy for the user's review. Existing level code is working code, not proof this gate passed. No later-level expansion.
+
+## Latest execution amendment — 15 September 2026, after Word Machine review
+
+The current user acknowledges technical/interface improvements but rejects the weak workshop story. Their rescue premise and request for beautiful atmosphere, pop-culture references and sound/music supersede the earlier delivery-story implementation order. This is changes requested, not acceptance or a numeric score.
+
+1. Research a varied set of narrative influences and compare premises before realization. Done as design work in `docs/STORY-INSPIRATION-20260915.md`.
+2. Author the rescue treatment and progressive learning actions before more game code. `docs/LLM-RESCUE-STORY.md` defines the selected working direction; `docs/WORLD-ATMOSPHERE-AND-AUDIO.md` defines art, sound, humor, reuse and required observations. These are unimplemented, unrated designs.
+3. Implement one bounded continuous Episode 1 arrival -> capture -> reachable repair -> first words -> reunion using existing opening/runtime/spec/rules components. Add only the required reusable gate/prop/audio primitives. Author and version rules/content fixtures before binding presentation; preserve existing attempts and retry evidence.
+4. Add a changed-context challenge with a prediction before feedback and reduced guidance. Validate evidence meaning separately from the rescue reward. Keep later episodes as a roadmap.
+5. Play the whole revised episode, including first action, mistake/recovery, reunion, transfer and replay/save. Inspect portrait widths, controls, enlarged text, reduced motion, sound-on and muted experience. Fix concrete story/atmosphere/HUD/learning blockers.
+6. Run appropriate storage/build/browser gates for code changes. Apply the expanded critic-policy probes, preserve exact-build evidence and stop at the sole current user's Phase 1 checkpoint. No production push/deploy is part of this design revision.
+
+The prior implemented workshop and its verification remain a baseline, not the accepted product direction. Current state and actual implementation status live in `docs/STATE.md`.
+
 **Current review amendment — 14 September 2026:** Next bounded unit: reusable third-person movement/orbit camera, consistent 3D login, full-viewport mobile HUD and optional browser fullscreen. Then hands-on browser review, exact complete CI and manual verified deployment. Read [GAME-CAMERA-INPUT.md](docs/GAME-CAMERA-INPUT.md).
 
 **Current user contract — 13 September 2026:** Read [docs/GAME-OPENING-PROGRESSION.md](docs/GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.

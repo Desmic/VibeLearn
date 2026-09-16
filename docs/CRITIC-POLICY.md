@@ -1,5 +1,12 @@
 # Critic policy — observed play, then the user's verdict
 
+**16 September workflow clarification:** during development, follow `../CODEX.md`:
+choose coherent small chunks (including simultaneous related work), finish/test/play
+the opening first, then verify and repair each chunk before extending it. Whole-chapter
+review below applies to an already built candidate; it does not authorize building
+ahead of an unresolved chunk gate. Review existing code for problems without treating
+its existence or a broad passing suite as proof of product quality. Deployment is paused.
+
 **Active from 15 September 2026.** This is the authority for review methods, ratings and readiness. It replaces conflicting weighted-score rules, sequential review restrictions and review-candidate exceptions in older documents. It does not authorize deployment or another phase.
 
 ## Who decides
@@ -65,6 +72,8 @@ These questions operationalize the criteria. Failing one is a blocker even if a 
 |---|---|
 | World and role | In the first minute, identify where we are, who the player controls, who needs help, what changed and what to do next using visible events and brief accessible cues. A glossary or several exposition cards supplying the premise fails. |
 | Opening is a scene | Show a causal event and character/world response in a coherent space. Repeated Continue over substantially the same diorama, with captions carrying the action, fails. Back/Skip/Replay/accessibility remain available. |
+| Attachment and atmosphere | Show a concrete reason to care about the companion, an inhabited coherent place and a visible relationship/world payoff. A generic errand or attractive but empty stage fails the promised rescue experience. Evaluate under attachment_pull and world_continuity; no points for technical complexity. |
+| Sound and cultural references | For the rescue revision, observe sound-on and muted opening/action/payoff; record actual listening. Missing promised music, distracting loops, masked cues, sound-only essential information or reference-dependent comprehension blocks readiness. Record under visible_causality, controls and world_continuity, with an unresolved blocker when appropriate. |
 | Phone framing | At each required action and consequence, player, relevant target and visible result fit the authored view. A marker contradicting the target direction or a key consequence offscreen fails. |
 | HUD and text | Default play has one short current goal and contextual action cues. No duplicate instruction stack, text over the manipulated object, nested reading area required for the immediate task, or control overlap. Optional detail stays available; accessible labels remain. |
 | Action survives save | Inspect/interact, wait for save, then actually use movement and every camera control without reloading. Disabled or intercepted controls fail even if their positions pass tests. |
@@ -75,6 +84,8 @@ These questions operationalize the criteria. Failing one is a blocker even if a 
 Do not remove all text or semantic HTML to chase this rubric. Inspect the world without expanded help as a diagnostic, then verify equivalent concise information through accessible controls and descriptions.
 
 ## Evidence and executable check
+
+The September 15 user feedback on the Word Machine is qualitative: interface/technical improvement, weak story, stronger rescue premise and captivating atmosphere/music requested. Preserve old numeric records. New story research and authored treatments are design evidence only. The existing checker validates the existing criterion IDs and explicitly supplied blockers; it does not automatically listen, measure atmosphere or enforce honest reporting. These additional review probes do not mean an automated critic service was added.
 
 Use [reviews/2026-09-15-render-337db57.json](reviews/2026-09-15-render-337db57.json) as the format example. Every score/coverage claim references existing repository evidence. The record contains exact SHA, reviewer method, environment, limitations, coverage, criterion ratings and unresolved blockers.
 

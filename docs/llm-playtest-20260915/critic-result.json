@@ -1,0 +1,16 @@
+{
+  "candidate_sha": "31025192a4c01dee04fcd621c1e4a52887b4efcb",
+  "status": "needs_revision",
+  "gate_minimums": {
+    "rendered_story": 5,
+    "first_touch": 7,
+    "whole_chapter": 6,
+    "learning": 5
+  },
+  "unassessed_criteria": [],
+  "unobserved_coverage": [
+    "touch",
+    "enlarged_text"
+  ],
+  "user_acceptance": "not_determined_by_tool"
+}

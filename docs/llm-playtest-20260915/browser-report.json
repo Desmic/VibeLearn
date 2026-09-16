@@ -1,0 +1,12 @@
+{
+  "result": "passed",
+  "checks": [
+    "Opening wake action \u2192 same runtime; generated piece survives reload; optional scores; visible wrong delivery.",
+    "Both deliveries: copying Garden fails in case 2; corrected Library succeeds. Camera/movement work after saved action. Replay preserves state/view; reduced motion; immutable completion resumes.",
+    "Unrelated orchard scene instantiates through the same WorldSpec package adapter and PlayCanvas backend.",
+    "Fresh 360/430 touch-enabled reduced-motion contexts play the opening and both deliveries to saved completion; second goal fades the location answer.",
+    "Controlled missing-engine and missing-model faults show Reload workshop and issue no gameplay commands."
+  ],
+  "page_errors": [],
+  "limits": "Automated Chromium with temporary SQLite; no physical phone, live hosted sign-in, novice study or mastery claim."
+}

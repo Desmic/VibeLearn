@@ -37,3 +37,24 @@ The first browser test draft read the wrong diagnostics field; it was corrected 
 - The existing one-active-draft rule remains. An unfinished Relay run must be completed before starting AI; no draft is overwritten.
 - No database migration was needed. Older code cannot present a new AI attempt, so rollback must retain this code for those new attempts or use the prior application with its prior disposable database. Do not roll back by deleting evidence.
 - The manual review database is separate from the learner database. Stop the matching loopback review server to end preview. The original checkout, original learner data and live Render deployment remain intact.
+
+## Final executed results
+
+Final application commit: `31025192a4c01dee04fcd621c1e4a52887b4efcb`. `manage.py build` passed on these source bytes; the current manifest digest was compared with the recorded build and matched.
+
+- `manage.py test`: **147 tests — 141 passed, 6 PostgreSQL skips**. Python/auth/storage/content code is unchanged between that run and the final presentation-only fixes.
+- `manage.py browser`: **all 11 browser modules passed**, including the original ten modules and the new episode.
+- `manage.py browser --group word-machine`: **passed again on the final frozen candidate**, after the last courier/marker framing adjustment.
+- Direct browser play on fresh final-candidate SQLite state completed 20 moves, both mistakes/repairs and a submitted result. One immutable evidence record and one reward were present; outcome correct, independence assisted, mastery unknown. Reload restored completion.
+
+[verification-summary.json](llm-playtest-20260915/verification-summary.json), [build manifest](llm-playtest-20260915/build-manifest.json), [application log](llm-playtest-20260915/application-tests.log), [integrated browser log](llm-playtest-20260915/integrated-browser.log), [final affected browser log](llm-playtest-20260915/final-browser.log), [episode report](llm-playtest-20260915/browser-report.json), [saved result](llm-playtest-20260915/final-saved-result.json).
+
+The critic review remains **needs_revision**, with no human acceptance. Read [LLM-EPISODE-1-PLAYTEST.md](LLM-EPISODE-1-PLAYTEST.md) for concrete weaknesses and ratings. The final local preview uses a separate fresh database from both review runs. The live Render revision remains `337db573d87c417aca42f55894a2c6e807df21ed`.
+
+## Current local preview
+
+URL: http://127.0.0.1:8001/word-machine. The running preview uses `artifacts/word-machine-preview-3102519.sqlite3`, separate from all test/playtest databases. It was reopened at the untouched arrival scene after resetting the temporary browser viewport override.
+
+To restart from this worktree, use the installed interpreter at `E:/Projects/VibeLearn/artifacts/render-local-337db57/.venv/Scripts/python.exe` with `manage.py serve --db artifacts/word-machine-preview-3102519.sqlite3 --port 8001`. Preserve that file to resume the user's preview; use a different explicitly disposable database for another test run. Do not point browser tests at this preview or the real learner database.
+
+The strict critic checker validated the new record and returned exit **1** for readiness, as expected: `needs_revision`, gate minima 5 / 7 / 6 / 5, touch and enlarged-text coverage unverified. Its output is [critic-result.json](llm-playtest-20260915/critic-result.json). User acceptance remains undetermined by the tool.

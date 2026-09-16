@@ -1,6 +1,8 @@
 # Current local candidate — prototype, not accepted
 
-Episode 1 of Inside the Word Machine is implemented locally on `codex/critic-evidence-reset`. Use [LLM-EPISODE-1-VERIFICATION.md](LLM-EPISODE-1-VERIFICATION.md) and the new episode playtest record for its actual scope/results. The earlier rejection below remains attached to the deployed commit; do not transfer its scores to the new game. No internal or human acceptance is inferred from a successful test run.
+**Latest human feedback — 15 September 2026:** the user found the prototype technically impressive and the interface improved, but called its story weak and asked for rescue-driven progression, a beautiful captivating world, references and sound/music. User verdict: **needs_revision**, no numeric score. [LLM-RESCUE-STORY.md](LLM-RESCUE-STORY.md) is the replacement design, not yet rendered or rated. Preserve the exact-build internal scores below as historical evidence for the existing prototype.
+
+Candidate `31025192a4c01dee04fcd621c1e4a52887b4efcb`: internal verdict **needs_revision** (gate minima 5 / 7 / 6 / 5). Episode 1 of Inside the Word Machine is implemented locally on `codex/critic-evidence-reset`. Use [LLM-EPISODE-1-VERIFICATION.md](LLM-EPISODE-1-VERIFICATION.md) and [LLM-EPISODE-1-PLAYTEST.md](LLM-EPISODE-1-PLAYTEST.md) for its actual scope/results. The earlier rejection below remains attached to the deployed commit; do not transfer its scores to the new game. No internal or human acceptance is inferred from a successful test run.
 
 # Deployed baseline story verdict — needs revision
 

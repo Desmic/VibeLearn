@@ -1,5 +1,27 @@
 # Reusable pieces used by Episode 1
 
+## Local rescue implementation — 16 September 2026
+
+The following now exist in the uncommitted `/first-words` working candidate.
+Their presence does not establish a completed product gate; follow
+`FIRST-WORDS-CHUNK-REVIEW.md`. Deployment is paused and no later-level assets are
+being developed. Earlier planned-only wording below describes the prior checkpoint.
+
+| Piece | Current use |
+|---|---|
+| `rescue-world-props.js` | Reusable gate, lantern, tower and planter primitives; multiple gate/lantern instances in Bellweather. |
+| `spec-game-world.js` | Timeline moves/cues, pause, reduced motion and cleanup, used by the rescue opening and reunion. |
+| `game-opening.js` | Shared story navigation with motion readiness; the rescue uses authored opening data rather than a copied controller. |
+| `game-audio.js` | Original procedural music/cues and shared mute/pause/disposal. Already implemented ahead of the corrected order; lifecycle checked, listening quality still unassessed. |
+| `learning-session.js` | Shared command/revision/save/retry client used by First Words. Server receipts and immutable evidence remain authoritative. |
+| `first-words-world.js` | Episode-specific world, staging and presentation mappings; not a general scene generator. |
+
+Existing PlayCanvas runtime, player controls, procedural player, Quaternius robot,
+workshop props and server GameRulesEngine are reused. No new external art/music or
+model service was introduced. A general on-demand generator remains out of scope.
+
+**Next revision — 15 September 2026:** the rescue design reuses the pieces listed below. Gate/cell modules, lantern/tower variants, voice-module prop and a shared audio cue/lifecycle adapter are **planned additions**, not completed assets. The existing `web/expedition.js` sound is only an optional synthesized tone; Word Machine has no music system. See [WORLD-ATMOSPHERE-AND-AUDIO.md](WORLD-ATMOSPHERE-AND-AUDIO.md) for the concrete production/reuse plan.
+
 15 September 2026. These are implemented files, not a claim that an on-demand course generator exists.
 
 ## Existing framework actually used

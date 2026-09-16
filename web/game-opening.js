@@ -38,7 +38,8 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   const completed=new Set();
   const gate=window.GameWorldStatus;
   const scene=()=>spec.scenes[step];
-  const ready=()=>Boolean(world?.available&&!runtime.stats().contextLost);
+  const available=()=>Boolean(world?.available&&!runtime.stats().contextLost);
+  const ready=()=>available()&&(!spec.waitForMotion||!world.stats?.().animating);
   const close=(reason='cancel')=>{
     if(closed)return;closed=true;cancelAnimationFrame(frame);
     if(replay)runtime.dispose();else runtime.detach();
@@ -57,7 +58,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
     progress.querySelectorAll('i').forEach((n,i)=>{n.classList.toggle('current',i===step);n.classList.toggle('on',i<=step);});
     world=runtime.showStory(worldModule,host,s.beat,{reducedMotion:reduced,paused});
     if(actionDone&&s.action?.patch)world.applyPresentation?.(s.action.patch);
-    gate?.set(host,ready()?'ready':'failed');
+    gate?.set(host,available()?'ready':'failed');
     next.disabled=!ready();
     const markers=overlay.querySelector('.rgi-markers');markers.replaceChildren();
     for(const marker of s.markers||[]){
@@ -80,8 +81,8 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   const updateMarkers=()=>{
     if(closed)return;
     next.disabled=!ready();
-    overlay.querySelector('#rgi-back').disabled=step===0||!ready();
-    overlay.querySelector('#rgi-replay-beat').disabled=!ready();pause.disabled=!ready();
+    overlay.querySelector('#rgi-back').disabled=step===0||!available();
+    overlay.querySelector('#rgi-replay-beat').disabled=!available();pause.disabled=!available();
     const hostRect=host.getBoundingClientRect();
     const cameraTools=host.querySelector('.game-view-tools')?.getBoundingClientRect();
     for(const marker of overlay.querySelectorAll('.rgi-marker')){

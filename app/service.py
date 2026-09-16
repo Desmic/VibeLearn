@@ -90,8 +90,8 @@ def seal(db, row, response, kind, stamp):
     return checkpoint_id, history
 
 
-def campaign_progress(db, learner, expedition=False, rescue_mode=False, word_machine_mode=False):
-    catalog = campaign_catalog(expedition, rescue_mode, word_machine_mode)
+def campaign_progress(db, learner, expedition=False, rescue_mode=False, word_machine_mode=False, first_words_mode=False):
+    catalog = campaign_catalog(expedition, rescue_mode, word_machine_mode, first_words_mode)
     cleared = set()
     for row in db.execute("SELECT capsule, result FROM evidence WHERE learner_id=? ORDER BY created_at", (learner,)):
         result = json.loads(row["result"])
@@ -202,7 +202,7 @@ def command(path, learner, action, body):
                 raise DomainError("ACTIVE_ATTEMPT", "Resume your existing attempt first.", 409)
             mission_id = body.get("mission_id")
             if mission_id:
-                progress = {item["id"]: item for item in campaign_progress(db, learner) + campaign_progress(db, learner, True) + campaign_progress(db, learner, rescue_mode=True) + campaign_progress(db, learner, word_machine_mode=True)}
+                progress = {item["id"]: item for item in campaign_progress(db, learner) + campaign_progress(db, learner, True) + campaign_progress(db, learner, rescue_mode=True) + campaign_progress(db, learner, word_machine_mode=True) + campaign_progress(db, learner, first_words_mode=True)}
                 if mission_id not in progress:
                     raise DomainError("NOT_FOUND", "Unknown mission.", 404)
                 if progress[mission_id]["status"] == "locked":
