@@ -2,89 +2,67 @@
 
 ## Active checkpoint — 17 September 2026 IST
 
-Status: **internally ready for the user's final Level 1 review.**
+Status: **user review in progress / needs revision.**
 
-Verified game candidate: `6fea8287aa5f078a5836902478320699e54571a9`.
+Verified game candidate under review: `6fea8287aa5f078a5836902478320699e54571a9`.
 Exact GitHub Actions run: `35138788244` (`Verify hosted pilot`, run 804).
 Private Render review deployment: commit `6de1f0ccb234507c1db2dccbe007c7cabfaf397e`, deploy `dep-daleugf40ujc73dphuo0`, service `srv-daf7dhuq1p3s73c122cg`.
 
-The Render commit differs from the verified game candidate only by review/documentation commits; the runtime game code is the verified `6fea828...` candidate.
+The internal gate previously returned `ready_for_user_review`, but the user's live review has exposed blockers. The user's product judgment overrides the internal recommendation. See `USER-REVIEW-20260917.md` for the running review log.
 
-## Internal gate result
+## Current user-review blockers
 
-All active Level 1 gates passed on the exact game candidate:
+1. **Opening character duplication/ambiguity:** two Zip-like robots are visible. One extra character near the middle visibly clips through the central table. Character identity and scene geometry are not acceptable.
+2. **Story establishment is insufficient:** the opening begins with a mood/friendship line but does not adequately establish Bellweather, the player/Zip relationship, the situation, the Warden, and the immediate stakes for a cold-start player.
+3. **Tutorial structure is wrong:** the current build labels steps inside Level 1 as `TUTORIAL · 1/3`. The user expected a distinct Tutorial/Prologue before Level 1, so reusable controls and the core interaction/learning loop are learned before the first actual mission.
 
-- foundation / entry / no 2D fallback — passed;
+These are not minor polish issues. Level 1 remains `needs_revision` until repaired and reviewed again.
+
+## Binding design direction
+
+The governing rule remains **easy to play, hard to master**.
+
+The revised progression boundary should be:
+
+`tutorial/prologue -> Level 1 mission -> later episodes with progressively less scaffolding and deeper LLM-internals reasoning`
+
+The Tutorial/Prologue should teach only reusable play semantics—movement/look/interact/menu plus the core learning interaction—with low/no failure pressure and a clean success. Level 1 should then feel like the first actual story mission rather than the tutorial itself.
+
+Opening/story repairs should use staged world events, concise dialogue/captions, character motion and interaction rather than long explanation panels.
+
+## What the prior technical/internal gate did establish
+
+On game candidate `6fea828...`, all active technical gates passed:
+
+- foundation / entry / no 2D fallback;
 - full application suite — **152 tests passed**;
-- opening, including explicit `ZIP` / `WARDEN` identity markers — passed;
-- controls after persisted action + reload — passed;
-- 200% text/readability at 360/390/430 — passed;
-- hosted reset/logout lifecycle — passed;
-- whole chapter: tutorial first win -> changed-context mistake -> recovery -> completion/reload, plus fresh 360/430 reduced-motion completions — passed with no page errors.
+- opening browser lifecycle/reduced-motion checks;
+- controls after persisted action + reload;
+- 200% text/readability at 360/390/430;
+- hosted reset/logout lifecycle;
+- whole chapter mistake/recovery/completion path.
 
-The executable internal critic record in `docs/reviews/2026-09-17-level1-6fea828.json` validates as `ready_for_user_review` for candidate `6fea828...` with criterion minimums:
-
-- rendered story: **9**;
-- first touch: **9**;
-- whole chapter: **9**;
-- learning: **9**.
-
-Every required coverage item is recorded as observed and there is no remaining internally identified blocker. See `LEVEL1-FINAL-CRITIC-20260917.md` for the exact observations and counterexample attempts.
-
-This is an internal recommendation for user review, **not user acceptance**.
-
-## Current player path
-
-The binding product rule is **easy to play, hard to master**.
-
-Current Level 1 flow:
-
-`opening -> connect Zip's power -> scan obvious Moon context -> generate word-by-word -> free Zip -> changed-context tower challenge -> recoverable wrong route -> current five-point clue -> open Star route -> Level 1 complete`
-
-Important simplifications now protected by tests:
-
-- the opening identifies Zip and the Warden directly in the world instead of adding another explanation card;
-- fresh Level 1 runs cannot intentionally fail before the first rescue;
-- optional engine inspection is hidden during the tutorial and appears only after the first win;
-- the former required `Predict the next input` quiz is removed from new runs; input growth is learned through the generation loop itself;
-- `Check route signs` is the guaranteed Level 1 context-selection path; physical boards are optional world shortcuts rather than a camera-hunting requirement;
-- movement/camera skill is available but not required to comprehend the Level 1 concept;
-- `Reset game progress` and `Sign out` are first-class in-game controls again;
-- completion remains in the 3D world before any optional reflection dialog;
-- no 2D gameplay fallback is allowed.
+Those checks remain useful regression evidence, but they did **not** prove product quality. The user review has specifically shown that the internal critic missed duplicate character identity, visible prop intersection under alternate camera views, insufficient cold-start story comprehension, and the tutorial-vs-Level-1 progression mismatch.
 
 ## Live review deployment
 
-The private Render service is now live at:
+The current review build remains live at:
 
 `https://vibelearn-4xws.onrender.com/`
 
-Render deployment `dep-daleugf40ujc73dphuo0` reached `live` on commit `6de1f0ccb234507c1db2dccbe007c7cabfaf397e`. Render's startup/health traffic received HTTP 200 and no error/critical logs were present after deployment.
-
-Auto-deploy remains off. Do not start Level 2 until the current user reviews this Level 1 candidate and provides feedback.
-
-## What remains specifically for the user's final review
-
-The internal environment cannot replace the user's judgment on:
-
-- subjective music/effects mix and musical appeal by actual listening;
-- physical-phone feel/performance and ergonomics;
-- genuine newcomer/young-player engagement and comprehension;
-- delayed learning/retention;
-- overall product taste and whether Level 1 feels fun enough to continue.
-
-Chromium touch/viewport emulation, audio lifecycle checks and internal criticism are evidence, not substitutes for those human judgments.
+Do not treat the deployed build as accepted. Auto-deploy remains off.
 
 ## Next action
 
-**User final review and feedback on Level 1.**
+Continue the user's Level 1 review and append each finding to `docs/USER-REVIEW-20260917.md` without arguing it away or averaging it against internal scores.
 
-Do not implement Level 2 yet. Any user-reported Level 1 blocker should be repaired and retested before progression work continues.
+After the user finishes the review:
 
-Relevant evidence:
+1. consolidate the findings;
+2. update the opening/tutorial/progression design docs and critic counterexamples where needed;
+3. repair Level 1/prologue in coherent chunks;
+4. retest the affected and integrated flows;
+5. deploy a new bounded review candidate;
+6. return to the user for another final review.
 
-- `docs/LEVEL1-FINAL-CRITIC-20260917.md`
-- `docs/reviews/2026-09-17-level1-6fea828.json`
-- `docs/FIRST-WORDS-CHUNK-REVIEW.md`
-- `docs/LEVEL1-QUALITY-GATE-20260916.md`
-- `docs/CRITIC-POLICY.md`
+**Do not start Level 2.**
