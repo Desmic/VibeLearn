@@ -1,54 +1,113 @@
-# World atmosphere, sound and cultural references
+# World atmosphere, art direction, sound and cultural references
 
-15 September 2026. Required direction from the user: beautiful, captivating places; stronger story; restrained text; useful pop-culture references; sound and music. This is the next revision's production brief, not a claim these assets or systems have shipped.
+**Active direction — 17 September 2026.** Read `ART-WORLD-DIRECTION-CRITIC.md`, `GAME-CREATION-PLATFORM.md`, `LLM-RESCUE-STORY.md`, `GAME-OPENING-PROGRESSION.md` and `STATE.md`.
 
-## A world worth entering
+## A world worth inhabiting, not only looking at
 
-Bellweather is a vertical garden city above clouds: apricot sunset, indigo distance, warm brass machines, turquoise glass, hanging plants, cloth lanterns and rooftop workshops. Use a cohesive illustrated adventure style with clear silhouettes and tactile materials. Avoid an empty flat stage filled with interchangeable primitive buildings.
+The September 17 user review gives the current world an important mixed signal: it is interesting enough that a kid might **look at it**, but not yet good/clear enough that they would **play it**.
 
-Compose three depths: a few close leaves or hanging ribbons frame the shot; player, Zip and the current mechanism occupy the clear middle; the bell tower and cloud islands promise the journey beyond. Foreground decoration must never hide interaction or the phone camera. The tower is recognizable from the square and each landing. Paths, lighting and character gaze guide attention before markers appear.
+Preserve visual attraction while fixing spatial/gameplay usability.
 
-Beauty is an experience over time: wind moves ribbons, a little maintenance creature tends plants, lantern reflections drift, distant lifts connect occupied places. Use a small number of intentional motions, held poses for reduced motion, and locally scaled detail. Do not depend on expensive post-processing to make the world coherent. Establish actual frame-time and asset budgets on the target browser before multiplying effects.
+The current play area is too congested. Prefer a larger world footprint and more negative space before adding detail. Use fewer, more meaningful props with room around the protagonist, current target and landmark.
 
-| Story state | Image and motion | Audio intention |
-|---|---|---|
-| Home | Warm occupied market, uneven handmade lanterns, Zip's unfinished pair-lantern | Original plucked motif, soft hand percussion, wind and workshop ticks |
-| Capture | Warden's rigid shapes cut through the warm scene; one local strip of lanterns goes dim | Music thins; clamp, interrupted song, restrained mechanical pulse |
-| Repair | Chest lights and token track answer player actions; occupied space remains readable | Token ticks, a two-note Zip call, low ambient bed during reasoning |
-| Reunion | Zip moves into the player's space; lantern route opens toward the tower | Complete the interrupted phrase; brief warm chord and Zip response |
-| Further rescues | Restored garden, route or landmark persists visibly | A rescued friend's instrument joins the arrangement; planned for later episodes |
+Generated environments should carry explicit layout controls for scale, density, landmark spacing and path width.
 
-Keep the city attractive during danger. Threat comes from what happens to friends and routes, not unreadable darkness or constant alarms. A quieter pause after a payoff lets the player look around.
+## Current prologue contrast
 
-## Sound behavior to implement
+The next proof-track prologue should use strong environmental contrast:
 
-- Compose an original short musical identity with exploration, tension and reunion variants; audition it in the scene. A repeated alert or oscillator beep is not a finished score.
-- Give semantic events distinct sounds: connect, next piece, send, rejected command, gate movement and reunion. Harmless mistakes get a puzzled response, not a humiliating buzzer. Audio must not announce success before the authoritative event.
-- Offer separate Music and Effects controls, master mute and remembered device preferences. Initialize playback from a deliberate user gesture. Pause on game pause/backgrounding, avoid stacked loops on reload/replay, and release resources on teardown.
-- Keep music below interaction cues; soften it during inspection. Short captions/visual responses carry the same essential information when muted. No puzzle requires hearing a pitch or timing an action to music.
-- Bind cue IDs to approved presentation events. Duplicate command acknowledgements must not replay a reward sting. Explicit opening replay may replay its own cues without changing progress; leaving it restores the previous audio state.
-- Record provenance/license/hash for any imported sound and an author/version for original cues. No commercial soundtrack asset is currently selected or imported.
+### Bellweather — normal/happy
 
-### Actual reuse status
+- open, colorful, inhabited and safe;
+- protagonist with robot friends;
+- enough spatial room to read relationships and movement;
+- playful ambient motion and sound;
+- visual evidence that this is a place worth returning to.
 
-`web/expedition.js` contains an older optional oscillator tone and preference toggle. It is evidence of a small existing sound behavior, **not** a reusable music mixer. The current Word Machine has no music system. Add a small shared audio lifecycle/cue adapter only as the rescue scene requires it; do not copy the old episode controller or build a speculative audio engine.
+### Rupture
 
-Reuse the current robot model/animations, procedural player, tree/pavilion/machine primitives, opening controller and spec-world adapter. Add a reusable animated gate/cell module, lantern variants, voice-module prop, tower facade kit and the cue adapter as needed. These additions are planned, not assets already made. Use the same gate component for the cell and the different transfer gate to demonstrate reuse. Episode-specific composition and dialogue stay in story data.
+- sudden thunder/energy/teleport disruption;
+- lighting, camera, sound and character motion change together;
+- clear before/after contrast rather than a caption claiming danger.
 
-## Pop culture: character humor and optional discovery
+### Dark limbo
 
-References should reward recognition while remaining funny or understandable without it. The central rescue must work for a player who knows none of the references.
+- temporarily stripped-down/dark space emphasizing displacement/loneliness;
+- not so dark that required action/geometry becomes unreadable;
+- use silence/sparse sound deliberately.
 
-- A printing-room placard reads **“Open Sesame”** beside a spilled jar of seeds: a direct nod to the classic speaking-door story, also a visual joke. It is not the answer to the current puzzle.
-- Zip discovers a dramatic cloak, poses like a space-opera villain, trips over the hem and returns to work. Familiar cinematic staging supplies the reference; the joke reads through acting.
-- An optional workshop shelf has a cube with a hand-drawn friendship heart, a gentle puzzle-game nod. It never competes with actual targets or carries a required clue.
-- After a successful repair, Zip briefly holds a little “WE'RE SO BACK” card, then accidentally shows its upside-down reverse. Treat this as a trial contemporary joke, not a claim about current popularity; remove it if it dates the scene or interrupts the reunion.
-- A Warden notice says “Your complaint is very important to us” above an obviously unplugged complaints tube. Character-specific humor can remain appealing longer than a feed of borrowed memes.
+### Prison reveal
 
-Use at most one optional gag in the opening and one or two discoveries in Episode 1. Never put a joke over a clue, make reading it mandatory, or turn the rescue into a chain of references. Audition humor with the current user; no youth appeal is presumed.
+- lights come on progressively;
+- an unfamiliar place becomes spatially understandable;
+- a **large blocked door** creates an immediate environmental goal;
+- antagonist entrance and speech-engine removal are staged clearly in the same space.
 
-## Review evidence required
+### Player control / tutorial
 
-Observe opening, danger, active reasoning and reunion with sound on and muted. Inspect a moving sequence, not only a hero screenshot. Check 360/390/430 portrait framing, keyboard/touch controls, enlarged text and reduced motion. Record what was actually heard and whether narration, music or effects masked another cue; muted automation cannot pass audio appeal.
+- camera settles into direct protagonist control;
+- the player can read the room and goal before the HUD explains everything;
+- first tutorial success should visibly change light/door/speech/world state.
 
-Block an internal ready recommendation when the supposed captivating world remains an empty diorama, decorative motion obscures an action, music overwhelms thought/dialogue, a central story cue is sound-only, or the story depends on a cultural reference. Judge atmosphere under story attachment and world continuity, HUD clarity under first touch, and audio under causality/controls/continuity. Existing criterion IDs and integer thresholds remain; no bonus points for asset counts or technical complexity.
+## Spatial direction
+
+World quality includes breathing room.
+
+Required checks:
+
+- does the protagonist have clear space around them?
+- do props cluster into an unreadable diorama?
+- can the player orbit/walk without immediately intersecting visual clutter?
+- are landmarks separated enough to build a mental map?
+- are paths wide enough for comfortable movement?
+- would simply scaling the environment outward improve it? If yes, do that first.
+
+## Art cohesion
+
+Use a coherent shape/material/lighting language per world state. Reused asset kits must be art-directed into the setting rather than exposed as a generic library.
+
+The current track can retain a stylized adventure look, but the new prison/limbo space should have a distinct yet compatible shape language from Bellweather.
+
+## Sound behavior
+
+- Original musical identity with state variants rather than a repeated generic loop.
+- Happy-world motif can be interrupted/transformed by the rupture.
+- Limbo may use sparse ambience/silence.
+- Prison reveal gets readable lighting/mechanical cues.
+- Speech-engine removal needs a distinct cue but cannot be sound-only information.
+- Tutorial success/recovered speech gets a clear positive response.
+- Separate Music/Effects/master mute and remembered device preferences.
+- Pause/background/reload/replay must not stack loops.
+- Actual listening is required before quality claims.
+
+## Pop-culture inspiration
+
+Research popular robots/characters/worlds in games, film, animation and literature to improve naming, character energy, emotional readability and visual motifs.
+
+The user's `Wall-G` example illustrates the desire for a memorable culturally resonant robot identity. Treat that as an ideation pattern, not a shipping requirement or permission to copy an existing character. Produce original final names/designs/dialogue/music and keep every reference optional.
+
+Useful references should work on two levels:
+
+- recognizable players get an extra smile;
+- uninitiated players still understand the joke/story/action.
+
+## Reusable world/atmosphere library
+
+The platform should eventually expose reusable, parameterized:
+
+- environment kits;
+- happy/danger/limbo/reveal lighting profiles;
+- weather/thunder/teleport FX;
+- doors/gates/prison-room kits;
+- ambient-life props/animations;
+- camera/cinematic transitions;
+- world density/scale presets;
+- music/ambience/cue lifecycle.
+
+Do not make the current track wait for a universal asset system. Extract these only as implementation proves them useful.
+
+## Art/world review evidence
+
+Review moving sequences from multiple camera angles, not only hero screenshots. Check desktop and 360/390/430 portrait, movement/orbit/zoom, clipping/intersections, negative space, world density, landmark readability and before/after atmosphere.
+
+A scene fails even if attractive when it is cramped, confusing to inhabit, only works from one camera, or uses decoration that obscures play.
