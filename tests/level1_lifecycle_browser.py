@@ -1,5 +1,4 @@
 """Hosted Bellweather lifecycle gate: reset and sign-out must remain usable in-game."""
-import re
 import tempfile
 import threading
 from pathlib import Path
@@ -25,7 +24,7 @@ def main():
                 browser=p.chromium.launch()
                 try:
                     page=browser.new_page(ignore_https_errors=True,viewport={'width':390,'height':844});page.goto(origin)
-                    page.locator('#login-email').fill('owner@example.test');page.locator('#login-password').fill('test-password');page.get_by_role('button',name=re.compile('Continue to The First Words')).click()
+                    page.locator('#login-email').fill('owner@example.test');page.locator('#login-password').fill('test-password');page.locator('#login-submit').click()
                     page.wait_for_url('**/first-words',timeout=15000);expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000)
                     page.get_by_role('button',name='Skip opening',exact=True).click();expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
                     page.get_by_role('button',name='Connect the power lead',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
