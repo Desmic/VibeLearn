@@ -1,22 +1,32 @@
 # Course generation produces playable teaching systems
 
-**Active platform direction — 17 September 2026.** Read `GAME-CREATION-PLATFORM.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`. This document defines how future generated games should be created; the current How-LLMs-Work track is the proof case, not the final product shape.
+**Active platform direction — 17 September 2026.** Read `GAME-CREATION-PLATFORM.md`, `LEARNER-ON-DEMAND-AND-REPAIR.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`. The product is learner-facing and creates personalized games on demand. This document defines production of those games; an internal authoring studio is supporting infrastructure, not the first learner experience. The current How-LLMs-Work track is the quality/reuse proof case, not the final product shape.
 
 ## North star
 
-VibeLearn is a **general platform for rapidly creating high-quality learning games/worlds from arbitrary concepts and subjects**.
+VibeLearn is a **learner-facing platform for rapidly creating personalized, high-quality learning games/worlds from learning goals and supported game capabilities**.
 
-The generator's job is not to emit themed lesson pages or a fresh app shell per course. It must transform learning intent into a playable system whose story, world behavior, mechanics, progression and transfer tasks embody the target capability.
+The generator's job is not to emit themed lesson pages or a fresh app shell per course. It must transform learning intent into a playable system whose story, world behavior, mechanics, progression and transfer tasks embody the target capability. Broader subject coverage is the direction, not a claim that arbitrary subjects or mechanics are already supported.
 
-The durable pipeline is:
+The durable spec pipeline is:
 
 `LearningSpec -> StoryWorldSpec -> GameDesignSpec -> GameRulesSpec -> WorldSpec -> RuntimeExperienceSpec -> EngineTargetSpec -> EngineCompiler -> EngineRuntime`
 
-`AssessmentEvidenceSpec` remains authoritative and engine-independent.
+`AssessmentEvidenceSpec` remains authoritative and engine-independent. Dependencies and verification feedback may revise earlier design stages; the diagram does not prescribe a one-way waterfall.
+
+## Learner request and personalized delivery
+
+The customer journey is `request -> relevant learner context and preferences -> personalized brief -> design/assembly -> verification -> playable release -> resume/adapt`. The learner must not operate a scene editor or release pipeline to get a game.
+
+Inputs include intended outcomes, relevant prior evidence, chosen depth, session constraints, creative preferences and accessibility/device requirements. Record explicit choices separately from inference and unknowns. Personalization changes substantive practice, scaffolding, pacing and mechanic selection as appropriate, not only theme. Do not silently lower outcome requirements or reinterpret previous evidence.
+
+Recommended delivery is a coherent verified first playable segment with a versioned plan for subsequent segments. Further generation may occur between safe checkpoints; never expose an unfinished prologue or change active assessed rules silently. Generation latency, first-playable size and automated release permissions remain design decisions, not settled promises.
+
+Reusable base packages plus learner-specific configuration/content should avoid a separate code fork or app deployment per learner. The detailed owning contract is `LEARNER-ON-DEMAND-AND-REPAIR.md`.
 
 ## Current proof-track strategy
 
-Do **not** build the full generic generator/agent platform before the current proof track is excellent. Use the track to discover and validate reusable pieces, then extract them.
+Do **not** build the full generic generator/agent platform before the current proof track is excellent. Build reusable boundaries into that track and verify them with small different fixtures rather than assuming a finished hard-coded game can later be generalized. The later learner-facing proof must demonstrate an actual request producing a materially personalized verified experience; one authored track alone is insufficient.
 
 After each accepted chunk ask:
 
@@ -119,11 +129,12 @@ Cross-engine orchestration:
 - input/action mapping;
 - protagonist/control profile;
 - HUD/UI slots and visibility schedule;
-- pause/replay/save/resume;
+- pause/replay/save/resume/reset/logout;
 - accessibility/reduced-motion policy;
 - device/performance budget;
 - authoritative state -> visible state mappings;
-- analytics/evidence hooks that do not decide learning truth.
+- analytics/evidence hooks that do not decide learning truth;
+- scoped diagnostic context and safe version activation for future conversational repair.
 
 ### 7. EngineTargetSpec
 
@@ -192,11 +203,11 @@ Then produce original characters, names, art, dialogue and music. Pop-culture-in
 
 ## Authoring pipeline
 
-Current target pipeline:
+Current target pipeline behind the learner experience:
 
-`goal/course -> source research -> LearningSpec -> story/cultural research -> StoryWorldSpec candidates -> story critic -> art/world direction -> GameDesignSpec -> WorldSpec + RuntimeExperienceSpec -> capability/schema validation -> engine compilation -> mechanic/world tests -> rendered story critic -> art/world critic -> gameplay critics -> learning/transfer gate -> user review -> publish`
+`personalized brief -> source research -> LearningSpec -> story/cultural research -> StoryWorldSpec candidates -> story design review -> art/world direction -> GameDesignSpec -> WorldSpec + RuntimeExperienceSpec -> capability/schema validation -> engine compilation -> mechanic/world tests -> rendered story critic -> art/world critic -> gameplay critics -> learning/transfer gate -> authorized release review -> publish`
 
-No stage self-certifies.
+No stage self-certifies. The current private proof retains explicit current-user review. Future routine personalized release approval must be defined separately; do not require each learner to act as a developer or assume autonomous global publication is already authorized.
 
 ## Art/world-direction gate
 
@@ -233,7 +244,7 @@ Phone-first does **not** mean world-small. The world can be physically/spatially
 
 ## Engine strategy
 
-PlayCanvas Engine is the first strategic backend for web/phone-first delivery. Three.js remains legacy/migration only. Future Unity/Unreal/2D/simulation runtimes may become backends when justified.
+PlayCanvas Engine is the first strategic backend for web/phone-first delivery. Three.js remains legacy/migration only. Future Unity/Unreal/2D/simulation runtimes may become backends when justified. The current game never silently falls back to 2D.
 
 Adding a backend must not rewrite LearningSpec, StoryWorldSpec or AssessmentEvidenceSpec.
 
@@ -247,7 +258,7 @@ A candidate must independently pass:
 4. first-touch/gameplay;
 5. whole-chapter/progression;
 6. learning/transfer;
-7. current-user review.
+7. authorized release review, including explicit current-user review for the private proof.
 
 Explicitly separate **visual attraction** from **willingness to play/continue**.
 
@@ -264,18 +275,20 @@ The platform should eventually support agents for:
 - story/art/game/learning critics;
 - test generation;
 - CI/CD/release orchestration;
-- regression triage/repair.
+- learner-facing report investigation and verified repair.
 
 Agents communicate through versioned specs/artifacts/evidence. Creator agents do not self-certify. Critic agents are internal, not user acceptance.
 
-**This is future work.** Preserve agent-friendly boundaries now, but prioritize proving this pipeline manually/tool-assisted on the current excellent track before building the orchestration layer.
+Learners can flag issues through chat without leaving their game state. Use the exact reported version and permitted context, investigate, judge whether a change is appropriate, build an isolated candidate, retest the failure and relevant regressions, then activate safely and explain the result. Reuse the creation/build/review/release pipeline for repair; do not create an untracked hotfix route. `LEARNER-ON-DEMAND-AND-REPAIR.md` owns the details.
+
+**This is future work.** Preserve agent-friendly boundaries now, but prioritize the current track's quality and a later thin learner-request-to-game proof before building the full orchestration layer.
 
 ## Security/evidence invariants
 
-Generated specs/data do not authorize arbitrary code execution. Prefer validated schemas, allowlisted/versioned primitives, immutable artifacts, asset validation, strict CSP/no eval and provenance.
+Generated specs/data and support reports do not authorize arbitrary code execution or expand agent permissions. Prefer validated schemas, allowlisted/versioned primitives, immutable artifacts, asset validation, strict CSP/no eval and provenance.
 
-Preserve canonical competency identity, pinned assessment/content versions, unknown distinct from failure, assistance/prior exposure semantics, XP distinct from mastery, immutable submitted evidence and learner isolation.
+Preserve canonical competency identity, pinned assessment/content versions, unknown distinct from failure, assistance/prior exposure semantics, XP distinct from mastery, immutable submitted evidence and learner isolation. Investigate with disposable or isolated replay state; do not reset live progress to reproduce a report. Personal changes and shared-runtime changes require distinct scopes and release checks.
 
 ## Current implementation boundary
 
-Private proof-track refinement. Build the revised prologue/tutorial/Level 1 in coherent chunks; do not start Level 2 or the full multi-agent generator until the current user accepts the proof direction.
+Private proof-track refinement and platform design. Build the revised prologue/tutorial/Level 1 in coherent chunks when gameplay implementation resumes. Do not start Level 2, provision model services or implement the full multi-agent generator/repair platform under a documentation-only clarification.

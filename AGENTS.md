@@ -7,10 +7,12 @@ before Level 2/Phase 2.
 
 ## Product and build order
 
-- VibeLearn is a **platform for creating learning games quickly**; the current LLM
-  learning track is the proof case. Build one excellent game/learning track first and
-  extract reusable worlds/assets/mechanics/specs from real needs. Do not pause current
-  work to build the future multi-agent creation platform.
+- VibeLearn is a **learner-facing product that creates personalized learning games on
+  demand**. A creator-operated studio is not the first customer experience; authoring
+  and review tools are internal support. Read `docs/LEARNER-ON-DEMAND-AND-REPAIR.md`.
+  The current LLM track proves game quality and useful reusable boundaries, not the
+  finished on-demand product. Do not build a universal generator prematurely or
+  hard-code the track as the platform.
 - The current track uses **direct protagonist control**. Do not invent a separate
   literal helper/avatar because story text says “you help X.” Player embodiment is an
   explicit game-design decision and must match the rendered world, camera and controls.
@@ -33,7 +35,7 @@ before Level 2/Phase 2.
 - Parallelize only independent work that cannot bypass the active gate, such as
   research or test preparation. Do not build future levels/systems early.
 - Keep plans and evidence current and concise. The current user is the sole final
-  human critic; internal/agent scores never override direct feedback.
+  human critic of this private proof; internal/agent scores never override direct feedback.
 
 ## Platform and reuse
 
@@ -48,9 +50,13 @@ before Level 2/Phase 2.
   ideation. Extract techniques, archetypes, naming energy, pacing and motifs; ship
   original characters/assets/dialogue/music and never make comprehension depend on a
   reference.
-- Future agents for ideation, creation, critics and CI/CD are planned. Preserve
-  agent-friendly versioned artifacts/evidence now; do not implement the orchestration
-  platform until the proof track earns it.
+- Future learners can chat with agents to flag issues. Investigate the exact build,
+  distinguish defects/preferences/confusion, make appropriate scoped changes, verify
+  the original issue and regressions, then activate safely and report. Do not blindly
+  patch every complaint or discard subjective feedback because CI passes.
+- Future agents for ideation, creation, critics, CI/CD and repair are planned. Preserve
+  versioned artifacts, contextual diagnostics, isolation and review boundaries now.
+  These design decisions do not authorize a live-model service or autonomous deployment.
 
 ## Architecture and safety
 
@@ -61,6 +67,9 @@ before Level 2/Phase 2.
   immutable snapshots/checkpoints/assistance/evidence and existing learning IDs.
   Rendering, XP, self-report and game completion do not establish mastery;
   missing evidence is unknown. Keep learning evidence independent of theme/engine.
+- Personalization must not silently lower learning outcomes or rewrite old assessment
+  evidence. Separate personal package changes from shared-runtime changes; preserve
+  saves and use explicit migration/release policy. Support reports are not reset consent.
 - Preserve learner data, supplied designs and unrelated work. Test on disposable
   databases. No live-model integration, untrusted runner, paid resources or broad
   rollout without explicit authorization. Never fake live verification.

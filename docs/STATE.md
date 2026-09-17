@@ -4,9 +4,21 @@
 
 Status: **user review / needs redesign before another Level 1 candidate.**
 
-Review build still live: Render commit `6de1f0ccb234507c1db2dccbe007c7cabfaf397e` (runtime game candidate `6fea8287aa5f078a5836902478320699e54571a9`).
+Active documentation/development branch: `game/level1-quality-gate`.
+
+Recorded review deployment: Render commit `6de1f0ccb234507c1db2dccbe007c7cabfaf397e` (runtime game candidate `6fea8287aa5f078a5836902478320699e54571a9`). The documentation clarification below does not change or re-verify that deployment.
 
 The previous internal gate returned `ready_for_user_review`, but the user's live review exposed structural product failures. The user's judgment supersedes that recommendation. See `USER-REVIEW-20260917.md`.
+
+## Latest product clarification — learner-facing, on demand
+
+The user explicitly selected a **learner-facing product that creates a personalized game on demand**, not a creator-operated studio as the initial customer experience. Internal creation/review tools support that product. The primary journey is request -> personalized brief/design -> assembly and verification -> play -> resume/adapt.
+
+The user also requires **future conversational issue reporting and agent repair**: learners flag problems in chat; an agent checks the actual experience, exercises judgment, verifies an appropriate candidate change, and applies it safely when justified. This is not merely a feedback inbox and not automatic agreement with every requested patch.
+
+`LEARNER-ON-DEMAND-AND-REPAIR.md` owns the detailed learner/repair contract; `GAME-CREATION-PLATFORM.md` and `COURSE-GENERATION-GAME-SYSTEM.md` link it to production. Personalization and repair-agent behavior are designed future capabilities, not implemented features. Exact generation latency, first-playable size and repair autonomy thresholds remain open.
+
+This is a documentation-only clarification: no gameplay changes, migrations, deployment, new runtime test results or agent service are claimed. It does not close the current game-quality blockers or authorize Level 2.
 
 ## Current user-review blockers
 
@@ -18,7 +30,7 @@ The previous internal gate returned `ready_for_user_review`, but the user's live
 6. Visual attraction exists (`would look`) but sustained playability/clarity does not (`would not play`).
 7. The current play space is too congested; a larger footprint with the same content would improve the experience.
 8. Player embodiment is wrong for this track: there should not be a literal helper/`you` avatar. The player directly controls the robot protagonist.
-9. The current critic process lacks a dedicated art/world-direction gate.
+9. The current critic process needs the dedicated art/world-direction gate enforced alongside its other checks.
 
 These are not polish items. Do not patch around them while preserving the current opening structure.
 
@@ -28,17 +40,17 @@ Current story/progression direction for the next design pass:
 
 `happy Bellweather -> dramatic disruption/thunder/teleport -> protagonist displaced to dark limbo -> lights reveal unknown prison/large blocked door -> evil robot removes protagonist's speech engine -> player takes direct control -> separate Tutorial/Prologue teaches movement/interact/core speech-repair loop and grants a clean success -> Level 1 begins`
 
-The protagonist name `Zip` is now provisional. Run a stronger character/naming ideation pass informed by pop culture, games, film, animation, literature and mythology, while keeping shipped characters/assets/story original and understandable without references.
+The protagonist name `Zip` is provisional. Run a stronger character/naming ideation pass informed by pop culture, games, film, animation, literature and mythology, while keeping shipped characters/assets/story original and understandable without references.
 
 ## Spatial/art direction
 
 The next world must be **larger and calmer**, not denser. Preserve useful buildings/props but introduce deliberate negative space, clearer landmark spacing and more room for movement/camera orbit.
 
-World generation and review now require configurable footprint/density/spacing parameters and an independent art/world-direction critic. See `ART-WORLD-DIRECTION-CRITIC.md`.
+World generation and review require configurable footprint/density/spacing parameters and an independent art/world-direction critic. See `ART-WORLD-DIRECTION-CRITIC.md`.
 
-## Platform direction
+## Platform direction and proof boundary
 
-VibeLearn is a **platform for rapidly creating learning games**, not one campaign. The current How-LLMs-Work track is the proof case.
+VibeLearn creates personalized learning games on demand for learners. The current How-LLMs-Work track is the proof case for quality and reusable foundations, not the permanent product or sufficient proof of personalized generation.
 
 Every accepted chunk should leave reusable components where justified:
 
@@ -51,35 +63,33 @@ Every accepted chunk should leave reusable components where justified:
 - HUD/accessibility/audio patterns;
 - critic/test/CI evidence templates.
 
-Reuse must not produce identical/reskinned games. Story, art direction, layout, scale and mechanics remain parameterizable.
+Reuse must not produce identical/reskinned games. Story, art direction, layout, scale and mechanics remain parameterizable; learner history remains independent of their replacement.
 
-Longer term the platform should support coordinated agents for research/ideation, story/game/art creation, implementation, critic roles, tests and CI/CD orchestration. **Do not build that multi-agent platform yet.** First prove the manual/tool-assisted creation model with one excellent game/learning track. See `GAME-CREATION-PLATFORM.md`.
+Longer term the platform supports agents for research/ideation, story/game/art creation, implementation, criticism, tests, CI/CD and learner-facing issue investigation/repair. Do not build the entire orchestration platform now. Keep the proof track bounded while establishing the contracts needed for a later thin end-to-end learner request -> personalized verified game flow.
 
 ## Review framework correction
 
 The prior internal 9/10 gate missed obvious world/art/story problems. Before another internal-ready recommendation:
 
-- story critic must compare written story to rendered beat-by-beat causality;
-- art/world critic must inspect space, density, clipping, silhouettes, landmarks and alternate camera angles;
-- gameplay critic must separately ask `would look?` and `would play/continue?`;
-- declared player embodiment must match the actual world;
-- prologue/tutorial/Level-1 boundaries must be explicit and tested;
+- story critic compares written story to rendered beat-by-beat causality;
+- art/world critic inspects space, density, clipping, silhouettes, landmarks and alternate camera angles;
+- gameplay critic separately asks `would look?` and `would play/continue?`;
+- declared player embodiment matches the actual world;
+- prologue/tutorial/Level-1 boundaries are explicit and tested;
 - technical CI remains necessary but earns no product-quality credit.
 
-`CRITIC-POLICY.md` and `ART-WORLD-DIRECTION-CRITIC.md` govern the next candidate.
+`CRITIC-POLICY.md` and `ART-WORLD-DIRECTION-CRITIC.md` govern the next candidate. The same evidence discipline must apply to future reported-issue repairs.
 
 ## What remains technically useful from the previous candidate
 
-The previous build's regression evidence remains useful infrastructure evidence: build/tests, auth/session, save/resume, reset/logout, controls, phone layouts, reduced motion and no active 2D fallback. It does **not** validate the current story/world design.
+The previous build's regression evidence remains useful infrastructure evidence: build/tests, auth/session, save/resume, reset/logout, controls, phone layouts, reduced motion and no active 2D fallback. It does **not** validate the current story/world design or the newly specified learner-facing platform capabilities.
 
-## Live deployment
+## Deployment record
 
-The rejected review build remains available at:
+Recorded review URL: `https://vibelearn-4xws.onrender.com/`.
 
-`https://vibelearn-4xws.onrender.com/`
-
-Do not treat it as accepted. Auto-deploy remains off.
+The reviewed build is not accepted. Auto-deploy was recorded as off. No Render or Supabase change is part of this documentation update; inspect those connectors before making a new operational claim or release.
 
 ## Next action
 
-Finish capturing the user's review, then redesign **prologue + tutorial + Level 1 boundary** before changing gameplay implementation. Update specs/docs first, then build the new prologue as the first coherent chunk. Do not start Level 2.
+Continue architecture/design clarification and recording the user's review. Before resuming gameplay implementation, finalize **prologue + separate tutorial + Level 1 boundary**, then build and verify the new prologue as the first coherent chunk. Keep the on-demand learner journey as the product target. Do not start Level 2 or claim the repair agents exist.

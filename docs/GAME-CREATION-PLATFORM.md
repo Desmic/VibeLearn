@@ -1,10 +1,12 @@
 # VibeLearn game-creation platform — product direction
 
-**Active product direction — 17 September 2026.** This document captures the user's current platform-level correction and supersedes narrower assumptions that VibeLearn is primarily one authored game. Read with `COURSE-GENERATION-GAME-SYSTEM.md`, `GAME-RUNTIME-ARCHITECTURE.md`, `GAME-AS-COURSE.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`.
+**Active product direction — 17 September 2026.** The primary product is learner-facing: a learner requests a goal and VibeLearn creates a personalized game on demand. This supersedes a creator-operated studio as the first customer experience. Read with `LEARNER-ON-DEMAND-AND-REPAIR.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `GAME-RUNTIME-ARCHITECTURE.md`, `GAME-AS-COURSE.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`.
 
 ## North star
 
-VibeLearn is a **platform for creating high-quality learning games quickly**, not a single game.
+VibeLearn is a **learner-facing platform for creating personalized, high-quality learning games on demand**, not a single game or an authoring tool the learner must operate.
+
+An internal creator/review workbench supports production and diagnosis. The learner should be able to describe what they want to learn, shape the experience conversationally, play, resume and request improvements without configuring scenes, repositories or deployments.
 
 The current How-LLMs-Work track is the proof case. Its purpose is to prove that the product can combine:
 
@@ -16,7 +18,15 @@ The current How-LLMs-Work track is the proof case. Its purpose is to prove that 
 - evidence-aware assessment;
 - critic/review loops that catch product failures before a learner sees them.
 
-Do not broaden into a generic generation product before this proof track is genuinely good. The fastest route to the platform is to extract reusable capabilities from one excellent game rather than prematurely designing a universal game engine.
+Do not broaden into a universal generation product before the current proof track is genuinely good. Build its useful boundaries now and verify reuse with small different fixtures. One excellent authored game alone does not establish on-demand personalization: a later bounded learner-facing slice must prove request -> personalized design -> verified playable release. Avoid both premature universal-engine work and hard-coding the proof track as the platform.
+
+## Learner journey and personalization
+
+The primary journey is `learning request -> relevant learner context and explicit preferences -> personalized brief -> assembly and verification -> play -> resume/adapt`.
+
+Personalization includes practice depth, prerequisites, scaffolding, pacing, mechanic fit and creative direction, not just names or colors. Keep confirmed preferences, inferred assumptions and unknowns distinct. Ask only useful clarifying questions and support a bounded 'surprise me' route. Preserve durable learner evidence independently of story or package replacement.
+
+Recommended delivery is a coherent verified first playable segment, with further generation at safe boundaries; this is not a promise of instant generation or permission to expose unfinished scenes. Exact generation budgets and first-playable size remain open. See `LEARNER-ON-DEMAND-AND-REPAIR.md` for the owning contract.
 
 ## What should be reusable
 
@@ -83,6 +93,14 @@ That critic owns spatial composition, scale, negative space, silhouettes, visual
 
 See `ART-WORLD-DIRECTION-CRITIC.md`.
 
+## Conversational improvement — future capability
+
+A learner can flag an issue or request a change through chat from the experience itself. The agent must inspect the reported version and context, investigate, decide whether a change is appropriate, make an isolated change when justified, verify the original problem and regressions, then apply it safely and report the result.
+
+This is a full repair loop, not merely a feedback inbox and not blind obedience to a requested patch. Personal preferences, accessibility problems, actual defects, intentional challenge and uncertain reports need different responses. A subjective complaint is still real feedback; a missing reproduction is not grounds to dismiss it.
+
+Scope personal changes separately from shared assets/mechanics/runtime. Protect active saves and assessment history; report chat is not permission to reset progress or change everyone else's game. Autonomy thresholds are a proposed policy to agree, not blanket deployment permission. `LEARNER-ON-DEMAND-AND-REPAIR.md` owns detailed context, judgment, verification and rollout requirements.
+
 ## Future agent system
 
 The platform should eventually support coordinated agents for:
@@ -101,11 +119,11 @@ The platform should eventually support coordinated agents for:
 - learning/transfer critic;
 - test generation;
 - CI/CD/release orchestration;
-- regression triage and repair proposals.
+- learner-facing issue triage and verified repair.
 
-Agents must communicate through versioned artifacts/specs and evidence, not hidden assumptions. A creator agent must not self-certify its own work. Critic agents are internal tools, not substitutes for the user's product judgment.
+Agents must communicate through versioned artifacts/specs and evidence, not hidden assumptions. A creator agent must not self-certify its own work. Critic agents are internal tools, not substitutes for the user's product judgment. One learner-facing conversation may route to specialists without forcing the learner to choose a developer or critic agent.
 
-This multi-agent creation system is **future work**. Do not pause the current proof track to build the orchestration platform. First prove the workflow manually/tool-assisted on one excellent track, then automate the repeated roles.
+The full multi-agent system and in-game repair capability are **future work**. Do not pause the current proof track to build all orchestration roles. Prove useful workflows manually/tool-assisted, then implement a thin end-to-end on-demand learner journey before broadening. Internal tools remain subordinate to the learner-facing product.
 
 ## Current proof-track gate
 
@@ -113,7 +131,7 @@ The current track should prove this sequence:
 
 `learning goal -> researched story/world ideation -> art/world direction -> game design -> reusable spec/world assembly -> playable prologue -> separate tutorial -> Level 1 -> technical CI -> story critic -> art/world critic -> game critic -> learning critic -> user review`
 
-A failure in one discipline is not averaged away by strength in another.
+A failure in one discipline is not averaged away by strength in another. The private proof's explicit user review remains required. How routine personalized releases will be approved at scale is a later release-policy decision, not a requirement that every learner operate a studio.
 
 ## Extraction rule
 
