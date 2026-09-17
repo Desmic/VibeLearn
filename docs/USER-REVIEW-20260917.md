@@ -32,6 +32,28 @@ The distinction matters for progression: Tutorial/Prologue should teach basic mo
 
 **Required correction:** introduce a distinct Tutorial/Prologue stage before Level 1. It should teach only the reusable controls and interaction/learning loop needed to start the game, grant a clean success, and then transition into Level 1. Level 1 can assume those basics and focus on its story/problem. Keep the established `easy to play, hard to master` progression contract.
 
+### UR-04 — Text and animation must jointly convey the written story and stakes
+
+The user explicitly asked the product team to compare the live experience against the story and progression already written in the docs: **does the game itself convey that story, and does it follow that progression?** Their answer for the current review build is plainly **no**.
+
+The intended standard is not a static lore card followed by unrelated animation. Text, dialogue, camera, character animation, world-state changes and player actions should advance the same narrative beat together. A player should be able to infer most of the story from what visibly happens; short text should reinforce and clarify those events, not substitute for them.
+
+**Required correction:** storyboard the complete prologue as a sequence of observable causes and consequences. For each beat, define what changes in the world, what the player sees a character do, what minimal line/caption appears at that moment, what the player does next, and what new information/stake that beat communicates. Then verify the rendered sequence against the written story beat-by-beat rather than checking only that all captions/animations exist.
+
+### UR-05 — Current progression does not match the documented progression contract
+
+The written progression says the player should be oriented, shown how to play, given an easy/clean success, and only then exposed to increasing challenge. The current live experience still feels like `look at this world -> infer what the controls/meaning are`, which is not the progression we documented.
+
+**Required correction:** make the progression boundary explicit and testable: `prologue/story orientation -> tutorial controls/core loop -> guaranteed practice success -> Level 1 mission -> recoverable challenge -> payoff`. Level 1 must not double as basic onboarding. Later episodes can become harder through deeper LLM reasoning and fading scaffolding, not through unexplained interaction complexity.
+
+### UR-06 — Kid-engagement test currently fails, but visual attraction is a real positive signal
+
+User verdict: **a kid would not play this current build, but would look at it.** Treat both halves as important.
+
+This means the visual/world layer has crossed a meaningful threshold: it can attract attention. That is a genuine achievement and should be preserved. But attraction has not yet converted into understandable, rewarding play. The missing bridge is clearer story causality, faster onboarding, obvious actions, satisfying immediate success, and a stronger reason to keep interacting.
+
+**Required correction:** future internal review must explicitly ask two separate questions instead of conflating them: `Would a kid/young player stop and look?` and `Would they understand what to do and want to keep playing?` A candidate is not >=9 game experience if only the first answer is yes.
+
 ## Internal-review misses exposed by this user review
 
 The prior internal critic record gave all four gate groups a minimum 9, yet it did not catch:
@@ -39,9 +61,12 @@ The prior internal critic record gave all four gate groups a minimum 9, yet it d
 - duplicate/ambiguous Zip presentation;
 - character-table clipping visible under camera movement;
 - insufficient story establishment for a first-time player;
-- the mismatch between an in-Level tutorial and the intended pre-Level tutorial/prologue structure.
+- the mismatch between an in-Level tutorial and the intended pre-Level tutorial/prologue structure;
+- failure of the actual rendered story to communicate the written story/stakes beat-by-beat;
+- failure of the live progression to match the documented onboarding/progression contract;
+- the distinction between visual attraction (`would look`) and sustained playability (`would play`).
 
-Therefore the current internal-review process is not sufficient by itself. Update its counterexamples/evidence so future candidates explicitly inspect duplicate character identity, world-object intersections from alternate camera angles, story comprehension from a cold start, and tutorial-vs-Level-1 progression boundaries.
+Therefore the current internal-review process is not sufficient by itself. Update its counterexamples/evidence so future candidates explicitly inspect duplicate character identity, world-object intersections from alternate camera angles, cold-start story comprehension, text-animation synchronization, tutorial-vs-Level-1 progression boundaries, and separate attraction-vs-playability judgments.
 
 ## Review status
 
