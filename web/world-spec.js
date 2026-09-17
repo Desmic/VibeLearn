@@ -133,6 +133,7 @@ export function validateWorldSpec(spec){
   if(spec.states){
     for(const [name,state] of Object.entries(spec.states)){
       if(state.camera)assert(spec.cameras[state.camera],`${name} references unknown camera ${state.camera}`);
+      if(state.environment)environment(state.environment);
       for(const key of ['show','hide']){
         if(state[key])for(const entityId of state[key])assert(ids.has(entityId),`${name} references unknown entity ${entityId}`);
       }
@@ -149,6 +150,19 @@ export function validateWorldSpec(spec){
       }
     }
   }
-  if(spec.player)validatePlayerProfile(spec.player,ids);
+  if(spec.player){
+    validatePlayerProfile(spec.player,ids);
+    if(spec.player.animations){
+      assert(spec.player.animations&&typeof spec.player.animations==='object'&&!Array.isArray(spec.player.animations),'player.animations must be an object');
+      assert(Object.keys(spec.player.animations).every(key=>key==='idle'||key==='move'),'player.animations only supports idle/move aliases');
+      const playerEntity=entityDefs.get(spec.player.entity);
+      assert(playerEntity?.asset,'player.animations requires an asset-backed player entity');
+      const aliases=assetDefs.get(playerEntity.asset).aliases;
+      for(const [key,alias] of Object.entries(spec.player.animations)){
+        id(alias,`player.animations.${key}`);
+        assert(aliases.has(alias),`player.animations.${key} references unknown alias ${alias}`);
+      }
+    }
+  }
   return spec;
 }
