@@ -1,5 +1,6 @@
-/* Reusable Signal Keeper character archetype, composed from portable primitives. */
+/* Reusable character/control profiles. Story identity is supplied by each game package. */
 'use strict';
+
 export function keeperCharacter(id='keeper'){
   const e=[{id,position:[0,0,0],enabled:false}];
   const part=(name,primitive,material,position,scale,extra={})=>e.push({id:`${id}-${name}`,parent:id,primitive,material,position,scale,...extra});
@@ -17,13 +18,27 @@ export function keeperCharacter(id='keeper'){
   part('lantern','sphere','keeper-light',[.43,.6,.12],[.17,.2,.17]);
   return e;
 }
+
 export const keeperMaterials={
   'keeper-coat':{diffuse:'#267f85',gloss:.25},'keeper-face':{diffuse:'#132a35',gloss:.1},
   'keeper-gold':{diffuse:'#ebc780',emissive:'#8d6730',emissiveIntensity:.15},
   'keeper-boot':{diffuse:'#19313d'},'keeper-light':{diffuse:'#bcffe8',emissive:'#8af2d9',emissiveIntensity:1.5}
 };
+
+export function characterControlProfile({
+  entity,spawn,surfaces,obstacles=[],camera={},speed=2.8,limbs=null,animations=null
+}){
+  return {
+    version:'1',entity,spawn,speed,surfaces,obstacles,
+    ...(limbs?.length?{limbs:[...limbs]}:{}),
+    ...(animations?{animations:{...animations}}:{}),
+    camera:{yaw:-42,pitch:22,distance:6,minDistance:2.8,maxDistance:15,targetHeight:1.1,...camera}
+  };
+}
+
 export function keeperProfile({spawn,surfaces,obstacles=[],camera={}}){
-  return {version:'1',entity:'keeper',spawn,speed:2.8,surfaces,obstacles,
-    limbs:['keeper-arm-left','keeper-arm-right','keeper-leg-right','keeper-leg-left'],
-    camera:{yaw:-42,pitch:22,distance:6,minDistance:2.8,maxDistance:15,targetHeight:1.1,...camera}};
+  return characterControlProfile({
+    entity:'keeper',spawn,surfaces,obstacles,camera,
+    limbs:['keeper-arm-left','keeper-arm-right','keeper-leg-right','keeper-leg-left']
+  });
 }
