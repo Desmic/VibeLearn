@@ -31,21 +31,18 @@ def main():
             page.get_by_role('button',name='Skip opening',exact=True).click()
             expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
             action(page,'Connect the power lead')
-            page.reload();expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+            page.reload()
+            expect(page.locator('#loading')).to_be_hidden(timeout=15000)
+            expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+            expect(page.locator('.game-player-controls')).to_have_attribute('data-control-mode','third-person',timeout=15000)
             expect(page.locator('.game-move-stick')).to_be_visible()
 
+            # A non-text game button may retain focus after interaction/reload. That
+            # must not suppress direct protagonist movement; only typing targets do.
+            page.get_by_role('button',name='Scan the Moon lock',exact=True).focus()
             start=position(page)
-            diagnostic=page.evaluate("""() => ({
-              active: document.activeElement?.outerHTML?.slice(0,180)||null,
-              mode: FirstWordsReview.runtime.world.player.mode,
-              worldStatus: document.querySelector('#world')?.dataset.worldStatus||null,
-              stageRects: document.querySelector('.game-runtime-stage')?.getClientRects().length||0,
-              inert: Boolean(document.querySelector('.game-runtime-stage')?.closest('[inert]')),
-              inputBlocked: Boolean(document.querySelector('.game-runtime-stage')?.closest('[data-game-input-blocked=\"true\"]')),
-              paused: FirstWordsReview.runtime.world.player.moving===false && document.querySelector('#paused')?.hidden===false
-            })""")
             page.keyboard.down('KeyW');page.wait_for_timeout(450);page.keyboard.up('KeyW');page.wait_for_timeout(120)
-            after_key=position(page);assert distance(start,after_key)>.08,(start,after_key,diagnostic)
+            after_key=position(page);assert distance(start,after_key)>.08,(start,after_key)
 
             page.get_by_role('button',name='Move right',exact=True).focus();page.keyboard.press('Enter');page.wait_for_timeout(120)
             after_button=position(page);assert distance(after_key,after_button)>.02,(after_key,after_button)
