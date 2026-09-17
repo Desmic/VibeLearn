@@ -2,35 +2,58 @@
 
 Read `docs/STATE.md` first and work in the active checkout it identifies. Read
 `CODEX.md` for the delivery loop and `CODEX-IMPLEMENTATION-PLAN.md` for scope.
-Latest user direction supersedes historical plans. Current work is local Level 1;
-deploy the latest verified checkpoint when the five-hour allowance reaches 10%
-remaining or less. Stop at the user's review checkpoint before Level 2/Phase 2.
+Latest user direction supersedes historical plans. Stop at the user's review checkpoint
+before Level 2/Phase 2.
 
 ## Product and build order
 
-- This is a consumer learning game. Clear story, attachment, atmosphere, readable
-  controls and meaningful play are requirements, not polish after implementation.
-- Choose chunk boundaries at your discretion around a coherent player experience;
-  a chunk may combine story, animation, controls and sound when they belong together.
-  Build one playable chunk at a time. The opening is the first and most
-  important attention/understanding gate: finish, test and play it before tutorial
-  or level expansion. Then verify each encounter before extending the level.
+- VibeLearn is a **platform for creating learning games quickly**; the current LLM
+  learning track is the proof case. Build one excellent game/learning track first and
+  extract reusable worlds/assets/mechanics/specs from real needs. Do not pause current
+  work to build the future multi-agent creation platform.
+- The current track uses **direct protagonist control**. Do not invent a separate
+  literal helper/avatar because story text says “you help X.” Player embodiment is an
+  explicit game-design decision and must match the rendered world, camera and controls.
+- The current journey is `entry -> prologue -> separate tutorial -> Level 1 -> later
+  challenge/payoff`. Level 1 is not the tutorial. The tutorial teaches reusable play
+  grammar and gives a clean success before the first mission.
+- Clear story, attachment, atmosphere, readable controls, spatial composition and
+  meaningful play are requirements, not polish after implementation.
+- The world must have breathing room. Treat playable footprint, prop density, negative
+  space, landmark spacing, camera occlusion and object intersections as design inputs.
+  More props/detail are not automatic improvements.
+- Choose chunk boundaries around a coherent player experience. Build one playable
+  chunk at a time. The prologue is the first attention/understanding gate: finish,
+  test and play it before tutorial or Level 1 expansion.
 - Follow `CODEX.md`: define observable success, implement, test, play through
   computer/browser use, critique, repair, recheck, record. Do not advance with
   known blocking failures or unobserved required behavior. Tests alone are not done.
+- Run **story, art/world-direction, gameplay and learning** criticism as independent
+  gates. Read `docs/ART-WORLD-DIRECTION-CRITIC.md` and `docs/CRITIC-POLICY.md`.
 - Parallelize only independent work that cannot bypass the active gate, such as
-  research or test preparation. Do not build future levels, audio or systems early.
-  Add sound/assets needed by the current chunk and verify them within that chunk.
-- Keep plans and evidence current and concise. Report uncertainty honestly; never
-  promise guaranteed success or equate technical completion with product quality.
-  The current user is the sole final human critic; see `docs/CRITIC-POLICY.md`.
+  research or test preparation. Do not build future levels/systems early.
+- Keep plans and evidence current and concise. The current user is the sole final
+  human critic; internal/agent scores never override direct feedback.
+
+## Platform and reuse
+
+- Read `docs/GAME-CREATION-PLATFORM.md`. Reuse versioned learning/story/rules/world/
+  runtime specs and shared PlayCanvas components; keep story-specific data outside
+  shared controllers. Three.js is legacy only.
+- Prefer reusable, parameterized world kits, character/control profiles, cinematic
+  beats, interactions, tutorial patterns, audio/HUD components and critic/test
+  templates. Reuse must support different layout, scale, art direction and story;
+  avoid reskinned copies.
+- Pop-culture, game, film, animation and literature research is encouraged for
+  ideation. Extract techniques, archetypes, naming energy, pacing and motifs; ship
+  original characters/assets/dialogue/music and never make comprehension depend on a
+  reference.
+- Future agents for ideation, creation, critics and CI/CD are planned. Preserve
+  agent-friendly versioned artifacts/evidence now; do not implement the orchestration
+  platform until the proof track earns it.
 
 ## Architecture and safety
 
-- Reuse versioned learning/story/rules/world/runtime specs and shared PlayCanvas
-  components; keep story-specific data outside shared controllers. Three.js is
-  legacy only. Build reusable assets from current needs, not speculative engines.
-  See `docs/GAME-RUNTIME-ARCHITECTURE.md` and `docs/GAME-RULES-SPEC.md`.
 - Keep one Python modular monolith and semantic HTML/CSS/JS. Local: SQLite and
   loopback. Hosted: Flask/Gunicorn, PostgreSQL and verified Supabase identity,
   allowlist, HTTPS and scoped/RLS-protected storage. See `docs/HOSTING.md`.
@@ -40,7 +63,7 @@ remaining or less. Stop at the user's review checkpoint before Level 2/Phase 2.
   missing evidence is unknown. Keep learning evidence independent of theme/engine.
 - Preserve learner data, supplied designs and unrelated work. Test on disposable
   databases. No live-model integration, untrusted runner, paid resources or broad
-  rollout. Record migrations, limits and recovery; never fake live verification.
+  rollout without explicit authorization. Never fake live verification.
 - At integrated gates run `python manage.py build`, `python manage.py test` and
-  `python manage.py browser`. Dependencies: `requirements.lock` and
+  active browser groups. Dependencies: `requirements.lock` and
   `requirements-dev.txt`; local preview: `python manage.py serve`.
