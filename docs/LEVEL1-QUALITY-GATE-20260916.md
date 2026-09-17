@@ -1,107 +1,98 @@
-# Level 1 quality gate — The First Words
+# Level 1 quality gate — reopened after user review
 
 **Updated:** 17 September 2026 IST  
 **Branch:** `game/level1-quality-gate`  
-**Verified behavioral candidate:** `6fea8287aa5f078a5836902478320699e54571a9`
+**Review build:** runtime `6fea8287aa5f078a5836902478320699e54571a9`
 
-Status: **internal Level 1 gate passed; user final review pending.**
+Status: **needs redesign / user review rejected the current product experience.**
 
-This gate exists to prevent the project from refining later content while the actual player entry, lifecycle or first learning loop is broken. `../CODEX.md`, `CRITIC-POLICY.md` and `GAME-OPENING-PROGRESSION.md` remain authoritative for execution/review method.
+The previous internal gate passed technical checks and an internal 9/10 critic record. Direct user review exposed structural failures that those gates missed. The internal pass remains historical evidence; it is not the active readiness state.
 
-## User correction that controlled this revision
+## Active user blockers
 
-The earlier preview exposed two Level 1 blockers:
+See `USER-REVIEW-20260917.md` for the detailed log. Current blockers include:
 
-- logout and game reset had disappeared from the active Bellweather UI;
-- the game was too convoluted/unclear before a new player had learned how to play or experienced success.
+- duplicate/ambiguous protagonist-like characters;
+- visible character/prop clipping;
+- rendered opening does not convey the written story/stakes;
+- Level 1 incorrectly doubles as onboarding;
+- text/animation/camera/world changes are not synchronized narrative beats;
+- progression does not match `orientation -> tutorial -> success -> Level 1 -> challenge -> payoff`;
+- current build can attract visual attention but not enough sustained play;
+- play area is too congested and needs a larger footprint/negative space;
+- wrong player embodiment for this track: direct protagonist control is required;
+- no independent art/world-direction critic existed.
 
-The binding product rule is **easy to play, hard to master**. Teach the basic interaction loop through a tutorial and immediate success. Add difficulty later through deeper reasoning, competing context, transfer, uncertainty and fading help — not more controls, quizzes or camera friction.
+## Replacement design boundary
 
-## Current repaired player path
+Before another Level 1 candidate, redesign the front of the game as:
 
-`opening -> power Zip -> scan obvious Moon clue -> generate word by word -> free Zip -> tower context challenge -> recoverable wrong route -> current five-point clue -> Star route -> completion`
+`happy Bellweather with protagonist + friends -> dramatic rupture/thunder/teleport -> protagonist displaced into dark limbo -> lights reveal unknown prison/large blocked exit -> evil robot removes protagonist's speech engine -> transition to direct protagonist control -> separate Tutorial/Prologue -> clean tutorial success -> Level 1 mission`
 
-Key constraints now enforced:
+The exact fiction can improve during ideation, but the causal progression and separate onboarding boundary are now required unless explicitly changed by the user.
 
-- Zip and the Warden are explicitly identified on their world characters during the opening; identity clarity is solved spatially rather than by another explanation card;
-- no intentional round-0 failure for fresh Level 1 runs;
-- optional model inspection stays out of the tutorial and appears after the first rescue;
-- the former required second input-growth prediction is removed from new runs;
-- input growth is demonstrated by the mechanic itself;
-- `Check route signs` is the guaranteed simple path into tower context selection;
-- physical route boards remain optional world interactions;
-- movement/camera skill is not a prerequisite for Level 1 concept comprehension;
-- reset and logout are visible in-game lifecycle controls, not merely backend endpoints;
-- completion remains visible in the 3D world before any optional reflection dialog;
-- no 2D gameplay fallback is permitted.
+## World/art direction gate
 
-## Technical gate result
+The next candidate must pass `ART-WORLD-DIRECTION-CRITIC.md` in addition to the existing story/game/learning checks.
 
-GitHub Actions run `35138788244` passed every active Level 1 job on the exact behavioral candidate:
+Required world fixes:
 
-| Gate | Result | What it protects |
-|---|---|---|
-| foundation | passed | build, full application suite, entry, historical-draft continuity, no 2D fallback |
-| application tests | **152 passed** | rules, storage, PostgreSQL behavior, auth/session, evidence/isolation contracts |
-| first-words-opening | passed | opening beats, explicit Zip/Warden identity, pause/sound lifecycle, skip/replay, reduced motion, tutorial handoff |
-| first-words-controls | passed | keyboard/touch/camera controls after persisted action + reload |
-| first-words-readability | passed | 200% text at 360/390/430 with usable world area |
-| first-words-lifecycle | passed | hosted reset/restart and sign-out/auth boundary |
-| first-words-chapter | passed | tutorial first win, mistake/recovery, completion/reload, 360/430 reduced-motion completion |
+- increase playable footprint;
+- introduce deliberate negative space;
+- reduce visual crowding without simply deleting useful content;
+- fix all ordinary actor/prop intersections;
+- verify default and alternate camera views;
+- make protagonist/cast silhouettes unambiguous;
+- preserve readable landmarks and paths;
+- review phone and desktop compositions.
 
-The opening and chapter browser reports have no page errors. Fresh exact-head screenshots were inspected in addition to DOM assertions.
+## Player embodiment
 
-## Internal qualitative critic result
+For this proof track, the player directly controls the robot protagonist. There is no separate literal helper/avatar.
 
-The exact candidate was then reviewed under `CRITIC-POLICY.md` with concrete failures/abandonment risks written before scores and a counterexample attempt recorded for every 9+ criterion.
+This must be consistent in StoryWorldSpec, GameDesignSpec, WorldSpec, controls, camera, dialogue and tutorial.
 
-The executable review record is:
+## Tutorial/Level 1 boundary
 
-`docs/reviews/2026-09-17-level1-6fea828.json`
+The Tutorial/Prologue teaches:
 
-Running the repository checker against candidate `6fea8287aa5f078a5836902478320699e54571a9` returns:
+- movement/look/recenter as appropriate;
+- interact/menu/replay/reset semantics where needed;
+- the minimum core speech-repair/learning loop;
+- a clean early success.
 
-- status: `ready_for_user_review`;
-- rendered story minimum: **9**;
-- first touch minimum: **9**;
-- whole chapter minimum: **9**;
-- learning minimum: **9**;
-- unassessed criteria: none;
-- unobserved required coverage: none;
-- blockers: none.
+Level 1 begins **after** these basics are learned and should feel like the first actual mission.
 
-Detailed observations and counterexample attempts are in `LEVEL1-FINAL-CRITIC-20260917.md`.
+## Technical evidence retained
 
-This internal result **does not determine user acceptance**.
+The rejected candidate still established useful engineering regressions: build/application tests, hosted auth/session, save/resume, reset/logout, controls, readability, reduced motion, no active 2D fallback and whole-chapter state mechanics.
 
-## Live review deployment
+Do not throw those protections away. They remain regression coverage while the story/world/progression is redesigned.
 
-The private Render review service now runs commit `6de1f0ccb234507c1db2dccbe007c7cabfaf397e`, deploy `dep-daleugf40ujc73dphuo0`, at:
+## Corrected internal readiness gate
 
-`https://vibelearn-4xws.onrender.com/`
+Another internal `ready_for_user_review` recommendation requires:
 
-That deployment contains the exact verified `6fea828...` runtime plus review/documentation commits only. Render reports the deploy as `live`; startup/health requests returned HTTP 200 and there were no post-deploy error/critical logs when checked.
+1. technical/runtime/accessibility gates pass;
+2. rendered story critic has no blocker;
+3. **art/world-direction critic has no blocker**;
+4. first-touch/gameplay critic distinguishes `would look` from `would play/continue` and passes both;
+5. whole-chapter/progression critic passes;
+6. learning/transfer critic passes;
+7. declared player embodiment matches actual game;
+8. prologue/tutorial/Level-1 boundaries match `GAME-OPENING-PROGRESSION.md`;
+9. no user-review finding remains unresolved.
 
-Auto-deploy remains off. This is a bounded user-review deployment, not acceptance or public rollout.
+A passing legacy JSON critic checker alone is insufficient.
 
-## Human-review limits that remain explicit
+## Platform/reuse implication
 
-The internal environment cannot replace the user's judgment on:
+This redesign is also a platform proof. Extract reusable world/layout parameters, protagonist-control profiles, cinematic beats, door/room kits, repair mechanics, tutorial patterns and critic/test templates from the implemented needs.
 
-- subjective music/effects mix and musical appeal by actual listening;
-- physical-phone feel/performance and ergonomics;
-- genuine newcomer/young-player engagement and comprehension;
-- delayed learning/retention;
-- overall product taste and willingness to continue playing.
+Read `GAME-CREATION-PLATFORM.md` and `COURSE-GENERATION-GAME-SYSTEM.md`.
 
-Audio lifecycle/scheduling/phase/mute behavior was verified, but subjective mix quality was not invented. Chromium touch/phone emulation is not a physical-device study.
+Future ideation/creation/critic/CI-CD agents are planned, but current priority is the game/learning proof track itself.
 
 ## Scope boundary
 
-**Do not implement Level 2 yet.**
-
-The next checkpoint is the current user's final Level 1 review and feedback. Any user-reported Level 1 blocker should be repaired and retested before progression work resumes.
-
-No new Supabase schema migration was required for this final Level 1 revision. Preserve hosted auth, learner isolation, immutable evidence and explicit assisted/unknown mastery semantics.
-
-Detailed technical evidence is recorded in [FIRST-WORDS-CHUNK-REVIEW.md](FIRST-WORDS-CHUNK-REVIEW.md); current deployment/work status is in [STATE.md](STATE.md).
+Do not start Level 2. Do not deploy a new review candidate until the redesigned prologue/tutorial/Level 1 front is implemented, technically verified and internally re-reviewed under the corrected gates.
