@@ -4,7 +4,9 @@
 
 Status: **user review / needs redesign before another Level 1 candidate.**
 
-Active documentation/development branch: `game/level1-quality-gate`.
+Canonical development branch: **`main`**.
+
+Branch policy: routine development, research, review and fixes continue on `main`. `deploy/render-supabase` is the pinned live-deployment branch and may intentionally lag. Existing `game/*` / `phase1/*` branches are historical snapshots unless explicitly revived. `game/level1-quality-gate` is retained only as a compatibility/reference alias and should not become a separate line of development again.
 
 Recorded review deployment: Render commit `6de1f0ccb234507c1db2dccbe007c7cabfaf397e` (runtime game candidate `6fea8287aa5f078a5836902478320699e54571a9`). The documentation clarification below does not change or re-verify that deployment.
 
@@ -14,11 +16,11 @@ The previous internal gate returned `ready_for_user_review`, but the user's live
 
 The user explicitly selected a **learner-facing product that creates a personalized game on demand**, not a creator-operated studio as the initial customer experience. Internal creation/review tools support that product. The primary journey is request -> personalized brief/design -> assembly and verification -> play -> resume/adapt.
 
-The user also requires **future conversational issue reporting and agent repair**: learners flag problems in chat; an agent checks the actual experience, exercises judgment, verifies an appropriate candidate change, and applies it safely when justified. This is not merely a feedback inbox and not automatic agreement with every requested patch.
+The user also requires **future conversational issue reporting and agent repair**: learners flag problems in chat; an agent checks the actual experience, exercises judgment, verifies an appropriate candidate change, and applies it safely when justified. Agents now have computer use available in the development environment, so future implementation should deliberately support inspecting and reproducing issues in the actual running experience rather than relying only on source or textual reports.
 
 `LEARNER-ON-DEMAND-AND-REPAIR.md` owns the detailed learner/repair contract; `GAME-CREATION-PLATFORM.md` and `COURSE-GENERATION-GAME-SYSTEM.md` link it to production. Personalization and repair-agent behavior are designed future capabilities, not implemented features. Exact generation latency, first-playable size and repair autonomy thresholds remain open.
 
-This is a documentation-only clarification: no gameplay changes, migrations, deployment, new runtime test results or agent service are claimed. It does not close the current game-quality blockers or authorize Level 2.
+This clarification does not close the current game-quality blockers or authorize Level 2.
 
 ## Current user-review blockers
 
@@ -88,8 +90,8 @@ The previous build's regression evidence remains useful infrastructure evidence:
 
 Recorded review URL: `https://vibelearn-4xws.onrender.com/`.
 
-The reviewed build is not accepted. Auto-deploy was recorded as off. No Render or Supabase change is part of this documentation update; inspect those connectors before making a new operational claim or release.
+The reviewed build is not accepted. Auto-deploy was recorded as off. No Render or Supabase change is part of this branch-consolidation update; inspect those connectors before making a new operational claim or release.
 
 ## Next action
 
-Continue architecture/design clarification and recording the user's review. Before resuming gameplay implementation, finalize **prologue + separate tutorial + Level 1 boundary**, then build and verify the new prologue as the first coherent chunk. Keep the on-demand learner journey as the product target. Do not start Level 2 or claim the repair agents exist.
+Continue architecture/design clarification and recording the user's review on `main`. Before resuming gameplay implementation, finalize **prologue + separate tutorial + Level 1 boundary**, then build and verify the new prologue as the first coherent chunk. Keep the on-demand learner journey as the product target. Do not start Level 2 or claim the repair agents exist.
