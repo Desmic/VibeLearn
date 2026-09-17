@@ -3,6 +3,7 @@
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const radians=n=>n*Math.PI/180;
 const formTarget=target=>target?.closest?.('button,input,select,textarea,a,summary,[contenteditable]');
+const typingTarget=target=>target?.closest?.('input,select,textarea,[contenteditable]');
 
 export function validatePlayerProfile(profile,ids){
   const fail=message=>{throw new Error(`WorldSpec player: ${message}`);};
@@ -118,7 +119,7 @@ export function createPlayerControls(host,profile,adapter){
   listen(host,'click',event=>{if(performance.now()<suppressUntil&&!formTarget(event.target)){event.preventDefault();event.stopImmediatePropagation();}},true);
   listen(host,'wheel',event=>{if(blocked()||formTarget(event.target)||event.target.closest('.game-controls-help'))return;event.preventDefault();zoom(event.deltaY*.008);},{passive:false});
   listen(window,'keydown',event=>{
-    if(blocked()||mode!=='third-person'||formTarget(event.target))return;
+    if(blocked()||mode!=='third-person'||typingTarget(event.target))return;
     if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowLeft','ArrowDown','ArrowRight'].includes(event.code)){keys.add(event.code);event.preventDefault();}
     if(event.code==='KeyR'){recenter();event.preventDefault();}
   });
