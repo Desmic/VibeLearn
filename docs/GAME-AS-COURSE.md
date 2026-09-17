@@ -1,113 +1,126 @@
 # The game is the course
 
-**Current authority — 15 September 2026:** [CRITIC-POLICY.md](CRITIC-POLICY.md) supersedes older score formulas, gate order and review-preview exceptions below. The sole human product critic is the current user. Review the whole playable candidate, use observed evidence and hard blockers, and keep preview/readiness/user acceptance distinct. The user selected an ongoing How LLMs Work series; see [NEXT-TEACHING-DESIGN.md](NEXT-TEACHING-DESIGN.md). Preserve existing retry evidence; the new topic needs new learning identities.
+**Active direction — 17 September 2026.** Read `GAME-CREATION-PLATFORM.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`.
 
-**Current review amendment — 14 September 2026:** The current player-control requirement adds third-person exploration and free camera movement. Preserve gradual cognitive load and accessible semantic task actions; movement is not extra mastery evidence or a mandatory navigation puzzle. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+VibeLearn's goal is not to produce a course decorated like a game. Meaningful play should deliver the learning outcome, ideally more effectively and memorably than a conventional course.
 
-**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
+## One excellent proof track before broad generation
 
-**Active user amendment · updated 12 September 2026.** The current user is the sole real product reviewer during private refinement; their explicit verdict overrides critic/agent/automation scores.
+The current How-LLMs-Work game/learning track is the proof case for the broader platform. Do not optimize it as a throwaway demo, but do not pause it to build the full generic generator/multi-agent platform either.
 
-VibeLearn is a game whose meaningful play is intended to deliver useful course outcomes, ideally better than an ordinary course. Experience is part of the product, not optional polish.
+The proof must show that we can create a game that is:
+
+- voluntarily playable;
+- visually/world-directionally coherent;
+- story-driven;
+- easy to start and progressively deeper;
+- faithful to the learning concept;
+- built from reusable components where real reuse is justified;
+- testable/deployable/reviewable as an exact artifact.
 
 ## General system, not one reference game
 
-Relay Rescue is the current authored reference slice. The system target is reusable across subjects/courses through:
+The durable system remains reusable across courses through engine-neutral specs:
 
-`LearningSpec -> StoryWorldSpec -> GameExperienceSpec -> AssessmentEvidenceSpec`
+`LearningSpec -> StoryWorldSpec -> GameDesignSpec -> GameRulesSpec -> WorldSpec -> RuntimeExperienceSpec -> AssessmentEvidenceSpec`
 
-Learning/evidence identity remains independent of Pip, gears, fantasy names, renderer, world-package version or Play Canvas implementation.
+Learning/evidence identity remains independent of protagonist name, setting, asset package or engine.
 
-## Story before gameplay realization
+## Player embodiment is part of game design
 
-For every course/subject, first create a **good story/fantasy/world premise** capable of carrying the learning experience. Review the written premise for feasibility and staging risks, then judge the rendered story using `CRITIC-POLICY.md`; a treatment score cannot pass the game.
+Every game must explicitly choose who/what the player controls.
 
-The predecessor Relay Rescue first touch was rejected by the user at **3/10**. The failure was not merely timing: storytelling was lazy/unclear and slide-like, Back navigation was missing, progression was too fast, and the opening failed to create enough attachment/curiosity/beauty for kids or young adults.
+For the current LLM proof track, the player directly controls the robot protagonist. There is no separate helper/avatar. “Help the protagonist” describes the player's goal, not the existence of a second character.
 
-Current story generation is topic/outcome-driven. Future explicit learner story preferences may shape genre/tone/world/visual direction without altering learning integrity.
+Future games may choose other embodiments, but the choice must be explicit and coherent across story, camera, movement, HUD and tutorial.
 
 ## Earn attention before demanding cognition
 
-A VibeLearn opening should behave like a good game: capture attention through story, beauty, character, mystery, atmosphere, movement, interaction or another subject-appropriate hook **before** raising cognitive load.
+A VibeLearn opening should behave like a good game: capture attention through story, beauty, character, mystery, atmosphere, movement and interaction before raising cognitive load.
 
-Default curve:
+Current preferred flow:
 
-`hook / wonder -> character + world desire -> concrete need -> one obvious action -> visible consequence -> easy recovery/success -> name concept -> variation -> combination -> transfer`
+`normal/happy world -> disruption -> concrete personal loss/need -> player embodiment becomes clear -> prologue handoff -> separate tutorial -> clean practice success -> Level 1 mission -> recoverable failure -> variation -> transfer`
 
-By the end of Chapter 1 even a child/novice should be able to explain who/what matters, the important objects/functions, what happened, what changed, why it matters, what remains uncertain, what the player did and what success means.
+Level 1 should not double as basic onboarding when the game needs reusable controls/tutorial grammar.
 
-Formal terminology comes after the concrete mental model when faithful.
+## Story through the world
 
-## First-touch control is part of game quality
+Do not tell a strong story in a document and then render a weak diorama with captions.
 
-First-run narrative progression is user-paced by default. Back/previous is mandatory. Continue, Skip, Replay and visible progress are required where applicable; Pause/Resume while motion runs. Reduced motion keeps equivalent causality/navigation.
+Text, animation, camera, lighting, sound, character acting and world-state changes must communicate the same causal sequence. A cold-start player should understand the story from the experience itself.
 
-Do not “fix” weak storytelling by only extending timers. Story should be dramatized through action, scene change, dialogue, discovery, conflict, consequence and character/world reaction.
+## World continuity and space
 
-## Play Canvas keeps the game continuous
+The game world is cognitive support. Preserve meaningful locations/objects/characters as complexity grows.
 
-The **Play Canvas** is the persistent game surface/orchestrator. Story, exploration, missions, consequences, progression, construction and transfer should feel like states of one game rather than course pages.
+The September 17 review adds a hard spatial rule: **worlds need breathing room**. If the same content would feel better simply spread over a larger area, enlarge the footprint instead of adding more props.
 
-For compatible story/mission states, preserve the same stage/world/runtime and change camera/state/HUD instead of remounting merely because a lesson changed.
+World generation should parameterize footprint, density, negative space, landmark spacing and camera margins.
 
-Accessible semantic DOM HUD actions remain required but support the game surface and server-authoritative commands.
+## Easy to play, hard to master
 
-## Reusable engine-neutral worlds
+Start with obvious controls and success. Add depth through:
 
-PlayCanvas is the Phase 1 3D backend behind GameRuntime. Future settings provide versioned StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec and RuntimeExperienceSpec data/assets. New settings must not require a new renderer or coupling to canonical learning identity. Three.js is legacy migration infrastructure.
+- richer reasoning;
+- uncertainty;
+- relevant competing information;
+- trade-offs;
+- combination of learned ideas;
+- reduced scaffolding;
+- transfer to unfamiliar contexts.
 
-The current fully 3D game requirement includes all seven signals, world markers, contextual helpers and progressive HUD visibility. There is no 2D gameplay fallback. Accessible semantic HUD controls remain required; engine failure must preserve progress and offer honest recovery.
+Do not increase difficulty through denser UI, longer instructions, unexplained controls or camera/navigation friction unless those are the learning target.
 
-## Independent product gates
+## Art/world direction is part of course quality
 
-1. **Story/world:** audience cares, understands the causal situation and wants to continue.
-2. **First-touch game:** fresh first 60–90 seconds independently score >=9/no blocker.
-3. **Whole-chapter game:** complete chapter independently scores >=9/no blocker.
-4. **Learning outcomes:** intended capabilities have purposeful practice and defensible assessment/transfer evidence, scoring >=9 where applicable.
-5. **Current user:** explicitly accepts the candidate.
+A game nobody wants to inhabit cannot deliver the intended learning experience well.
 
-Inspect all gates even if an earlier one fails. Use the policy criteria and their minimums, not a single weighted score. Do not average gates. A great story with weak play fails. Delightful play with shallow learning fails. Rigorous learning nobody wants to continue also fails.
+Run `ART-WORLD-DIRECTION-CRITIC.md` independently from story/gameplay/learning critics. Spatial scale, silhouettes, clipping, hierarchy, atmosphere and reusable-asset composition are product requirements.
 
-## Course-to-game coverage contract
+## Attraction and sustained play are different
 
-Each versioned course package includes:
+Internal review asks both:
 
-`outcome -> prerequisite -> mechanic -> player decision -> causal feedback -> varied practice -> transfer assessment -> delayed retrieval -> evidence limits`
+1. Would a kid/young player stop and look?
+2. Would they understand what to do and want to continue playing?
 
-For every row specify what the learner should actually predict, explain, diagnose, construct, implement or decide, and which game action demands that operation. State where scaffolding fades and which rule combinations are new.
+The current rejected build achieved some of the first and not enough of the second.
 
-## Current retry reference: required capabilities
+## Course-to-game coverage
 
-| Intended capability | Suitable play | Required assessment beyond rehearsal |
-|---|---|---|
-| Distinguish unknown acknowledgement from failed effect | Observe courier/Forge separately; investigate missing reply | Fresh case without revealed answer; explain uncertainty |
-| Preserve intent through restarts | Recover/reuse an order identity across courier changes | Diagnose a different identity failure and construct durable intent handling |
-| Respect finite deduplication retention | Manipulate/observe time; see expired identity behave differently | Boundary/late-arrival cases with unfamiliar timing |
-| Bind identity to request meaning | Alter request and observe conflict | Changed-parameters case before worked result is revealed |
-| Reconcile outcomes and preserve unknown | Inspect authoritative record; distinguish committed/absent/unavailable | Novel known-absent and uncertain cases |
-| Build a defensible retry contract | Construct route/policy, run disruptions, revise | Fresh counterexamples and authentic implementation/design artifact where promised |
-| Retain and transfer idea | Return later to unfamiliar context with less scaffolding | Delayed retrieval + non-gear context, not memorized replay |
+Each versioned game package maps:
 
-## Experience assurance
+`outcome -> prerequisite -> mechanic -> player decision -> causal feedback -> varied practice -> transfer -> delayed retrieval -> evidence limits`
 
-Freeze/review story before expensive realization. Then inspect one exact playable candidate: fresh entry, first action, error, recovery, harder encounter, payoff, transfer and replay.
+For every outcome, specify which game action requires the learner to predict, explain, diagnose, construct, compare or decide.
 
-Phone-first evidence uses mainstream Android/iPhone portrait around 360–430 CSS px with touch, safe areas, text enlargement and reduced motion.
+## Reusable game-creation assets
 
-Human final review remains essential. Do not substitute reward pressure, streak loss, shame, fake urgency or grinding for curiosity, attachment and earned competence.
+Accepted chunks should contribute reusable components where justified:
+
+- environment/world kits;
+- configurable layouts/scale/density;
+- character/control profiles;
+- cinematic beats;
+- doors/gates/routes/rooms;
+- interaction/scanning/repair/build mechanics;
+- tutorial/scaffolding patterns;
+- HUD/audio/accessibility patterns;
+- critic/test/CI templates.
+
+Reuse should enable materially different games, not reskins.
 
 ## Learning/evidence integrity
 
-XP is practice/game progression only and never determines mastery. Assistance, prior exposure and independence remain distinct. Missing evidence is not failure. Submitted evidence remains immutable except explicit learner-scoped reset.
+XP/practice progress is not mastery. Assistance, prior exposure and independent performance remain distinct. Missing evidence remains unknown. Game completion/animation/world state do not establish learning by themselves.
 
-World/rendering state is presentation, not learning evidence merely because an animation or visual state change occurred.
+## Future agents
 
-## Scope
+The platform should eventually support coordinated agents for research, ideation, creation, art/world direction, implementation, critic roles, tests and CI/CD. Agents operate on versioned specs/artifacts and cannot self-certify.
 
-Current work remains private Phase 1 reference refinement. The general generator/world-package direction describes future phases but does not authorize broad Phase 2+, arbitrary generated code loading, new model integrations, external testers, paid resources or public rollout.
+That is future platform work. First prove the game-creation model manually/tool-assisted on this track.
 
-## Foundation: games generated from learning needs and preferences
+## Acceptance
 
-User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
-
-Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.
+Technical CI, internal critics and generated artifacts are necessary evidence, not final product acceptance. The current user is the sole final human product critic during this private refinement phase.
