@@ -1,15 +1,42 @@
-# Current local candidate — prototype, not accepted
+# Current story critic — rendered story needs redesign
 
-**Latest human feedback — 15 September 2026:** the user found the prototype technically impressive and the interface improved, but called its story weak and asked for rescue-driven progression, a beautiful captivating world, references and sound/music. User verdict: **needs_revision**, no numeric score. [LLM-RESCUE-STORY.md](LLM-RESCUE-STORY.md) is the replacement design, not yet rendered or rated. Preserve the exact-build internal scores below as historical evidence for the existing prototype.
+**17 September 2026.** The user's direct review of the rendered LLM rescue candidate is authoritative: **needs_revision**.
 
-Candidate `31025192a4c01dee04fcd621c1e4a52887b4efcb`: internal verdict **needs_revision** (gate minima 5 / 7 / 6 / 5). Episode 1 of Inside the Word Machine is implemented locally on `codex/critic-evidence-reset`. Use [LLM-EPISODE-1-VERIFICATION.md](LLM-EPISODE-1-VERIFICATION.md) and [LLM-EPISODE-1-PLAYTEST.md](LLM-EPISODE-1-PLAYTEST.md) for its actual scope/results. The earlier rejection below remains attached to the deployed commit; do not transfer its scores to the new game. No internal or human acceptance is inferred from a successful test run.
+The previous written rescue treatment had promise, but the implementation did not convey that story. This is exactly why story-treatment quality and rendered-story quality are separate gates.
 
-# Deployed baseline story verdict — needs revision
+## Current failures
 
-**15 September 2026.** Candidate `337db573d87c417aca42f55894a2c6e807df21ed`; method **internal_tool_assisted**, actual browser play locally from deployed source. No human/youth validation or current numeric user score.
+- opening does not establish the written story/stakes clearly enough;
+- text and animation are separate layers rather than synchronized narrative beats;
+- duplicate/ambiguous robot presentation weakens character identity;
+- player embodiment is wrong for the current track;
+- progression jumps into in-Level tutorial rather than a separate prologue/tutorial;
+- world scale is cramped enough to weaken staging;
+- visual attraction exists but does not yet convert into sustained play.
 
-The rendered opening relies on repeated explanatory panels over a similar diorama. World geography, player role and the meaning of the failure are insufficiently legible; important phone consequences are offscreen. See [PLAYTEST-20260915.md](PLAYTEST-20260915.md) and the [criterion record](reviews/2026-09-15-render-337db57.json).
+## Active story direction
 
-Historical story-v3 **9.059** and story-v2 **9.37** rated treatments, not this realized scene. Their descriptions overestimated what a child could infer from the proposed staging. They are not active passes. The original records are preserved in [history/20260914-CURRENT-STORY-CRITIC.md](history/20260914-CURRENT-STORY-CRITIC.md).
+The next design pass begins from:
 
-The new LLM series now has one implemented local episode; its review is separate from this deployed-baseline verdict. Use [CRITIC-POLICY.md](CRITIC-POLICY.md) for future review. The sole current human reviewer remains the user.
+`happy Bellweather with protagonist + friends -> dramatic rupture/thunder/teleport -> protagonist alone in dark limbo -> lights reveal unknown prison/large blocked door -> evil robot visibly removes protagonist speech engine -> direct protagonist control -> separate Tutorial/Prologue -> clean success -> Level 1`
+
+The exact event/antagonist/naming can improve during ideation. `Zip` is provisional; run a fresh culturally informed but original naming/character pass.
+
+## Story review requirement
+
+Every beat must define and verify:
+
+- visible world-before;
+- event;
+- camera/focus;
+- character/world reaction;
+- minimal text/dialogue;
+- light/sound/effect;
+- world-after;
+- newcomer takeaway.
+
+If the rendered scene does not communicate the written beat, the story fails regardless of the treatment prose.
+
+Run `STORY-GENERATION-AND-CRITIC.md` and `ART-WORLD-DIRECTION-CRITIC.md` independently. A strong story idea cannot compensate for cramped/broken visual staging.
+
+Older Echo Forge/story-v2/story-v3 scores remain historical only and must not be transferred to the current track.
