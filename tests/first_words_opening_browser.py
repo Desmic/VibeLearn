@@ -23,11 +23,10 @@ def main():
             expect(page.locator('#rgi-title')).to_have_text('Bellweather is alive.')
             expect(page.locator('#rgi-body')).to_contain_text('Zip is home with friends')
             page.screenshot(path=str(out/'prologue-home-390.png'),timeout=15000)
-            until(page,"()=>FirstWordsReview.audio.ready && FirstWordsReview.audio.version==='bellweather-score-v2' && FirstWordsReview.audio.scheduledBars>0")
-            assert page.evaluate("FirstWordsReview.audio.phase")=='home'
 
             log('Prologue: rupture');page.get_by_role('button',name='Continue →',exact=True).click()
             expect(page.locator('#rgi-title')).to_have_text('The sky cracks open.')
+            until(page,"()=>FirstWordsReview.audio.ready && FirstWordsReview.audio.version==='bellweather-score-v2' && FirstWordsReview.audio.scheduledBars>0")
             until(page,"()=>FirstWordsReview.audio.phase==='danger'")
             page.get_by_role('button',name='Pause story motion').click()
             until(page,"()=>FirstWordsReview.audio.state==='suspended'")
@@ -66,6 +65,7 @@ def main():
             assert page.evaluate('FirstWordsReview.runtime.instanceId')==instance
             assert page.evaluate("FirstWordsReview.runtime.mode")=='mission'
             checks.append('Six causal prologue beats establish happy Bellweather, rupture, isolation, prison reveal, visible speech loss and repair handoff before the separate tutorial; the same runtime becomes direct-control mission play.')
+            checks.append('The Bellweather score is not required before a gesture; the first Continue gesture unlocks bellweather-score-v2 and schedules bars before danger-phase assertions.')
 
             before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
             log('Prologue: replay preserves draft');page.get_by_role('button',name='Open game menu').click();page.get_by_role('button',name='Replay the prologue',exact=True).click()
@@ -92,7 +92,7 @@ def main():
                 q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000);ctx.close()
             assert not errors,errors
             checks.append('Fresh 360/430/desktop reduced-motion preserves the same six story states and can skip safely into the separate tutorial without a 2D fallback.')
-            (out/'first-words-opening-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'scope':'Prologue only. Audio lifecycle and phase changes are automated; subjective mix/appeal, physical-phone feel and human acceptance remain unassessed.'},indent=2))
+            (out/'first-words-opening-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'scope':'Prologue only. Audio lifecycle and phase changes are automated after an explicit player gesture; subjective mix/appeal, physical-phone feel and human acceptance remain unassessed.'},indent=2))
             log('Prologue gate passed')
         finally:
             browser.close();stop_server(proc)
