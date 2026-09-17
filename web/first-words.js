@@ -7,7 +7,9 @@ import * as chapter from './first-words-world.js';
 const $=s=>document.querySelector(s),runtime=getGameRuntime(),audio=createGameAudio(),host=$('#world');
 const initial={round:0,pieces:0,status:'building',powered:false,output:[],context:[],moves:0};
 let reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,paused=false,inOpening=false,ready=false,presented=null,lastCue=null;
-let world=runtime.showMission(chapter,host,initial,{reducedMotion:reduced});
+// Fresh entry mounts the first prologue composition behind the loading layer. Do not
+// instantiate the prison mission first and then flash it while learner state resolves.
+let world=runtime.showStory(chapter,host,0,{reducedMotion:reduced});
 const session=createLearningSession(render);
 const ours=()=>session.attempt?.snapshot?.word_machine?.version==='first-words-1';
 const view=()=>ours()?session.attempt.word_machine_state:initial;
@@ -180,12 +182,17 @@ host.addEventListener('click',async e=>{
 });
 async function boot(){
   try{
-    if(!world.available)throw Error('The 3D world could not open.');await world.whenReady();ready=true;$('#loading').hidden=true;frame();
+    if(!world.available)throw Error('The 3D world could not open.');
+    await world.whenReady();ready=true;frame();
+    // Resolve learner state while the loading layer still covers the stage. Fresh
+    // players remain on Bellweather beat 0; returning players mount their saved prison
+    // state before the loading layer is removed.
     await session.load();text('#start','Enter the prologue →');$('#start').disabled=false;render();
     if(!ours())opening();
+    $('#loading').hidden=true;
   }catch(error){
     if(!ready){window.dispatchEvent(new CustomEvent('game-entry-failed',{detail:error.message+' Your saved progress is safe.'}));return;}
-    text('#start','Sign in to continue');$('#start').disabled=false;$('#start').onclick=()=>{location.assign('/');};text('#error',error.message);$('#error').hidden=false;
+    $('#loading').hidden=true;text('#start','Sign in to continue');$('#start').disabled=false;$('#start').onclick=()=>{location.assign('/');};text('#error',error.message);$('#error').hidden=false;
   }
 }
 window.FirstWordsReview={get state(){return view();},get runtime(){return runtime.stats();},get audio(){return audio.stats();}};
