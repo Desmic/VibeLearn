@@ -14,19 +14,19 @@ Observed in the first opening beat: the scene visibly presents two Zip-like robo
 
 The extra middle character also visibly intersects/clips through the central table, making the opening world look broken rather than intentional.
 
-**Required correction:** the opening must contain one unambiguous Zip presentation. Remove or clearly differentiate any other similar robot; fix transforms/collision/placement so no character intersects the central table or props. Verify the full opening from multiple camera angles, not only the authored default frame.
+**Required correction:** the opening must contain one unambiguous protagonist presentation. Remove or clearly differentiate other robots; fix transforms/collision/placement so no character intersects the central table or props. Verify the full opening from multiple camera angles, not only the authored default frame.
 
 ### UR-02 — Opening does not establish the story/world clearly enough
 
 The opening currently begins with `Every adventure needs a friend.` and a short line about Zip's lantern, but the user reports that the story does not meaningfully begin to explain itself there.
 
-This means the current three-beat opening is still too dependent on the reviewer already knowing the intended Bellweather/Zip/Warden context. It does not sufficiently establish what Bellweather is, who the player/Zip are, what is happening tonight, why the Warden matters, and why the player should care before asking for interaction.
+This means the current three-beat opening is still too dependent on the reviewer already knowing the intended Bellweather/Zip/Warden context. It does not sufficiently establish the world, protagonist, disruption, antagonist and immediate stakes for a cold-start player.
 
 **Required correction:** redesign the prologue/opening so story, world, relationship and immediate stakes are understandable from the experience itself. Do not solve this by stacking long exposition panels; use staged world events, concise dialogue/captions, character motion and tutorialized interaction.
 
 ### UR-03 — A tutorial embedded inside Level 1 is not the requested tutorial structure
 
-The current build enters `The First Words` and then shows `TUTORIAL · 1/3` inside that level. The user expected a tutorial/prologue **before Level 1**, so the player learns how to play before Level 1 begins.
+The current build enters `The First Words` and then shows `TUTORIAL · 1/3` inside that level. The user expected a distinct Tutorial/Prologue **before Level 1**, so the player learns how to play before Level 1 begins.
 
 The distinction matters for progression: Tutorial/Prologue should teach basic movement/look/interact/game-menu semantics and the core learning mechanic with low/no failure pressure. Level 1 should then feel like the first actual mission, not the tutorial itself.
 
@@ -54,19 +54,86 @@ This means the visual/world layer has crossed a meaningful threshold: it can att
 
 **Required correction:** future internal review must explicitly ask two separate questions instead of conflating them: `Would a kid/young player stop and look?` and `Would they understand what to do and want to keep playing?` A candidate is not >=9 game experience if only the first answer is yes.
 
+### UR-07 — Current play area is too congested
+
+The user describes the current world/play area as congested/constipated. Importantly, they believe **simply making the playable world larger while keeping essentially the same content would materially improve the experience**.
+
+This is an art/world-direction problem, not a request to add more scenery. The current footprint compresses characters, props, landmarks and interactions into a small diorama, which makes the world less pleasant to inhabit and increases visual collisions/ambiguity.
+
+**Required correction:** enlarge the playable spatial footprint and introduce deliberate negative space. Preserve useful landmarks/props but spread them so movement, camera orbit and focal interactions have breathing room. Add world-density/spacing parameters to the reusable world system so future generated games do not default to compact prop piles.
+
+### UR-08 — Player embodiment is wrong: control the protagonist directly
+
+The phrase “help Zip” was incorrectly realized as a literal separate `you`/helper character. The user did **not** intend a second player avatar in the fiction.
+
+For this track, keep the robot protagonist and its friends; **the player controls the protagonist directly**. There should not be a separate literal helper/avatar unless a future game explicitly chooses that embodiment model.
+
+**Required correction:** remove the separate player-character fiction/visual from this track. Story, camera, controls and dialogue should all assume direct protagonist control. The platform must make player embodiment an explicit design/spec decision rather than inferring an avatar from second-person wording.
+
+### UR-09 — New opening direction: happiness -> violent disruption -> limbo/prison -> speech theft -> control
+
+The user proposed a clearer cinematic causal chain:
+
+1. show Bellweather alive, happy and normal; the protagonist and friends are together;
+2. a dramatic interruption (for example a thunderstrike/violent supernatural-technological event) suddenly breaks that normality;
+3. the protagonist and friends are teleported/displaced away;
+4. cut to the protagonist alone in a dark limbo-like space;
+5. lights come on and reveal an unknown place with a large locked/blocked exit door;
+6. an evil robot arrives and removes the protagonist's speech engine;
+7. transition into direct player control of the protagonist;
+8. the Tutorial/Prologue teaches movement/interact/core speech-repair loop and lets the protagonist restore enough speech/open the first way forward;
+9. **Level 1 starts after those basics are learned.**
+
+This direction has a readable before/after contrast, an inciting incident, mystery, concrete imprisonment, a visible antagonist action and an immediate personal reason to learn the speech mechanic.
+
+**Required correction:** use this as the working opening/prologue direction for the next design pass unless a clearly stronger alternative is produced and reviewed. Story text, animation, lighting, camera and player control must all reinforce the same causal sequence.
+
+### UR-10 — Add an independent art/world-direction critic
+
+The existing internal critic passed a build that still had cramped spatial composition, duplicate/ambiguous characters and visible character/prop intersection. Story/gameplay/learning review did not catch the art-direction failure adequately.
+
+**Required correction:** add a separate art/world-direction critic covering spatial scale, negative space, focal hierarchy, silhouette/identity, prop density, geometry/intersections, camera sweep, landmark readability, palette/material cohesion, atmosphere, reusable-asset composition and phone/desktop world readability. `ART-WORLD-DIRECTION-CRITIC.md` is now an active hard gate.
+
+### UR-11 — Use pop culture as inspiration more deliberately, while keeping the game original
+
+The user wants stronger cultural inspiration during story/character ideation—for example a memorable robot name or personality that feels like it belongs in the same cultural conversation as famous movie/game robots rather than a generic placeholder such as `Zip`.
+
+A “Wall-G”-style wordplay/reference is an example of the *kind of recognizability* they mean, not a requirement to copy a protected character/design.
+
+**Required correction:** add a deliberate pop-culture/literature/game inspiration pass before story freeze. Extract naming energy, archetypes, pacing, humor and motifs, then produce original characters/assets/story. References should reward recognition but never be required for comprehension.
+
+### UR-12 — The product is a game-creation platform; this track is the proof case
+
+The user re-emphasized that VibeLearn is **not primarily one game**. The goal is a platform that can create learning games quickly from reusable worlds, assets, mechanics, progression patterns and runtime systems.
+
+The current LLM learning track exists to prove the model end-to-end. Do not derail the proof by prematurely implementing the full generator/orchestrator, but every accepted implementation should leave behind reusable, parameterized components rather than one-off campaign glue.
+
+**Required correction:** future architecture/game-generation docs must treat reusable world kits, characters, cinematic beats, mechanics, HUD/tutorial patterns, progression and critic/test templates as first-class platform assets. Reuse must support meaningful variation in layout, scale, art direction and story rather than producing reskinned copies.
+
+### UR-13 — Future platform should support agents across the creation/review/release pipeline
+
+Longer term, the platform should support agents for ideation, research, story/game creation, art/world direction, implementation, critics, testing and CI/CD/release orchestration.
+
+This is **planned future capability**, not the current implementation priority. The immediate priority is still to prove the system through one excellent game/learning track.
+
+**Required correction:** preserve agent-friendly boundaries now—versioned specs, explicit artifacts, reproducible tests/evidence and independent critic roles—without stopping current game work to build the full multi-agent system.
+
 ## Internal-review misses exposed by this user review
 
 The prior internal critic record gave all four gate groups a minimum 9, yet it did not catch:
 
-- duplicate/ambiguous Zip presentation;
+- duplicate/ambiguous protagonist presentation;
 - character-table clipping visible under camera movement;
 - insufficient story establishment for a first-time player;
 - the mismatch between an in-Level tutorial and the intended pre-Level tutorial/prologue structure;
 - failure of the actual rendered story to communicate the written story/stakes beat-by-beat;
 - failure of the live progression to match the documented onboarding/progression contract;
-- the distinction between visual attraction (`would look`) and sustained playability (`would play`).
+- the distinction between visual attraction (`would look`) and sustained playability (`would play`);
+- cramped world scale/insufficient negative space;
+- the wrong player-embodiment model;
+- absence of a dedicated art/world-direction review gate.
 
-Therefore the current internal-review process is not sufficient by itself. Update its counterexamples/evidence so future candidates explicitly inspect duplicate character identity, world-object intersections from alternate camera angles, cold-start story comprehension, text-animation synchronization, tutorial-vs-Level-1 progression boundaries, and separate attraction-vs-playability judgments.
+Therefore the current internal-review process is not sufficient by itself. Future candidates must explicitly inspect character identity, world-object intersections from alternate camera angles, cold-start story comprehension, text-animation synchronization, tutorial-vs-Level-1 progression boundaries, attraction-vs-playability, spatial density/breathing room and declared player embodiment.
 
 ## Review status
 
