@@ -1,13 +1,63 @@
 # Game review — actual play is required
 
-**15 September 2026 review expansion:** apply the atmosphere, sound and reference probes in [WORLD-ATMOSPHERE-AND-AUDIO.md](WORLD-ATMOSPHERE-AND-AUDIO.md) to the exact candidate. Observe friendship, capture, reasoning and reunion as moving sequences with audio and muted. State whether the world invites exploration and whether the payoff motivates continuing. Do not infer these from canvas existence, asset counts or a passing bounds check. The current user's workshop-story rejection remains final until they review a replacement.
+**Active direction — 17 September 2026.** Follow `CRITIC-POLICY.md` and `ART-WORLD-DIRECTION-CRITIC.md`. The current user review of candidate `6fea828...` is `needs_revision`; prior internal 9s do not survive direct user rejection.
 
-**15 September 2026.** Follow [CRITIC-POLICY.md](CRITIC-POLICY.md) for all active ratings, hard blockers, evidence and readiness. It replaces the old weighted dual-score process.
+## Review the actual experience
 
-Review fresh entry, first action, failure/recovery, middle challenge, construction, finale, transfer, save/resume and replay on the exact candidate. Inspect the whole playable chapter even when the opening fails. Record any workaround and unobserved state. Required desktop/360/390/430, controls-after-save, touch/keyboard, enlarged-text and reduced-motion checks cannot be replaced by a canvas-existence assertion or a chosen success screenshot.
+Review fresh entry, prologue, separate tutorial, Level 1 mission, failure/recovery, later challenge, payoff, transfer, save/resume, replay, reset/logout and controls on the exact candidate.
 
-The opening must establish the world, player role, concrete need and next action through a scene. The camera must show the active target and result. HUD/markers must agree with the world and leave it usable. Difficulty grows through thinking and consequences. Later play must stay coherent; copied recipes do not establish transfer.
+Do not infer quality from source, asset counts, canvas existence or passing bounds checks.
 
-Use the policy's eleven criteria in four separate gates. Whole-number scores are diagnostic judgments; each criterion needs observed evidence. A low clarity score or a blocker cannot be offset by appearance. Passing tests earns no quality points. No physical-phone or youth validation is implied by emulated browser checks.
+## Required product questions
 
-The current user is the only human product critic and has final authority. Current findings: [PLAYTEST-20260915.md](PLAYTEST-20260915.md). Historical rubric: [history/20260914-GAME-UX-REVIEW.md](history/20260914-GAME-UX-REVIEW.md).
+Ask separately:
+
+1. Would a kid/young player stop and look?
+2. Would they understand what to do?
+3. Would they want to keep playing?
+4. Does the rendered story convey the written story/stakes?
+5. Does the world feel good to inhabit/move through?
+6. Does the gameplay embody the learning target?
+
+A candidate that only wins question 1 is not a game-quality pass.
+
+## Art/world review
+
+Perform a separate pass for:
+
+- playable-area scale and negative space;
+- prop/actor density;
+- protagonist silhouette/identity;
+- clipping/intersections;
+- landmark/path readability;
+- camera orbit/zoom/walk compositions;
+- palette/material/lighting cohesion;
+- atmosphere/state contrast;
+- reusable-asset composition;
+- desktop and 360/390/430 framing.
+
+The September 17 review specifically shows why this matters: a scene can be attractive while cramped, ambiguous and visibly intersecting props/characters.
+
+## Embodiment review
+
+Confirm who the player controls from the experience itself. Compare against the declared design. For the current track the player directly controls the robot protagonist; a separate literal helper/avatar is a blocker.
+
+## Story/progression review
+
+Verify the actual boundary:
+
+`prologue -> separate tutorial -> clean success -> Level 1 -> challenge -> payoff`
+
+Opening text/animation/camera/sound/world changes should tell one synchronized causal story. Level 1 must not secretly remain onboarding.
+
+## Evidence
+
+Inspect moving sequences and before/after states, not only chosen success screenshots. Use alternate camera angles. Record workarounds/reloads. Unchecked is unassessed.
+
+Phone-first evidence uses 360/390/430 CSS-pixel portrait plus desktop. Record touch/keyboard, enlarged text, reduced motion and actual sound listening when audio quality is claimed.
+
+## Ratings
+
+Use the policy's integer criteria and independent gates. No weighted average. A beautiful scene cannot offset unclear play, weak learning or an art/world blocker.
+
+The current user is the final product authority.
