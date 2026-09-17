@@ -1,102 +1,159 @@
-# Critic policy — observed play, then the user's verdict
+# Critic policy — observed play, independent disciplines, then the user's verdict
 
-**16 September workflow clarification:** during development, follow `../CODEX.md`:
-choose coherent small chunks (including simultaneous related work), finish/test/play
-the opening first, then verify and repair each chunk before extending it. Whole-chapter
-review below applies to an already built candidate; it does not authorize building
-ahead of an unresolved chunk gate. Review existing code for problems without treating
-its existence or a broad passing suite as proof of product quality. Deployment is paused.
+**Active policy — 17 September 2026.** The September 17 user review invalidated the prior internal `ready_for_user_review` recommendation for candidate `6fea828...`. The internal checker passed a build with duplicate/ambiguous characters, visible clipping, insufficient story communication, wrong tutorial boundary, cramped world scale and the wrong player-embodiment model. That proves the checker/critic process was necessary but insufficient.
 
-**Active from 15 September 2026.** This is the authority for review methods, ratings and readiness. It replaces conflicting weighted-score rules, sequential review restrictions and review-candidate exceptions in older documents. It does not authorize deployment or another phase.
+The user is the sole final human product critic. Their explicit verdict overrides every internal score, agent judgment, CI result and deployment state.
 
-## Who decides
+## Critic disciplines are independent
 
-There is currently **one human product critic: the current user**. Their explicit verdict is final. Do not invent a panel, child study, user score, approval or new review requirement involving other people. Agents and tools are fallible internal reviewers. Even a separate agent is not audience validation.
+Every serious candidate is reviewed through separate disciplines:
 
-The user may inspect a draft whenever they want and may reject or accept it regardless of internal scores. A requested preview is a preview, not a recommendation or acceptance. No internal score, green CI run, deploy, missing response or completed level changes the user's verdict. Acceptance must cite the user's actual statement and identify its candidate/scope; do not infer it from this validator.
+1. **Story/rendered narrative critic** — does the actual scene communicate world, role, cause, stakes and forward pull?
+2. **Art/world-direction critic** — does the world have intentional scale, negative space, hierarchy, silhouettes, geometry, landmarks, atmosphere and visual cohesion? See `ART-WORLD-DIRECTION-CRITIC.md`.
+3. **Gameplay/first-touch critic** — can a newcomer understand what to do and enjoy doing it?
+4. **Whole-chapter/progression critic** — does play deepen coherently, recover from mistakes and produce payoff?
+5. **Learning/transfer critic** — does the mechanic faithfully embody the idea and require it in changed situations?
+6. **Technical/accessibility gate** — build/runtime/state/auth/save/device behaviors are verified independently.
 
-## Why the old process failed
+A candidate fails if any required discipline has a blocker. Do not average them.
 
-The audit of deployed `337db573d87c417aca42f55894a2c6e807df21ed` found:
+## Attraction versus playability
 
-- There is no running critic model/service or quality-scoring step in CI. The critics were prompts, documents and manually entered ratings. Browser reports deliberately say `critic_pending`; they verify behavior, not enjoyment.
-- The **9.059** story score judged a written story candidate. An older **9.37** treatment review described intended visual clarity with unwarranted confidence. Neither established that the actual opening communicated its world.
-- **8.528** was a historical, limited first-touch review, not a pass for this deployed revision. No complete current story/game/learning acceptance existed.
-- A bounded review-deployment exception allowed a technically verified preview below 9. The PR disclosed its browser limitations. However, “free of identified blockers” was too weak when the relevant interactions had not actually been inspected.
-- Weighted averages, optimistic 9.x descriptions and screenshot selection obscured basic failures. Requiring first touch to pass before inspecting later play also left later problems unexamined.
+Internal review must explicitly answer two separate questions:
 
-Historical records remain historical; do not silently rewrite their numbers. The actual seven-signal playthrough and limitations are in [PLAYTEST-20260915.md](PLAYTEST-20260915.md). This build is **needs_revision**. The user supplied qualitative changes, not a new numerical rating.
+- **Would a kid/young player stop and look?**
+- **Would they understand what to do and want to keep playing?**
+
+The current rejected build achieved some visual attraction but failed the second question. “Looks good” is not a gameplay pass.
 
 ## Review workflow
 
-1. Freeze the exact candidate commit and identify package/content versions, environment and disposable learner state. Record prior knowledge, assistance, restarts and any source inspection before play.
-2. Review the learning premise and written story for contradictions, prerequisites and production risks. Call this a **design review**, never a rendered story pass. A promising paragraph cannot earn game-quality points.
-3. Play the fresh opening without a walkthrough. Record what the screen communicates before reading source explanations. If the reviewer already knows the design, disclose that bias. Imagining a novice is useful criticism, not a novice study.
-4. Inspect the whole playable chapter even when the opening fails. Exercise first action, mistake, recovery, harder decisions, payoff, transfer, replay, save/resume and controls after a saved action. Stop only where an actual blocker prevents progress; mark the rest unobserved. Document reloads/workarounds rather than counting them as smooth play.
-5. Use desktop and 360/390/430 CSS-pixel portrait evidence. Check moving cause/effect and before/after states, not just attractive stills. Record touch/keyboard, text enlargement and reduced-motion checks separately; desktop viewport emulation is not a physical phone test.
-6. Write failures and likely abandonment points **before** numbers. For each criterion cite exact visible evidence, give an integer rating or leave it unassessed, explain its limit, and state a concrete repair/retest condition.
-7. Run the record checker. Fix blockers before recommending another candidate. A source-only fix or a passing existence/bounds test cannot close a perceptual or interaction finding; replay the failing sequence on the changed candidate.
-8. Present an honest recommendation and known limits to the current user. Their verdict remains final. Do not repeatedly polish to chase numbers after the user gives different direction.
+1. Freeze the exact candidate SHA and environment.
+2. Read the active product/story/progression specs, but disclose reviewer prior knowledge.
+3. Review the fresh prologue cold where possible. Before interpreting intent, write what the rendered scene actually communicated.
+4. Compare the written storyboard to rendered causality beat-by-beat: world-before -> event -> reaction -> text/sound/camera -> world-after -> newcomer takeaway.
+5. Run the art/world-direction pass: alternate camera angles, orbit/zoom/walk, density/negative space, clipping/intersections, protagonist identity, landmarks and phone/desktop compositions.
+6. Play the separate tutorial. Verify reusable controls/core interaction grammar and a clean first success **before Level 1**.
+7. Play Level 1 and the whole available chapter: first mission, mistake, recovery, harder decision, payoff, transfer, replay, save/resume and lifecycle controls.
+8. Exercise desktop and 360/390/430 portrait, touch/keyboard, enlarged text and reduced motion where applicable. Browser emulation is not a physical-device study.
+9. Write failures and likely quit points **before** assigning numbers.
+10. For each 9+ judgment, record a strong counterexample attempt.
+11. Run technical checks/record validators. They validate evidence structure/runtime behavior, not fun, art direction or comprehension.
+12. Fix blockers and replay the failed sequence on the changed candidate.
+13. Only after all internal disciplines pass may the candidate be recommended for user review. The user's verdict remains final.
 
 ## Rating calibration
 
-Use **whole numbers from 0 to 10**, per criterion. No decimal precision or weighted averages. `null` means not assessed; missing evidence is not a zero or failure. These are internal judgments about the observed experience, not measured audience scores.
+Use whole numbers 0–10 for diagnostic criteria. No decimals or weighted averages.
 
 | Rating | Anchor |
 |---|---|
-| 0–2 | Missing, misleading or unusable; the intended activity cannot be followed. |
-| 3–4 | A reviewer can progress through substantial explanation, guessing or workarounds; a basic requirement fails. |
-| 5–6 | Understandable with noticeable friction, weak motivation or repeated scaffolding. |
-| 7–8 | Clear and competent across inspected states; meaningful weaknesses remain. |
-| 9 | Convincing across the required observed states, no material weakness found; cite the strongest counterexample attempted. |
-| 10 | Exceptional sustained execution across the chapter; explain what exceeds 9. This remains an opinion, not human validation. |
+| 0–2 | Missing/misleading/unusable. |
+| 3–4 | Progress requires explanation, guessing or workaround; basic requirement fails. |
+| 5–6 | Understandable but meaningfully frictional/weak. |
+| 7–8 | Clear and competent; material weaknesses remain. |
+| 9 | Convincing across required observed states; no material weakness found; strongest counterexample attempted and recorded. |
+| 10 | Exceptional sustained execution; explain what exceeds 9. |
 
-The >=9 aspiration remains. Each required criterion must reach 9, with no blocker and complete required evidence, before an internal **ready_for_user_review** recommendation. The gate summary is its **lowest** criterion, never an average; do not publish one blended game score. A 10 for beauty cannot offset a 3 for understanding the goal. Unknown criteria make readiness incomplete. Criteria below 9 or concrete blockers mean needs_revision. Missing technical checks prevent readiness without pretending the checks failed.
+`null` means not assessed. Unknown is not a pass or a zero.
 
-### Required criteria
+## Legacy executable criteria
 
-| Gate | Criteria |
-|---|---|
-| Rendered story | `world_role_stakes`: who/where/what matters; `visible_causality`: events communicate why; `attachment_pull`: a visible reason to care and continue. |
-| First touch | `orientation_action`: locate self/goal/first action; `hud_readability`: useful markers and unobstructed play; `controls`: movement/camera/action remain operable. |
-| Whole chapter | `meaningful_agency`: choices affect the world; `progression_recovery`: challenge changes and recovery teaches; `world_continuity`: later play stays coherent and tangible. |
-| Learning | `concept_fidelity`: mechanic embodies the declared idea faithfully; `fresh_transfer`: a new situation requires the idea without copying the just-shown answer. |
+The current JSON checker still validates these eleven criteria:
 
-A learning-design review assesses opportunity and evidence quality. It does not establish that anyone learned. Delayed retention and audience enjoyment remain untested until actual evidence exists. XP, completion, assistance and animation do not establish mastery.
+### Rendered story
+- `world_role_stakes`
+- `visible_causality`
+- `attachment_pull`
 
-## Non-negotiable checks and blockers
+### First touch
+- `orientation_action`
+- `hud_readability`
+- `controls`
 
-These questions operationalize the criteria. Failing one is a blocker even if a reviewer likes the art. They are reviewer probes, not claims that a real child passed them.
+### Whole chapter
+- `meaningful_agency`
+- `progression_recovery`
+- `world_continuity`
 
-| Check | Evidence required / failure condition |
-|---|---|
-| World and role | In the first minute, identify where we are, who the player controls, who needs help, what changed and what to do next using visible events and brief accessible cues. A glossary or several exposition cards supplying the premise fails. |
-| Opening is a scene | Show a causal event and character/world response in a coherent space. Repeated Continue over substantially the same diorama, with captions carrying the action, fails. Back/Skip/Replay/accessibility remain available. |
-| Attachment and atmosphere | Show a concrete reason to care about the companion, an inhabited coherent place and a visible relationship/world payoff. A generic errand or attractive but empty stage fails the promised rescue experience. Evaluate under attachment_pull and world_continuity; no points for technical complexity. |
-| Sound and cultural references | For the rescue revision, observe sound-on and muted opening/action/payoff; record actual listening. Missing promised music, distracting loops, masked cues, sound-only essential information or reference-dependent comprehension blocks readiness. Record under visible_causality, controls and world_continuity, with an unresolved blocker when appropriate. |
-| Phone framing | At each required action and consequence, player, relevant target and visible result fit the authored view. A marker contradicting the target direction or a key consequence offscreen fails. |
-| HUD and text | Default play has one short current goal and contextual action cues. No duplicate instruction stack, text over the manipulated object, nested reading area required for the immediate task, or control overlap. Optional detail stays available; accessible labels remain. |
-| Action survives save | Inspect/interact, wait for save, then actually use movement and every camera control without reloading. Disabled or intercepted controls fail even if their positions pass tests. |
-| State matches explanation | Object/payload, marker, objective, chosen action and resulting world agree. A stale “one gear” panel during a “three gears” problem fails. |
-| Meaningful progression | Inspect a middle and final challenge. Longer prose and renamed nouns with the same answer pattern do not count as increasing depth. |
-| Transfer | Attempt a novel layout/context with faded prompts before feedback. A recipe copied from the preceding worked task cannot certify independent transfer. Disclose prior exposure and assistance. |
+### Learning
+- `concept_fidelity`
+- `fresh_transfer`
 
-Do not remove all text or semantic HTML to chase this rubric. Inspect the world without expanded help as a diagnostic, then verify equivalent concise information through accessible controls and descriptions.
+Every legacy criterion must still be >=9 with complete required coverage for an internal recommendation.
 
-## Evidence and executable check
+**However:** the September 17 review proved those criteria/checker did not sufficiently enforce art/world direction, declared embodiment, spatial scale or prologue/tutorial/Level-1 boundaries. Therefore a passing JSON checker is no longer sufficient by itself.
 
-The September 15 user feedback on the Word Machine is qualitative: interface/technical improvement, weak story, stronger rescue premise and captivating atmosphere/music requested. Preserve old numeric records. New story research and authored treatments are design evidence only. The existing checker validates the existing criterion IDs and explicitly supplied blockers; it does not automatically listen, measure atmosphere or enforce honest reporting. These additional review probes do not mean an automated critic service was added.
+Until the checker is extended, the following are **manual/internal hard gates**:
 
-Use [reviews/2026-09-15-render-337db57.json](reviews/2026-09-15-render-337db57.json) as the format example. Every score/coverage claim references existing repository evidence. The record contains exact SHA, reviewer method, environment, limitations, coverage, criterion ratings and unresolved blockers.
+- `ART-WORLD-DIRECTION-CRITIC.md` has no unresolved blocker;
+- player embodiment is explicitly declared and matches the rendered character/camera/control model;
+- prologue, separate tutorial and Level 1 boundaries match `GAME-OPENING-PROGRESSION.md`;
+- rendered story communicates the active written storyboard without relying on design-doc knowledge;
+- attraction and sustained playability are judged separately.
 
-```
-python tools/check_critic_review.py docs/reviews/2026-09-15-render-337db57.json --candidate 337db573d87c417aca42f55894a2c6e807df21ed
-```
+## Non-negotiable probes
 
-Exit 0 = internally ready for user review; 1 = valid record but needs revision/incomplete; 2 = invalid/stale record. `--validate-only` checks record structure/evidence references without implying readiness. The checker rejects mismatched revisions, missing evidence and fractional ratings. It cannot verify honesty, inspect pixels, judge enjoyment, or accept a product for the user. It is an explicit review command, **not a Render deployment hook or automated critic service**.
+### World / story / role
+Within the opening, identify from visible events and concise cues:
 
-When a candidate changes, make a new review record. Keep prior review scores attached to their old revision. Link unchanged evidence only with an explicit scope argument and fresh checks of the affected behavior. Do not count fictional test fixtures as real review evidence.
+- what the normal world feels like;
+- who the player controls;
+- what disruption occurred;
+- what the antagonist did;
+- what the immediate obstacle/need is;
+- what the player can do next.
 
-## Scope and recovery
+A synopsis in a caption does not substitute for visible staging.
 
-Private Phase 1 only. Use disposable local/test data; preserve Supabase identity, allowlist, RLS, immutable learner evidence and assessment contracts. No new external testers, critic/model service, paid resources or public rollout. Policy/tool changes are reversible in Git; historical reports and learner data are not rewritten. The next topic choice is in [NEXT-TEACHING-DESIGN.md](NEXT-TEACHING-DESIGN.md).
+### Player embodiment
+The declared protagonist/control model must be obvious. Duplicate protagonist-looking actors, a mysterious extra `you` avatar or camera/control behavior contradicting the story are blockers.
+
+### Spatial composition
+Inspect whether simply enlarging the world/spacing props would materially improve play. If yes, current density/scale is a blocker. Check negative space, path width, camera occlusion and landmark spacing.
+
+### Geometry / alternate cameras
+Orbit/zoom/walk beyond hero screenshots. Visible character-table intersections, doors crossing actors, floating props, camera penetration or compositions that only work from one angle are blockers.
+
+### Prologue versus tutorial versus Level 1
+The prologue establishes world/inciting event/stakes. The separate tutorial teaches reusable controls/core interaction and grants a clean success. Level 1 is the first actual mission. Collapsing these into one confusing onboarding level is a blocker when the active design requires separation.
+
+### Story synchronization
+Text, animation, camera, sound, lighting and player action must advance the same beat. Captions describing actions the world does not visibly perform fail `visible_causality`.
+
+### HUD and controls
+One short current goal/contextual action. Optional detail remains secondary. Controls remain usable after saves/reloads. No overlapping/nested reading surface for the immediate action.
+
+### Meaningful progression
+Difficulty grows through reasoning, uncertainty, trade-offs, combined mechanics and fading help—not denser UI, longer prose or repeated answer patterns.
+
+### Transfer
+Attempt a changed layout/context with faded prompts before feedback. Repeating the just-demonstrated recipe does not establish independent transfer.
+
+### Sound
+If atmosphere/music is part of the candidate, actual listening is required before quality claims. Muted play must preserve essential meaning.
+
+## Pop-culture/reference review
+
+Research and cultural references are valid ideation inputs. Review must ensure:
+
+- the experience works for a player who recognizes none of them;
+- references do not replace story causality or clues;
+- shipped characters/names/designs/dialogue/music remain original rather than confusingly derivative;
+- references support personality/joy rather than becoming a collage of borrowed IP.
+
+## Future critic agents
+
+VibeLearn may later use independent agents for story, art/world, gameplay, learning, test and CI/CD review. Creator agents must not self-certify their own output. Agent outputs need exact candidate IDs, evidence and reproducible counterexamples.
+
+This is future platform work; current proof-track quality comes first.
+
+## Technical checker boundary
+
+`tools/check_critic_review.py` validates the legacy record structure/evidence and exact SHA. It does not inspect pixels, orbit cameras, detect clipping, judge world scale, listen to audio or determine user acceptance. Do not describe its `ready_for_user_review` output as sufficient after September 17 without the additional art/world and progression gates above.
+
+Historical numeric records stay attached to their historical candidates. Never carry a score to a changed build.
+
+## Scope
+
+Private proof-track refinement only. No external tester panel, paid resource, broad rollout, live generation model or multi-agent orchestration platform is authorized by this policy. The user may request a preview at any time; preview is not acceptance.
