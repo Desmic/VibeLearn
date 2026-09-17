@@ -1,25 +1,76 @@
-# Story research and selection — 15 September 2026
+# Story research and inspiration method
 
-The user asked us to learn from classics, modern cinema, games, epics, plays and pop culture before writing the story. This is a focused first research pass across a classic tale, a play, cinema and games with mythic settings; it is not an exhaustive survey or evidence of what today's children prefer. Sources below were inspected on this date. The applications are our design inferences, not endorsements by the creators.
+**Updated direction — 17 September 2026.** The user wants stronger, more deliberate inspiration from games, movies, animation, literature, mythology and pop culture when creating characters/worlds/stories. The goal is **memorable original work informed by proven cultural techniques**, not generic placeholders and not copies.
 
-| Source | Observed basis | Specific application |
+## What to research
+
+Before freezing a new game/story candidate, inspect a small varied set of relevant works and extract concrete techniques such as:
+
+- protagonist silhouette/personality hook;
+- memorable naming rhythm or wordplay;
+- relationship establishment;
+- normal-world happiness before disruption;
+- inciting-event drama;
+- mystery/reveal structure;
+- environmental storytelling;
+- humor;
+- villain entrance;
+- world-state contrast;
+- tutorial integration;
+- payoff/reunion;
+- music/atmosphere use;
+- level/progression structure.
+
+Do not merely list titles; write the design technique and how it might apply to the current learning game.
+
+## Current examples already researched
+
+| Source | Observed basis | Design application |
 |---|---|---|
-| [Pixar: WALL-E](https://www.pixar.com/wall-e) | Pixar describes a wordless world-history sequence, the robot's curiosity, and lighting that turns a functional home into an intimate place. | Establish home through activity; demonstrate Zip's generosity; use warm light and a personal object to make reunion matter. |
-| [Ali Baba, Project Gutenberg](https://www.gutenberg.org/files/37679/37679-h/37679-h.htm) | A spoken phrase opens a hidden door; forgetting the phrase has consequences. | The user's magic-word door has a familiar, immediately visible cause/effect. Our puzzle still requires inspecting generation and context, not recalling a password. |
-| [RSC: The Tempest](https://www.rsc.org.uk/the-tempest/the-plot) | Ariel's service and eventual freedom run through the island's conflicts. | Give captive friends desires and agency; each release should be a relationship payoff, not collecting an inventory item. |
-| [Valve: Portal 2](https://www.thinkwithportals.com/about.php) | Valve frames a puzzle adventure around an antagonistic AI, an expanded cast and using thought to overcome obstacles. | Make the Warden's interference create playable problems. His humor should reveal character; each repair should change our possibilities. |
-| [Supergiant: Hades](https://www.supergiantgames.com/games/hades/) and [soundtrack discussion](https://www.supergiantgames.com/blog/hades-bastion-vinyl-osts/) | The game uses an underworld of Greek myth; the studio explicitly treats music as a way to create mood and place. | Give the ascent distinct locations and a recurring musical identity. Use relationship continuity between challenges; no roguelike death loop is needed here. |
+| Pixar: WALL-E | Wordless/visual world-history, robot curiosity/personality, intimate environmental staging | Establish robot personality/world through behavior and setting; use visual causality before exposition. |
+| Ali Baba / classic speaking-door tale | Spoken phrase visibly changes access | A door/speech mechanic can give immediate physical cause/effect. |
+| The Tempest | Character service/freedom relationships | Rescued friends should have desires/agency and change the world after rescue. |
+| Portal 2 | Puzzle adventure, antagonistic AI personality, environment-integrated problems | Make antagonist actions create playable problems; humor reveals character rather than becoming UI copy. |
+| Hades / Supergiant | Strong place/music identity and relationship continuity | Give world states/locations musical and visual identity; relationships persist through progression. |
 
-## Concepts considered
+These sources are inspiration/research, not asset/story licenses.
 
-1. **Continue the workshop errands.** Cheap to reuse, but the user's criticism exposes the weak motivation. More scenery or jokes would leave that weakness intact.
-2. **Rescue Zip and ascend the tower together — selected working treatment.** Directly follows the user's premise. It gives a clear first rescue, a continuing companion, visible destinations and room for progressively restored abilities.
-3. **A city-wide battle of robot bands.** Music and varied outputs fit naturally, but it delays the urgent rescue and could turn LLM learning into a rhythm game. Keep the parade as the eventual payoff, not the opening premise.
+## Current user naming feedback
 
-The selected direction and names are an authored proposal following the user's guidance; the user has not accepted the treatment or its realization. See [LLM-RESCUE-STORY.md](LLM-RESCUE-STORY.md).
+The user specifically suggested that a generic robot name such as `Zip` may be weaker than a playful culturally resonant name—for example a `Wall-G`-style reference/wordplay inspired by famous movie robots.
+
+Interpret this as a **creative-quality target**:
+
+- names should feel memorable and characterful;
+- cultural echoes can be playful;
+- recognizable archetypes may make characters immediately legible;
+- the game should feel connected to culture rather than generated from generic fantasy nouns.
+
+Do **not** interpret it as permission to ship a confusingly similar derivative character. Final names, visual design, dialogue, music and assets should be original. A player who misses the reference must lose nothing essential.
+
+## Current proof-track direction
+
+The next story ideation pass should compare multiple protagonist names/personalities and multiple ways to stage:
+
+`happy Bellweather -> dramatic rupture/teleport -> dark limbo -> unknown prison reveal -> speech-engine theft -> direct protagonist control -> tutorial success -> Level 1`
+
+Research can suggest stronger details, but should preserve the user's core causal clarity unless a clearly better alternative is reviewed.
 
 ## Repeatable ideation method
 
-Start from audience knowledge, learning actions and explicit preferences. Research a small varied set of works; extract techniques with sources. Write two or three genuinely different premises. Compare emotional motivation, newcomer clarity, learning causality, progression potential, atmosphere, production feasibility and cliché risk in plain language. Select a treatment, stage its first event/action/payoff, then review the rendered scene. Never turn a research bibliography or a compelling synopsis into a 9/10 game score.
+1. Start from LearningSpec, audience and explicit user preferences/feedback.
+2. Research 4–8 varied cultural/game/story references.
+3. Extract specific techniques, not plot copies.
+4. Generate multiple genuinely different premises/character identities/naming directions.
+5. Compare emotional motivation, newcomer clarity, learning causality, art/world potential, progression potential, production feasibility, reuse opportunities and derivative/cliché risk.
+6. Select/freeze one candidate.
+7. Storyboard the first visible event/action/payoff.
+8. Run story critic.
+9. Run art/world-direction feasibility review.
+10. Implement/review actual rendered play; never turn a bibliography or compelling synopsis into a game-quality score.
 
-The earlier six-repository technical research remains in [REUSE-RESEARCH-20260915.md](REUSE-RESEARCH-20260915.md). Narrative research complements that implementation research. No source artwork, music or code was imported during this pass.
+## Platform/future-agent direction
+
+A future ideation agent can automate research/option generation, but it must output explicit sourced techniques and versioned story candidates. It cannot self-certify originality, art direction, fun or user acceptance.
+
+Current priority is proving this method on the LLM track before building the agent orchestration system.
