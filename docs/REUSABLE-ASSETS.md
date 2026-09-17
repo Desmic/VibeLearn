@@ -1,54 +1,192 @@
-# Reusable pieces used by Episode 1
+# Reusable worlds, assets and mechanics
 
-## Local rescue implementation — 16 September 2026
+**Active platform direction — 17 September 2026.** This replaces the narrower Episode-1 inventory framing. Read `GAME-CREATION-PLATFORM.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `ART-WORLD-DIRECTION-CRITIC.md` and `STATE.md`.
 
-The following now exist in the uncommitted `/first-words` working candidate.
-Their presence does not establish a completed product gate; follow
-`FIRST-WORDS-CHUNK-REVIEW.md`. Deployment is paused and no later-level assets are
-being developed. Earlier planned-only wording below describes the prior checkpoint.
+## Purpose
 
-| Piece | Current use |
-|---|---|
-| `rescue-world-props.js` | Reusable gate, lantern, tower and planter primitives; multiple gate/lantern instances in Bellweather. |
-| `spec-game-world.js` | Timeline moves/cues, pause, reduced motion and cleanup, used by the rescue opening and reunion. |
-| `game-opening.js` | Shared story navigation with motion readiness; the rescue uses authored opening data rather than a copied controller. |
-| `game-audio.js` | Original procedural music/cues and shared mute/pause/disposal. Already implemented ahead of the corrected order; lifecycle checked, listening quality still unassessed. |
-| `learning-session.js` | Shared command/revision/save/retry client used by First Words. Server receipts and immutable evidence remain authoritative. |
-| `first-words-world.js` | Episode-specific world, staging and presentation mappings; not a general scene generator. |
+VibeLearn is a platform for creating learning games quickly. Reuse should reduce creation time **without forcing every game into the same map, art direction or interaction pattern**.
 
-Existing PlayCanvas runtime, player controls, procedural player, Quaternius robot,
-workshop props and server GameRulesEngine are reused. No new external art/music or
-model service was introduced. A general on-demand generator remains out of scope.
+The current LLM track is the proof case. Extract reusable pieces from real needs; do not build a speculative universal engine.
 
-**Next revision — 15 September 2026:** the rescue design reuses the pieces listed below. Gate/cell modules, lantern/tower variants, voice-module prop and a shared audio cue/lifecycle adapter are **planned additions**, not completed assets. The existing `web/expedition.js` sound is only an optional synthesized tone; Word Machine has no music system. See [WORLD-ATMOSPHERE-AND-AUDIO.md](WORLD-ATMOSPHERE-AND-AUDIO.md) for the concrete production/reuse plan.
+## What counts as reusable
 
-15 September 2026. These are implemented files, not a claim that an on-demand course generator exists.
+A useful reusable piece is:
 
-## Existing framework actually used
+- versioned;
+- documented by semantic role;
+- parameterizable;
+- portable enough to survive story/theme changes;
+- separable from canonical learning identity;
+- tested in at least one real game need;
+- ideally proven in a materially different fixture before being called general.
 
-| Piece | Use in the new episode |
-|---|---|
-| `web/game-runtime.js` | One persistent PlayCanvas world from opening into both deliveries; saved commands do not recreate it. Opening replay uses an isolated presentation runtime. |
-| `web/game-opening.js` | The courier arrival and machine wake action use the existing validated opening package/controller, including skip, pause and replay. Completed action markers can now disappear. |
-| `web/world-spec.js`, `playcanvas-backend.js` | Compile the courtyard, machines, characters, materials and asset references; semantic picking and scene patches. No new renderer. |
-| `web/player-controls.js` | Keyboard/touch movement, orbit, zoom and recenter. Optional validated portrait distance now survives recenter. |
-| `web/game-character-spec.js` | Our existing procedural hooded player and movement profile. |
-| `app/game_rules.py` | Executes the new episode's legal actions and deterministic replay. |
-| `app/service.py`, storage and assessment | Existing session, receipts, revisions, snapshots, assisted-practice checkpoints and immutable evidence. New AI identities; retry evidence is unchanged. |
+## World/environment kits
 
-## New reusable assets and code
+Future world kits should expose **layout as data**, not bake one diorama into code.
 
-| File | What was made / reuse evidence |
-|---|---|
-| `web/workshop-props.js` | Procedural token track, message machine, pavilion, tree and flower/book parcel components. Pavilions appear twice; trees four times; the parcel component is used by both courier and recipient with the two content variants. These are code-generated 3D primitives, not new downloaded artwork. |
-| `web/spec-game-world.js` | Small WorldSpec-to-GameRuntime package adapter: state presentation, timed movement, pause/reduced motion, readiness and cleanup. Automated real-browser proof also mounts a materially different orchard scene through it. |
-| `web/word-machine-world.js` | The authored courtyard composition and opening data. Its context/delivery presentation mapping is episode-specific. |
-| `app/word_machine.py` | Episode-specific authored prediction toy and GameRulesSpec. This is not a trained model or a reusable general LLM implementation. |
-| `web/word-machine-boot.js` | Actionable recovery if an entry-module/engine import fails under the existing Content Security Policy. |
-| `tools/check_critic_review.py` | Review record validator from the previous increment. It checks evidence references and strict criteria; it does not watch the game, create ratings or grant user acceptance. |
+Parameterize:
 
-## Imported assets already present
+- playable footprint/scale;
+- prop density;
+- negative-space targets;
+- landmark spacing;
+- path width;
+- room/zone dimensions;
+- camera clearance;
+- lighting/environment states;
+- material/palette variants;
+- decoration intensity;
+- spawn/interaction anchors.
 
-The courier is the existing Quaternius animated robot, provisioned by `tools/vendor_game_assets.py` with pinned hashes and its license notice. The existing Quaternius blacksmith remains available for Relay Rescue; this episode does not use it. Neither model was made by us. PlayCanvas is the existing pinned 2.22.1 engine. No new third-party source, model weights or raster artwork was imported in this increment.
+The September 17 review found the current world too congested. Reuse that cannot make the same environment larger/calmer without rewriting the scene is insufficient.
 
-See [REUSE-RESEARCH-20260915.md](REUSE-RESEARCH-20260915.md) for the six public repositories inspected before implementation. The useful patterns informed the work; their Svelte/ONNX/custom-renderer stacks were not added.
+Useful environment archetypes from the current proof track may include:
+
+- lively town/square;
+- limbo/void transition space;
+- prison/unknown chamber;
+- large blocked door/gate;
+- corridor/route/landing;
+- workshop/repair station;
+- tower/vertical landmark.
+
+These are semantic kits, not one fixed Bellweather layout.
+
+## Character and embodiment assets
+
+Reusable character systems should separate:
+
+- model/rig/animation set;
+- semantic character identity;
+- protagonist/NPC role;
+- direct-control profile;
+- NPC behavior profile;
+- camera follow/target profile;
+- interaction anchors;
+- presentation effects.
+
+For the current track the player directly controls the robot protagonist. Do not spawn a generic separate player avatar by default.
+
+A future game can choose another embodiment profile explicitly.
+
+## Reusable cinematic/story primitives
+
+Extract common staged transitions where implementation proves useful:
+
+- establish-happy-world;
+- interruption/thunder/storm;
+- teleport/displacement;
+- blackout/dark-limbo;
+- progressive-light reveal;
+- antagonist entrance;
+- capability/item removal;
+- door lock/unlock;
+- reunion;
+- world-restoration payoff;
+- camera-to-gameplay handoff.
+
+A cinematic primitive should expose timing, target entities, camera, lighting, audio and state transitions as data. Story-specific dialogue/names remain authored content.
+
+## Reusable gameplay mechanics
+
+Potential shared mechanics include:
+
+- interact;
+- move/look/orbit/recenter;
+- inspect/scan;
+- connect/repair;
+- generate/advance step;
+- choose context/input;
+- compare alternatives;
+- assemble/sequence;
+- open/route/traverse;
+- collect/use resource;
+- construct/test/revise;
+- dialogue/response;
+- prediction before feedback;
+- local retry/recovery.
+
+Learning rules and evidence semantics remain separate from presentation mechanics.
+
+## Tutorial/scaffolding assets
+
+Tutorial capability should be reusable and spec-driven:
+
+- one-action-at-a-time guidance;
+- optional marker/focus;
+- movement/look introduction;
+- interaction prompt;
+- clean first success;
+- assistance tracking;
+- scaffolding fade;
+- skip/replay semantics where appropriate;
+- transition into Level 1/first mission.
+
+Tutorial is a product stage, not a label inside Level 1 by default.
+
+## Art-direction variants
+
+A reusable asset library needs enough controls that reuse does not look procedural/cheap.
+
+Track:
+
+- material/palette variants;
+- scale ranges;
+- silhouette variants;
+- dressing sets;
+- lighting compatibility;
+- animation variants;
+- semantic role;
+- provenance/license/hash;
+- performance metadata.
+
+`ART-WORLD-DIRECTION-CRITIC.md` judges whether reused pieces look intentionally composed.
+
+## Audio/FX reuse
+
+Reusable lifecycle/cue primitives can cover:
+
+- exploration motif state;
+- danger/interruption;
+- silence/limbo;
+- reveal;
+- interact/connect/repair;
+- error/recovery;
+- success/reunion;
+- pause/mute/replay cleanup.
+
+Final music/sound identity remains game-specific enough to avoid every generated game sounding identical.
+
+## Pop-culture-informed ideation versus asset reuse
+
+Cultural references are ideation inputs, not an asset library. Do not copy recognizable protected character models, music or dialogue merely because a story is inspired by them.
+
+A `Wall-G`-style naming idea can inspire a fresh character naming pass; final shipped identity should be original.
+
+## Existing current assets/components
+
+Current code already contains useful building blocks such as:
+
+- `game-runtime.js` / PlayCanvas runtime;
+- `world-spec.js` / backend world compilation;
+- `player-controls.js`;
+- `game-opening.js`;
+- `spec-game-world.js`;
+- `game-audio.js`;
+- learning session / authoritative command/save/revision infrastructure;
+- procedural gates/lanterns/tower/planters and imported robot assets.
+
+Their existence does not mean they are already general. Review each against the new platform contract before reuse.
+
+## Extraction discipline
+
+For each accepted chunk:
+
+1. ship the player experience first;
+2. identify repeated semantic capability;
+3. parameterize only the repeated/stable part;
+4. keep story nouns/cameras/dialogue out of shared code;
+5. add a second materially different fixture when claiming generality;
+6. add critic/regression coverage for the abstraction.
+
+Fast game creation comes from a growing library of proven pieces, not maximum abstraction on day one.
