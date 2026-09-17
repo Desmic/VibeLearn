@@ -56,10 +56,21 @@ def main():
             return 1
         for script in sorted((ROOT / "web").glob("*.js")):
             subprocess.run(["node", "--input-type=module", "--check"], input=script.read_text(encoding="utf-8"), text=True, check=True)
+        # Parsing alone cannot catch a generated/reused world package that refers
+        # to a missing material/entity/camera. Validate the active engine-neutral
+        # package before the expensive Chromium matrix so package compatibility
+        # failures are reported in seconds rather than as a generic 3D timeout.
+        world_validation = """
+import {worldSpec} from './web/first-words-world.js';
+import {validateWorldSpec} from './web/world-spec.js';
+validateWorldSpec(worldSpec);
+console.log('Active WorldSpec validated.');
+"""
+        subprocess.run(["node", "--input-type=module"], input=world_validation, text=True, check=True, cwd=ROOT)
         from app.manifest import manifest
         (ROOT / "artifacts").mkdir(exist_ok=True)
         (ROOT / "artifacts" / "build-manifest.json").write_text(json.dumps(manifest(), indent=2), encoding="utf-8")
-        print("Build passed: application/test Python compiled; browser JavaScript parsed with ESM semantics.")
+        print("Build passed: Python compiled; browser JavaScript parsed; active WorldSpec validated.")
         return 0
     if command == "browser":
         parser = argparse.ArgumentParser(description="Run all active browser checks or one group")
