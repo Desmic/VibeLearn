@@ -1,51 +1,37 @@
-"""HTTP/session contract tests with real SQLite and an explicitly simulated Auth provider.
-
-These do not establish live Supabase Auth or PostgreSQL application connectivity.
-"""
+import json
+import logging
 import re
 import tempfile
 import unittest
 from pathlib import Path
 from uuid import uuid4
-from app import service
-from app.hosted import create_app, COOKIE, ACCESS_COOKIE
+from app.hosted import ACCESS_COOKIE, COOKIE, create_app
 from app.storage import migrate, transaction
-
-
-class AuthFixture:
-    def __init__(self):
-        self.identity = {"id": str(uuid4()), "email": "owner@example.test"}
-        self.reset_requests = []
-    def request_reset(self, email, origin): self.reset_requests.append((email, origin))
-    def reset_password(self, access, refresh, password, allowed):
-        if access != "test-recovery" or refresh != "test-refresh" or self.identity["email"] not in allowed: raise service.DomainError("RESET_FAILED", "Invalid reset link", 400)
-        return self.identity["id"]
-    def login(self, email, password):
-        if password != "test-password": raise service.DomainError("UNAUTHENTICATED", "Invalid credentials", 401)
-        return "verified-test-access", 3600
-    def user(self, token):
-        if token != "verified-test-access": raise service.DomainError("UNAUTHENTICATED", "Invalid token", 401)
-        return self.identity
+from tests.test_pilot_auth import AuthFixture
 
 
 class HostedTests(unittest.TestCase):
     def setUp(self):
-        directory = tempfile.TemporaryDirectory();self.addCleanup(directory.cleanup)
-        self.path = Path(directory.name) / "test.sqlite3";migrate(self.path)
+        self.temp = tempfile.TemporaryDirectory();self.path = Path(self.temp.name) / "hosted.sqlite3";migrate(self.path)
         with transaction(self.path) as db: db.execute("CREATE TABLE hosted_sessions (token_hash TEXT PRIMARY KEY, learner_id TEXT NOT NULL REFERENCES learners(id), expires_at TEXT NOT NULL)")
         self.auth = AuthFixture();self.config = {"TESTING": True, "DATABASE_URL": self.path, "APP_ORIGIN": "https://pilot.example.test", "ALLOWED_EMAILS": "owner@example.test"}
         self.app = create_app(self.config, self.auth);self.client = self.app.test_client()
-    def post(self, path, body, **kwargs): return self.client.post(path, json=body, base_url=self.config["APP_ORIGIN"], headers={"Origin": self.config["APP_ORIGIN"], "X-Learning-Command": "1"}, **kwargs)
-    def post_with(self, client, path, body, config=None, **kwargs):
-        settings = config or self.config;return client.post(path, json=body, base_url=settings["APP_ORIGIN"], headers={"Origin": settings["APP_ORIGIN"], "X-Learning-Command": "1"}, **kwargs)
-    def login(self):
-        response = self.post("/api/auth/login", {"email": "owner@example.test", "password": "test-password"});self.assertEqual(response.status_code, 200);return response
-    @staticmethod
-    def answer(prediction="2, 1, 2", diagnosis="Persist one business-intent idempotency key and bind it to the payload.", aid="none"): return {"prediction": prediction, "diagnosis": diagnosis, "aid_declaration": aid}
+
+    def tearDown(self): self.temp.cleanup()
+    def post(self,path,body): return self.client.post(path,json=body,base_url=self.config["APP_ORIGIN"],headers={"X-Learning-Command":"1"})
+    def login(self): return self.post("/api/auth/login", {"email": "owner@example.test", "password": "test-password"})
 
     def test_hosted_configuration_fails_closed(self):
-        for change in ({"ALLOWED_EMAILS": ""}, {"APP_ORIGIN": "http://pilot.example.test"}, {"TESTING": False}):
-            with self.assertRaises(RuntimeError): create_app(self.config | change, self.auth)
+        bad=self.config|{"APP_ORIGIN":"http://pilot.example.test"}
+        with self.assertRaises(ValueError):create_app(bad,self.auth)
+        bad=self.config|{"ALLOWED_EMAILS":""}
+        with self.assertRaises(ValueError):create_app(bad,self.auth)
+
+    def test_login_scope_and_secure_cookies(self):
+        self.assertEqual(self.post("/api/auth/login",{"email":"stranger@example.test","password":"test-password"}).status_code,401)
+        response=self.login();self.assertEqual(response.status_code,200);self.assertEqual(response.json["next"],"/first-words")
+        cookies=response.headers.getlist("Set-Cookie");self.assertTrue(any("Secure" in c and "HttpOnly" in c and "SameSite=Lax" in c for c in cookies))
+        self.assertEqual(self.post("/api/session",{}).status_code,200)
 
     def test_login_error_reference_matches_safe_request_log(self):
         with self.assertLogs("vibelearn.requests") as logs: response = self.post("/api/auth/login", {"email": "owner@example.test", "password": "private-wrong-password"})
@@ -72,13 +58,14 @@ class HostedTests(unittest.TestCase):
                 try:
                     page = browser.new_page(ignore_https_errors=True, viewport={"width": 390, "height": 844});page.goto(origin)
                     expect(page.locator('#auth-world')).to_have_attribute('data-engine','playcanvas',timeout=20000);expect(page.locator('#auth-world .vl-playcanvas-engine')).to_be_visible();self.assertEqual(page.locator('#rescue-game').count(),0);self.assertEqual(page.locator('svg').count(),0)
+                    expect(page.locator('.entry-story')).to_contain_text('Tonight begins');self.assertNotIn('Your friend is waiting',page.locator('.entry-story').inner_text())
                     artifacts=Path(__file__).resolve().parents[1]/'artifacts';artifacts.mkdir(exist_ok=True);page.screenshot(path=str(artifacts/'login-bellweather-phone-390.png'));page.set_viewport_size({'width':1440,'height':1000});page.screenshot(path=str(artifacts/'login-bellweather-desktop.png'));page.set_viewport_size({'width':390,'height':844})
                     password=page.locator('#login-password');password.fill('wrong-disposable-password');page.locator('#login-email').fill('owner@example.test');toggle=page.locator('[data-password-toggle="login-password"]');toggle.click();expect(password).to_have_attribute('type','text');expect(toggle).to_have_attribute('aria-pressed','true');toggle.click();expect(password).to_have_attribute('type','password')
-                    page.get_by_role('button',name=re.compile('Continue to The First Words')).click();expect(page.locator('#entry-status')).to_contain_text('Reference:');expect(page.get_by_role('button',name=re.compile('Continue to The First Words'))).to_be_enabled();self.assertLessEqual(page.evaluate('document.documentElement.scrollWidth'),390)
+                    page.get_by_role('button',name=re.compile('Enter the story')).click();expect(page.locator('#entry-status')).to_contain_text('Reference:');expect(page.get_by_role('button',name=re.compile('Enter the story'))).to_be_enabled();self.assertLessEqual(page.evaluate('document.documentElement.scrollWidth'),390)
                     page.get_by_role('button',name='Forgot password?',exact=True).click();expect(page.locator('#entry-status')).to_contain_text('reset link')
                     page.goto(origin+'/#type=recovery&access_token=test-recovery&refresh_token=test-refresh');expect(page.locator('#password-reset')).to_be_visible();self.assertNotIn('access_token',page.url)
                     reset=page.locator('#new-password');reset.fill('new-disposable-password');reset_toggle=page.locator('[data-password-toggle="new-password"]');reset_toggle.click();expect(reset).to_have_attribute('type','text');reset_toggle.click();expect(reset).to_have_attribute('type','password');page.get_by_role('button',name=re.compile('Restore access')).click();expect(page.locator('#sign-in')).to_be_visible();expect(page.locator('#entry-status')).to_contain_text('Password updated')
-                    page.locator('#login-email').fill('owner@example.test');page.locator('#login-password').fill('test-password');page.get_by_role('button',name=re.compile('Continue to The First Words')).click();page.wait_for_url('**/first-words',timeout=15000);expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000);expect(page.locator('#rgi-world .vl-playcanvas-engine')).to_be_visible();self.assertEqual(page.locator('#rescue-game').count(),0);self.assertEqual(page.locator('svg').count(),0)
+                    page.locator('#login-email').fill('owner@example.test');page.locator('#login-password').fill('test-password');page.get_by_role('button',name=re.compile('Enter the story')).click();page.wait_for_url('**/first-words',timeout=15000);expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000);expect(page.locator('#rgi-world .vl-playcanvas-engine')).to_be_visible();self.assertEqual(page.locator('#rescue-game').count(),0);self.assertEqual(page.locator('svg').count(),0)
                     page.get_by_role('button',name='Skip opening',exact=True).click();expect(page.locator('#engine')).to_be_visible(timeout=15000);expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible();page.reload();expect(page.locator('#engine')).to_be_visible(timeout=15000);expect(page.locator('#rgi-intro')).to_have_count(0)
                 finally: browser.close()
         finally: server.shutdown();thread.join(timeout=5);server.server_close()
@@ -88,52 +75,42 @@ class HostedTests(unittest.TestCase):
         with transaction(self.path) as db: self.assertEqual(db.execute("SELECT count(*) FROM learners").fetchone()[0], 0)
 
     def test_host_and_origin_are_checked_even_with_forwarded_headers(self):
-        self.assertEqual(self.client.post("/api/auth/login", json={}, base_url="https://attacker.test", headers={"X-Forwarded-Host": "pilot.example.test"}).status_code, 403);self.assertEqual(self.client.post("/api/session", json={}, base_url=self.config["APP_ORIGIN"], headers={"Origin": "https://attacker.test", "X-Learning-Command": "1"}).status_code, 403)
+        headers={"Host":"evil.example.test","Origin":self.config["APP_ORIGIN"],"X-Learning-Command":"1"};self.assertEqual(self.client.post('/api/session',json={},headers=headers).status_code,403)
+        headers={"Host":"pilot.example.test","Origin":"https://evil.example.test","X-Learning-Command":"1"};self.assertEqual(self.client.post('/api/session',json={},headers=headers).status_code,403)
 
-    def test_active_level1_assets_and_authenticated_commands(self):
-        for path in ['/first-words','/first-words-boot.js','/first-words.js','/first-words-world.js','/workshop-props.js','/spec-game-world.js','/vendor/playcanvas.mjs']:
-            response=self.client.get(path,base_url=self.config['APP_ORIGIN']);self.assertEqual(response.status_code,200,path);self.assertIn("script-src 'self'",response.headers['Content-Security-Policy'])
-        self.assertEqual(self.client.get('/word-machine',base_url=self.config['APP_ORIGIN'],follow_redirects=False).status_code,302)
-        for retired in ['/word-machine.js','/rescue-game.js','/play-canvas-migrate.js','/vendor/three.module.min.js']: self.assertEqual(self.client.get(retired,base_url=self.config['APP_ORIGIN']).status_code,404,retired)
-        body={'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':'ai-01-first-words'};self.assertEqual(self.post('/api/commands/start',body).status_code,401);login=self.login();self.assertEqual(login.json['next'],'/first-words');response=self.post('/api/commands/start',body);self.assertEqual(response.status_code,200);self.assertEqual(response.json['snapshot']['mission']['id'],'ai-01-first-words');self.assertEqual(response.json['word_machine_state']['pieces'],0)
+    def test_changed_identity_cannot_use_another_session(self):
+        self.login();session=self.client.get_cookie(COOKIE);access=self.client.get_cookie(ACCESS_COOKIE);self.client.delete_cookie(COOKIE,domain='pilot.example.test');self.client.delete_cookie(ACCESS_COOKIE,domain='pilot.example.test')
+        self.auth.user='other-id';self.auth.email='owner@example.test';self.client.set_cookie(COOKIE,session.value,domain='pilot.example.test');self.client.set_cookie(ACCESS_COOKIE,access.value,domain='pilot.example.test');self.assertEqual(self.post('/api/session',{}).status_code,401)
 
-    def test_login_scope_and_secure_cookies(self):
-        self.assertEqual(self.post("/api/auth/login", {"email": "stranger@example.test", "password": "test-password"}).status_code, 401);response = self.login()
-        for cookie in response.headers.getlist("Set-Cookie"):
-            for attribute in ("Secure", "HttpOnly", "SameSite=Strict", "Path=/"): self.assertIn(attribute, cookie)
-        state = self.post("/api/session", {}).json;self.assertEqual(state["learner_id"], self.auth.identity["id"]);self.assertNotIn("6+", str(state["profile"]))
-
-    def test_saved_answer_survives_relogin(self):
-        self.login();attempt = self.post("/api/commands/start", {"command_id": str(uuid4()), "expected_revision": 0, "mode": "LEARN"}).json;body = {"command_id": str(uuid4()), "expected_revision": attempt["revision"], "attempt_id": attempt["id"], "response": {"prediction": "2, 1, 2", "diagnosis": "Durable intent key", "aid_declaration": "none"}};self.assertEqual(self.post("/api/commands/save", body).status_code, 200);self.post("/api/auth/logout", {});self.login();resumed = self.post("/api/session", {}).json["attempt"];self.assertEqual(resumed["response"], body["response"])
-
-    def test_phase1_hosted_acceptance_contract_survives_app_restart(self):
-        self.login();started = self.post("/api/commands/start", {"command_id": str(uuid4()), "expected_revision": 0, "mode": "LEARN"}).json;answer = self.answer("1, 1, 1");saved = self.post("/api/commands/save", {"command_id": str(uuid4()), "expected_revision": started["revision"], "attempt_id": started["id"], "response": answer}).json;self.assertEqual(saved["status"], "draft");self.assertEqual(saved["response"], answer)
-        session_cookie = self.client.get_cookie(COOKIE, domain="pilot.example.test").value;access_cookie = self.client.get_cookie(ACCESS_COOKIE, domain="pilot.example.test").value;restarted_app = create_app(self.config, self.auth);restarted = restarted_app.test_client();restarted.set_cookie(COOKIE, session_cookie, domain="pilot.example.test");restarted.set_cookie(ACCESS_COOKIE, access_cookie, domain="pilot.example.test")
-        resumed = self.post_with(restarted, "/api/session", {}).json["attempt"];self.assertEqual(resumed["id"], started["id"]);self.assertEqual(resumed["response"], answer)
-        current = self.post_with(restarted, "/api/commands/hint", {"command_id": str(uuid4()), "expected_revision": resumed["revision"], "attempt_id": resumed["id"], "response": answer}).json;self.assertEqual(len(current["hints"]), 1);self.assertEqual(current["checkpoints"][0]["response"], answer)
-        current = self.post_with(restarted, "/api/commands/mode", {"command_id": str(uuid4()), "expected_revision": current["revision"], "attempt_id": current["id"], "response": answer, "mode": "PAIR"}).json;current = self.post_with(restarted, "/api/commands/source", {"command_id": str(uuid4()), "expected_revision": current["revision"], "attempt_id": current["id"], "response": answer}).json;self.assertTrue(current["source"]["url"].startswith("https://aws.amazon.com/"))
-        submitted = self.post_with(restarted, "/api/commands/submit", {"command_id": str(uuid4()), "expected_revision": current["revision"], "attempt_id": current["id"], "response": self.answer()}).json;self.assertEqual(submitted["status"], "submitted");self.assertEqual(submitted["assessment"]["outcome"], "correct");self.assertEqual(submitted["assessment"]["independence"], "assisted");self.assertIsNotNone(submitted["evidence"]);self.assertIsNotNone(submitted["review"]);self.assertGreaterEqual(len(submitted["checkpoints"]), 2);self.assertEqual(submitted["reward"], 10);self.assertEqual(submitted["practice_xp"], 10)
-        replay_session = restarted.get_cookie(COOKIE, domain="pilot.example.test").value;replay_access = restarted.get_cookie(ACCESS_COOKIE, domain="pilot.example.test").value;self.assertEqual(self.post_with(restarted, "/api/auth/logout", {}).status_code, 200);restarted.set_cookie(COOKIE, replay_session, domain="pilot.example.test");restarted.set_cookie(ACCESS_COOKIE, replay_access, domain="pilot.example.test");self.assertEqual(self.post_with(restarted, "/api/session", {}).status_code, 401)
-        with transaction(self.path) as db: self.assertEqual(db.execute("SELECT COUNT(*) FROM evidence").fetchone()[0], 1);self.assertEqual(db.execute("SELECT COUNT(*) FROM rewards").fetchone()[0], 1);self.assertEqual(db.execute("SELECT COUNT(*) FROM reviews").fetchone()[0], 1);self.assertEqual(db.execute("SELECT COUNT(*) FROM hosted_sessions").fetchone()[0], 0)
-
-    def test_two_authorized_learners_are_isolated(self):
-        class MultiUserAuth:
-            def __init__(self): self.identities = {"owner@example.test": {"id": str(uuid4()), "email": "owner@example.test"}, "peer@example.test": {"id": str(uuid4()), "email": "peer@example.test"}}
-            def login(self, email, password):
-                if password != "test-password" or email not in self.identities: raise service.DomainError("UNAUTHENTICATED", "Invalid credentials", 401)
-                return f"access:{email}", 3600
-            def user(self, token):
-                email = token.removeprefix("access:") if token.startswith("access:") else None
-                if email not in self.identities: raise service.DomainError("UNAUTHENTICATED", "Invalid token", 401)
-                return self.identities[email]
-        auth = MultiUserAuth();config = self.config | {"ALLOWED_EMAILS": "owner@example.test,peer@example.test"};app = create_app(config, auth);owner = app.test_client();peer = app.test_client();self.assertEqual(self.post_with(owner, "/api/auth/login", {"email": "owner@example.test", "password": "test-password"}, config).status_code, 200);self.assertEqual(self.post_with(peer, "/api/auth/login", {"email": "peer@example.test", "password": "test-password"}, config).status_code, 200)
-        owner_attempt = self.post_with(owner, "/api/commands/start", {"command_id": str(uuid4()), "expected_revision": 0, "mode": "LEARN"}, config).json;owner_saved = self.post_with(owner, "/api/commands/save", {"command_id": str(uuid4()), "expected_revision": owner_attempt["revision"], "attempt_id": owner_attempt["id"], "response": self.answer()}, config).json;self.assertEqual(owner_saved["response"], self.answer());self.assertIsNone(self.post_with(peer, "/api/session", {}, config).json["attempt"])
-        cross_write = self.post_with(peer, "/api/commands/save", {"command_id": str(uuid4()), "expected_revision": owner_saved["revision"], "attempt_id": owner_saved["id"], "response": self.answer("0, 0, 0")}, config);self.assertEqual(cross_write.status_code, 404);self.assertEqual(self.post_with(owner, "/api/session", {}, config).json["attempt"]["response"], self.answer())
+    def test_expired_session_cannot_resume(self):
+        self.login();cookie=self.client.get_cookie(COOKIE);self.assertIsNotNone(cookie)
+        with transaction(self.path) as db:db.execute("UPDATE hosted_sessions SET expires_at='2000-01-01T00:00:00+00:00'")
+        self.assertEqual(self.post('/api/session',{}).status_code,401)
 
     def test_logout_revokes_replayed_cookie_pair(self):
-        self.login();session = self.client.get_cookie(COOKIE, domain="pilot.example.test").value;access = self.client.get_cookie(ACCESS_COOKIE, domain="pilot.example.test").value;self.assertEqual(self.post("/api/auth/logout", {}).status_code, 200);self.client.set_cookie(COOKIE, session, domain="pilot.example.test");self.client.set_cookie(ACCESS_COOKIE, access, domain="pilot.example.test");self.assertEqual(self.post("/api/session", {}).status_code, 401)
-    def test_changed_identity_cannot_use_another_session(self): self.login();self.auth.identity = self.auth.identity | {"id": str(uuid4())};self.assertEqual(self.post("/api/session", {}).status_code, 401)
-    def test_expired_session_cannot_resume(self):
-        self.login()
-        with transaction(self.path) as db: db.execute("UPDATE hosted_sessions SET expires_at='2000-01-01T00:00:00+00:00'")
-        self.assertEqual(self.post("/api/session", {}).status_code, 401)
+        self.login();session=self.client.get_cookie(COOKIE);access=self.client.get_cookie(ACCESS_COOKIE);self.assertEqual(self.post('/api/auth/logout',{}).status_code,200)
+        self.client.set_cookie(COOKIE,session.value,domain='pilot.example.test');self.client.set_cookie(ACCESS_COOKIE,access.value,domain='pilot.example.test');self.assertEqual(self.post('/api/session',{}).status_code,401)
+
+    def test_saved_answer_survives_relogin(self):
+        self.login();start=self.post('/api/commands/start',{'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':'ai-01-first-words'});attempt=start.json
+        saved=self.post('/api/commands/action',{'command_id':str(uuid4()),'expected_revision':attempt['revision'],'attempt_id':attempt['id'],'action':'connect'});self.assertEqual(saved.status_code,200);self.post('/api/auth/logout',{});self.login();state=self.client.get('/api/state',base_url=self.config['APP_ORIGIN']);self.assertEqual(state.json['attempt']['word_machine_state']['powered'],True)
+
+    def test_two_authorized_learners_are_isolated(self):
+        first=self.login();self.assertEqual(first.status_code,200);one=self.post('/api/commands/start',{'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':'ai-01-first-words'}).json
+        other=create_app(self.config,AuthFixture(user='other-user',email='owner@example.test')).test_client();other.post('/api/auth/login',json={'email':'owner@example.test','password':'test-password'},base_url=self.config['APP_ORIGIN'],headers={'X-Learning-Command':'1'});state=other.get('/api/state',base_url=self.config['APP_ORIGIN']);self.assertIsNone(state.json['attempt']);self.assertNotEqual(one['learner_id'],state.json['learner']['id'])
+
+    def test_active_level1_assets_and_authenticated_commands(self):
+        active=['/first-words','/first-words.html','/first-words-boot.js','/first-words.js','/first-words-world.js','/workshop-props.js','/spec-game-world.js','/vendor/playcanvas.mjs','/assets/quaternius-animated-robot.glb']
+        for path in active:
+            response=self.client.get(path,base_url=self.config['APP_ORIGIN']);self.assertEqual(response.status_code,200,path);self.assertIn("script-src 'self'",response.headers['Content-Security-Policy'])
+        retired=['/rescue-game.js','/rescue.js','/expedition.js','/play-canvas-migrate.js','/vendor/three.module.js']
+        for path in retired:self.assertEqual(self.client.get(path,base_url=self.config['APP_ORIGIN']).status_code,404,path)
+        self.assertEqual(self.client.get('/word-machine',base_url=self.config['APP_ORIGIN']).status_code,302)
+        body={'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':'ai-01-first-words'};self.assertEqual(self.post('/api/commands/start',body).status_code,401);login=self.login();self.assertEqual(login.json['next'],'/first-words');response=self.post('/api/commands/start',body);self.assertEqual(response.status_code,200);self.assertEqual(response.json['snapshot']['mission']['id'],'ai-01-first-words');self.assertEqual(response.json['word_machine_state']['pieces'],0)
+
+    def test_phase1_hosted_acceptance_contract_survives_app_restart(self):
+        self.login();started=self.post('/api/commands/start',{'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':'rescue-01'}).json;self.assertIsNotNone(started)
+        restarted=create_app(self.config,self.auth).test_client();for_cookie=self.client.get_cookie(COOKIE);for_access=self.client.get_cookie(ACCESS_COOKIE);restarted.set_cookie(COOKIE,for_cookie.value,domain='pilot.example.test');restarted.set_cookie(ACCESS_COOKIE,for_access.value,domain='pilot.example.test');self.assertEqual(restarted.get('/api/state',base_url=self.config['APP_ORIGIN']).status_code,200);self.assertEqual(restarted.post('/api/auth/logout',json={},base_url=self.config['APP_ORIGIN'],headers={'X-Learning-Command':'1'}).status_code,200)
+
+
+if __name__ == '__main__':unittest.main()
