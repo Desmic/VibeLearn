@@ -1,26 +1,30 @@
 # Course generation produces playable teaching systems
 
-**Current authority — 15 September 2026:** [CRITIC-POLICY.md](CRITIC-POLICY.md) supersedes older score formulas, gate order and review-preview exceptions below. The sole human product critic is the current user. Review the whole playable candidate, use observed evidence and hard blockers, and keep preview/readiness/user acceptance distinct. The user selected an ongoing How LLMs Work series; see [NEXT-TEACHING-DESIGN.md](NEXT-TEACHING-DESIGN.md). Preserve existing retry evidence; the new topic needs new learning identities.
-
-**Current review amendment — 14 September 2026:** Generated exploration games should provide reusable avatar/navigation/camera profiles and full-screen device HUD rules as specs. Third person is the preferred current default for most games; other future mechanics may justify another declared camera mode. Learning outcomes remain independent of the view. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
-
-**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
-
-**Current authority — updated 12 September 2026.** Read root `CODEX-IMPLEMENTATION-PLAN.md`, `GAME-RUNTIME-ARCHITECTURE.md`, `STORY-GENERATION-AND-CRITIC.md`, `GAME-AS-COURSE.md`, `GAME-UX-SYSTEM.md`, `GAME-UX-REVIEW.md`, and `STATE.md`.
+**Active platform direction — 17 September 2026.** Read `GAME-CREATION-PLATFORM.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`. This document defines how future generated games should be created; the current How-LLMs-Work track is the proof case, not the final product shape.
 
 ## North star
 
-VibeLearn is a **general system for generating effective learning games/worlds from arbitrary concepts and subjects**.
+VibeLearn is a **general platform for rapidly creating high-quality learning games/worlds from arbitrary concepts and subjects**.
 
-The generator's job is not to write themed lessons or emit a fresh site/app shell per course. It must transform learning intent into a playable system whose mechanics, world behavior, progression and transfer tasks embody the target capability.
+The generator's job is not to emit themed lesson pages or a fresh app shell per course. It must transform learning intent into a playable system whose story, world behavior, mechanics, progression and transfer tasks embody the target capability.
 
 The durable pipeline is:
 
-`LearningSpec -> StoryWorldSpec -> GameDesignSpec -> WorldSpec -> RuntimeExperienceSpec -> EngineCompiler -> EngineRuntime`
+`LearningSpec -> StoryWorldSpec -> GameDesignSpec -> GameRulesSpec -> WorldSpec -> RuntimeExperienceSpec -> EngineTargetSpec -> EngineCompiler -> EngineRuntime`
 
 `AssessmentEvidenceSpec` remains authoritative and engine-independent.
 
-Relay Rescue/Echo Forge is one authored reference, not the schema every generated game must resemble.
+## Current proof-track strategy
+
+Do **not** build the full generic generator/agent platform before the current proof track is excellent. Use the track to discover and validate reusable pieces, then extract them.
+
+After each accepted chunk ask:
+
+1. What remains authored story data?
+2. What mechanic/runtime capability is reusable?
+3. What asset/archetype/layout primitive can be parameterized?
+4. What critic/test becomes a future invariant?
+5. Can the reused piece produce a materially different game without copying this track's nouns, map or look?
 
 ## Generated package model
 
@@ -28,11 +32,19 @@ Relay Rescue/Echo Forge is one authored reference, not the schema every generate
 
 Canonical competency IDs, prerequisites, intended outcomes, source/provenance constraints, misconceptions, assessment criteria, transfer/retrieval requirements and allowed assistance.
 
-LearningSpec is durable identity. It cannot depend on a story noun, art style, engine, renderer or asset package.
+LearningSpec is durable identity. It cannot depend on story nouns, art style, engine or asset package.
 
 ### 2. StoryWorldSpec
 
 Premise, characters, locations, world rules, emotional arc, important objects/resources, stakes, chapter progression and mappings from world semantics to LearningSpec.
+
+It must also declare:
+
+- **player embodiment**: who/what the player controls in the fiction;
+- protagonist/cast roles;
+- normal-world baseline before disruption where relevant;
+- inciting event and causal chain;
+- cultural/reference inspirations as optional design inputs, never required knowledge.
 
 StoryWorldSpec is engine-agnostic.
 
@@ -40,9 +52,31 @@ StoryWorldSpec is engine-agnostic.
 
 Core loop, player verbs, mechanics, challenge/mission graph, progression/difficulty curve, failure/recovery, rewards/payoff, tutorial/scaffolding policy, information schedule and mappings from mechanics to intended learning.
 
+Required explicit fields include:
+
+- player embodiment mode;
+- prologue/opening boundary;
+- separate tutorial boundary where onboarding is required;
+- first guaranteed success;
+- Level 1 / first-mission start condition;
+- scaffolding-fade schedule;
+- changed-context/transfer strategy.
+
 A lesson page plus graphics is not a valid GameDesignSpec.
 
-### 4. WorldSpec
+### 4. GameRulesSpec
+
+Deterministic gameplay truth independently of rendering/assessment:
+
+- typed game state/resources;
+- semantic actions/preconditions;
+- deterministic transitions/effects;
+- invariants/objectives;
+- game events;
+- seeded randomness contracts;
+- serialization/replay/versioning.
+
+### 5. WorldSpec
 
 Engine-neutral executable world structure:
 
@@ -54,7 +88,7 @@ Engine-neutral executable world structure:
 - colliders/physics intent;
 - animation/state-machine intent;
 - cameras/compositions;
-- lights/environment;
+- lights/environment states;
 - semantic interactions;
 - triggers/conditions;
 - pathing/navigation intent;
@@ -63,15 +97,27 @@ Engine-neutral executable world structure:
 - world variables;
 - reusable prefab/archetype references.
 
-WorldSpec says what exists and how it behaves, not which PlayCanvas/Unity/Unreal API constructs it.
+**Spatial direction is part of WorldSpec**, not an afterthought. Include configurable:
 
-### 5. RuntimeExperienceSpec
+- playable footprint/scale;
+- prop/actor density;
+- negative-space budgets;
+- landmark spacing;
+- path width;
+- focal-object limits;
+- camera/occlusion margins;
+- phone/desktop composition targets.
+
+A generated world should be able to get larger/calmer without rewriting its mechanics.
+
+### 6. RuntimeExperienceSpec
 
 Cross-engine orchestration:
 
-- game modes/state transitions;
-- active world/scene;
+- mode/state transitions;
+- active scene/world;
 - input/action mapping;
+- protagonist/control profile;
 - HUD/UI slots and visibility schedule;
 - pause/replay/save/resume;
 - accessibility/reduced-motion policy;
@@ -79,249 +125,157 @@ Cross-engine orchestration:
 - authoritative state -> visible state mappings;
 - analytics/evidence hooks that do not decide learning truth.
 
-### 6. EngineTargetSpec
+### 7. EngineTargetSpec
 
-Declares target capabilities and constraints such as platform, 2D/3D, physics, animation, input, WebGPU, memory/startup budget and deployment cost.
+Target capabilities/constraints: platform, 2D/3D, physics, animation, input, WebGPU, memory/startup budget and deployment cost.
 
-The generator may adapt game realization to the selected engine profile rather than assuming every engine offers identical capabilities.
+### 8. AssessmentEvidenceSpec
 
-### 7. AssessmentEvidenceSpec
+Observable actions/results supporting learning claims, scoring boundaries, transfer/delayed-retrieval requirements, assistance/exposure semantics, evidence identity and what stays `unknown`.
 
-Observable actions/results that support learning claims, scoring boundaries, transfer/delayed-retrieval requirements, assistance/exposure semantics, evidence identity and what stays `unknown`.
+Engine/game state never establishes mastery by itself.
 
-Engine state does not establish mastery by itself.
-
-## Authoring pipeline
-
-`goal/course -> source research -> LearningSpec -> StoryWorldSpec -> story critic -> GameDesignSpec -> WorldSpec + RuntimeExperienceSpec -> capability/schema validation -> engine compilation -> runtime verification -> first-touch critic -> whole-game critic -> learning/transfer gate -> learner review -> publish`
-
-The generator cannot self-certify a stage.
-
-## Engine strategy
-
-### PlayCanvas Engine first
-
-PlayCanvas is the first strategic backend because current delivery is web/phone-first and generated games need real engine primitives: entities/components, animation, physics, input, audio, assets and modern WebGL/WebGPU rendering.
-
-Use the PlayCanvas Engine programmatically. The editor may assist authoring/debugging but editor project state must not become canonical generated state.
-
-### Three.js migration only
-
-Three.js is no longer a strategic generated-world target. Current Story3D code may be used as a behavior/reference baseline while Echo Forge migrates.
-
-Do not make future specs depend on Three.js APIs/classes or continue building a home-grown Three.js game engine.
-
-### Future engines
-
-Unity, Unreal, specialized 2D engines and simulation runtimes may later become backends when their quality/capabilities justify deployment cost.
-
-Adding an engine must not require rewriting LearningSpec or AssessmentEvidenceSpec.
-
-## Engine compiler contract
-
-An engine backend consumes validated specs/assets and produces an `EngineArtifactBundle` / runtime binding.
-
-Backend capability surface should include approximately:
-
-- world load/unload;
-- entity instantiate/destroy;
-- state synchronization;
-- animation/effects/audio;
-- camera control;
-- physics/collision;
-- semantic interaction binding;
-- HUD/UI binding;
-- input mapping;
-- pause/resume;
-- presentation-state save/restore;
-- performance/failure reporting;
-- cleanup/disposal.
-
-Backend code never owns canonical learning IDs, assessment rules or learner mastery.
-
-## Reusable primitive/archetype library
+## Reusable game-construction library
 
 Fast generation requires composition above raw engine APIs.
 
-Build versioned engine-neutral primitives from real game needs, such as:
+Build versioned engine-neutral primitives only as real games demand them:
 
 - interactable;
-- resource/collectible;
-- inventory;
+- collectible/resource;
+- repair/connection point;
+- scanner/inspector;
 - switch/control;
-- movable/rotatable/attachable object;
+- movable/attachable object;
 - route/network;
 - timer/cooldown;
-- simulation meter/variable;
 - dialogue/character response;
 - NPC state machine;
 - trigger zone;
 - puzzle constraint;
 - build/crafting slot;
-- flow/projectile/message;
+- flow/message;
 - camera/cinematic beat;
+- teleport/displacement transition;
+- lighting/environment reveal;
+- door/gate/room traversal;
 - mission objective;
 - success/failure consequence;
 - semantic HUD indicator.
 
-Reusable archetypes may compose these into characters, machines, resource-flow systems, networks, puzzle boards, environment zones and dialogue NPCs.
+Reusable archetypes should include configurable characters, rooms, gates, environment zones, cinematic states, tutorial steps and interaction stations.
 
-The same semantic primitive can compile differently on different engines.
+Reuse must support different scale/layout/material/lighting/story. Avoid template sameness.
 
-Do not speculatively create a universal engine. Expand from concrete learning-game requirements.
+## Asset strategy
 
-## Assets
+WorldSpec references versioned portable `AssetRef`s with id/version/hash, semantic role, provenance/license, source/derived formats and performance metadata.
 
-WorldSpec references versioned portable `AssetRef`s rather than engine-native object identity.
+Prefer portable formats such as glTF where practical.
 
-Track:
+Asset reuse needs **art direction**, not merely availability. A pile of valid reused assets can still create a bad world.
 
-- id/version/hash;
-- semantic role;
-- provenance/license;
-- source format;
-- derived engine variants;
-- size/performance metadata.
+## Story/cultural inspiration pipeline
 
-Prefer portable interchange formats such as glTF where practical.
+Before freezing a story, research a small varied set of games, films, animation, literature, mythology and cultural works. Extract techniques:
 
-## Inputs: current vs future
+- protagonist hook;
+- naming rhythm;
+- silhouettes/archetypes;
+- inciting events;
+- pacing/reversals;
+- humor;
+- environmental storytelling;
+- payoff structure.
 
-Current generation uses course/subject intent, intended outcomes/prerequisites, source-grounded causal structure and explicitly known learner-level constraints.
+Then produce original characters, names, art, dialogue and music. Pop-culture-inspired wordplay/references may be explored but must be optional and non-essential to comprehension. Avoid confusingly derivative shipped characters/assets.
 
-Future explicit `StoryPreferenceProfile` may influence genre, fantasy/realism, tone, characters, visual style, humor/darkness, pace and exploration/action balance.
+## Authoring pipeline
 
-Preference changes may regenerate story/game/world specs but must not silently alter canonical learning/evidence meaning.
+Current target pipeline:
 
-## Story generation gate
+`goal/course -> source research -> LearningSpec -> story/cultural research -> StoryWorldSpec candidates -> story critic -> art/world direction -> GameDesignSpec -> WorldSpec + RuntimeExperienceSpec -> capability/schema validation -> engine compilation -> mechanic/world tests -> rendered story critic -> art/world critic -> gameplay critics -> learning/transfer gate -> user review -> publish`
 
-Generate one frozen story candidate at a time under `STORY-GENERATION-AND-CRITIC.md`.
+No stage self-certifies.
 
-Review the written premise for contradictions and staging risks before realization. It cannot earn a rendered-story pass. Use `CRITIC-POLICY.md` for observed integer criterion ratings, hard blockers and readiness.
+## Art/world-direction gate
 
-A failed story is revised as story. Do not hide weak storytelling under rendering sophistication or curriculum correctness.
+Every generated game needs an art/world-direction review independent of gameplay/story scoring. It checks:
 
-## First chapter contract
+- spatial scale/negative space;
+- density and focal hierarchy;
+- character identity/silhouette;
+- clipping/intersections from alternate cameras;
+- landmarks/navigation readability;
+- palette/material/lighting cohesion;
+- atmosphere/state contrast;
+- reusable-asset composition;
+- phone/desktop framing;
+- performance-aware visual ambition.
 
-Chapter 1 must build the learner's world model with low initial cognitive load.
+See `ART-WORLD-DIRECTION-CRITIC.md`.
 
-Default curve:
+## Opening/tutorial/progression default
 
-`hook/world -> character/world desire -> concrete need -> obvious action -> visible consequence -> easy recovery/success -> formal concept -> variation -> combination -> transfer`
+For games that need onboarding:
 
-Prefer action, environmental storytelling, direct manipulation and visible consequences over exposition cards.
+`hook/normal world -> disruption/need -> player embodiment becomes clear -> prologue handoff -> separate tutorial -> guaranteed practice success -> Level 1/first mission -> recoverable challenge -> variation -> transfer`
 
-First-run progression is user-paced by default. Back/Continue/Skip/Replay/progress are required where applicable; Pause/Resume while motion runs; reduced motion preserves meaning/navigation.
+Tutorial teaches reusable play grammar. Do not make Level 1 carry basic onboarding by default.
 
-## Game generation and progression
+Difficulty rises through reasoning, uncertainty, trade-offs, interacting rules and reduced scaffolding—not longer prompts, denser dashboards or unexplained controls.
 
-Generate a campaign/progression graph, not a lesson list.
+## Phone-first and spacious-world target
 
-Difficulty increases through reasoning, transfer, uncertainty, trade-offs, interacting rules, reduced scaffolding and agency—not longer prompts or denser dashboards.
+Current generated games optimize important first-touch flows for mainstream Android/iPhone portrait around 360–430 CSS px while remaining coherent on desktop.
 
-Use mechanics that embody subject thinking: manipulate, choose, arrange, simulate, compare, construct, trace, classify, debug, sequence, explore, negotiate or trade off when appropriate.
+Phone-first does **not** mean world-small. The world can be physically/spatially large while the camera/HUD remain readable. Generated layout should preserve breathing room and navigation clarity.
 
-As complexity rises, preserve established world objects/system behavior where they still carry the concrete model.
+## Engine strategy
 
-## HUD / visibility generation
+PlayCanvas Engine is the first strategic backend for web/phone-first delivery. Three.js remains legacy/migration only. Future Unity/Unreal/2D/simulation runtimes may become backends when justified.
 
-Every RuntimeExperienceSpec answers:
-
-- what must be visible now;
-- what is deferred;
-- what appears after discovery/success;
-- what is secondary/collapsible;
-- what semantic action each control represents;
-- how phone/safe-area/accessibility budgets are met.
-
-Opening screens avoid dashboard density.
+Adding a backend must not rewrite LearningSpec, StoryWorldSpec or AssessmentEvidenceSpec.
 
 ## Quality gates
 
-### First-touch magic >=9
+A candidate must independently pass:
 
-Judge fresh first 60–90 seconds for beauty/hook, curiosity, character/world attachment, causal clarity, low cognitive load, pacing/navigation control, obvious first action and story-to-play transition.
+1. technical/runtime/accessibility;
+2. rendered story;
+3. art/world direction;
+4. first-touch/gameplay;
+5. whole-chapter/progression;
+6. learning/transfer;
+7. current-user review.
 
-### Whole-game/chapter >=9
+Explicitly separate **visual attraction** from **willingness to play/continue**.
 
-Judge story-to-play continuity, agency, progression, challenge, recovery, payoff, forward pull, commercial-game cohesion and learning integration.
+## Future agent system
 
-Explicitly penalize reverting to course-site UI when reasoning becomes harder.
+The platform should eventually support agents for:
 
-### Learning / transfer >=9
+- research/source gathering;
+- story/game ideation;
+- art/world direction;
+- learning design;
+- game/world creation;
+- asset selection/generation;
+- story/art/game/learning critics;
+- test generation;
+- CI/CD/release orchestration;
+- regression triage/repair.
 
-Even if a game gate fails, inspect whether meaningful play supports LearningSpec through purposeful practice, misconception handling, unassisted success, hint dependence, fresh transfer and delayed retrieval where claimed.
+Agents communicate through versioned specs/artifacts/evidence. Creator agents do not self-certify. Critic agents are internal, not user acceptance.
 
-Critic scores never override direct user rejection.
+**This is future work.** Preserve agent-friendly boundaries now, but prioritize proving this pipeline manually/tool-assisted on the current excellent track before building the orchestration layer.
 
-## Evidence invariants
+## Security/evidence invariants
 
-Generated games preserve:
+Generated specs/data do not authorize arbitrary code execution. Prefer validated schemas, allowlisted/versioned primitives, immutable artifacts, asset validation, strict CSP/no eval and provenance.
 
-- canonical competency identity independent of story/engine;
-- pinned assessment/content versions;
-- `unknown` distinct from failure;
-- current assistance distinct from prior exposure;
-- XP distinct from mastery;
-- submitted evidence immutability;
-- learner isolation;
-- engine/story replacement without losing legitimate history.
-
-## Phone-first target
-
-Initial generated games optimize important first-touch/Chapter 1 flows for mainstream Android/iPhone portrait use, roughly **360–430 CSS px** wide with touch, safe areas, text enlargement and reduced motion.
-
-EngineTargetSpec/RuntimeExperienceSpec must carry explicit performance and interaction budgets.
-
-## Validation / repair loop
-
-Keep validators separate:
-
-1. schema/coverage;
-2. source/grounding correctness;
-3. story quality;
-4. game-design coherence;
-5. WorldSpec/runtime capability validity;
-6. engine compilation/runtime integrity;
-7. first-touch quality;
-8. whole-game quality;
-9. accessibility/device interaction;
-10. assessment/evidence integrity;
-11. learning/transfer.
-
-Never lower a rubric or delete a failing test to advance.
-
-## Portability acceptance
-
-Once a second engine backend exists, require proof that:
-
-- one engine-neutral WorldSpec compiles to both backends;
-- LearningSpec/AssessmentEvidenceSpec remain unchanged;
-- semantic action IDs remain stable;
-- game state serializes independently of engine object identity;
-- engine swap preserves legitimate learner history;
-- backend code contains no course-specific learning rules.
-
-## Security boundary
-
-Generated specs/data do not authorize arbitrary generated code execution.
-
-Prefer schema validation, allowlisted/versioned primitives, immutable artifacts, asset validation, capability validation, strict CSP/no eval and provenance linking exact specs to exact engine artifacts.
-
-Custom engine code is an exceptional later extension path, not normal course generation output.
+Preserve canonical competency identity, pinned assessment/content versions, unknown distinct from failure, assistance/prior exposure semantics, XP distinct from mastery, immutable submitted evidence and learner isolation.
 
 ## Current implementation boundary
 
-Current work remains private Phase 1 architecture/reference refinement.
-
-Immediate work is to define the engine-neutral schemas/compiler boundary, establish PlayCanvas as the first backend, prove spec-driven generation with two small worlds, then port Echo Forge incrementally while preserving existing evidence/save/auth semantics.
-
-## Opening/progression boundary — current amendment
-
-Every generated RuntimeExperienceSpec must carry an opening eligibility/resume/replay policy and a progressive HUD schedule; GameDesignSpec must carry an early success before complexity, the new demand at each level, scaffolding fade and visible payoff. For this delivery WorldSpec must realize the whole game in PlayCanvas 3D, including world-anchored markers and tutorial targets. Validation rejects silent 2D gameplay substitution and replay that mutates progression.
-
-## Foundation: games generated from learning needs and preferences
-
-User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
-
-Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.
+Private proof-track refinement. Build the revised prologue/tutorial/Level 1 in coherent chunks; do not start Level 2 or the full multi-agent generator until the current user accepts the proof direction.
