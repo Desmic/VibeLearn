@@ -1,6 +1,63 @@
 # Bring Back the Words — story and progression treatment
 
-15 September 2026. Working title and authored design candidate, following the user's rescue premise and atmosphere feedback. This replaces the delivery-workshop story for the next revision. After reading the synopsis the user said “yes much better now” and asked about progression: positive feedback on the story direction, not acceptance of an implemented game. The rescue revision remains **unimplemented**. The existing local prototype and its evidence remain the technical baseline.
+## 17 September 2026 user-directed rewrite — supersedes conflicting treatment below
+
+The current implemented opening was user-rejected. The next story pass must use a **directly controlled robot protagonist**, not a separate literal helper/player avatar. `Zip` is now a provisional working name rather than a fixed character decision.
+
+### Revised opening/prologue shape
+
+The strongest current direction from the user is:
+
+1. **Bellweather before the problem:** show the city happy, lively and worth caring about. The protagonist is with robot friends; the world visibly feels safe and joyful.
+2. **Dramatic rupture:** a sudden thunderstrike/violent event interrupts the scene. Light, sound, camera and animation all change together.
+3. **Displacement:** the protagonist and friends are teleported/torn out of Bellweather.
+4. **Dark limbo:** cut to the protagonist alone in darkness. Do not explain first; let the player feel the loss of place.
+5. **Reveal the prison:** lights come on progressively. The player now sees an unknown space and a large blocked/locked door that clearly prevents escape.
+6. **Speech theft:** an evil robot enters and visibly removes the protagonist's speech engine. This is the personal inciting loss; the player sees cause and consequence in one scene.
+7. **Take control:** the camera settles into the declared gameplay view and the player directly controls the protagonist.
+8. **Separate Tutorial/Prologue:** teach movement/look/interact and the minimum speech-repair mechanic with low/no failure pressure. Give the player a clean success—restore enough speech/interaction capability to open the first way forward.
+9. **Level 1 begins after onboarding:** Level 1 is the first actual mission/problem and may assume those reusable controls/basic interaction grammar.
+
+The exact thunder/teleport fiction can change during story ideation, but the **before -> rupture -> unknown confinement -> antagonist-caused speech loss -> direct control -> tutorial success -> Level 1** causal structure is the current binding direction unless a clearly stronger alternative is reviewed.
+
+### Storytelling rule
+
+Text, dialogue, animation, camera, lighting, effects and player actions must tell the **same beat at the same time**. The player should understand most of the story by watching what happens; concise text reinforces what is visible rather than carrying missing causality.
+
+For every prologue beat define:
+
+- world state before;
+- visible event/action;
+- camera/focus change;
+- character reaction;
+- minimal caption/dialogue;
+- player action, if any;
+- world state after;
+- what a cold-start player should now understand.
+
+If the rendered scene does not convey the written story without reading this document, the story realization fails.
+
+### Protagonist and names
+
+The protagonist is the player's controlled character. There is no separate literal `you` helper in this track.
+
+Run a fresh character/naming ideation pass before locking the next build. Learn from memorable robots/characters in film, games, animation and literature. A playful homage-style name such as the user's `Wall-G` example illustrates the desired recognizability/energy, but shipped names, designs, dialogue and assets should remain original and should work even for players who miss the reference.
+
+### World direction
+
+The current compact diorama is too congested. The new world should use a larger playable footprint, clearer landmark spacing and deliberate negative space. Do not compensate for weak composition by adding more props.
+
+Use `ART-WORLD-DIRECTION-CRITIC.md` as a separate gate for world scale, spatial density, silhouettes, clipping/intersections, camera sweep, landmarks and art cohesion.
+
+### Platform extraction
+
+This track is a proof for the broader VibeLearn game-creation platform. Opening beats, teleport/reveal effects, character-control profiles, tutorial patterns, doors/rooms, lighting states and repair interactions should become reusable/spec-driven where the implementation proves them useful. See `GAME-CREATION-PLATFORM.md`.
+
+---
+
+## Historical 15 September treatment — retained for design history, superseded where it conflicts
+
+15 September 2026. Working title and authored design candidate, following the user's rescue premise and atmosphere feedback. This replaced the delivery-workshop story at that time. After reading the synopsis the user said “yes much better now” and asked about progression: positive feedback on the story direction, not acceptance of an implemented game.
 
 ## The promise
 
@@ -88,6 +145,6 @@ Episode 1 uses illustrative authored scores and whole-word pieces, clearly ident
 
 ## Production and design review
 
-Use [WORLD-ATMOSPHERE-AND-AUDIO.md](WORLD-ATMOSPHERE-AND-AUDIO.md) for visual/sound direction and [STORY-INSPIRATION-20260915.md](STORY-INSPIRATION-20260915.md) for researched influences. Reuse the existing opening controller, WorldSpec adapter, PlayCanvas runtime, controls and authoritative rules. Story names, gestures, cameras, cue IDs and setting belong in the authored package.
+Use [WORLD-ATMOSPHERE-AND-AUDIO.md](WORLD-ATMOSPHERE-AND-AUDIO.md) for visual/sound direction and [STORY-INSPIRATION-20260915.md](STORY-INSPIRATION-20260915.md) for researched influences. Reuse the existing opening controller, WorldSpec adapter, PlayCanvas runtime, controls and authoritative rules where they still fit the revised embodiment/story. Story names, gestures, cameras, cue IDs and setting belong in the authored package.
 
-Main unresolved risks: staging the capture legibly on a phone, conveying friendship with the existing robot rig, fitting candidate/input inspection without blocking the cell, and making the fresh challenge require thinking. First build/review one continuous arrival -> capture -> repair -> reunion path, then the changed-context challenge. No written quality score is assigned. The user's latest verdict on the workshop prototype remains **needs_revision**.
+The September 17 user review supersedes the old realization assumptions. Next design work starts from the revised prologue/direct-protagonist direction above, not by patching the rejected three-beat scene.
