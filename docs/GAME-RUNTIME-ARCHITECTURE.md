@@ -1,158 +1,128 @@
-# Game runtime architecture — engine-neutral world/game compiler
+# Game runtime architecture — engine-neutral game/world compiler
 
-**Current review amendment — 14 September 2026:** WorldSpec carries avatar/spawn, walkable regions, obstacles and camera limits. Shared input/navigation/camera and viewport HUD compile that data. Position and view are presentation state in this reference; preserve them across same-level redraws and isolate cinematic replay. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
-
-**Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
-
-**Status:** authoritative strategic architecture · 12 September 2026  
-**Read with:** root `CODEX-IMPLEMENTATION-PLAN.md`, `STATE.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `GAME-AS-COURSE.md`, and `GAME-UX-SYSTEM.md`.
+**Active architecture — 17 September 2026.** Read `GAME-CREATION-PLATFORM.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `GAME-OPENING-PROGRESSION.md`, `REUSABLE-ASSETS.md`, `ART-WORLD-DIRECTION-CRITIC.md` and `STATE.md`.
 
 ## Decision
 
-VibeLearn is not a Three.js application and must not evolve into a home-grown Three.js game engine.
+VibeLearn is a **platform for rapidly creating learning games**, not a PlayCanvas/Three.js application and not a single authored campaign.
 
-The product objective is to **generate high-quality learning games/worlds on demand for arbitrary concepts and subjects**. Therefore the durable architecture must sit above any particular renderer or commercial/open-source game engine.
+The durable architecture sits above the renderer/engine:
 
-The strategic hierarchy is:
+`LearningSpec -> StoryWorldSpec -> GameDesignSpec -> GameRulesSpec -> WorldSpec -> RuntimeExperienceSpec -> EngineTargetSpec -> EngineCompiler -> EngineRuntime`
 
-`LearningSpec -> StoryWorldSpec -> GameDesignSpec -> GameRulesSpec + WorldSpec -> RuntimeExperienceSpec -> EngineCompiler -> EngineRuntime`
+`AssessmentEvidenceSpec` remains a separate authority.
 
-The first strategic engine target is **PlayCanvas Engine** because VibeLearn is currently browser/phone-first and needs a real web game engine with entities/components, animation, physics, input, audio, assets and WebGL/WebGPU support.
-
-Three.js is now a **legacy/migration backend only**. Do not invest further in turning the Story3D layer into a general game engine except where required to preserve the current reference experience during migration.
-
-Future engines may include Unity, Unreal or other runtimes. Adding one must not require changing canonical learning, story, game-design or evidence identity.
+PlayCanvas Engine is the current browser/phone-first backend. Three.js is legacy/migration only. Future backends may include Unity, Unreal, specialized 2D engines or simulation runtimes without rewriting canonical learning/evidence identity.
 
 ## Why this architecture exists
 
-The long-term task is not “render different fantasy scenes.” It is:
+Given a learning objective, sources and learner state, VibeLearn should be able to assemble a game from versioned specs, reusable mechanics/world kits and approved assets, then compile/run it on an appropriate engine.
 
-> Given a learning objective, sources and learner state, generate a game that teaches the target capability through meaningful play, then run that game safely on an appropriate engine/runtime.
+If every new course requires fresh renderer loops, camera glue, input plumbing, save lifecycle or bespoke UI architecture, the platform has failed.
 
-That requires a reusable **world/game framework expressed as specs**, plus engine compilers/adapters.
+## Canonical specs
 
-If a generated game requires the model to repeatedly write renderer loops, physics glue, input plumbing, scene lifecycle code or engine-specific state management, the architecture has failed.
+### LearningSpec
 
-## Canonical pipeline
+Owns competency IDs, prerequisites, sources/provenance, intended outcomes, misconceptions, transfer/retrieval requirements and assessment constraints. Engine/story/art independent.
 
-### 1. LearningSpec
+### StoryWorldSpec
 
-Owns durable pedagogical identity:
+Owns premise, protagonist/cast, locations, world rules, causal events, stakes, progression and concept mappings.
 
-- competencies and canonical IDs;
-- prerequisites;
-- source/provenance constraints;
-- misconceptions;
-- intended outcomes;
-- transfer/retrieval requirements;
-- assessment/evidence requirements.
+**Required explicit field: player embodiment.** Declare who/what the player controls. Examples: direct protagonist, separate avatar, external guide/cursor, strategy controller. Do not infer a helper avatar from second-person story wording.
 
-It is engine-, story- and art-independent.
+For the current proof track: direct robot protagonist control.
 
-### 2. StoryWorldSpec
+### GameDesignSpec
 
-Owns semantic fiction/world meaning:
+Owns core loop, verbs, mechanics, mission graph, progression/difficulty, failure/recovery, payoff, tutorial/scaffolding, information schedule and mappings to learning.
 
-- premise and fantasy;
-- characters/actors;
-- locations;
-- causal world rules;
-- important resources/objects;
-- stakes and progression;
-- mappings from fictional/world behavior back to real concepts.
+It explicitly declares:
 
-It contains **no PlayCanvas/Three.js/Unity/Unreal implementation objects**.
+- prologue/opening boundary;
+- separate tutorial boundary when onboarding is required;
+- guaranteed first success;
+- Level 1/first-mission start;
+- scaffolding fade;
+- transfer/challenge structure;
+- player embodiment mode.
 
-### 3. GameDesignSpec
+### GameRulesSpec
 
-Owns actual play:
+Owns deterministic gameplay truth independently of rendering/assessment:
 
-- core loop;
-- mechanics;
-- mission/challenge graph;
-- progression and difficulty curve;
-- player verbs;
-- failure/recovery;
-- rewards/payoff;
-- exploration/build/combat/simulation/puzzle modes where justified;
-- tutorial/scaffolding policy;
-- HUD/information schedule;
-- mappings from mechanics to learning outcomes.
-
-A lesson page with a renderer is not a valid GameDesignSpec.
-
-### 4. GameRulesSpec
-
-Owns deterministic gameplay truth independently of rendering and assessment:
-
-- typed game state and bounded resources;
-- semantic player actions and preconditions;
-- deterministic transitions/effects and branches;
-- invariants and objectives;
-- semantic game events;
-- seeded randomness contracts where needed;
+- typed game state/resources;
+- semantic actions/preconditions;
+- deterministic transitions/effects;
+- objectives/invariants;
+- game events;
+- seeded randomness where needed;
 - serialization/replay/versioning.
 
-GameRulesSpec contains no PlayCanvas/Unity/Unreal objects and no arbitrary generated code. Engine state is a projection of game truth, not the authority for it. `AssessmentEvidenceSpec` may consume validated observations/events but remains a separate authority: winning an engine interaction is not itself evidence of mastery.
+No arbitrary generated code is required for ordinary generated games.
 
-The current Phase 1 interpreter already proves this boundary on both retry/idempotency semantics and an unrelated bounded-resource loop. Mature Relay Rescue server semantics remain authoritative and should be mapped incrementally rather than rewritten for architectural purity.
+### WorldSpec
 
-### 5. WorldSpec
-
-Engine-neutral executable world description.
-
-It should describe reusable game primitives such as:
+Engine-neutral world description:
 
 - scenes/zones;
-- entities and stable semantic IDs;
+- entities/stable semantic IDs;
 - components/properties;
 - transforms/hierarchy;
-- visual/audio asset references;
-- colliders and physics intent;
-- animation/state-machine intent;
-- cameras and compositions;
-- lights/environment;
-- interactions and semantic action IDs;
+- asset references;
+- colliders/physics intent;
+- animation/state intent;
+- cameras/compositions;
+- lights/environment states;
+- interactions/action IDs;
 - triggers/conditions;
-- navigation/pathing intent;
+- navigation/pathing;
 - effects;
-- spawn/despawn rules;
+- spawn/despawn;
 - persistent world variables;
-- authored/generated prefabs/archetypes.
+- prefabs/archetypes.
 
-WorldSpec states **what exists and how it behaves**, not how a particular engine API constructs it.
+#### Spatial layout is first-class data
 
-### 6. RuntimeExperienceSpec
+The September 17 review found the current world too congested. WorldSpec/layout tooling must support:
 
-Owns cross-engine runtime orchestration:
+- playable footprint/scale;
+- prop/actor density;
+- negative-space budgets;
+- landmark spacing;
+- path width;
+- zone/room dimensions;
+- camera clearance/occlusion margins;
+- focal-object limits;
+- phone/desktop composition targets.
+
+A world should be able to become larger/calmer without rewriting its game rules.
+
+### RuntimeExperienceSpec
+
+Owns cross-engine orchestration:
 
 - mode/state transitions;
-- active scene/world package;
-- HUD and semantic UI slots;
+- active world/zone;
 - input/action mapping;
-- pause/replay/save/resume;
+- direct-control/NPC profiles;
+- HUD/UI slots/visibility schedule;
+- pause/replay/save/resume/reset/logout;
 - accessibility/reduced-motion policy;
-- performance/device budget;
-- authoritative-game-state -> visible-world-state mappings;
-- analytics/evidence event hooks that do not decide learning truth.
+- performance/device budgets;
+- authoritative state -> visible state mappings;
+- analytics/evidence hooks that do not decide learning truth.
 
-This replaces the old architectural meaning of “Play Canvas.” Existing `play-canvas*.js` names are migration implementation details, not the long-term product abstraction.
+### EngineTargetSpec
 
-### 7. AssessmentEvidenceSpec
+Declares engine/platform capabilities/constraints: 2D/3D, physics, animation, input, touch/gamepad, audio, memory/startup/bundle budgets, deployment cost.
 
-Owns evidence semantics and remains outside engine truth:
+### AssessmentEvidenceSpec
 
-- observable evidence;
-- assistance/exposure semantics;
-- transfer/retrieval claims;
-- scoring limits;
-- what remains unknown.
-
-No engine animation, collision or client state alone establishes mastery.
+Owns evidence semantics: observable evidence, assistance/exposure, transfer/retrieval claims, scoring limits and unknown state. Renderer/game completion does not establish mastery.
 
 ## EngineCompiler contract
-
-An engine backend consumes the engine-neutral specs and produces a runnable artifact/runtime binding.
 
 Conceptually:
 
@@ -168,257 +138,164 @@ compile({
 }) -> EngineArtifactBundle
 ```
 
-Every backend must expose a common capability surface approximately like:
+Backends expose common capabilities such as:
 
 - load/unload world;
 - instantiate/destroy entity;
-- set/get world state;
-- play animation/effect/audio;
-- camera transition;
-- physics/collision hooks;
+- set/get visible world state;
+- animation/effects/audio;
+- camera transitions;
+- physics/collision;
 - semantic interaction binding;
-- HUD/UI binding;
-- pause/resume;
+- HUD/input binding;
+- pause/replay;
 - save/restore presentation state;
-- performance stats;
-- failure/fallback reporting;
-- dispose/cleanup.
+- performance/failure reporting;
+- cleanup/disposal.
 
-Engine adapters never own canonical learning IDs, assessment rules or learner mastery.
+Backend code never owns canonical learning/mastery rules.
 
-## Engine capability profiles
+## Current backend: PlayCanvas Engine
 
-Not every generated game must target every engine.
+PlayCanvas remains the first strategic backend because it is browser-native and provides real game primitives: entity/components, animation, physics, input, audio, glTF assets and WebGL/WebGPU.
 
-`EngineTargetSpec` should advertise capabilities and constraints, for example:
+Use the engine programmatically. Editor state is optional authoring/debugging, not canonical generated state.
 
-```text
-id: playcanvas-web
-platforms: [web, mobile-browser, desktop-browser]
-capabilities:
-  2d: true
-  3d: true
-  physics3d: true
-  skeletalAnimation: true
-  audio3d: true
-  webgpu: true
-  touch: true
-  gamepad: true
-limits:
-  bundleBudgetMb: ...
-  memoryBudgetMb: ...
-  startupBudgetMs: ...
-```
+No silent 2D gameplay fallback. Engine/module/context failure blocks gameplay and offers explicit recovery while preserving progression.
 
-The generator/compiler chooses mechanics and realization compatible with the target rather than assuming one engine can express every game equally well.
+## Reusable primitive/archetype layer
 
-## Primary backend: PlayCanvas Engine
+Fast game creation needs composition above raw engine entities. Build only from real game needs.
 
-PlayCanvas becomes the first strategic engine backend.
-
-Reasons:
-
-- browser-native runtime;
-- WebGL2 + WebGPU;
-- entity/component game architecture;
-- animation system;
-- physics integration;
-- mouse/touch/gamepad input;
-- audio;
-- asynchronous glTF-oriented asset system;
-- JavaScript/TypeScript integration;
-- open-source engine suitable for direct/runtime-driven generation;
-- smaller web/runtime impedance than compiling a large native engine for every generated lesson-game.
-
-VibeLearn should use the **PlayCanvas Engine programmatically**, with the Editor optional for authoring/debugging rather than making editor project state canonical.
-
-## Three.js migration status
-
-Current Echo Forge/Relay Rescue work uses:
-
-- `story3d-runtime.js`;
-- `story3d-world-host.js`;
-- `rescue-story3d.js`;
-- `play-canvas.js` and migration shims.
-
-These remain valid reference/migration code but are no longer the desired framework foundation.
-
-Rules from this point:
-
-1. no new generic engine features should be built on Three.js unless needed for safe migration;
-2. no future generated-world contract may depend on Three.js classes/API names;
-3. extract useful semantic concepts into WorldSpec/RuntimeExperienceSpec;
-4. implement equivalent PlayCanvas backend behavior;
-5. move Echo Forge onto PlayCanvas incrementally;
-6. delete/decommission Three.js runtime infrastructure after parity and critic verification.
-
-## Fast world/game construction from specs
-
-The framework should optimize for this workflow:
-
-```text
-learning goal
-  -> LearningSpec
-  -> story/world candidate
-  -> GameDesignSpec
-  -> GameRulesSpec + WorldSpec + RuntimeExperienceSpec
-  -> validate schemas/capabilities
-  -> compile PlayCanvas artifact
-  -> run automated mechanic/world checks
-  -> run game critic
-  -> run learning/transfer critic
-  -> publish immutable version
-```
-
-A generated game should be mostly **data/spec + assets**, not generated engine glue.
-
-### Reusable primitive library
-
-Build a versioned library of engine-neutral game primitives only as real games demand them, e.g.:
+Reusable primitives/archetypes may include:
 
 - interactable;
-- collectible/resource;
-- inventory;
-- switch/lever/control;
-- movable/rotatable/attachable object;
-- path/route/network;
-- timer/cooldown;
-- health/energy/pressure/temperature-style meters;
-- dialogue/character response;
-- NPC state machine;
+- resource/collectible;
+- repair/connection station;
+- scanner/inspector;
+- switch/control;
+- route/network;
+- door/gate/room;
 - trigger zone;
-- puzzle constraint;
-- crafting/build slots;
-- simulation variable;
-- projectile/flow/message;
-- camera focus/cinematic beat;
-- quest/mission objective;
+- puzzle/build slot;
+- dialogue/NPC response;
+- character control profile;
+- camera/cinematic beat;
+- teleport/displacement transition;
+- blackout/light-reveal state;
+- weather/thunder effect;
+- mission objective;
 - success/failure consequence;
-- semantic HUD indicator.
+- semantic HUD indicator;
+- tutorial/scaffolding step.
 
-The same semantic primitive may compile differently on PlayCanvas, Unity or Unreal.
-
-## Prefabs/archetypes
-
-Generated worlds need composition above raw entities.
-
-Define engine-neutral versioned archetypes such as:
-
-```text
-CharacterArchetype
-InteractiveMachineArchetype
-TransportNetworkArchetype
-PuzzleBoardArchetype
-ResourceFlowArchetype
-EnvironmentZoneArchetype
-DialogueNPCArchetype
-```
-
-Archetypes expand into WorldSpec primitives and can be themed through assets/properties without changing learning identity.
-
-Do not create a speculative universal engine. Add primitives/archetypes from concrete learning-game needs and keep the spec versioned.
+Archetypes are themed/laid out through data. Reuse should not force identical worlds.
 
 ## Assets
 
-Asset generation/acquisition is a separate pipeline from world semantics.
-
-WorldSpec should reference immutable `AssetRef`s with:
+WorldSpec references versioned immutable AssetRefs with:
 
 - id/version/hash;
-- type;
+- type/semantic role;
 - provenance/license;
-- engine-neutral semantic role;
-- source format;
-- derived engine variants;
-- size/performance metadata;
-- safety/moderation status where applicable.
+- source/derived formats;
+- scale/bounds/normalization;
+- animation aliases;
+- performance metadata.
 
-The first concrete Phase 1 contract is now implemented for container/glTF assets: build-time acquisition is pinned to immutable upstream bytes and provenance, learner runtime serves the verified artifact same-origin, WorldSpec owns normalization transforms and semantic animation aliases, imported child meshes map back to a stable semantic entity, and declared primitive fallbacks remain available if realization fails. The generic PlayCanvas backend can also report imported render bounds so normalization can be measured rather than guessed. None of this changes game or assessment truth.
+Art direction remains separate from asset validity. `ART-WORLD-DIRECTION-CRITIC.md` checks whether reused assets form a coherent, spacious, readable world.
 
-Prefer portable interchange formats where practical (for example glTF for 3D) so assets are not permanently locked to one engine.
+## Cinematic/prologue support
 
-## Unity / Unreal later
+The runtime should support reusable spec-driven cinematic states rather than one story controller per game:
 
-The engine-neutral layer exists specifically so higher-end runtimes can be introduced when they provide enough value.
+- world baseline/establishing state;
+- event/interruption;
+- camera transition;
+- lighting/environment transition;
+- actor animation/reaction;
+- timed/semantic cues;
+- optional player interaction;
+- persistent world-after patch;
+- replay without progression mutation;
+- reduced-motion equivalent;
+- handoff into direct gameplay/tutorial.
 
-Possible future targets:
+The current proof track's happy-world -> disruption -> limbo -> prison reveal -> speech theft sequence should exercise these capabilities, but story nouns remain package data.
 
-- Unity for richer native/mobile/desktop experiences, mature tooling and broad ecosystem;
-- Unreal for high-fidelity worlds, advanced rendering and potentially streamed experiences;
-- specialized 2D engines for lightweight concepts;
-- simulation-specific runtimes.
+## Tutorial/progression support
 
-Do not prematurely force feature parity across engines. Each backend declares capabilities and deployment costs. The generator selects or adapts a design accordingly.
+Tutorial should be a reusable runtime/game-design stage separate from Level 1 when required:
 
-Web/phone remains the current delivery priority, so PlayCanvas is the practical first engine.
+- one obvious action at a time;
+- movement/look/recenter introduction;
+- interact/menu semantics;
+- core mechanic practice;
+- guaranteed success;
+- assistance tracking;
+- scaffolding fade;
+- transition into first mission.
 
-## Portability acceptance tests
+## Platform proof strategy
 
-The architecture is not engine-neutral merely because interfaces exist.
+Do not build a speculative universal generator. Use the current LLM track to prove:
 
-Require tests proving:
+1. a compelling prologue;
+2. reusable direct-control profile;
+3. reusable spatial/layout parameters;
+4. reusable cinematic transitions;
+5. reusable tutorial/scaffolding;
+6. Level 1 learning mechanic;
+7. story/art/game/learning critic pipeline;
+8. deployment/regression evidence.
 
-1. canonical LearningSpec/AssessmentEvidenceSpec are unchanged when switching engine target;
-2. one synthetic WorldSpec compiles to at least two backends once a second backend exists;
-3. backend code contains no course-specific competency IDs/rules;
-4. game state can be serialized independently of renderer object identity;
-5. replacing engine/world package preserves legitimate learner history;
-6. semantic action IDs remain stable across backends;
-7. critic/evidence pipelines consume engine-neutral observations;
-8. engine failure cannot silently create learning evidence.
+Then demonstrate selected pieces in a materially different synthetic/second world before calling them general.
+
+## Future multi-agent creation pipeline
+
+Longer term agents may own:
+
+- source research;
+- story/game ideation;
+- art/world direction;
+- learning design;
+- world/spec construction;
+- asset selection/generation;
+- implementation/compiler work;
+- story/art/game/learning critics;
+- test generation;
+- CI/CD/release orchestration;
+- triage/repair proposals.
+
+Agents exchange versioned specs/artifacts/evidence. Creator agents do not self-certify. Critic agents never establish user acceptance.
+
+This is future work. Preserve the boundaries now; do not stop current proof-track development to implement the orchestration platform.
+
+## Portability acceptance
+
+Once a second engine backend exists, prove:
+
+- canonical learning/evidence specs unchanged across engine swap;
+- one engine-neutral WorldSpec compiles to both backends;
+- semantic action IDs stable;
+- game state serializes independently of renderer identity;
+- legitimate learner history survives world/engine replacement;
+- backend core contains no course-specific competency rules.
 
 ## Security boundary
 
-Generated specs/data are not permission to execute arbitrary generated code.
-
-Prefer:
-
-- validated schemas;
-- allowlisted/versioned primitives/components;
-- immutable artifacts;
-- asset validation;
-- capability validation;
-- no eval/remote script injection;
-- sandboxed extension points when custom behavior is eventually necessary;
-- provenance linking generated specs to exact compiled artifacts.
-
-Custom engine-specific code is an exceptional capability with stronger review/sandbox requirements, not normal course generation output.
-
-## Immediate implementation order
-
-1. freeze further Three.js framework expansion;
-2. rename the architectural abstraction from internal “Play Canvas” to `RuntimeExperience` / game runtime surface in docs and new code;
-3. define versioned schemas for `GameDesignSpec`, `WorldSpec`, `RuntimeExperienceSpec`, `EngineTargetSpec` and `AssetRef`;
-4. define `EngineCompiler` / runtime adapter interfaces;
-5. add PlayCanvas Engine as the first backend;
-6. build a tiny generated/spec-driven PlayCanvas vertical slice proving entity, interaction, camera, HUD, state and save mappings;
-7. compile a synthetic second world from the same schema without backend-core edits;
-8. port Echo Forge opening + Signal 1 to the PlayCanvas backend;
-9. compare experience/performance/authoring friction against the Three.js predecessor;
-10. migrate later signals only after the backend/spec seam is proven;
-11. remove Three.js dependencies after equivalent behavior, tests and critic quality are achieved.
+Generated specs/data do not authorize arbitrary generated code execution. Prefer validated schemas, allowlisted/versioned primitives, immutable artifacts, asset validation, CSP/no eval, capability checks and provenance.
 
 ## Quality invariant
 
-Engine architecture is infrastructure, not product quality.
+Engine architecture earns zero product-quality points by itself. A generated game must independently pass:
 
-PlayCanvas, Unity or Unreal earns zero critic points by itself. The generated game still must independently pass story, first-touch, whole-game and learning/transfer gates, followed by the user's review.
+- technical/accessibility;
+- rendered story;
+- art/world direction;
+- first-touch/gameplay;
+- whole-chapter/progression;
+- learning/transfer;
+- current-user review.
 
-## Opening/progression boundary — current amendment
-
-RuntimeExperience owns opening eligibility, replay return context, progressive HUD and 3D loading/recovery. Eligibility derives from authenticated campaign progress and persisted attempts; a browser-wide seen flag is insufficient. Replay must preserve the existing mission DOM/draft and must not call a start/submit action. Module or context failure blocks invisible gameplay and offers recovery instead of SVG/CSS gameplay.
-
-## Foundation: games generated from learning needs and preferences
-
-User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
-
-Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.
-
-
-## Opening framework implementation checkpoint (September 2026)
-
-`game-opening.js` owns shared lifecycle, validated scene structure, semantic actions, subtitle/marker HUD, keyboard focus, skip/back/pause and non-destructive replay. `echo-forge-opening-spec.js` owns reference dialogue, causal beats and presentation patches; `echo-forge-world-spec.js` owns the versioned scene/assets. The controller makes no assessment/progression writes. `rescue-intro.js` is the campaign adapter: it uses authoritative cleared missions/current attempt to decide entry and starts the existing persisted tutorial command on normal completion/skip. Replay uses a separate runtime and returns to the prior untouched draft.
-
-`game-world-status.js` provides shared loading/recovery states. Missing modules/engine or context loss cannot become a playable SVG scene; context restoration replays presentation without changing canonical progress. The reusable `projectEntity` backend capability anchors opening markers. `tests/opening_contract_browser.py` compiles an unrelated Seed Garden package through these same controller/backend capabilities and verifies unchanged campaign state.
-
-This is a bounded foundation, not an implemented on-demand generator: shared opening and world/asset compilation are proven; broader tutorial/HUD/progression authoring still needs additional reusable contracts grounded in real games. No preference collection or model-generation service is claimed by this checkpoint.
+The current user review remains `needs_revision`; do not start Level 2 until the redesigned front-of-game candidate is accepted.
