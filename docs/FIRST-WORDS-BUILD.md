@@ -1,118 +1,161 @@
-# The First Words — Level 1 build and verification
+# LLM proof track — next build and verification boundary
 
-## Active correction — 16 September 2026
+**Active redesign — 17 September 2026.** The previous `The First Words` build plan is superseded by the user's live review in `USER-REVIEW-20260917.md`.
 
-Level 1 is not `/first-words` in isolation. It begins at `/`: loading, login/recovery,
-transition into Bellweather, opening story, tutorial, first success, changed-context
-challenge, ending, reset/logout and return/resume behavior are one ordered experience.
+The deployed `6fea828...` runtime is **technical regression evidence, not the design to continue**. Do not incrementally polish its opening/tutorial structure or start Level 2.
 
-The active player path is Bellweather -> `/first-words`. Relay Rescue and Word Machine
-are historical prototypes only. They must not be default/player recovery routes.
-`/word-machine` redirects to `/first-words`; the root must not load the retired Relay
-Rescue scripts/world. Active hosted assets exclude the retired SVG/DOM gameplay stack
-and Three.js runtime.
+Read first:
 
-**No 2D gameplay fallback.** The active game uses PlayCanvas. During loading the player
-sees loading state only; on required-engine/asset failure the game fails closed with a
-clear retry. Never display the old illustrated/SVG world underneath or before 3D.
+- `STATE.md`
+- `USER-REVIEW-20260917.md`
+- `LLM-RESCUE-STORY.md`
+- `GAME-OPENING-PROGRESSION.md`
+- `GAME-CREATION-PLATFORM.md`
+- `ART-WORLD-DIRECTION-CRITIC.md`
+- `CRITIC-POLICY.md`
 
-## Easy to play; depth comes from learning, not friction
+## Binding player/story correction
 
-This Level 1 follows the existing first-chapter contract in
-`GAME-OPENING-PROGRESSION.md` and `COURSE-GENERATION-GAME-SYSTEM.md`:
+The player directly controls the robot protagonist. There is **no separate literal helper/you avatar** in this track.
 
-`hook -> obvious action -> visible response -> guided success -> variation -> recoverable challenge -> transfer`
+`Zip` is provisional. Run a fresh character/naming ideation pass before freezing the next story package. Pop-culture inspiration is encouraged as a technique source; shipped characters, names, assets, dialogue and music remain original and understandable without the reference.
 
-The learner must not need to understand the LLM concept before they can operate the
-game. Teach the controls and learning loop in context, one action at a time. The first
-normal run has a golden path and a visible win before a wrong answer is expected.
-Difficulty later comes from reasoning, competing context, reduced scaffolding and deeper
-LLM internals—not denser HUDs, more buttons, extra navigation chores or stacked quizzes.
+## Working prologue direction
 
-The current tutorial is deliberately simple:
+Design the next opening as a real causal sequence:
 
-1. **Power:** one highlighted action connects Zip's speech engine.
-2. **Context:** one highlighted Moon plaque is scanned because it visibly describes
-   where Zip is.
-3. **Words:** one repeated `Next word` action makes the word-by-word loop visible; each
-   word visibly joins the next input.
-4. **Success:** the Moon gate opens and Zip returns to the player. No intentional failure
-   is required before this payoff.
-5. **Challenge:** only after that success does the tower route introduce competing
-   context, one saved gate prediction, a normal wrong route and recovery.
+1. Bellweather is alive, happy and worth caring about; protagonist and friends are visible together.
+2. A dramatic rupture/thunder/teleport event interrupts the normal world.
+3. Protagonist/friends are displaced.
+4. Protagonist appears alone in a dark limbo-like space.
+5. Lights reveal an unknown prison/room and a large blocked exit door.
+6. An evil robot visibly removes the protagonist's speech engine.
+7. Camera transitions into direct protagonist control.
+8. A **separate Tutorial/Prologue stage** teaches movement/look/interact/menu and the minimum speech-repair mechanic.
+9. Tutorial grants a clean visible success—restore enough speech/capability to open the first way forward.
+10. **Level 1 starts after onboarding.**
 
-The former required `Predict the next input` quiz is not part of new Level-1 runs. The
-growing-input mechanic is demonstrated through play. Legacy `first-words-1` drafts that
-already require that step remain resumable and immutable historical evidence remains
-valid.
+The exact fiction can improve, but the before/after contrast, visible antagonist-caused loss, direct player embodiment, separate tutorial and Level-1 boundary are required unless replaced by a clearly stronger reviewed design.
 
-## Game lifecycle is part of Level 1
+## Storyboard contract
 
-The in-game menu must always expose working **Reset game progress** and **Sign out**
-controls in hosted play. Reset requires explicit confirmation, clears the current
-learner's saved game/practice progress through the authoritative reset endpoint, keeps
-device sound/accessibility preferences, and returns to the first-entry opening. Sign out
-revokes the hosted session cookies/server session and returns to Bellweather account
-entry. These behaviors are browser-gated; backend endpoints existing without usable game
-controls does not count as implemented.
+Before coding the prologue, define every beat with:
 
-Opening replay remains non-destructive. Refresh/resume keeps a saved Level-1 attempt and
-does not replay the opening automatically. A different authenticated learner remains
-isolated.
+- world state before;
+- visible event/action;
+- camera/focus;
+- character reaction;
+- minimal text/dialogue;
+- lighting/effects/audio cue;
+- optional player action;
+- world state after;
+- cold-start player takeaway.
+
+Text, animation, camera, lighting and sound must convey the **same story beat**. Captions cannot be used to explain action the world failed to show.
+
+## Spatial/world correction
+
+The next world must be **larger and calmer**. The user's review says the same content would improve substantially simply by giving it more space.
+
+Do not add decorative density. Instead:
+
+- increase playable footprint;
+- increase negative space around interactions;
+- spread landmarks/props/actors;
+- widen paths/rooms where needed;
+- protect camera clearance;
+- avoid duplicate protagonist-like actors;
+- eliminate visible actor/prop/camera clipping from normal orbit/zoom views.
+
+World layout should use reusable footprint/density/spacing parameters so future generated games can vary scale without rewriting mechanics.
+
+## Separate tutorial contract
+
+Tutorial is not Level 1.
+
+Teach only reusable game grammar:
+
+- move;
+- look/orbit;
+- interact;
+- menu/reset/logout awareness where appropriate;
+- one minimum speech-engine repair/generation interaction.
+
+One obvious action at a time. Low/no failure pressure. Clean success before the first mission.
+
+Level 1 may then introduce a normal recoverable learning mistake and deeper reasoning.
+
+## Learning behavior to preserve
+
+The useful conceptual target from the previous build remains:
+
+`available context -> candidate next-piece scores -> choose one -> append it -> repeat -> world independently checks/uses the result`
+
+The game must make clear that the language model only receives supplied context; it does not secretly see the whole 3D world.
+
+The first real mission should require the player to use this idea in a meaningful changed situation. Tutorial completion remains assisted practice, not mastery evidence.
+
+## Reuse/platform extraction
+
+The proof track should leave reusable pieces only where the game proves them useful:
+
+- direct-protagonist control profile;
+- spacious room/world templates;
+- cinematic happy-state / rupture / teleport / reveal beats;
+- lighting/weather/emotional state transitions;
+- door/gate/blocked-route archetypes;
+- repair/scanner/context-selection mechanics;
+- stepwise generation display;
+- tutorial/scaffolding patterns;
+- HUD/accessibility/audio patterns;
+- story/art/game/learning critic evidence templates.
+
+Do not build the future multi-agent generation platform now. Preserve versioned, agent-friendly specs/artifacts so ideation/creation/critic/CI-CD agents can be added later.
 
 ## Ordered implementation gate
 
-Follow `../CODEX.md` strictly in this order:
+After the current user review is consolidated:
 
-1. entry/login/recovery, reset/logout and direct Level-1 routing;
-2. opening friendship -> capture -> voice loss -> reachable repair;
-3. one-action-at-a-time tutorial -> guaranteed first rescue success;
-4. changed-context tower challenge -> recoverable mistake -> current route;
-5. world-first completion/ending, save/reload/replay/accessibility;
-6. complete `/` -> ending playthrough, active CI, critic policy, then user review.
+1. freeze the revised story/protagonist/naming candidate;
+2. art/world-direction pass for scale, layout, palette, landmarks and reusable kit;
+3. storyboard and build the **prologue only**;
+4. test/play/critique prologue under story + art/world gates;
+5. build the separate tutorial;
+6. test tutorial first success and lifecycle;
+7. only then rebuild Level 1's first actual mission/challenge;
+8. integrated technical/browser/accessibility regression;
+9. independent story, art/world, gameplay and learning critics;
+10. user review.
 
-Do not implement Level 2 or later-series features before this full gate passes. Existing
-later code is not evidence that an earlier gate is complete.
+Do not build later episodes while an earlier boundary is unresolved.
 
-## Frozen Level 1 learning behavior
+## Technical regression requirements retained
 
-Use mission/content identity `ai-01-first-words` and pinned `first-words-1` rules.
-Preserve old immutable snapshots/evidence. No model provider or general generator is
-needed for this bounded level.
+Preserve the useful engineering work from the rejected candidate:
 
-Opening: Bellweather home -> Warden captures a friend and steals speech engines -> Zip
-saves the player and loses their voice -> reachable repair socket. The reduced-motion,
-muted and replay paths communicate the same causal story.
+- Bellweather-consistent auth/entry;
+- hosted reset/logout;
+- save/resume and learner isolation;
+- keyboard/touch/camera controls;
+- reduced motion and enlarged text;
+- desktop + 360/390/430 phone checks;
+- explicit 3D loading/recovery;
+- **no active 2D gameplay fallback**;
+- authoritative commands/evidence and immutable submitted evidence.
 
-Guided rescue: power Zip's speech engine, scan the obvious Moon plaque, then generate
-`Open the Moon gate` word-by-word. The input display makes output accumulation visible.
-The correct command visibly frees Zip. This is practice and onboarding, not assessment
-or mastery.
+Technical CI is necessary but earns no product-quality score.
 
-Transfer: after reunion, the route to the tower changes. The player selects what context
-enters the engine from an old Moon sign, unrelated parade notice, or the current clue.
-The current clue requires mapping visible world information to the five-point Star mark
-rather than literally saying the answer. Record the learner's first gate prediction
-before generation/feedback. A stale first context can lead to a wrong route, then be
-repaired without erasing the original prediction.
+## Review gates
 
-Assessment remains bounded: guided chapter completion plus the first changed-context gate
-prediction. No independent mastery, retention or audience-learning claim follows from
-completion.
+A future candidate cannot be internally recommended merely because the old 11-criterion checker passes.
 
-## Verification gate
+Required independent gates now include:
 
-Use disposable storage. Run focused rules/storage checks after behavior changes, then the
-active browser suites. Verify entry/lifecycle, opening, controls, full chapter and
-readability independently, then run the combined Level-1 browser command before the
-final critic pass.
+- rendered-story causality/comprehension;
+- **art/world direction** (`ART-WORLD-DIRECTION-CRITIC.md`);
+- gameplay/first-touch and whole-track progression;
+- learning/transfer fidelity;
+- technical/accessibility/device CI;
+- current user's final verdict.
 
-Verify desktop and 360/390/430 portrait, save/reload, camera and movement after save,
-reset/logout, reduced motion, sound controls, text enlargement, missing required assets,
-opening replay without progress mutation and explicit no-2D-fallback behavior.
-
-At the full gate run build, full application tests, `python manage.py browser`, then play
-the complete experience from `/` through the world ending. Apply `CRITIC-POLICY.md` to
-the exact candidate. Every required story/first-touch/chapter/learning criterion must be
->=9 with no blocker before internally marking `ready_for_user_review`. The user's review
-remains final.
+Explicitly ask both: **would a kid/young player stop and look?** and **would they understand what to do and want to keep playing?** The previous build achieved only the first.
