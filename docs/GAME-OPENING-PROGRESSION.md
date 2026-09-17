@@ -1,93 +1,167 @@
-# 3D opening, tutorial and progression — current product contract
+# 3D prologue, tutorial and progression — current product contract
 
-**LLM rescue amendment — 15 September 2026:** [LLM-RESCUE-STORY.md](LLM-RESCUE-STORY.md) owns the next episode's characters, opening and progression. Stage home/friendship -> capture and lost voice -> reachable repair -> first words -> reunion -> a changed-context challenge. The opening must communicate this through visible acting and causes. Introduce abilities gradually; restore a companion, route or place at each milestone. Beauty and music support these events under [WORLD-ATMOSPHERE-AND-AUDIO.md](WORLD-ATMOSPHERE-AND-AUDIO.md). Entry/skip/resume/replay, early success, phone framing and reduced-motion requirements below remain binding. Echo Forge-specific beats and Signals 1–7 below belong to the preserved retry episode, not the new LLM story.
+**Active direction — 17 September 2026.** This document supersedes conflicting older opening/tutorial guidance. Read with `LLM-RESCUE-STORY.md`, `GAME-CREATION-PLATFORM.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`.
 
-**Current authority — 15 September 2026:** [CRITIC-POLICY.md](CRITIC-POLICY.md) supersedes older score formulas, gate order and review-preview exceptions below. The sole human product critic is the current user. Review the whole playable candidate, use observed evidence and hard blockers, and keep preview/readiness/user acceptance distinct. The user selected an ongoing How LLMs Work series; see [NEXT-TEACHING-DESIGN.md](NEXT-TEACHING-DESIGN.md). Preserve existing retry evidence; the new topic needs new learning identities.
+## Product journey versus Level 1
 
-**Current review amendment — 14 September 2026:** Keep the skippable first-entry opening, later-level resume and non-destructive replay. After the opening, teach third-person movement/look briefly and introduce task controls progressively. Story framing is recoverable; gameplay uses player-controlled camera movement. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
+The product journey begins at first entry; **Level 1 does not**.
 
-Confirmed by the user on 13 September 2026 (14 September IST). This contract supersedes conflicting active 2D/2.5D/Three.js-selection and gameplay-fallback guidance. The deployed `16a655e` experience is **user_rejected / needs_revision**; no new numeric user score was supplied. Its passing tests and successful deployment remain engineering evidence only.
+Required order:
 
-## Required experience
+`entry/auth -> prologue/opening -> separate tutorial -> guaranteed practice success -> Level 1 mission -> recoverable challenge -> payoff -> later levels`
 
-Deliver a fully 3D PlayCanvas game throughout the opening, tutorial and Signals 1–7. The world is the primary surface, with a game HUD, spatial markers and contextual helpers. A small 3D viewport embedded among lesson panels does not satisfy this requirement.
+Do not label basic onboarding inside Level 1. The tutorial teaches reusable play grammar; Level 1 is the first actual mission/problem.
 
-Use Zelda/Witcher as references for how a game establishes a world, gives the player a reason to care and teaches through progressive play. This is a design reference, not a request for their characters, assets, open-world scope or AAA production values.
+## Current track: direct protagonist control
 
-Author in this order: story/setting and stakes -> progression and information schedule -> opening/tutorial -> Level 1 and subsequent challenges -> rendered review. Do not start with controls and retrofit story captions.
+The current LLM proof track uses a directly controlled robot protagonist. There is no separate literal helper/player avatar. Story phrases such as “help the robot” must not be interpreted as permission to spawn a second `you` character.
 
-## Entry, skip, resume and replay
+Every generated game must explicitly declare its embodiment model in `GameDesignSpec`/`RuntimeExperienceSpec`, for example:
 
-| Player state | Required behavior |
+- direct protagonist;
+- separate avatar assisting another character;
+- external guide/cursor;
+- strategy/management controller;
+- other explicit model.
+
+Story, camera, input and tutorial must agree with the declaration.
+
+## Current working prologue direction
+
+The next design pass starts from this causal sequence unless a clearly stronger alternative is reviewed:
+
+1. **Bellweather happy/alive.** Establish a place worth losing: protagonist + robot friends in a joyful, inhabited world.
+2. **Dramatic rupture.** Thunder/energy/another authored event violently interrupts normality. Text, sound, lighting, camera and animation change together.
+3. **Teleport/displacement.** The protagonist and friends are torn out of Bellweather.
+4. **Dark limbo.** The protagonist is alone in darkness; hold long enough to establish contrast.
+5. **Reveal unknown prison.** Lights come on progressively and expose a new space with a large blocked/locked exit door.
+6. **Antagonist action.** An evil robot visibly removes the protagonist's speech engine. Keep cause and consequence in the same readable composition.
+7. **Take direct control.** Transition from cinematic camera to the normal declared control camera.
+8. **Tutorial/Prologue play.** Teach movement/look/interact/menu and the minimum speech-repair/core learning interaction with low/no failure pressure.
+9. **Clean success.** Restore enough speech/capability to open the first way forward.
+10. **Level 1 begins.** The first mission can assume basic controls and focus on the first real LLM challenge/story problem.
+
+The exact fiction/effect can evolve; the before/after emotional contrast, personal loss, confinement, direct control and separate tutorial boundary are the important structure.
+
+## Storyboard contract
+
+Do not implement prose first and add animation afterward. Each beat must define one synchronized causal unit:
+
+| Field | Requirement |
 |---|---|
-| First authenticated campaign entry, no existing play | Automatically enter the 3D opening before the campaign/mission interface. |
-| Opening completed or explicitly skipped | Continue into the tutorial/Level 1. Do not restart the opening on refresh or next login. |
-| Unfinished Level 1 | Resume the saved attempt and its appropriate tutorial step; no automatic cinematic interruption. |
-| Level 2 or later, including a new browser/device | Resume current progress. Never auto-play the opening because local storage is empty. |
-| Explicit Replay opening from the game menu | Play the opening, then return to the exact prior map/mission and draft. Never launch Level 1, reset progression or award XP/evidence. |
-| Different learner on the same browser | One learner's intro dismissal must not suppress another learner's first opening. |
+| world-before | What the player sees before the beat |
+| event | What visibly happens |
+| camera/focus | What the composition makes important |
+| acting/reaction | What characters/world do in response |
+| text/dialogue | Minimal words reinforcing the visible event |
+| sound/light/effect | Supporting cue, never sole essential information |
+| player action | Optional interaction, one clear action where used |
+| world-after | Persistent visible consequence |
+| newcomer takeaway | What a cold-start player should now understand |
 
-Authoritative campaign progress takes precedence over presentation preferences. Presentation completion/skip must be scoped to the learner and campaign/version; it is not mastery, a mission clear or an assessment. Persist using the existing authenticated save model where possible; device-only preferences must not be described as cross-device guarantees.
+Rendered review asks: **does the scene itself convey the story we wrote?** Presence of captions/animations is insufficient.
 
-Skip is always available. Skipping the cinematic does not skip the essential first-action tutorial. Replay is optional at every level. Back, Continue, scene replay and Pause/Resume preserve deliberate pacing; reduced motion retains visible causal states and equivalent controls.
+## Opening controls
 
-## Opening and tutorial design
+- Skippable on first entry.
+- Back/previous for user-paced story beats where applicable.
+- Replay scene/opening without mutating progression.
+- Pause/resume while motion runs.
+- Reduced motion preserves causal states and navigation.
+- Muted play preserves all essential information.
+- Returning players resume saved progress rather than replaying the prologue automatically.
+- Explicit replay returns to prior gameplay state unchanged.
 
-The player must understand, without specialist knowledge:
+Skipping the cinematic does **not** skip the separate essential tutorial.
 
-1. Where am I, and what makes this world worth entering?
-2. Who is Pip, what does Pip want, and why should I care?
-3. What happened to the crossing, and why does it matter to the valley?
-4. What is my role, what can I do, and what is my immediate goal?
+## Tutorial contract
 
-Teach only what is needed for the next action. Short dialogue/subtitles support character acting, environmental events, camera focus and visible consequences. They must not become a six-page explanation pasted over scenery. Do not explain the whole course at the opening.
+Tutorial goals are reusable interaction grammar, not subject mastery.
 
-Stage the existing Echo Forge story in a continuous world: homeward valley -> bridge breaks -> one gear ordered -> reply lost -> scarce ember stakes -> Signal Keeper awakens. Respect player-versus-character knowledge and preserve uncertainty required by the later task. `CURRENT-STORY-CANDIDATE.md` owns the exact treatment.
+Teach only what is needed immediately:
 
-Give the player an immediate, safe success through an obvious world interaction and visible acknowledgement before asking them to reason about uncertain outcomes. The opening/tutorial flows directly into Signal 1; it must not end on a dense campaign selection page. First meaningful success changes the world and earns a clear reaction from Pip.
+1. move/look/recenter as appropriate;
+2. interact with one obvious world target;
+3. understand one game-menu/replay/reset affordance if necessary;
+4. experience the minimum core learning mechanic;
+5. receive immediate visible acknowledgment/success;
+6. transition cleanly into Level 1.
 
-## Progression and cognitive-load budget
+No normal intentional failure before the first tutorial success. No dense system inspector, evidence dashboard or advanced mechanic during onboarding.
 
-| Segment | New demand | Support and visible payoff |
-|---|---|---|
-| Opening/tutorial | Notice, focus and interact with one marked object | One highlighted target, one instruction, immediate world response; no assessment jargon. |
-| Signal 1 | Inspect the Forge and order; recover one gear safely | Guided inspections, clear same-order choice, recoverable mistake, bridge/character payoff. |
-| Signal 2 | Keep job identity across a worker restart | Reuse familiar objects/actions; introduce only the changed worker. |
-| Signal 3 | Keep the order’s meaning consistent | Introduce changed payload and show why the old seal cannot name a different job. |
-| Signal 4 | Recognize that memory expires | Introduce time/retention and reconcile against the authoritative record after identity and meaning are understood. |
-| Signal 5 | Handle an unavailable authoritative record | Distinguish unknown from absence and introduce safe pause; do not invent success. |
-| Signal 6 | Combine the learned recovery rules | Spatial route construction, storm tests, visible feedback; contextual help rather than a page-sized manual. |
-| Signal 7 | Transfer the policy to a new setting | Deliberate 3D world transition, reduced scaffolding, preserved independent/assisted evidence semantics. |
+## Level 1 contract
 
-New tools, markers and HUD elements appear when useful. Raise difficulty through reasoning, uncertainty and reduced support, not more text. Journals, evidence and technical debrief stay available as secondary views. Early success is practice, not a claim of mastery.
+Level 1 should feel like the **first mission**, not onboarding.
+
+Default shape:
+
+`clear story problem -> familiar action -> new LLM concept demand -> recoverable mistake -> visible reason it failed -> corrected attempt -> changed-context application -> world payoff`
+
+Difficulty rises through reasoning, uncertainty, relevant competing context and fading scaffolding—not through unexplained controls, camera hunting or more text.
+
+## World scale / composition contract
+
+The September 17 user review found the current world too congested. Generated worlds must carry explicit layout parameters:
+
+- playable footprint/scale;
+- prop density;
+- negative-space minimums around focal interactions;
+- landmark distance;
+- path width;
+- camera/occlusion margins;
+- maximum simultaneous focal objects;
+- phone/desktop framing targets.
+
+A scene that would improve simply by spreading the same content over more space should be revised before art/detail is added. See `ART-WORLD-DIRECTION-CRITIC.md`.
 
 ## No 2D gameplay fallback
 
-Remove the runtime switch to the old SVG/CSS/DOM game when PlayCanvas fails. An engine/module/context failure must show an honest loading/recovery screen with Retry and safe navigation; retain saved progress and block invisible game actions. Missing required deployed assets must fail verification. Never silently continue into a different 2D game.
+PlayCanvas remains the current full 3D backend. Engine/module/context failure shows honest loading/recovery UI with Retry and safe navigation; never silently continue in the retired SVG/CSS/DOM game. Accessible DOM HUD/subtitles/menu controls over 3D remain valid.
 
-DOM-based HUD buttons, subtitles, labels, keyboard/screen-reader semantics, menus and login remain valid accessibility/UI layers over the 3D experience. These are not a second gameplay renderer. Reduced motion still uses 3D. An explicitly declared simplified **3D** asset representation is distinct from the removed 2D gameplay fallback and cannot excuse a broken essential scene.
+## Progression across later levels
 
-## Executable acceptance and product review
+After the tutorial and Level 1, new levels reuse established controls/world grammar and add one major cognitive burden at a time. Preserve familiar objects/relationships where they help the mental model.
 
-Verify fresh authenticated entry, skip -> tutorial, reload, returning Level 1, Level 2+ with empty local storage, account isolation, and explicit replay from an active later-level draft. Replay must preserve attempt/route/progress and produce no learning reward.
+Difficulty can grow through:
 
-Exercise missing engine/module, context loss/restoration and asset delivery. Prove that no 2D game becomes playable and that Retry recovers the 3D path without discarding progress.
+- less scaffolding;
+- multiple relevant observations;
+- ambiguity/uncertainty;
+- combination of previously learned mechanics;
+- transfer to a new context;
+- trade-offs;
+- planning and diagnosis.
 
-Inspect exact desktop and 360/390/430px rendered opening, tutorial, first choice, first success, later-level HUD and transfer evidence, including touch, keyboard, text enlargement and reduced motion. Check markers against the objects they label and actual tap targets, not just canvas existence.
+It should not grow through denser HUDs, longer instructions, unexplained input schemes or arbitrary navigation friction.
 
-Keep the full unit/PostgreSQL/static/browser gates. Story, first-touch, whole-game and learning critics remain separate; no historical score transfers automatically. The user's current rejection is final until a new candidate is explicitly reviewed. A source document, engine tag, CI success or deployment SHA does not establish engagement or comprehension.
+## Review/acceptance
 
-## Documentation ownership
+Before internal readiness, inspect the exact candidate through:
 
-This file owns the entry/progression/no-2D contract. The root implementation plan and AGENTS carry execution order; story candidate and story critic own narrative; runtime/rules docs own state boundaries; UX/design/generation docs carry HUD and load scheduling; acceptance/critic docs carry tests and product gates; STATE records actual verification and the latest user verdict; HOSTING records deployment/asset checks. Historical snapshots remain historical and cannot override this contract.
+- story critic;
+- **art/world-direction critic**;
+- first-touch/gameplay critic;
+- whole-chapter critic;
+- learning/transfer critic;
+- technical/browser/accessibility gates.
 
-## Foundation: games generated from learning needs and preferences
+Inspect desktop and 360/390/430 portrait, touch/keyboard, alternate camera angles, enlarged text and reduced motion where applicable. Explicitly check actor/prop clipping, duplicate protagonists, spatial congestion and whether the story remains clear without reading design docs.
 
-User reaffirmed the ultimate product goal on 13 September 2026: generate games on demand from what a user needs to learn and their explicit preferences. Echo Forge is the reference, not the framework. LearningSpec, explicit UserPreference/StoryPreference inputs, StoryWorldSpec, GameDesignSpec, GameRulesSpec, WorldSpec, RuntimeExperienceSpec and versioned AssetRefs must compose through shared validators/runtime. Canonical learning and evidence cannot depend on theme, assets or engine. Preferences may influence setting, tone, presentation, pace and interaction style without weakening outcomes or assessment. Never infer unstated preferences.
+The user's verdict remains final.
 
-Implement the opening/tutorial/HUD/progression as reusable, spec-driven capabilities and assets; keep Echo Forge dialogue, beats, cameras and object IDs in the reference package. New games must not require copied opening controllers or new renderer lifecycles. Prove a materially different fixture through shared components. This foundations work does not claim that an on-demand generator/model integration is already implemented or authorize unrelated Phase 2 work.
+## Platform/reuse boundary
 
+This track is the proof case for `GAME-CREATION-PLATFORM.md`. Implement opening/tutorial/progression as spec-driven capabilities:
 
-## Current user review checkpoint
+- player embodiment profile;
+- cinematic beat/state-transition primitives;
+- environment/lighting transitions;
+- tutorial step/scaffolding patterns;
+- reusable room/door/gate/traversal kits;
+- density/scale/layout parameters;
+- audio/FX cues;
+- HUD/accessibility patterns.
 
-**15 September 2026:** [CRITIC-POLICY.md](CRITIC-POLICY.md) controls review. The user may inspect a draft at any time; a preview is not an internal ready recommendation, acceptance or deployment authorization. The current user is the sole human product critic and final authority.
+Story nouns, exact cameras/dialogue and episode logic belong in authored package data. Do not create a universal engine speculatively; extract components that the proof game actually needs.
+
+Historical Echo Forge/Signal-specific progression remains historical reference only and must not override this active contract.
