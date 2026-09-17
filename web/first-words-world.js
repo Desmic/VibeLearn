@@ -148,7 +148,7 @@ function opening(beat){
       {entity:'zip',from:[0,0,10],to:[0,4,8],at:1300,duration:1300},
       {entity:'singer',from:[5,0,2],to:[1,6,-1],at:1200,duration:1400},
       {entity:'friend-a',from:[-5.5,0,3.5],to:[-1,6,-1],at:1200,duration:1400}
-    ],cues:[{at:400,patch:{show:['storm-flash']}},{at:900,patch:{hide:['storm-flash']}},{at:1200,patch:{animations:{singer:'no',friend-a:'no'}}}],finish:{hide:['storm-flash']}};
+    ],cues:[{at:400,patch:{show:['storm-flash']}},{at:900,patch:{hide:['storm-flash']}},{at:1200,patch:{animations:{singer:'no','friend-a':'no'}}}],finish:{hide:['storm-flash']}};
   }else if(beat===2){
     p.camera='limbo';p.show.push('limbo-backdrop');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
   }else if(beat===3){
