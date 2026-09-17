@@ -24,7 +24,15 @@ async function mountWorld(){
   try{
     world=createPlayCanvasWorld(host,worldSpec,{interactive:false,pixelRatioCap:1.5,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
     if(!world.available)throw new Error(world.error||'PlayCanvas unavailable');
-    world.applyPatch({camera:'home',show:['zip','singer','our-lantern'],hide:['warden','singer-cage','stolen-voice','wrong-ring','reunion-ring','route-glow']});
+    // Entry shows Bellweather before the inciting incident. Keep the prison, rift
+    // and antagonist completely out of frame so login and prologue tell one story.
+    world.applyPatch({
+      camera:'home',
+      show:['bellweather-zone','zip','zip-voice'],
+      hide:['prison-zone','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today'],
+      transforms:{zip:{position:[0,0,10]}},
+      animations:{zip:'idle'}
+    });
     const deadline=performance.now()+15000;
     while(world.stats().assetsPending>0&&performance.now()<deadline)await new Promise(resolve=>requestAnimationFrame(resolve));
     const stats=world.stats();
@@ -83,7 +91,7 @@ $('#reset-form').addEventListener('submit',async event=>{
   try{
     if(!recovery?.access_token||!recovery?.refresh_token)throw new Error('Request a new reset link.');
     await api('/api/auth/reset-password',{...recovery,password:$('#new-password').value});
-    recovery=null;$('#new-password').value='';$('#password-reset').hidden=true;$('#sign-in').hidden=false;setStatus('Password updated. Sign in to continue to Level 1.');
+    recovery=null;$('#new-password').value='';$('#password-reset').hidden=true;$('#sign-in').hidden=false;setStatus('Password updated. Sign in to restart from the prologue or resume your adventure.');
   }catch(error){$('#reset-status').textContent=error.message+(error.requestId?` Reference: ${error.requestId}`:'');}
   finally{button.disabled=false;}
 });
