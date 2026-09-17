@@ -39,7 +39,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   const gate=window.GameWorldStatus;
   const scene=()=>spec.scenes[step];
   const available=()=>Boolean(world?.available&&!runtime.stats().contextLost);
-  const ready=()=>available()&&(!spec.waitForMotion||!world.stats?.().animating);
+  const ready=()=>!paused&&available()&&(!spec.waitForMotion||!world.stats?.().animating);
   const close=(reason='cancel')=>{
     if(closed)return;closed=true;cancelAnimationFrame(frame);
     if(replay)runtime.dispose();else runtime.detach();
@@ -115,7 +115,11 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   overlay.querySelector('#rgi-skip').onclick=()=>close(replay?'return':'skip');
   overlay.querySelector('#rgi-replay-beat').onclick=()=>{completed.delete(step);refresh();};
   pause.hidden=reduced;
-  pause.onclick=()=>{paused=!paused;runtime.setPaused(paused);pause.textContent=paused?'Resume':'Pause';pause.setAttribute('aria-label',paused?'Resume story motion':'Pause story motion');overlay.classList.toggle('rgi-paused',paused);};
+  pause.onclick=()=>{
+    paused=!paused;runtime.setPaused(paused);pause.textContent=paused?'Resume':'Pause';pause.setAttribute('aria-label',paused?'Resume story motion':'Pause story motion');overlay.classList.toggle('rgi-paused',paused);
+    next.disabled=!ready();
+    for(const marker of overlay.querySelectorAll('.rgi-target'))marker.disabled=!ready();
+  };
   overlay.addEventListener('keydown',event=>{
     if(event.key==='Escape'){event.preventDefault();close(replay?'return':'skip');}
     if(event.key==='Tab'){
