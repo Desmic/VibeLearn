@@ -1,68 +1,85 @@
-# Current state — The First Words Level 1
+# Current state — LLM learning-game proof track
 
 ## Active checkpoint — 17 September 2026 IST
 
-Status: **user review in progress / needs revision.**
+Status: **user review / needs redesign before another Level 1 candidate.**
 
-Verified game candidate under review: `6fea8287aa5f078a5836902478320699e54571a9`.
-Exact GitHub Actions run: `35138788244` (`Verify hosted pilot`, run 804).
-Private Render review deployment: commit `6de1f0ccb234507c1db2dccbe007c7cabfaf397e`, deploy `dep-daleugf40ujc73dphuo0`, service `srv-daf7dhuq1p3s73c122cg`.
+Review build still live: Render commit `6de1f0ccb234507c1db2dccbe007c7cabfaf397e` (runtime game candidate `6fea8287aa5f078a5836902478320699e54571a9`).
 
-The internal gate previously returned `ready_for_user_review`, but the user's live review has exposed blockers. The user's product judgment overrides the internal recommendation. See `USER-REVIEW-20260917.md` for the running review log.
+The previous internal gate returned `ready_for_user_review`, but the user's live review exposed structural product failures. The user's judgment supersedes that recommendation. See `USER-REVIEW-20260917.md`.
 
 ## Current user-review blockers
 
-1. **Opening character duplication/ambiguity:** two Zip-like robots are visible. One extra character near the middle visibly clips through the central table. Character identity and scene geometry are not acceptable.
-2. **Story establishment is insufficient:** the opening begins with a mood/friendship line but does not adequately establish Bellweather, the player/Zip relationship, the situation, the Warden, and the immediate stakes for a cold-start player.
-3. **Tutorial structure is wrong:** the current build labels steps inside Level 1 as `TUTORIAL · 1/3`. The user expected a distinct Tutorial/Prologue before Level 1, so reusable controls and the core interaction/learning loop are learned before the first actual mission.
+1. Duplicate/ambiguous protagonist-looking robots and visible table/character clipping.
+2. Opening does not communicate the written story/stakes through the rendered scene.
+3. Tutorial is incorrectly embedded inside Level 1 instead of existing as a separate prologue/tutorial stage.
+4. Text, animation, camera and world changes are not yet one coherent storytelling system.
+5. Current progression does not follow `orientation -> tutorial -> clean success -> Level 1 -> challenge -> payoff`.
+6. Visual attraction exists (`would look`) but sustained playability/clarity does not (`would not play`).
+7. The current play space is too congested; a larger footprint with the same content would improve the experience.
+8. Player embodiment is wrong for this track: there should not be a literal helper/`you` avatar. The player directly controls the robot protagonist.
+9. The current critic process lacks a dedicated art/world-direction gate.
 
-These are not minor polish issues. Level 1 remains `needs_revision` until repaired and reviewed again.
+These are not polish items. Do not patch around them while preserving the current opening structure.
 
-## Binding design direction
+## Working replacement direction
 
-The governing rule remains **easy to play, hard to master**.
+Current story/progression direction for the next design pass:
 
-The revised progression boundary should be:
+`happy Bellweather -> dramatic disruption/thunder/teleport -> protagonist displaced to dark limbo -> lights reveal unknown prison/large blocked door -> evil robot removes protagonist's speech engine -> player takes direct control -> separate Tutorial/Prologue teaches movement/interact/core speech-repair loop and grants a clean success -> Level 1 begins`
 
-`tutorial/prologue -> Level 1 mission -> later episodes with progressively less scaffolding and deeper LLM-internals reasoning`
+The protagonist name `Zip` is now provisional. Run a stronger character/naming ideation pass informed by pop culture, games, film, animation, literature and mythology, while keeping shipped characters/assets/story original and understandable without references.
 
-The Tutorial/Prologue should teach only reusable play semantics—movement/look/interact/menu plus the core learning interaction—with low/no failure pressure and a clean success. Level 1 should then feel like the first actual story mission rather than the tutorial itself.
+## Spatial/art direction
 
-Opening/story repairs should use staged world events, concise dialogue/captions, character motion and interaction rather than long explanation panels.
+The next world must be **larger and calmer**, not denser. Preserve useful buildings/props but introduce deliberate negative space, clearer landmark spacing and more room for movement/camera orbit.
 
-## What the prior technical/internal gate did establish
+World generation and review now require configurable footprint/density/spacing parameters and an independent art/world-direction critic. See `ART-WORLD-DIRECTION-CRITIC.md`.
 
-On game candidate `6fea828...`, all active technical gates passed:
+## Platform direction
 
-- foundation / entry / no 2D fallback;
-- full application suite — **152 tests passed**;
-- opening browser lifecycle/reduced-motion checks;
-- controls after persisted action + reload;
-- 200% text/readability at 360/390/430;
-- hosted reset/logout lifecycle;
-- whole chapter mistake/recovery/completion path.
+VibeLearn is a **platform for rapidly creating learning games**, not one campaign. The current How-LLMs-Work track is the proof case.
 
-Those checks remain useful regression evidence, but they did **not** prove product quality. The user review has specifically shown that the internal critic missed duplicate character identity, visible prop intersection under alternate camera views, insufficient cold-start story comprehension, and the tutorial-vs-Level-1 progression mismatch.
+Every accepted chunk should leave reusable components where justified:
 
-## Live review deployment
+- world/environment kits;
+- layout/spacing parameters;
+- character/control profiles;
+- cinematic beats and state transitions;
+- mechanics and tutorial/scaffolding patterns;
+- reusable gates/doors/routes/interactions;
+- HUD/accessibility/audio patterns;
+- critic/test/CI evidence templates.
 
-The current review build remains live at:
+Reuse must not produce identical/reskinned games. Story, art direction, layout, scale and mechanics remain parameterizable.
+
+Longer term the platform should support coordinated agents for research/ideation, story/game/art creation, implementation, critic roles, tests and CI/CD orchestration. **Do not build that multi-agent platform yet.** First prove the manual/tool-assisted creation model with one excellent game/learning track. See `GAME-CREATION-PLATFORM.md`.
+
+## Review framework correction
+
+The prior internal 9/10 gate missed obvious world/art/story problems. Before another internal-ready recommendation:
+
+- story critic must compare written story to rendered beat-by-beat causality;
+- art/world critic must inspect space, density, clipping, silhouettes, landmarks and alternate camera angles;
+- gameplay critic must separately ask `would look?` and `would play/continue?`;
+- declared player embodiment must match the actual world;
+- prologue/tutorial/Level-1 boundaries must be explicit and tested;
+- technical CI remains necessary but earns no product-quality credit.
+
+`CRITIC-POLICY.md` and `ART-WORLD-DIRECTION-CRITIC.md` govern the next candidate.
+
+## What remains technically useful from the previous candidate
+
+The previous build's regression evidence remains useful infrastructure evidence: build/tests, auth/session, save/resume, reset/logout, controls, phone layouts, reduced motion and no active 2D fallback. It does **not** validate the current story/world design.
+
+## Live deployment
+
+The rejected review build remains available at:
 
 `https://vibelearn-4xws.onrender.com/`
 
-Do not treat the deployed build as accepted. Auto-deploy remains off.
+Do not treat it as accepted. Auto-deploy remains off.
 
 ## Next action
 
-Continue the user's Level 1 review and append each finding to `docs/USER-REVIEW-20260917.md` without arguing it away or averaging it against internal scores.
-
-After the user finishes the review:
-
-1. consolidate the findings;
-2. update the opening/tutorial/progression design docs and critic counterexamples where needed;
-3. repair Level 1/prologue in coherent chunks;
-4. retest the affected and integrated flows;
-5. deploy a new bounded review candidate;
-6. return to the user for another final review.
-
-**Do not start Level 2.**
+Finish capturing the user's review, then redesign **prologue + tutorial + Level 1 boundary** before changing gameplay implementation. Update specs/docs first, then build the new prologue as the first coherent chunk. Do not start Level 2.
