@@ -108,3 +108,20 @@ At the complete candidate gate run build, full application tests and active brow
 suites, then play the whole experience from `/` through the ending. Internal readiness
 requires no blocker across story, art/world, gameplay and learning gates. Only then
 present the candidate to the user for their final judgment.
+
+
+## Evidence gate for new game candidates
+
+For any candidate created after the 18 September quality-system repair:
+
+- use critic-record schema v2;
+- run cold-observer review before intent comparison;
+- do not rate motion from still screenshots;
+- do not rate physicality without interactive traversal;
+- do not rate audio atmosphere without listening;
+- do not treat green browser/CI suites as creative readiness;
+- do not hand a candidate to the user until required v2 criteria are assessed,
+  no blocker remains, and the evidence belongs to the exact runtime SHA.
+
+If an evidence adapter is unavailable, stop at `review_incomplete`; do not
+downgrade the evidence requirement.
