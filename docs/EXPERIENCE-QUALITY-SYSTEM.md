@@ -305,3 +305,47 @@ For normal preview promotion:
 Explicit user preview override is deliberately narrower: it may allow
 missing/unresolved review for an otherwise safe candidate, but never a
 `needs_revision` critic or explicit blocker.
+
+
+## Sealed critic evidence capsules
+
+A generated critic assignment is now materialized into a filesystem capsule
+before reviewer execution.
+
+The capsule contains:
+- the exact assignment JSON;
+- only evidence explicitly allowed by that assignment;
+- candidate/pass/assignment identity;
+- SHA-256 + byte size for every copied evidence file;
+- deterministic capsule ID;
+- no repository/source/design context unless that assignment explicitly allows
+  it.
+
+The capsule validator rejects:
+- missing or extra evidence files;
+- symlink/path escape;
+- candidate/assignment mismatch;
+- tampered evidence content or size;
+- tampered assignment/manifest;
+- untracked files inside the evidence directory.
+
+The harness execution receipt is bound to the capsule ID. Reviewer results are
+then bound to both assignment ID and execution-receipt ID.
+
+This does not make LLM independence cryptographically provable, but it moves
+context separation from reviewer self-description into a traceable, deterministic
+harness artifact.
+
+## Exact green system-repair checkpoint
+
+Candidate `ddfbaca219f712e241e47941806ecd8f7aeff190`, GitHub Actions run
+`35384949480`, passed all seven technical/browser suites plus review-index
+aggregation.
+
+Its generated critic assignments are:
+- ready: cold_observer, motion_audience, physicality, handoff_tutorial,
+  audio_atmosphere, learning_transfer;
+- blocked until a validated cold-observer result exists: cinematic_causality,
+  intent_comparison.
+
+No creative/readiness score is inferred from that technical success.
