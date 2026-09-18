@@ -109,3 +109,37 @@ check desktop and 360/390/430 portrait before advancing to tutorial review.
 Deployment requires the latest user condition: all critic scores >=9, no blockers,
 complete evidence. Historical numeric reviews are not inherited. Audio listening
 and physical devices are not yet observed in this review.
+
+
+## 18 September continued: Phase 1 critic evidence repair
+
+Current candidate lineage after the friendship/reveal and control-practice work:
+`8cc05db` -> test-alignment commits -> `95631b0` -> `5a9d6b1` ->
+`54f703d` -> `e2fd892` -> `1b2fe12`.
+
+Review of exact-CI screenshots from `95631b0` found two issues that functional
+tests alone did not detect:
+
+- the friendship composition was improved by bringing the three characters
+  forward so the relationship, not the tower, owns the opening frame;
+- the Warden/speech-theft frame now makes antagonist + protagonist + extracted
+  speech module legible together;
+- the 360 reduced-motion lantern frame missed the caption-clearance budget by
+  about 5 px; the lantern endpoint was lowered rather than weakening the gate;
+- tutorial MOVE -> LOOK -> MENU now has dedicated phone/desktop screenshot
+  evidence instead of only a post-practice handoff screenshot;
+- Level 1 tutorial success and final payoff text said a route/gate was open, but
+  the shared gate asset's oversized torus still visually read as a closed giant
+  circular door. This is a visible-causality/art-direction blocker, not merely a
+  test wording issue.
+
+The shared `gate()` kit was therefore changed from the oversized torus arch to
+a conventional lintel/frame, leaving the moving bars as the actual blocker.
+A regression test now guards that reusable open-portal shape. The controls gate
+also preserves screenshots after orbit and zoom before recentering so art/world
+review can inspect non-authored camera views.
+
+Current exact candidate: `1b2fe12e0c0786b0fa0f51d6a4f3291fb16d4ddc`.
+Its CI/artifact review is still pending. Do not assign 9+ scores, deploy, or
+inherit the prior review until opening, tutorial, alternate-camera, Level 1
+recovery/payoff and technical gates all pass on this exact SHA.
