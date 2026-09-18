@@ -209,7 +209,21 @@ function frame(){
     const tutorialTarget=marker.classList.contains('tutorial-target-marker');
     const targetMismatch=tutorialTarget&&(marker.dataset.anchor!==host.dataset.tutorialWorldTarget||!available);
     marker.hidden=!point?.visible||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.anchor==='star-label'&&s.status==='success');
-    if(point){marker.style.left=Math.max(40,Math.min(rect.width-40,point.x))+'px';marker.style.top=(point.y-12)+'px';if(point.y>tray.top-rect.top||point.y<Math.max(150,goal.bottom-rect.top+marker.offsetHeight+8))marker.hidden=true;}
+    if(point){
+      marker.style.left=Math.max(40,Math.min(rect.width-40,point.x))+'px';
+      const safeTop=Math.max(150,goal.bottom-rect.top+marker.offsetHeight+8);
+      const safeBottom=Math.max(safeTop+12,tray.top-rect.top-12);
+      const desiredY=point.y-12;
+      if(tutorialTarget){
+        const clampedY=Math.max(safeTop,Math.min(safeBottom,desiredY));
+        marker.style.top=clampedY+'px';
+        marker.classList.toggle('edge-cued',Math.abs(clampedY-desiredY)>2);
+      }else{
+        marker.style.top=desiredY+'px';
+        marker.classList.remove('edge-cued');
+        if(point.y>tray.top-rect.top||point.y<safeTop)marker.hidden=true;
+      }
+    }
   }
   requestAnimationFrame(frame);
 }
