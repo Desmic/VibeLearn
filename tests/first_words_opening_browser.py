@@ -100,8 +100,10 @@ def main():
                     const {getGameRuntime}=await import('/game-runtime.js');
                     const point=getGameRuntime().world.projectEntity('friendship-lantern');
                     const top=document.querySelector('#rgi-world').getBoundingClientRect().top;
-                    const caption=document.querySelector('.rgi-scene-caption').getBoundingClientRect();
-                    return {visible:point?.visible,lanternX:point?.x||0,lanternY:top+(point?.y||0),captionLeft:caption.left,captionRight:caption.right,captionBottom:caption.bottom};
+                    const nodes=[...document.querySelectorAll('.rgi-scene-caption .rgi-kicker,#rgi-title,#rgi-body,#rgi-dialogue,#rgi-fact')].filter(n=>n.textContent.trim());
+                    const rects=nodes.map(n=>n.getBoundingClientRect());
+                    const textBounds={left:Math.min(...rects.map(r=>r.left)),right:Math.max(...rects.map(r=>r.right)),bottom:Math.max(...rects.map(r=>r.bottom))};
+                    return {visible:point?.visible,lanternX:point?.x||0,lanternY:top+(point?.y||0),captionLeft:textBounds.left,captionRight:textBounds.right,captionBottom:textBounds.bottom};
                 }""")
                 horizontal_clear=clearance['lanternX']<clearance['captionLeft']-16 or clearance['lanternX']>clearance['captionRight']+16
                 vertical_clear=clearance['lanternY']>clearance['captionBottom']+16
