@@ -36,6 +36,18 @@ def main():
             expect(page.locator('.game-player-controls')).to_have_attribute('data-control-mode','third-person',timeout=15000)
             expect(page.locator('.game-move-stick')).to_be_visible()
 
+            # Motion direction is an explicit runtime contract. Zip's rest state is
+            # intentionally subdued (frozen standing pose), movement switches to
+            # the declared run animation, and releasing input returns to calm idle.
+            idle=page.evaluate('FirstWordsReview.runtime.world.playerAnimation')
+            assert idle['alias']=='idle' and idle['speed']==0,idle
+            page.keyboard.down('KeyW');page.wait_for_timeout(180)
+            moving=page.evaluate('FirstWordsReview.runtime.world.playerAnimation')
+            assert moving['alias']=='run' and moving['speed']>0,moving
+            page.keyboard.up('KeyW');page.wait_for_timeout(180)
+            idle_again=page.evaluate('FirstWordsReview.runtime.world.playerAnimation')
+            assert idle_again['alias']=='idle' and idle_again['speed']==0,idle_again
+
             # A reusable world prop must be physical. The token track sits immediately
             # left of the spawn; a sustained left input should stop at its collider
             # rather than letting the protagonist pass through the visible geometry.
