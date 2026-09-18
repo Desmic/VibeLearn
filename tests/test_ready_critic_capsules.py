@@ -97,7 +97,7 @@ class ReadyCriticCapsuleTests(unittest.TestCase):
 
     def test_verify_workflow_packages_ready_critic_capsules(self):
         workflow=(Path(__file__).resolve().parents[1]/".github"/"workflows"/"verify.yml").read_text(encoding="utf-8")
-        self.assertIn("materialize_ready_critic_capsules.py",workflow)
+        self.assertIn("python -m tools.materialize_ready_critic_capsules",workflow)
         self.assertIn("--assignments-dir /tmp/vibelearn-review-index/critic-assignments",workflow)
         self.assertIn("--evidence-root /tmp/vibelearn-review-evidence",workflow)
         self.assertIn("/tmp/vibelearn-review-index/critic-capsules/**",workflow)
