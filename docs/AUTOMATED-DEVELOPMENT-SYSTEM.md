@@ -161,6 +161,8 @@ A single versioned run/evidence lineage should connect both systems through refe
 
 ### 4.0 Adapter contract
 
+The detailed evolving contract is in `docs/ORCHESTRATOR-ADAPTER-CONTRACT.md`. That document owns capability negotiation, versioning, idempotency/unknown-effect reconciliation, opaque cross-system refs, worker/reviewer requirements, evidence/candidate semantics and first contract fixtures.
+
 Start with the smallest useful interface. Exact names may change, but the semantics should remain narrow:
 
 ```text
