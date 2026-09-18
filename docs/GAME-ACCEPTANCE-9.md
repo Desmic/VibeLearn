@@ -1,5 +1,19 @@
 # Game acceptance — the user's verdict is final
 
+## Current status — 18 September 2026
+
+Runtime `ad14c5aced6cf053c7617dfb03245506e1e9dad5` is **rejected**.
+The user stopped further review. Prior internal 9/10 scores for this candidate are
+invalid as readiness claims.
+
+The next candidate must be produced through the revised evidence-first quality
+system in `EXPERIENCE-QUALITY-SYSTEM.md`. No Level 2/public rollout/new phase
+begins until a later Phase 1 candidate is internally re-qualified and then
+accepted by the user.
+
+## Historical acceptance/readiness record
+
+
 ## Current user review — 18 September 2026
 
 The user is now reviewing runtime
