@@ -18,6 +18,11 @@ def load(path:Path):
         raise ValueError(f"{path} must contain an object")
     return value
 
+def digest_receipt(value:dict):
+    return "sha256:"+hashlib.sha256(
+        json.dumps(value,sort_keys=True,separators=(",",":")).encode("utf-8")
+    ).hexdigest()
+
 def sha256(path:Path):
     digest=hashlib.sha256()
     with path.open("rb") as handle:
@@ -95,8 +100,7 @@ def materialize(assignment:dict,evidence_root:Path,output:Path):
         "forbidden_context":assignment.get("forbidden_context") or [],
         "evidence":copied,
     }
-    digest_payload=json.dumps(manifest,sort_keys=True,separators=(",",":")).encode("utf-8")
-    manifest["capsule_id"]="sha256:"+hashlib.sha256(digest_payload).hexdigest()
+    manifest["capsule_id"]=digest_receipt(manifest)
     (output/"capsule.json").write_text(json.dumps(manifest,indent=2)+"\n",encoding="utf-8")
 
     readme=[
@@ -125,6 +129,55 @@ def materialize(assignment:dict,evidence_root:Path,output:Path):
     (output/"README.md").write_text("\n".join(readme)+"\n",encoding="utf-8")
     return manifest
 
+def validate_capsule(output:Path):
+    output=output.resolve()
+    assignment=load(output/"assignment.json")
+    manifest=load(output/"capsule.json")
+    if manifest.get("schema")!="vibelearn.critic-capsule.v1":
+        raise ValueError("unsupported critic capsule schema")
+    for key in ("candidate_sha","pass","assignment_id"):
+        if manifest.get(key)!=assignment.get(key):
+            raise ValueError(f"capsule {key} does not match assignment")
+    if manifest.get("context_mode")!="assignment_only":
+        raise ValueError("capsule context mode must be assignment_only")
+    if manifest.get("supplied_context")!=["assignment"]:
+        raise ValueError("capsule supplied context must be assignment only")
+
+    expected_id=digest_receipt({k:v for k,v in manifest.items() if k!="capsule_id"})
+    if manifest.get("capsule_id")!=expected_id:
+        raise ValueError("capsule manifest digest mismatch")
+
+    allowed={
+        (item.get("ref"),item.get("modality"),item.get("candidate_sha"))
+        for item in assignment.get("allowed_evidence") or []
+        if isinstance(item,dict)
+    }
+    observed=set()
+    expected_files=set()
+    for item in manifest.get("evidence") or []:
+        key=(item.get("ref"),item.get("modality"),item.get("candidate_sha"))
+        if key not in allowed:
+            raise ValueError(f"capsule contains evidence outside assignment: {item.get('ref')}")
+        observed.add(key)
+        capsule_ref=item.get("capsule_ref")
+        if not isinstance(capsule_ref,str) or not capsule_ref.startswith("evidence/"):
+            raise ValueError("capsule evidence ref is invalid")
+        path=(output/capsule_ref).resolve()
+        if not path.is_relative_to((output/"evidence").resolve()) or not path.is_file():
+            raise ValueError(f"capsule evidence file missing: {capsule_ref}")
+        expected_files.add(path)
+        if path.stat().st_size!=item.get("bytes"):
+            raise ValueError(f"capsule evidence size mismatch: {capsule_ref}")
+        if sha256(path)!=item.get("sha256"):
+            raise ValueError(f"capsule evidence digest mismatch: {capsule_ref}")
+    if observed!=allowed:
+        missing=allowed-observed
+        raise ValueError(f"capsule did not materialize all allowed evidence: {sorted(missing)}")
+    actual_files={p.resolve() for p in (output/"evidence").rglob("*") if p.is_file()}
+    if actual_files!=expected_files:
+        raise ValueError("capsule evidence directory contains untracked files")
+    return manifest
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--assignment",type=Path,required=True)
@@ -132,7 +185,8 @@ def main():
     parser.add_argument("--output",type=Path,required=True)
     args=parser.parse_args()
     try:
-        manifest=materialize(load(args.assignment),args.evidence_root,args.output)
+        materialize(load(args.assignment),args.evidence_root,args.output)
+        manifest=validate_capsule(args.output)
     except ValueError as exc:
         print(json.dumps({"status":"invalid_critic_capsule","error":str(exc)}))
         return 2
