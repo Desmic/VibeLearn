@@ -106,6 +106,12 @@ export function createGameAudio(){
       else if(name==='finish'){effectPattern([62,66,69,74,78,86],{spacing:.1,length:.82,volume:.075,type:'triangle'});noise(now+.06,.42,.009,effectsBus,{frequency:1500,type:'bandpass',q:.9});}
       else if(name==='tap')effectPattern([74,81],{spacing:.13,length:.38,volume:.045,type:'triangle'});
       else if(name==='capture'){voice(45,now,.42,.08,effectsBus,'sine',.006);voice(38,now+.16,.65,.09,effectsBus,'sine',.006);noise(now+.08,.22,.022,effectsBus,{frequency:420,type:'bandpass',q:2.4});}
+      else if(name==='rupture'){
+        voice(31,now,.95,.12,effectsBus,'sine',.004);voice(26,now+.08,1.25,.1,effectsBus,'sine',.004);
+        noise(now,.16,.075,effectsBus,{frequency:2400,type:'bandpass',q:1.1});
+        noise(now+.08,.75,.055,effectsBus,{frequency:360,type:'lowpass',q:.35});
+        effectPattern([86,78,69,57],{spacing:.055,length:.32,volume:.055,type:'sawtooth'});
+      }
       else effectPattern([74],{length:.4,volume:.05});
     },
     setPreference(name,value){if(!(name in preferences))return;preferences[name]=Boolean(value);try{localStorage.setItem('vibelearn-audio',JSON.stringify(preferences));}catch{}levels();},
