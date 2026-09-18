@@ -9,6 +9,8 @@ import json
 import re
 from pathlib import Path
 
+from tools.materialize_critic_capsule import validate_capsule
+
 HEX40=re.compile(r"^[0-9a-f]{40}$")
 
 def digest_receipt(value:dict):
@@ -18,7 +20,8 @@ def digest_receipt(value:dict):
     ).hexdigest()
 
 def build_receipt(assignment:dict,executor_id:str,session_id:str,supplied_evidence:list,
-                  supplied_context:list|None=None,forbidden_context_supplied:list|None=None):
+                  supplied_context:list|None=None,forbidden_context_supplied:list|None=None,
+                  capsule_id:str|None=None):
     if assignment.get("schema")!="vibelearn.critic-assignment.v1":
         raise ValueError("unsupported critic assignment schema")
     candidate=assignment.get("candidate_sha")
@@ -31,6 +34,8 @@ def build_receipt(assignment:dict,executor_id:str,session_id:str,supplied_eviden
         raise ValueError("executor_id is required")
     if not isinstance(session_id,str) or not session_id.strip():
         raise ValueError("session_id is required")
+    if capsule_id is not None and not re.fullmatch(r"sha256:[0-9a-f]{64}",capsule_id):
+        raise ValueError("capsule_id is invalid")
     allowed={
         (item.get("ref"),item.get("modality"),item.get("candidate_sha"))
         for item in assignment.get("allowed_evidence") or []
@@ -69,6 +74,7 @@ def build_receipt(assignment:dict,executor_id:str,session_id:str,supplied_eviden
         "candidate_sha":candidate,
         "pass":assignment.get("pass"),
         "assignment_id":assignment_id,
+        "capsule_id":capsule_id,
         "executor_id":executor_id.strip(),
         "session_id":session_id.strip(),
         "context_mode":"assignment_only",
@@ -87,6 +93,7 @@ def validate_receipt(assignment:dict,receipt:dict):
         receipt.get("supplied_evidence") or [],
         receipt.get("supplied_context") or [],
         receipt.get("forbidden_context_supplied") or [],
+        receipt.get("capsule_id"),
     )
     if receipt.get("schema")!="vibelearn.critic-execution-receipt.v1":
         raise ValueError("unsupported critic execution receipt schema")
@@ -113,18 +120,33 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--assignment",type=Path,required=True)
     parser.add_argument("--context-manifest",type=Path,required=True,
-                        help="Harness-authored JSON containing executor_id, session_id, supplied_evidence and supplied_context")
+                        help="Harness-authored JSON containing executor_id, session_id and supplied_context")
+    parser.add_argument("--capsule-dir",type=Path,required=True,
+                        help="Validated sealed capsule mounted into the reviewer session")
     parser.add_argument("--output",type=Path,required=True)
     args=parser.parse_args()
     try:
         assignment=load(args.assignment);manifest=load(args.context_manifest)
+        capsule=validate_capsule(args.capsule_dir)
+        for key in ("candidate_sha","pass","assignment_id"):
+            if capsule.get(key)!=assignment.get(key):
+                raise ValueError(f"capsule {key} does not match execution assignment")
+        supplied_evidence=[
+            {
+                "ref":item["ref"],
+                "modality":item["modality"],
+                "candidate_sha":item["candidate_sha"],
+            }
+            for item in capsule.get("evidence") or []
+        ]
         receipt=build_receipt(
             assignment,
             manifest.get("executor_id",""),
             manifest.get("session_id",""),
-            manifest.get("supplied_evidence") or [],
+            supplied_evidence,
             manifest.get("supplied_context") or ["assignment"],
             manifest.get("forbidden_context_supplied") or [],
+            capsule.get("capsule_id"),
         )
     except ValueError as exc:
         print(json.dumps({"status":"invalid_critic_execution","error":str(exc)}))
@@ -133,7 +155,7 @@ def main():
     args.output.write_text(json.dumps(receipt,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({
         "status":"ok","candidate_sha":receipt["candidate_sha"],"pass":receipt["pass"],
-        "assignment_id":receipt["assignment_id"],"receipt_id":receipt["receipt_id"]
+        "assignment_id":receipt["assignment_id"],"capsule_id":receipt["capsule_id"],"receipt_id":receipt["receipt_id"]
     }))
     return 0
 
