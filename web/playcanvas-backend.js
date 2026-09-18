@@ -152,7 +152,9 @@ class PlayCanvasWorld {
     else this.setCamera(Object.keys(this.spec.cameras)[0]);
     if(this.spec.player&&interactive){
       this.controls=createPlayerControls(host,this.spec.player,{
-        isEntityEnabled:id=>Boolean(this.entities.get(id)?.enabled),
+        isEntityEnabled:id=>this._entityVisible(this.entities.get(id)),
+        isPlayerBlocked:(x,y,z,body)=>this._playerBlocked(x,y,z,body),
+        isCameraBlocked:(x,y,z)=>this._cameraBlocked(x,y,z),
         setAvatar:(position,yaw)=>{const entity=this.entities.get(this.spec.player.entity);entity?.setLocalPosition(...position);entity?.setLocalEulerAngles(0,yaw,0);},
         setCamera:(position,target,fov)=>{this.camera.setPosition(...position);this.camera.lookAt(...target);if(fov)this.camera.camera.fov=fov;},
         setMoving:value=>{this.playerMoving=value;}
@@ -162,6 +164,43 @@ class PlayCanvasWorld {
       canvas.addEventListener('webglcontextlost',()=>this.controls?.setPaused(true));
       canvas.addEventListener('webglcontextrestored',()=>this.controls?.setPaused(this.paused));
     }
+  }
+
+  _entityVisible(entity){
+    for(let current=entity;current&&current!==this.app.root;current=current.parent)if(current.enabled===false)return false;
+    return Boolean(entity);
+  }
+
+  _colliderBounds(entityId){
+    const def=this.entityDefinitions.get(entityId),entity=this.entities.get(entityId),collider=def?.collider;
+    if(!collider||!entity||!this._entityVisible(entity))return null;
+    const half=collider.halfExtents||[.5,.5,.5],offset=collider.offset||[0,0,0],matrix=entity.getWorldTransform();
+    let min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
+    for(const sx of [-1,1])for(const sy of [-1,1])for(const sz of [-1,1]){
+      const local=new pc.Vec3(offset[0]+sx*half[0],offset[1]+sy*half[1],offset[2]+sz*half[2]);
+      const world=matrix.transformPoint(local);
+      min=[Math.min(min[0],world.x),Math.min(min[1],world.y),Math.min(min[2],world.z)];
+      max=[Math.max(max[0],world.x),Math.max(max[1],world.y),Math.max(max[2],world.z)];
+    }
+    return{min,max,collider};
+  }
+
+  _playerBlocked(x,y,z,body={radius:.32,height:1.6}){
+    for(const id of this.entities.keys()){
+      const bounds=this._colliderBounds(id);if(!bounds||bounds.collider.blocksPlayer===false)continue;
+      const {min,max}=bounds,r=body.radius||.32,h=body.height||1.6;
+      if(x>min[0]-r&&x<max[0]+r&&z>min[2]-r&&z<max[2]+r&&y+h>min[1]&&y<max[1])return true;
+    }
+    return false;
+  }
+
+  _cameraBlocked(x,y,z){
+    for(const id of this.entities.keys()){
+      const bounds=this._colliderBounds(id);if(!bounds||bounds.collider.blocksCamera===false)continue;
+      const {min,max}=bounds;
+      if(x>min[0]-.15&&x<max[0]+.15&&y>min[1]-.15&&y<max[1]+.15&&z>min[2]-.15&&z<max[2]+.15)return true;
+    }
+    return false;
   }
 
   _createEntity(def){
@@ -469,6 +508,7 @@ class PlayCanvasWorld {
       backendVersion:PLAYCANVAS_BACKEND_VERSION,worldId:this.spec.id,worldVersion:this.spec.version,
       state:this.state,camera:this.cameraName,cameraVariant:this.cameraVariant,toneMapping:this.toneMapping,
       exposure:this.app.scene.exposure,fogType:fog.type,entityCount:this.entities.size,
+      colliderCount:this.spec.entities.filter(entity=>Boolean(entity.collider)).length,
       assetEntityCount:this.spec.entities.filter(entity=>Boolean(entity.asset)).length,
       assetsPending:this.assetsPending,assetsLoaded:this.assetsLoaded,assetsFailed:this.assetsFailed,
       loadedAssetEntities:[...this.assetInstances.keys()],activeAnimations:Object.fromEntries(this.activeAnimations),
