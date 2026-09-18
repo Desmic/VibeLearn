@@ -45,6 +45,7 @@ EVIDENCE_MODALITIES = {
     "authoritative_replay",
     "ci_report",
     "source_inspection",
+    "review_assignment",
 }
 
 MODALITY_EXTENSIONS = {
@@ -57,6 +58,7 @@ MODALITY_EXTENSIONS = {
     "authoritative_replay": {".json", ".md"},
     "ci_report": {".json", ".txt"},
     "source_inspection": {".json", ".md", ".txt"},
+    "review_assignment": {".json", ".md", ".txt"},
 }
 
 # Each tuple is an AND requirement; alternatives inside a tuple are OR.
