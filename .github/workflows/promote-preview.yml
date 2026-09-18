@@ -112,6 +112,7 @@ jobs:
             --quality-status docs/quality-status.json \
             --review-record "$REVIEW_RECORD" \
             --evidence-root /tmp/vibelearn-review-evidence \
+            --critic-results-root /tmp/vibelearn-review-evidence/post-ci \
             $EXTRA
 
       - name: Ensure candidate belongs to main history
