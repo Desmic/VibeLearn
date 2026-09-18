@@ -40,6 +40,9 @@ def validate_result(assignment:dict,result:dict,execution_receipt:dict|None=None
     require(result.get("verdict") in ALLOWED_VERDICTS,"invalid critic verdict")
     require(isinstance(execution_receipt,dict),"critic execution receipt is required")
     normalized_receipt=validate_receipt(assignment,execution_receipt)
+    capsule_id=normalized_receipt.get("capsule_id")
+    require(isinstance(capsule_id,str) and re.fullmatch(r"sha256:[0-9a-f]{64}",capsule_id),
+            "sealed critic capsule is required")
     require(result.get("execution_receipt_id")==normalized_receipt["receipt_id"],
             "critic result belongs to a different execution receipt")
 
@@ -109,6 +112,7 @@ def validate_result(assignment:dict,result:dict,execution_receipt:dict|None=None
         "schema":"vibelearn.validated-critic-result.v1",
         "candidate_sha":candidate,
         "assignment_id":assignment_id,
+        "capsule_id":capsule_id,
         "execution_receipt_id":normalized_receipt["receipt_id"],
         "executor_id":normalized_receipt["executor_id"],
         "session_id":normalized_receipt["session_id"],
