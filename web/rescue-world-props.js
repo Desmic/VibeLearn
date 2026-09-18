@@ -70,3 +70,19 @@ export function capabilityModule(id,position,{parent=null,color='mint',accent='g
     {id:id+'-signal-b',parent:id,primitive:'box',material:'glow',position:[0,.58,.04],scale:[.09,.48,.08]},
     {id:id+'-signal-c',parent:id,primitive:'box',material:'glow',position:[.18,.42,.04],scale:[.09,.18,.08]}];
 }
+
+
+export function capabilitySocket(id,position,{parent=null,accent='gold',enabled=true}={}){
+  const root={id,position,enabled,storyObject:{role:'capability-socket',importance:'minor',readability:['attachment','silhouette']}};
+  if(parent)root.parent=parent;
+  return [root,
+    {id:id+'-rim',parent:id,primitive:'torus',material:accent,position:[0,0,0],scale:[.72,.09,.72],rotation:[90,0,0]},
+    {id:id+'-well',parent:id,primitive:'cylinder',material:'ink',position:[0,0,-.03],scale:[.38,.08,.38],rotation:[90,0,0]},
+    {id:id+'-contact-a',parent:id,primitive:'box',material:'glow',position:[-.17,.22,.03],scale:[.06,.14,.05]},
+    {id:id+'-contact-b',parent:id,primitive:'box',material:'glow',position:[.17,.22,.03],scale:[.06,.14,.05]}];
+}
+
+export function eventLink(id,position,{material='redGlow',length=2.5,radius=.08,rotation=[0,0,0],enabled=true}={}){
+  return [{id,primitive:'cylinder',material,position,rotation,scale:[radius,length,radius],enabled,
+    motion:{type:'pulse',amplitude:.12,speed:5}}];
+}
