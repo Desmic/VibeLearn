@@ -159,30 +159,35 @@ function opening(beat){
   const p={show:['zip',...revealParts],hide:['bellweather-zone','prison-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','zip-voice'],transforms:{zip:{position:[0,0,10]},singer:{position:[3.8,0,1]},'friend-a':{position:[-3,0,1]},'friendship-lantern':{position:[-2.2,1.2,10.5]},'moon-door':{position:[0,0,0]}},animations:{zip:'idle'}};
   p.hide.push('sun','star','notice-old','notice-parade','notice-today','tutorial-route-open','wrong-ring','reunion-ring','route-glow');
   if(beat===0){
-    p.camera='home';p.show.push('bellweather-zone','zip-voice','friendship-lantern');p.animations.zip='wave';
+    p.camera='home';p.environment={clearColor:'#172238',ambient:'#806f68',exposure:1.12,fog:{type:'linear',color:'#8f91a7',start:38,end:125}};p.show.push('bellweather-zone','zip-voice','friendship-lantern');p.animations.zip='wave';
     p.timeline={duration:2200,moves:[{entity:'friendship-lantern',from:[-2.2,1.2,10.5],to:[-.8,1.1,10.5],at:600,duration:1100}],cues:[{at:1600,patch:{animations:{zip:'yes'}}}],finish:{animations:{zip:'idle'}}};
   }else if(beat===1){
-    p.camera='rupture';p.show.push('bellweather-zone','zip-voice','rift','storm-flash');p.animations.zip='no';
-    p.timeline={duration:3600,moves:[
-      {entity:'zip',from:[0,0,10],to:[0,4.7,8],at:1300,duration:1300},
-      {entity:'singer',from:[3.8,0,1],to:[1.1,5.4,7.5],at:1200,duration:1400},
-      {entity:'friend-a',from:[-3,0,1],to:[-1.1,4.6,7.2],at:1200,duration:1400}
+    p.camera='rupture';p.environment={clearColor:'#10172a',ambient:'#4a5068',exposure:.9,fog:{type:'linear',color:'#4e5c79',start:24,end:86}};
+    p.show.push('bellweather-zone','zip-voice','rift','storm-flash','warden');p.animations.zip='no';
+    p.transforms.warden={position:[0,3.1,7.15],scale:[.72,.72,.72]};
+    p.timeline={duration:3900,moves:[
+      {entity:'warden',from:[0,3.1,7.15],to:[0,3.7,7.7],at:500,duration:850},
+      {entity:'zip',from:[0,0,10],to:[0,4.7,8],at:1350,duration:1300},
+      {entity:'singer',from:[3.8,0,1],to:[1.1,5.4,7.5],at:1250,duration:1400},
+      {entity:'friend-a',from:[-3,0,1],to:[-1.1,4.6,7.2],at:1250,duration:1400}
     ],cues:[
-      {at:400,patch:{show:['storm-flash']}},
-      {at:900,patch:{hide:['storm-flash']}},
+      {at:180,patch:{show:['storm-flash'],environment:{clearColor:'#e8f4ff',ambient:'#d6e8ff',exposure:2.15,fog:{type:'linear',color:'#b8d5ef',start:18,end:68}}}},
+      {at:520,patch:{environment:{clearColor:'#07101f',ambient:'#222d49',exposure:.62,fog:{type:'linear',color:'#263650',start:18,end:72}}}},
+      {at:850,patch:{hide:['storm-flash']}},
       {at:1200,patch:{animations:{singer:'no','friend-a':'no'}}},
-      {at:2400,patch:{hide:['singer','friend-a']}},
-      {at:2850,patch:{hide:['zip']}}
-    ],finish:{hide:['storm-flash','zip','singer','friend-a']}};
+      {at:2450,patch:{hide:['singer','friend-a']}},
+      {at:2900,patch:{hide:['zip']}},
+      {at:3250,patch:{hide:['warden']}}
+    ],finish:{hide:['storm-flash','zip','singer','friend-a','warden'],environment:{clearColor:'#03060d',ambient:'#111827',exposure:.35,fog:{type:'none'}}}};
   }else if(beat===2){
-    p.camera='limbo';p.show.push('limbo-backdrop','zip-voice');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
+    p.camera='limbo';p.environment={clearColor:'#02040a',ambient:'#10131c',exposure:.35,fog:{type:'none'}};p.show.push('limbo-backdrop','zip-voice');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
   }else if(beat===3){
-    p.camera='reveal';p.show=p.show.filter(id=>!revealParts.includes(id));
+    p.camera='reveal';p.environment={clearColor:'#070b12',ambient:'#2b354a',exposure:.72,fog:{type:'linear',color:'#202a3b',start:18,end:82}};p.show=p.show.filter(id=>!revealParts.includes(id));
     p.show.push('prison-zone','zip-voice','limbo-backdrop');p.hide.push(...revealParts);
     p.transforms.zip={position:[0,0,-28]};
     p.timeline={duration:3000,cues:revealGroups.map((show,i)=>({at:250+i*750,patch:{show}})),finish:{hide:['limbo-backdrop']}};
   }else if(beat===4){
-    p.camera='theft';p.show.push('prison-zone','warden','zip-voice');p.transforms.zip={position:[0,0,-28]};p.transforms.warden={position:[5,0,-33]};
+    p.camera='theft';p.environment={clearColor:'#080b13',ambient:'#332b3b',exposure:.68,fog:{type:'linear',color:'#26283a',start:16,end:76}};p.show.push('prison-zone','warden','zip-voice');p.transforms.zip={position:[0,0,-28]};p.transforms.warden={position:[5,0,-33],scale:[1,1,1]};
     p.transforms['stolen-voice']={position:[0,.9,-27.55]};
     p.timeline={duration:4700,moves:[
       {entity:'warden',from:[5,0,-33],to:[1.4,0,-28],duration:1300},
@@ -191,7 +196,7 @@ function opening(beat){
       {entity:'stolen-voice',from:[.4,1.8,-27.8],to:[2,1.8,-33.8],at:3200,duration:1200}
     ],cues:[{at:1650,patch:{show:['stolen-voice'],hide:['zip-voice'],animations:{zip:'no'}}}],finish:{animations:{zip:'idle'}}};
   }else{
-    p.camera='reveal';p.show.push('prison-zone');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
+    p.camera='reveal';p.environment={clearColor:'#0c1220',ambient:'#46536b',exposure:.85,fog:{type:'linear',color:'#34415a',start:20,end:88}};p.show.push('prison-zone');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
   }
   return p;
 }
