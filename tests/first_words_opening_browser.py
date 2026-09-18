@@ -33,7 +33,7 @@ def main():
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before_lantern
             until(page,"()=>FirstWordsReview.audio.ready")
-            capture_started=page.evaluate("()=>FirstWordsReview.audio.startCapture()")
+            capture_started=page.evaluate("()=>FirstWordsReview.audioCapture.start()")
             assert capture_started['state']=='recording',capture_started
             page.screenshot(path=str(out/'prologue-lantern-release-390.png'),timeout=15000)
 
@@ -117,7 +117,7 @@ def main():
             assert removal['module'] and removal['module']['visible'],removal
             assert removal['warden'] and removal['warden']['visible'],removal
             page.screenshot(path=str(out/'prologue-speech-removed-390.png'),timeout=15000)
-            captured=page.evaluate("()=>FirstWordsReview.audio.stopCapture()")
+            captured=page.evaluate("()=>FirstWordsReview.audioCapture.stop()")
             assert captured and captured['bytes']>1000,captured
             payload=captured['dataUrl'].split(',',1)[1]
             (out/'prologue-event-audio.webm').write_bytes(base64.b64decode(payload))
