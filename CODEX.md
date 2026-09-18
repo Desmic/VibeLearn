@@ -38,12 +38,13 @@ and runtime pieces when real needs prove them useful; do not replace the current
 gate with speculative framework work.
 
 Read `docs/GAME-CREATION-PLATFORM.md` and `docs/AUTOMATED-DEVELOPMENT-SYSTEM.md`.
-Bounded integration of the existing Terminal PM Agent/orchestrator is now approved.
-Implement it as a thin vertical slice: economical worker -> independent reviewer whose
-criticisms implicitly include falsification/proof -> evidence -> accept/repair. Existing
-story/art-world/gameplay/learning critics remain independent disciplines but should
-reuse the same reviewer/runtime/evidence machinery. Do not merge the donor repository
-wholesale or build all future roles before real runs justify them.
+VibeLearn's automation boundary is now approved, but Terminal PM Agent remains an
+external evolving orchestrator. Start with a small typed adapter contract and fixtures;
+do not copy its moving runtime/session/verifier/recovery internals into VibeLearn.
+When its own current policy later permits a bounded live run, exercise the same contract
+with a real VibeLearn task. Existing story/art-world/gameplay/learning critics remain
+independent disciplines over shared evidence semantics. Deeper coupling must be justified
+by a stable external boundary or evidence from real runs.
 
 ## One active chunk
 
