@@ -213,3 +213,41 @@ adopts that motion language.
 Review at least several full idle-loop repetitions. Reject loops that become
 uncanny, creepy, twitchy, distracting or inconsistent with the target
 kid/young-adult audience.
+
+
+## Narration and exposition contract
+
+Opening scenes may use narration. Visual-first storytelling does **not** mean the
+game must be silent or textless.
+
+Current proof-track choice: use concise **text narration** while the opening is
+being redesigned.
+
+Future opening packages may choose narrator voice for suitable moments such as:
+- establishing an opening tone;
+- bridging locations/time;
+- marking a major transition;
+- punctuating a rupture, reveal or other significant event.
+
+The test is additive:
+
+`visual/animation meaning + concise narration = stronger beat`
+
+not:
+
+`missing visual meaning + narration = acceptable beat`.
+
+A player watching without narration should still understand the material
+world-state change and action. Narration can answer higher-level questions such
+as tone, history, implication or emotional framing.
+
+Every narrated beat should define:
+- what the visuals communicate without words;
+- what additional information/tone the narration contributes;
+- text/subtitle representation;
+- whether voice narration is appropriate for this game's style;
+- muted/reduced-motion behavior.
+
+For now, authored text fulfills the narration field. Future narrator voice should
+be a presentation variant of the same story beat rather than separate canonical
+story content.
