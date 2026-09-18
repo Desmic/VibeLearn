@@ -11,6 +11,7 @@ class EvidenceReceiptTests(unittest.TestCase):
             root=Path(temp)
             for name in (
                 "cold-observer-opening-packet.json",
+                "cold-observer-opening-report.json",
                 "prologue-motion-390.webm",
                 "prologue-home-390.png",
                 "first-words-opening-report.json",
@@ -22,7 +23,8 @@ class EvidenceReceiptTests(unittest.TestCase):
             sha="a"*40
             receipt=build_receipt(root,sha,"first-words-opening")
             by_name={item["ref"]:item["modality"] for item in receipt["evidence"]}
-            self.assertEqual(by_name["cold-observer-opening-packet.json"],"cold_observer_report")
+            self.assertEqual(by_name["cold-observer-opening-packet.json"],"review_assignment")
+            self.assertEqual(by_name["cold-observer-opening-report.json"],"cold_observer_report")
             self.assertEqual(by_name["prologue-motion-390.webm"],"motion_video")
             self.assertEqual(by_name["prologue-home-390.png"],"screenshot")
             self.assertEqual(by_name["first-words-opening-report.json"],"runtime_trace")
