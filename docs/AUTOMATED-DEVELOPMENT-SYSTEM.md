@@ -1183,3 +1183,83 @@ Astra is used rarely to generate better hypotheses when evidence is stuck
 The system does not require LLMs to be deterministic.
 
 It requires the artifacts, observations and evidence they produce to be **traceable, reproducible where possible, and tied to the exact version that produced them**.
+
+
+## 5.1 Critic independence requires context separation
+
+The `ad14c5a` incident showed that a separate reviewer prompt can still be
+correlated with the creator if both receive the same intent-heavy context.
+
+For player-experience work, the orchestrator should support at least two context
+capsules:
+
+### Cold-observer capsule
+
+Contains:
+- exact runtime/candidate identity;
+- access to the running experience/computer-use surface;
+- device/accessibility constraints;
+- the minimal player-facing task ("experience this as a new player");
+- no story treatment, storyboard explanation, creator rationale or expected
+  interpretation unless required for safety.
+
+The reviewer reports observations/inferences/confusions before seeing intent.
+
+### Intent-comparison capsule
+
+Contains:
+- cold-observer report/evidence;
+- StoryWorldSpec/GameDesignSpec/creative intent;
+- relevant implementation evidence.
+
+This reviewer compares observed versus intended meaning. It must not rewrite the
+cold observations to fit the design.
+
+The same pattern applies to tutorial/UX review: first attempt the experience from
+the player-facing instructions, then inspect implementation/specs.
+
+## 5.2 Outcome-evidence adapters by claim type
+
+Do not give every critic the same screenshot bundle.
+
+Route evidence by claim:
+- story/world comprehension -> interactive/motion capture + caption-blind pass;
+- animation direction -> timed motion/video/loop observation;
+- major events -> motion + environment/VFX + audio evidence;
+- physicality -> traversal/collision probes;
+- handoff/tutorial -> fresh interactive path and mode/action trace;
+- art composition -> alternate camera/device screenshots + traversal;
+- audio quality -> actual listening;
+- learning -> authoritative action/evidence replay + changed-context attempts.
+
+The reviewer must state when the required evidence adapter is unavailable and
+return UNRESOLVED rather than substituting weaker evidence.
+
+## 5.3 Structural prevention before LLM judgment
+
+Before spending reviewer tokens, deterministic validators/runtime checks should
+reject preventable invalid states:
+- conflicting experience modes;
+- missing declared colliders on archetypes that promise solidity;
+- invalid tutorial-step specs;
+- malformed major-event direction metadata;
+- major semantic objects with no readability strategy;
+- asset-backed controlled characters with no explicit motion profile.
+
+LLM critics then spend judgment on comprehension, taste, pacing and quality—not
+on defects the platform can prevent mechanically.
+
+## 13.1 VibeLearn quality-failure corpus additions
+
+Add the `ad14c5a` incident as a regression family:
+- "ordered screenshots but opening world still incomprehensible";
+- "major event caption says thunder but event has weak/no atmosphere";
+- "intended antagonist cause absent from perceived causal chain";
+- "semantic major object represented by unreadable generic primitive";
+- "controlled character walks through visible prop";
+- "stock idle loop passes technical tests but reads uncanny for audience";
+- "prologue and tutorial UI active simultaneously";
+- "tutorial text exists but target/action/success path is unclear".
+
+Any reviewer/harness change claiming to improve creative/game evaluation must
+demonstrably catch this corpus without adding Bellweather-specific wording.
