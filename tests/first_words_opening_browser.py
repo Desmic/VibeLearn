@@ -130,7 +130,7 @@ def main():
             expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE')
             page.get_by_role('button',name='Skip control practice',exact=True).click()
             expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
-            expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 1/3')
+            expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 1/4')
             expect(page.locator('#saved')).to_have_text('Saved')
             until(page,"()=>FirstWordsReview.audio.phase==='repair'")
             assert page.evaluate('FirstWordsReview.runtime.instanceId')==instance
