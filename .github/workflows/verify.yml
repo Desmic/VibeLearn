@@ -110,11 +110,18 @@ jobs:
           python tools/build_critic_assignments.py \
             --index "/tmp/vibelearn-review-index/review-evidence-index-${{ github.event.pull_request.head.sha || github.sha }}.json" \
             --output-dir /tmp/vibelearn-review-index/critic-assignments
-      - name: Upload exact-candidate review index and critic assignments
+      - name: Materialize sealed capsules for ready critic passes
+        run: |
+          python tools/materialize_ready_critic_capsules.py \
+            --assignments-dir /tmp/vibelearn-review-index/critic-assignments \
+            --evidence-root /tmp/vibelearn-review-evidence \
+            --output-root /tmp/vibelearn-review-index/critic-capsules
+      - name: Upload exact-candidate review index, assignments and sealed capsules
         uses: actions/upload-artifact@v4
         with:
           name: review-evidence-index-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             /tmp/vibelearn-review-index/*.json
             /tmp/vibelearn-review-index/critic-assignments/*.json
+            /tmp/vibelearn-review-index/critic-capsules/**
           retention-days: 7
