@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 from tests.browser_check import start_server, stop_server
-from tests.level1_chapter_browser import action
+from tests.level1_chapter_browser import action,skip_opening_to_tutorial
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -28,8 +28,7 @@ def main():
         try:
             ctx=browser.new_context(viewport={'width':390,'height':844},has_touch=True)
             page=ctx.new_page();page.goto(url+'/first-words')
-            page.get_by_role('button',name='Skip opening',exact=True).click()
-            expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+            skip_opening_to_tutorial(page,skip_controls=True)
             action(page,'Connect the power lead')
             page.reload()
             expect(page.locator('#loading')).to_be_hidden(timeout=15000)
