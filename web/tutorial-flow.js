@@ -70,3 +70,63 @@ export function createTutorialFlow(input,{storage=globalThis.localStorage}={}){
     reset(){index=0;save();}
   };
 }
+
+
+const CONDITION_OPERATORS=new Set(['eq','neq','in','gt','gte','lt','lte']);
+
+function readPath(value,path){
+  return path.split('.').reduce((current,key)=>current==null?undefined:current[key],value);
+}
+
+function conditionMatches(actual,expected){
+  if(expected===null||typeof expected!=='object'||Array.isArray(expected))return Object.is(actual,expected);
+  for(const [operator,value] of Object.entries(expected)){
+    if(!CONDITION_OPERATORS.has(operator))return false;
+    if(operator==='eq'&&!Object.is(actual,value))return false;
+    if(operator==='neq'&&Object.is(actual,value))return false;
+    if(operator==='in'&&(!Array.isArray(value)||!value.includes(actual)))return false;
+    if(operator==='gt'&&!(actual>value))return false;
+    if(operator==='gte'&&!(actual>=value))return false;
+    if(operator==='lt'&&!(actual<value))return false;
+    if(operator==='lte'&&!(actual<=value))return false;
+  }
+  return true;
+}
+
+export function stateMatches(expectations,state){
+  if(!expectations||typeof expectations!=='object'||Array.isArray(expectations))return false;
+  return Object.entries(expectations).every(([path,expected])=>conditionMatches(readPath(state,path),expected));
+}
+
+export function validateStateTutorialSpec(spec){
+  require(spec&&typeof spec==='object','state tutorial spec is required');
+  require(typeof spec.id==='string'&&spec.id.length>0,'state tutorial id is required');
+  require(typeof spec.version==='string'&&spec.version.length>0,'state tutorial version is required');
+  require(Array.isArray(spec.steps)&&spec.steps.length>0,'state tutorial steps are required');
+  const ids=new Set();
+  for(const step of spec.steps){
+    require(step&&typeof step==='object','state tutorial step must be an object');
+    require(typeof step.id==='string'&&step.id.length>0&&!ids.has(step.id),'state tutorial step id is invalid or duplicated');
+    ids.add(step.id);
+    for(const key of ['stage','title','detail']){
+      require(typeof step[key]==='string'&&step[key].trim(),`${step.id}.${key} is required`);
+    }
+    require(step.when&&typeof step.when==='object'&&!Array.isArray(step.when),`${step.id}.when is required`);
+    require(Array.isArray(step.actions)&&step.actions.length>0&&step.actions.every(v=>typeof v==='string'&&v.length>0),`${step.id}.actions are required`);
+    if(step.target!==undefined)require(typeof step.target==='string'&&step.target.length>0,`${step.id}.target is invalid`);
+    if(step.focus!==undefined)require(['world','hud','none'].includes(step.focus),`${step.id}.focus is invalid`);
+    if(step.success!==undefined)require(step.success&&typeof step.success==='object'&&!Array.isArray(step.success),`${step.id}.success is invalid`);
+    for(const [path,expected] of Object.entries(step.when)){
+      require(typeof path==='string'&&/^[A-Za-z0-9_.-]+$/.test(path),`${step.id}.when path is invalid`);
+      if(expected&&typeof expected==='object'&&!Array.isArray(expected)){
+        require(Object.keys(expected).length>0&&Object.keys(expected).every(op=>CONDITION_OPERATORS.has(op)),`${step.id}.when condition is invalid`);
+      }
+    }
+  }
+  return spec;
+}
+
+export function selectStateTutorialStep(input,state){
+  const spec=validateStateTutorialSpec(input);
+  return spec.steps.find(step=>stateMatches(step.when,state))||null;
+}
