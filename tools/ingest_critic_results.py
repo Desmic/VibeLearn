@@ -38,11 +38,17 @@ def base_workspace(index:dict):
         "critic_passes":[],
     }
 
-def ingest(index:dict,raw_results:dict):
+def ingest(index:dict,raw_results:dict,execution_receipts:dict):
     workspace=base_workspace(index)
     unknown=sorted(set(raw_results)-set(PASS_ORDER))
     if unknown:
         raise ValueError(f"unknown critic result passes: {', '.join(unknown)}")
+    unknown_receipts=sorted(set(execution_receipts)-set(PASS_ORDER))
+    if unknown_receipts:
+        raise ValueError(f"unknown critic execution-receipt passes: {', '.join(unknown_receipts)}")
+    orphan_receipts=sorted(set(execution_receipts)-set(raw_results))
+    if orphan_receipts:
+        raise ValueError(f"execution receipt without critic result: {', '.join(orphan_receipts)}")
     normalized={}
     for review_pass in PASS_ORDER:
         raw=raw_results.get(review_pass)
@@ -51,7 +57,10 @@ def ingest(index:dict,raw_results:dict):
         assignment=build_assignments(workspace).get(review_pass)
         if not assignment:
             raise ValueError(f"no assignment generated for pass: {review_pass}")
-        result=validate_result(assignment,raw)
+        receipt=execution_receipts.get(review_pass)
+        if receipt is None:
+            raise ValueError(f"critic result is missing execution receipt: {review_pass}")
+        result=validate_result(assignment,raw,receipt)
         normalized[review_pass]=result
         workspace["supplemental_evidence"].append({
             "ref":f"post-ci/{review_pass}.json",
@@ -67,18 +76,25 @@ def read_raw_results(root:Path):
     root=root.resolve()
     if not root.is_dir():
         raise ValueError("critic-result root must be a directory")
-    results={}
+    results={};receipts={}
     for path in sorted(root.rglob("*.json")):
         value=load(path)
-        if value.get("schema")!="vibelearn.critic-result.v1":
-            continue
-        review_pass=value.get("pass")
-        if not isinstance(review_pass,str) or not review_pass:
-            raise ValueError(f"critic result has no pass: {path}")
-        if review_pass in results:
-            raise ValueError(f"duplicate raw critic result for pass: {review_pass}")
-        results[review_pass]=value
-    return results
+        schema=value.get("schema")
+        if schema=="vibelearn.critic-result.v1":
+            review_pass=value.get("pass")
+            if not isinstance(review_pass,str) or not review_pass:
+                raise ValueError(f"critic result has no pass: {path}")
+            if review_pass in results:
+                raise ValueError(f"duplicate raw critic result for pass: {review_pass}")
+            results[review_pass]=value
+        elif schema=="vibelearn.critic-execution-receipt.v1":
+            review_pass=value.get("pass")
+            if not isinstance(review_pass,str) or not review_pass:
+                raise ValueError(f"critic execution receipt has no pass: {path}")
+            if review_pass in receipts:
+                raise ValueError(f"duplicate critic execution receipt for pass: {review_pass}")
+            receipts[review_pass]=value
+    return results,receipts
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
@@ -88,7 +104,8 @@ def main():
     args=parser.parse_args()
     try:
         index=load(args.index)
-        workspace,normalized=ingest(index,read_raw_results(args.results_root))
+        raw_results,execution_receipts=read_raw_results(args.results_root)
+        workspace,normalized=ingest(index,raw_results,execution_receipts)
     except ValueError as exc:
         print(json.dumps({"status":"invalid_post_ci_review","error":str(exc)}))
         return 2
