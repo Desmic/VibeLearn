@@ -24,8 +24,9 @@ function setExperienceMode(mode){
   $('#controls').hidden=mode==='opening'||mode==='loading';
   $('#welcome').hidden=mode!=='entry';
   $('#engine').hidden=!playable;
-  host.dataset.tutorialFocus=mode==='tutorial'?practice.step:'';
-  $('#menu-open').classList.toggle('tutorial-focus',mode==='tutorial'&&practice.step==='menu');
+  const tutorialFocus=mode==='tutorial'?(practice.current?.focus||''):'';
+  host.dataset.tutorialFocus=tutorialFocus;
+  $('#menu-open').classList.toggle('tutorial-focus',tutorialFocus==='menu');
 }
 setExperienceMode('loading');
 const blocked=()=>!ready||paused||inOpening||session.busy||session.pending||runtime.stats().contextLost||world.stats().animating||document.querySelector('dialog[open]');
