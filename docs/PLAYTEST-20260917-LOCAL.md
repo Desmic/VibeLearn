@@ -143,3 +143,58 @@ Current exact candidate: `1b2fe12e0c0786b0fa0f51d6a4f3291fb16d4ddc`.
 Its CI/artifact review is still pending. Do not assign 9+ scores, deploy, or
 inherit the prior review until opening, tutorial, alternate-camera, Level 1
 recovery/payoff and technical gates all pass on this exact SHA.
+
+
+## 18 September final internal Phase 1 review — ad14c5a
+
+Reviewed runtime candidate:
+`ad14c5aced6cf053c7617dfb03245506e1e9dad5`. Exact GitHub Actions run:
+`35335042617`. All seven active suites passed.
+
+The review loop intentionally treated passing browser tests as evidence, not
+product quality. Screenshot inspection found and repaired additional failures
+before this checkpoint:
+
+- friendship framing initially made the tower more important than the friends;
+- speech theft depended too heavily on caption text;
+- the shared gate torus looked like a solid circular wall after its bars opened;
+- a solid prison wall still existed behind that nominally open gate;
+- the rupture first read as a glowing sphere rather than a sky tear;
+- after the next rupture pass, the friends visibly remained in Bellweather even
+  though the story said everyone disappeared;
+- player UI leaked development-status language in the menu, ending and login;
+- the backend mission package still used helper-avatar wording after the game
+  switched to direct protagonist control;
+- control tests exercised alternate camera views but originally threw away those
+  views before preserving review evidence.
+
+The final exact candidate now preserves evidence for:
+- Bellweather desktop entry and phone entry;
+- player-driven shared lantern ritual;
+- completed rupture with an empty Bellweather square;
+- reduced-motion rupture at 360, 430 and 1280;
+- limbo, progressive reveal, Warden theft and repair handoff;
+- MOVE/LOOK/MENU control practice;
+- post-save keyboard/touch/orbit/zoom/recenter;
+- tutorial success with a real open Moon passage and deeper closed Star gate;
+- stale-context wrong route and recovery;
+- final open deeper route at 360, 390, 430 and 1280;
+- fail-closed 3D runtime with no active 2D fallback.
+
+Learning counterexamples include current Star context with a deliberately wrong
+Moon human prediction. The authoritative engine still emits `Open the Star gate`,
+demonstrating that the prediction is recorded learner evidence rather than hidden
+model input. Unrelated/hinted cases do not overclaim transfer and mastery stays
+unknown.
+
+Current internal manual scores on the exact runtime:
+story 9/10; art/world 9/10; gameplay/progression 9/10; learning/transfer
+9/10; technical/accessibility passed. See
+`LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md`.
+
+**Remaining limitation:** subjective music/SFX listening has not been performed
+in this environment. Automated audio lifecycle, phase, pause/mute and muted
+semantic-equivalence checks pass, but current policy does not equate those with a
+9+ atmosphere/audio judgment. Physical-phone feel is also not established by
+browser emulation. Therefore overall internal status remains review incomplete,
+and there is no user-acceptance claim or Level 2 authorization.
