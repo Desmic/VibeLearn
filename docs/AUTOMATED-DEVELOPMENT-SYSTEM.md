@@ -1263,3 +1263,94 @@ Add the `ad14c5a` incident as a regression family:
 
 Any reviewer/harness change claiming to improve creative/game evaluation must
 demonstrably catch this corpus without adding Bellweather-specific wording.
+
+
+## 5.4 Executable post-CI critic pipeline
+
+The player-experience review pipeline is now a concrete artifact protocol rather
+than an informal sequence of prompts.
+
+### Immutable technical/evidence stage
+
+For one exact runtime candidate SHA, CI:
+
+1. runs the seven technical/browser suites;
+2. emits candidate-bound evidence receipts per suite;
+3. preserves motion, caption-blind motion, screenshots, interactive traces,
+   authoritative replay, captured player-facing audio and tracked-source evidence
+   when available;
+4. aggregates receipts into one `review-evidence-index`;
+5. generates critic assignments from that index.
+
+The evidence index is immutable run evidence. Post-CI reviewers do not rewrite
+it.
+
+### Context-separated critic assignment stage
+
+`tools/build_critic_assignments.py` determines which critic passes are ready
+from the evidence modalities actually present.
+
+Examples:
+- cold observer starts from caption-blind/player-facing evidence and cannot see
+  source/design rationale;
+- physicality requires an interactive trace;
+- audio atmosphere requires a captured audio input before a listener can be
+  assigned;
+- cinematic causality and intent comparison remain blocked until a real
+  cold-observer result exists.
+
+A missing modality yields `blocked_missing_evidence`, not a weaker assignment.
+
+### Raw critic-result stage
+
+External/independent reviewers produce raw
+`vibelearn.critic-result.v1` records under:
+
+`docs/reviews/results/<candidate-sha>/<pass>.json`
+
+Raw results are not trusted merely because they are committed.
+
+### Sequential revalidation stage
+
+Before release, `tools/ingest_critic_results.py` starts from the immutable CI
+index and:
+
+1. regenerates the current assignment for each pass;
+2. validates the raw result against only that assignment's allowed evidence;
+3. verifies exact candidate/pass identity and context-separation attestations;
+4. normalizes the result into a candidate-bound post-CI evidence item;
+5. adds it to the review workspace;
+6. regenerates downstream assignments before validating the next dependent pass.
+
+This means, for example, a cinematic or intent-comparison result cannot be
+accepted before a valid cold-observer result has actually unlocked that pass.
+
+### Final review / release stage
+
+A new Phase 1 preview requires:
+- successful exact-candidate CI evidence;
+- complete/revalidated post-CI critic results required by schema v2;
+- final schema-v2 review record whose evidence exists in the combined workspace;
+- no explicit blocker;
+- candidate not present in human-rejected status;
+- release gate success.
+
+Preview promotion is handled by
+`.github/workflows/promote-preview.yml`, which rebuilds the evidence index and
+revalidates raw critic results again rather than trusting earlier labels.
+
+Level/phase advancement remains a separate gate and requires explicit human
+acceptance for the exact runtime candidate.
+
+### Evidence integrity rule
+
+An **assignment packet is not an observation**.
+
+A raw audio capture is not an audio-quality judgment.
+
+A source/spec file is not player-experience evidence.
+
+A green technical suite is not creative readiness.
+
+The system preserves these distinctions in machine-readable modalities so
+orchestration cannot collapse them into one generic "evidence" bucket.
