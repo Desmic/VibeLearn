@@ -55,6 +55,15 @@ jobs:
       - run: python manage.py test
         if: matrix.suite == 'foundation'
       - run: python manage.py browser --group ${{ matrix.suite }}
+      - name: Build exact-candidate evidence receipt
+        if: always()
+        run: |
+          mkdir -p artifacts
+          python tools/build_evidence_receipt.py \
+            --root artifacts \
+            --candidate "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --suite "${{ matrix.suite }}" \
+            --output "artifacts/evidence-receipt-${{ matrix.suite }}.json"
       - name: Preserve browser evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
