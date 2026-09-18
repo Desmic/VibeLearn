@@ -487,7 +487,8 @@ class PlayCanvasWorld {
     if(!entity||!entity.enabled||!this.available)return null;
     const point=this.camera.camera.worldToScreen(entity.getPosition());
     const rect=this.canvas.getBoundingClientRect();
-    return {x:point.x,y:point.y,visible:point.z>0&&point.x>=0&&point.x<=rect.width&&point.y>=0&&point.y<=rect.height};
+    const inFront=point.z>0;
+    return {x:point.x,y:point.y,inFront,visible:inFront&&point.x>=0&&point.x<=rect.width&&point.y>=0&&point.y<=rect.height};
   }
   async pickEntityIdsAt(clientX,clientY,{radius=7}={}){
     if(this.disposed||!this.available||!this.camera?.camera)return [];
