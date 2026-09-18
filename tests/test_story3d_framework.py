@@ -85,6 +85,13 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertNotIn('vendor_three.py',vendor_block)
         self.assertIn('vendor_playcanvas.py',vendor_block)
 
+    def test_active_prison_wall_leaves_a_real_gate_passage(self):
+        world = (ROOT / 'web' / 'first-words-world.js').read_text(encoding='utf-8')
+        self.assertNotIn("part('prison-back','box'", world)
+        for segment in ('prison-back-left', 'prison-back-right', 'prison-back-top'):
+            self.assertIn(segment, world)
+        self.assertIn("gate('moon',[0,0,-7]", world)
+
     def test_reusable_gate_frame_keeps_open_portal_visually_clear(self):
         props = (ROOT / 'web' / 'rescue-world-props.js').read_text(encoding='utf-8')
         gate = props.split('export function gate(', 1)[1].split('export function tower(', 1)[0]
