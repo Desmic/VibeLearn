@@ -49,6 +49,30 @@ class CriticAssignmentTests(unittest.TestCase):
         self.assertIn("motion_video",modalities)
         self.assertNotIn("review_assignment",modalities)
 
+    def test_cold_observer_context_is_scoped_to_opening_role(self):
+        cold=build_assignments(self.index())["cold_observer"]
+        self.assertEqual(cold["suite_roles"],["opening"])
+        self.assertTrue(cold["allowed_evidence"])
+        self.assertTrue(all(item["suite_role"]=="opening" for item in cold["allowed_evidence"]))
+        self.assertFalse(any("controls/" in item["ref"] or "chapter/" in item["ref"] for item in cold["allowed_evidence"]))
+
+    def test_physicality_context_is_scoped_to_controls_role(self):
+        physical=build_assignments(self.index())["physicality"]
+        self.assertEqual(physical["suite_roles"],["controls"])
+        self.assertTrue(all(item["suite_role"]=="controls" for item in physical["allowed_evidence"]))
+
+    def test_strong_modality_in_wrong_suite_does_not_unlock_pass(self):
+        changed=self.index()
+        replay=changed["receipts"].pop(2)["evidence"][0]
+        changed["receipts"].append({
+            "suite":"foundation",
+            "receipt_ref":"foundation/evidence-receipt-foundation.json",
+            "evidence":[replay],
+        })
+        learning=build_assignments(changed)["learning_transfer"]
+        self.assertEqual(learning["status"],"blocked_missing_evidence")
+        self.assertEqual(learning["missing_evidence"],[["authoritative_replay"]])
+
     def test_assignment_id_changes_when_allowed_evidence_changes(self):
         first=build_assignments(self.index())["cold_observer"]["assignment_id"]
         changed=self.index()
