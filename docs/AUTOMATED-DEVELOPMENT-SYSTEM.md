@@ -3,7 +3,7 @@
 **Status:** approved target architecture / implementation handoff  
 **Date:** 18 September 2026  
 **VibeLearn baseline inspected:** `main` at `a150db3f31fb565ddc28cacf9f41e99ec3eebb16`; current reviewed runtime candidate remains `ad14c5aced6cf053c7617dfb03245506e1e9dad5` per `docs/STATE.md`.  
-**Terminal PM Agent donor baseline inspected:** `Desmic/terminal-agent-20260223023455` `master` at `acc3a6d3580d8ea0715ff807434f973eff4f90d0`.
+**Terminal PM Agent donor baseline:** inspected through the connected private GitHub source. Because VibeLearn is public, the donor repository identifier and exact private revision must remain out of this public document and be captured in the private integration run/evidence record.
 
 This document defines how to merge the useful orchestration/runtime ideas from the Terminal PM Agent into VibeLearn so VibeLearn can become a highly automated product-development and game-generation system.
 
@@ -1051,7 +1051,7 @@ An implementation agent receiving this document should:
 
 1. read `AGENTS.md`, `CODEX.md`, `docs/STATE.md` and this document;
 2. inspect the current VibeLearn repository rather than assuming this document's module suggestions already exist;
-3. inspect `Desmic/terminal-agent-20260223023455` at/after the recorded donor baseline, especially execution/session/evidence/recovery modules;
+3. inspect the connected private Terminal PM Agent donor repository at the privately recorded donor baseline, especially execution/session/evidence/recovery modules; do not copy the private repository URL, credentials or private-only evidence into this public repository;
 4. produce a **small extraction map** of donor capabilities to reuse/adapt versus leave behind;
 5. select the smallest real VibeLearn task that can prove the worker -> reviewer -> evidence loop;
 6. implement Phase 0/Phase 1 only;
