@@ -5,8 +5,8 @@ from pathlib import Path
 
 PASS_SPECS={
     "cold_observer":{
-        "requires":[["motion_video"]],
-        "allowed_modalities":["motion_video","audio_capture","screenshot","runtime_trace"],
+        "requires":[["caption_blind_motion","interactive_trace"]],
+        "allowed_modalities":["caption_blind_motion","motion_video","audio_capture","screenshot","runtime_trace"],
         "forbidden_context":["story treatment","storyboard rationale","creator intent","semantic source identifiers","prior critic scores","user review diagnosis"],
         "output_modality":"cold_observer_report",
         "questions":[
