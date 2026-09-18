@@ -42,6 +42,9 @@ def main():
             page.get_by_role('button',name='Toggle opening sound').click()
             assert page.evaluate('FirstWordsReview.audio.preferences.muted')
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            vanished=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
+                const w=getGameRuntime().world;return ['zip','singer','friend-a'].map(id=>w.projectEntity(id));}""")
+            assert vanished==[None,None,None],vanished
             page.screenshot(path=str(out/'prologue-rupture-complete-390.png'),timeout=15000)
 
             log('Prologue: limbo');page.get_by_role('button',name='Continue →',exact=True).click()
@@ -111,6 +114,7 @@ def main():
                 assert clearance['visible'] and (horizontal_clear or vertical_clear),clearance
                 q.screenshot(path=str(out/f'prologue-lantern-release-{width}.png'),timeout=15000)
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('The sky cracks open.')
+                q.screenshot(path=str(out/f'prologue-rupture-reduced-{width}.png'),timeout=15000)
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('Silence.')
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.get_by_role('button',name='SEALED EXIT',exact=True)).to_be_visible()
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('It takes Zip’s voice.')
