@@ -42,6 +42,7 @@ def main():
             page.get_by_role('button',name='Toggle opening sound').click()
             assert page.evaluate('FirstWordsReview.audio.preferences.muted')
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            page.screenshot(path=str(out/'prologue-rupture-complete-390.png'),timeout=15000)
 
             log('Prologue: limbo');page.get_by_role('button',name='Continue →',exact=True).click()
             expect(page.locator('#rgi-title')).to_have_text('Silence.')
