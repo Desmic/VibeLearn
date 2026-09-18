@@ -88,3 +88,29 @@ The current user is the sole human product critic and final authority.
 ## Platform direction
 
 Story generation should eventually be supported by ideation/research/critic agents operating on versioned StoryWorldSpec artifacts. That multi-agent pipeline is future work. For now, prove the process manually/tool-assisted on the current track and extract reusable story/cinematic primitives only when the game demonstrates their value.
+
+
+## Narration as a story-design choice
+
+Story generation may deliberately choose a narrator, but it must state **why**
+narration improves the experience.
+
+Useful narrator cases include openings, transitions, major events and concise
+bridges where voice/text can create tone or compress context. Not every game
+needs a narrator, and not every event should be narrated.
+
+Current proof-track implementation uses text. Future story packages may specify
+voice narration with synchronized text/subtitles.
+
+The story critic must evaluate narration separately from visual comprehension:
+
+1. With narration ignored, is the setting/action/world-state change still
+   understandable?
+2. What does narration add that the visuals should not have to carry—tone,
+   history, implication, humor, emotional framing?
+3. Is narration concise enough not to turn the game into an illustrated lecture?
+4. If voice is used, does the voice/performance fit the character of the game?
+5. Does muted play retain all essential meaning?
+
+A critic must not award story quality because narration accurately describes an
+event that the rendered world failed to show.
