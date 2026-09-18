@@ -29,8 +29,8 @@ class CriticAssignmentTests(unittest.TestCase):
                     ]
                 },
                 {
-                    "suite":"foundation",
-                    "receipt_ref":"foundation/evidence-receipt-foundation.json",
+                    "suite":"first-words-chapter",
+                    "receipt_ref":"chapter/evidence-receipt-first-words-chapter.json",
                     "evidence":[
                         {"ref":"learning-replay.json","modality":"authoritative_replay","candidate_sha":sha}
                     ]
