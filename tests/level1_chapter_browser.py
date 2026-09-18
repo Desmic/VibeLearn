@@ -9,6 +9,20 @@ from tests.first_words_browser import until
 ROOT=Path(__file__).resolve().parents[1]
 
 
+def skip_opening_to_tutorial(page, *, skip_controls=False):
+    expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000)
+    page.get_by_role('button',name='Skip opening',exact=True).click()
+    expect(page.locator('#rgi-intro')).to_have_count(0,timeout=15000)
+    expect(page.locator('#adventure')).to_have_attribute('data-experience-mode','tutorial',timeout=15000)
+    expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE',timeout=15000)
+    expect(page.get_by_role('button',name='Skip control practice',exact=True)).to_be_visible(timeout=15000)
+    expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+    if skip_controls:
+        page.get_by_role('button',name='Skip control practice',exact=True).click()
+        expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 1/3',timeout=15000)
+        expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
+
+
 def action(page,name,saved_text='Saved'):
     if name=='Connect the power lead' and page.get_by_role('button',name='Skip control practice',exact=True).is_visible():
         page.get_by_role('button',name='Skip control practice',exact=True).click()
@@ -53,8 +67,7 @@ def main():
         try:
             page=browser.new_page(viewport={'width':390,'height':844},has_touch=True)
             page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url+'/first-words')
-            page.get_by_role('button',name='Skip opening',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
-            expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE')
+            skip_opening_to_tutorial(page)
             complete_tutorial(page)
             page.screenshot(path=str(out/'tutorial-first-success-390.png'))
             checks.append('Separate tutorial gives one obvious action at a time, hides optional inspection, restores speech and opens the first door before Level 1 begins.')
@@ -84,7 +97,7 @@ def main():
             for width in (360,430,1280):
                 height=844 if width<500 else 800
                 ctx=browser.new_context(viewport={'width':width,'height':height},has_touch=width<500,reduced_motion='reduce');q=ctx.new_page();q.goto(url+'/first-words')
-                q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved',timeout=15000)
+                skip_opening_to_tutorial(q)
                 complete_tutorial(q);action(q,'Begin Level 1 →')
                 choose(q,'Check route signs','Current notice · “Moon route closed. The tower bell answers the five-point lantern mark.”')
                 choose(q,'Predict the gate','Star');generate(q);action(q,'Finish Level 1 →','Level saved · practice recorded');expect(q.locator('#goal')).to_have_text('The deeper gate is open.',timeout=15000)
