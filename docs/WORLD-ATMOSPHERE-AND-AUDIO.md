@@ -146,3 +146,25 @@ globally. Suggested spec-level values are conceptually:
 Do not implement a voice-generation/provider dependency merely to satisfy this
 future contract. Provider/model/TTS selection remains replaceable platform
 infrastructure when the capability is actually introduced.
+
+## Major-event atmosphere contract
+
+High-impact story events need an effect stack whose perceived magnitude matches
+their narrative importance. This is not a particle-count requirement.
+
+Possible coordinated channels:
+- world/environment motion;
+- lighting/exposure/color shift;
+- weather/fog/sky change;
+- VFX;
+- camera motion/focus;
+- character reactions;
+- SFX;
+- music transition;
+- text/voice narration.
+
+The event designer selects the appropriate subset, but a catastrophic event
+cannot rely on narration while the world remains atmospherically unchanged.
+
+Sound cues for major events should communicate impact/timing/cause, while muted
+play preserves essential causality visually.
