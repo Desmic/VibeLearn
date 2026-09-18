@@ -47,9 +47,23 @@ def build_receipt(assignment:dict,executor_id:str,session_id:str,supplied_eviden
         if key in seen:
             continue
         seen.add(key);normalized.append(dict(item))
+    context_labels=list(supplied_context or ["assignment"])
+    if not context_labels or not all(isinstance(label,str) and label.strip() for label in context_labels):
+        raise ValueError("supplied_context must be a non-empty list of strings")
+    normalized_context=[label.strip().lower() for label in context_labels]
+    if "assignment" not in normalized_context:
+        raise ValueError("execution context must include the assignment capsule")
     forbidden=list(forbidden_context_supplied or [])
     if forbidden:
         raise ValueError("execution receipt contains forbidden context")
+    forbidden_rules=[
+        str(label).strip().lower()
+        for label in assignment.get("forbidden_context") or []
+        if str(label).strip()
+    ]
+    for supplied in normalized_context:
+        if any(rule in supplied or supplied in rule for rule in forbidden_rules):
+            raise ValueError(f"execution supplied forbidden context label: {supplied}")
     value={
         "schema":"vibelearn.critic-execution-receipt.v1",
         "candidate_sha":candidate,
@@ -59,7 +73,7 @@ def build_receipt(assignment:dict,executor_id:str,session_id:str,supplied_eviden
         "session_id":session_id.strip(),
         "context_mode":"assignment_only",
         "supplied_evidence":sorted(normalized,key=lambda x:(x.get("modality",""),x.get("ref",""))),
-        "supplied_context":list(supplied_context or ["assignment"]),
+        "supplied_context":context_labels,
         "forbidden_context_supplied":[],
     }
     value["receipt_id"]=digest_receipt(value)
