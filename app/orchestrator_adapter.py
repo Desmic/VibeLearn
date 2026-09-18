@@ -333,7 +333,23 @@ class VibeLearnAdapter:
     def consume_run(snapshot: Mapping[str, Any], original_run_request: Mapping[str, Any]) -> dict[str, Any]:
         """Return only VibeLearn-facing semantics; never synthesize product acceptance."""
         candidates = snapshot.get("candidate_refs") or []
-        candidate = candidates[-1] if isinstance(candidates, list) and candidates else None
+        if not isinstance(candidates, list):
+            candidates = []
+        active = snapshot.get("active_candidate_ref")
+        candidate = None
+        candidate_selection = "missing"
+        if active is not None:
+            matches = [item for item in candidates if _key(item) == _key(active)]
+            if len(matches) == 1:
+                candidate = copy.deepcopy(matches[0])
+                candidate_selection = "explicit"
+            else:
+                candidate_selection = "invalid_active"
+        elif len(candidates) == 1:
+            candidate = copy.deepcopy(candidates[0])
+            candidate_selection = "single"
+        elif len(candidates) > 1:
+            candidate_selection = "ambiguous"
         candidate_key = _key(candidate) if candidate is not None else None
 
         required = {
@@ -341,13 +357,22 @@ class VibeLearnAdapter:
             for item in (original_run_request.get("review_requirements") or [])
             if item.get("required", True)
         }
-        results = {
-            item.get("requirement_id"): item
-            for item in (snapshot.get("review_results") or [])
-            if isinstance(item, Mapping) and item.get("requirement_id")
-        }
+        results = {}
+        duplicate_review_ids = set()
+        for item in snapshot.get("review_results") or []:
+            if not isinstance(item, Mapping) or not item.get("requirement_id"):
+                continue
+            rid = item["requirement_id"]
+            if rid in results:
+                duplicate_review_ids.add(rid)
+                continue
+            results[rid] = item
         statuses, blocking, stale = {}, [], []
         for rid, requirement in required.items():
+            if rid in duplicate_review_ids:
+                statuses[rid] = "duplicate"
+                blocking.append(rid)
+                continue
             result = results.get(rid)
             if result is None:
                 statuses[rid] = "missing"
@@ -382,9 +407,12 @@ class VibeLearnAdapter:
 
         ready = (
             snapshot.get("state") == "completed"
+            and snapshot.get("orchestration_disposition") == "candidate_available"
             and candidate is not None
+            and candidate_selection in {"single", "explicit"}
             and bool(linked)
             and not blocking
+            and not duplicate_review_ids
         )
         return {
             "run_ref": copy.deepcopy(snapshot.get("run_ref")),
@@ -392,12 +420,14 @@ class VibeLearnAdapter:
             "state": snapshot.get("state"),
             "orchestration_disposition": snapshot.get("orchestration_disposition"),
             "candidate_ref": copy.deepcopy(candidate),
+            "candidate_selection": candidate_selection,
             "candidate_evidence_refs": linked,
             "unlinked_evidence_refs": unlinked,
             "worker_activity_refs": copy.deepcopy(snapshot.get("worker_activity_refs") or []),
             "review_statuses": statuses,
             "blocking_review_ids": sorted(set(blocking)),
             "stale_review_ids": sorted(set(stale)),
+            "duplicate_review_ids": sorted(duplicate_review_ids),
             "ready_for_vibelearn_evaluation": ready,
             "product_acceptance": "undetermined",
         }
