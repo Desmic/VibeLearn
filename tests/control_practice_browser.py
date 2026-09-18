@@ -39,13 +39,15 @@ def main():
                 page.screenshot(path=str(ROOT/f'artifacts/control-practice-menu-open-{width}.png'))
                 expect(page.locator('#menu')).to_be_visible()
                 page.get_by_role('button',name='Close game menu',exact=True).click()
-                expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 1/3')
+                expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 1/4')
                 assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
                 expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible()
                 page.screenshot(path=str(ROOT/f'artifacts/control-practice-handoff-{width}.png'))
-                page.get_by_role('button',name='Connect the power lead',exact=True).click()
-                expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 2/3')
-                page.reload();expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 2/3')
+                with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
+                    page.get_by_role('button',name='Connect the loose power lead',exact=True).click()
+                assert saved.value.ok,saved.value.status
+                expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 2/4')
+                page.reload();expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 2/4')
                 ctx.close()
 
             ctx=browser.new_context(viewport={'width':360,'height':800})
@@ -54,9 +56,9 @@ def main():
             expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE')
             before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
             page.get_by_role('button',name='Skip control practice',exact=True).click()
-            expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 1/3')
+            expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 1/4')
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
-            page.reload();expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 1/3')
+            page.reload();expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 1/4')
             ctx.close()
             print('Control practice: actual movement/camera/menu, reload, skip and evidence isolation passed',flush=True)
         finally:
