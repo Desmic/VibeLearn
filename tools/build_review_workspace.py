@@ -44,7 +44,7 @@ def build_workspace(index:dict,supplemental_root:Path|None=None):
             require(isinstance(modality,str) and modality,
                     f"supplemental critic result has no modality: {path}")
             supplemental.append({
-                "ref":path.relative_to(supplemental_root).as_posix(),
+                "ref":(Path("post-ci")/path.relative_to(supplemental_root)).as_posix(),
                 "modality":modality,
                 "candidate_sha":candidate,
                 "pass":review_pass,
