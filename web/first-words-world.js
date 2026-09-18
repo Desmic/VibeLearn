@@ -171,7 +171,7 @@ function opening(beat){
       {entity:'singer',from:[3.8,0,1],to:[1.1,5.4,7.5],at:1250,duration:1400},
       {entity:'friend-a',from:[-3,0,1],to:[-1.1,4.6,7.2],at:1250,duration:1400}
     ],cues:[
-      {at:180,patch:{show:['storm-flash'],environment:{clearColor:'#e8f4ff',ambient:'#d6e8ff',exposure:2.15,fog:{type:'linear',color:'#b8d5ef',start:18,end:68}}}},
+      {at:180,patch:{show:['storm-flash'],cameraImpulse:{duration:760,intensity:10},environment:{clearColor:'#e8f4ff',ambient:'#d6e8ff',exposure:2.15,fog:{type:'linear',color:'#b8d5ef',start:18,end:68}}}},
       {at:520,patch:{environment:{clearColor:'#07101f',ambient:'#222d49',exposure:.62,fog:{type:'linear',color:'#263650',start:18,end:72}}}},
       {at:850,patch:{hide:['storm-flash']}},
       {at:1200,patch:{animations:{singer:'no','friend-a':'no'}}},
@@ -238,20 +238,20 @@ export const createGameWorld=pkg.createGameWorld;
 export const openingSpec={
   id:'bellweather.opening.v4',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
   scenes:[
-    {beat:0,kicker:'BELLWEATHER · LANTERN NIGHT',title:'One lantern. Three friends.',body:'Your friend made this for the three of you. Send it into the sky.',
+    {beat:0,audioPhase:'home',kicker:'BELLWEATHER · LANTERN NIGHT',title:'One lantern. Three friends.',body:'Your friend made this for the three of you. Send it into the sky.',
       direction:{kind:'establishing',channels:['world','character','camera','interaction','narration'],worldAfter:'The shared lantern is launched and the three friends have visibly acted together.'},
       action:{target:'release-lantern',label:'Send up our lantern',patch:{show:['friendship-lantern'],animations:{zip:'wave'},timeline:{duration:2800,moves:[{entity:'friendship-lantern',from:[-.8,1.1,10.5],to:[0,4.7,8],duration:2600},{entity:'singer',from:[3.8,0,1],to:[2.4,0,1],duration:1000},{entity:'friend-a',from:[-3,0,1],to:[-1.8,0,1],duration:1000}],finish:{animations:{zip:'yes'}}}}},
       success:{body:'Three lights rise above your home.',dialogue:'“Same time next year. All three of us.”'}},
-    {beat:1,kicker:'WITHOUT WARNING',title:'The sky cracks open.',body:'Thunder. A white rift tears through the square—and pulls everyone away.',
+    {beat:1,audioPhase:'danger',audioCue:'rupture',kicker:'WITHOUT WARNING',title:'The sky cracks open.',body:'Thunder. A white rift tears through the square—and pulls everyone away.',
       direction:{kind:'major-event',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','lighting','vfx','audio','narration'],worldAfter:'Bellweather is disrupted and Zip plus both friends are gone from the square.'}},
-    {beat:2,kicker:'SOMEWHERE ELSE',title:'Silence.',body:'Zip wakes alone. No market. No friends. Bellweather is gone.',
+    {beat:2,audioPhase:'danger',kicker:'SOMEWHERE ELSE',title:'Silence.',body:'Zip wakes alone. No market. No friends. Bellweather is gone.',
       direction:{kind:'transition',channels:['world','character','camera','lighting','narration'],worldAfter:'Zip is isolated in an unknown dark location.'}},
-    {beat:3,kicker:'THEN THE LIGHTS COME ON',title:'This is not home.',body:'Cold walls. One enormous locked door. No obvious way back.',
+    {beat:3,audioPhase:'danger',kicker:'THEN THE LIGHTS COME ON',title:'This is not home.',body:'Cold walls. One enormous locked door. No obvious way back.',
       direction:{kind:'transition',channels:['world','camera','lighting','narration'],worldAfter:'The prison chamber and sealed route are spatially established.'},
       markers:[{entity:'moon-label',label:'SEALED EXIT',offset:[0,-8]}]},
-    {beat:4,kicker:'THE WARDEN',title:'It takes Zip’s voice.',body:'The Warden removes the speech engine. The door stays sealed.',
+    {beat:4,audioPhase:'danger',audioCue:'wrong',kicker:'THE WARDEN',title:'It takes Zip’s voice.',body:'The Warden removes the speech engine. The door stays sealed.',
       direction:{kind:'antagonist-action',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','vfx','audio','narration'],worldAfter:'The speech engine is visibly absent from Zip and possessed by the Warden.'}},
-    {beat:5,kicker:'ONE THING STILL WORKS',title:'Get the words back.',body:'A repair socket still has power. Restore enough speech to open the door.',
+    {beat:5,audioPhase:'repair',kicker:'ONE THING STILL WORKS',title:'Get the words back.',body:'A repair socket still has power. Restore enough speech to open the door.',
       direction:{kind:'handoff',channels:['world','character','camera','interaction','narration'],worldAfter:'Direct control begins with one clear repair objective and target.'},
       markers:[{entity:'loose-plug',label:'REPAIR SOCKET',offset:[0,-8]}]}
   ]
