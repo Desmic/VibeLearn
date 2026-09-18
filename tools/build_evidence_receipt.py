@@ -15,6 +15,9 @@ def modality_for(path: Path):
         return "cold_observer_report"
     if name.endswith("trace.zip"):
         return "interactive_trace"
+    if (name.endswith("-audio.wav") or name.endswith("-audio.mp3") or
+        name.endswith("-audio.ogg") or name.endswith("-audio.m4a")):
+        return "audio_capture"
     if suffix in {".webm", ".mp4", ".mov"}:
         return "motion_video"
     if suffix in {".png", ".jpg", ".jpeg", ".webp"}:
