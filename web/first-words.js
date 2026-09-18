@@ -97,7 +97,7 @@ function render(){
   else if(s.round===1&&s.clue==='none')button('Check route signs','notices');
   else if(s.round===1&&s.prediction==='none'){button('Predict the gate','predict');button('Ask for a hint','hint',false);}
   else if(s.round===1&&!s.available_actions?.includes('step')&&s.loop_prediction==='none'&&s.available_actions?.some(a=>a.startsWith('loop-')))button('Continue saved run','loop');
-  else{button(s.pieces<4?'Next word':'Speak to gate →',s.pieces<4?'step':'send');if(s.round===1&&s.pieces===0)button('Check route signs','notices',false);}
+  else{button(s.pieces===0?'Make first word':s.pieces<4?'Next word':'Speak to gate →',s.pieces<4?'step':'send');if(s.round===1&&s.pieces===0)button('Check route signs','notices',false);}
   $('#rewind').hidden=complete||!s.powered||s.status==='success'||s.pieces===0;
   text('#saved',session.busy?'Saving…':session.pending?'Not saved · retry available':complete?'Level saved · practice recorded':'Saved');
   let scene;
