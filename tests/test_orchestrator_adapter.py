@@ -245,6 +245,21 @@ class OrchestratorAdapterTests(unittest.TestCase):
         self.assertEqual(error.exception.code, "UNSUPPORTED_CAPABILITY")
         self.assertFalse(any(call[0] == "start_run" for call in transport.calls))
 
+    def test_required_review_semantics_derive_hard_capabilities(self):
+        fixture = self.fixture()
+        value = fixture["start_request"]
+        value["required_capabilities"] = [
+            item for item in value["required_capabilities"]
+            if not item.startswith("review.")
+        ]
+        transport = FakeTransport()
+        transport.descriptor["review"]["independent_context"] = False
+        with self.assertRaises(ContractError) as error:
+            VibeLearnAdapter(transport).start_run(value)
+        self.assertEqual(error.exception.code, "UNSUPPORTED_CAPABILITY")
+        self.assertIn("review.independent_context", str(error.exception))
+        self.assertFalse(any(call[0] == "start_run" for call in transport.calls))
+
     def test_hard_budget_does_not_downgrade_to_observed_only(self):
         transport = FakeTransport()
         value = request()
