@@ -106,7 +106,7 @@ part('warden-head','box','ink',[0,3,0],[1.35,.85,1],{parent:'warden'});
 part('warden-eye','box','redGlow',[0,3.05,.53],[.88,.11,.06],{parent:'warden'});
 part('warden-crown','cone','gold',[0,3.75,0],[.82,.82,.68],{parent:'warden'});
 part('warden-hand','box','gold',[-1,1.8,.18],[.34,.9,.38],{parent:'warden'});
-part('stolen-voice','box','mint',[0,1.1,-27.5],[.62,.62,.62],{rotation:[0,30,15],enabled:false});
+part('stolen-voice','box','mint',[0,1.1,-27.5],[.95,.95,.95],{rotation:[0,30,15],enabled:false});
 
 const revealGroups=[
   ['prison-floor'],
@@ -123,11 +123,11 @@ export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'
   entities:e,
   lights:[{id:'sunlight',type:'directional',color:'#ffd8aa',intensity:.9,rotation:[45,-35,0],castShadows:true},{id:'sky-light',type:'directional',color:'#a6bce4',intensity:.4,rotation:[50,150,0]}],
   cameras:{
-    home:{position:[15,12,30],lookAt:[0,1.5,10],fov:50,portrait:{position:[3,16,41],lookAt:[0,1.5,12],fov:50}},
+    home:{position:[10,8,25],lookAt:[0,1.4,10],fov:46,portrait:{position:[3,10,32],lookAt:[0,1.4,10],fov:46}},
     rupture:{position:[11,9,26],lookAt:[0,2,9],fov:48,portrait:{position:[7,12,31],lookAt:[0,2,9],fov:48}},
     limbo:{position:[5,4,-20],lookAt:[0,1,-28],fov:46,portrait:{position:[3.5,6,-18],lookAt:[0,1,-28],fov:46}},
     reveal:{position:[1,8,-16],lookAt:[0,2,-33],fov:52,portrait:{position:[1,13,-5],lookAt:[0,3,-32],fov:50}},
-    theft:{position:[1.5,5,-18],lookAt:[1.5,1.8,-30],fov:50,portrait:{position:[1.5,8,-9],lookAt:[1.5,1.8,-30],fov:50}}
+    theft:{position:[2.5,4,-18],lookAt:[1.2,1.7,-29],fov:44,portrait:{position:[2.5,6,-14],lookAt:[1.2,1.7,-29],fov:44}}
   },
   states:{arrival:{camera:'reveal'}},
   player:characterControlProfile({entity:'zip',spawn:[0,0,-28],speed:3.2,surfaces:[
