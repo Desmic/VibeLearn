@@ -4,6 +4,8 @@ import json
 import re
 from pathlib import Path
 
+from tools.critic_execution_receipt import validate_receipt
+
 HEX40=re.compile(r"^[0-9a-f]{40}$")
 PASS_RESULT_MODALITY={
     "cold_observer":"cold_observer_report",
@@ -20,7 +22,7 @@ def load(path:Path):
         raise ValueError(f"{path} must contain an object")
     return value
 
-def validate_result(assignment:dict,result:dict):
+def validate_result(assignment:dict,result:dict,execution_receipt:dict|None=None):
     def require(ok,message):
         if not ok: raise ValueError(message)
 
@@ -36,6 +38,10 @@ def validate_result(assignment:dict,result:dict):
     require(result.get("pass")==review_pass,"critic result belongs to a different pass")
     require(assignment.get("status")=="ready","cannot submit a result for a blocked critic assignment")
     require(result.get("verdict") in ALLOWED_VERDICTS,"invalid critic verdict")
+    require(isinstance(execution_receipt,dict),"critic execution receipt is required")
+    normalized_receipt=validate_receipt(assignment,execution_receipt)
+    require(result.get("execution_receipt_id")==normalized_receipt["receipt_id"],
+            "critic result belongs to a different execution receipt")
 
     attestation=result.get("context_attestation")
     require(isinstance(attestation,dict),"context_attestation is required")
@@ -77,11 +83,17 @@ def validate_result(assignment:dict,result:dict):
         for item in assignment.get("allowed_evidence") or []
         if isinstance(item,dict)
     }
+    supplied={
+        (item.get("ref"),item.get("modality"),item.get("candidate_sha"))
+        for item in normalized_receipt.get("supplied_evidence") or []
+        if isinstance(item,dict)
+    }
     used_modalities=set()
     for item in used:
         require(isinstance(item,dict),"used_evidence entries must be objects")
         key=(item.get("ref"),item.get("modality"),item.get("candidate_sha"))
         require(key in allowed,f"critic used evidence outside its assignment: {item.get('ref')}")
+        require(key in supplied,f"critic used evidence not supplied by execution harness: {item.get('ref')}")
         used_modalities.add(item.get("modality"))
     for alternatives in assignment.get("required_evidence_groups") or []:
         require(isinstance(alternatives,list) and alternatives,"assignment required-evidence group is invalid")
@@ -97,6 +109,9 @@ def validate_result(assignment:dict,result:dict):
         "schema":"vibelearn.validated-critic-result.v1",
         "candidate_sha":candidate,
         "assignment_id":assignment_id,
+        "execution_receipt_id":normalized_receipt["receipt_id"],
+        "executor_id":normalized_receipt["executor_id"],
+        "session_id":normalized_receipt["session_id"],
         "pass":review_pass,
         "modality":normalized_modality,
         "verdict":result["verdict"],
@@ -113,10 +128,13 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--assignment",type=Path,required=True)
     parser.add_argument("--result",type=Path,required=True)
+    parser.add_argument("--execution-receipt",type=Path,required=True)
     parser.add_argument("--output",type=Path,required=True)
     args=parser.parse_args()
     try:
-        normalized=validate_result(load(args.assignment),load(args.result))
+        normalized=validate_result(
+            load(args.assignment),load(args.result),load(args.execution_receipt)
+        )
     except ValueError as exc:
         print(json.dumps({"status":"invalid_critic_result","error":str(exc)}))
         return 2
