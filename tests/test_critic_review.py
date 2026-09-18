@@ -146,6 +146,16 @@ class CriticReviewTests(unittest.TestCase):
         self.assertEqual(result["user_acceptance"], "not_determined_by_tool")
         self.assertEqual(set(result["gate_minimums"]), set(V2_GATES))
 
+    def test_v2_review_assignment_cannot_substitute_for_cold_observer_report(self):
+        record = self.v2_record()
+        (self.root / "assignment.json").write_text("assignment", encoding="utf-8")
+        record["criteria"]["world_comprehension"]["evidence"] = [
+            {"ref": "assignment.json", "modality": "review_assignment", "candidate_sha": self.sha},
+            {"ref": "motion.webm", "modality": "motion_video", "candidate_sha": self.sha},
+        ]
+        with self.assertRaisesRegex(ValueError, "world_comprehension: evidence needs"):
+            self.check(record)
+
     def test_v2_motion_claim_cannot_use_screenshot_only(self):
         record = self.v2_record()
         record["criteria"]["motion_direction"]["evidence"] = [{
