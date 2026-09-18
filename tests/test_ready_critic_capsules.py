@@ -21,6 +21,7 @@ class ReadyCriticCapsuleTests(unittest.TestCase):
                 ("opening/motion.webm","motion_video"),
                 ("opening/audio.webm","audio_capture"),
                 ("controls/trace.json","interactive_trace"),
+                ("tutorial/trace.json","interactive_trace"),
                 ("chapter/replay.json","authoritative_replay"),
                 ("foundation/source.tar","source_inspection"),
             ]
@@ -44,6 +45,13 @@ class ReadyCriticCapsuleTests(unittest.TestCase):
                     {
                         "suite":"first-words-controls",
                         "receipt_ref":"controls/evidence-receipt.json",
+                        "evidence":[
+                            {"ref":"trace.json","modality":"interactive_trace","candidate_sha":sha},
+                        ],
+                    },
+                    {
+                        "suite":"first-words-tutorial",
+                        "receipt_ref":"tutorial/evidence-receipt.json",
                         "evidence":[
                             {"ref":"trace.json","modality":"interactive_trace","candidate_sha":sha},
                         ],
