@@ -111,3 +111,38 @@ Do not make the current track wait for a universal asset system. Extract these o
 Review moving sequences from multiple camera angles, not only hero screenshots. Check desktop and 360/390/430 portrait, movement/orbit/zoom, clipping/intersections, negative space, world density, landmark readability and before/after atmosphere.
 
 A scene fails even if attractive when it is cramped, confusing to inhabit, only works from one camera, or uses decoration that obscures play.
+
+
+## Narration direction — text now, optional voice later
+
+Narration is a first-class but **optional** presentation layer.
+
+For the current proof track, narration remains text-based. Future generated games
+may use a narrator voice where it materially improves storytelling, particularly
+for:
+
+- prologues/opening scenes;
+- chapter/location/time transitions;
+- major reveals or world-changing events;
+- brief emotional or thematic bridges.
+
+Narration must never compensate for a world that is not visually understandable.
+The scene still has to establish place, activity, action and consequence through
+environment, animation, staging and camera. Narration may add tone, context,
+compression and flavor after that visual foundation exists.
+
+Narrator voice requirements:
+- equivalent subtitle/text representation;
+- complete comprehension when muted;
+- separate control from music/effects where appropriate;
+- no essential instruction or learning evidence delivered only through voice;
+- pacing that respects user-controlled/reduced-motion presentation;
+- a voice/personality that fits the game's audience and creative direction.
+
+Game packages should explicitly choose narration mode rather than inheriting one
+globally. Suggested spec-level values are conceptually:
+`none | text | voice_with_text`. The current runtime uses `text`.
+
+Do not implement a voice-generation/provider dependency merely to satisfy this
+future contract. Provider/model/TTS selection remains replaceable platform
+infrastructure when the capability is actually introduced.
