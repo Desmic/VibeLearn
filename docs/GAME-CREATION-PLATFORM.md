@@ -171,3 +171,22 @@ voice support should preserve:
 Voice narration does not relax the visual-storytelling contract. Generated worlds
 must still communicate setting, activity, action and consequence through their
 own visuals and motion.
+
+## Evidence-first quality system
+
+`EXPERIENCE-QUALITY-SYSTEM.md` is a first-class platform contract.
+
+Future game creation should produce reviewable artifacts/specs for:
+- cold-start comprehension;
+- major-event causality;
+- semantic-object readability;
+- animation direction;
+- physicality/collision;
+- mode transitions/handoffs;
+- tutorial steps;
+- learning/transfer.
+
+The platform should prevent structurally invalid experiences where feasible
+(schema/runtime constraints), then use independent critics for judgment/taste.
+Do not encode every current-game failure as a special case; extract the reusable
+contract and prove it in this game plus later materially different games.
