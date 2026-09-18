@@ -40,6 +40,12 @@ class SequentialCriticIngestionTests(unittest.TestCase):
                     "receipt_ref":"foundation/evidence-receipt.json",
                     "evidence":[
                         {"ref":"review-source.tar","modality":"source_inspection","candidate_sha":self.sha},
+                    ],
+                },
+                {
+                    "suite":"first-words-chapter",
+                    "receipt_ref":"chapter/evidence-receipt.json",
+                    "evidence":[
                         {"ref":"learning-replay.json","modality":"authoritative_replay","candidate_sha":self.sha},
                     ],
                 },
