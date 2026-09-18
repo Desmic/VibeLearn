@@ -13,6 +13,8 @@ export function validateOpeningSpec(spec){
   for(const scene of spec.scenes){
     if(typeof scene.title!=='string'||!Number.isInteger(scene.beat))throw Error('Invalid opening scene');
     if(scene.action&&(!scene.action.target||!scene.action.label))throw Error('Invalid opening action');
+    if(scene.audioCue!==undefined&&(!/^[a-z0-9._:-]+$/i.test(scene.audioCue)))throw Error('Invalid opening audio cue');
+    if(scene.audioPhase!==undefined&&(!/^[a-z0-9._:-]+$/i.test(scene.audioPhase)))throw Error('Invalid opening audio phase');
     for(const marker of scene.markers||[])if(marker.offset&&(!Array.isArray(marker.offset)||marker.offset.length!==2||!marker.offset.every(Number.isFinite)))throw Error('Invalid marker offset');
     if(spec.directionVersion==='1'){
       const d=scene.direction;
