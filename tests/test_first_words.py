@@ -90,6 +90,16 @@ class FirstWordsTests(unittest.TestCase):
         response=copy.deepcopy(self.attempt['response']);response['word_machine']['moves']=[]
         with self.assertRaises(service.DomainError):service.command(self.path,self.learner,'save',{'command_id':str(uuid4()),'expected_revision':self.attempt['revision'],'attempt_id':self.attempt['id'],'response':response})
 
+    def test_wrong_human_prediction_does_not_override_current_context(self):
+        for move in FIRST+['next','scan-star','predict-moon']+['step']*4+['send']:self.action(move)
+        state=self.attempt['word_machine_state']
+        self.assertEqual(state['status'],'success')
+        self.assertEqual(state['output'],['Open','the','Star','gate'])
+        self.action('finish');result=self.attempt['assessment']['transfer_observations']
+        self.assertTrue(result['relevant_context'])
+        self.assertEqual(result['predicted_destination'],'moon')
+        self.assertFalse(result['prediction_matches_supplied_context'])
+
     def test_hints_and_unrelated_notice_do_not_claim_transfer(self):
         for move in FIRST+['next','scan-parade','hint','predict-star']+['step']*4+['send','scan-star']+['step']*4+['send']:self.action(move)
         self.action('finish');result=self.attempt['assessment']['transfer_observations']
