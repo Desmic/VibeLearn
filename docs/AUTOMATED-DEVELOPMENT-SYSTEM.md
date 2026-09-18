@@ -1354,3 +1354,40 @@ A green technical suite is not creative readiness.
 
 The system preserves these distinctions in machine-readable modalities so
 orchestration cannot collapse them into one generic "evidence" bucket.
+
+
+## 5.5 Harness-side critic execution receipts
+
+The `ad14c5a` failure showed that a reviewer saying "I was independent" is not
+enough evidence of independence.
+
+For every post-CI critic execution, the **orchestrator**, not the reviewer,
+records a candidate/assignment-bound execution receipt.
+
+Protocol:
+
+1. generate the pass assignment from the immutable candidate workspace;
+2. launch a fresh reviewer session using only the assignment capsule;
+3. record exactly which evidence/context was mounted into that session;
+4. create `vibelearn.critic-execution-receipt.v1` with
+   `tools/critic_execution_receipt.py`;
+5. give the reviewer only the allowed context/evidence;
+6. reviewer emits `vibelearn.critic-result.v1` including the receipt ID;
+7. ingestion rejects results whose assignment/receipt/evidence do not match.
+
+The receipt captures:
+- executor identity;
+- reviewer session identity;
+- exact candidate and assignment ID;
+- supplied evidence;
+- supplied context labels;
+- any forbidden context (hard failure).
+
+This is intentionally adapter-neutral. Terminal Agent, future Work agents, CI
+review workers or other reviewer backends can implement the same receipt
+contract.
+
+A receipt does not prove taste or semantic independence cryptographically. Its
+job is to make context leakage **observable and traceable**, so a later incident
+can answer "what did this critic actually receive?" rather than relying on a
+prompt's claim.
