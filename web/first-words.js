@@ -217,10 +217,11 @@ function frame(){
       if(tutorialTarget){
         const clampedY=Math.max(safeTop,Math.min(safeBottom,desiredY));
         marker.style.top=clampedY+'px';
-        marker.classList.toggle('edge-cued',Math.abs(clampedY-desiredY)>2);
+        const edge=desiredY<safeTop?'top':desiredY>safeBottom?'bottom':'';
+        marker.classList.toggle('edge-cued',Boolean(edge));marker.dataset.edge=edge;
       }else{
         marker.style.top=desiredY+'px';
-        marker.classList.remove('edge-cued');
+        marker.classList.remove('edge-cued');delete marker.dataset.edge;
         if(point.y>tray.top-rect.top||point.y<safeTop)marker.hidden=true;
       }
     }
