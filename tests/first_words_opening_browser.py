@@ -35,11 +35,7 @@ def main():
 
             log('Prologue: rupture');page.get_by_role('button',name='Continue →',exact=True).click()
             expect(page.locator('#rgi-title')).to_have_text('The sky cracks open.')
-            until(page,"""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
-                const w=getGameRuntime().world;
-                const warden=w.projectEntity('warden'),link=w.projectEntity('warden-rift-link-pulse-3'),rift=w.projectEntity('rift');
-                return Boolean(warden?.visible&&link?.visible&&!rift);
-            }""")
+            page.get_by_role('button',name='Pause story motion').click()
             cause_before=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
                 const w=getGameRuntime().world;return {
                   warden:w.projectEntity('warden'),
@@ -50,6 +46,7 @@ def main():
             assert cause_before['link'] and cause_before['link']['visible'],cause_before
             assert cause_before['rift'] is None,cause_before
             page.screenshot(path=str(out/'prologue-rupture-cause-before-effect-390.png'),timeout=15000)
+            page.get_by_role('button',name='Resume story motion').click()
             until(page,"""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
                 return Boolean(getGameRuntime().world.projectEntity('rift')?.visible);
             }""")
