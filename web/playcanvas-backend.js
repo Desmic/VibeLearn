@@ -203,6 +203,19 @@ class PlayCanvasWorld {
     return false;
   }
 
+  _applyEnvironment(patch={}){
+    const base=this.spec.environment||{},fog={...(base.fog||{type:'none'}),...(patch.fog||{})};
+    const env={...base,...patch,fog};
+    if(env.ambient)this.app.scene.ambientLight=color(env.ambient);
+    if(Number.isFinite(env.exposure))this.app.scene.exposure=env.exposure;
+    this.app.scene.fog.type=FOG_TYPES[fog.type||'none'];
+    if(fog.color)this.app.scene.fog.color=color(fog.color);
+    if(Number.isFinite(fog.start))this.app.scene.fog.start=fog.start;
+    if(Number.isFinite(fog.end))this.app.scene.fog.end=fog.end;
+    if(Number.isFinite(fog.density))this.app.scene.fog.density=fog.density;
+    if(env.clearColor&&this.camera?.camera)this.camera.camera.clearColor=color(env.clearColor);
+  }
+
   _createEntity(def){
     const entity=new pc.Entity(def.id);
     entity.enabled=def.enabled!==false;
@@ -352,6 +365,7 @@ class PlayCanvasWorld {
   }
 
   _reset(){
+    this._applyEnvironment({});
     for(const [id,base] of this.baseline){
       const entity=this.entities.get(id);
       entity.enabled=base.enabled;
@@ -389,6 +403,7 @@ class PlayCanvasWorld {
   }
 
   applyPatch(patch={}){
+    if(patch.environment)this._applyEnvironment(patch.environment);
     for(const id of patch.show||[]){const entity=this.entities.get(id);if(entity)entity.enabled=true;}
     for(const id of patch.hide||[]){const entity=this.entities.get(id);if(entity)entity.enabled=false;}
     for(const [id,transform] of Object.entries(patch.transforms||{})){
