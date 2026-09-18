@@ -1,0 +1,23 @@
+{
+  "schema": "vibelearn.quality-status.v1",
+  "phase": "phase1_system_repair",
+  "level2_allowed": false,
+  "deployed_preview": {
+    "candidate_sha": "ad14c5aced6cf053c7617dfb03245506e1e9dad5",
+    "verdict": "rejected",
+    "user_review_complete": true,
+    "note": "User ended review after systemic storytelling, motion, physicality and tutorial failures."
+  },
+  "rejected_candidates": [
+    "6fea8287aa5f078a5836902478320699e54571a9",
+    "ad14c5aced6cf053c7617dfb03245506e1e9dad5"
+  ],
+  "accepted_candidates": [],
+  "policy": {
+    "preview_requires_review_schema": 2,
+    "preview_requires_status": "ready_for_user_review",
+    "phase_advance_requires_human_acceptance": true,
+    "manual_preview_override_requires_explicit_user_request": true,
+    "manual_preview_override_forbidden_for_known_rejected_candidate": true
+  }
+}
