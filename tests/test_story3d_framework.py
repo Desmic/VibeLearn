@@ -100,6 +100,38 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn("id:id+'-door'", gate)
         self.assertIn("parent:id+'-door'", gate)
 
+    def test_quality_system_contracts_are_runtime_backed(self):
+        world_spec = (ROOT / 'web' / 'world-spec.js').read_text(encoding='utf-8')
+        backend = (ROOT / 'web' / 'playcanvas-backend.js').read_text(encoding='utf-8')
+        controls = (ROOT / 'web' / 'player-controls.js').read_text(encoding='utf-8')
+        opening = (ROOT / 'web' / 'game-opening.js').read_text(encoding='utf-8')
+        props = (ROOT / 'web' / 'rescue-world-props.js').read_text(encoding='utf-8')
+        world = (ROOT / 'web' / 'first-words-world.js').read_text(encoding='utf-8')
+
+        # Physicality belongs to world entities/archetypes, not only a player obstacle list.
+        self.assertIn("if(entity.collider)collider(", world_spec)
+        self.assertIn("_playerBlocked(", backend)
+        self.assertIn("isPlayerBlocked:", backend)
+        self.assertIn("collider:{shape:'box'", props)
+
+        # Asset-backed controlled characters need explicit motion direction and the
+        # backend actually consumes it instead of silently inheriting stock idle.
+        self.assertIn("asset-backed player requires explicit player.animations", world_spec)
+        self.assertIn("_setPlayerMoving(", backend)
+        self.assertIn("animationSpeeds:{idle:0,move:1}", world)
+
+        # Major semantic objects and cinematic events carry machine-checkable intent.
+        self.assertIn("major object needs at least two readability channels", world_spec)
+        self.assertIn("export function capabilityModule", props)
+        self.assertIn("directionVersion:'1'", world)
+        self.assertIn("Major opening event needs at least four coordinated channels", opening)
+        self.assertIn("Visible antagonist action needs cause.entity", opening)
+
+        # Tutorial progression is represented as a reusable flow rather than only copy.
+        self.assertIn("export function createTutorialFlow", controls)
+        self.assertIn("skill:'move protagonist'", controls)
+        self.assertIn("success:'protagonist position changed'", controls)
+
     def test_game_asset_vendor_is_pinned_and_verified(self):
         vendor = (ROOT / 'tools' / 'vendor_game_assets.py').read_text(encoding='utf-8')
         manage = (ROOT / 'manage.py').read_text(encoding='utf-8')
