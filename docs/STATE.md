@@ -1,5 +1,55 @@
 # Current state — LLM learning-game proof track
 
+## System-repair checkpoint — 18 September 2026
+
+The current deployed runtime `ad14c5aced6cf053c7617dfb03245506e1e9dad5`
+is **rejected**. The user ended further review because the opening, cinematic
+direction, physicality and onboarding still failed despite prior internal 9/10
+claims.
+
+Do not ask the user to continue reviewing this candidate. Do not start Level 2.
+The active work is now **system repair**, using the current game as the proof case.
+
+Failures that must be solved generically:
+- cold-start world/setting comprehension;
+- major-event direction (cause, reaction, VFX/light/audio/atmosphere,
+  consequence);
+- intended antagonist causality;
+- semantic readability of important story objects;
+- character animation/motion direction;
+- world-owned collision/physicality;
+- mutually exclusive experience modes;
+- opening -> tutorial handoff;
+- tutorial target/action/success clarity;
+- critic evidence quality and reviewer-context leakage.
+
+`docs/EXPERIENCE-QUALITY-SYSTEM.md` is the new quality-system contract.
+
+Implementation already started:
+- WorldSpec entity colliders are being introduced so reusable world objects own
+  physicality instead of relying on a separate remembered obstacle list;
+- PlayCanvas player/camera navigation now queries enabled world colliders;
+- reusable prop kits are being given collider intent;
+- asset-backed player characters now require an explicit motion profile;
+- Zip's current rest profile deliberately freezes the stock standing loop rather
+  than silently inheriting the bundled default animation.
+
+Next system slices:
+1. finish collision regressions and validate traversal;
+2. add reusable major-event/cinematic-direction metadata + evidence;
+3. add semantic-story-object readability contract;
+4. enforce single active experience mode and a reusable transition/handoff
+   contract;
+5. replace the ad-hoc tutorial with explicit tutorial-step specs;
+6. improve critic evidence: cold observer first, motion/audio/traversal evidence,
+   then design-intent comparison;
+7. rebuild the opening/tutorial using those system capabilities;
+8. re-run independent critics before any new user review.
+
+Render may remain on the rejected review build until a replacement candidate is
+verified; it is not an accepted release.
+
+
 ## Live user review checkpoint — 18 September 2026
 
 Deployed runtime under review:
