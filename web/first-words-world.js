@@ -301,6 +301,48 @@ export const controlTutorialSpec={
   ]
 };
 
+
+export const speechRepairTutorialSpec={
+  id:'first-words-speech-repair',version:'1',
+  steps:[
+    {
+      id:'connect',stage:'TUTORIAL · REPAIR 1/4',title:'Restore power to your speech engine.',
+      detail:'The loose lead beside the repair station is highlighted. Connect it to wake the engine.',
+      feedback:'The repair socket lights and the speech module powers on.',
+      when:{round:0,powered:false},success:{powered:true},
+      target:'loose-plug',focus:'world',actions:['connect'],primaryAction:'connect',actionLabel:'Connect the power lead'
+    },
+    {
+      id:'scan',stage:'TUTORIAL · REPAIR 2/4',title:'Give the engine the visible clue.',
+      detail:'The large exit is marked with a Moon. Scan that lock so the clue becomes part of the engine input.',
+      feedback:'The Moon clue appears in the speech-engine input.',
+      when:{round:0,powered:true,status:'building',clue:'none'},success:{clue:'moon'},
+      target:'moon-label',focus:'world',actions:['scan-moon'],primaryAction:'scan-moon',actionLabel:'Scan the Moon lock'
+    },
+    {
+      id:'build',stage:'TUTORIAL · REPAIR 3/4',title:'Build the command one word at a time.',
+      detail:'Run the speech engine. Each chosen word becomes part of the next input.',
+      feedback:'A new word appears in the command and joins the next input.',
+      when:{round:0,powered:true,status:'building',clue:{neq:'none'},pieces:{lt:4}},success:{pieces:{gte:1}},
+      target:'socket',focus:'hud',actions:['step'],primaryAction:'step',actionLabel:'Make next word'
+    },
+    {
+      id:'speak',stage:'TUTORIAL · REPAIR 4/4',title:'Use the completed sentence on the gate.',
+      detail:'The four-word command is ready. Speak it to the Moon gate and watch the world respond.',
+      feedback:'The Moon gate opens and the route beyond becomes visible.',
+      when:{round:0,powered:true,status:'building',pieces:{gte:4}},success:{status:'success'},
+      target:'moon-label',focus:'world',actions:['send'],primaryAction:'send',actionLabel:'Speak to gate →'
+    },
+    {
+      id:'complete',stage:'TUTORIAL · COMPLETE',title:'You can speak again.',
+      detail:'The first door is open. The real mission now changes the context and removes most of the guidance.',
+      feedback:'Level 1 becomes available beyond the opened route.',
+      when:{round:0,status:'success'},success:{round:{gte:1}},
+      target:'moon-door',focus:'world',actions:['next'],primaryAction:'next',actionLabel:'Begin Level 1 →'
+    }
+  ]
+};
+
 export const openingSpec={
   id:'bellweather.opening.v6',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
   scenes:[
