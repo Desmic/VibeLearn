@@ -1,13 +1,22 @@
 import copy
+import tempfile
 import unittest
+from pathlib import Path
 
-from tools.validate_critic_result import validate_result
 from tools.critic_execution_receipt import build_receipt
+from tools.materialize_critic_capsule import materialize
+from tools.validate_critic_result import validate_result
 
 
 class CriticResultValidationTests(unittest.TestCase):
     def setUp(self):
+        self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
+        self.root=Path(self.temp.name)/"workspace";self.root.mkdir()
+        self.capsule_dir=Path(self.temp.name)/"capsule"
         self.sha="a"*40
+        (self.root/"opening").mkdir()
+        (self.root/"opening"/"prologue-caption-blind.webm").write_bytes(b"motion")
+        (self.root/"opening"/"prologue-audio.webm").write_bytes(b"audio")
         self.evidence=[
             {"ref":"opening/prologue-caption-blind.webm","modality":"caption_blind_motion","candidate_sha":self.sha},
             {"ref":"opening/prologue-audio.webm","modality":"audio_capture","candidate_sha":self.sha},
@@ -25,12 +34,14 @@ class CriticResultValidationTests(unittest.TestCase):
             "questions":["What world is shown?"],
             "expected_output_modality":"cold_observer_report",
         }
+        self.capsule=materialize(self.assignment,self.root,self.capsule_dir)
         self.receipt=build_receipt(
             self.assignment,
             "test-harness",
             "session-1",
             copy.deepcopy(self.evidence),
             ["assignment"],
+            capsule_id=self.capsule["capsule_id"],
         )
         self.result={
             "schema":"vibelearn.critic-result.v1",
@@ -58,6 +69,7 @@ class CriticResultValidationTests(unittest.TestCase):
         self.assertEqual(result["pass"],"cold_observer")
         self.assertEqual(result["modality"],"cold_observer_report")
         self.assertEqual(result["verdict"],"unresolved")
+        self.assertEqual(result["capsule_id"],self.capsule["capsule_id"])
 
     def test_execution_receipt_is_required(self):
         with self.assertRaisesRegex(ValueError,"execution receipt is required"):
@@ -75,6 +87,7 @@ class CriticResultValidationTests(unittest.TestCase):
             "session-2",
             [copy.deepcopy(self.evidence[1])],
             ["assignment"],
+            capsule_id=self.capsule["capsule_id"],
         )
         result=copy.deepcopy(self.result)
         result["execution_receipt_id"]=narrow["receipt_id"]
