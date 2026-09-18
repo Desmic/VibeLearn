@@ -1,40 +1,68 @@
 # Game acceptance — the user's verdict is final
 
-**Current verdict — 17 September 2026.** Review candidate runtime `6fea8287aa5f078a5836902478320699e54571a9` is **needs_revision** after direct user review. The prior internal `ready_for_user_review` result and 9/10 gate minima are historical internal evidence only and did not establish product quality.
+## User acceptance status
 
-The user's findings include:
+The most recent explicit user verdict remains the **17 September 2026
+needs_revision** verdict for historical runtime
+`6fea8287aa5f078a5836902478320699e54571a9`.
 
-- duplicate/ambiguous protagonist-looking characters;
-- visible actor/table clipping;
-- story not conveyed by the rendered opening;
-- tutorial incorrectly embedded inside Level 1;
-- current progression not matching the written contract;
-- visual attraction without enough willingness to play;
-- cramped/congested world scale;
-- wrong player embodiment (separate helper/avatar instead of direct protagonist control);
-- missing independent art/world-direction critic.
+That verdict exposed duplicate/ambiguous characters, clipping, weak rendered
+story causality, wrong tutorial/Level-1 boundaries, cramped scale, wrong player
+embodiment and a missing independent art/world critic. It remains authoritative
+for that candidate and for the process lessons it created.
 
-## Readiness and acceptance are separate
+The user has **not yet reviewed or accepted** the materially revised runtime
+`ad14c5aced6cf053c7617dfb03245506e1e9dad5`. Do not silently transfer either the old rejection or an
+internal pass into a user verdict.
 
-- Technical verification can prove runtime/state behavior; it cannot prove fun, story comprehension or art direction.
-- Story treatment review cannot pass rendered story quality.
-- The legacy critic JSON/checker is necessary but no longer sufficient for internal readiness.
-- Internal readiness now requires story, **art/world direction**, gameplay/progression and learning critics with no blockers, plus technical/accessibility verification.
-- A preview may be shown below readiness when explicitly requested; it remains a preview.
+## Current internal candidate
+
+Exact runtime `ad14c5aced6cf053c7617dfb03245506e1e9dad5`, reviewed on exact CI run
+`35335042617`:
+
+- rendered story: 9/10;
+- art/world direction: 9/10;
+- gameplay/progression: 9/10;
+- learning/transfer: 9/10;
+- technical/accessibility: passed.
+
+Exact review: `LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md`.
+
+The legacy JSON checker also has all criteria >=9 and complete coverage, but the
+September 17 review proved that checker is not sufficient by itself.
+
+## Readiness and acceptance remain separate
+
+- Technical verification proves runtime/state behavior, not fun or product
+  acceptance.
+- Story text does not substitute for rendered story causality.
+- The independent art/world gate is mandatory.
+- A preview may be shown below strict readiness when explicitly requested.
 - **Only the current user's explicit verdict establishes acceptance.**
 
-## Current redesign boundary
+The strict internal review is still **incomplete** on one non-scored dimension:
+subjective music/SFX listening. Audio lifecycle and mute semantics are tested,
+but current critic policy requires actual listening before a 9+ atmosphere/music
+claim. Physical-phone feel also remains distinct from Chromium emulation.
 
-The next candidate must implement/review:
+## Binding Phase 1 boundary
 
-`happy/normal world -> dramatic disruption -> protagonist displaced -> prison/blocked-door reveal -> antagonist removes speech engine -> direct protagonist control -> separate Tutorial/Prologue -> clean success -> Level 1 mission`
+The implemented/reviewed sequence is now:
 
-The world should be larger/less congested, with explicit density/negative-space review.
+`happy Bellweather -> shared ritual -> dramatic rupture/disappearance -> dark
+limbo -> progressive prison reveal -> Warden removes speech engine -> direct
+protagonist control -> separate control practice -> speech-repair tutorial ->
+clean success -> Level 1 changed-context mission -> recoverable mistake ->
+visible world payoff`
 
-Read `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md`, `GAME-CREATION-PLATFORM.md` and `USER-REVIEW-20260917.md`.
+No Level 2/public rollout/new phase begins until the current user reviews and
+accepts the revised Phase 1 candidate. Runtime scores are exact-SHA evidence and
+must not be transferred to a changed build.
 
 ## Platform boundary
 
-This proof track exists to validate VibeLearn as a reusable game-creation platform. Future agent-driven ideation/creation/critics/CI/CD are planned, but they do not authorize skipping current product proof or user review.
-
-No Level 2/public rollout/new phase begins until the user reviews and accepts a materially revised candidate.
+This proof track validates VibeLearn as a reusable game-creation platform.
+Reusable world kits, direct-control profiles, cinematic beats, gate/route
+archetypes, tutorial patterns and critic evidence are being extracted only where
+the proof game demonstrates them. Future agent-driven creation/review/CI-CD does
+not authorize skipping this product proof or the user's final review.
