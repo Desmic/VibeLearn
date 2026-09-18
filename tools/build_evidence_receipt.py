@@ -13,6 +13,8 @@ def modality_for(path: Path):
         return "review_assignment"
     if name.startswith("cold-observer-") and name.endswith("-report.json"):
         return "cold_observer_report"
+    if name=="review-source.tar":
+        return "source_inspection"
     if name.endswith("trace.zip") or name.endswith("-interaction-trace.json"):
         return "interactive_trace"
     if (name.endswith("-audio.wav") or name.endswith("-audio.mp3") or
