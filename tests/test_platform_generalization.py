@@ -51,7 +51,7 @@ class PlatformGeneralizationTests(unittest.TestCase):
               }},
               states:{{
                 storm:{{camera:'storm',environment:{{clearColor:'#101723',ambient:'#465369',exposure:.72,fog:{{type:'linear',color:'#42546b',start:8,end:46}}}},show:['storm-beacon']}},
-                repaired:{{camera:'repair',transforms:{{pressure-core:{{position:[2,1.5,-2]}}}}}}
+                repaired:{{camera:'repair',transforms:{{'pressure-core':{{position:[2,1.5,-2]}}}}}}
               }},
               player:{{
                 version:'1',entity:'pilot',spawn:[0,0,0],speed:3,
@@ -148,7 +148,11 @@ class PlatformGeneralizationTests(unittest.TestCase):
         """)
         completed=subprocess.run(
             ["node","--input-type=module","-e",script],
-            cwd=ROOT,capture_output=True,text=True,check=True
+            cwd=ROOT,capture_output=True,text=True
+        )
+        self.assertEqual(
+            completed.returncode,0,
+            f"alternate-game contract fixture failed:\nSTDOUT:\n{completed.stdout}\nSTDERR:\n{completed.stderr}"
         )
         result=json.loads(completed.stdout.strip().splitlines()[-1])
         self.assertEqual(result["world"],"harbor.relay")
