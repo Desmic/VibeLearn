@@ -161,16 +161,23 @@ export function validateWorldSpec(spec){
   }
   if(spec.player){
     validatePlayerProfile(spec.player,ids);
+    const playerEntity=entityDefs.get(spec.player.entity);
+    if(playerEntity?.asset)assert(spec.player.animations,'asset-backed player requires explicit player.animations');
     if(spec.player.animations){
       assert(spec.player.animations&&typeof spec.player.animations==='object'&&!Array.isArray(spec.player.animations),'player.animations must be an object');
       assert(Object.keys(spec.player.animations).every(key=>key==='idle'||key==='move'),'player.animations only supports idle/move aliases');
-      const playerEntity=entityDefs.get(spec.player.entity);
       assert(playerEntity?.asset,'player.animations requires an asset-backed player entity');
       const aliases=assetDefs.get(playerEntity.asset).aliases;
       for(const [key,alias] of Object.entries(spec.player.animations)){
         id(alias,`player.animations.${key}`);
         assert(aliases.has(alias),`player.animations.${key} references unknown alias ${alias}`);
       }
+      assert(typeof spec.player.animations.idle==='string'&&typeof spec.player.animations.move==='string','player.animations must explicitly declare idle and move');
+    }
+    if(spec.player.animationSpeeds){
+      assert(spec.player.animationSpeeds&&typeof spec.player.animationSpeeds==='object'&&!Array.isArray(spec.player.animationSpeeds),'player.animationSpeeds must be an object');
+      assert(Object.keys(spec.player.animationSpeeds).every(key=>key==='idle'||key==='move'),'player.animationSpeeds only supports idle/move');
+      for(const [key,value] of Object.entries(spec.player.animationSpeeds))assert(Number.isFinite(value)&&value>=0&&value<=3,`player.animationSpeeds.${key} must be between 0 and 3`);
     }
   }
   return spec;
