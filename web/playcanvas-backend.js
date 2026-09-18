@@ -207,7 +207,7 @@ class PlayCanvasWorld {
     if(this.reducedMotion||!this.canvas?.animate)return;
     const duration=Math.max(80,Math.min(1600,Number(value.duration)||520));
     const px=Math.max(1,Math.min(16,Number(value.intensity)||7));
-    this.canvas.getAnimations?.().filter(a=>a.id==='vibelearn-camera-impulse').forEach(a=>a.cancel());
+    (this.canvas.getAnimations?.()||[]).filter(a=>a.id==='vibelearn-camera-impulse').forEach(a=>a.cancel());
     const animation=this.canvas.animate([
       {transform:'translate(0,0)'},
       {transform:`translate(${-px}px,${px*.35}px)`},
