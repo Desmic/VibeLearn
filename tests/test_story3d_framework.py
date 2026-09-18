@@ -61,8 +61,8 @@ class RuntimeMigrationTests(unittest.TestCase):
         hosted = (ROOT / 'app' / 'hosted.py').read_text(encoding='utf-8')
         active = (
             'first-words.js', 'first-words-boot.js', 'first-words-world.js',
-            'game-runtime.js', 'game-opening.js', 'world-spec.js',
-            'playcanvas-backend.js', 'player-controls.js', 'auth-game.js',
+            'game-runtime.js', 'game-opening.js', 'tutorial-flow.js', 'experience-mode.js',
+            'world-spec.js', 'playcanvas-backend.js', 'player-controls.js', 'auth-game.js',
             'playcanvas.mjs', 'quaternius-animated-robot.glb'
         )
         for asset in active:
@@ -104,6 +104,8 @@ class RuntimeMigrationTests(unittest.TestCase):
         world_spec = (ROOT / 'web' / 'world-spec.js').read_text(encoding='utf-8')
         backend = (ROOT / 'web' / 'playcanvas-backend.js').read_text(encoding='utf-8')
         controls = (ROOT / 'web' / 'player-controls.js').read_text(encoding='utf-8')
+        tutorial = (ROOT / 'web' / 'tutorial-flow.js').read_text(encoding='utf-8')
+        modes = (ROOT / 'web' / 'experience-mode.js').read_text(encoding='utf-8')
         opening = (ROOT / 'web' / 'game-opening.js').read_text(encoding='utf-8')
         props = (ROOT / 'web' / 'rescue-world-props.js').read_text(encoding='utf-8')
         world = (ROOT / 'web' / 'first-words-world.js').read_text(encoding='utf-8')
@@ -127,10 +129,12 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn("Major opening event needs at least four coordinated channels", opening)
         self.assertIn("Visible antagonist action needs cause.entity", opening)
 
-        # Tutorial progression is represented as a reusable flow rather than only copy.
-        self.assertIn("export function createTutorialFlow", controls)
-        self.assertIn("skill:'move protagonist'", controls)
-        self.assertIn("success:'protagonist position changed'", controls)
+        # Tutorial progression and mode exclusivity are reusable runtime contracts.
+        self.assertIn("export function createTutorialFlow", tutorial)
+        self.assertIn("export function createExperienceModeController", modes)
+        self.assertNotIn("createTutorialFlow", controls)
+        self.assertIn("skill:'move protagonist'", world)
+        self.assertIn("success:'protagonist position changed'", world)
 
     def test_game_asset_vendor_is_pinned_and_verified(self):
         vendor = (ROOT / 'tools' / 'vendor_game_assets.py').read_text(encoding='utf-8')
