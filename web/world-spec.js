@@ -5,7 +5,7 @@ import {validatePlayerProfile} from './player-controls.js';
 export const WORLD_SPEC_VERSION = '1';
 const PRIMITIVES = new Set(['box','sphere','cone','cylinder','plane','torus','capsule']);
 const ASSET_TYPES = new Set(['container']);
-const MOTIONS = new Set(['spin','bob','pulse']);
+const MOTIONS = new Set(['spin','bob','pulse','patrol']);
 const FOG_TYPES = new Set(['none','linear','exp','exp2']);
 const TONE_MAPPINGS = new Set(['linear','filmic','hejl','aces','aces2','neutral']);
 
@@ -128,8 +128,11 @@ export function validateWorldSpec(spec){
     if(entity.motion){
       assert(MOTIONS.has(entity.motion.type),`unsupported motion ${entity.motion.type}`);
       if(entity.motion.axis)vec(entity.motion.axis,3,`${entity.id}.motion.axis`);
-      if('speed' in entity.motion)assert(Number.isFinite(entity.motion.speed),`${entity.id}.motion.speed`);
+      if(entity.motion.offset)vec(entity.motion.offset,3,`${entity.id}.motion.offset`);
+      if('speed' in entity.motion)assert(Number.isFinite(entity.motion.speed)&&entity.motion.speed>0,`${entity.id}.motion.speed`);
       if('amplitude' in entity.motion)assert(Number.isFinite(entity.motion.amplitude),`${entity.id}.motion.amplitude`);
+      if('phase' in entity.motion)assert(Number.isFinite(entity.motion.phase),`${entity.id}.motion.phase`);
+      if(entity.motion.type==='patrol')assert(entity.motion.offset&&entity.motion.offset.some(v=>Math.abs(v)>.01),`${entity.id}.motion patrol needs a non-zero offset`);
     }
   }
   for(const entity of spec.entities){
