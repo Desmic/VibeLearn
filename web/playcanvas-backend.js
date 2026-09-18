@@ -157,7 +157,7 @@ class PlayCanvasWorld {
         isCameraBlocked:(x,y,z)=>this._cameraBlocked(x,y,z),
         setAvatar:(position,yaw)=>{const entity=this.entities.get(this.spec.player.entity);entity?.setLocalPosition(...position);entity?.setLocalEulerAngles(0,yaw,0);},
         setCamera:(position,target,fov)=>{this.camera.setPosition(...position);this.camera.lookAt(...target);if(fov)this.camera.camera.fov=fov;},
-        setMoving:value=>{this.playerMoving=value;}
+        setMoving:value=>this._setPlayerMoving(value)
       });
       this.controls.setShot(this._cameraShot(this.cameraName).shot);
       canvas.style.pointerEvents='auto';canvas.style.touchAction='none';host.tabIndex=0;
@@ -274,7 +274,8 @@ class PlayCanvasWorld {
         const bounds=this._measureAssetBounds(instance);
         this.assetInstances.set(def.id,{asset,instance,fallback,bounds});
         this.assetsLoaded+=1;
-        this._applyEntityAnimation(def.id,this.desiredAnimations.get(def.id)||def.animation||assetDef.defaultAnimation||null,0);
+        const playerIdle=def.id===this.spec.player?.entity?this.spec.player?.animations?.idle:null;
+        this._applyEntityAnimation(def.id,this.desiredAnimations.get(def.id)||def.animation||playerIdle||assetDef.defaultAnimation||null,0);
       }catch(assetError){
         try{instance?.destroy();}catch(_){}
         this.assetsFailed+=1;
@@ -322,6 +323,12 @@ class PlayCanvasWorld {
     }
   }
 
+  _animationSpeed(entityId,alias){
+    if(entityId!==this.spec.player?.entity)return 1;
+    const profile=this.spec.player,kind=profile.animations?.move===alias?'move':profile.animations?.idle===alias?'idle':null;
+    return kind&&Number.isFinite(profile.animationSpeeds?.[kind])?profile.animationSpeeds[kind]:1;
+  }
+
   _applyEntityAnimation(entityId,alias,blendTime){
     if(!alias)return;
     this.desiredAnimations.set(entityId,alias);
@@ -330,10 +337,18 @@ class PlayCanvasWorld {
     if(!anim?.baseLayer)return;
     const def=this.entityDefinitions.get(entityId)||{};
     const duration=Number.isFinite(blendTime)?blendTime:(Number.isFinite(def.animationBlendTime)?def.animationBlendTime:.18);
-    anim.speed=this.reducedMotion?0:1;
+    anim.speed=this.reducedMotion?0:this._animationSpeed(entityId,alias);
     anim.baseLayer.transition(alias,this.reducedMotion?0:duration);
     anim.playing=!this.paused;
     this.activeAnimations.set(entityId,alias);
+  }
+
+  _setPlayerMoving(value){
+    const moving=Boolean(value);
+    if(this.playerMoving===moving)return;
+    this.playerMoving=moving;
+    const alias=moving?this.spec.player?.animations?.move:this.spec.player?.animations?.idle;
+    if(alias)this._applyEntityAnimation(this.spec.player.entity,alias,.12);
   }
 
   _reset(){
@@ -390,7 +405,8 @@ class PlayCanvasWorld {
     this.desiredAnimations.clear();
     for(const def of this.spec.entities){
       if(!def.asset)continue;
-      const alias=def.animation||this.spec.assets?.[def.asset]?.defaultAnimation;
+      const playerIdle=def.id===this.spec.player?.entity?this.spec.player?.animations?.idle:null;
+      const alias=def.animation||playerIdle||this.spec.assets?.[def.asset]?.defaultAnimation;
       if(alias)this.desiredAnimations.set(def.id,alias);
     }
     this.applyPatch(state);
