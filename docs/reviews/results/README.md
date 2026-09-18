@@ -21,12 +21,14 @@ A reviewer output uses:
 Required fields:
 
 - `candidate_sha`
+- `assignment_id` copied exactly from the generated assignment
 - `pass`
 - `verdict: pass | needs_revision | unresolved`
 - `context_attestation.allowed_context_only: true`
 - `context_attestation.observations_before_interpretation: true`
 - non-empty attestation notes
-- `used_evidence` copied exactly from the assignment's allowed evidence
+- `used_evidence` copied exactly from the assignment's allowed evidence; it
+  must include at least one item from every `required_evidence_groups` group
 - non-empty `observations`
 - non-empty `interpretation`
 - `uncertainties`
@@ -64,3 +66,24 @@ The gated preview workflow requires:
 
 Level/phase advancement additionally requires explicit human acceptance recorded
 for that exact runtime candidate.
+
+
+### Assignment identity
+
+Assignments now carry a deterministic `assignment_id` (SHA-256 over the exact
+candidate/pass/evidence/context/questions contract). A raw critic result is
+invalid if it was produced for a different assignment, even when candidate SHA
+and pass name happen to match.
+
+This prevents stale/replayed judgments after the evidence set or context policy
+changes.
+
+### Required evidence use
+
+An assignment becoming `ready` only means the required evidence exists. The
+reviewer must actually use evidence satisfying every required modality group.
+For example, a cold observer cannot submit a result based only on an allowed
+screenshot when the assignment required caption-blind motion/interactive
+evidence.
+
+The validator checks this from `used_evidence`.
