@@ -209,14 +209,20 @@ function opening(beat){
     p.transforms.zip={position:[0,0,-28]};
     p.timeline={duration:3000,cues:revealGroups.map((show,i)=>({at:250+i*750,patch:{show}})),finish:{hide:['limbo-backdrop']}};
   }else if(beat===5){
-    p.camera='theft';p.environment={clearColor:'#080b13',ambient:'#332b3b',exposure:.68,fog:{type:'linear',color:'#26283a',start:16,end:76}};p.show.push('prison-zone','warden','zip-voice');p.transforms.zip={position:[0,0,-28]};p.transforms.warden={position:[5,0,-33],scale:[1,1,1]};
-    p.transforms['stolen-voice']={position:[0,.9,-27.55]};
-    p.timeline={duration:4700,moves:[
-      {entity:'warden',from:[5,0,-33],to:[1.4,0,-28],duration:1300},
-      {entity:'stolen-voice',from:[0,.9,-27.55],to:[.4,1.8,-27.8],at:1700,duration:950},
-      {entity:'warden',from:[1.4,0,-28],to:[3,0,-34],at:3200,duration:1200},
-      {entity:'stolen-voice',from:[.4,1.8,-27.8],to:[2,1.8,-33.8],at:3200,duration:1200}
-    ],cues:[{at:1450,patch:{show:['voice-extract-link']}},{at:1650,patch:{show:['stolen-voice'],hide:['zip-voice'],animations:{zip:'no'}}},{at:2600,patch:{hide:['voice-extract-link']}}],finish:{hide:['voice-extract-link'],animations:{zip:'idle'}}};
+    p.camera='theft';p.environment={clearColor:'#080b13',ambient:'#332b3b',exposure:.68,fog:{type:'linear',color:'#26283a',start:16,end:76}};
+    p.show.push('prison-zone','warden','zip-voice','voice-extract-link');
+    p.transforms.zip={position:[0,0,-28]};p.transforms.warden={position:[1.4,0,-28],scale:[1,1,1]};p.animations.zip='no';
+    p.timeline={duration:1500,moves:[{entity:'warden',from:[5,0,-33],to:[1.4,0,-28],duration:1200}],finish:{animations:{zip:'no'}}};
+  }else if(beat===6){
+    p.camera='theft';p.environment={clearColor:'#080b13',ambient:'#332b3b',exposure:.68,fog:{type:'linear',color:'#26283a',start:16,end:76}};
+    p.show.push('prison-zone','warden','stolen-voice','voice-extract-link');p.hide.push('zip-voice');
+    p.transforms.zip={position:[0,0,-28]};p.transforms.warden={position:[1.4,0,-28],scale:[1,1,1]};
+    p.transforms['stolen-voice']={position:[0,1,-27.5]};p.animations.zip='no';
+    p.timeline={duration:3000,moves:[
+      {entity:'stolen-voice',from:[0,1,-27.5],to:[1.55,2,-28.45],at:250,duration:1200},
+      {entity:'warden',from:[1.4,0,-28],to:[3,0,-34],at:1550,duration:1200},
+      {entity:'stolen-voice',from:[1.55,2,-28.45],to:[2.15,1.9,-33.8],at:1550,duration:1200}
+    ],cues:[{at:1350,patch:{hide:['voice-extract-link']}}],finish:{hide:['voice-extract-link'],animations:{zip:'idle'}}};
   }else{
     p.camera='reveal';p.environment={clearColor:'#0c1220',ambient:'#46536b',exposure:.85,fog:{type:'linear',color:'#34415a',start:20,end:88}};p.show.push('prison-zone');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
   }
@@ -258,7 +264,7 @@ export const gameWorldManifest=pkg.gameWorldManifest;
 export const createGameWorld=pkg.createGameWorld;
 
 export const openingSpec={
-  id:'bellweather.opening.v5',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
+  id:'bellweather.opening.v6',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
   scenes:[
     {beat:0,audioPhase:'home',kicker:'BELLWEATHER · LANTERN NIGHT',title:'One lantern. Three friends.',body:'Your friend made this for the three of you. Send it into the sky.',
       direction:{kind:'establishing',channels:['world','character','camera','interaction','narration'],worldAfter:'The shared lantern is launched and the three friends have visibly acted together.'},
@@ -273,9 +279,11 @@ export const openingSpec={
     {beat:4,audioPhase:'danger',kicker:'THEN THE LIGHTS COME ON',title:'This is not home.',body:'Cold walls. One enormous locked door. No obvious way back.',
       direction:{kind:'transition',channels:['world','camera','lighting','narration'],worldAfter:'The prison chamber and sealed route are spatially established.'},
       markers:[{entity:'moon-label',label:'SEALED EXIT',offset:[0,-8]}]},
-    {beat:5,audioPhase:'danger',audioCue:'wrong',kicker:'THE WARDEN',title:'It takes Zip’s voice.',body:'The Warden pulls the speech module from Zip’s chest. The door stays sealed.',
-      direction:{kind:'antagonist-action',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','vfx','audio','narration'],worldAfter:'The speech module is visibly absent from Zip and possessed by the Warden.'}},
-    {beat:6,audioPhase:'repair',kicker:'ONE THING STILL WORKS',title:'Get the words back.',body:'A repair socket still has power. Restore enough speech to open the door.',
+    {beat:5,audioPhase:'danger',audioCue:'capture',kicker:'THE WARDEN',title:'It finds your voice.',body:'A red field locks onto the glowing speech module in Zip’s chest.',
+      direction:{kind:'antagonist-action',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','vfx','audio','narration'],worldAfter:'The Warden is visibly targeting the still-attached speech module in Zip’s chest.'}},
+    {beat:6,audioPhase:'danger',audioCue:'wrong',kicker:'THE WARDEN',title:'It tears the module free.',body:'The same glowing module leaves the chest socket and moves into the Warden’s grasp.',
+      direction:{kind:'antagonist-action',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','vfx','audio','narration'],worldAfter:'Zip’s chest socket is visibly empty and the removed speech module ends with the Warden.'}},
+    {beat:7,audioPhase:'repair',kicker:'ONE THING STILL WORKS',title:'Get the words back.',body:'A repair socket still has power. Restore enough speech to open the door.',
       direction:{kind:'handoff',channels:['world','character','camera','interaction','narration'],worldAfter:'Direct control begins with one clear repair objective and target.'},
       markers:[{entity:'loose-plug',label:'REPAIR SOCKET',offset:[0,-8]}]}
   ]
