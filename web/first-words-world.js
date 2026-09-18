@@ -324,28 +324,28 @@ export const speechRepairTutorialSpec={
       detail:'Run the speech engine. The chosen word will become part of the next input.',
       feedback:'The first word appears and becomes part of the next input.',
       when:{round:0,powered:true,status:'building',clue:{neq:'none'},pieces:0},success:{pieces:{gte:1}},
-      target:'socket',focus:'hud',actions:['step'],primaryAction:'step',actionLabel:'Make first word'
+      target:'socket',focus:'world',actions:['step'],primaryAction:'step',actionLabel:'Make first word'
     },
     {
       id:'build-2',stage:'TUTORIAL · REPAIR 3/4',title:'Watch the input grow.',
       detail:'Run it again. The first generated word is now included in the next prediction input.',
       feedback:'A second word appears and the input grows again.',
       when:{round:0,powered:true,status:'building',clue:{neq:'none'},pieces:1},success:{pieces:{gte:2}},
-      target:'socket',focus:'hud',actions:['step'],primaryAction:'step',actionLabel:'Next word'
+      target:'socket',focus:'world',actions:['step'],primaryAction:'step',actionLabel:'Next word'
     },
     {
       id:'build-3',stage:'TUTORIAL · REPAIR 3/4',title:'Keep the same loop going.',
       detail:'Each generated word joins the context used for the following word.',
       feedback:'A third word appears in the growing command.',
       when:{round:0,powered:true,status:'building',clue:{neq:'none'},pieces:2},success:{pieces:{gte:3}},
-      target:'socket',focus:'hud',actions:['step'],primaryAction:'step',actionLabel:'Next word'
+      target:'socket',focus:'world',actions:['step'],primaryAction:'step',actionLabel:'Next word'
     },
     {
       id:'build-4',stage:'TUTORIAL · REPAIR 3/4',title:'Finish the four-word command.',
       detail:'One more prediction completes the sentence that will be sent to the gate.',
       feedback:'The four-word command is complete.',
       when:{round:0,powered:true,status:'building',clue:{neq:'none'},pieces:3},success:{pieces:{gte:4}},
-      target:'socket',focus:'hud',actions:['step'],primaryAction:'step',actionLabel:'Next word'
+      target:'socket',focus:'world',actions:['step'],primaryAction:'step',actionLabel:'Next word'
     },
     {
       id:'speak',stage:'TUTORIAL · REPAIR 4/4',title:'Use the completed sentence on the gate.',
