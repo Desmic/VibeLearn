@@ -2,7 +2,7 @@
 
 ## Verified main + adapter-fixture checkpoint — 19 September 2026
 
-Current `main`:
+Last fully verified implementation checkpoint before this state-record update:
 `2bc82b5f2e9d12377fcceca9fc01362f873dab60`.
 
 Exact GitHub Actions run `35390536902` passed:
