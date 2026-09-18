@@ -34,13 +34,16 @@ the resulting candidate.
 
 VibeLearn is a platform for creating learning games quickly. The current track is the
 proof case. Reuse validated worlds/assets/mechanics/cinematic beats/tutorial patterns
-and runtime pieces when real needs prove them useful, but do not pause the track to
-build a speculative universal generator or multi-agent orchestration system.
+and runtime pieces when real needs prove them useful; do not replace the current product
+gate with speculative framework work.
 
-Read `docs/GAME-CREATION-PLATFORM.md`. Future agent roles for ideation, creation,
-critics and CI/CD are planned; today we preserve agent-friendly versioned specs,
-artifacts, evidence and independent critic roles without implementing the full agent
-platform.
+Read `docs/GAME-CREATION-PLATFORM.md` and `docs/AUTOMATED-DEVELOPMENT-SYSTEM.md`.
+Bounded integration of the existing Terminal PM Agent/orchestrator is now approved.
+Implement it as a thin vertical slice: economical worker -> independent reviewer whose
+criticisms implicitly include falsification/proof -> evidence -> accept/repair. Existing
+story/art-world/gameplay/learning critics remain independent disciplines but should
+reuse the same reviewer/runtime/evidence machinery. Do not merge the donor repository
+wholesale or build all future roles before real runs justify them.
 
 ## One active chunk
 
