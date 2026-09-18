@@ -3,9 +3,9 @@
 ## Exact system-repair checkpoint — 18 September 2026
 
 Current verified development candidate:
-`337d8352b47bb9bfc45556e8778408bdf1b80070`.
+`ddfbaca219f712e241e47941806ecd8f7aeff190`.
 
-Exact GitHub Actions run `35382351720` passed:
+Exact GitHub Actions run `35384949480` passed:
 - foundation;
 - first-words-opening;
 - first-words-tutorial;
@@ -39,7 +39,7 @@ are reusable platform behavior rather than Bellweather-name-specific validators.
 
 ### Evidence/critic pipeline status
 
-The exact review index for `337d8352b47bb9bfc45556e8778408bdf1b80070` contains:
+The exact review index for `ddfbaca219f712e241e47941806ecd8f7aeff190` contains:
 - motion video;
 - caption-blind motion;
 - actual captured WebAudio;
@@ -72,7 +72,8 @@ Post-CI reviewers are now bound to:
 - exact candidate SHA;
 - deterministic assignment ID;
 - required evidence modality groups;
-- harness-authored execution receipt;
+- a sealed evidence capsule containing only assignment-approved evidence;
+- harness-authored execution receipt bound to that capsule;
 - executor/session identity;
 - exact evidence/context supplied by the harness;
 - forbidden-context checks;
@@ -80,8 +81,9 @@ Post-CI reviewers are now bound to:
 - explicit verdict + blockers/retest.
 
 A result cannot be replayed against another assignment/session, cannot claim
-evidence the harness did not supply, and cannot substitute weaker evidence for
-the modality required by its pass.
+evidence the harness did not supply, cannot cite evidence outside the sealed
+capsule, and cannot substitute weaker evidence for the modality required by its
+pass. Capsule manifests are tamper-verifiable and candidate/assignment-bound.
 
 ### Release boundary
 
