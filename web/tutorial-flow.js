@@ -113,6 +113,8 @@ export function validateStateTutorialSpec(spec){
     }
     require(step.when&&typeof step.when==='object'&&!Array.isArray(step.when),`${step.id}.when is required`);
     require(Array.isArray(step.actions)&&step.actions.length>0&&step.actions.every(v=>typeof v==='string'&&v.length>0),`${step.id}.actions are required`);
+    require(typeof step.primaryAction==='string'&&step.actions.includes(step.primaryAction),`${step.id}.primaryAction must be one of actions`);
+    require(typeof step.actionLabel==='string'&&step.actionLabel.trim(),`${step.id}.actionLabel is required`);
     if(step.target!==undefined)require(typeof step.target==='string'&&step.target.length>0,`${step.id}.target is invalid`);
     if(step.focus!==undefined)require(['world','hud','none'].includes(step.focus),`${step.id}.focus is invalid`);
     if(step.success!==undefined)require(step.success&&typeof step.success==='object'&&!Array.isArray(step.success),`${step.id}.success is invalid`);
@@ -122,6 +124,13 @@ export function validateStateTutorialSpec(spec){
         require(Object.keys(expected).length>0&&Object.keys(expected).every(op=>CONDITION_OPERATORS.has(op)),`${step.id}.when condition is invalid`);
       }
     }
+    for(const [path,expected] of Object.entries(step.success||{})){
+      require(typeof path==='string'&&/^[A-Za-z0-9_.-]+$/.test(path),`${step.id}.success path is invalid`);
+      if(expected&&typeof expected==='object'&&!Array.isArray(expected)){
+        require(Object.keys(expected).length>0&&Object.keys(expected).every(op=>CONDITION_OPERATORS.has(op)),`${step.id}.success condition is invalid`);
+      }
+    }
+
   }
   return spec;
 }
@@ -129,4 +138,8 @@ export function validateStateTutorialSpec(spec){
 export function selectStateTutorialStep(input,state){
   const spec=validateStateTutorialSpec(input);
   return spec.steps.find(step=>stateMatches(step.when,state))||null;
+}
+
+export function tutorialStepSucceeded(step,state){
+  return Boolean(step?.success)&&stateMatches(step.success,state);
 }
