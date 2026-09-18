@@ -29,6 +29,14 @@ function cameraShot(shot,label){
   if('fov' in shot)assert(Number.isFinite(shot.fov)&&shot.fov>1&&shot.fov<179,`${label}.fov must be between 1 and 179`);
   if('toneMapping' in shot)tone(shot.toneMapping,`${label}.toneMapping`);
 }
+function collider(value,label){
+  assert(value&&typeof value==='object'&&!Array.isArray(value),`${label} must be an object`);
+  assert(value.shape==='box',`${label}.shape must be box`);
+  if(value.halfExtents)vec(value.halfExtents,3,`${label}.halfExtents`);
+  if(value.offset)vec(value.offset,3,`${label}.offset`);
+  if(value.halfExtents)assert(value.halfExtents.every(v=>v>0&&v<=100),`${label}.halfExtents must be > 0 and <= 100`);
+  for(const key of ['blocksPlayer','blocksCamera'])if(key in value)assert(typeof value[key]==='boolean',`${label}.${key} must be boolean`);
+}
 function environment(def){
   if(def==null)return;
   assert(typeof def==='object'&&!Array.isArray(def),'environment must be an object');
@@ -107,6 +115,7 @@ export function validateWorldSpec(spec){
     if(entity.position)vec(entity.position,3,`${entity.id}.position`);
     if(entity.rotation)vec(entity.rotation,3,`${entity.id}.rotation`);
     if(entity.scale)vec(entity.scale,3,`${entity.id}.scale`);
+    if(entity.collider)collider(entity.collider,`${entity.id}.collider`);
     if(entity.motion){
       assert(MOTIONS.has(entity.motion.type),`unsupported motion ${entity.motion.type}`);
       if(entity.motion.axis)vec(entity.motion.axis,3,`${entity.id}.motion.axis`);
