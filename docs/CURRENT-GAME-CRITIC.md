@@ -1,39 +1,60 @@
-# Current game critic — needs revision
+# Current game critic — exact candidate review incomplete
 
-**17 September 2026.** Current reviewed runtime candidate: `6fea8287aa5f078a5836902478320699e54571a9`. User verdict: **needs_revision**. No current user numeric score was supplied.
+**18 September 2026.** Current reviewed runtime candidate:
+`ad14c5aced6cf053c7617dfb03245506e1e9dad5`.
 
-The prior internal record returned 9/10 minimums and `ready_for_user_review`, but direct user review exposed product failures that invalidate that recommendation:
+The September 17 user verdict of **needs_revision** remains authoritative for
+historical candidate `6fea8287aa5f078a5836902478320699e54571a9`; it is not a
+verdict on this materially revised runtime.
 
-- duplicate/ambiguous protagonist-looking robots;
-- visible actor/table clipping;
-- cramped/congested playable world;
-- opening does not convey the written story/stakes;
-- text/animation/world state are not one causal narrative;
-- tutorial is inside Level 1 instead of a separate onboarding stage;
-- player embodiment is wrong for this track (separate helper/avatar instead of direct protagonist control);
-- visual attraction exists, but user judges that a kid would look rather than actually play;
-- no independent art/world-direction critic had been applied.
+## Current internal result
 
-## Active review method
+Exact CI run `35335042617` passed all seven active suites on `ad14c5aced6cf053c7617dfb03245506e1e9dad5`:
+foundation, opening, tutorial, controls, chapter, readability and hosted
+lifecycle.
 
-Use:
+Manual current-policy critic:
+- rendered story: **9/10**;
+- art/world direction: **9/10**;
+- gameplay/progression: **9/10**;
+- learning/transfer: **9/10**;
+- technical/accessibility: **passed**.
 
-- `USER-REVIEW-20260917.md` for the authoritative running user findings;
-- `CRITIC-POLICY.md` for current review workflow;
-- `ART-WORLD-DIRECTION-CRITIC.md` for the new independent world/art gate;
-- `GAME-OPENING-PROGRESSION.md` for prologue/tutorial/Level-1 boundaries;
-- `GAME-CREATION-PLATFORM.md` for reusable-platform implications.
+No observed blocker remains in those scored disciplines. The legacy JSON record
+also has all eleven criteria >=9 and complete required coverage, but that checker
+is intentionally not treated as sufficient after the September 17 review.
 
-Internal readiness cannot be restored by rerunning the legacy JSON checker alone.
+Exact evidence:
+- `docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md`
+- `docs/reviews/2026-09-18-level1-ad14c5a.json`
 
-## Next candidate expectation
+## Remaining internal limitation
 
-The next front-of-game candidate should implement the revised direct-protagonist flow:
+Subjective music/SFX listening has not been performed in the current execution
+environment. Audio lifecycle, phase scheduling, pause/mute and muted semantic
+equivalence are automated, but `CRITIC-POLICY.md` requires actual listening
+before a 9+ atmosphere/music claim. Physical-phone feel is likewise not proven
+by Chromium emulation.
 
-`happy Bellweather -> dramatic rupture/teleport -> dark limbo -> prison/blocked-door reveal -> antagonist removes speech engine -> direct control -> separate Tutorial/Prologue -> clean success -> Level 1`
+Therefore the overall internal status is **review_incomplete**, not accepted and
+not yet a final user-review recommendation under the strict current policy.
 
-The world should be materially more spacious and pass alternate-camera clipping/density review.
+## What changed from the rejected candidate
 
-## Historical records
+The revised runtime now has:
+- one direct protagonist with distinct round-teal and tall-coral friends;
+- a player-driven friendship ritual before a visible rupture/disappearance;
+- limbo -> progressive prison reveal -> visible Warden speech theft;
+- a larger, calmer prison with alternate-camera evidence and real gate passages;
+- separate MOVE/LOOK/MENU control practice before speech repair;
+- a guaranteed tutorial success before Level 1;
+- recoverable stale-context failure and a visibly changed world payoff;
+- evidence that a learner's prediction does not override the model's supplied
+  context;
+- player-facing entry/menu/ending copy with development-status language removed.
 
-Older prototype/deployed reviews and numeric records remain valid only for their exact historical candidates under `docs/history/`, `PLAYTEST-20260915.md` and old review JSON files. Do not transfer those scores forward.
+## Authority and next gate
+
+The current user remains the sole final product critic. Do not advance Level 2
+or describe Phase 1 as accepted until the user reviews and accepts the materially
+revised candidate. Do not transfer scores to any changed runtime SHA.
