@@ -34,6 +34,9 @@ export function validatePlayerProfile(profile,ids){
     if(surface.whenVisible&&!ids.has(surface.whenVisible))fail('surface visibility entity is invalid');
   }
   for(const box of profile.obstacles||[])if(!vector(box,6)||box[0]>=box[3]||box[1]>=box[4]||box[2]>=box[5])fail('obstacle bounds are invalid');
+  if(profile.body){
+    if(!profile.body||typeof profile.body!=='object'||!Number.isFinite(profile.body.radius)||!Number.isFinite(profile.body.height)||profile.body.radius<=0||profile.body.radius>2||profile.body.height<=0||profile.body.height>5)fail('body collision is invalid');
+  }
   if(!profile.surfaces.some(s=>!s.whenVisible&&profile.spawn[0]>=s.bounds[0]&&profile.spawn[0]<=s.bounds[1]&&profile.spawn[2]>=s.bounds[2]&&profile.spawn[2]<=s.bounds[3]&&Math.abs(profile.spawn[1]-s.height)<.1))fail('spawn must be on an initially walkable surface');
   const c=profile.camera;
   if(!c||![c.yaw,c.pitch,c.distance,c.minDistance,c.maxDistance,c.targetHeight].every(Number.isFinite)||c.minDistance<1||c.maxDistance>40||c.minDistance>=c.maxDistance||c.distance<c.minDistance||c.distance>c.maxDistance||c.pitch<5||c.pitch>70)fail('camera limits are invalid');
@@ -50,7 +53,8 @@ export function createPlayerControls(host,profile,adapter){
   const listen=(target,event,fn,options)=>{target.addEventListener(event,fn,options);cleanups.push(()=>target.removeEventListener(event,fn,options));};
   const blocked=()=>paused||!host.isConnected||!host.getClientRects().length||host.closest('[inert]')||host.closest('[data-world-status="failed"],[data-world-status="loading"]')||host.closest('[data-game-input-blocked="true"]');
   const surfaceAt=(x,z)=>profile.surfaces.find(s=>(!s.whenVisible||adapter.isEntityEnabled(s.whenVisible))&&x>=s.bounds[0]&&x<=s.bounds[1]&&z>=s.bounds[2]&&z<=s.bounds[3]);
-  const solidAt=(x,y,z)=> (profile.obstacles||[]).some(b=>x>b[0]-.2&&x<b[3]+.2&&z>b[2]-.2&&z<b[5]+.2&&y+1.6>b[1]&&y<b[4]);
+  const body=profile.body||{radius:.32,height:1.6};
+  const solidAt=(x,y,z)=>Boolean(adapter.isPlayerBlocked?.(x,y,z,body))||(profile.obstacles||[]).some(b=>x>b[0]-body.radius&&x<b[3]+body.radius&&z>b[2]-body.radius&&z<b[5]+body.radius&&y+body.height>b[1]&&y<b[4]);
   const overlay=document.createElement('div');overlay.className='game-player-controls';
   overlay.innerHTML='<div class="game-view-tools" role="group" aria-label="Camera controls"><button type="button" data-view="recenter" aria-label="Recenter camera">◎</button><button type="button" data-view="in" aria-label="Zoom camera in">+</button><button type="button" data-view="out" aria-label="Zoom camera out">−</button><button type="button" data-view="help" aria-label="Movement controls" aria-expanded="false">?</button></div><div class="game-move-stick" role="group" aria-label="Move player"><span class="game-stick-knob"></span><span class="game-stick-label">MOVE</span><button type="button" data-step="forward" aria-label="Move forward">↑</button><button type="button" data-step="left" aria-label="Move left">←</button><button type="button" data-step="back" aria-label="Move backward">↓</button><button type="button" data-step="right" aria-label="Move right">→</button></div><p class="game-controls-help" hidden><strong>Explore the world.</strong><span>WASD / arrows: move · Drag the world: look · Wheel: zoom.</span><span>On phones, use the movement stick and drag the world to look. Tap ◎ to recenter. Use the highlighted task controls to interact.</span></p>';
   host.append(overlay);
@@ -78,7 +82,7 @@ export function createPlayerControls(host,profile,adapter){
     let safe=[...target];
     for(let i=1;i<=40;i++){
       const t=i/40,p=target.map((v,k)=>v+(eye[k]-v)*t);
-      if(p[1]<-.2||(profile.obstacles||[]).some(b=>p[0]>b[0]-.15&&p[0]<b[3]+.15&&p[1]>b[1]-.15&&p[1]<b[4]+.15&&p[2]>b[2]-.15&&p[2]<b[5]+.15))break;
+      if(p[1]<-.2||adapter.isCameraBlocked?.(...p)||(profile.obstacles||[]).some(b=>p[0]>b[0]-.15&&p[0]<b[3]+.15&&p[1]>b[1]-.15&&p[1]<b[4]+.15&&p[2]>b[2]-.15&&p[2]<b[5]+.15))break;
       safe=p;
     }
     return safe;
