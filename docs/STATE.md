@@ -1,5 +1,28 @@
 # Current state — LLM learning-game proof track
 
+## Phase 1 review checkpoint — 18 September 2026
+
+Canonical branch remains `main`. Current exact candidate is
+`1b2fe12e0c0786b0fa0f51d6a4f3291fb16d4ddc`; CI/artifact review is pending,
+so it is not an accepted or deployable candidate yet.
+
+Recent critic-driven repairs are intentionally reusable:
+- fresh control practice is separate from speech repair and has MOVE/LOOK/MENU
+  screenshot evidence on phone and desktop;
+- prologue friendship and speech-theft framing were tightened after exact-CI
+  screenshot inspection;
+- the shared gate kit no longer uses an oversized torus that visually blocked
+  an opened route; a regression test guards the open-portal shape;
+- the controls gate now preserves orbit and zoom screenshots before recentering
+  for the independent art/world-direction pass.
+
+The latest unresolved gate is exact-SHA verification of the whole Phase 1 path:
+prologue -> control/core-loop tutorial -> clean success -> Level 1 mission ->
+recoverable wrong route -> corrected transfer -> visible world payoff. Do not
+advance Level 2, deploy to Render, or assign inherited 9+ scores before that
+candidate's complete evidence and critic pass.
+
+
 ## Friendship/reveal checkpoint — 18 September 2026
 
 On `main`, the next prologue chunk is implemented and verified: the player sends
