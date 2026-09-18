@@ -106,6 +106,7 @@ class FakeTransport:
         receipt = {
             "request_id": value["request_id"],
             "idempotency_key": value["idempotency_key"],
+            "intent_digest": value["intent_digest"],
             "effect_status": "effect_confirmed",
             "run_ref": "terminal_pm:run/1",
         }
@@ -117,8 +118,8 @@ class FakeTransport:
         self.lookup_results[value["idempotency_key"]] = copy.deepcopy(receipt)
         return receipt
 
-    def lookup_operation(self, *, request_id, idempotency_key):
-        self.calls.append(("lookup_operation", request_id, idempotency_key))
+    def lookup_operation(self, *, request_id, idempotency_key, intent_digest):
+        self.calls.append(("lookup_operation", request_id, idempotency_key, intent_digest))
         return copy.deepcopy(self.lookup_results.get(idempotency_key))
 
     def get_run(self, run_ref):
@@ -130,6 +131,7 @@ class FakeTransport:
         receipt = {
             "request_id": value["request_id"],
             "idempotency_key": value["idempotency_key"],
+            "intent_digest": value["intent_digest"],
             "effect_status": "acknowledged",
             "run_ref": value["run_ref"],
         }
@@ -231,6 +233,26 @@ class OrchestratorAdapterTests(unittest.TestCase):
             adapter.start_run(changed)
         self.assertEqual(error.exception.code, "IDEMPOTENCY_CONFLICT")
 
+    def test_retry_after_adapter_restart_reconciles_by_key_and_intent_digest(self):
+        transport = FakeTransport()
+        first = VibeLearnAdapter(transport).start_run(request())
+        retry = request()
+        retry["request_id"] = "req-after-restart"
+        second = VibeLearnAdapter(transport).start_run(retry)
+        self.assertEqual(second, first)
+        self.assertEqual(sum(x[0] == "start_run" for x in transport.calls), 1)
+
+    def test_changed_payload_after_adapter_restart_detects_idempotency_conflict(self):
+        transport = FakeTransport()
+        VibeLearnAdapter(transport).start_run(request())
+        changed = request()
+        changed["request_id"] = "req-after-restart"
+        changed["run_request"]["requested_outcome"] = "A materially different outcome"
+        with self.assertRaises(ContractError) as error:
+            VibeLearnAdapter(transport).start_run(changed)
+        self.assertEqual(error.exception.code, "IDEMPOTENCY_CONFLICT")
+        self.assertEqual(sum(x[0] == "start_run" for x in transport.calls), 1)
+
     def test_same_intended_operation_with_new_request_id_reconciles_without_redispatch(self):
         transport = FakeTransport()
         adapter = VibeLearnAdapter(transport)
@@ -242,7 +264,8 @@ class OrchestratorAdapterTests(unittest.TestCase):
         self.assertEqual(sum(x[0] == "start_run" for x in transport.calls), 1)
         lookups = [x for x in transport.calls if x[0] == "lookup_operation"]
         self.assertGreaterEqual(len(lookups), 2)
-        self.assertEqual(lookups[-1][1:], ("req-2", "repair-1"))
+        self.assertEqual(lookups[-1][1:3], ("req-2", "repair-1"))
+        self.assertEqual(len(lookups[-1][3]), 64)
 
     def test_candidate_change_invalidates_prior_review_and_stale_evidence(self):
         transport = FakeTransport()
