@@ -93,7 +93,8 @@ class FakeTransport:
         self.calls = []
         self.raise_start_unknown = False
         self.raise_cancel_unknown = False
-        self.lookup_result = None
+        self.store_unknown_receipt = True
+        self.lookup_results = {}
         self.snapshot = snapshot()
 
     def describe_capabilities(self):
@@ -102,18 +103,23 @@ class FakeTransport:
 
     def start_run(self, value):
         self.calls.append(("start_run", copy.deepcopy(value)))
-        if self.raise_start_unknown:
-            raise EffectUnknown()
-        return {
+        receipt = {
             "request_id": value["request_id"],
             "idempotency_key": value["idempotency_key"],
             "effect_status": "effect_confirmed",
             "run_ref": "terminal_pm:run/1",
         }
+        if self.raise_start_unknown:
+            if self.store_unknown_receipt:
+                receipt["effect_status"] = "acknowledged"
+                self.lookup_results[value["idempotency_key"]] = copy.deepcopy(receipt)
+            raise EffectUnknown()
+        self.lookup_results[value["idempotency_key"]] = copy.deepcopy(receipt)
+        return receipt
 
     def lookup_operation(self, *, request_id, idempotency_key):
         self.calls.append(("lookup_operation", request_id, idempotency_key))
-        return copy.deepcopy(self.lookup_result)
+        return copy.deepcopy(self.lookup_results.get(idempotency_key))
 
     def get_run(self, run_ref):
         self.calls.append(("get_run", copy.deepcopy(run_ref)))
@@ -121,14 +127,19 @@ class FakeTransport:
 
     def cancel_run(self, value):
         self.calls.append(("cancel_run", copy.deepcopy(value)))
-        if self.raise_cancel_unknown:
-            raise EffectUnknown()
-        return {
+        receipt = {
             "request_id": value["request_id"],
             "idempotency_key": value["idempotency_key"],
             "effect_status": "acknowledged",
             "run_ref": value["run_ref"],
         }
+        if self.raise_cancel_unknown:
+            if self.store_unknown_receipt:
+                receipt["effect_status"] = "effect_unknown"
+                self.lookup_results[value["idempotency_key"]] = copy.deepcopy(receipt)
+            raise EffectUnknown()
+        self.lookup_results[value["idempotency_key"]] = copy.deepcopy(receipt)
+        return receipt
 
 
 class OrchestratorAdapterTests(unittest.TestCase):
@@ -181,10 +192,6 @@ class OrchestratorAdapterTests(unittest.TestCase):
     def test_unknown_start_effect_reconciles_and_never_blindly_redispatches(self):
         transport = FakeTransport()
         transport.raise_start_unknown = True
-        transport.lookup_result = {
-            "request_id": "req-1", "idempotency_key": "repair-1",
-            "effect_status": "acknowledged", "run_ref": "terminal_pm:run/1",
-        }
         receipt = VibeLearnAdapter(transport).start_run(request())
         self.assertEqual(receipt["effect_status"], "acknowledged")
         self.assertEqual(
@@ -196,6 +203,7 @@ class OrchestratorAdapterTests(unittest.TestCase):
     def test_unknown_start_effect_stays_unknown_without_reconciliation_evidence(self):
         transport = FakeTransport()
         transport.raise_start_unknown = True
+        transport.store_unknown_receipt = False
         with self.assertRaises(ContractError) as error:
             VibeLearnAdapter(transport).start_run(request())
         self.assertEqual(error.exception.code, "EFFECT_UNKNOWN")
@@ -204,10 +212,6 @@ class OrchestratorAdapterTests(unittest.TestCase):
     def test_unknown_cancel_effect_stays_uncertain(self):
         transport = FakeTransport()
         transport.raise_cancel_unknown = True
-        transport.lookup_result = {
-            "request_id": "cancel-1", "idempotency_key": "cancel-key",
-            "effect_status": "effect_unknown", "run_ref": "terminal_pm:run/1",
-        }
         with self.assertRaises(ContractError) as error:
             VibeLearnAdapter(transport).cancel_run(
                 run_ref="terminal_pm:run/1", expected_revision=11,
@@ -226,6 +230,19 @@ class OrchestratorAdapterTests(unittest.TestCase):
         with self.assertRaises(ContractError) as error:
             adapter.start_run(changed)
         self.assertEqual(error.exception.code, "IDEMPOTENCY_CONFLICT")
+
+    def test_same_intended_operation_with_new_request_id_reconciles_without_redispatch(self):
+        transport = FakeTransport()
+        adapter = VibeLearnAdapter(transport)
+        first = adapter.start_run(request())
+        retry = request()
+        retry["request_id"] = "req-2"
+        second = adapter.start_run(retry)
+        self.assertEqual(second, first)
+        self.assertEqual(sum(x[0] == "start_run" for x in transport.calls), 1)
+        lookups = [x for x in transport.calls if x[0] == "lookup_operation"]
+        self.assertGreaterEqual(len(lookups), 2)
+        self.assertEqual(lookups[-1][1:], ("req-2", "repair-1"))
 
     def test_candidate_change_invalidates_prior_review_and_stale_evidence(self):
         transport = FakeTransport()
