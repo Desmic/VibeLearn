@@ -965,9 +965,13 @@ Minimum fixture matrix:
 | Reviewer-proven defect | Finding includes attempted reproduction and evidence; candidate not silently treated as accepted |
 | Reviewer unresolved | Required blocking review remains unresolved, not pass |
 | Unsupported critic capability | Run rejected/blocked; no silent critic omission |
-| Unknown start effect | Adapter reconciles idempotency key before redispatch |
+| Unknown start effect | Adapter reconciles idempotency key + intent digest before redispatch |
+| Same intent, new request ID | Original authoritative receipt is reused; no second dispatch |
+| Same key, changed payload after restart | Intent-digest mismatch returns `IDEMPOTENCY_CONFLICT`; no dispatch |
 | Unknown cancel effect | Run remains uncertain until confirmed/reconciled |
 | Worker replacement | Same run lineage preserves old/new activity refs |
+| Multiple candidates | Exact `active_candidate_ref` is required; list order never chooses authority |
+| Duplicate required review results | Candidate evaluation blocks until the duplicate requirement is reconciled |
 | Candidate changed after review | Prior affected review no longer authorizes changed candidate |
 | Budget cannot be enforced | Hard-required budget capability blocks run |
 | VibeLearn product rejection after Terminal completion | Incident links to exact run/candidate; child repair run can reference it |
