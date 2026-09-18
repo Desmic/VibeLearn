@@ -204,8 +204,11 @@ function frame(){
   $('#actions').querySelectorAll('button').forEach(b=>b.disabled=Boolean(blocked()));$('#rewind').disabled=Boolean(blocked());
   for(const marker of $('#markers').children){
     const point=world.projectEntity(marker.dataset.anchor),wrongRound=marker.dataset.round!==undefined&&Number(marker.dataset.round)!==s.round;
-    if(marker.dataset.action){marker.disabled=Boolean(blocked()||!s.available_actions?.includes(marker.dataset.action));marker.classList.toggle('chosen',marker.dataset.clue===s.clue);}
-    marker.hidden=!point?.visible||wrongRound||inOpening||!ours()||(marker.dataset.anchor==='star-label'&&s.status==='success');
+    const available=marker.dataset.action?s.available_actions?.includes(marker.dataset.action):true;
+    if(marker.dataset.action){marker.disabled=Boolean(blocked()||!available);marker.classList.toggle('chosen',marker.dataset.clue===s.clue);}
+    const tutorialTarget=marker.classList.contains('tutorial-target-marker');
+    const targetMismatch=tutorialTarget&&(marker.dataset.anchor!==host.dataset.tutorialWorldTarget||!available);
+    marker.hidden=!point?.visible||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.anchor==='star-label'&&s.status==='success');
     if(point){marker.style.left=Math.max(40,Math.min(rect.width-40,point.x))+'px';marker.style.top=(point.y-12)+'px';if(point.y>tray.top-rect.top||point.y<Math.max(150,goal.bottom-rect.top+marker.offsetHeight+8))marker.hidden=true;}
   }
   requestAnimationFrame(frame);
