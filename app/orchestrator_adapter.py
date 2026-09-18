@@ -270,7 +270,6 @@ class VibeLearnAdapter:
             + (work.get("required_capabilities") or [])
             + required_review_capabilities(value["run_request"])
         ))
-        self.require_capabilities(required)
         self._remember_idempotency(value)
         intent_digest = self._intent_digest(value)
         existing = self._lookup_existing(
@@ -278,6 +277,7 @@ class VibeLearnAdapter:
         )
         if existing is not None:
             return existing
+        self.require_capabilities(required)
         outbound = copy.deepcopy(value)
         outbound["intent_digest"] = intent_digest
         try:
@@ -294,7 +294,6 @@ class VibeLearnAdapter:
         self, *, run_ref: Any, expected_revision: Any, request_id: str,
         idempotency_key: str, actor_ref: str
     ) -> dict[str, Any]:
-        self.describe_capabilities()
         request = {
             "contract_version": CONTRACT_VERSION,
             "request_id": _require_text(request_id, "request_id"),
@@ -312,6 +311,7 @@ class VibeLearnAdapter:
         )
         if existing is not None:
             return existing
+        self.describe_capabilities()
         outbound = copy.deepcopy(request)
         outbound["intent_digest"] = intent_digest
         try:
