@@ -148,3 +148,41 @@ A yes to only the first question is not success.
 ## Platform/future-agent boundary
 
 Future agents may handle UX/world generation, art direction, critic roles and regression checks through versioned specs/evidence. Current priority is to prove the system manually/tool-assisted on one excellent track before automating the pipeline.
+
+## Experience-mode exclusivity
+
+The game must never simultaneously present incompatible mode-level goals.
+
+Examples of invalid UX:
+- tutorial HUD visible while a card asks the player to enter/replay the prologue;
+- mission actions visible during an unskippable cinematic;
+- completion/result language while the world still asks for an unfinished task.
+
+At every moment one primary mode owns the player's mental model.
+
+## Transition / handoff UX
+
+A handoff is a designed gameplay moment, not merely hiding one overlay and
+showing another.
+
+On opening -> tutorial, tutorial -> mission, location -> location or mission ->
+result, the player should understand immediately:
+- who they control;
+- what just happened;
+- what matters now;
+- which control/verb is newly available;
+- the single best next action.
+
+Use camera, world target highlight, animation and concise text together. Avoid
+generic "continue" language when a concrete verb/action can be introduced.
+
+## Tutorial clarity
+
+Each tutorial step should visibly pair:
+`target/control -> action -> response`.
+
+The player should not have to map a paragraph of instruction onto an unmarked
+world. The system should know what counts as completion and immediately
+acknowledge it before introducing the next concept.
+
+Tutorial copy is support; successful interaction is the teaching medium.
