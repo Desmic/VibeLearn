@@ -29,6 +29,14 @@ function cameraShot(shot,label){
   if('fov' in shot)assert(Number.isFinite(shot.fov)&&shot.fov>1&&shot.fov<179,`${label}.fov must be between 1 and 179`);
   if('toneMapping' in shot)tone(shot.toneMapping,`${label}.toneMapping`);
 }
+const STORY_READABILITY=new Set(['attachment','silhouette','material','light','motion','interaction','label','narration','sound','transformation']);
+function storyObject(value,label){
+  assert(value&&typeof value==='object'&&!Array.isArray(value),`${label} must be an object`);
+  id(value.role,`${label}.role`);
+  assert(['minor','major'].includes(value.importance),`${label}.importance must be minor or major`);
+  assert(Array.isArray(value.readability)&&value.readability.length>0&&value.readability.every(v=>STORY_READABILITY.has(v)),`${label}.readability is invalid`);
+  if(value.importance==='major')assert(new Set(value.readability).size>=2,`${label} major object needs at least two readability channels`);
+}
 function collider(value,label){
   assert(value&&typeof value==='object'&&!Array.isArray(value),`${label} must be an object`);
   assert(value.shape==='box',`${label}.shape must be box`);
@@ -116,6 +124,7 @@ export function validateWorldSpec(spec){
     if(entity.rotation)vec(entity.rotation,3,`${entity.id}.rotation`);
     if(entity.scale)vec(entity.scale,3,`${entity.id}.scale`);
     if(entity.collider)collider(entity.collider,`${entity.id}.collider`);
+    if(entity.storyObject)storyObject(entity.storyObject,`${entity.id}.storyObject`);
     if(entity.motion){
       assert(MOTIONS.has(entity.motion.type),`unsupported motion ${entity.motion.type}`);
       if(entity.motion.axis)vec(entity.motion.axis,3,`${entity.id}.motion.axis`);
