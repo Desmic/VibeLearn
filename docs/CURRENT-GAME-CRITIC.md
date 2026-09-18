@@ -1,54 +1,80 @@
-# Current game critic — schema-v2 review pending
+# Current game critic — independent v2 execution is the active gate
 
-**18 September 2026.** The deployed runtime
-`ad14c5aced6cf053c7617dfb03245506e1e9dad5` remains rejected by the user.
-Do not request more review of that build.
+**18 September 2026.**
 
-The active `main` line is a **system-repair candidate**, not a product-ready
-candidate. Previous 9/10 records are historical evidence of an insufficient
-review process and must not be inherited.
+Rejected deployed runtime:
+`ad14c5aced6cf053c7617dfb03245506e1e9dad5`.
 
-## What the repaired system now proves structurally
+Current exact green system-repair candidate:
+`337d8352b47bb9bfc45556e8778408bdf1b80070`  
+Exact CI/review-index run:
+`35382351720`.
 
-Runtime/schema/browser evidence now covers:
-- world-owned collision and adversarial traversal;
-- explicit controlled-character idle/move profiles;
-- mutually exclusive opening/tutorial/mission surfaces;
-- reusable tutorial-flow progression and highlighted control/world targets;
-- major-event cause/effect metadata and atmosphere channels;
-- semantic capability objects and removal/socket staging;
-- motion-video capture in CI;
-- exact-candidate cold-observer evidence packets;
-- review schema v2 with claim-specific evidence modalities.
+The current candidate is **technically/systemically qualified for post-CI
+criticism**, not creatively accepted or preview-ready.
 
-These are implementation/verification achievements, not creative scores.
+## What is proven on this SHA
 
-## Current review status
+All seven technical/browser suites pass, including:
+- real world-owned collision probes;
+- explicit calm-idle -> locomotion -> calm-idle animation switching;
+- mutually exclusive opening/tutorial/mission modes;
+- world-first state-driven tutorial targets/actions;
+- motion/caption-blind evidence;
+- actual WebAudio capture;
+- changed-context authoritative learning replay;
+- exact-SHA evidence receipts and aggregate review index.
 
-Use `EXPERIENCE-QUALITY-SYSTEM.md` and critic-record schema v2.
+A materially different Harbor Relay fixture also passes the generic platform
+contracts, guarding against Bellweather-specific overfitting.
 
-A new internal-ready recommendation requires all of the following on one exact
-runtime SHA:
-1. context-restricted cold-observer report;
-2. cinematic causality/event-direction review from motion evidence;
-3. character-motion/audience review from motion evidence;
-4. physicality/traversal review from interactive evidence;
-5. opening/tutorial/mission handoff and tutorial review from interactive evidence;
-6. actual audio listening for atmosphere/music claims;
-7. design-intent comparison after the cold pass;
-8. learning/transfer review from authoritative replay;
-9. technical/accessibility pass.
+## What is not yet proven
 
-The current assistant already knows the intended story, so it cannot honestly
-self-produce the required cold-observer evidence for the same candidate.
-Likewise, no 9+ audio-atmosphere claim is valid without listening.
+No current creative/story 9/10 claim exists.
 
-Therefore current product status is **review_incomplete / system repair in
-progress**. No numeric readiness score is active.
+The exact review queue reports:
 
-## Release boundary
+Ready:
+- cold_observer;
+- motion_audience;
+- physicality;
+- handoff_tutorial;
+- audio_atmosphere;
+- learning_transfer.
 
-Do not start Level 2 and do not move the system-repair candidate to Render for
-user review merely because CI is green. A later Phase 1 candidate first needs a
-complete v2 evidence packet with no blocker. The current user remains the sole
-final acceptance authority.
+Blocked until a real cold-observer report exists:
+- cinematic_causality;
+- intent_comparison.
+
+The current assistant is not a valid cold observer because it knows the intended
+story and the prior user feedback. It must not synthesize the missing result.
+
+## Critic-result integrity
+
+A valid post-CI critic result now requires:
+- exact candidate;
+- exact assignment ID;
+- harness-side execution-receipt ID;
+- evidence actually supplied by the harness;
+- use of every required evidence modality group;
+- allowed-context-only execution;
+- observations before interpretation;
+- counterexample attempt;
+- explicit verdict;
+- blockers + retest for `needs_revision`.
+
+Assignments and execution receipts are adapter-neutral so the Terminal
+Agent/orchestrator or another future reviewer backend can execute them without
+changing the VibeLearn contract.
+
+## Release meaning
+
+Green CI is not a preview recommendation.
+
+Normal preview promotion requires **all required validated critic verdicts =
+pass** plus a schema-v2 `ready_for_user_review` final record. A
+`needs_revision` critic verdict cannot be bypassed even by an explicit preview
+override.
+
+Only the current user's explicit verdict establishes acceptance or permits Level
+2/phase advancement.
