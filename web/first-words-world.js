@@ -263,6 +263,44 @@ const pkg=makeWorldPackage(worldSpec,(state,previous)=>{
 export const gameWorldManifest=pkg.gameWorldManifest;
 export const createGameWorld=pkg.createGameWorld;
 
+
+export const controlTutorialSpec={
+  id:'first-words-core-controls',version:'3',skipAllowed:true,
+  handoff:{
+    from:'opening',to:'tutorial',playerRole:'direct protagonist',
+    goal:'Take control and learn the three controls needed before the first repair.'
+  },
+  steps:[
+    {
+      id:'move',skill:'move protagonist',observe:'move',focus:'move',
+      success:'protagonist position changed',
+      title:'You control Zip now.',
+      instructions:{
+        desktop:'Use the highlighted WASD / arrow movement controls. Make Zip take a few steps.',
+        touch:'Move the highlighted stick at bottom left. Make Zip take a few steps. Arrow keys work too.'
+      }
+    },
+    {
+      id:'look',skill:'look/orbit camera',observe:'look',focus:'look',
+      success:'camera yaw or distance changed',
+      title:'Now look around as Zip.',
+      instructions:{
+        desktop:'Drag the highlighted world view to turn the camera. The + / − controls zoom.',
+        touch:'Drag the highlighted world view to turn the camera. The + / − controls zoom.'
+      }
+    },
+    {
+      id:'menu',skill:'open game menu',observe:'menu',focus:'menu',
+      success:'game menu opened',
+      title:'One last control: your game menu.',
+      instructions:{
+        desktop:'Open the highlighted ☰ button. That is where pause, sound and story replay live.',
+        touch:'Open the highlighted ☰ button. That is where pause, sound and story replay live.'
+      }
+    }
+  ]
+};
+
 export const openingSpec={
   id:'bellweather.opening.v6',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
   scenes:[
