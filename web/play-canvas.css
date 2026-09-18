@@ -130,3 +130,20 @@
 [data-world-status='loading']>:not(.game-world-status):not(.game-runtime-stage),[data-world-status='failed']>:not(.game-world-status){visibility:hidden!important;pointer-events:none!important}
 .rg-encounter:has([data-world-status='failed']) .rg-console,.rg-encounter:has([data-world-status='loading']) .rg-console{visibility:hidden;pointer-events:none}
 .rg-world>svg,.rgi-fallback{display:none!important}
+
+
+/* Reusable tutorial focus: the game host declares the control family currently
+   being taught; generated/tutorial-specific copy stays outside this layer. */
+[data-tutorial-focus='move'] .game-move-stick{
+  outline:3px solid #f0c873;
+  outline-offset:4px;
+  box-shadow:0 0 0 8px #f0c87324,0 0 30px #f0c87355;
+}
+[data-tutorial-focus='look'] .play-canvas-webgl{
+  outline:3px solid #8dd9d0;
+  outline-offset:-4px;
+}
+@media (prefers-reduced-motion:no-preference){
+  [data-tutorial-focus='move'] .game-move-stick{animation:vl-tutorial-focus 1.4s ease-in-out infinite}
+}
+@keyframes vl-tutorial-focus{50%{box-shadow:0 0 0 12px #f0c87312,0 0 38px #f0c87370}}
