@@ -138,3 +138,96 @@ Therefore the current internal-review process is not sufficient by itself. Futur
 ## Review status
 
 **Needs revision.** Continue recording user feedback in this file during the review. Do not mark Level 1 ready again until all findings are repaired, retested, and the user reviews the new candidate.
+
+
+## Continued user review — 18 September 2026 — deployed runtime ad14c5a
+
+**Reviewed runtime:** `ad14c5aced6cf053c7617dfb03245506e1e9dad5`  
+**Render deployment:** `dep-damhjg6k1f9s7393d650`  
+**Status:** **review in progress / opening rejected**
+
+The user is continuing through the rest of Phase 1. Do not change the deployed
+runtime merely to pre-empt later feedback; record findings as they arrive, then
+repair coherently after the user has reviewed the remaining experience unless a
+blocking defect prevents further review.
+
+### UR-14 — Opening still does not visually establish the world or setting
+
+The materially revised opening still does not make sense to the user as an
+opening scene. The sequence now has more explicit causal states, but it still
+depends on captions and prior design knowledge to communicate what Bellweather
+is, how this world normally works, who inhabits it, what kind of life exists
+there, and why the disruption matters.
+
+This exposes a critic failure: the internal story/art pass over-weighted
+`beat A -> visible event -> beat B` and screenshot readability. It verified
+that a reviewer who already knew the intended story could reconstruct the
+sequence. That is weaker than the required standard.
+
+**Required correction:** use visuals, environmental animation and character
+behavior to establish the world **before** asking the player to interpret the
+plot. Bellweather should visibly feel inhabited and coherent: background life,
+purposeful activity, social relationships, spatial landmarks, environmental
+motion and cause-and-effect should communicate setting without requiring prose.
+Captions may reinforce what is already legible; they may not carry the burden of
+world-building.
+
+The cold-start test must become: **without reading captions or design docs, what
+world does a new player think this is, who lives here, what are they doing, and
+what changed when the rupture occurs?** If the answer is vague or wrong, the
+opening fails even when every storyboard beat exists.
+
+### UR-15 — Zip's default idle/rest animation is unnatural for this art direction
+
+The current default rest animation makes Zip feel unnaturally animated and can
+read as creepy to kids/young adults. The user identifies the motion language as
+a classic retro-game technique: exaggerated/repeated movement communicates
+"this sprite/character is alive" when visual fidelity and animation budgets are
+low. That convention is not automatically appropriate for this game's current
+3D visual direction.
+
+The problem is not merely animation smoothness. It is **animation-direction
+mismatch**: the idle loop communicates a different genre/aesthetic from the
+world, character and target audience.
+
+**Required correction:** do not inherit stock/default idle loops without
+art-direction review. Character motion must be authored/selected for the game's
+theme, audience and emotional tone. For Zip, use a calmer, physically plausible
+rest state with subtle breathing/servo/head/weight-shift motion only where it
+supports personality. Avoid repetitive whole-body swaying, twitching or
+exaggerated "always moving" loops unless the chosen game style deliberately
+calls for them.
+
+Future animation review must inspect motion in real time, not only still-frame
+silhouettes. Ask whether the idle, locomotion, reactions and cinematic acting
+belong to the same game, whether they accidentally look uncanny/creepy, and
+whether they fit the target age group.
+
+## New internal-review misses exposed by ad14c5a
+
+The `ad14c5a` internal critic gave story/art/gameplay/learning 9/10, yet current
+user review immediately found:
+
+- visual story causality was not enough to establish the world/setting;
+- screenshots let a reviewer reconstruct intended beats but did not prove
+  cold-start visual comprehension;
+- the critic reviewed character identity/silhouette but not **motion language**;
+- stock/default animation conventions were not checked against theme, art
+  direction or young-player emotional response.
+
+Therefore the `ad14c5a` 9/10 story/art findings are **invalidated as readiness
+claims** for this candidate. They remain historical evidence of what the old
+rubric measured; they do not represent current product quality.
+
+The creative-direction gate must now cover two separate questions:
+1. **What does the still/composition communicate?**
+2. **What does the scene communicate over time through motion, behavior and
+   environmental life?**
+
+A candidate cannot pass creative direction by satisfying only the first.
+
+## Current review status
+
+**Opening: needs revision. Review of the rest of the experience is still in
+progress.** Continue collecting user feedback before rebuilding the opening so
+repairs can be planned coherently. Do not begin Level 2.
