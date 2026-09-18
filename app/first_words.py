@@ -98,11 +98,11 @@ def build_content(template):
     item['rubric']['criteria'][0]['coverage'] = 'Chapter completion; transfer observations reported separately, never mastery.'
     item.update(
         title='The First Words',
-        intro='The Warden has taken Zip’s voice. Help your friend speak and escape.',
-        prompt='Repair Zip’s words. Give the engine the clue it needs.',
+        intro='The Warden took your voice. Restore it and find a way out.',
+        prompt='Repair your words. Give the speech engine the clue it needs.',
         hints=['Scan the clue that describes the route now.', 'The engine only receives the context you choose.'],
     )
-    item['mission'].update(id=MISSION_ID, title='The First Words', objective='Free Zip and reach the tower', plain_objective='Help Zip speak. Open the gate.')
+    item['mission'].update(id=MISSION_ID, title='The First Words', objective='Restore your voice and reach the tower', plain_objective='Get your words back. Open the gate.')
     item['policies']['assessment'] = VERSION
     item['validation'].update(scope='Guided rescue and changed-context exit experiment', basis='Pending exact-build checks and user review.')
     item['word_machine'] = {'version': VERSION, 'rules': deepcopy(RULES), 'cases': deepcopy(CASES)}
