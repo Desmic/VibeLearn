@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.check_critic_review import COVERAGE, GATES, evaluate
+from tools.check_critic_review import COVERAGE, GATES, V2_GATES, CRITERION_MODALITIES, evaluate
 
 
 class CriticReviewTests(unittest.TestCase):
@@ -81,6 +81,106 @@ class CriticReviewTests(unittest.TestCase):
         del self.record["criteria"]["controls"]["counterexample_attempt"]
         with self.assertRaisesRegex(ValueError, "counterexample"):
             self.check()
+
+
+    def v2_record(self):
+        files = {
+            "cold_observer_report": "cold.json",
+            "interactive_trace": "interactive.json",
+            "motion_video": "motion.webm",
+            "audio_listening": "audio.txt",
+            "screenshot": "screen.png",
+            "runtime_trace": "runtime.json",
+            "authoritative_replay": "replay.json",
+            "ci_report": "ci.json",
+            "source_inspection": "source.txt",
+        }
+        for modality, name in files.items():
+            (self.root / name).write_text(f"{modality} fixture", encoding="utf-8")
+
+        def ev(modality):
+            return {"ref": files[modality], "modality": modality, "candidate_sha": self.sha}
+
+        criteria = {}
+        for name in {criterion for group in V2_GATES.values() for criterion in group}:
+            evidence = []
+            for alternatives in CRITERION_MODALITIES.get(name, ()):
+                evidence.append(ev(alternatives[0]))
+            if not evidence:
+                evidence = [ev("source_inspection")]
+            criteria[name] = {
+                "rating": 9,
+                "reason": "Synthetic v2 fixture",
+                "evidence": evidence,
+                "counterexample_attempt": "Synthetic adversarial attempt",
+            }
+
+        return {
+            "schema_version": 2,
+            "candidate_sha": self.sha,
+            "method": "independent_agent",
+            "environment": "Synthetic v2 fixture",
+            "limitations": "No real game was reviewed",
+            "prior_context": "Cold observer intentionally restricted",
+            "user_authority": "Current user is sole human product critic",
+            "review_order": "cold_observer_then_intent",
+            "cold_observer_context": "Runtime evidence only; no story/design treatment",
+            "technical_status": "passed",
+            "technical_evidence": [ev("ci_report")],
+            "criteria": criteria,
+            "coverage": {
+                name: {
+                    "status": "observed",
+                    "note": "Synthetic fixture",
+                    "evidence": [ev("interactive_trace")],
+                }
+                for name in COVERAGE
+            },
+            "blockers": [],
+        }
+
+    def test_v2_can_be_structurally_ready_without_becoming_user_acceptance(self):
+        result = self.check(self.v2_record())
+        self.assertEqual(result["schema_version"], 2)
+        self.assertEqual(result["status"], "ready_for_user_review")
+        self.assertEqual(result["user_acceptance"], "not_determined_by_tool")
+        self.assertEqual(set(result["gate_minimums"]), set(V2_GATES))
+
+    def test_v2_motion_claim_cannot_use_screenshot_only(self):
+        record = self.v2_record()
+        record["criteria"]["motion_direction"]["evidence"] = [{
+            "ref": "screen.png", "modality": "screenshot", "candidate_sha": self.sha
+        }]
+        with self.assertRaisesRegex(ValueError, "motion_direction: evidence needs"):
+            self.check(record)
+
+    def test_v2_audio_quality_requires_actual_listening_evidence(self):
+        record = self.v2_record()
+        record["criteria"]["audio_atmosphere"]["evidence"] = [{
+            "ref": "motion.webm", "modality": "motion_video", "candidate_sha": self.sha
+        }]
+        with self.assertRaisesRegex(ValueError, "audio_atmosphere: evidence needs"):
+            self.check(record)
+
+    def test_v2_physicality_requires_interactive_trace(self):
+        record = self.v2_record()
+        record["criteria"]["physicality"]["evidence"] = [{
+            "ref": "runtime.json", "modality": "runtime_trace", "candidate_sha": self.sha
+        }]
+        with self.assertRaisesRegex(ValueError, "physicality: evidence needs"):
+            self.check(record)
+
+    def test_v2_requires_cold_observer_before_intent(self):
+        record = self.v2_record()
+        record["review_order"] = "intent_first"
+        with self.assertRaisesRegex(ValueError, "cold observer"):
+            self.check(record)
+
+    def test_v2_evidence_is_exact_candidate_bound(self):
+        record = self.v2_record()
+        record["criteria"]["controls"]["evidence"][0]["candidate_sha"] = "b" * 40
+        with self.assertRaisesRegex(ValueError, "different candidate"):
+            self.check(record)
 
     def test_acceptance_cannot_be_forged_in_internal_record(self):
         self.record["user_accepted"] = True
