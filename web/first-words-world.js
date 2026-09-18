@@ -95,11 +95,17 @@ e.push({id:'zip',asset:'robot',position:[0,0,-28],scale:[.9,.9,.9],animation:'id
 part('zip-voice','box','mint',[0,1,.5],[.36,.36,.18],{parent:'zip',enabled:false});
 
 /* Reusable dramatic interruption primitives. */
-e.push({id:'rift',position:[0,5.2,8],enabled:false});
-part('rift-core','box','glow',[0,0,0],[.42,5.8,.22],{parent:'rift',rotation:[0,0,-7],motion:{type:'pulse',amplitude:.12,speed:5}});
-part('rift-branch-a','box','blueGlow',[.75,1.45,0],[1.8,.24,.18],{parent:'rift',rotation:[0,0,32]});
-part('rift-branch-b','box','blueGlow',[-.72,-1.3,0],[1.7,.22,.18],{parent:'rift',rotation:[0,0,-36]});
-part('rift-branch-c','box','glow',[.42,-2.25,0],[1.05,.18,.15],{parent:'rift',rotation:[0,0,25]});
+e.push({id:'rift',position:[0,6.2,8],enabled:false});
+for(const [i,x,y,length,angle,material] of [
+  [0,.05,2.5,1.35,-8,'glow'],
+  [1,-.18,1.35,1.25,13,'blueGlow'],
+  [2,.12,.25,1.15,-11,'glow'],
+  [3,-.08,-.8,1.15,10,'blueGlow'],
+  [4,.18,-1.85,1.2,-14,'glow']
+])part('rift-segment-'+i,'box',material,[x,y,0],[.16,length,.14],{parent:'rift',rotation:[0,0,angle]});
+part('rift-branch-a','box','blueGlow',[.62,1.1,0],[1.25,.12,.1],{parent:'rift',rotation:[0,0,34]});
+part('rift-branch-b','box','blueGlow',[-.62,-.55,0],[1.05,.11,.1],{parent:'rift',rotation:[0,0,-38]});
+part('rift-branch-c','box','glow',[.48,-2.05,0],[.8,.1,.09],{parent:'rift',rotation:[0,0,30]});
 part('storm-flash','sphere','glow',[0,12,8],[6,2,6],{enabled:false});
 
 /* The antagonist is deliberately unlike the protagonist silhouette. */
