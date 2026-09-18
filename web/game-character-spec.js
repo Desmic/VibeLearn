@@ -26,12 +26,14 @@ export const keeperMaterials={
 };
 
 export function characterControlProfile({
-  entity,spawn,surfaces,obstacles=[],camera={},speed=2.8,limbs=null,animations=null
+  entity,spawn,surfaces,obstacles=[],camera={},speed=2.8,limbs=null,animations=null,animationSpeeds=null,body=null
 }){
   return {
     version:'1',entity,spawn,speed,surfaces,obstacles,
     ...(limbs?.length?{limbs:[...limbs]}:{}),
     ...(animations?{animations:{...animations}}:{}),
+    ...(animationSpeeds?{animationSpeeds:{...animationSpeeds}}:{}),
+    ...(body?{body:{...body}}:{}),
     camera:{yaw:-42,pitch:22,distance:6,minDistance:2.8,maxDistance:15,targetHeight:1.1,...camera}
   };
 }
