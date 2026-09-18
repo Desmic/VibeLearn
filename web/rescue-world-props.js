@@ -57,3 +57,16 @@ export function planter(id,position,scale=1){
   }
   return e;
 }
+
+
+export function capabilityModule(id,position,{parent=null,color='mint',accent='gold',enabled=true}={}){
+  const root={id,position,enabled,storyObject:{role:'communication-capability',importance:'major',readability:['attachment','silhouette','light','motion']}};
+  if(parent)root.parent=parent;
+  return [root,
+    {id:id+'-shell',parent:id,primitive:'cylinder',material:accent,position:[0,0,0],scale:[.42,.16,.42],rotation:[90,0,0]},
+    {id:id+'-core',parent:id,primitive:'sphere',material:color,position:[0,0,.08],scale:[.3,.3,.18],motion:{type:'pulse',amplitude:.08,speed:2.2}},
+    {id:id+'-ring',parent:id,primitive:'torus',material:'glow',position:[0,0,.1],scale:[.68,.07,.68],rotation:[90,0,0],motion:{type:'spin',axis:[0,0,1],speed:18}},
+    {id:id+'-signal-a',parent:id,primitive:'box',material:'glow',position:[-.18,.48,.04],scale:[.09,.28,.08]},
+    {id:id+'-signal-b',parent:id,primitive:'box',material:'glow',position:[0,.58,.04],scale:[.09,.48,.08]},
+    {id:id+'-signal-c',parent:id,primitive:'box',material:'glow',position:[.18,.42,.04],scale:[.09,.18,.08]}];
+}
