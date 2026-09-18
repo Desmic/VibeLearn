@@ -182,6 +182,14 @@ class CriticReviewTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "different candidate"):
             self.check(record)
 
+    def test_v2_rejects_evidence_file_type_that_does_not_match_modality(self):
+        record = self.v2_record()
+        record["criteria"]["motion_direction"]["evidence"] = [{
+            "ref": "screen.png", "modality": "motion_video", "candidate_sha": self.sha
+        }]
+        with self.assertRaisesRegex(ValueError, "motion_video: unsupported evidence file type"):
+            self.check(record)
+
     def test_acceptance_cannot_be_forged_in_internal_record(self):
         self.record["user_accepted"] = True
         with self.assertRaisesRegex(ValueError, "User acceptance"):
