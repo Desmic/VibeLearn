@@ -16,6 +16,7 @@ class ReleaseGateTests(unittest.TestCase):
             "cold_observer_report":"cold.json",
             "interactive_trace":"interactive.json",
             "motion_video":"motion.webm",
+            "caption_blind_motion":"caption-blind.webm",
             "audio_listening":"audio.txt",
             "screenshot":"screen.png",
             "runtime_trace":"runtime.json",
