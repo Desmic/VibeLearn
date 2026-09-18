@@ -174,22 +174,22 @@ function opening(beat){
     p.camera='rupture';p.environment={clearColor:'#10172a',ambient:'#4a5068',exposure:.9,fog:{type:'linear',color:'#4e5c79',start:24,end:86}};
     p.show.push('bellweather-zone','zip-voice','warden','warden-rift-link');p.animations.zip='no';
     p.transforms.warden={position:[0,3.1,7.15],scale:[.72,.72,.72]};
-    p.timeline={duration:3900,moves:[
-      {entity:'warden',from:[0,3.1,7.15],to:[0,3.7,7.7],at:500,duration:850},
-      {entity:'bellworker-a',from:[-7.5,0,6.2],to:[-.8,3.8,7.4],at:1180,duration:1500},
-      {entity:'bellworker-b',from:[7.6,0,6.1],to:[.9,4.1,7.5],at:1220,duration:1450},
-      {entity:'zip',from:[0,0,10],to:[0,4.7,8],at:1350,duration:1300},
-      {entity:'singer',from:[3.8,0,1],to:[1.1,5.4,7.5],at:1250,duration:1400},
-      {entity:'friend-a',from:[-3,0,1],to:[-1.1,4.6,7.2],at:1250,duration:1400}
+    p.timeline={duration:4800,moves:[
+      {entity:'warden',from:[0,3.1,7.15],to:[0,3.7,7.7],at:180,duration:900},
+      {entity:'bellworker-a',from:[-7.5,0,6.2],to:[-.8,3.8,7.4],at:1750,duration:1500},
+      {entity:'bellworker-b',from:[7.6,0,6.1],to:[.9,4.1,7.5],at:1800,duration:1450},
+      {entity:'zip',from:[0,0,10],to:[0,4.7,8],at:1900,duration:1300},
+      {entity:'singer',from:[3.8,0,1],to:[1.1,5.4,7.5],at:1800,duration:1400},
+      {entity:'friend-a',from:[-3,0,1],to:[-1.1,4.6,7.2],at:1800,duration:1400}
     ],cues:[
-      {at:320,patch:{show:['rift','storm-flash'],cameraImpulse:{duration:760,intensity:10},environment:{clearColor:'#e8f4ff',ambient:'#d6e8ff',exposure:2.15,fog:{type:'linear',color:'#b8d5ef',start:18,end:68}}}},
-      {at:620,patch:{environment:{clearColor:'#07101f',ambient:'#222d49',exposure:.62,fog:{type:'linear',color:'#263650',start:18,end:72}}}},
-      {at:850,patch:{hide:['storm-flash']}},
-      {at:1200,patch:{animations:{singer:'no','friend-a':'no'}}},
-      {at:1450,patch:{hide:['warden-rift-link']}},
-      {at:2450,patch:{hide:['singer','friend-a','bellworker-a','bellworker-b']}},
-      {at:2900,patch:{hide:['zip']}},
-      {at:3250,patch:{hide:['warden']}}
+      {at:900,patch:{show:['rift','storm-flash'],cameraImpulse:{duration:760,intensity:10},environment:{clearColor:'#e8f4ff',ambient:'#d6e8ff',exposure:2.15,fog:{type:'linear',color:'#b8d5ef',start:18,end:68}}}},
+      {at:1200,patch:{environment:{clearColor:'#07101f',ambient:'#222d49',exposure:.62,fog:{type:'linear',color:'#263650',start:18,end:72}}}},
+      {at:1450,patch:{hide:['storm-flash']}},
+      {at:1700,patch:{animations:{singer:'no','friend-a':'no'}}},
+      {at:1950,patch:{hide:['warden-rift-link']}},
+      {at:3200,patch:{hide:['singer','friend-a','bellworker-a','bellworker-b']}},
+      {at:3650,patch:{hide:['zip']}},
+      {at:4100,patch:{hide:['warden']}}
     ],finish:{hide:['storm-flash','zip','singer','friend-a','bellworker-a','bellworker-b','warden','warden-rift-link'],environment:{clearColor:'#03060d',ambient:'#111827',exposure:.35,fog:{type:'none'}}}};
   }else if(beat===2){
     p.camera='limbo';p.environment={clearColor:'#02040a',ambient:'#10131c',exposure:.35,fog:{type:'none'}};p.show.push('limbo-backdrop','zip-voice');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
@@ -255,7 +255,7 @@ export const openingSpec={
       action:{target:'release-lantern',label:'Send up our lantern',patch:{show:['friendship-lantern'],animations:{zip:'wave'},timeline:{duration:2800,moves:[{entity:'friendship-lantern',from:[-.8,1.1,10.5],to:[0,4.7,8],duration:2600},{entity:'singer',from:[3.8,0,1],to:[2.4,0,1],duration:1000},{entity:'friend-a',from:[-3,0,1],to:[-1.8,0,1],duration:1000}],finish:{animations:{zip:'yes'}}}}},
       success:{body:'Three lights rise above your home.',dialogue:'“Same time next year. All three of us.”'}},
     {beat:1,audioPhase:'danger',audioCue:'rupture',kicker:'WITHOUT WARNING',title:'The sky cracks open.',body:'The Warden raises a hand. Thunder answers—and a white rift tears through the square.',
-      direction:{kind:'major-event',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','lighting','vfx','audio','narration'],worldAfter:'Bellweather is disrupted and Zip plus both friends are gone from the square.'}},
+      direction:{kind:'major-event',cause:{mode:'visible',entity:'warden'},causeLeadMs:900,channels:['world','character','camera','lighting','vfx','audio','narration'],worldAfter:'Bellweather is disrupted and Zip plus both friends are gone from the square.'}},
     {beat:2,audioPhase:'danger',kicker:'SOMEWHERE ELSE',title:'Silence.',body:'Zip wakes alone. No market. No friends. Bellweather is gone.',
       direction:{kind:'transition',channels:['world','character','camera','lighting','narration'],worldAfter:'Zip is isolated in an unknown dark location.'}},
     {beat:3,audioPhase:'danger',kicker:'THEN THE LIGHTS COME ON',title:'This is not home.',body:'Cold walls. One enormous locked door. No obvious way back.',
