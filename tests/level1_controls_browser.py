@@ -56,8 +56,10 @@ def main():
             x=world_box['x']+world_box['width']*.55;y=world_box['y']+world_box['height']*.45
             touch(cdp,'touchStart',x,y);page.wait_for_timeout(80);touch(cdp,'touchMove',x+70,y+10);page.wait_for_timeout(80);touch(cdp,'touchEnd');page.wait_for_timeout(120)
             yaw_after=page.evaluate('FirstWordsReview.runtime.world.player.yaw');assert abs(yaw_after-yaw_before)>2,(yaw_before,yaw_after)
+            page.screenshot(path=str(out/'level1-controls-orbit-390.png'))
             dist_before=page.evaluate('FirstWordsReview.runtime.world.player.distance');page.get_by_role('button',name='Zoom camera in',exact=True).click();page.wait_for_timeout(80)
             assert page.evaluate('FirstWordsReview.runtime.world.player.distance')<dist_before
+            page.screenshot(path=str(out/'level1-controls-zoom-390.png'))
             page.get_by_role('button',name='Recenter camera',exact=True).click();page.wait_for_timeout(80)
             page.screenshot(path=str(out/'level1-controls-after-save-390.png'));print('Level 1 post-save keyboard/touch/camera controls passed');ctx.close()
         finally:
