@@ -148,7 +148,7 @@ $('#menu-open').onclick=()=>{if(practice.observe('menu'))render();dialog('#menu'
 host.addEventListener('game-control-used',event=>{
   if(ours()&&!inOpening&&!blocked()&&practice.observe(event.detail?.kind))render();
 });
-for(const marker of document.querySelectorAll('#markers .notice-marker'))marker.addEventListener('click',()=>{const action=marker.dataset.action;if(view().available_actions?.includes(action))act(action);});
+for(const marker of document.querySelectorAll('#markers [data-action]'))marker.addEventListener('click',()=>{const action=marker.dataset.action;if(view().available_actions?.includes(action))act(action);});
 function togglePause(){paused=!paused;$('#paused').hidden=!paused;text('#pause',paused?'Resume the world':'Pause the world');pauseSystems();}
 $('#pause').onclick=()=>{$('#menu').close();togglePause();};$('#paused').onclick=togglePause;
 $('#reset-progress').onclick=()=>{$('#menu').close();text('#reset-progress-status','');dialog('#reset-confirm');};
