@@ -77,7 +77,7 @@ class CriticAssignmentTests(unittest.TestCase):
         first=build_assignments(self.index())["cold_observer"]["assignment_id"]
         changed=self.index()
         changed["receipts"][0]["evidence"].append({
-            "ref":"extra.png","modality":"screenshot","candidate_sha":"a"*40
+            "ref":"extra-motion.webm","modality":"motion_video","candidate_sha":"a"*40
         })
         second=build_assignments(changed)["cold_observer"]["assignment_id"]
         self.assertNotEqual(first,second)
