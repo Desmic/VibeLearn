@@ -35,12 +35,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Package tracked review source (never runtime data or credentials)
         if: matrix.suite == 'foundation'
-        run: git archive --format=tar HEAD -o /tmp/vibelearn-review-source.tar
+        run: |
+          mkdir -p artifacts
+          git archive --format=tar HEAD -o artifacts/review-source.tar
       - uses: actions/upload-artifact@v4
         if: matrix.suite == 'foundation'
         with:
           name: review-source-${{ github.event.pull_request.head.sha || github.sha }}
-          path: /tmp/vibelearn-review-source.tar
+          path: artifacts/review-source.tar
           retention-days: 3
       - uses: actions/setup-python@v5
         with:
@@ -73,6 +75,7 @@ jobs:
             artifacts/*.png
             artifacts/*.json
             artifacts/*.webm
+            artifacts/*.tar
             artifacts/*trace.zip
             web/vendor/*
           retention-days: 7
