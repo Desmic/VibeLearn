@@ -6,9 +6,9 @@ Rejected deployed runtime:
 `ad14c5aced6cf053c7617dfb03245506e1e9dad5`.
 
 Current exact green system-repair candidate:
-`337d8352b47bb9bfc45556e8778408bdf1b80070`  
+`ddfbaca219f712e241e47941806ecd8f7aeff190`  
 Exact CI/review-index run:
-`35382351720`.
+`35384949480`.
 
 The current candidate is **technically/systemically qualified for post-CI
 criticism**, not creatively accepted or preview-ready.
@@ -54,8 +54,9 @@ story and the prior user feedback. It must not synthesize the missing result.
 A valid post-CI critic result now requires:
 - exact candidate;
 - exact assignment ID;
+- sealed evidence-capsule ID;
 - harness-side execution-receipt ID;
-- evidence actually supplied by the harness;
+- evidence actually supplied from that capsule by the harness;
 - use of every required evidence modality group;
 - allowed-context-only execution;
 - observations before interpretation;
