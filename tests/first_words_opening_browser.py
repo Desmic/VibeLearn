@@ -200,7 +200,11 @@ def main():
             blind_ctx=browser.new_context(viewport={'width':390,'height':844},has_touch=True,record_video_dir=str(out/'blind-video'),record_video_size={'width':390,'height':844})
             blind=blind_ctx.new_page();blind.set_default_timeout(15000);blind.goto(url+'/first-words')
             expect(blind.locator('#rgi-intro')).to_be_visible(timeout=20000)
-            blind.add_style_tag(content='.rgi-scene-caption{visibility:hidden!important}')
+            blind.evaluate("""()=>{
+              for(const selector of ['.rgi-kicker','#rgi-title','#rgi-body','#rgi-dialogue','#rgi-fact']){
+                for(const node of document.querySelectorAll(selector))node.hidden=true;
+              }
+            }""")
             until(blind,'()=>!FirstWordsReview.runtime.world.animating')
             blind.locator('#rgi-next').click();until(blind,'()=>!FirstWordsReview.runtime.world.animating')
             for _ in range(7):
