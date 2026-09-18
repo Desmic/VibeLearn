@@ -2,6 +2,7 @@ import copy
 import unittest
 
 from tools.validate_critic_result import validate_result
+from tools.critic_execution_receipt import build_receipt
 
 
 class CriticResultValidationTests(unittest.TestCase):
@@ -24,10 +25,18 @@ class CriticResultValidationTests(unittest.TestCase):
             "questions":["What world is shown?"],
             "expected_output_modality":"cold_observer_report",
         }
+        self.receipt=build_receipt(
+            self.assignment,
+            "test-harness",
+            "session-1",
+            copy.deepcopy(self.evidence),
+            ["assignment"],
+        )
         self.result={
             "schema":"vibelearn.critic-result.v1",
             "candidate_sha":self.sha,
             "assignment_id":self.assignment["assignment_id"],
+            "execution_receipt_id":self.receipt["receipt_id"],
             "pass":"cold_observer",
             "verdict":"unresolved",
             "context_attestation":{
@@ -44,21 +53,43 @@ class CriticResultValidationTests(unittest.TestCase):
         }
 
     def test_valid_result_is_normalized_to_pass_modality(self):
-        result=validate_result(self.assignment,self.result)
+        result=validate_result(self.assignment,self.result,self.receipt)
         self.assertEqual(result["candidate_sha"],self.sha)
         self.assertEqual(result["pass"],"cold_observer")
         self.assertEqual(result["modality"],"cold_observer_report")
         self.assertEqual(result["verdict"],"unresolved")
 
+    def test_execution_receipt_is_required(self):
+        with self.assertRaisesRegex(ValueError,"execution receipt is required"):
+            validate_result(self.assignment,self.result,None)
+
+    def test_result_must_echo_exact_execution_receipt_id(self):
+        self.result["execution_receipt_id"]="sha256:"+"9"*64
+        with self.assertRaisesRegex(ValueError,"different execution receipt"):
+            validate_result(self.assignment,self.result,self.receipt)
+
+    def test_result_cannot_claim_evidence_not_supplied_by_harness(self):
+        narrow=build_receipt(
+            self.assignment,
+            "test-harness",
+            "session-2",
+            [copy.deepcopy(self.evidence[1])],
+            ["assignment"],
+        )
+        result=copy.deepcopy(self.result)
+        result["execution_receipt_id"]=narrow["receipt_id"]
+        with self.assertRaisesRegex(ValueError,"not supplied by execution harness"):
+            validate_result(self.assignment,result,narrow)
+
     def test_result_must_echo_exact_assignment_id(self):
         self.result["assignment_id"]="sha256:"+"2"*64
         with self.assertRaisesRegex(ValueError,"different assignment"):
-            validate_result(self.assignment,self.result)
+            validate_result(self.assignment,self.result,self.receipt)
 
     def test_result_must_use_required_evidence_modality(self):
         self.result["used_evidence"]=[copy.deepcopy(self.evidence[1])]
         with self.assertRaisesRegex(ValueError,"did not use required evidence modality"):
-            validate_result(self.assignment,self.result)
+            validate_result(self.assignment,self.result,self.receipt)
 
     def test_result_cannot_use_unassigned_evidence(self):
         self.result["used_evidence"]=[{
@@ -67,28 +98,28 @@ class CriticResultValidationTests(unittest.TestCase):
             "candidate_sha":self.sha
         }]
         with self.assertRaisesRegex(ValueError,"outside its assignment"):
-            validate_result(self.assignment,self.result)
+            validate_result(self.assignment,self.result,self.receipt)
 
     def test_blocked_assignment_cannot_receive_result(self):
         self.assignment["status"]="blocked_missing_evidence"
         with self.assertRaisesRegex(ValueError,"blocked critic assignment"):
-            validate_result(self.assignment,self.result)
+            validate_result(self.assignment,self.result,self.receipt)
 
     def test_context_attestation_is_required(self):
         self.result["context_attestation"]["allowed_context_only"]=False
         with self.assertRaisesRegex(ValueError,"allowed-context-only"):
-            validate_result(self.assignment,self.result)
+            validate_result(self.assignment,self.result,self.receipt)
 
     def test_passing_result_cannot_hide_blocker(self):
         self.result["verdict"]="pass"
         self.result["blockers"]=[{"finding":"Cause is unclear","retest":"Replay without captions"}]
         with self.assertRaisesRegex(ValueError,"passing critic result"):
-            validate_result(self.assignment,self.result)
+            validate_result(self.assignment,self.result,self.receipt)
 
     def test_needs_revision_requires_blocker(self):
         self.result["verdict"]="needs_revision"
         with self.assertRaisesRegex(ValueError,"must contain at least one blocker"):
-            validate_result(self.assignment,self.result)
+            validate_result(self.assignment,self.result,self.receipt)
 
     def test_candidate_and_pass_are_exact_boundaries(self):
         for field,value,pattern in (
@@ -98,7 +129,7 @@ class CriticResultValidationTests(unittest.TestCase):
             result=copy.deepcopy(self.result)
             result[field]=value
             with self.assertRaisesRegex(ValueError,pattern):
-                validate_result(self.assignment,result)
+                validate_result(self.assignment,result,self.receipt)
 
 
 if __name__=="__main__":
