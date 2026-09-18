@@ -35,12 +35,26 @@ def main():
 
             log('Prologue: rupture');page.get_by_role('button',name='Continue →',exact=True).click()
             expect(page.locator('#rgi-title')).to_have_text('The sky cracks open.')
+            until(page,"""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
+                const w=getGameRuntime().world;
+                const warden=w.projectEntity('warden'),link=w.projectEntity('warden-rift-link-pulse-3'),rift=w.projectEntity('rift');
+                return Boolean(warden?.visible&&link?.visible&&!rift);
+            }""")
+            cause_before=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
+                const w=getGameRuntime().world;return {
+                  warden:w.projectEntity('warden'),
+                  link:w.projectEntity('warden-rift-link-pulse-3'),
+                  rift:w.projectEntity('rift')
+                };}""")
+            assert cause_before['warden'] and cause_before['warden']['visible'],cause_before
+            assert cause_before['link'] and cause_before['link']['visible'],cause_before
+            assert cause_before['rift'] is None,cause_before
+            page.screenshot(path=str(out/'prologue-rupture-cause-before-effect-390.png'),timeout=15000)
+            until(page,"""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
+                return Boolean(getGameRuntime().world.projectEntity('rift')?.visible);
+            }""")
             until(page,"()=>FirstWordsReview.audio.ready && FirstWordsReview.audio.version==='bellweather-score-v2' && FirstWordsReview.audio.scheduledBars>0")
             until(page,"()=>FirstWordsReview.audio.phase==='danger'")
-            cause=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
-                const w=getGameRuntime().world;return {warden:w.projectEntity('warden'),link:w.projectEntity('warden-rift-link-pulse-3')};}""")
-            assert cause['warden'] and cause['warden']['visible'],cause
-            assert cause['link'] and cause['link']['visible'],cause
             page.get_by_role('button',name='Pause story motion').click()
             until(page,"()=>FirstWordsReview.audio.state==='suspended'")
             assert page.get_by_role('button',name='Continue →',exact=True).is_disabled()
@@ -167,7 +181,7 @@ def main():
                 'intentionally_omitted':['story treatment','storyboard rationale','intended causal explanation','creator critique scores'],
                 'evidence':{
                     'motion_video':'prologue-motion-390.webm',
-                    'phone_frames':['prologue-home-390.png','prologue-lantern-release-390.png','prologue-rupture-paused-390.png','prologue-rupture-complete-390.png','prologue-limbo-390.png','prologue-prison-reveal-390.png','prologue-speech-extraction-paused-390.png','prologue-speech-theft-390.png','prologue-repair-handoff-390.png'],
+                    'phone_frames':['prologue-home-390.png','prologue-lantern-release-390.png','prologue-rupture-cause-before-effect-390.png','prologue-rupture-paused-390.png','prologue-rupture-complete-390.png','prologue-limbo-390.png','prologue-prison-reveal-390.png','prologue-speech-extraction-paused-390.png','prologue-speech-theft-390.png','prologue-repair-handoff-390.png'],
                     'reduced_motion_frames':['prologue-rupture-reduced-360.png','prologue-rupture-reduced-430.png','prologue-rupture-reduced-1280.png'],
                     'experience_modes':['opening','tutorial'],
                     'device':'Chromium emulation 390x844 touch plus reduced-motion 360/430/1280'
