@@ -18,7 +18,7 @@ class EvidenceReceiptTests(unittest.TestCase):
                 "opening-trace.zip",
                 "controls-interaction-trace.json",
                 "learning-replay.json",
-                "opening-audio.wav",
+                "opening-audio.webm",
                 "ignore.bin",
             ):
                 (root/name).write_bytes(b"x")
@@ -33,7 +33,7 @@ class EvidenceReceiptTests(unittest.TestCase):
             self.assertEqual(by_name["opening-trace.zip"],"interactive_trace")
             self.assertEqual(by_name["controls-interaction-trace.json"],"interactive_trace")
             self.assertEqual(by_name["learning-replay.json"],"authoritative_replay")
-            self.assertEqual(by_name["opening-audio.wav"],"audio_capture")
+            self.assertEqual(by_name["opening-audio.webm"],"audio_capture")
             self.assertNotIn("ignore.bin",by_name)
             self.assertEqual(receipt["candidate_sha"],sha)
             self.assertEqual(receipt["suite"],"first-words-opening")
