@@ -82,7 +82,17 @@ export function capabilitySocket(id,position,{parent=null,accent='gold',enabled=
     {id:id+'-contact-b',parent:id,primitive:'box',material:'glow',position:[.17,.22,.03],scale:[.06,.14,.05]}];
 }
 
-export function eventLink(id,position,{material='redGlow',length=2.5,radius=.08,rotation=[0,0,0],enabled=true}={}){
-  return [{id,primitive:'cylinder',material,position,rotation,scale:[radius,length,radius],enabled,
-    motion:{type:'pulse',amplitude:.12,speed:5}}];
+export function eventLink(id,from,to,{material='redGlow',segments=7,radius=.12,enabled=true}={}){
+  const e=[{id,position:[0,0,0],enabled}];
+  const count=Math.max(3,Math.min(16,Math.round(segments)));
+  for(let i=0;i<count;i++){
+    const t=(i+.5)/count;
+    e.push({
+      id:`${id}-pulse-${i}`,parent:id,primitive:'sphere',material,
+      position:from.map((v,k)=>v+(to[k]-v)*t),
+      scale:[radius,radius,radius],
+      motion:{type:'pulse',amplitude:.28,speed:7,phase:i*.7}
+    });
+  }
+  return e;
 }
