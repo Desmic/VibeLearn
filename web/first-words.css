@@ -21,3 +21,18 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
   outline-offset:4px;
   box-shadow:0 0 0 8px #f0c87324,0 0 28px #f0c87355;
 }
+
+
+#markers>.world-action-marker{
+  z-index:8;min-height:44px;padding:7px 10px;border-radius:999px;
+  border:1px solid #f0c873;background:#183b43ed;color:#fff0c4;
+  box-shadow:0 0 0 5px #f0c8731c,0 8px 24px #0007;
+  font-size:9px;letter-spacing:.12em;font-weight:900;
+}
+#markers>.tutorial-target-marker:not([hidden]){
+  outline:2px solid #f0c873;outline-offset:3px;
+}
+@media (prefers-reduced-motion:no-preference){
+  #markers>.tutorial-target-marker:not([hidden]){animation:vl-world-target 1.35s ease-in-out infinite}
+}
+@keyframes vl-world-target{50%{box-shadow:0 0 0 10px #f0c87312,0 8px 28px #0008}}
