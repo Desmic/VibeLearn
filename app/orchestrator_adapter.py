@@ -75,6 +75,58 @@ def capability_tokens(descriptor: Mapping[str, Any]) -> set[str]:
     return tokens
 
 
+OUTCOME_SOURCES = {"human", "model", "critic", "telemetry"}
+INCIDENT_STATUSES = {"open", "diagnosed", "repairing", "resolved"}
+
+
+def validate_outcome_record(record: Mapping[str, Any]) -> dict[str, Any]:
+    """Validate fixture/adapter lineage without choosing a production store."""
+    if not isinstance(record, Mapping) or record.get("schema") != "vibelearn.automation-outcome.v0.1":
+        raise ContractError("INVALID_REFERENCE", "unsupported automation outcome record")
+    value = copy.deepcopy(dict(record))
+    for field in ("outcome_ref", "build_ref", "run_ref", "candidate_ref", "observation", "observed_at"):
+        _require_text(value.get(field), f"outcome.{field}")
+    if value.get("source") not in OUTCOME_SOURCES:
+        raise ContractError("INVALID_REFERENCE", "outcome.source is invalid")
+    evidence = value.get("evidence_refs")
+    if not isinstance(evidence, list) or not evidence:
+        raise ContractError("INVALID_REFERENCE", "outcome.evidence_refs are required")
+    return value
+
+
+def validate_incident_record(
+    record: Mapping[str, Any], outcome: Mapping[str, Any] | None = None
+) -> dict[str, Any]:
+    """Validate an escaped-failure record and, when supplied, exact outcome lineage."""
+    if not isinstance(record, Mapping) or record.get("schema") != "vibelearn.automation-incident.v0.1":
+        raise ContractError("INVALID_REFERENCE", "unsupported automation incident record")
+    value = copy.deepcopy(dict(record))
+    for field in (
+        "incident_ref", "outcome_ref", "build_ref", "originating_run_ref",
+        "candidate_ref", "problem_summary", "escape_summary",
+    ):
+        _require_text(value.get(field), f"incident.{field}")
+    if value.get("status") not in INCIDENT_STATUSES:
+        raise ContractError("INVALID_REFERENCE", "incident.status is invalid")
+    evidence = value.get("evidence_refs")
+    if not isinstance(evidence, list) or not evidence:
+        raise ContractError("INVALID_REFERENCE", "incident.evidence_refs are required")
+    if outcome is not None:
+        normalized = validate_outcome_record(outcome)
+        expected = {
+            "outcome_ref": normalized["outcome_ref"],
+            "build_ref": normalized["build_ref"],
+            "originating_run_ref": normalized["run_ref"],
+            "candidate_ref": normalized["candidate_ref"],
+        }
+        for field, expected_value in expected.items():
+            if value.get(field) != expected_value:
+                raise ContractError(
+                    "INVALID_REFERENCE", f"incident.{field} does not match outcome lineage"
+                )
+    return value
+
+
 def validate_start_request(request: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(request, Mapping) or request.get("contract_version") != CONTRACT_VERSION:
         raise ContractError("UNSUPPORTED_CONTRACT_VERSION", "start_run requires contract 0.1")
