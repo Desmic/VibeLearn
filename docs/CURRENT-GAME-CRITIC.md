@@ -1,11 +1,67 @@
-# Current game critic — exact candidate review incomplete
+# Current game critic — user review found new blockers
 
-**18 September 2026.** Current reviewed runtime candidate:
+**18 September 2026.** Deployed/reviewed runtime:
 `ad14c5aced6cf053c7617dfb03245506e1e9dad5`.
 
-The September 17 user verdict of **needs_revision** remains authoritative for
-historical candidate `6fea8287aa5f078a5836902478320699e54571a9`; it is not a
-verdict on this materially revised runtime.
+The current user's live review supersedes the earlier internal 9/10
+recommendation for this same runtime. The opening is **needs_revision** while the
+user continues reviewing the rest of Phase 1.
+
+## Current user blockers
+
+1. **World/setting is not visually established.** The opening contains ordered
+   causal beats, but a cold-start viewer still cannot understand Bellweather as
+   a living place from visuals/animation alone. Captions and reviewer prior
+   knowledge are carrying too much of the meaning.
+2. **Zip's default idle animation does not fit the game's creative direction.**
+   The exaggerated/repetitive rest loop reads like a retro-game "always alive"
+   convention transplanted into a different 3D style and may feel uncanny or
+   creepy to kids/young adults.
+
+These are creative-direction failures, not cosmetic polish.
+
+## Why the previous creative/art critic passed incorrectly
+
+The critic over-weighted:
+- ordered before/event/after causality;
+- screenshot composition;
+- silhouette identity;
+- spacing/clipping;
+- visible world-state contrast.
+
+It under-weighted:
+- **visual-first world-building comprehension**;
+- background environmental life and purposeful activity;
+- character performance over time;
+- animation-style coherence with theme/genre;
+- audience emotional response to motion;
+- whether a newcomer can infer setting without captions/design-doc knowledge.
+
+The result was a false positive: a reviewer who already knew the story could map
+screenshots back to the intended storyboard, but the opening itself still did
+not sell the world.
+
+## Active critic correction
+
+The next candidate must pass a cold visual-comprehension test with captions
+ignored/muted where possible:
+- What is this place?
+- Who lives here?
+- What are they doing before the incident?
+- What relationships/activity make the place feel alive?
+- What visibly changes when the disruption occurs?
+- Why should the player care?
+
+Animation direction is now a hard part of creative direction. Default/stock idle
+loops, locomotion and reactions must be judged in motion for theme, personality,
+physical plausibility, target age group and unintended uncanny/creepy effects.
+
+Do not restore any internal-ready recommendation until the user's ongoing Phase
+1 review is complete and the resulting repair has been re-reviewed.
+
+## Historical internal evidence for this candidate
+
+The section below records the now-invalidated internal pass that preceded current user feedback. It is retained to diagnose critic failure, not as a current readiness claim.
 
 ## Current internal result
 
