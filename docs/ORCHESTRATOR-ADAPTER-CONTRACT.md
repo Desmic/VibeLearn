@@ -134,7 +134,13 @@ Core operation:
 describe_capabilities() -> CapabilityDescriptor
 ```
 
-A request declares `required_capabilities`. If the orchestrator cannot satisfy one, it must reject or block the run explicitly. It must not silently downgrade.
+A request declares `required_capabilities`. If the orchestrator cannot satisfy one, it must reject or block a **new dispatch** explicitly. It must not silently downgrade.
+
+Retry/recovery is different: first reconcile an existing `idempotency_key` +
+`intent_digest`. If an authoritative prior receipt already exists, return that
+receipt even if the orchestrator's currently advertised capabilities have since
+changed. Current capability negotiation is required before creating a new effect,
+not before learning what already happened.
 
 ### 4.3 Additive evolution
 
@@ -164,8 +170,9 @@ Every mutating request should conceptually carry:
 
 ```yaml
 contract_version: "0.1"
-request_id: <unique request ref>
+request_id: <unique transport-attempt ref>
 idempotency_key: <stable key for this intended operation>
+intent_digest: <trusted SHA-256 of the intended operation payload>
 actor_ref: <transport-authenticated actor/service ref>
 purpose: <short machine-readable purpose>
 required_capabilities: []
@@ -175,9 +182,11 @@ extensions: {}
 Rules:
 
 - Actor identity comes from trusted transport/authentication, not model-generated text.
-- Reusing the same idempotency key with a materially different payload is an `IDEMPOTENCY_CONFLICT`.
+- `intent_digest` is computed by the trusted adapter/harness over the intended operation payload; it excludes transport-attempt identity such as `request_id` and the idempotency key itself.
+- Retrying the same intended operation may use a new `request_id`, but it must preserve the same `idempotency_key` and `intent_digest`.
+- Reusing the same idempotency key with a different `intent_digest` is an `IDEMPOTENCY_CONFLICT`.
 - A transport timeout does not prove the operation failed.
-- Mutating operations must be reconcilable by `request_id` or `idempotency_key`.
+- Mutating operations must be reconcilable by `request_id` or `idempotency_key`, with the expected `intent_digest` supplied during reconciliation.
 
 ---
 
@@ -242,9 +251,13 @@ Returns the latest authoritative run snapshot known to Terminal PM Agent.
 
 ### 7.4 `lookup_operation`
 
-Reconciles a mutating request by `request_id` or `idempotency_key`.
+Reconciles a mutating request by `request_id` or `idempotency_key`, together
+with the caller's expected `intent_digest`.
 
-This operation is mandatory because network/controller uncertainty must not cause duplicate effects.
+This operation is mandatory because network/controller uncertainty must not cause
+duplicate effects. A lookup that finds the same idempotency key under a different
+intent digest returns `IDEMPOTENCY_CONFLICT`, not the older result as though it
+belonged to the new payload.
 
 ### 7.5 `cancel_run`
 
@@ -276,6 +289,7 @@ Every mutating operation returns or can later reconcile to an operation receipt:
 operation_ref:
 request_id:
 idempotency_key:
+intent_digest:
 effect_status: rejected | acknowledged | effect_confirmed | effect_unknown
 run_ref: optional
 evidence_refs: []
@@ -290,11 +304,17 @@ Meaning:
 - `effect_confirmed`: requested effect has authoritative evidence.
 - `effect_unknown`: the system cannot currently prove whether the effect occurred.
 
-Critical invariant:
+Critical invariants:
 
 > `effect_unknown` is never automatically treated as safe-to-retry.
 
-Reconcile first.
+> A reconciled receipt is valid for a retry only when its `idempotency_key` and
+> `intent_digest` match the intended operation. The original receipt may carry a
+> different `request_id` because a later retry/reconciliation attempt is a new
+> transport attempt, not a new intended effect.
+
+Reconcile first. If the same key resolves to another intent digest, return
+`IDEMPOTENCY_CONFLICT`; never dispatch again to discover which effect wins.
 
 ---
 
@@ -481,6 +501,7 @@ review_result:
   review_ref:
   requirement_id: optional
   profile_ref:
+  candidate_ref: <exact candidate reviewed>
   reviewer_activity_refs: []
 
   status: passed | failed | unresolved | blocked
@@ -606,6 +627,7 @@ run:
   goal_ref:
   base_revision:
   candidate_refs: []
+  active_candidate_ref: optional
 
   worker_activity_refs: []
   review_results: []
@@ -623,6 +645,18 @@ run:
   updated_at:
 ```
 
+### Candidate selection is explicit
+
+If exactly one candidate exists, VibeLearn may use it directly. If multiple
+candidates exist, Terminal PM Agent must provide an exact `active_candidate_ref`
+for the candidate it is returning for downstream evaluation. VibeLearn must not
+infer the active candidate from list order, timestamps or worker narrative.
+
+Every required review result that may authorize downstream evaluation must bind
+to that exact candidate. Duplicate results for the same required
+`requirement_id` are ambiguous and block evaluation until reconciled; they are
+not resolved by "last result wins."
+
 ### Important semantic distinction
 
 `state: completed` means Terminal PM Agent has completed its orchestration responsibility for this run.
@@ -635,6 +669,9 @@ It does **not** mean:
 - learning outcome proven.
 
 VibeLearn performs its own product evaluation after receiving the candidate/evidence.
+A completed run is eligible for that evaluation only when its orchestration
+disposition actually exposes a candidate, the candidate identity is unambiguous,
+and every required blocking review is exact-candidate-bound.
 
 ---
 
@@ -934,9 +971,13 @@ Minimum fixture matrix:
 | Reviewer-proven defect | Finding includes attempted reproduction and evidence; candidate not silently treated as accepted |
 | Reviewer unresolved | Required blocking review remains unresolved, not pass |
 | Unsupported critic capability | Run rejected/blocked; no silent critic omission |
-| Unknown start effect | Adapter reconciles idempotency key before redispatch |
+| Unknown start effect | Adapter reconciles idempotency key + intent digest before redispatch |
+| Same intent, new request ID | Original authoritative receipt is reused; no second dispatch |
+| Same key, changed payload after restart | Intent-digest mismatch returns `IDEMPOTENCY_CONFLICT`; no dispatch |
 | Unknown cancel effect | Run remains uncertain until confirmed/reconciled |
 | Worker replacement | Same run lineage preserves old/new activity refs |
+| Multiple candidates | Exact `active_candidate_ref` is required; list order never chooses authority |
+| Duplicate required review results | Candidate evaluation blocks until the duplicate requirement is reconciled |
 | Candidate changed after review | Prior affected review no longer authorizes changed candidate |
 | Budget cannot be enforced | Hard-required budget capability blocks run |
 | VibeLearn product rejection after Terminal completion | Incident links to exact run/candidate; child repair run can reference it |

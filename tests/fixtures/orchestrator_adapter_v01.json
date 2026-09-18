@@ -1,0 +1,560 @@
+{
+  "schema": "vibelearn.orchestrator-adapter-fixture.v0.1",
+  "capability_descriptor": {
+    "contract_versions": [
+      "0.1"
+    ],
+    "operations": {
+      "core": [
+        "describe_capabilities",
+        "start_run",
+        "get_run",
+        "lookup_operation",
+        "cancel_run"
+      ]
+    },
+    "execution": [
+      "repo_edit",
+      "test_execution"
+    ],
+    "review": {
+      "independent_context": true,
+      "executable_reproduction": true
+    },
+    "evidence": {
+      "candidate_digest": true
+    },
+    "budget": {
+      "model_call_limit": "enforced",
+      "cost_limit": "observed_only"
+    },
+    "privacy": {
+      "secret_redaction": true
+    },
+    "limitations": [
+      "fixture boundary only; no live Terminal PM dispatch"
+    ]
+  },
+  "start_request": {
+    "contract_version": "0.1",
+    "request_id": "fixture-req-1",
+    "idempotency_key": "fixture-terminal-pm-adapter-hardening-1",
+    "actor_ref": "vibelearn:service/automation",
+    "purpose": "implement_and_review_product_change",
+    "required_capabilities": [
+      "repo_edit",
+      "test_execution",
+      "review.independent_context",
+      "review.executable_reproduction",
+      "budget.model_call_limit.enforced"
+    ],
+    "extensions": {
+      "vibelearn.fixture": {
+        "historical_base": true
+      }
+    },
+    "run_request": {
+      "goal_ref": "vibelearn:goal/terminal-pm-adapter-phase0@1",
+      "requested_outcome": "Harden the v0.1 Terminal PM adapter retry contract without changing the active game runtime or deployment.",
+      "repository": {
+        "repo_ref": "Desmic/VibeLearn",
+        "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+        "allowed_read_scope": [
+          "repo"
+        ],
+        "allowed_write_scope": [
+          "app/orchestrator_adapter.py",
+          "tests/",
+          "docs/ORCHESTRATOR-ADAPTER-CONTRACT.md"
+        ]
+      },
+      "context_refs": [
+        "vibelearn:doc/AUTOMATED-DEVELOPMENT-SYSTEM@2026-09-18",
+        "vibelearn:doc/ORCHESTRATOR-ADAPTER-CONTRACT@0.1"
+      ],
+      "work_requirements": {
+        "required_capabilities": [
+          "repo_edit",
+          "test_execution"
+        ],
+        "max_parallelism": 1
+      },
+      "review_requirements": [
+        {
+          "requirement_id": "contract-safety",
+          "profile_ref": "vibelearn:review/adapter-contract-safety@1",
+          "required": true,
+          "blocking": true,
+          "independence": {
+            "separate_from_builder": true,
+            "fresh_context_first_pass": true
+          },
+          "evidence_policy": {
+            "substantive_claims_require_falsification_attempt": true,
+            "execute_reproduction_when_possible": true
+          }
+        },
+        {
+          "requirement_id": "regression",
+          "profile_ref": "vibelearn:review/regression@1",
+          "required": true,
+          "blocking": true,
+          "independence": {
+            "separate_from_builder": true,
+            "fresh_context_first_pass": true
+          },
+          "evidence_policy": {
+            "substantive_claims_require_falsification_attempt": true,
+            "execute_reproduction_when_possible": true
+          }
+        }
+      ],
+      "acceptance_requirements": [
+        "vibelearn:acceptance/adapter-phase0@1"
+      ],
+      "execution_policy_ref": "vibelearn:policy/fixture-only@1",
+      "privacy_policy_ref": "vibelearn:privacy/no-learner-data@1",
+      "budget": {
+        "max_model_calls": 30,
+        "max_tool_calls": 100,
+        "max_parallel_workers": 1
+      }
+    }
+  },
+  "run_snapshots": {
+    "success": {
+      "run_ref": {
+        "system": "terminal_pm",
+        "kind": "run",
+        "id": "fixture-1"
+      },
+      "revision": 4,
+      "state": "completed",
+      "orchestration_disposition": "candidate_available",
+      "candidate_refs": [
+        {
+          "system": "terminal_pm",
+          "kind": "candidate",
+          "id": "fixture-candidate-1",
+          "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+          "candidate_revision_or_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "artifact_refs": [
+            {
+              "system": "terminal_pm",
+              "kind": "artifact",
+              "id": "fixture-patch-1",
+              "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+            }
+          ],
+          "environment_ref": {
+            "system": "terminal_pm",
+            "kind": "context",
+            "id": "fixture-env-1"
+          }
+        }
+      ],
+      "worker_activity_refs": [
+        "terminal_pm:activity/worker-1",
+        "terminal_pm:activity/reviewer-1"
+      ],
+      "review_results": [
+        {
+          "requirement_id": "contract-safety",
+          "profile_ref": "vibelearn:review/adapter-contract-safety@1",
+          "candidate_ref": {
+            "system": "terminal_pm",
+            "kind": "candidate",
+            "id": "fixture-candidate-1",
+            "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+            "candidate_revision_or_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "artifact_refs": [
+              {
+                "system": "terminal_pm",
+                "kind": "artifact",
+                "id": "fixture-patch-1",
+                "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+              }
+            ],
+            "environment_ref": {
+              "system": "terminal_pm",
+              "kind": "context",
+              "id": "fixture-env-1"
+            }
+          },
+          "status": "passed"
+        },
+        {
+          "requirement_id": "regression",
+          "profile_ref": "vibelearn:review/regression@1",
+          "candidate_ref": {
+            "system": "terminal_pm",
+            "kind": "candidate",
+            "id": "fixture-candidate-1",
+            "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+            "candidate_revision_or_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "artifact_refs": [
+              {
+                "system": "terminal_pm",
+                "kind": "artifact",
+                "id": "fixture-patch-1",
+                "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+              }
+            ],
+            "environment_ref": {
+              "system": "terminal_pm",
+              "kind": "context",
+              "id": "fixture-env-1"
+            }
+          },
+          "status": "passed"
+        }
+      ],
+      "evidence_refs": [
+        {
+          "id": "terminal_pm:evidence/unit-tests",
+          "kind": "command_test",
+          "candidate_ref": {
+            "system": "terminal_pm",
+            "kind": "candidate",
+            "id": "fixture-candidate-1",
+            "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+            "candidate_revision_or_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "artifact_refs": [
+              {
+                "system": "terminal_pm",
+                "kind": "artifact",
+                "id": "fixture-patch-1",
+                "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+              }
+            ],
+            "environment_ref": {
+              "system": "terminal_pm",
+              "kind": "context",
+              "id": "fixture-env-1"
+            }
+          }
+        }
+      ]
+    },
+    "reviewer_defect": {
+      "run_ref": {
+        "system": "terminal_pm",
+        "kind": "run",
+        "id": "fixture-2"
+      },
+      "revision": 4,
+      "state": "completed",
+      "orchestration_disposition": "candidate_available",
+      "candidate_refs": [
+        {
+          "system": "terminal_pm",
+          "kind": "candidate",
+          "id": "fixture-candidate-2",
+          "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+          "candidate_revision_or_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "artifact_refs": [
+            {
+              "system": "terminal_pm",
+              "kind": "artifact",
+              "id": "fixture-patch-2",
+              "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+            }
+          ],
+          "environment_ref": {
+            "system": "terminal_pm",
+            "kind": "context",
+            "id": "fixture-env-1"
+          }
+        }
+      ],
+      "worker_activity_refs": [
+        "terminal_pm:activity/worker-2",
+        "terminal_pm:activity/reviewer-2"
+      ],
+      "review_results": [
+        {
+          "requirement_id": "contract-safety",
+          "profile_ref": "vibelearn:review/adapter-contract-safety@1",
+          "candidate_ref": {
+            "system": "terminal_pm",
+            "kind": "candidate",
+            "id": "fixture-candidate-2",
+            "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+            "candidate_revision_or_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "artifact_refs": [
+              {
+                "system": "terminal_pm",
+                "kind": "artifact",
+                "id": "fixture-patch-2",
+                "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+              }
+            ],
+            "environment_ref": {
+              "system": "terminal_pm",
+              "kind": "context",
+              "id": "fixture-env-1"
+            }
+          },
+          "status": "failed",
+          "findings": [
+            {
+              "claim": "Unknown-effect retry can duplicate a run.",
+              "disposition": "proven",
+              "attempted_reproduction_refs": [
+                "terminal_pm:evidence/retry-reproduction"
+              ]
+            }
+          ]
+        },
+        {
+          "requirement_id": "regression",
+          "profile_ref": "vibelearn:review/regression@1",
+          "candidate_ref": {
+            "system": "terminal_pm",
+            "kind": "candidate",
+            "id": "fixture-candidate-2",
+            "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+            "candidate_revision_or_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "artifact_refs": [
+              {
+                "system": "terminal_pm",
+                "kind": "artifact",
+                "id": "fixture-patch-2",
+                "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+              }
+            ],
+            "environment_ref": {
+              "system": "terminal_pm",
+              "kind": "context",
+              "id": "fixture-env-1"
+            }
+          },
+          "status": "passed"
+        }
+      ],
+      "evidence_refs": [
+        {
+          "id": "terminal_pm:evidence/retry-reproduction",
+          "kind": "command_test",
+          "candidate_ref": {
+            "system": "terminal_pm",
+            "kind": "candidate",
+            "id": "fixture-candidate-2",
+            "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+            "candidate_revision_or_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "artifact_refs": [
+              {
+                "system": "terminal_pm",
+                "kind": "artifact",
+                "id": "fixture-patch-2",
+                "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+              }
+            ],
+            "environment_ref": {
+              "system": "terminal_pm",
+              "kind": "context",
+              "id": "fixture-env-1"
+            }
+          }
+        }
+      ]
+    },
+    "unresolved": {
+      "run_ref": {
+        "system": "terminal_pm",
+        "kind": "run",
+        "id": "fixture-3"
+      },
+      "revision": 4,
+      "state": "completed",
+      "orchestration_disposition": "candidate_available",
+      "candidate_refs": [
+        {
+          "system": "terminal_pm",
+          "kind": "candidate",
+          "id": "fixture-candidate-3",
+          "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+          "candidate_revision_or_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+          "artifact_refs": [
+            {
+              "system": "terminal_pm",
+              "kind": "artifact",
+              "id": "fixture-patch-3",
+              "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+            }
+          ],
+          "environment_ref": {
+            "system": "terminal_pm",
+            "kind": "context",
+            "id": "fixture-env-1"
+          }
+        }
+      ],
+      "worker_activity_refs": [
+        "terminal_pm:activity/worker-3",
+        "terminal_pm:activity/reviewer-3"
+      ],
+      "review_results": [
+        {
+          "requirement_id": "contract-safety",
+          "profile_ref": "vibelearn:review/adapter-contract-safety@1",
+          "candidate_ref": {
+            "system": "terminal_pm",
+            "kind": "candidate",
+            "id": "fixture-candidate-3",
+            "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+            "candidate_revision_or_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+            "artifact_refs": [
+              {
+                "system": "terminal_pm",
+                "kind": "artifact",
+                "id": "fixture-patch-3",
+                "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+              }
+            ],
+            "environment_ref": {
+              "system": "terminal_pm",
+              "kind": "context",
+              "id": "fixture-env-1"
+            }
+          },
+          "status": "unresolved"
+        },
+        {
+          "requirement_id": "regression",
+          "profile_ref": "vibelearn:review/regression@1",
+          "candidate_ref": {
+            "system": "terminal_pm",
+            "kind": "candidate",
+            "id": "fixture-candidate-3",
+            "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+            "candidate_revision_or_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+            "artifact_refs": [
+              {
+                "system": "terminal_pm",
+                "kind": "artifact",
+                "id": "fixture-patch-3",
+                "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+              }
+            ],
+            "environment_ref": {
+              "system": "terminal_pm",
+              "kind": "context",
+              "id": "fixture-env-1"
+            }
+          },
+          "status": "passed"
+        }
+      ],
+      "evidence_refs": [
+        {
+          "id": "terminal_pm:evidence/partial",
+          "kind": "command_test",
+          "candidate_ref": {
+            "system": "terminal_pm",
+            "kind": "candidate",
+            "id": "fixture-candidate-3",
+            "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+            "candidate_revision_or_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+            "artifact_refs": [
+              {
+                "system": "terminal_pm",
+                "kind": "artifact",
+                "id": "fixture-patch-3",
+                "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+              }
+            ],
+            "environment_ref": {
+              "system": "terminal_pm",
+              "kind": "context",
+              "id": "fixture-env-1"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "outcome": {
+    "schema": "vibelearn.automation-outcome.v0.1",
+    "outcome_ref": "vibelearn:outcome/fixture-user-rejection-1",
+    "build_ref": {
+      "system": "vibelearn",
+      "kind": "build",
+      "id": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+      "revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e"
+    },
+    "run_ref": {
+      "system": "terminal_pm",
+      "kind": "run",
+      "id": "fixture-1"
+    },
+    "candidate_ref": {
+      "system": "terminal_pm",
+      "kind": "candidate",
+      "id": "fixture-candidate-1",
+      "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+      "candidate_revision_or_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "artifact_refs": [
+        {
+          "system": "terminal_pm",
+          "kind": "artifact",
+          "id": "fixture-patch-1",
+          "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+        }
+      ],
+      "environment_ref": {
+        "system": "terminal_pm",
+        "kind": "context",
+        "id": "fixture-env-1"
+      }
+    },
+    "source": "human",
+    "observed_at": "2026-09-19T02:30:00+05:30",
+    "observation": "The engineering run completed, but the exact product candidate was rejected by the human product gate.",
+    "evidence_refs": [
+      "vibelearn:evidence/human-review-fixture-1"
+    ]
+  },
+  "incident": {
+    "schema": "vibelearn.automation-incident.v0.1",
+    "incident_ref": "vibelearn:incident/fixture-escape-1",
+    "outcome_ref": "vibelearn:outcome/fixture-user-rejection-1",
+    "build_ref": {
+      "system": "vibelearn",
+      "kind": "build",
+      "id": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+      "revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e"
+    },
+    "originating_run_ref": {
+      "system": "terminal_pm",
+      "kind": "run",
+      "id": "fixture-1"
+    },
+    "candidate_ref": {
+      "system": "terminal_pm",
+      "kind": "candidate",
+      "id": "fixture-candidate-1",
+      "base_revision": "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+      "candidate_revision_or_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "artifact_refs": [
+        {
+          "system": "terminal_pm",
+          "kind": "artifact",
+          "id": "fixture-patch-1",
+          "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+        }
+      ],
+      "environment_ref": {
+        "system": "terminal_pm",
+        "kind": "context",
+        "id": "fixture-env-1"
+      }
+    },
+    "problem_summary": "A technically completed external run still failed the VibeLearn product outcome.",
+    "escape_summary": "The orchestrator completion state was correctly kept separate from VibeLearn product acceptance; no automatic release occurred.",
+    "evidence_refs": [
+      "vibelearn:evidence/human-review-fixture-1"
+    ],
+    "status": "diagnosed"
+  }
+}
