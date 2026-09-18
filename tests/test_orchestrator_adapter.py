@@ -322,6 +322,17 @@ class OrchestratorAdapterTests(unittest.TestCase):
             adapter.start_run(changed)
         self.assertEqual(error.exception.code, "IDEMPOTENCY_CONFLICT")
 
+    def test_retry_reconciliation_does_not_depend_on_current_capability_advertisement(self):
+        transport = FakeTransport()
+        first = VibeLearnAdapter(transport).start_run(request())
+        transport.descriptor["contract_versions"] = []
+        retry = request()
+        retry["request_id"] = "req-after-capability-change"
+        second = VibeLearnAdapter(transport).start_run(retry)
+        self.assertEqual(second, first)
+        self.assertEqual(sum(x[0] == "describe_capabilities" for x in transport.calls), 1)
+        self.assertEqual(sum(x[0] == "start_run" for x in transport.calls), 1)
+
     def test_retry_after_adapter_restart_reconciles_by_key_and_intent_digest(self):
         transport = FakeTransport()
         first = VibeLearnAdapter(transport).start_run(request())
