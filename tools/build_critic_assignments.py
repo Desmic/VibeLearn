@@ -1,5 +1,6 @@
 """Build context-separated critic assignments from an exact-candidate review evidence index."""
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -141,11 +142,12 @@ def build_assignments(index):
         allowed=[]
         for modality in spec["allowed_modalities"]:
             allowed.extend(by_modality.get(modality,[]))
-        assignments[name]={
+        assignment={
             "schema":"vibelearn.critic-assignment.v1",
             "candidate_sha":candidate,
             "pass":name,
             "status":"ready" if not missing else "blocked_missing_evidence",
+            "required_evidence_groups":[list(group) for group in spec["requires"]],
             "missing_evidence":[list(group) for group in missing],
             "allowed_evidence":sorted(allowed,key=lambda item:(item.get("suite",""),item.get("ref",""))),
             "allowed_modalities":spec["allowed_modalities"],
@@ -154,6 +156,11 @@ def build_assignments(index):
             "expected_output_modality":spec["output_modality"],
             "instruction":"Report observations before interpretation. If required evidence is missing or ambiguous, return unresolved rather than substituting weaker evidence."
         }
+        digest_payload={key:value for key,value in assignment.items() if key!="assignment_id"}
+        assignment["assignment_id"]="sha256:"+hashlib.sha256(
+            json.dumps(digest_payload,sort_keys=True,separators=(",",":")).encode("utf-8")
+        ).hexdigest()
+        assignments[name]=assignment
     return assignments
 
 def main():
