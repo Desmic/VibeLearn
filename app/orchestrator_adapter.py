@@ -32,7 +32,7 @@ class Transport(Protocol):
     def describe_capabilities(self) -> Mapping[str, Any]: ...
     def start_run(self, request: Mapping[str, Any]) -> Mapping[str, Any]: ...
     def lookup_operation(
-        self, *, request_id: str, idempotency_key: str
+        self, *, request_id: str, idempotency_key: str, intent_digest: str
     ) -> Mapping[str, Any] | None: ...
     def get_run(self, run_ref: Any) -> Mapping[str, Any]: ...
     def cancel_run(self, request: Mapping[str, Any]) -> Mapping[str, Any]: ...
@@ -53,6 +53,9 @@ def _receipt(value: Mapping[str, Any]) -> dict[str, Any]:
         raise ContractError("INTERNAL_ERROR", "invalid operation receipt")
     _require_text(value.get("request_id"), "receipt.request_id")
     _require_text(value.get("idempotency_key"), "receipt.idempotency_key")
+    digest = _require_text(value.get("intent_digest"), "receipt.intent_digest")
+    if len(digest) != 64 or any(ch not in "0123456789abcdef" for ch in digest):
+        raise ContractError("INTERNAL_ERROR", "receipt.intent_digest must be sha256 hex")
     return copy.deepcopy(dict(value))
 
 
@@ -141,6 +144,7 @@ class VibeLearnAdapter:
         payload = copy.deepcopy(dict(request))
         payload.pop("request_id", None)
         payload.pop("idempotency_key", None)
+        payload.pop("intent_digest", None)
         return hashlib.sha256(_key(payload).encode()).hexdigest()
 
     def _remember_idempotency(self, request: Mapping[str, Any]) -> None:
@@ -151,23 +155,29 @@ class VibeLearnAdapter:
             raise ContractError("IDEMPOTENCY_CONFLICT", "same key used for different intended payload")
         self._seen_idempotency[key] = digest
 
-    def _lookup_existing(self, request_id: str, idempotency_key: str, operation: str):
+    def _lookup_existing(
+        self, request_id: str, idempotency_key: str, intent_digest: str, operation: str
+    ):
         found = self.transport.lookup_operation(
-            request_id=request_id, idempotency_key=idempotency_key
+            request_id=request_id,
+            idempotency_key=idempotency_key,
+            intent_digest=intent_digest,
         )
         if found is None:
             return None
-        return self._validate_reconciled(found, idempotency_key, operation)
+        return self._validate_reconciled(found, idempotency_key, intent_digest, operation)
 
     @staticmethod
     def _validate_reconciled(
-        found: Mapping[str, Any], idempotency_key: str, operation: str
+        found: Mapping[str, Any], idempotency_key: str, intent_digest: str, operation: str
     ) -> dict[str, Any]:
         receipt = _receipt(found)
         # A retry may use a new request_id. The original authoritative receipt
         # is still the same operation when the idempotency key matches.
         if receipt["idempotency_key"] != idempotency_key:
             raise ContractError("INTERNAL_ERROR", "reconciled receipt idempotency mismatch")
+        if receipt["intent_digest"] != intent_digest:
+            raise ContractError("IDEMPOTENCY_CONFLICT", "same key belongs to a different intended payload")
         if receipt["effect_status"] == "effect_unknown":
             raise ContractError("EFFECT_UNKNOWN", f"{operation} remains unknown; do not retry")
         return receipt
@@ -181,15 +191,23 @@ class VibeLearnAdapter:
         ))
         self.require_capabilities(required)
         self._remember_idempotency(value)
+        intent_digest = self._intent_digest(value)
         existing = self._lookup_existing(
-            value["request_id"], value["idempotency_key"], "start_run"
+            value["request_id"], value["idempotency_key"], intent_digest, "start_run"
         )
         if existing is not None:
             return existing
+        outbound = copy.deepcopy(value)
+        outbound["intent_digest"] = intent_digest
         try:
-            return _receipt(self.transport.start_run(copy.deepcopy(value)))
+            receipt = _receipt(self.transport.start_run(outbound))
+            return self._validate_reconciled(
+                receipt, value["idempotency_key"], intent_digest, "start_run"
+            )
         except EffectUnknown:
-            return self._reconcile(value["request_id"], value["idempotency_key"], "start_run")
+            return self._reconcile(
+                value["request_id"], value["idempotency_key"], intent_digest, "start_run"
+            )
 
     def cancel_run(
         self, *, run_ref: Any, expected_revision: Any, request_id: str,
@@ -208,21 +226,35 @@ class VibeLearnAdapter:
         if run_ref in (None, "", {}):
             raise ContractError("INVALID_REFERENCE", "run_ref is required")
         self._remember_idempotency(request)
-        existing = self._lookup_existing(request_id, idempotency_key, "cancel_run")
+        intent_digest = self._intent_digest(request)
+        existing = self._lookup_existing(
+            request_id, idempotency_key, intent_digest, "cancel_run"
+        )
         if existing is not None:
             return existing
+        outbound = copy.deepcopy(request)
+        outbound["intent_digest"] = intent_digest
         try:
-            return _receipt(self.transport.cancel_run(copy.deepcopy(request)))
+            receipt = _receipt(self.transport.cancel_run(outbound))
+            return self._validate_reconciled(
+                receipt, idempotency_key, intent_digest, "cancel_run"
+            )
         except EffectUnknown:
-            return self._reconcile(request_id, idempotency_key, "cancel_run")
+            return self._reconcile(
+                request_id, idempotency_key, intent_digest, "cancel_run"
+            )
 
-    def _reconcile(self, request_id: str, idempotency_key: str, operation: str) -> dict[str, Any]:
+    def _reconcile(
+        self, request_id: str, idempotency_key: str, intent_digest: str, operation: str
+    ) -> dict[str, Any]:
         found = self.transport.lookup_operation(
-            request_id=request_id, idempotency_key=idempotency_key
+            request_id=request_id,
+            idempotency_key=idempotency_key,
+            intent_digest=intent_digest,
         )
         if found is None:
             raise ContractError("EFFECT_UNKNOWN", f"{operation} remains unknown; do not retry")
-        return self._validate_reconciled(found, idempotency_key, operation)
+        return self._validate_reconciled(found, idempotency_key, intent_digest, operation)
 
     def get_run(self, run_ref: Any, original_run_request: Mapping[str, Any]) -> dict[str, Any]:
         if run_ref in (None, "", {}):
