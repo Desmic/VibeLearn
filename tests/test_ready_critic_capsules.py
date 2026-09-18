@@ -87,6 +87,13 @@ class ReadyCriticCapsuleTests(unittest.TestCase):
             self.assertTrue((output/"cold_observer"/"assignment.json").is_file())
             self.assertFalse((output/"cinematic_causality").exists())
 
+    def test_verify_workflow_packages_ready_critic_capsules(self):
+        workflow=(Path(__file__).resolve().parents[1]/".github"/"workflows"/"verify.yml").read_text(encoding="utf-8")
+        self.assertIn("materialize_ready_critic_capsules.py",workflow)
+        self.assertIn("--assignments-dir /tmp/vibelearn-review-index/critic-assignments",workflow)
+        self.assertIn("--evidence-root /tmp/vibelearn-review-evidence",workflow)
+        self.assertIn("/tmp/vibelearn-review-index/critic-capsules/**",workflow)
+
     def test_missing_ready_evidence_fails_instead_of_emitting_partial_capsule(self):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)
