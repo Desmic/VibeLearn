@@ -78,6 +78,24 @@ jobs:
             --technical-result success \
             --output /tmp/vibelearn-review-evidence-index.json
 
+      - name: Materialize validated post-CI critic evidence
+        env:
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        run: |
+          SUPPLEMENTAL="docs/reviews/evidence/$CANDIDATE_SHA"
+          mkdir -p /tmp/vibelearn-review-evidence/post-ci
+          if [ -d "$SUPPLEMENTAL" ]; then
+            cp -R "$SUPPLEMENTAL"/. /tmp/vibelearn-review-evidence/post-ci/
+            python tools/build_review_workspace.py \
+              --index /tmp/vibelearn-review-evidence-index.json \
+              --supplemental-root "$SUPPLEMENTAL" \
+              --output /tmp/vibelearn-review-evidence/review-workspace.json
+          else
+            python tools/build_review_workspace.py \
+              --index /tmp/vibelearn-review-evidence-index.json \
+              --output /tmp/vibelearn-review-evidence/review-workspace.json
+          fi
+
       - name: Validate preview release gate
         env:
           CANDIDATE_SHA: ${{ inputs.candidate_sha }}
