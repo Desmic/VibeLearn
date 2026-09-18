@@ -5,7 +5,8 @@ against exact-candidate assignments before any preview promotion.
 
 Use:
 
-`docs/reviews/results/<40-char-candidate-sha>/<pass>.json`
+- reviewer output: `docs/reviews/results/<40-char-candidate-sha>/<pass>.json`
+- harness receipt: `docs/reviews/results/<40-char-candidate-sha>/<pass>.execution.json`
 
 Do not commit files that merely claim to be "validated." The promotion workflow
 does not trust that label. It downloads the candidate's immutable CI evidence,
@@ -22,6 +23,7 @@ Required fields:
 
 - `candidate_sha`
 - `assignment_id` copied exactly from the generated assignment
+- `execution_receipt_id` copied exactly from the harness-generated execution receipt
 - `pass`
 - `verdict: pass | needs_revision | unresolved`
 - `context_attestation.allowed_context_only: true`
@@ -87,3 +89,37 @@ screenshot when the assignment required caption-blind motion/interactive
 evidence.
 
 The validator checks this from `used_evidence`.
+
+
+### Harness execution receipt
+
+Context isolation is **not** accepted as reviewer self-attestation alone.
+
+The orchestrator/harness that launches the critic must create a separate
+`vibelearn.critic-execution-receipt.v1` sidecar using
+`tools/critic_execution_receipt.py`.
+
+The receipt records:
+- exact candidate SHA;
+- exact `assignment_id`;
+- critic pass;
+- executor/session identity;
+- `context_mode: assignment_only`;
+- evidence actually mounted/supplied to the critic;
+- context labels supplied by the harness;
+- forbidden context supplied (must be empty);
+- deterministic `receipt_id`.
+
+The reviewer result must echo that `receipt_id`. During ingestion,
+`validate_critic_result.py` verifies that every evidence item claimed in
+`used_evidence` was both:
+1. allowed by the assignment; and
+2. actually supplied by the harness receipt.
+
+A reviewer therefore cannot self-certify that it was a cold observer after being
+given creator/source context, and a result cannot be replayed against another
+assignment/session without failing validation.
+
+The receipt is bookkeeping/traceability rather than cryptographic proof of model
+independence. The external orchestrator remains responsible for creating the
+session from the assignment capsule rather than broad project context.
