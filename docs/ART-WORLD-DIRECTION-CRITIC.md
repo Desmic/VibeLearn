@@ -119,3 +119,63 @@ One critic cannot compensate for another. “Beautiful but not playable” fails
 The existing JSON critic checker does not yet encode this independent gate. Until it is extended, this document is a manual/internal hard gate: any unresolved art/world-direction blocker means `needs_revision` even if the legacy checker returns `ready_for_user_review`.
 
 Future critic agents may automate parts of this review (camera sweeps, intersection checks, density metrics, visual comparisons), but human/user judgment remains final.
+
+
+## 13. Visual world-building / environmental storytelling
+
+A world is not established by a skyline, a label and a few foreground props.
+For openings that depend on attachment to a place, the critic must observe
+**normal life** before disruption.
+
+Look for:
+- purposeful background motion and routines;
+- characters using the space rather than posing in it;
+- environmental systems that imply how the place works;
+- landmarks with readable function/identity;
+- social grouping, attention and reactions that show relationships;
+- foreground/midground/background activity that creates depth without clutter;
+- visible continuity between the world being described and the world being
+  animated.
+
+Ask a cold viewer to describe the setting with captions ignored. "A colorful
+place with robots" is not enough if the intended fiction is a living lantern
+city/community with a particular tone and way of life.
+
+**Hard blocker:** the scene is attractive or compositionally clean but functions
+as a static stage/set, while explanatory copy carries the actual world-building.
+
+## 14. Animation / motion direction
+
+Animation is part of art direction, not merely runtime behavior.
+
+Inspect:
+- idle/rest loops in real time for at least several repetitions;
+- transitions into/out of locomotion and interaction;
+- reaction timing and pose language;
+- whole-body versus localized motion;
+- mechanical/biological weight and inertia appropriate to the character;
+- whether reused/stock animation exposes its source style;
+- whether motion creates an unintended uncanny/creepy/hyperactive read.
+
+For young-player experiences, explicitly ask whether a default idle could feel
+threatening, twitchy, lifeless, toy-like, cute, calm, energetic or annoying—and
+whether that is the intended personality.
+
+Do not use continuous movement merely to prove a character is alive. Motion
+budget and amplitude should match the visual fidelity, theme and character.
+
+**Hard blockers:**
+- stock/default idle animation visibly conflicts with the game's theme;
+- repeated rest motion becomes distracting or uncanny;
+- character motion suggests a different personality than the story intends;
+- animation style varies incoherently between characters/assets;
+- the critic only evaluates still silhouettes and never watches the loop.
+
+## Review-method addition
+
+For any opening/character review, include:
+1. a caption-blind moving pass;
+2. at least one uninterrupted observation of every default idle/rest loop;
+3. a note describing the world's normal background activity before disruption;
+4. a target-audience motion read ("calm", "playful", "creepy", "twitchy",
+   "mechanical", etc.) and whether that matches intent.
