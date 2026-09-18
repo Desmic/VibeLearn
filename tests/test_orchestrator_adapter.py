@@ -1,9 +1,14 @@
 import copy
+import json
 import unittest
+from pathlib import Path
 
 from app.orchestrator_adapter import (
     CONTRACT_VERSION, ContractError, EffectUnknown, VibeLearnAdapter,
+    validate_incident_record, validate_outcome_record, validate_start_request,
 )
+
+FIXTURE = Path(__file__).resolve().parent / "fixtures" / "orchestrator_adapter_v01.json"
 
 
 def descriptor():
@@ -145,6 +150,63 @@ class FakeTransport:
 
 
 class OrchestratorAdapterTests(unittest.TestCase):
+    @staticmethod
+    def fixture():
+        return json.loads(FIXTURE.read_text(encoding="utf-8"))
+
+    def test_serialized_fixture_expresses_real_task_and_required_boundary_states(self):
+        fixture = self.fixture()
+        value = validate_start_request(fixture["start_request"])
+        self.assertEqual(
+            value["run_request"]["repository"]["base_revision"],
+            "02d8e80e81df2e96262d75a17124a3a3d4ca483e",
+        )
+        self.assertIn("Terminal PM adapter retry contract", value["run_request"]["requested_outcome"])
+        self.assertEqual(
+            set(fixture["run_snapshots"]),
+            {"success", "reviewer_defect", "unresolved"},
+        )
+
+    def test_serialized_fixture_run_states_preserve_vibelearn_acceptance_authority(self):
+        fixture = self.fixture()
+        run_request = fixture["start_request"]["run_request"]
+        success = VibeLearnAdapter.consume_run(fixture["run_snapshots"]["success"], run_request)
+        defect = VibeLearnAdapter.consume_run(
+            fixture["run_snapshots"]["reviewer_defect"], run_request
+        )
+        unresolved = VibeLearnAdapter.consume_run(
+            fixture["run_snapshots"]["unresolved"], run_request
+        )
+        self.assertTrue(success["ready_for_vibelearn_evaluation"])
+        self.assertEqual(success["product_acceptance"], "undetermined")
+        self.assertFalse(defect["ready_for_vibelearn_evaluation"])
+        self.assertIn("contract-safety", defect["blocking_review_ids"])
+        self.assertFalse(unresolved["ready_for_vibelearn_evaluation"])
+        self.assertIn("contract-safety", unresolved["blocking_review_ids"])
+
+    def test_serialized_outcome_and_incident_keep_exact_cross_system_lineage(self):
+        fixture = self.fixture()
+        outcome = validate_outcome_record(fixture["outcome"])
+        incident = validate_incident_record(fixture["incident"], outcome)
+        self.assertEqual(incident["originating_run_ref"], outcome["run_ref"])
+        self.assertEqual(incident["candidate_ref"], outcome["candidate_ref"])
+        self.assertEqual(incident["build_ref"], outcome["build_ref"])
+
+    def test_fixture_carries_no_model_visible_credentials(self):
+        fixture = self.fixture()
+        forbidden_keys = {"password", "token", "cookie", "database_url", "api_key"}
+
+        def walk(value):
+            if isinstance(value, dict):
+                for key, child in value.items():
+                    self.assertNotIn(key.lower(), forbidden_keys)
+                    walk(child)
+            elif isinstance(value, list):
+                for child in value:
+                    walk(child)
+
+        walk(fixture)
+
     def test_successful_candidate_keeps_exact_evidence_and_product_authority_separate(self):
         transport = FakeTransport()
         adapter = VibeLearnAdapter(transport)
