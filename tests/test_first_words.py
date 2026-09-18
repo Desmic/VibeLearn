@@ -106,6 +106,13 @@ class FirstWordsTests(unittest.TestCase):
         self.assertTrue(result['hint_before_prediction']);self.assertFalse(result['relevant_context']);self.assertFalse(result['prediction_matches_supplied_context'])
         self.assertIsNone(result['loop_correct'])
 
+    def test_active_content_uses_direct_protagonist_language(self):
+        snapshot=self.attempt['snapshot']
+        self.assertIn('your voice',snapshot['intro'].lower())
+        self.assertNotIn('help your friend',snapshot['intro'].lower())
+        self.assertNotIn('help zip',snapshot['mission']['plain_objective'].lower())
+        self.assertIn('your words',snapshot['mission']['plain_objective'].lower())
+
     def test_old_content_and_rules_remain_pinned(self):
         old=freeze('LEARN',word_machine.MISSION_ID)
         self.assertNotEqual(old['family_id'],self.attempt['snapshot']['family_id'])
