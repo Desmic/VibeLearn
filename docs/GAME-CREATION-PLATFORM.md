@@ -101,7 +101,7 @@ This is a full repair loop, not merely a feedback inbox and not blind obedience 
 
 Scope personal changes separately from shared assets/mechanics/runtime. Protect active saves and assessment history; report chat is not permission to reset progress or change everyone else's game. Autonomy thresholds are a proposed policy to agree, not blanket deployment permission. `LEARNER-ON-DEMAND-AND-REPAIR.md` owns detailed context, judgment, verification and rollout requirements.
 
-## Future agent system
+## Automated agent system — approved bounded integration
 
 The platform should eventually support coordinated agents for:
 
@@ -123,7 +123,7 @@ The platform should eventually support coordinated agents for:
 
 Agents must communicate through versioned artifacts/specs and evidence, not hidden assumptions. A creator agent must not self-certify its own work. Critic agents are internal tools, not substitutes for the user's product judgment. One learner-facing conversation may route to specialists without forcing the learner to choose a developer or critic agent.
 
-The full multi-agent system and in-game repair capability are **future work**. Do not pause the current proof track to build all orchestration roles. Prove useful workflows manually/tool-assisted, then implement a thin end-to-end on-demand learner journey before broadening. Internal tools remain subordinate to the learner-facing product.
+The orchestration foundation is now an **approved bounded integration target** using the existing Terminal PM Agent/orchestrator as a donor/reference implementation. See `AUTOMATED-DEVELOPMENT-SYSTEM.md`. Do not implement the role list above as a fleet of permanent agent types: ordinary work should default to one economical worker and one independent reviewer, with reviewer claims implicitly requiring attempted proof/reproduction. Story, art/world, gameplay and learning remain separate evaluation disciplines implemented as reviewer profiles over shared runtime/evidence machinery. Extract only the donor execution/session/evidence/recovery capabilities needed by real VibeLearn runs; do not transplant its complete verifier/history stack. Internal automation remains subordinate to the learner-facing product and does not authorize autonomous production deployment.
 
 ## Current proof-track gate
 
