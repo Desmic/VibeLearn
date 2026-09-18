@@ -48,6 +48,7 @@ EVIDENCE_MODALITIES = {
     "review_assignment",
     "audio_capture",
     "caption_blind_motion",
+    "critic_report",
 }
 
 MODALITY_EXTENSIONS = {
@@ -63,6 +64,7 @@ MODALITY_EXTENSIONS = {
     "review_assignment": {".json", ".md", ".txt"},
     "audio_capture": {".wav", ".mp3", ".ogg", ".m4a", ".webm"},
     "caption_blind_motion": {".webm", ".mp4", ".mov"},
+    "critic_report": {".json", ".md", ".txt"},
 }
 
 # Each tuple is an AND requirement; alternatives inside a tuple are OR.
