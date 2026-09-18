@@ -134,7 +134,13 @@ Core operation:
 describe_capabilities() -> CapabilityDescriptor
 ```
 
-A request declares `required_capabilities`. If the orchestrator cannot satisfy one, it must reject or block the run explicitly. It must not silently downgrade.
+A request declares `required_capabilities`. If the orchestrator cannot satisfy one, it must reject or block a **new dispatch** explicitly. It must not silently downgrade.
+
+Retry/recovery is different: first reconcile an existing `idempotency_key` +
+`intent_digest`. If an authoritative prior receipt already exists, return that
+receipt even if the orchestrator's currently advertised capabilities have since
+changed. Current capability negotiation is required before creating a new effect,
+not before learning what already happened.
 
 ### 4.3 Additive evolution
 
