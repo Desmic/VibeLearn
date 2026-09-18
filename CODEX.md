@@ -65,8 +65,13 @@ combined result before extending it.
    clarity, attachment, text obstruction, controls, prop density, clipping,
    protagonist identity and spatial breathing room. Verify muted comprehension and
    reduced motion when affected; listen to sound before claiming its quality.
-5. **Critique now:** apply `docs/CRITIC-POLICY.md` plus
-   `docs/ART-WORLD-DIRECTION-CRITIC.md`. A technically green scene can still fail
+5. **Critique now:** apply `docs/EXPERIENCE-QUALITY-SYSTEM.md`,
+   `docs/CRITIC-POLICY.md` plus
+   `docs/ART-WORLD-DIRECTION-CRITIC.md`. Start player-experience review with a
+   cold observer who has not read the story/design treatment. Probe collision,
+   transition/handoff clarity and tutorial targets/actions; watch animation loops
+   and major events in motion. Only afterward compare against intended design.
+   A technically green scene can still fail
    because it is cramped, visually ambiguous, unattractive to inhabit or does not
    communicate the written story.
 6. **Repair and recheck:** fix blockers in this chunk, rerun affected checks and
