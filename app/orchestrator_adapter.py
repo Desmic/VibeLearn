@@ -127,6 +127,21 @@ def validate_incident_record(
     return value
 
 
+def required_review_capabilities(run_request: Mapping[str, Any]) -> list[str]:
+    """Derive hard runtime capabilities from required review semantics."""
+    required = []
+    for review in run_request.get("review_requirements") or []:
+        if not isinstance(review, Mapping) or review.get("required", True) is not True:
+            continue
+        independence = review.get("independence") or {}
+        if independence.get("separate_from_builder") is True or independence.get("fresh_context_first_pass") is True:
+            required.append("review.independent_context")
+        policy = review.get("evidence_policy") or {}
+        if policy.get("execute_reproduction_when_possible") is True:
+            required.append("review.executable_reproduction")
+    return list(dict.fromkeys(required))
+
+
 def validate_start_request(request: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(request, Mapping) or request.get("contract_version") != CONTRACT_VERSION:
         raise ContractError("UNSUPPORTED_CONTRACT_VERSION", "start_run requires contract 0.1")
@@ -240,6 +255,7 @@ class VibeLearnAdapter:
         required = list(dict.fromkeys(
             (value.get("required_capabilities") or [])
             + (work.get("required_capabilities") or [])
+            + required_review_capabilities(value["run_request"])
         ))
         self.require_capabilities(required)
         self._remember_idempotency(value)
