@@ -231,3 +231,32 @@ A candidate cannot pass creative direction by satisfying only the first.
 **Opening: needs revision. Review of the rest of the experience is still in
 progress.** Continue collecting user feedback before rebuilding the opening so
 repairs can be planned coherently. Do not begin Level 2.
+
+
+### UR-16 — Narration can use text now and voice later
+
+The user clarified that narration itself is valid and useful. The problem is not
+"text versus visuals"; the problem is using narration to replace missing visual
+storytelling.
+
+For the current Phase 1 proof track, keep narration as **on-screen text** while
+the opening is redesigned. Longer term, VibeLearn should support an optional
+**narrator voice** for appropriate storytelling moments, especially:
+
+- opening scenes / prologues;
+- transitions between places, chapters or time periods;
+- major events, reveals or emotional turning points;
+- short connective beats where a narrator improves pacing or tone.
+
+Narration—text or voice—must support what the player can already see happening.
+It may establish tone, compress context or add character/world flavor, but it
+must not carry world/setting/action causality that the visuals and animation fail
+to communicate.
+
+Future narrator voice must retain equivalent text/subtitles and muted-play
+comprehension. Voice narration is an explicit creative-direction choice, not a
+default requirement for every generated game or every story beat.
+
+**Current implementation decision:** text narration now; narrator-voice support is
+a planned platform capability for future appropriate cases. Do not add voice
+generation to the current runtime while this user review is still in progress.
