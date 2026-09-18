@@ -37,6 +37,10 @@ def main():
             expect(page.locator('#rgi-title')).to_have_text('The sky cracks open.')
             until(page,"()=>FirstWordsReview.audio.ready && FirstWordsReview.audio.version==='bellweather-score-v2' && FirstWordsReview.audio.scheduledBars>0")
             until(page,"()=>FirstWordsReview.audio.phase==='danger'")
+            cause=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
+                const w=getGameRuntime().world;return {warden:w.projectEntity('warden'),link:w.projectEntity('warden-rift-link')};}""")
+            assert cause['warden'] and cause['warden']['visible'],cause
+            assert cause['link'] and cause['link']['visible'],cause
             page.get_by_role('button',name='Pause story motion').click()
             until(page,"()=>FirstWordsReview.audio.state==='suspended'")
             assert page.get_by_role('button',name='Continue →',exact=True).is_disabled()
@@ -70,6 +74,10 @@ def main():
             log('Prologue: speech theft');page.get_by_role('button',name='Continue →',exact=True).click()
             expect(page.locator('#rgi-title')).to_have_text('It takes Zip’s voice.')
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            removal=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
+                const w=getGameRuntime().world;return {socket:w.projectEntity('zip-voice-socket'),module:w.projectEntity('stolen-voice')};}""")
+            assert removal['socket'] and removal['socket']['visible'],removal
+            assert removal['module'] and removal['module']['visible'],removal
             page.screenshot(path=str(out/'prologue-speech-theft-390.png'),timeout=15000)
 
             log('Prologue: repair handoff');page.get_by_role('button',name='Continue →',exact=True).click()
