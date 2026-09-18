@@ -22,6 +22,7 @@ export function validateOpeningSpec(spec){
       if(typeof d.worldAfter!=='string'||!d.worldAfter.trim())throw Error('Opening direction needs worldAfter');
       if(d.kind==='major-event'||d.kind==='antagonist-action'){
         if(!d.cause||!['visible','unknown','ambiguous'].includes(d.cause.mode))throw Error('Major opening event needs causal attribution');
+        if(d.causeLeadMs!==undefined&&(!Number.isFinite(d.causeLeadMs)||d.causeLeadMs<0||d.causeLeadMs>5000))throw Error('Invalid opening cause lead');
       }
       if(d.kind==='major-event'){
         if(new Set(d.channels).size<4)throw Error('Major opening event needs at least four coordinated channels');
