@@ -21,6 +21,8 @@ def modality_for(path: Path):
         name.endswith("-audio.ogg") or name.endswith("-audio.m4a") or
         name.endswith("-audio.webm")):
         return "audio_capture"
+    if "caption-blind" in name and suffix in {".webm", ".mp4", ".mov"}:
+        return "caption_blind_motion"
     if suffix in {".webm", ".mp4", ".mov"}:
         return "motion_video"
     if suffix in {".png", ".jpg", ".jpeg", ".webp"}:
