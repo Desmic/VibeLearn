@@ -299,3 +299,81 @@ Engine architecture earns zero product-quality points by itself. A generated gam
 - current-user review.
 
 The current user review remains `needs_revision`; do not start Level 2 until the redesigned front-of-game candidate is accepted.
+
+## Physicality contract
+
+Collision belongs to WorldSpec entities/archetypes, not to a separate remembered
+list on one player controller.
+
+World entities may declare engine-neutral collider intent. The current first
+implementation supports box colliders with player/camera blocking semantics.
+Engine backends resolve colliders from the entity's live world transform and
+enabled state.
+
+Reusable props/architecture should carry their own physicality where appropriate.
+A generated game should not need to remember that a visible station, wall or
+closed gate also needs a second obstacle declaration.
+
+Legacy player-profile obstacle lists may remain temporarily for migration, but
+new generated content should prefer world-owned colliders.
+
+## Major-event / cinematic-direction contract
+
+StoryWorldSpec/GameDesignSpec should represent major events explicitly enough to
+review/compile their direction, including:
+- causal attribution;
+- event importance;
+- actor reactions;
+- environment/light/atmosphere transition;
+- VFX;
+- audio/narration cue intent;
+- camera/focus;
+- persistent world-after state.
+
+Not every engine backend must implement the same effect primitive, but every
+compiled experience must preserve the semantic event intent.
+
+## Semantic story-object contract
+
+High-importance story/mechanic objects should carry semantic role plus a
+readability strategy. Semantic IDs are not evidence that players understand an
+object.
+
+Reusable archetypes may encode visual/behavioral language for capabilities such
+as power, communication, memory, access, damage or repair, but games remain free
+to art-direct materially different representations.
+
+## Experience-mode invariant
+
+RuntimeExperienceSpec should model mutually exclusive experience modes such as:
+`opening | handoff | tutorial | mission | result | paused/error`.
+
+Each mode owns which HUD/story/action surfaces may be active. Cross-mode prompt
+leakage is invalid runtime state.
+
+Transitions should use a HandoffSpec-like contract containing:
+- previous mode/event summary;
+- player embodiment/control state;
+- immediate objective;
+- available verb/control;
+- recommended next action;
+- success signal;
+- destination mode.
+
+## Tutorial-step contract
+
+Tutorials should compile from explicit steps rather than arbitrary copy.
+
+Each step owns:
+- id / taught verb;
+- target/control;
+- instruction;
+- completion observation;
+- feedback;
+- next step;
+- skip policy;
+- evidence/assistance semantics.
+
+The runtime should make the current target and completion observable so browser
+tests and critics can verify the tutorial behavior without reading implementation
+details.
