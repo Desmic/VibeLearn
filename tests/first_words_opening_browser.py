@@ -84,27 +84,37 @@ def main():
             expect(page.get_by_role('button',name='SEALED EXIT',exact=True)).to_be_visible()
             page.screenshot(path=str(out/'prologue-prison-reveal-390.png'),timeout=15000)
 
-            log('Prologue: speech theft');page.get_by_role('button',name='Continue →',exact=True).click()
-            expect(page.locator('#rgi-title')).to_have_text('It takes Zip’s voice.')
-            page.wait_for_timeout(1900)
-            page.get_by_role('button',name='Pause story motion',exact=True).click()
-            extracting=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
+            log('Prologue: speech target');page.get_by_role('button',name='Continue →',exact=True).click()
+            expect(page.locator('#rgi-title')).to_have_text('It finds your voice.')
+            until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            targeted=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
                 const w=getGameRuntime().world;return {
                   socket:w.projectEntity('zip-voice-socket'),
-                  module:w.projectEntity('stolen-voice'),
-                  link:w.projectEntity('voice-extract-link-pulse-2')
+                  attached:w.projectEntity('zip-voice'),
+                  link:w.projectEntity('voice-extract-link-pulse-2'),
+                  removed:w.projectEntity('stolen-voice')
                 };}""")
-            assert extracting['socket'] and extracting['socket']['visible'],extracting
-            assert extracting['module'] and extracting['module']['visible'],extracting
-            assert extracting['link'] and extracting['link']['visible'],extracting
-            page.screenshot(path=str(out/'prologue-speech-extraction-paused-390.png'),timeout=15000)
-            page.get_by_role('button',name='Resume story motion',exact=True).click()
+            assert targeted['socket'] and targeted['socket']['visible'],targeted
+            assert targeted['attached'] and targeted['attached']['visible'],targeted
+            assert targeted['link'] and targeted['link']['visible'],targeted
+            assert targeted['removed'] is None,targeted
+            page.screenshot(path=str(out/'prologue-speech-targeted-390.png'),timeout=15000)
+
+            log('Prologue: speech removal');page.get_by_role('button',name='Continue →',exact=True).click()
+            expect(page.locator('#rgi-title')).to_have_text('It tears the module free.')
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
             removal=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
-                const w=getGameRuntime().world;return {socket:w.projectEntity('zip-voice-socket'),module:w.projectEntity('stolen-voice')};}""")
+                const w=getGameRuntime().world;return {
+                  socket:w.projectEntity('zip-voice-socket'),
+                  attached:w.projectEntity('zip-voice'),
+                  module:w.projectEntity('stolen-voice'),
+                  warden:w.projectEntity('warden')
+                };}""")
             assert removal['socket'] and removal['socket']['visible'],removal
+            assert removal['attached'] is None,removal
             assert removal['module'] and removal['module']['visible'],removal
-            page.screenshot(path=str(out/'prologue-speech-theft-390.png'),timeout=15000)
+            assert removal['warden'] and removal['warden']['visible'],removal
+            page.screenshot(path=str(out/'prologue-speech-removed-390.png'),timeout=15000)
 
             log('Prologue: repair handoff');page.get_by_role('button',name='Continue →',exact=True).click()
             expect(page.locator('#rgi-title')).to_have_text('Get the words back.')
@@ -125,7 +135,7 @@ def main():
             until(page,"()=>FirstWordsReview.audio.phase==='repair'")
             assert page.evaluate('FirstWordsReview.runtime.instanceId')==instance
             assert page.evaluate("FirstWordsReview.runtime.mode")=='mission'
-            checks.append('Seven causal prologue beats separate normal Bellweather, visible Warden cause, rupture effect, isolation, prison reveal, visible speech loss and repair handoff before the separate tutorial; the same runtime becomes direct-control mission play.')
+            checks.append('Eight causal prologue beats separate normal Bellweather, visible Warden cause, rupture effect, isolation, prison reveal, speech targeting, capability removal and repair handoff before the separate tutorial; the same runtime becomes direct-control mission play.')
             checks.append('The Bellweather score is not required before a gesture; the first Continue gesture unlocks bellweather-score-v2 and schedules bars before danger-phase assertions.')
 
             before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
@@ -161,7 +171,8 @@ def main():
                 q.screenshot(path=str(out/f'prologue-rupture-reduced-{width}.png'),timeout=15000)
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('Silence.')
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.get_by_role('button',name='SEALED EXIT',exact=True)).to_be_visible()
-                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('It takes Zip’s voice.')
+                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('It finds your voice.')
+                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('It tears the module free.')
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.get_by_role('button',name='REPAIR SOCKET',exact=True)).to_be_visible()
                 expect(q.get_by_role('button',name='Take control →',exact=True)).to_be_enabled()
                 assert q.evaluate('document.documentElement.scrollWidth<=innerWidth && document.documentElement.scrollHeight<=innerHeight')
@@ -174,7 +185,7 @@ def main():
             video.save_as(str(out/'prologue-motion-390.webm'))
             assert (out/'prologue-motion-390.webm').exists()
             assert not errors,errors
-            checks.append('Fresh 360/430/desktop reduced-motion preserves the same seven story states and can skip safely into the separate tutorial without a 2D fallback.')
+            checks.append('Fresh 360/430/desktop reduced-motion preserves the same eight story states and can skip safely into the separate tutorial without a 2D fallback.')
             cold_packet={
                 'schema':'vibelearn.cold-observer-evidence.v1',
                 'candidate_source':'GitHub Actions exact SHA supplies candidate identity',
@@ -182,7 +193,7 @@ def main():
                 'intentionally_omitted':['story treatment','storyboard rationale','intended causal explanation','creator critique scores'],
                 'evidence':{
                     'motion_video':'prologue-motion-390.webm',
-                    'phone_frames':['prologue-home-390.png','prologue-lantern-release-390.png','prologue-threat-cause-390.png','prologue-rupture-paused-390.png','prologue-rupture-complete-390.png','prologue-limbo-390.png','prologue-prison-reveal-390.png','prologue-speech-extraction-paused-390.png','prologue-speech-theft-390.png','prologue-repair-handoff-390.png'],
+                    'phone_frames':['prologue-home-390.png','prologue-lantern-release-390.png','prologue-threat-cause-390.png','prologue-rupture-paused-390.png','prologue-rupture-complete-390.png','prologue-limbo-390.png','prologue-prison-reveal-390.png','prologue-speech-targeted-390.png','prologue-speech-removed-390.png','prologue-repair-handoff-390.png'],
                     'reduced_motion_frames':['prologue-threat-reduced-360.png','prologue-threat-reduced-430.png','prologue-threat-reduced-1280.png','prologue-rupture-reduced-360.png','prologue-rupture-reduced-430.png','prologue-rupture-reduced-1280.png'],
                     'experience_modes':['opening','tutorial'],
                     'device':'Chromium emulation 390x844 touch plus reduced-motion 360/430/1280'
