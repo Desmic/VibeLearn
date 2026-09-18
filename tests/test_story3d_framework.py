@@ -129,12 +129,19 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn("Major opening event needs at least four coordinated channels", opening)
         self.assertIn("Visible antagonist action needs cause.entity", opening)
 
-        # Tutorial progression and mode exclusivity are reusable runtime contracts.
+        # Tutorial progression, state-driven interaction teaching and mode
+        # exclusivity are reusable runtime contracts; package data supplies content.
         self.assertIn("export function createTutorialFlow", tutorial)
+        self.assertIn("export function selectStateTutorialStep", tutorial)
+        self.assertIn("export function tutorialStepSucceeded", tutorial)
         self.assertIn("export function createExperienceModeController", modes)
         self.assertNotIn("createTutorialFlow", controls)
+        self.assertIn("export const controlTutorialSpec", world)
+        self.assertIn("export const speechRepairTutorialSpec", world)
         self.assertIn("skill:'move protagonist'", world)
         self.assertIn("success:'protagonist position changed'", world)
+        self.assertIn("id:'connect',stage:'TUTORIAL · REPAIR 1/4'", world)
+        self.assertIn("id:'speak',stage:'TUTORIAL · REPAIR 4/4'", world)
 
     def test_game_asset_vendor_is_pinned_and_verified(self):
         vendor = (ROOT / 'tools' / 'vendor_game_assets.py').read_text(encoding='utf-8')
