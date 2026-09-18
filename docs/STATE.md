@@ -1,5 +1,129 @@
 # Current state — LLM learning-game proof track
 
+## Exact system-repair checkpoint — 18 September 2026
+
+Current verified development candidate:
+`337d8352b47bb9bfc45556e8778408bdf1b80070`.
+
+Exact GitHub Actions run `35382351720` passed:
+- foundation;
+- first-words-opening;
+- first-words-tutorial;
+- first-words-controls;
+- first-words-chapter;
+- first-words-readability;
+- first-words-lifecycle;
+- exact-candidate review-index aggregation.
+
+This is **not** a creative-readiness claim and is not deployed to Render.
+
+### Anti-overfitting proof
+
+The foundation suite now includes a materially different synthetic game fixture,
+**Harbor Relay**, rather than testing only the Bellweather/First Words package.
+
+That fixture independently exercises:
+- WorldSpec colliders and walkable surfaces;
+- major semantic-object readability metadata;
+- purposeful ambient patrol motion;
+- environment/camera world states;
+- major-event cause/effect direction metadata;
+- opening -> tutorial handoff semantics;
+- generic control tutorial flow;
+- generic state-driven interaction tutorial;
+- mutually exclusive experience modes;
+- HUD-safe critical world-marker placement.
+
+The cross-game fixture passed on the exact candidate. This proves those contracts
+are reusable platform behavior rather than Bellweather-name-specific validators.
+
+### Evidence/critic pipeline status
+
+The exact review index for `337d8352b47bb9bfc45556e8778408bdf1b80070` contains:
+- motion video;
+- caption-blind motion;
+- actual captured WebAudio;
+- interactive control/physicality/tutorial traces;
+- authoritative learning replay;
+- screenshots/runtime reports;
+- exact tracked source;
+- assignment packets kept distinct from actual reviewer reports.
+
+Generated critic assignments currently resolve as:
+
+**ready for independent execution**
+- cold_observer;
+- motion_audience;
+- physicality;
+- handoff_tutorial;
+- audio_atmosphere;
+- learning_transfer.
+
+**blocked by design until a validated cold-observer result exists**
+- cinematic_causality;
+- intent_comparison.
+
+This dependency is intentional. The current assistant already knows the design
+intent and therefore does not self-author the cold-observer result.
+
+### Reviewer authority hardening
+
+Post-CI reviewers are now bound to:
+- exact candidate SHA;
+- deterministic assignment ID;
+- required evidence modality groups;
+- harness-authored execution receipt;
+- executor/session identity;
+- exact evidence/context supplied by the harness;
+- forbidden-context checks;
+- observations-before-interpretation output;
+- explicit verdict + blockers/retest.
+
+A result cannot be replayed against another assignment/session, cannot claim
+evidence the harness did not supply, and cannot substitute weaker evidence for
+the modality required by its pass.
+
+### Release boundary
+
+Normal preview promotion now requires:
+1. exact-candidate successful technical run;
+2. complete review index;
+3. schema-v2 final review record;
+4. every required post-CI critic result revalidated against its assignment and
+   execution receipt;
+5. **every required critic verdict = pass**;
+6. no blocker;
+7. candidate not previously rejected by the user.
+
+An explicit user preview override may only tolerate **missing/unresolved**
+review on an otherwise technically safe/unblocked candidate. It cannot bypass a
+`needs_revision` critic verdict or known rejected candidate.
+
+Phase/Level advancement still requires explicit human acceptance for the same
+candidate SHA.
+
+### Deployment state
+
+Render remains intentionally pinned to rejected runtime
+`ad14c5aced6cf053c7617dfb03245506e1e9dad5`. Do not ask the user to review that
+build again. Do not start Level 2.
+
+### Next active work
+
+The structural/system repair has reached the point where the next meaningful
+gate is **independent critic execution using the generated assignments and
+harness receipts**. Do not manufacture those judgments inside a context that
+already knows the intended story.
+
+After those critic results:
+1. ingest/revalidate them sequentially;
+2. repair any `needs_revision` blocker;
+3. repeat on one exact SHA;
+4. only when all v2 passes say `pass`, build the final schema-v2 review record;
+5. use the gated preview workflow before moving a replacement candidate to
+   Render.
+
+
 ## Quality-system enforcement checkpoint — 18 September 2026
 
 The deployed runtime `ad14c5aced6cf053c7617dfb03245506e1e9dad5`
