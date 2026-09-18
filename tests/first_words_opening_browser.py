@@ -1,4 +1,5 @@
 """Opening-first gate. Does not play or certify the rest of Level 1."""
+import base64
 import json
 import tempfile
 from pathlib import Path
@@ -31,6 +32,9 @@ def main():
             expect(page.locator('#rgi-dialogue')).to_contain_text('All three of us')
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before_lantern
+            until(page,"()=>FirstWordsReview.audio.ready")
+            capture_started=page.evaluate("()=>FirstWordsReview.audio.startCapture()")
+            assert capture_started['state']=='recording',capture_started
             page.screenshot(path=str(out/'prologue-lantern-release-390.png'),timeout=15000)
 
             log('Prologue: visible cause');page.get_by_role('button',name='Continue →',exact=True).click()
@@ -59,8 +63,6 @@ def main():
             assert page.get_by_role('button',name='Continue →',exact=True).is_disabled()
             page.screenshot(path=str(out/'prologue-rupture-paused-390.png'),timeout=15000)
             page.get_by_role('button',name='Resume story motion').click()
-            page.get_by_role('button',name='Toggle opening sound').click()
-            assert page.evaluate('FirstWordsReview.audio.preferences.muted')
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
             vanished=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
                 const w=getGameRuntime().world;return ['zip','singer','friend-a'].map(id=>w.projectEntity(id));}""")
@@ -115,6 +117,13 @@ def main():
             assert removal['module'] and removal['module']['visible'],removal
             assert removal['warden'] and removal['warden']['visible'],removal
             page.screenshot(path=str(out/'prologue-speech-removed-390.png'),timeout=15000)
+            captured=page.evaluate("()=>FirstWordsReview.audio.stopCapture()")
+            assert captured and captured['bytes']>1000,captured
+            payload=captured['dataUrl'].split(',',1)[1]
+            (out/'prologue-event-audio.webm').write_bytes(base64.b64decode(payload))
+            assert (out/'prologue-event-audio.webm').stat().st_size==captured['bytes']
+            page.get_by_role('button',name='Toggle opening sound').click()
+            assert page.evaluate('FirstWordsReview.audio.preferences.muted')
 
             log('Prologue: repair handoff');page.get_by_role('button',name='Continue →',exact=True).click()
             expect(page.locator('#rgi-title')).to_have_text('Get the words back.')
@@ -193,6 +202,7 @@ def main():
                 'intentionally_omitted':['story treatment','storyboard rationale','intended causal explanation','creator critique scores'],
                 'evidence':{
                     'motion_video':'prologue-motion-390.webm',
+                    'audio_capture':'prologue-event-audio.webm',
                     'phone_frames':['prologue-home-390.png','prologue-lantern-release-390.png','prologue-threat-cause-390.png','prologue-rupture-paused-390.png','prologue-rupture-complete-390.png','prologue-limbo-390.png','prologue-prison-reveal-390.png','prologue-speech-targeted-390.png','prologue-speech-removed-390.png','prologue-repair-handoff-390.png'],
                     'reduced_motion_frames':['prologue-threat-reduced-360.png','prologue-threat-reduced-430.png','prologue-threat-reduced-1280.png','prologue-rupture-reduced-360.png','prologue-rupture-reduced-430.png','prologue-rupture-reduced-1280.png'],
                     'experience_modes':['opening','tutorial'],
@@ -210,7 +220,7 @@ def main():
                 ]
             }
             (out/'cold-observer-opening-packet.json').write_text(json.dumps(cold_packet,indent=2))
-            (out/'first-words-opening-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'scope':'Prologue only. Motion evidence and a context-restricted cold-observer packet are preserved. Audio lifecycle/phase changes are automated; subjective audio quality, physical-phone feel and human acceptance remain unassessed.'},indent=2))
+            (out/'first-words-opening-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'scope':'Prologue only. Motion evidence, actual WebAudio event capture and a context-restricted cold-observer packet are preserved. Audio lifecycle/phase changes are automated; subjective audio quality still requires listening, and physical-phone feel/human acceptance remain unassessed.'},indent=2))
             log('Prologue gate passed')
         finally:
             browser.close();stop_server(proc)
