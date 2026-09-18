@@ -14,3 +14,10 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 /* Opening owns one full viewport; inherited grid tracks must not become panels. */
 .first-opening .rgi-shell{display:block;height:100dvh;min-height:0;padding:0}.first-opening .rgi-visual{height:100%;min-height:0}.first-opening .rgi-scene-caption{bottom:auto}.first-opening .rgi-progress{position:absolute;left:25px;right:25px;bottom:143px;height:3px;padding:0;z-index:8}.first-opening .rgi-controls{z-index:10}.first-opening .rgi-storybar{padding:0;background:none;font-size:10px}.first-opening .rgi-nav{display:grid}.first-opening .rgi-utilities{display:grid;grid-template-columns:repeat(4,1fr)}
 .first-opening .game-view-tools{left:12px!important;right:auto!important}.first-opening .game-controls-help{left:68px!important;right:auto!important}
+
+
+#menu-open.tutorial-focus{
+  outline:3px solid #f0c873;
+  outline-offset:4px;
+  box-shadow:0 0 0 8px #f0c87324,0 0 28px #f0c87355;
+}
