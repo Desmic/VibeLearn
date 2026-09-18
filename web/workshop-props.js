@@ -1,6 +1,6 @@
 /* Portable procedural props: no course rules, engine objects or learner state. */
 export function tokenTrack(id,position,count=3){
-  const items=[{id,position}];
+  const items=[{id,position,collider:{shape:'box',halfExtents:[count*.42+.2,.25,.58],offset:[0,.18,0]}}];
   items.push({id:`${id}-base`,parent:id,primitive:'box',material:'ink',position:[0,0,0],scale:[count*.82+.3,.18,1.0]});
   for(let i=0;i<count;i++){
     const x=(i-(count-1)/2)*.82;
@@ -10,7 +10,7 @@ export function tokenTrack(id,position,count=3){
   return items;
 }
 export function messageMachine(id,position){
-  return [{id,position},
+  return [{id,position,collider:{shape:'box',halfExtents:[1.2,1.15,.95],offset:[0,1.05,0]}},
     {id:`${id}-feet`,parent:id,primitive:'cylinder',material:'ink',position:[0,.16,0],scale:[2.3,.3,2.3]},
     {id:`${id}-body`,parent:id,primitive:'box',material:'teal',position:[0,.8,0],scale:[1.7,1.1,1.3]},
     {id:`${id}-top`,parent:id,primitive:'box',material:'paper',position:[0,1.38,0],scale:[1.9,.12,1.4]},
@@ -20,7 +20,7 @@ export function messageMachine(id,position){
     {id:`${id}-button`,parent:id,primitive:'cylinder',material:'coral',position:[.56,1.48,.42],scale:[.23,.12,.23]}];
 }
 export function pavilion(id,position,material='teal'){
-  return [{id,position},
+  return [{id,position,collider:{shape:'box',halfExtents:[1.55,1.75,1.35],offset:[0,1.55,0]}},
     {id:`${id}-step`,parent:id,primitive:'box',material:'paper',position:[0,.12,.3],scale:[2.8,.24,2.6]},
     {id:`${id}-wall`,parent:id,primitive:'box',material,position:[0,1.35,0],scale:[2.25,2.5,1.9]},
     {id:`${id}-roof`,parent:id,primitive:'cone',material:'ink',position:[0,3,0],scale:[3.3,1.1,2.9]},
@@ -29,7 +29,7 @@ export function pavilion(id,position,material='teal'){
     {id:`${id}-sign`,parent:id,primitive:'box',material:'paper',position:[0,2.32,1.05],scale:[1.62,.42,.08]}];
 }
 export function smallTree(id,position,scale=1){
-  return [{id,position,scale:[scale,scale,scale]},
+  return [{id,position,scale:[scale,scale,scale],collider:{shape:'box',halfExtents:[.55,1.05,.55],offset:[0,1,0]}},
     {id:`${id}-trunk`,parent:id,primitive:'cylinder',material:'wood',position:[0,.65,0],scale:[.19,1.3,.19]},
     {id:`${id}-crown`,parent:id,primitive:'sphere',material:'leaf',position:[0,1.6,0],scale:[1.15,1.6,1.1]},
     {id:`${id}-fruit`,parent:id,primitive:'sphere',material:'gold',position:[.42,1.55,.3],scale:[.2,.2,.2]}];
