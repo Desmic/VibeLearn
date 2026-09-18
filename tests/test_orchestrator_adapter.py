@@ -344,6 +344,50 @@ class OrchestratorAdapterTests(unittest.TestCase):
         self.assertEqual(lookups[-1][1:3], ("req-2", "repair-1"))
         self.assertEqual(len(lookups[-1][3]), 64)
 
+    def test_multiple_candidates_without_active_ref_are_ambiguous(self):
+        transport = FakeTransport()
+        transport.snapshot = snapshot(candidate="candidate-2")
+        transport.snapshot["candidate_refs"] = ["candidate-1", "candidate-2"]
+        result = VibeLearnAdapter(transport).get_run(
+            "terminal_pm:run/1", request()["run_request"]
+        )
+        self.assertEqual(result["candidate_selection"], "ambiguous")
+        self.assertIsNone(result["candidate_ref"])
+        self.assertFalse(result["ready_for_vibelearn_evaluation"])
+
+    def test_explicit_active_candidate_resolves_multi_candidate_snapshot(self):
+        transport = FakeTransport()
+        transport.snapshot = snapshot(candidate="candidate-2")
+        transport.snapshot["candidate_refs"] = ["candidate-1", "candidate-2"]
+        transport.snapshot["active_candidate_ref"] = "candidate-2"
+        result = VibeLearnAdapter(transport).get_run(
+            "terminal_pm:run/1", request()["run_request"]
+        )
+        self.assertEqual(result["candidate_selection"], "explicit")
+        self.assertEqual(result["candidate_ref"], "candidate-2")
+        self.assertTrue(result["ready_for_vibelearn_evaluation"])
+
+    def test_duplicate_required_review_results_block_instead_of_overwriting(self):
+        transport = FakeTransport()
+        transport.snapshot["review_results"].append(copy.deepcopy(
+            transport.snapshot["review_results"][0]
+        ))
+        result = VibeLearnAdapter(transport).get_run(
+            "terminal_pm:run/1", request()["run_request"]
+        )
+        self.assertEqual(result["review_statuses"]["story"], "duplicate")
+        self.assertEqual(result["duplicate_review_ids"], ["story"])
+        self.assertIn("story", result["blocking_review_ids"])
+        self.assertFalse(result["ready_for_vibelearn_evaluation"])
+
+    def test_completed_run_without_candidate_available_disposition_is_not_ready(self):
+        transport = FakeTransport()
+        transport.snapshot["orchestration_disposition"] = "finished"
+        result = VibeLearnAdapter(transport).get_run(
+            "terminal_pm:run/1", request()["run_request"]
+        )
+        self.assertFalse(result["ready_for_vibelearn_evaluation"])
+
     def test_candidate_change_invalidates_prior_review_and_stale_evidence(self):
         transport = FakeTransport()
         transport.snapshot = snapshot(candidate="candidate-2")
