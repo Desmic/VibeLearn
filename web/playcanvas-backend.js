@@ -537,6 +537,11 @@ class PlayCanvasWorld {
       }else if(motion.type==='pulse'){
         const s=base.scale,amp=motion.amplitude||.08,speed=motion.speed||2,k=1+Math.sin(this.elapsed*speed)*amp;
         entity.setLocalScale(s[0]*k,s[1]*k,s[2]*k);
+      }else if(motion.type==='patrol'){
+        const p=base.position,o=motion.offset||[0,0,0],speed=motion.speed||.35,phase=motion.phase||0;
+        const t=(1+Math.sin(this.elapsed*speed+phase))/2;
+        entity.setLocalPosition(p[0]+o[0]*t,p[1]+o[1]*t,p[2]+o[2]*t);
+        if(Math.abs(o[0])+Math.abs(o[2])>.01)entity.setLocalEulerAngles(0,Math.atan2(o[0],o[2])*180/Math.PI+(Math.cos(this.elapsed*speed+phase)<0?180:0),0);
       }
     }
   }
