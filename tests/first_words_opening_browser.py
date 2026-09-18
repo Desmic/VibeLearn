@@ -139,7 +139,31 @@ def main():
             assert (out/'prologue-motion-390.webm').exists()
             assert not errors,errors
             checks.append('Fresh 360/430/desktop reduced-motion preserves the same six story states and can skip safely into the separate tutorial without a 2D fallback.')
-            (out/'first-words-opening-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'scope':'Prologue only. Audio lifecycle and phase changes are automated after an explicit player gesture; subjective mix/appeal, physical-phone feel and human acceptance remain unassessed.'},indent=2))
+            cold_packet={
+                'schema':'vibelearn.cold-observer-evidence.v1',
+                'candidate_source':'GitHub Actions exact SHA supplies candidate identity',
+                'review_instruction':'Experience this as a new player. Describe only what the running experience communicates before reading story/design intent.',
+                'intentionally_omitted':['story treatment','storyboard rationale','intended causal explanation','creator critique scores'],
+                'evidence':{
+                    'motion_video':'prologue-motion-390.webm',
+                    'phone_frames':['prologue-home-390.png','prologue-lantern-release-390.png','prologue-rupture-paused-390.png','prologue-rupture-complete-390.png','prologue-limbo-390.png','prologue-prison-reveal-390.png','prologue-speech-theft-390.png','prologue-repair-handoff-390.png'],
+                    'reduced_motion_frames':['prologue-rupture-reduced-360.png','prologue-rupture-reduced-430.png','prologue-rupture-reduced-1280.png'],
+                    'experience_modes':['opening','tutorial'],
+                    'device':'Chromium emulation 390x844 touch plus reduced-motion 360/430/1280'
+                },
+                'questions':[
+                    'What kind of place is shown before the disruption?',
+                    'Who appears important and what relationships are visible?',
+                    'What ordinary activity makes the place feel inhabited?',
+                    'What causes the major disruption, if a cause is perceptible?',
+                    'What visibly changes in the world and characters?',
+                    'What object or capability appears to be taken later?',
+                    'At the handoff, who do you control and what should you do next?',
+                    'List anything confusing or inferred only from text.'
+                ]
+            }
+            (out/'cold-observer-opening-packet.json').write_text(json.dumps(cold_packet,indent=2))
+            (out/'first-words-opening-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'scope':'Prologue only. Motion evidence and a context-restricted cold-observer packet are preserved. Audio lifecycle/phase changes are automated; subjective audio quality, physical-phone feel and human acceptance remain unassessed.'},indent=2))
             log('Prologue gate passed')
         finally:
             browser.close();stop_server(proc)
