@@ -63,6 +63,7 @@ jobs:
           path: |
             artifacts/*.png
             artifacts/*.json
+            artifacts/*.webm
             artifacts/*trace.zip
             web/vendor/*
           retention-days: 7
