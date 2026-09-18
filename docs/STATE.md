@@ -1,5 +1,42 @@
 # Current state — LLM learning-game proof track
 
+## Exact Phase 1 review checkpoint — 18 September 2026
+
+Canonical development branch remains `main`. The reviewed **runtime candidate**
+is `ad14c5aced6cf053c7617dfb03245506e1e9dad5`; later commits that only add/update review documentation do
+not change that runtime identity.
+
+Exact GitHub Actions run `35335042617` passed all seven active suites. Exact
+artifact review covers Bellweather entry, friendship ritual, completed
+rupture/disappearance, limbo, progressive prison reveal, Warden speech theft,
+MOVE/LOOK/MENU control practice, speech-repair tutorial, alternate orbit/zoom,
+stale-context failure/recovery, and phone + desktop final payoff.
+
+Current internal product gates on that exact runtime:
+- story/rendered narrative 9/10;
+- art/world direction 9/10;
+- gameplay/progression 9/10;
+- learning/transfer 9/10;
+- technical/accessibility passed.
+
+The strict overall status remains **review incomplete** because subjective
+music/SFX listening is unavailable in this execution environment. Automated
+audio lifecycle/mute semantics pass, but code/metrics are not a substitute for
+listening. Physical-device feel also remains distinct from Chromium emulation.
+
+The current user has **not yet accepted this revised candidate**. The September
+17 needs-revision verdict belongs to the older reviewed build and remains useful
+historical evidence, not a verdict on `ad14c5aced6cf053c7617dfb03245506e1e9dad5`.
+
+Exact review records:
+- `docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md`
+- `docs/reviews/2026-09-18-level1-ad14c5a.json`
+
+Do not start Level 2, claim Phase 1 acceptance, or transfer these scores to a
+different runtime SHA. Render remains intentionally pinned until the current
+release/review gate is satisfied.
+
+
 ## Phase 1 review checkpoint — 18 September 2026
 
 Canonical branch remains `main`. Current exact candidate is
