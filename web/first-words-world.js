@@ -40,7 +40,9 @@ for(const [i,color] of ['gold','teal','coral'].entries())part('friendship-light-
 
 /* The playable prison is materially larger and calmer than the rejected square. */
 part('prison-floor','box','prison',[0,-.1,0],[18,.2,16],{parent:'prison-zone'});
-part('prison-back','box','dark',[0,4,-8.3],[18,8,.35],{parent:'prison-zone'});
+part('prison-back-left','box','dark',[-6.1,4,-8.3],[5.8,8,.35],{parent:'prison-zone'});
+part('prison-back-right','box','dark',[6.1,4,-8.3],[5.8,8,.35],{parent:'prison-zone'});
+part('prison-back-top','box','dark',[0,7.5,-8.3],[6.4,1,.35],{parent:'prison-zone'});
 part('prison-left','box','dark',[-9,4,-.2],[.35,8,16],{parent:'prison-zone'});
 part('prison-right','box','dark',[9,4,-.2],[.35,8,16],{parent:'prison-zone'});
 part('prison-ceiling-beam-a','box','indigo',[-4.6,7.4,-1],[.3,.3,14],{parent:'prison-zone'});
@@ -110,7 +112,7 @@ part('stolen-voice','box','mint',[0,1.1,-27.5],[.95,.95,.95],{rotation:[0,30,15]
 
 const revealGroups=[
   ['prison-floor'],
-  ['prison-back','prison-left','prison-right','prison-ceiling-beam-a','prison-ceiling-beam-b'],
+  ['prison-back-left','prison-back-right','prison-back-top','prison-left','prison-right','prison-ceiling-beam-a','prison-ceiling-beam-b'],
   ['prison-light-a','prison-light-b','moon'],
   ['socket','words','cable','loose-plug','friend-cube']
 ];
