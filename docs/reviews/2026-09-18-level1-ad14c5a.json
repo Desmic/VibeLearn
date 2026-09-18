@@ -1,0 +1,232 @@
+{
+  "schema_version": 1,
+  "candidate_sha": "ad14c5aced6cf053c7617dfb03245506e1e9dad5",
+  "method": "internal_tool_assisted",
+  "environment": "Exact GitHub Actions run 35335042617 for candidate ad14c5aced6cf053c7617dfb03245506e1e9dad5; Playwright Chromium; disposable SQLite/PostgreSQL state; PlayCanvas runtime; 360/390/430 portrait and 1280 desktop evidence.",
+  "limitations": "Reviewer had prior design context. Browser emulation is not physical-phone testing. Subjective music/SFX listening is not available in this environment; the legacy checker does not encode the separate art/world or audio gate.",
+  "prior_context": "Reviewer knew the September 17 user rejection and intended replacement progression. Counterexamples target those known failure modes rather than claiming a blind novice study.",
+  "user_authority": "The current user is the sole final product critic. This internal record cannot establish acceptance.",
+  "technical_status": "passed",
+  "technical_evidence": [
+    "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+  ],
+  "criteria": {
+    "world_role_stakes": {
+      "rating": 9,
+      "reason": "Bellweather, direct protagonist role, disappearance, prison, speech theft and repair objective are rendered before tutorial play.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ],
+      "counterexample_attempt": "Read the prologue from rendered states only; the role, loss and stakes remained legible."
+    },
+    "visible_causality": {
+      "rating": 9,
+      "reason": "Lantern release, disappearance, progressive reveal, visible module theft, wrong route, gate opening and deeper-route payoff each change the world.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ],
+      "counterexample_attempt": "Checked muted/reduced-motion and final closed, wrong and open gate states; causality did not depend on captions alone."
+    },
+    "attachment_pull": {
+      "rating": 9,
+      "reason": "The three-light ritual and promise establish a specific relationship before the friends disappear; the ending help signal supplies forward pull.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ],
+      "counterexample_attempt": "Skipped explanatory intent and inspected only the ritual, disappearance and ending beats; the relationship and unresolved rescue remained concrete."
+    },
+    "orientation_action": {
+      "rating": 9,
+      "reason": "Fresh entry and tutorial present one dominant action at a time: move, look, menu, repair, scan, generate, then explicit Begin Level 1.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ],
+      "counterexample_attempt": "Looked for competing required actions at each tutorial state and exercised skip/reload; the required next action remained clear."
+    },
+    "hud_readability": {
+      "rating": 9,
+      "reason": "World-first HUD remains bounded on phone/desktop and passes enlarged-text checks while keeping goal and action reachable.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ],
+      "counterexample_attempt": "Inspected densest phone and 200% states for collapse into a reading page; controls/actions stayed usable."
+    },
+    "controls": {
+      "rating": 9,
+      "reason": "Direct protagonist movement, touch stick, keyboard, orbit, zoom and recenter pass after persisted save/reload.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ],
+      "counterexample_attempt": "Used retained non-text button focus, touch drag, orbit and zoom; movement/camera remained functional without a focus workaround."
+    },
+    "meaningful_agency": {
+      "rating": 9,
+      "reason": "Chosen context changes model output and world outcome; stale Moon context produces a plausible but wrong route and current Star context changes the command.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ],
+      "counterexample_attempt": "Deliberately selected stale context and separately made a wrong human prediction under current context; the engine followed supplied context, not the guess."
+    },
+    "progression_recovery": {
+      "rating": 9,
+      "reason": "Separate guaranteed tutorial success precedes the changed-context mission; wrong route preserves history and recovers through current context without restart.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ],
+      "counterexample_attempt": "Failed the first mission with stale context, then recovered from signs without erasing the failed choice or restarting."
+    },
+    "world_continuity": {
+      "rating": 9,
+      "reason": "Entry, prologue, tutorial, failure/recovery and payoff stay in the same PlayCanvas story/world continuity with direct control.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ],
+      "counterexample_attempt": "Compared tutorial success, wrong route and final payoff; world geometry visibly transitions instead of cutting to a detached results page."
+    },
+    "concept_fidelity": {
+      "rating": 9,
+      "reason": "The toy causally models context-conditioned next-piece generation with growing input and transparent authored-score/whole-word limitations.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ],
+      "counterexample_attempt": "Used current Star context with a Moon human prediction; authoritative generation still produced Star, showing prediction is not hidden model input."
+    },
+    "fresh_transfer": {
+      "rating": 9,
+      "reason": "Level 1 changes the route context after Moon tutorial; stale reuse fails while the current five-point clue supports a different Star solution.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ],
+      "counterexample_attempt": "Tried the just-practiced Moon solution unchanged; it fails and must be repaired from new context."
+    }
+  },
+  "coverage": {
+    "fresh_entry": {
+      "status": "observed",
+      "note": "Bellweather login and fresh opening inspected.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "first_action": {
+      "status": "observed",
+      "note": "Lantern action and first control/repair actions exercised.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "mistake": {
+      "status": "observed",
+      "note": "Stale Moon context deliberately selected in Level 1.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "recovery": {
+      "status": "observed",
+      "note": "Wrong route recovered using current Star clue.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "later_challenge": {
+      "status": "observed",
+      "note": "Changed-context mission begins only after tutorial success.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "payoff": {
+      "status": "observed",
+      "note": "Open deeper route inspected on phone and 1280 desktop.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "transfer": {
+      "status": "observed",
+      "note": "Moon tutorial -> changed Star route and wrong-prediction counterexample exercised.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "replay": {
+      "status": "observed",
+      "note": "Prologue replay preserves mission draft and returns safely.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "save_resume": {
+      "status": "observed",
+      "note": "Tutorial/mission state survives reload; reset/logout lifecycle covered.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "controls_after_save": {
+      "status": "observed",
+      "note": "Keyboard/touch/camera controls exercised after persisted action and reload.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "desktop": {
+      "status": "observed",
+      "note": "Login, tutorial, rupture and final payoff have desktop evidence.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "phone_360": {
+      "status": "observed",
+      "note": "Reduced opening/chapter and enlarged-text coverage at 360.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "phone_390": {
+      "status": "observed",
+      "note": "Primary opening/tutorial/wrong-route/payoff/control/lifecycle path at 390.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "phone_430": {
+      "status": "observed",
+      "note": "Reduced opening/chapter and enlarged-text coverage at 430.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "touch": {
+      "status": "observed",
+      "note": "Touch movement and drag-to-look exercised in portrait.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "keyboard": {
+      "status": "observed",
+      "note": "WASD/arrow movement exercised including retained game-button focus.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "enlarged_text": {
+      "status": "observed",
+      "note": "200% text gate passes at phone widths.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    },
+    "reduced_motion": {
+      "status": "observed",
+      "note": "Opening and completion paths exercised with reduced motion on phone and desktop.",
+      "evidence": [
+        "docs/LEVEL1-FINAL-CRITIC-20260918-ad14c5a.md"
+      ]
+    }
+  },
+  "blockers": []
+}
