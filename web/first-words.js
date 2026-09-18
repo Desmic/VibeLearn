@@ -2,7 +2,8 @@ import {getGameRuntime,createGameRuntime} from './game-runtime.js';
 import {openGameOpening} from './game-opening.js';
 import {createGameAudio} from './game-audio.js';
 import {createLearningSession} from './learning-session.js';
-import {createControlPractice} from './player-controls.js';
+import {createTutorialFlow} from './tutorial-flow.js';
+import {createExperienceModeController} from './experience-mode.js';
 import * as chapter from './first-words-world.js';
 
 const $=s=>document.querySelector(s),runtime=getGameRuntime(),audio=createGameAudio(),host=$('#world');
@@ -12,22 +13,26 @@ let reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,paused=false,
 // instantiate the prison mission first and then flash it while learner state resolves.
 let world=runtime.showStory(chapter,host,0,{reducedMotion:reduced});
 const session=createLearningSession(render);
-const practice=createControlPractice();
+const practice=createTutorialFlow(chapter.controlTutorialSpec);
 const ours=()=>session.attempt?.snapshot?.word_machine?.version==='first-words-1';
 const view=()=>ours()?session.attempt.word_machine_state:initial;
 const text=(s,v)=>{$(s).textContent=v;};
 const root=$('#adventure');
-function setExperienceMode(mode){
-  root.dataset.experienceMode=mode;
-  const playable=mode==='tutorial'||mode==='mission'||mode==='complete';
-  $('.mission').hidden=!playable;
-  $('#controls').hidden=mode==='opening'||mode==='loading';
-  $('#welcome').hidden=mode!=='entry';
-  $('#engine').hidden=!playable;
-  const tutorialFocus=mode==='tutorial'?(practice.current?.focus||''):'';
-  host.dataset.tutorialFocus=tutorialFocus;
-  $('#menu-open').classList.toggle('tutorial-focus',tutorialFocus==='menu');
-}
+const experience=createExperienceModeController(root,{
+  modes:['loading','entry','opening','tutorial','mission','complete'],
+  surfaces:[
+    {selector:'.mission',modes:['tutorial','mission','complete']},
+    {selector:'#controls',modes:['entry','tutorial','mission','complete']},
+    {selector:'#welcome',modes:['entry']},
+    {selector:'#engine',modes:['tutorial','mission','complete']}
+  ],
+  onChange(mode){
+    const tutorialFocus=mode==='tutorial'?(practice.current?.focus||''):'';
+    host.dataset.tutorialFocus=tutorialFocus;
+    $('#menu-open').classList.toggle('tutorial-focus',tutorialFocus==='menu');
+  }
+});
+const setExperienceMode=mode=>experience.set(mode);
 setExperienceMode('loading');
 const blocked=()=>!ready||paused||inOpening||session.busy||session.pending||runtime.stats().contextLost||world.stats().animating||document.querySelector('dialog[open]');
 function pauseSystems(){const value=paused||Boolean(document.querySelector('dialog[open]'));runtime.setPaused(value);audio.setPaused(value);}
@@ -106,12 +111,10 @@ function render(){
   text('#scene-description',`${scene} ${goal} ${detail} Input: ${s.context.join(' ')}. Output: ${s.output.join(' ')||'none'}.`);
   const step=practice.step;$('#controls').classList.toggle('practicing',step!=='done');
   if(step!=='done'){
-    const prompts={
-      move:['You control Zip now.',host.clientWidth<700?'Move the highlighted stick at bottom left. Make Zip take a few steps.':'Use the highlighted WASD / arrow movement controls. Make Zip take a few steps.'],
-      look:['Now look around as Zip.','Drag the highlighted world view to turn the camera. The + / − controls zoom.'],
-      menu:['One last control: your game menu.','Open the highlighted ☰ button. That is where pause, sound and story replay live.']
-    };
-    const [title,instruction]=prompts[step];
+    const current=practice.current;
+    const title=current?.title||current?.skill||'Try the highlighted control.';
+    const instructions=current?.instructions||{};
+    const instruction=host.clientWidth<700?(instructions.touch||instructions.desktop||'Use the highlighted control.'):(instructions.desktop||'Use the highlighted control.');
     text('#stage-name','TUTORIAL · '+step.toUpperCase());text('#goal',title);text('#detail',instruction);
     text('#engine-label','GET YOUR BEARINGS');text('#scene-description',title+' '+instruction);
     $('#actions').replaceChildren();button('Skip control practice','skip-controls',false);
