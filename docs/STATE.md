@@ -2,9 +2,11 @@
 
 ## Automation integration direction — 18 September 2026
 
-The user has now approved a **bounded merge of the existing Terminal PM Agent/orchestrator into VibeLearn** to turn the project into a highly automated development and game-generation system. `docs/AUTOMATED-DEVELOPMENT-SYSTEM.md` is the owning architecture/handoff.
+The user has approved VibeLearn becoming a highly automated development/game-generation system, but the existing Terminal PM Agent is still under active development. `docs/AUTOMATED-DEVELOPMENT-SYSTEM.md` is the owning architecture/handoff.
 
-This supersedes older text that treated orchestration only as indefinite future work, but it does not authorize a wholesale donor-repo transplant, a fleet of permanent specialist agents, autonomous production deployment, or Level 2 work. Start with a thin real VibeLearn slice: economical worker -> independent reviewer with implicit falsification/proof -> evidence -> accept/repair, then add outcome/incident learning. Reuse Terminal PM execution/session/evidence/recovery ideas selectively and increase complexity only for an obvious invariant or evidence from real runs.
+**Current integration decision:** keep Terminal PM Agent as a separate evolving external orchestrator and integrate through a thin versioned adapter contract. Do not copy/extract its runtime/session/verifier/recovery internals into VibeLearn while Gate 1.5 remains open, live runs are unauthorized and ER-1 review is incomplete. Phase 0 is contract/fixture work only; the first real external run waits for the Terminal PM Agent's own current execution policy to permit it.
+
+The intended worker model remains economical worker -> independent reviewer with implicit falsification/proof -> evidence -> VibeLearn outcome evaluation -> accept/repair. Deeper coupling or new complexity requires either an obvious safety/correctness invariant or evidence from real integration runs.
 
 The current Phase 1 runtime/review identity and user-acceptance gate below are unchanged by this architecture documentation.
 
