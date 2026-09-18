@@ -144,3 +144,30 @@ After each accepted chunk, ask:
 5. Can the same reusable piece create a materially different game/world without copying this track's nouns or layout?
 
 Extract only capabilities proven useful by real game needs. Avoid speculative framework growth.
+
+
+## Narration capability
+
+The game-creation platform should support narration as a replaceable presentation
+capability, not as a mandatory global style.
+
+A generated game's design/runtime spec should be able to declare whether it uses:
+- no narrator;
+- text narration;
+- narrator voice with synchronized text/subtitles.
+
+Narrator voice is especially appropriate to consider for opening scenes,
+transitions and major events, but the creative/story agent must choose it based
+on the game's tone, audience and pacing rather than applying it mechanically.
+
+The current LLM proof track stays on text narration during this review. Future
+voice support should preserve:
+- accessibility/subtitle parity;
+- muted-play comprehension;
+- provider/model/TTS independence;
+- separate preferences/volume where needed;
+- deterministic canonical story text independent of synthesized performance.
+
+Voice narration does not relax the visual-storytelling contract. Generated worlds
+must still communicate setting, activity, action and consequence through their
+own visuals and motion.
