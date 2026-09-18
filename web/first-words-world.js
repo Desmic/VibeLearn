@@ -1,6 +1,6 @@
 /* Bellweather / prison proof track: story, composition and semantic presentation. */
 import {characterControlProfile} from './game-character-spec.js';
-import {messageMachine,tokenTrack,smallTree,pavilion} from './workshop-props.js';
+import {messageMachine,tokenTrack,smallTree,pavilion,deliveryParcel} from './workshop-props.js';
 import {lantern,gate,tower,planter,companionRobot,capabilityModule} from './rescue-world-props.js';
 import {makeWorldPackage} from './spec-game-world.js';
 
@@ -30,6 +30,12 @@ for(let i=0;i<8;i++){
   addTo('bellweather-zone',lantern('hanging-'+i,[x,6.5-Math.sin(i/7*Math.PI)*1.1,2],{scale:.7,color:i%2?'glow':'pinkGlow',floating:true}));
 }
 for(let i=0;i<5;i++)addTo('bellweather-zone',lantern('sky-lantern-'+i,[-12+i*6,11+i%2*2,-9],{scale:.55,floating:true}));
+
+/* Purposeful background life: small workers traverse between visible civic places
+   rather than decorating the square with static crowd props. */
+addTo('bellweather-zone',companionRobot('bellworker-a',[-10,0,7],{color:'wood',height:1.15,motion:{type:'patrol',offset:[5.5,0,-1.8],speed:.42,phase:0}}));
+e.push(...deliveryParcel('bellworker-a-parcel','bellworker-a',[.45,.7,.15]));
+addTo('bellweather-zone',companionRobot('bellworker-b',[10,0,5],{color:'leaf',round:true,height:1.05,motion:{type:'patrol',offset:[-4.8,0,2.3],speed:.36,phase:1.7}}));
 
 /* Friends are intentionally separated in space and dressed differently so the
    protagonist does not read as duplicated. */
@@ -167,6 +173,8 @@ function opening(beat){
     p.transforms.warden={position:[0,3.1,7.15],scale:[.72,.72,.72]};
     p.timeline={duration:3900,moves:[
       {entity:'warden',from:[0,3.1,7.15],to:[0,3.7,7.7],at:500,duration:850},
+      {entity:'bellworker-a',from:[-7.5,0,6.2],to:[-.8,3.8,7.4],at:1180,duration:1500},
+      {entity:'bellworker-b',from:[7.6,0,6.1],to:[.9,4.1,7.5],at:1220,duration:1450},
       {entity:'zip',from:[0,0,10],to:[0,4.7,8],at:1350,duration:1300},
       {entity:'singer',from:[3.8,0,1],to:[1.1,5.4,7.5],at:1250,duration:1400},
       {entity:'friend-a',from:[-3,0,1],to:[-1.1,4.6,7.2],at:1250,duration:1400}
@@ -175,10 +183,10 @@ function opening(beat){
       {at:520,patch:{environment:{clearColor:'#07101f',ambient:'#222d49',exposure:.62,fog:{type:'linear',color:'#263650',start:18,end:72}}}},
       {at:850,patch:{hide:['storm-flash']}},
       {at:1200,patch:{animations:{singer:'no','friend-a':'no'}}},
-      {at:2450,patch:{hide:['singer','friend-a']}},
+      {at:2450,patch:{hide:['singer','friend-a','bellworker-a','bellworker-b']}},
       {at:2900,patch:{hide:['zip']}},
       {at:3250,patch:{hide:['warden']}}
-    ],finish:{hide:['storm-flash','zip','singer','friend-a','warden'],environment:{clearColor:'#03060d',ambient:'#111827',exposure:.35,fog:{type:'none'}}}};
+    ],finish:{hide:['storm-flash','zip','singer','friend-a','bellworker-a','bellworker-b','warden'],environment:{clearColor:'#03060d',ambient:'#111827',exposure:.35,fog:{type:'none'}}}};
   }else if(beat===2){
     p.camera='limbo';p.environment={clearColor:'#02040a',ambient:'#10131c',exposure:.35,fog:{type:'none'}};p.show.push('limbo-backdrop','zip-voice');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
   }else if(beat===3){
