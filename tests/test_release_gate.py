@@ -81,6 +81,19 @@ class ReleaseGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"review_incomplete"):
             gate(self.sha,"preview",self.status,self.review,self.root,explicit_preview_override=True)
 
+
+    def test_preview_promotion_workflow_is_release_gate_driven(self):
+        workflow=(Path(__file__).resolve().parents[1]/".github"/"workflows"/"promote-preview.yml").read_text(encoding="utf-8")
+        self.assertIn("workflow_dispatch:",workflow)
+        self.assertIn("evidence_run_id:",workflow)
+        self.assertIn("review_record:",workflow)
+        self.assertIn("build_review_index.py",workflow)
+        self.assertIn("check_release_gate.py",workflow)
+        self.assertIn('gh","api"',workflow)
+        self.assertIn("git merge-base --is-ancestor",workflow)
+        self.assertIn("deploy/render-supabase",workflow)
+        self.assertIn("Render auto-deploy is intentionally off",workflow)
+
     def test_phase_advance_requires_human_acceptance_and_flag(self):
         with self.assertRaisesRegex(ValueError,"disabled"):
             gate(self.sha,"phase-advance",self.status,None,self.root)
