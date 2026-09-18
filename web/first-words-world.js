@@ -95,9 +95,11 @@ e.push({id:'zip',asset:'robot',position:[0,0,-28],scale:[.9,.9,.9],animation:'id
 part('zip-voice','box','mint',[0,1,.5],[.36,.36,.18],{parent:'zip',enabled:false});
 
 /* Reusable dramatic interruption primitives. */
-e.push({id:'rift',position:[0,3,8],enabled:false});
-part('rift-ring','torus','blueGlow',[0,0,0],[4.6,.22,4.6],{parent:'rift',rotation:[90,0,0]});
-part('rift-core','sphere','glow',[0,0,0],[1.2,1.2,1.2],{parent:'rift',motion:{type:'pulse',amplitude:.18,speed:5}});
+e.push({id:'rift',position:[0,5.2,8],enabled:false});
+part('rift-core','box','glow',[0,0,0],[.42,5.8,.22],{parent:'rift',rotation:[0,0,-7],motion:{type:'pulse',amplitude:.12,speed:5}});
+part('rift-branch-a','box','blueGlow',[.75,1.45,0],[1.8,.24,.18],{parent:'rift',rotation:[0,0,32]});
+part('rift-branch-b','box','blueGlow',[-.72,-1.3,0],[1.7,.22,.18],{parent:'rift',rotation:[0,0,-36]});
+part('rift-branch-c','box','glow',[.42,-2.25,0],[1.05,.18,.15],{parent:'rift',rotation:[0,0,25]});
 part('storm-flash','sphere','glow',[0,12,8],[6,2,6],{enabled:false});
 
 /* The antagonist is deliberately unlike the protagonist silhouette. */
@@ -154,9 +156,9 @@ function opening(beat){
   }else if(beat===1){
     p.camera='rupture';p.show.push('bellweather-zone','zip-voice','rift','storm-flash');p.animations.zip='no';
     p.timeline={duration:3600,moves:[
-      {entity:'zip',from:[0,0,10],to:[0,4,8],at:1300,duration:1300},
-      {entity:'singer',from:[3.8,0,1],to:[1,6,-1],at:1200,duration:1400},
-      {entity:'friend-a',from:[-3,0,1],to:[-1,6,-1],at:1200,duration:1400}
+      {entity:'zip',from:[0,0,10],to:[0,4.7,8],at:1300,duration:1300},
+      {entity:'singer',from:[3.8,0,1],to:[1.1,5.4,7.5],at:1200,duration:1400},
+      {entity:'friend-a',from:[-3,0,1],to:[-1.1,4.6,7.2],at:1200,duration:1400}
     ],cues:[{at:400,patch:{show:['storm-flash']}},{at:900,patch:{hide:['storm-flash']}},{at:1200,patch:{animations:{singer:'no','friend-a':'no'}}}],finish:{hide:['storm-flash']}};
   }else if(beat===2){
     p.camera='limbo';p.show.push('limbo-backdrop','zip-voice');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
