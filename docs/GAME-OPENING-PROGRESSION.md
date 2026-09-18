@@ -165,3 +165,51 @@ This track is the proof case for `GAME-CREATION-PLATFORM.md`. Implement opening/
 Story nouns, exact cameras/dialogue and episode logic belong in authored package data. Do not create a universal engine speculatively; extract components that the proof game actually needs.
 
 Historical Echo Forge/Signal-specific progression remains historical reference only and must not override this active contract.
+
+
+## Visual world-setting contract — added after 18 September user review
+
+The opening must **show the world before it explains the plot**.
+
+"Bellweather happy/alive" does not mean a pretty background plus three posed
+characters and a caption. The pre-disruption sequence needs enough visible
+ordinary life that a cold viewer can infer the nature of the place:
+
+- purposeful robot activity in foreground/midground/background;
+- environmental systems in motion (lanterns, workshops, transit, signals,
+  machinery, community rituals, etc. as appropriate);
+- characters responding to each other and using the space;
+- landmarks whose function/identity can be inferred visually;
+- spatial continuity that makes the rupture feel like damage to a known place;
+- a clear normal rhythm that the disruption violently breaks.
+
+A caption-blind viewer should be able to say substantially more than "there are
+robots in a colorful place." If the intended setting is not apparent without
+prose, the prologue is not ready.
+
+Do not solve this by adding visual clutter. Use **selective purposeful motion**,
+staging and environmental behavior to communicate life.
+
+## Character animation-direction contract
+
+The default animation set is part of the game's creative identity.
+
+Do not automatically use the animation bundled with a character asset. For every
+protagonist/major character, explicitly select or author:
+- rest/idle behavior;
+- locomotion;
+- interaction/reaction;
+- cinematic acting.
+
+For each, define intended personality and motion adjectives (for example:
+calm, curious, precise, playful, nervous, heavy, springy, mechanical).
+
+For Zip's current direction, the baseline rest state should be quiet and
+physically plausible: minimal weight/servo/head motion, not continuous
+whole-body performance. An exaggerated retro-style "always moving so the
+character looks alive" idle should only be used if the entire game deliberately
+adopts that motion language.
+
+Review at least several full idle-loop repetitions. Reject loops that become
+uncanny, creepy, twitchy, distracting or inconsistent with the target
+kid/young-adult audience.
