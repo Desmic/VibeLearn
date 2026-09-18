@@ -85,6 +85,14 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertNotIn('vendor_three.py',vendor_block)
         self.assertIn('vendor_playcanvas.py',vendor_block)
 
+    def test_reusable_gate_frame_keeps_open_portal_visually_clear(self):
+        props = (ROOT / 'web' / 'rescue-world-props.js').read_text(encoding='utf-8')
+        gate = props.split('export function gate(', 1)[1].split('export function tower(', 1)[0]
+        self.assertIn("part('arch','box'", gate)
+        self.assertNotIn("part('arch','torus'", gate)
+        self.assertIn("id:id+'-door'", gate)
+        self.assertIn("parent:id+'-door'", gate)
+
     def test_game_asset_vendor_is_pinned_and_verified(self):
         vendor = (ROOT / 'tools' / 'vendor_game_assets.py').read_text(encoding='utf-8')
         manage = (ROOT / 'manage.py').read_text(encoding='utf-8')
