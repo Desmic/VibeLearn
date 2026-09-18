@@ -257,3 +257,51 @@ to the repository merely to satisfy review structure.
 
 A structurally valid v2 record still does **not** determine taste, product
 quality or user acceptance. It prevents known classes of unsupported claims.
+
+
+## Anti-overfitting verification
+
+System-level quality protections must be proven against more than the proof game.
+
+The foundation suite now carries a materially different synthetic **Harbor
+Relay** package. It exercises WorldSpec, major-event direction, semantic objects,
+ambient activity, tutorial flow, state-driven interaction teaching,
+experience-mode exclusivity and world-marker placement without using
+Bellweather/Zip/Warden content.
+
+A quality-system change that only works for the current story package is not
+considered generalized until this or another materially different fixture also
+passes.
+
+## Harness-attested critic context
+
+Reviewer self-attestation is necessary but no longer sufficient.
+
+For each critic execution the orchestrator records
+`vibelearn.critic-execution-receipt.v1`, binding:
+- candidate SHA;
+- assignment ID;
+- executor/session identity;
+- evidence actually supplied;
+- supplied context labels;
+- forbidden-context checks.
+
+The reviewer result must echo the receipt ID and may only cite evidence present
+in both the assignment and execution receipt.
+
+This makes context leakage observable and prevents stale/replayed critic results
+after the assignment/evidence capsule changes.
+
+## Critic verdicts are release authority
+
+Validated critic files are not merely evidence references.
+
+For normal preview promotion:
+- every required post-CI critic pass must exist;
+- every pass must have verdict `pass`;
+- any `needs_revision` verdict blocks promotion;
+- missing/unresolved passes keep normal promotion blocked.
+
+Explicit user preview override is deliberately narrower: it may allow
+missing/unresolved review for an otherwise safe candidate, but never a
+`needs_revision` critic or explicit blocker.
