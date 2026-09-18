@@ -36,3 +36,9 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
   #markers>.tutorial-target-marker:not([hidden]){animation:vl-world-target 1.35s ease-in-out infinite}
 }
 @keyframes vl-world-target{50%{box-shadow:0 0 0 10px #f0c87312,0 8px 28px #0008}}
+
+#markers>.tutorial-target-marker.edge-cued::after{
+  display:inline-block;margin-left:6px;font-size:12px;line-height:1
+}
+#markers>.tutorial-target-marker.edge-cued[data-edge='top']::after{content:'↑'}
+#markers>.tutorial-target-marker.edge-cued[data-edge='bottom']::after{content:'↓'}
