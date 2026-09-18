@@ -4,12 +4,31 @@ export function shouldOpenGame({missions=[],attempt=null}={}){
   return !missions.some(m=>m.status==='cleared') && !attempt;
 }
 
+const DIRECTION_KINDS=new Set(['establishing','major-event','transition','antagonist-action','handoff']);
+const DIRECTION_CHANNELS=new Set(['world','character','camera','lighting','vfx','audio','narration','interaction']);
+
 export function validateOpeningSpec(spec){
   if(!spec?.id||!spec?.title||!Array.isArray(spec.scenes)||!spec.scenes.length||spec.scenes.length>16)throw Error('Invalid opening package');
+  if(spec.directionVersion!==undefined&&spec.directionVersion!=='1')throw Error('Unsupported opening direction contract');
   for(const scene of spec.scenes){
     if(typeof scene.title!=='string'||!Number.isInteger(scene.beat))throw Error('Invalid opening scene');
     if(scene.action&&(!scene.action.target||!scene.action.label))throw Error('Invalid opening action');
     for(const marker of scene.markers||[])if(marker.offset&&(!Array.isArray(marker.offset)||marker.offset.length!==2||!marker.offset.every(Number.isFinite)))throw Error('Invalid marker offset');
+    if(spec.directionVersion==='1'){
+      const d=scene.direction;
+      if(!d||!DIRECTION_KINDS.has(d.kind)||!Array.isArray(d.channels)||!d.channels.length||d.channels.some(ch=>!DIRECTION_CHANNELS.has(ch)))throw Error('Invalid opening scene direction');
+      if(typeof d.worldAfter!=='string'||!d.worldAfter.trim())throw Error('Opening direction needs worldAfter');
+      if(d.kind==='major-event'||d.kind==='antagonist-action'){
+        if(!d.cause||!['visible','unknown','ambiguous'].includes(d.cause.mode))throw Error('Major opening event needs causal attribution');
+      }
+      if(d.kind==='major-event'){
+        if(new Set(d.channels).size<4)throw Error('Major opening event needs at least four coordinated channels');
+        if(!d.channels.includes('world')||!d.channels.includes('character'))throw Error('Major opening event needs world and character response');
+        if(!d.channels.some(ch=>['lighting','vfx','audio'].includes(ch)))throw Error('Major opening event needs an atmosphere/effect channel');
+      }
+      if(d.kind==='antagonist-action'&&d.cause.mode==='visible'&&!d.cause.entity)throw Error('Visible antagonist action needs cause.entity');
+      if(d.kind==='handoff'&&!d.channels.includes('interaction'))throw Error('Handoff direction needs interaction channel');
+    }
   }
   return spec;
 }
