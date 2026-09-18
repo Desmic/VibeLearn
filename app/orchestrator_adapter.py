@@ -133,13 +133,44 @@ class VibeLearnAdapter:
         )
         raise ContractError(code, "unsupported capabilities: " + ", ".join(missing))
 
+    @staticmethod
+    def _intent_digest(request: Mapping[str, Any]) -> str:
+        # request_id identifies a transport attempt, while idempotency_key
+        # identifies the intended external effect. A safe retry may use a new
+        # request_id but must not change the intended payload.
+        payload = copy.deepcopy(dict(request))
+        payload.pop("request_id", None)
+        payload.pop("idempotency_key", None)
+        return hashlib.sha256(_key(payload).encode()).hexdigest()
+
     def _remember_idempotency(self, request: Mapping[str, Any]) -> None:
         key = request["idempotency_key"]
-        digest = hashlib.sha256(_key(request).encode()).hexdigest()
+        digest = self._intent_digest(request)
         previous = self._seen_idempotency.get(key)
         if previous is not None and previous != digest:
-            raise ContractError("IDEMPOTENCY_CONFLICT", "same key used for different payload")
+            raise ContractError("IDEMPOTENCY_CONFLICT", "same key used for different intended payload")
         self._seen_idempotency[key] = digest
+
+    def _lookup_existing(self, request_id: str, idempotency_key: str, operation: str):
+        found = self.transport.lookup_operation(
+            request_id=request_id, idempotency_key=idempotency_key
+        )
+        if found is None:
+            return None
+        return self._validate_reconciled(found, idempotency_key, operation)
+
+    @staticmethod
+    def _validate_reconciled(
+        found: Mapping[str, Any], idempotency_key: str, operation: str
+    ) -> dict[str, Any]:
+        receipt = _receipt(found)
+        # A retry may use a new request_id. The original authoritative receipt
+        # is still the same operation when the idempotency key matches.
+        if receipt["idempotency_key"] != idempotency_key:
+            raise ContractError("INTERNAL_ERROR", "reconciled receipt idempotency mismatch")
+        if receipt["effect_status"] == "effect_unknown":
+            raise ContractError("EFFECT_UNKNOWN", f"{operation} remains unknown; do not retry")
+        return receipt
 
     def start_run(self, request: Mapping[str, Any]) -> dict[str, Any]:
         value = validate_start_request(request)
@@ -150,6 +181,11 @@ class VibeLearnAdapter:
         ))
         self.require_capabilities(required)
         self._remember_idempotency(value)
+        existing = self._lookup_existing(
+            value["request_id"], value["idempotency_key"], "start_run"
+        )
+        if existing is not None:
+            return existing
         try:
             return _receipt(self.transport.start_run(copy.deepcopy(value)))
         except EffectUnknown:
@@ -172,6 +208,9 @@ class VibeLearnAdapter:
         if run_ref in (None, "", {}):
             raise ContractError("INVALID_REFERENCE", "run_ref is required")
         self._remember_idempotency(request)
+        existing = self._lookup_existing(request_id, idempotency_key, "cancel_run")
+        if existing is not None:
+            return existing
         try:
             return _receipt(self.transport.cancel_run(copy.deepcopy(request)))
         except EffectUnknown:
@@ -183,12 +222,7 @@ class VibeLearnAdapter:
         )
         if found is None:
             raise ContractError("EFFECT_UNKNOWN", f"{operation} remains unknown; do not retry")
-        receipt = _receipt(found)
-        if receipt["request_id"] != request_id or receipt["idempotency_key"] != idempotency_key:
-            raise ContractError("INTERNAL_ERROR", "reconciled receipt identity mismatch")
-        if receipt["effect_status"] == "effect_unknown":
-            raise ContractError("EFFECT_UNKNOWN", f"{operation} remains unknown; do not retry")
-        return receipt
+        return self._validate_reconciled(found, idempotency_key, operation)
 
     def get_run(self, run_ref: Any, original_run_request: Mapping[str, Any]) -> dict[str, Any]:
         if run_ref in (None, "", {}):
