@@ -9,7 +9,9 @@ HEX40 = re.compile(r"^[0-9a-f]{40}$")
 def modality_for(path: Path):
     name = path.name.lower()
     suffix = path.suffix.lower()
-    if name.startswith("cold-observer-") and suffix == ".json":
+    if name.startswith("cold-observer-") and name.endswith("-packet.json"):
+        return "review_assignment"
+    if name.startswith("cold-observer-") and name.endswith("-report.json"):
         return "cold_observer_report"
     if name.endswith("trace.zip"):
         return "interactive_trace"
