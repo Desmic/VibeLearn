@@ -185,11 +185,10 @@ function opening(replay=false){
   mute.setAttribute('aria-pressed',String(audio.preferences.muted));
   mute.onclick=()=>{audio.setPreference('muted',!audio.preferences.muted);mute.textContent=audio.preferences.muted?'Sound off':'Sound on';mute.setAttribute('aria-pressed',String(audio.preferences.muted));syncAudio();};instance.element.querySelector('.rgi-utilities').append(mute);
   const observer=new MutationObserver(()=>{
-    const step=Number(instance.element.dataset.step);
-    audio.setPhase(step===0?'home':step<=4?'danger':'repair');
+    const step=Number(instance.element.dataset.step),scene=chapter.openingSpec.scenes[step]||{};
+    audio.setPhase(scene.audioPhase||'home');
     audio.setPaused(instance.element.classList.contains('rgi-paused'));
-    if(step===1)audio.cue('capture',`opening-${sequence}-rupture`);
-    if(step===4)audio.cue('wrong',`opening-${sequence}-speech-theft`);
+    if(scene.audioCue)audio.cue(scene.audioCue,`opening-${sequence}-${step}-${scene.audioCue}`);
   });observer.observe(instance.element,{attributes:true,attributeFilter:['data-step','class']});
 }
 $('#replay').onclick=()=>{$('#menu').close();opening(true);};
