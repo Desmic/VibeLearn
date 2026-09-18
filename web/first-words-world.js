@@ -165,7 +165,13 @@ function opening(beat){
       {entity:'zip',from:[0,0,10],to:[0,4.7,8],at:1300,duration:1300},
       {entity:'singer',from:[3.8,0,1],to:[1.1,5.4,7.5],at:1200,duration:1400},
       {entity:'friend-a',from:[-3,0,1],to:[-1.1,4.6,7.2],at:1200,duration:1400}
-    ],cues:[{at:400,patch:{show:['storm-flash']}},{at:900,patch:{hide:['storm-flash']}},{at:1200,patch:{animations:{singer:'no','friend-a':'no'}}}],finish:{hide:['storm-flash']}};
+    ],cues:[
+      {at:400,patch:{show:['storm-flash']}},
+      {at:900,patch:{hide:['storm-flash']}},
+      {at:1200,patch:{animations:{singer:'no','friend-a':'no'}}},
+      {at:2400,patch:{hide:['singer','friend-a']}},
+      {at:2850,patch:{hide:['zip']}}
+    ],finish:{hide:['storm-flash','zip','singer','friend-a']}};
   }else if(beat===2){
     p.camera='limbo';p.show.push('limbo-backdrop','zip-voice');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
   }else if(beat===3){
