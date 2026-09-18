@@ -5,51 +5,6 @@ const radians=n=>n*Math.PI/180;
 const formTarget=target=>target?.closest?.('button,input,select,textarea,a,summary,[contenteditable]');
 const typingTarget=target=>target?.closest?.('input,select,textarea,[contenteditable]');
 
-// Device-local tutorial familiarity, never learner assessment or game progress.
-export function createTutorialFlow(spec){
-  if(!spec?.id||!spec?.version||!Array.isArray(spec.steps)||!spec.steps.length)throw new Error('Invalid tutorial flow');
-  const ids=new Set();
-  for(const step of spec.steps){
-    if(!step?.id||ids.has(step.id)||!step.observe||!step.focus||!step.skill)throw new Error('Invalid tutorial step');
-    ids.add(step.id);
-  }
-  let key=null,index=spec.steps.length;
-  const save=()=>{try{localStorage.setItem(key,index>=spec.steps.length?'done':spec.steps[index].id);}catch(_){}};
-  return{
-    spec,
-    bind(id,enabled){
-      if(!enabled){key=null;index=spec.steps.length;return;}
-      const next=`vibelearn.tutorial.${spec.id}.${spec.version}:${id}`;if(key===next)return;
-      key=next;let stored;try{stored=localStorage.getItem(key);}catch(_){}
-      index=stored==='done'?spec.steps.length:Math.max(0,spec.steps.findIndex(step=>step.id===stored));
-      if(index<0)index=0;
-    },
-    get step(){return index>=spec.steps.length?'done':spec.steps[index].id;},
-    get current(){return index>=spec.steps.length?null:spec.steps[index];},
-    get handoff(){return spec.handoff||null;},
-    observe(kind){
-      const current=this.current;if(!current||kind!==current.observe)return false;
-      index+=1;save();return true;
-    },
-    skip(){
-      if(spec.skipAllowed===false)return false;
-      index=spec.steps.length;if(key)save();return true;
-    }
-  };
-}
-
-export function createControlPractice(){
-  return createTutorialFlow({
-    id:'core-controls',version:'2',skipAllowed:true,
-    handoff:{from:'opening',to:'tutorial',playerRole:'direct protagonist',goal:'Take control and learn the three controls needed before the first repair.'},
-    steps:[
-      {id:'move',skill:'move protagonist',observe:'move',focus:'move',success:'protagonist position changed'},
-      {id:'look',skill:'look/orbit camera',observe:'look',focus:'look',success:'camera yaw or distance changed'},
-      {id:'menu',skill:'open game menu',observe:'menu',focus:'menu',success:'game menu opened'}
-    ]
-  });
-}
-
 export function validatePlayerProfile(profile,ids){
   const fail=message=>{throw new Error(`WorldSpec player: ${message}`);};
   const vector=(v,n)=>Array.isArray(v)&&v.length===n&&v.every(Number.isFinite);
