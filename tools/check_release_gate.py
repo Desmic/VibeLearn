@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 
 from tools.check_critic_review import evaluate
+from tools.ingest_critic_results import PASS_ORDER
 
 HEX40=re.compile(r"^[0-9a-f]{40}$")
 
@@ -17,8 +18,29 @@ def load_json(path:Path):
         raise ValueError(f"{path} must contain an object")
     return value
 
+def read_validated_critic_results(root:Path|None,candidate:str):
+    if root is None:
+        return {}
+    root=root.resolve()
+    if not root.is_dir():
+        raise ValueError("validated critic-result root must be a directory")
+    results={}
+    for path in sorted(root.rglob("*.json")):
+        value=load_json(path)
+        if value.get("schema")!="vibelearn.validated-critic-result.v1":
+            continue
+        if value.get("candidate_sha")!=candidate:
+            raise ValueError(f"validated critic result belongs to another candidate: {path}")
+        review_pass=value.get("pass")
+        if review_pass not in PASS_ORDER:
+            raise ValueError(f"validated critic result has unknown pass: {review_pass}")
+        if review_pass in results:
+            raise ValueError(f"duplicate validated critic result for pass: {review_pass}")
+        results[review_pass]=value
+    return results
+
 def gate(candidate:str,mode:str,status_record:dict,review_record:dict|None,evidence_root:Path,
-         explicit_preview_override:bool=False):
+         explicit_preview_override:bool=False,validated_critic_results:dict|None=None):
     def require(ok,message):
         if not ok: raise ValueError(message)
 
@@ -48,11 +70,22 @@ def gate(candidate:str,mode:str,status_record:dict,review_record:dict|None,evide
     # Preview mode.
     require(review_record is not None,"preview requires an internal review record")
     result=evaluate(review_record,candidate,evidence_root)
+    critic_results=validated_critic_results or {}
+    critic_verdicts={name:value.get("verdict") for name,value in critic_results.items()}
+    failed_critics=sorted(name for name,verdict in critic_verdicts.items() if verdict=="needs_revision")
+    require(not failed_critics,
+            "preview cannot bypass needs_revision critic verdicts: "+", ".join(failed_critics))
     required_schema=policy.get("preview_requires_review_schema",2)
     require(result.get("schema_version")==required_schema,
             f"preview requires critic schema v{required_schema}")
 
     if result["status"]=="ready_for_user_review":
+        missing_critics=sorted(set(PASS_ORDER)-set(critic_results))
+        require(not missing_critics,
+                "ready preview requires all validated critic passes: "+", ".join(missing_critics))
+        nonpassing=sorted(name for name in PASS_ORDER if critic_verdicts.get(name)!="pass")
+        require(not nonpassing,
+                "ready preview requires pass verdict from every critic: "+", ".join(nonpassing))
         return {
             "status":"allowed",
             "mode":"preview",
@@ -70,12 +103,16 @@ def gate(candidate:str,mode:str,status_record:dict,review_record:dict|None,evide
                 "manual preview override requires technical pass")
         require(not review_record.get("blockers"),
                 "manual preview override cannot bypass explicit blockers")
+        unresolved=sorted(name for name,verdict in critic_verdicts.items() if verdict=="unresolved")
+        missing=sorted(set(PASS_ORDER)-set(critic_results))
         return {
             "status":"allowed",
             "mode":"preview",
             "candidate_sha":candidate,
             "review_status":result["status"],
             "authority":"explicit_user_preview_override",
+            "unresolved_critics":unresolved,
+            "missing_critics":missing,
         }
 
     raise ValueError(f"preview blocked: internal review status is {result['status']}")
@@ -87,14 +124,17 @@ def main():
     parser.add_argument("--quality-status",type=Path,default=Path("docs/quality-status.json"))
     parser.add_argument("--review-record",type=Path)
     parser.add_argument("--evidence-root",type=Path,default=Path("."))
+    parser.add_argument("--critic-results-root",type=Path)
     parser.add_argument("--explicit-user-preview-override",action="store_true")
     args=parser.parse_args()
     try:
         status_record=load_json(args.quality_status)
         review_record=load_json(args.review_record) if args.review_record else None
+        critic_results=read_validated_critic_results(args.critic_results_root,args.candidate)
         result=gate(
             args.candidate,args.mode,status_record,review_record,args.evidence_root,
-            explicit_preview_override=args.explicit_user_preview_override
+            explicit_preview_override=args.explicit_user_preview_override,
+            validated_critic_results=critic_results
         )
     except ValueError as exc:
         print(json.dumps({"status":"blocked","error":str(exc)}))
