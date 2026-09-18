@@ -1,61 +1,54 @@
-# Current game critic — candidate rejected; quality system under repair
+# Current game critic — schema-v2 review pending
 
-**18 September 2026.** Deployed runtime
-`ad14c5aced6cf053c7617dfb03245506e1e9dad5` is **rejected by the current
-user**. The user ended further review; no additional acceptance testing should be
-requested for this candidate.
+**18 September 2026.** The deployed runtime
+`ad14c5aced6cf053c7617dfb03245506e1e9dad5` remains rejected by the user.
+Do not request more review of that build.
 
-## Why the internal process failed
+The active `main` line is a **system-repair candidate**, not a product-ready
+candidate. Previous 9/10 records are historical evidence of an insufficient
+review process and must not be inherited.
 
-The previous internal process produced false 9/10 claims because it allowed
-reviewers with design knowledge to reconstruct intent from partial evidence.
+## What the repaired system now proves structurally
 
-It did not adequately prove:
-- cold-start visual comprehension of world/setting;
-- cinematic magnitude and atmosphere in motion;
-- who caused major events;
-- semantic readability of important objects;
-- animation style/audience fit;
-- physical collision/navigation integrity;
-- single-mode transition clarity;
-- tutorial comprehension from a fresh-player perspective.
+Runtime/schema/browser evidence now covers:
+- world-owned collision and adversarial traversal;
+- explicit controlled-character idle/move profiles;
+- mutually exclusive opening/tutorial/mission surfaces;
+- reusable tutorial-flow progression and highlighted control/world targets;
+- major-event cause/effect metadata and atmosphere channels;
+- semantic capability objects and removal/socket staging;
+- motion-video capture in CI;
+- exact-candidate cold-observer evidence packets;
+- review schema v2 with claim-specific evidence modalities.
 
-The critic also relied too heavily on screenshots/source. Those are insufficient
-for motion, audio, atmosphere, collision, handoff and tutorial-feel claims.
+These are implementation/verification achievements, not creative scores.
 
-## New quality-system direction
+## Current review status
 
-Use `EXPERIENCE-QUALITY-SYSTEM.md`.
+Use `EXPERIENCE-QUALITY-SYSTEM.md` and critic-record schema v2.
 
-Review order is now:
-1. cold observer without design treatment;
-2. cinematic causality/event-direction critic;
-3. motion/audience critic;
-4. physicality/traversal critic;
-5. transition/handoff critic;
-6. fresh-player tutorial critic;
-7. design-intent comparison;
-8. learning/transfer;
-9. technical/accessibility.
+A new internal-ready recommendation requires all of the following on one exact
+runtime SHA:
+1. context-restricted cold-observer report;
+2. cinematic causality/event-direction review from motion evidence;
+3. character-motion/audience review from motion evidence;
+4. physicality/traversal review from interactive evidence;
+5. opening/tutorial/mission handoff and tutorial review from interactive evidence;
+6. actual audio listening for atmosphere/music claims;
+7. design-intent comparison after the cold pass;
+8. learning/transfer review from authoritative replay;
+9. technical/accessibility pass.
 
-Structural failures should be prevented by specs/runtime where possible rather
-than delegated to prompts:
-- world-owned colliders;
-- explicit player motion profiles;
-- major-event contracts;
-- semantic story-object roles;
-- experience-mode exclusivity;
-- tutorial-step specs.
+The current assistant already knows the intended story, so it cannot honestly
+self-produce the required cold-observer evidence for the same candidate.
+Likewise, no 9+ audio-atmosphere claim is valid without listening.
 
-## Current development status
+Therefore current product status is **review_incomplete / system repair in
+progress**. No numeric readiness score is active.
 
-System repair is in progress on `main`. The current game is the proof case, but
-new rules must generalize to future generated games rather than encode
-Bellweather-specific checks.
+## Release boundary
 
-No current numeric readiness score is valid. Historical scores remain evidence
-of what the old rubric measured, not product quality.
-
-Do not start Level 2 or present another candidate until the revised system is
-exercised end-to-end and produces stronger evidence than the process that passed
-`ad14c5a`.
+Do not start Level 2 and do not move the system-repair candidate to Render for
+user review merely because CI is green. A later Phase 1 candidate first needs a
+complete v2 evidence packet with no blocker. The current user remains the sole
+final acceptance authority.
