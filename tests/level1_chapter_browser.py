@@ -54,6 +54,9 @@ def generate(page):
 
 
 def complete_tutorial(page):
+    if page.get_by_role('button',name='Skip control practice',exact=True).is_visible():
+        page.get_by_role('button',name='Skip control practice',exact=True).click()
+        expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 1/4')
     expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible()
     world_action(page,'Connect the loose power lead')
     expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 2/4')
