@@ -555,6 +555,8 @@ class PlayCanvasWorld {
   stats(){
     const rect=this.canvas.getBoundingClientRect();
     const fog=this.spec.environment?.fog||{type:'none'};
+    const playerEntityId=this.spec.player?.entity;
+    const playerAnim=this.assetInstances.get(playerEntityId)?.instance?.anim;
     return{
       available:this.available,engine:'playcanvas',engineVersion:PLAYCANVAS_ENGINE_VERSION,
       backendVersion:PLAYCANVAS_BACKEND_VERSION,worldId:this.spec.id,worldVersion:this.spec.version,
@@ -567,6 +569,11 @@ class PlayCanvasWorld {
       assetBounds:Object.fromEntries([...this.assetInstances].map(([id,record])=>[id,record.bounds])),
       assetErrors:[...this.assetErrors],
       player:this.controls?.stats()||null,
+      playerAnimation:playerEntityId?{
+        alias:this.activeAnimations.get(playerEntityId)||null,
+        speed:playerAnim?.speed??null,
+        playing:playerAnim?.playing??null
+      }:null,
       deviceType:this.app.graphicsDevice?.deviceType||'unknown',canvasCount:this.host.querySelectorAll('canvas').length,
       canvasCssWidth:Math.round(rect.width),canvasCssHeight:Math.round(rect.height),
       bufferWidth:this.app.graphicsDevice?.width||0,bufferHeight:this.app.graphicsDevice?.height||0
