@@ -101,9 +101,17 @@ jobs:
             --candidate "${{ github.event.pull_request.head.sha || github.sha }}" \
             --technical-result "${{ needs.tests.result }}" \
             --output "/tmp/vibelearn-review-index/review-evidence-index-${{ github.event.pull_request.head.sha || github.sha }}.json"
-      - name: Upload exact-candidate review index
+      - name: Build context-separated critic assignments
+        run: |
+          mkdir -p /tmp/vibelearn-review-index/critic-assignments
+          python tools/build_critic_assignments.py \
+            --index "/tmp/vibelearn-review-index/review-evidence-index-${{ github.event.pull_request.head.sha || github.sha }}.json" \
+            --output-dir /tmp/vibelearn-review-index/critic-assignments
+      - name: Upload exact-candidate review index and critic assignments
         uses: actions/upload-artifact@v4
         with:
           name: review-evidence-index-${{ github.event.pull_request.head.sha || github.sha }}
-          path: /tmp/vibelearn-review-index/*.json
+          path: |
+            /tmp/vibelearn-review-index/*.json
+            /tmp/vibelearn-review-index/critic-assignments/*.json
           retention-days: 7
