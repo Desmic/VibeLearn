@@ -112,7 +112,7 @@ jobs:
             --output-dir /tmp/vibelearn-review-index/critic-assignments
       - name: Materialize sealed capsules for ready critic passes
         run: |
-          python tools/materialize_ready_critic_capsules.py \
+          python -m tools.materialize_ready_critic_capsules \
             --assignments-dir /tmp/vibelearn-review-index/critic-assignments \
             --evidence-root /tmp/vibelearn-review-evidence \
             --output-root /tmp/vibelearn-review-index/critic-capsules
