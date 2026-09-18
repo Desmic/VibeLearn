@@ -16,6 +16,7 @@ def main():
                 page=ctx.new_page();page.goto(url+'/first-words')
                 page.get_by_role('button',name='Skip opening',exact=True).click()
                 expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE')
+                page.screenshot(path=str(ROOT/f'artifacts/control-practice-move-{width}.png'))
                 before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
                 expect(page.locator('#output')).to_be_hidden()
                 if width<500:
@@ -24,11 +25,14 @@ def main():
                 else:
                     page.keyboard.down('KeyD');page.wait_for_timeout(180);page.keyboard.up('KeyD')
                 expect(page.locator('#stage-name')).to_have_text('TUTORIAL · LOOK')
+                page.screenshot(path=str(ROOT/f'artifacts/control-practice-look-{width}.png'))
                 page.reload()
                 expect(page.locator('#stage-name')).to_have_text('TUTORIAL · LOOK')
                 page.get_by_role('button',name='Zoom camera in',exact=True).click()
                 expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MENU')
+                page.screenshot(path=str(ROOT/f'artifacts/control-practice-menu-prompt-{width}.png'))
                 page.get_by_role('button',name='Open game menu',exact=True).click()
+                page.screenshot(path=str(ROOT/f'artifacts/control-practice-menu-open-{width}.png'))
                 expect(page.locator('#menu')).to_be_visible()
                 page.get_by_role('button',name='Close game menu',exact=True).click()
                 expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 1/3')
