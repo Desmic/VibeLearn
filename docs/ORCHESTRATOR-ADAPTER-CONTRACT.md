@@ -495,6 +495,7 @@ review_result:
   review_ref:
   requirement_id: optional
   profile_ref:
+  candidate_ref: <exact candidate reviewed>
   reviewer_activity_refs: []
 
   status: passed | failed | unresolved | blocked
@@ -620,6 +621,7 @@ run:
   goal_ref:
   base_revision:
   candidate_refs: []
+  active_candidate_ref: optional
 
   worker_activity_refs: []
   review_results: []
@@ -637,6 +639,18 @@ run:
   updated_at:
 ```
 
+### Candidate selection is explicit
+
+If exactly one candidate exists, VibeLearn may use it directly. If multiple
+candidates exist, Terminal PM Agent must provide an exact `active_candidate_ref`
+for the candidate it is returning for downstream evaluation. VibeLearn must not
+infer the active candidate from list order, timestamps or worker narrative.
+
+Every required review result that may authorize downstream evaluation must bind
+to that exact candidate. Duplicate results for the same required
+`requirement_id` are ambiguous and block evaluation until reconciled; they are
+not resolved by "last result wins."
+
 ### Important semantic distinction
 
 `state: completed` means Terminal PM Agent has completed its orchestration responsibility for this run.
@@ -649,6 +663,9 @@ It does **not** mean:
 - learning outcome proven.
 
 VibeLearn performs its own product evaluation after receiving the candidate/evidence.
+A completed run is eligible for that evaluation only when its orchestration
+disposition actually exposes a candidate, the candidate identity is unambiguous,
+and every required blocking review is exact-candidate-bound.
 
 ---
 
