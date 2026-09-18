@@ -231,3 +231,66 @@ The critic must state separately:
 2. what the scene communicates over time through motion and environmental life.
 
 Passing one does not compensate for failing the other.
+
+## 18 September correction — causality, physicality and handoff evidence
+
+The final `ad14c5a` user review exposed additional false positives.
+
+### Major-event causality
+
+For every major story event, critics must observe the event in motion and record:
+- perceived cause/source;
+- anticipation/setup;
+- character reaction;
+- environment reaction;
+- camera/focus;
+- VFX/lighting/atmosphere change;
+- SFX/music/narration contribution;
+- persistent consequence.
+
+If intended causal attribution is known (for example an antagonist caused the
+event), compare that intent with what a cold viewer actually infers. Do not infer
+the cause from the storyboard.
+
+**Blocker:** narrative magnitude is high but rendered magnitude is low, or the
+intended cause is not perceptible and ambiguity was not intentional.
+
+### Semantic-object readability
+
+Important story/mechanic objects must be reviewed by appearance/behavior before
+their semantic IDs are revealed. A generic primitive does not automatically
+communicate "voice", "memory", "key", "power core", etc.
+
+**Blocker:** a major object only makes sense after reading its label/source ID.
+
+### Physicality
+
+Critics must actively attempt to walk through/into major props, walls, doors and
+interactables. Camera collision is tested separately.
+
+**Blocker:** visible solid geometry can be penetrated in ordinary play unless
+intentionally non-solid and visually communicated as such.
+
+### Experience-mode and handoff integrity
+
+At any transition, only one experience mode may communicate goals/actions:
+opening, handoff, tutorial, mission, result, etc.
+
+The reviewer must answer:
+- who/what do I control now?
+- what changed?
+- what is the current goal?
+- what can I do?
+- what is the recommended next action?
+- what visible feedback proves success?
+
+**Blocker:** two modes present conflicting prompts, or the player must infer the
+interaction grammar at a handoff.
+
+### Tutorial evidence
+
+Tutorial quality requires an actual fresh-path observation. For each step record:
+target/control -> player action -> success detector -> feedback -> next state.
+
+Presence of tutorial copy or an automated state transition is not a tutorial
+quality pass.
