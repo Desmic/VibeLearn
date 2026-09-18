@@ -76,3 +76,34 @@ jobs:
             artifacts/*trace.zip
             web/vendor/*
           retention-days: 7
+
+  review-index:
+    if: always()
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download exact-candidate evidence artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: game-review-evidence-${{ github.event.pull_request.head.sha || github.sha }}-*
+          path: /tmp/vibelearn-review-evidence
+      - name: Build exact-candidate review index
+        run: |
+          mkdir -p /tmp/vibelearn-review-index
+          python tools/build_review_index.py \
+            --root /tmp/vibelearn-review-evidence \
+            --candidate "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --technical-result "${{ needs.tests.result }}" \
+            --output "/tmp/vibelearn-review-index/review-evidence-index-${{ github.event.pull_request.head.sha || github.sha }}.json"
+      - name: Upload exact-candidate review index
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-evidence-index-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/vibelearn-review-index/*.json
+          retention-days: 7
