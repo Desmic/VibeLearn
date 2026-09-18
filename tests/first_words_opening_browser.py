@@ -15,7 +15,7 @@ def main():
     with tempfile.TemporaryDirectory() as temp,sync_playwright() as p:
         proc,url=start_server(Path(temp)/'opening.db');browser=p.chromium.launch()
         try:
-            context=browser.new_context(viewport={'width':390,'height':844},has_touch=True)
+            context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,record_video_dir=str(out/'video'),record_video_size={'width':390,'height':844})
             page=context.new_page();page.set_default_timeout(15000);page.on('pageerror',lambda e:errors.append(str(e)))
             log('Prologue: navigate');page.goto(url+'/first-words')
             expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000)
@@ -133,6 +133,10 @@ def main():
                     b=q.locator(selector).bounding_box();assert b and b['x']>=0 and b['y']>=0 and b['x']+b['width']<=width+1 and b['y']+b['height']<=height+1,(selector,b)
                 q.screenshot(path=str(out/f'prologue-reduced-{width}.png'),timeout=15000)
                 q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.get_by_role('button',name='Skip control practice',exact=True)).to_be_visible(timeout=15000);ctx.close()
+            video=page.video
+            context.close()
+            video.save_as(str(out/'prologue-motion-390.webm'))
+            assert (out/'prologue-motion-390.webm').exists()
             assert not errors,errors
             checks.append('Fresh 360/430/desktop reduced-motion preserves the same six story states and can skip safely into the separate tutorial without a 2D fallback.')
             (out/'first-words-opening-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'scope':'Prologue only. Audio lifecycle and phase changes are automated after an explicit player gesture; subjective mix/appeal, physical-phone feel and human acceptance remain unassessed.'},indent=2))
