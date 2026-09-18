@@ -77,30 +77,39 @@ def complete_tutorial(page):
 
 
 def main():
-    out=ROOT/'artifacts';out.mkdir(exist_ok=True);errors=[];checks=[]
+    out=ROOT/'artifacts';out.mkdir(exist_ok=True);errors=[];checks=[];trace=[];replay=[]
     with tempfile.TemporaryDirectory() as temp,sync_playwright() as p:
         proc,url=start_server(Path(temp)/'level1-chapter.db');browser=p.chromium.launch()
         try:
             page=browser.new_page(viewport={'width':390,'height':844},has_touch=True)
             page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url+'/first-words')
             skip_opening_to_tutorial(page)
+            trace.append({'phase':'opening-to-tutorial','mode':page.locator('#adventure').get_attribute('data-experience-mode'),'passed':True})
             complete_tutorial(page)
+            tutorial_state=page.evaluate('FirstWordsReview.state')
+            replay.append({'phase':'tutorial-success','state':tutorial_state})
             page.screenshot(path=str(out/'tutorial-first-success-390.png'))
             checks.append('Separate tutorial gives one obvious action at a time, hides optional inspection, restores speech and opens the first door before Level 1 begins.')
 
             action(page,'Begin Level 1 →')
             expect(page.locator('#stage-name')).to_have_text('LEVEL 1 · FIRST MISSION')
+            trace.append({'phase':'tutorial-to-level1','mode':page.locator('#adventure').get_attribute('data-experience-mode'),'passed':True})
             expect(page.get_by_role('button',name='Inspect the speech engine')).to_be_visible()
             choose(page,'Check route signs','Old sign · “Take the Moon gate.”')
             expect(page.locator('#context')).to_contain_text('Old route')
+            replay.append({'phase':'stale-context-selected','state':page.evaluate('FirstWordsReview.state')})
             choose(page,'Predict the gate','Moon')
             expect(page.get_by_role('button',name='Predict the next input',exact=True)).to_have_count(0)
+            replay.append({'phase':'moon-prediction','state':page.evaluate('FirstWordsReview.state')})
             generate(page);expect(page.locator('#stage-name')).to_have_text('LEVEL 1 · RECOVER');expect(page.locator('#goal')).to_have_text('Wrong route.')
+            replay.append({'phase':'stale-context-failure','state':page.evaluate('FirstWordsReview.state')})
             page.screenshot(path=str(out/'level1-transfer-wrong-390.png'))
             choose(page,'Check route signs','Current notice · “Moon route closed. The tower bell answers the five-point lantern mark.”')
             expect(page.locator('#context')).to_contain_text('five-point lantern mark')
+            replay.append({'phase':'current-context-selected','state':page.evaluate('FirstWordsReview.state')})
             generate(page);until(page,'()=>!FirstWordsReview.runtime.world.animating')
             expect(page.locator('#stage-name')).to_have_text('LEVEL 1 · COMPLETE')
+            replay.append({'phase':'changed-context-success','state':page.evaluate('FirstWordsReview.state')})
             expect(page.locator('#goal')).to_have_text('Route found.')
             action(page,'Finish Level 1 →','Level saved · practice recorded');expect(page.locator('#goal')).to_have_text('The deeper gate is open.',timeout=15000)
             expect(page.locator('#ending')).not_to_be_visible();page.screenshot(path=str(out/'level1-ending-world-390.png'))
@@ -121,6 +130,8 @@ def main():
                 q.screenshot(path=str(out/f'level1-complete-{width}-reduced.png'));ctx.close()
             checks.append('360/430 phone and 1280 desktop reduced-motion players follow the same separate tutorial and solve Level 1 without requiring camera skill.')
             assert not errors,errors
+            (out/'first-words-chapter-interaction-trace.json').write_text(json.dumps({'schema':'vibelearn.interactive-trace.v1','suite':'first-words-chapter','observations':trace},indent=2))
+            (out/'level1-authoritative-replay.json').write_text(json.dumps({'schema':'vibelearn.authoritative-replay.v1','suite':'first-words-chapter','observations':replay,'claim':'stale context can fail; changed current context can recover without human prediction controlling model output'},indent=2))
             (out/'level1-chapter-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'limits':'Automated Chromium emulation is not a novice human or physical-phone acceptance study.'},indent=2))
         finally:
             browser.close();stop_server(proc)
