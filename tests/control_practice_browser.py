@@ -17,6 +17,7 @@ def main():
                 page.get_by_role('button',name='Skip opening',exact=True).click()
                 expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE')
                 expect(page.locator('#world')).to_have_attribute('data-tutorial-focus','move')
+                expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_hidden()
                 page.screenshot(path=str(ROOT/f'artifacts/control-practice-move-{width}.png'))
                 before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
                 expect(page.locator('#output')).to_be_hidden()
@@ -40,6 +41,7 @@ def main():
                 expect(page.locator('#menu')).to_be_visible()
                 page.get_by_role('button',name='Close game menu',exact=True).click()
                 expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 1/4')
+                expect(page.locator('#world')).to_have_attribute('data-tutorial-world-target','loose-plug')
                 assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
                 expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible()
                 page.screenshot(path=str(ROOT/f'artifacts/control-practice-handoff-{width}.png'))
