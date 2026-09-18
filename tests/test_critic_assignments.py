@@ -42,10 +42,21 @@ class CriticAssignmentTests(unittest.TestCase):
         assignments=build_assignments(self.index())
         cold=assignments["cold_observer"]
         self.assertEqual(cold["status"],"ready")
+        self.assertRegex(cold["assignment_id"],r"^sha256:[0-9a-f]{64}$")
+        self.assertEqual(cold["required_evidence_groups"],[["caption_blind_motion","interactive_trace"]])
         self.assertIn("story treatment",cold["forbidden_context"])
         modalities={item["modality"] for item in cold["allowed_evidence"]}
         self.assertIn("motion_video",modalities)
         self.assertNotIn("review_assignment",modalities)
+
+    def test_assignment_id_changes_when_allowed_evidence_changes(self):
+        first=build_assignments(self.index())["cold_observer"]["assignment_id"]
+        changed=self.index()
+        changed["receipts"][0]["evidence"].append({
+            "ref":"extra.png","modality":"screenshot","candidate_sha":"a"*40
+        })
+        second=build_assignments(changed)["cold_observer"]["assignment_id"]
+        self.assertNotEqual(first,second)
 
     def test_downstream_causality_waits_for_actual_cold_report(self):
         assignments=build_assignments(self.index())
