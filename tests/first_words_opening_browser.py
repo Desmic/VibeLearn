@@ -16,7 +16,7 @@ def main():
     with tempfile.TemporaryDirectory() as temp,sync_playwright() as p:
         proc,url=start_server(Path(temp)/'opening.db');browser=p.chromium.launch()
         try:
-            context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,record_video_dir=str(out/'video'),record_video_size={'width':390,'height':844})
+            context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,record_video_dir=str(Path(temp)/'video'),record_video_size={'width':390,'height':844})
             page=context.new_page();page.set_default_timeout(15000);page.on('pageerror',lambda e:errors.append(str(e)))
             log('Prologue: navigate');page.goto(url+'/first-words')
             expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000)
@@ -197,7 +197,7 @@ def main():
             # Separate cold-observer motion evidence: same rendered sequence, but
             # explanatory scene captions are visually suppressed so reviewers
             # must first infer world/causality from staging, animation and effects.
-            blind_ctx=browser.new_context(viewport={'width':390,'height':844},has_touch=True,record_video_dir=str(out/'blind-video'),record_video_size={'width':390,'height':844})
+            blind_ctx=browser.new_context(viewport={'width':390,'height':844},has_touch=True,record_video_dir=str(Path(temp)/'blind-video'),record_video_size={'width':390,'height':844})
             blind=blind_ctx.new_page();blind.set_default_timeout(15000);blind.goto(url+'/first-words')
             expect(blind.locator('#rgi-intro')).to_be_visible(timeout=20000)
             blind.evaluate("""()=>{
