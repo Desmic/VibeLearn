@@ -16,6 +16,7 @@ class CriticAssignmentTests(unittest.TestCase):
                     "receipt_ref":"opening/evidence-receipt-first-words-opening.json",
                     "evidence":[
                         {"ref":"prologue-motion.webm","modality":"motion_video","candidate_sha":sha},
+                        {"ref":"prologue-caption-blind.webm","modality":"caption_blind_motion","candidate_sha":sha},
                         {"ref":"frame.png","modality":"screenshot","candidate_sha":sha},
                         {"ref":"cold-observer-opening-packet.json","modality":"review_assignment","candidate_sha":sha},
                     ]
