@@ -54,7 +54,7 @@ def main():
             page=browser.new_page(viewport={'width':390,'height':844},has_touch=True)
             page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url+'/first-words')
             page.get_by_role('button',name='Skip opening',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
-            expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 1/3')
+            expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE')
             complete_tutorial(page)
             page.screenshot(path=str(out/'tutorial-first-success-390.png'))
             checks.append('Separate tutorial gives one obvious action at a time, hides optional inspection, restores speech and opens the first door before Level 1 begins.')
