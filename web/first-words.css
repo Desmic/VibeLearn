@@ -42,3 +42,5 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 }
 #markers>.tutorial-target-marker.edge-cued[data-edge='top']::after{content:'↑'}
 #markers>.tutorial-target-marker.edge-cued[data-edge='bottom']::after{content:'↓'}
+#markers>.tutorial-target-marker.edge-cued[data-edge='left']::after{content:'←'}
+#markers>.tutorial-target-marker.edge-cued[data-edge='right']::after{content:'→'}
