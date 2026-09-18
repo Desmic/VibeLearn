@@ -1,5 +1,87 @@
 # Current state — LLM learning-game proof track
 
+## Verified main + adapter-fixture checkpoint — 19 September 2026
+
+Current `main`:
+`2bc82b5f2e9d12377fcceca9fc01362f873dab60`.
+
+Exact GitHub Actions run `35390536902` passed:
+- foundation, including the full unit suite;
+- first-words-opening;
+- first-words-tutorial;
+- first-words-controls;
+- first-words-chapter;
+- first-words-readability;
+- first-words-lifecycle;
+- exact-candidate review-index aggregation and sealed-capsule materialization.
+
+The exact review index reports these critic passes as ready for independent
+execution:
+- cold_observer;
+- motion_audience;
+- physicality;
+- handoff_tutorial;
+- audio_atmosphere;
+- learning_transfer.
+
+These remain blocked by design until a validated cold-observer result exists:
+- cinematic_causality;
+- intent_comparison.
+
+This is still **not** a creative-readiness, user-acceptance or deployment claim.
+The current chat/reviewer context already knows the intended story and prior user
+feedback, so it must not counterfeit the cold-observer result.
+
+### Terminal PM adapter Phase 0
+
+A fixture-only semantic adapter boundary now exists at
+`app/orchestrator_adapter.py`, with 13 focused tests in
+`tests/test_orchestrator_adapter.py`.
+
+The slice proves only the v0.1 contract targets already authorized in
+`docs/ORCHESTRATOR-ADAPTER-CONTRACT.md`:
+- capability negotiation;
+- `start_run` request serialization without encoding worker topology;
+- idempotency/effect-unknown reconciliation before any retry;
+- conservative unknown cancel semantics;
+- `get_run` snapshot consumption;
+- multiple opaque required review profiles with no score averaging;
+- exact candidate/review/evidence linkage;
+- worker replacement lineage preservation;
+- VibeLearn product acceptance remaining independent from Terminal PM
+  orchestration completion;
+- product outcome -> incident -> child repair-run linkage;
+- hard budget requirements blocking when enforcement is unavailable;
+- additive extension data not gaining control authority.
+
+This is **not a live Terminal PM integration**. No HTTP/MCP/IPC transport,
+scheduler coupling, provider/model assumption, live run or production authority
+was added. Continue using contract fixtures until Terminal PM Agent's own
+execution policy authorizes a suitable live integration.
+
+### Deployment/database boundary
+
+Render remains intentionally pinned to rejected
+`ad14c5aced6cf053c7617dfb03245506e1e9dad5`; do not ask the user to review it
+again. No Render promotion and no Supabase schema/data mutation occurred in this
+checkpoint. Do not start Level 2.
+
+### Next active work
+
+1. Preserve the exact candidate/evidence identity produced by CI.
+2. Run genuinely context-separated critic execution outside this contaminated
+   chat context; ingest results only with matching harness receipts.
+3. Unlock cinematic-causality and intent-comparison only after the cold-observer
+   dependency validates.
+4. Repair any `needs_revision` blocker and re-run the exact-candidate gates.
+5. In parallel, only continue Terminal PM integration at the fixture/contract
+   boundary until its own live-execution policy changes.
+6. Promote a replacement preview only after all required product critics pass;
+   Level 2 still requires explicit human acceptance.
+
+---
+
+
 ## Exact system-repair checkpoint — 18 September 2026
 
 Current verified development candidate:
