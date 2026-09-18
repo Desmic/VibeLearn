@@ -157,3 +157,77 @@ Historical numeric records stay attached to their historical candidates. Never c
 ## Scope
 
 Private proof-track refinement only. No external tester panel, paid resource, broad rollout, live generation model or multi-agent orchestration platform is authorized by this policy. The user may request a preview at any time; preview is not acceptance.
+
+
+## 18 September correction — visual world-building and motion direction
+
+The `ad14c5a` review exposed another false positive. The internal story/art
+critic could reconstruct the intended causal chain from ordered screenshots,
+yet the user still found that the opening did not make sense as a world/setting.
+It also passed Zip's stock/default idle loop without judging whether that motion
+belonged to the game's style or audience.
+
+This changes the critic contract.
+
+### Visual-first world comprehension is required
+
+Before reading captions, lore or the design doc, the critic must inspect the
+opening as moving visual media and answer:
+
+- What kind of place is this?
+- Who lives here?
+- What normal activities are happening?
+- Which characters have relationships with each other?
+- What landmarks/functions organize the space?
+- What changes when the inciting incident happens?
+- What has been lost after the transition?
+
+A list of correct storyboard beats is **not** enough. If a reviewer can only
+understand the world because they already know the intended story, the rendered
+story/creative-direction gate fails.
+
+Where practical, perform a **caption-blind pass** first: hide/ignore explanatory
+captions and judge what the visuals, environmental animation, character acting,
+camera and world-state changes communicate on their own. Text may clarify a
+visually established beat; it may not supply the missing setting.
+
+### Motion/animation direction is required
+
+Review characters and environments in motion, not only screenshots.
+
+For each recurring animation family—idle/rest, locomotion, interaction,
+reaction, cinematic acting—judge:
+
+- theme/genre fit;
+- character/personality fit;
+- physical plausibility within the chosen style;
+- repetition/frequency/amplitude;
+- whether the loop becomes distracting or uncanny;
+- target-audience emotional read, especially for kids/young adults;
+- consistency with the rest of the game's motion language.
+
+Stock/default animation is not neutral. A retro-game exaggerated idle, realistic
+breathing loop, anime anticipation pose and mechanical servo-rest all communicate
+different creative directions. Reused assets must be retargeted/reselected when
+their motion language conflicts with the current game.
+
+### New hard blockers
+
+Any of these blocks internal readiness:
+
+- setting/world cannot be identified from visuals/behavior without explanatory
+  text;
+- opening world feels like a static set rather than an inhabited place when the
+  story depends on caring about that place;
+- captions are doing primary world-building that animation/environment should do;
+- character animation belongs to a visibly different genre/style than the game;
+- an idle/rest loop reads as uncanny, creepy, hyperactive or distracting for the
+  target audience without deliberate narrative intent;
+- critic evidence consists mainly of still screenshots for an animation/motion
+  quality claim.
+
+The critic must state separately:
+1. what the composition communicates as a still;
+2. what the scene communicates over time through motion and environmental life.
+
+Passing one does not compensate for failing the other.
