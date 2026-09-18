@@ -21,7 +21,7 @@ class ReadyCriticCapsuleTests(unittest.TestCase):
                 ("opening/motion.webm","motion_video"),
                 ("opening/audio.webm","audio_capture"),
                 ("controls/trace.json","interactive_trace"),
-                ("foundation/replay.json","authoritative_replay"),
+                ("chapter/replay.json","authoritative_replay"),
                 ("foundation/source.tar","source_inspection"),
             ]
             for ref,modality in files:
@@ -52,8 +52,14 @@ class ReadyCriticCapsuleTests(unittest.TestCase):
                         "suite":"foundation",
                         "receipt_ref":"foundation/evidence-receipt.json",
                         "evidence":[
-                            {"ref":"replay.json","modality":"authoritative_replay","candidate_sha":sha},
                             {"ref":"source.tar","modality":"source_inspection","candidate_sha":sha},
+                        ],
+                    },
+                    {
+                        "suite":"first-words-chapter",
+                        "receipt_ref":"chapter/evidence-receipt.json",
+                        "evidence":[
+                            {"ref":"replay.json","modality":"authoritative_replay","candidate_sha":sha},
                         ],
                     },
                 ],
