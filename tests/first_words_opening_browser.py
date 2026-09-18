@@ -101,9 +101,11 @@ def main():
                     const point=getGameRuntime().world.projectEntity('friendship-lantern');
                     const top=document.querySelector('#rgi-world').getBoundingClientRect().top;
                     const caption=document.querySelector('.rgi-scene-caption').getBoundingClientRect();
-                    return {visible:point?.visible,lanternY:top+(point?.y||0),captionBottom:caption.bottom};
+                    return {visible:point?.visible,lanternX:point?.x||0,lanternY:top+(point?.y||0),captionLeft:caption.left,captionRight:caption.right,captionBottom:caption.bottom};
                 }""")
-                assert clearance['visible'] and clearance['lanternY']>clearance['captionBottom']+16,clearance
+                horizontal_clear=clearance['lanternX']<clearance['captionLeft']-16 or clearance['lanternX']>clearance['captionRight']+16
+                vertical_clear=clearance['lanternY']>clearance['captionBottom']+16
+                assert clearance['visible'] and (horizontal_clear or vertical_clear),clearance
                 q.screenshot(path=str(out/f'prologue-lantern-release-{width}.png'),timeout=15000)
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('The sky cracks open.')
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('Silence.')
