@@ -40,11 +40,11 @@ for(const [i,color] of ['gold','teal','coral'].entries())part('friendship-light-
 
 /* The playable prison is materially larger and calmer than the rejected square. */
 part('prison-floor','box','prison',[0,-.1,0],[18,.2,16],{parent:'prison-zone'});
-part('prison-back-left','box','dark',[-6.1,4,-8.3],[5.8,8,.35],{parent:'prison-zone'});
-part('prison-back-right','box','dark',[6.1,4,-8.3],[5.8,8,.35],{parent:'prison-zone'});
-part('prison-back-top','box','dark',[0,7.5,-8.3],[6.4,1,.35],{parent:'prison-zone'});
-part('prison-left','box','dark',[-9,4,-.2],[.35,8,16],{parent:'prison-zone'});
-part('prison-right','box','dark',[9,4,-.2],[.35,8,16],{parent:'prison-zone'});
+part('prison-back-left','box','dark',[-6.1,4,-8.3],[5.8,8,.35],{parent:'prison-zone',collider:{shape:'box'}});
+part('prison-back-right','box','dark',[6.1,4,-8.3],[5.8,8,.35],{parent:'prison-zone',collider:{shape:'box'}});
+part('prison-back-top','box','dark',[0,7.5,-8.3],[6.4,1,.35],{parent:'prison-zone',collider:{shape:'box'}});
+part('prison-left','box','dark',[-9,4,-.2],[.35,8,16],{parent:'prison-zone',collider:{shape:'box'}});
+part('prison-right','box','dark',[9,4,-.2],[.35,8,16],{parent:'prison-zone',collider:{shape:'box'}});
 part('prison-ceiling-beam-a','box','indigo',[-4.6,7.4,-1],[.3,.3,14],{parent:'prison-zone'});
 part('prison-ceiling-beam-b','box','indigo',[4.6,7.4,-1],[.3,.3,14],{parent:'prison-zone'});
 part('prison-light-a','sphere','blueGlow',[-6.8,5.3,-6.8],[.35,.35,.35],{parent:'prison-zone'});
@@ -63,7 +63,7 @@ for(let i=0;i<5;i++){
 part('tutorial-route-open','box','mint',[0,.02,-12.4],[4,.04,10],{parent:'prison-zone',enabled:false});
 
 function routeBoard(id,position,rotation,material,accent){
-  e.push({id,parent:'prison-zone',position,rotation:[0,rotation,0]});
+  e.push({id,parent:'prison-zone',position,rotation:[0,rotation,0],collider:{shape:'box',halfExtents:[1.2,1.15,.28],offset:[0,1.15,0]}});
   part(id+'-post','cylinder','wood',[0,.72,0],[.11,1.45,.11],{parent:id});
   part(id+'-board','box',material,[0,1.55,0],[2.3,1.15,.14],{parent:id});
   part(id+'-cap','box',accent,[0,2.08,.08],[2.35,.13,.12],{parent:id});
@@ -81,7 +81,7 @@ part('loose-plug','sphere','mint',[-1,.3,3],[.4,.4,.4],{parent:'prison-zone'});
 part('wrong-ring','torus','rose',[0,.12,-10.8],[2.1,.1,2.1],{parent:'prison-zone',enabled:false});
 part('reunion-ring','torus','mint',[0,.13,2.4],[2.2,.07,2.2],{parent:'prison-zone',enabled:false});
 part('route-glow','box','mint',[0,.08,-15.2],[1.8,.04,5.2],{parent:'prison-zone',enabled:false});
-part('friend-cube','box','rose',[7,.7,4.8],[.8,.8,.8],{parent:'prison-zone'});
+part('friend-cube','box','rose',[7,.7,4.8],[.8,.8,.8],{parent:'prison-zone',collider:{shape:'box'}});
 part('friend-heart-a','sphere','paper',[-.12,.08,.42],[.22,.22,.05],{parent:'friend-cube'});
 part('friend-heart-b','sphere','paper',[.12,.08,.42],[.22,.22,.05],{parent:'friend-cube'});
 part('friend-heart-tip','cone','paper',[0,-.08,.42],[.4,.32,.05],{rotation:[180,0,0],parent:'friend-cube'});
