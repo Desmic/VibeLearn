@@ -81,10 +81,10 @@ function render(){
     }
     lastCue=key;
   }
-  const repair=repairStep(s);
+  const repair=repairStep(s),controlStep=practice.step;
   const [stage,goal,detail]=tutorialStage(s,complete);text('#stage-name',stage);text('#goal',goal);text('#detail',detail);
-  host.dataset.tutorialWorldTarget=repair?.focus==='world'?(repair.target||''):'';
-  host.dataset.tutorialInteractionStep=repair?.id||'';
+  host.dataset.tutorialWorldTarget=controlStep==='done'&&repair?.focus==='world'?(repair.target||''):'';
+  host.dataset.tutorialInteractionStep=controlStep==='done'?(repair?.id||''):'';
   $('#output').replaceChildren();for(let i=0;i<4;i++){const span=document.createElement('span');span.textContent=s.output[i]||'·';if(!s.output[i])span.className='empty';$('#output').append(span);}
   text('#context',s.context.join(' ')||'Waiting for power.');
   text('#engine-label',complete?'YOUR SPEECH ENGINE · ROUTE OPEN':s.round===1?'YOUR SPEECH ENGINE · LEVEL 1':'YOUR SPEECH ENGINE · TUTORIAL');
@@ -108,7 +108,7 @@ function render(){
   else scene='You have left the first chamber. Three route boards stand in the wider corridor, and a glowing five-point mark identifies one deeper gate.';
   host.setAttribute('aria-label',`Unknown prison beyond Bellweather. ${scene}`);
   text('#scene-description',`${scene} ${goal} ${detail} Input: ${s.context.join(' ')}. Output: ${s.output.join(' ')||'none'}.`);
-  const step=practice.step;$('#controls').classList.toggle('practicing',step!=='done');
+  const step=controlStep;$('#controls').classList.toggle('practicing',step!=='done');
   if(step!=='done'){
     const current=practice.current;
     const title=current?.title||current?.skill||'Try the highlighted control.';
