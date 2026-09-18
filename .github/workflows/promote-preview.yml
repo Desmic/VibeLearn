@@ -78,23 +78,22 @@ jobs:
             --technical-result success \
             --output /tmp/vibelearn-review-evidence-index.json
 
-      - name: Materialize validated post-CI critic evidence
+      - name: Revalidate and materialize post-CI critic results
         env:
           CANDIDATE_SHA: ${{ inputs.candidate_sha }}
         run: |
-          SUPPLEMENTAL="docs/reviews/evidence/$CANDIDATE_SHA"
-          mkdir -p /tmp/vibelearn-review-evidence/post-ci
-          if [ -d "$SUPPLEMENTAL" ]; then
-            cp -R "$SUPPLEMENTAL"/. /tmp/vibelearn-review-evidence/post-ci/
-            python tools/build_review_workspace.py \
-              --index /tmp/vibelearn-review-evidence-index.json \
-              --supplemental-root "$SUPPLEMENTAL" \
-              --output /tmp/vibelearn-review-evidence/review-workspace.json
+          RESULTS="docs/reviews/results/$CANDIDATE_SHA"
+          EMPTY="/tmp/vibelearn-empty-critic-results"
+          mkdir -p "$EMPTY" /tmp/vibelearn-review-evidence
+          if [ -d "$RESULTS" ]; then
+            RESULTS_ROOT="$RESULTS"
           else
-            python tools/build_review_workspace.py \
-              --index /tmp/vibelearn-review-evidence-index.json \
-              --output /tmp/vibelearn-review-evidence/review-workspace.json
+            RESULTS_ROOT="$EMPTY"
           fi
+          python tools/ingest_critic_results.py \
+            --index /tmp/vibelearn-review-evidence-index.json \
+            --results-root "$RESULTS_ROOT" \
+            --output-root /tmp/vibelearn-review-evidence
 
       - name: Validate preview release gate
         env:
