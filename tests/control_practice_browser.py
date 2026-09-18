@@ -41,6 +41,7 @@ def main():
                 page.get_by_role('button',name='Close game menu',exact=True).click()
                 expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 1/3')
                 assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
+                expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible()
                 page.screenshot(path=str(ROOT/f'artifacts/control-practice-handoff-{width}.png'))
                 page.get_by_role('button',name='Connect the power lead',exact=True).click()
                 expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 2/3')
