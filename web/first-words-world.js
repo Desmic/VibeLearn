@@ -143,7 +143,9 @@ export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'
   player:characterControlProfile({entity:'zip',spawn:[0,0,-28],speed:3.2,surfaces:[
     {bounds:[-8.2,8.2,-38,-24],height:0},
     {bounds:[-8.2,8.2,-52,-38],height:0,whenVisible:'tutorial-route-open'}
-  ],camera:{yaw:0,pitch:25,distance:8,portraitDistance:14,minDistance:4,maxDistance:18,targetHeight:1.2}})
+  ],animations:{idle:'idle',move:'run'},animationSpeeds:{idle:0,move:1},
+    body:{radius:.34,height:1.55},
+    camera:{yaw:0,pitch:25,distance:8,portraitDistance:14,minDistance:4,maxDistance:18,targetHeight:1.2}})
 };
 
 const missionBase=()=>({
