@@ -1,13 +1,13 @@
-# VibeLearn automated development system — Terminal PM Agent integration
+# VibeLearn automated development system — Terminal PM Agent orchestration contract
 
-**Status:** approved target architecture / implementation handoff  
+**Status:** approved target architecture / decoupled integration handoff  
 **Date:** 18 September 2026  
 **VibeLearn baseline inspected:** `main` at `a150db3f31fb565ddc28cacf9f41e99ec3eebb16`; current reviewed runtime candidate remains `ad14c5aced6cf053c7617dfb03245506e1e9dad5` per `docs/STATE.md`.  
-**Terminal PM Agent donor baseline:** inspected through the connected private GitHub source. Because VibeLearn is public, the donor repository identifier and exact private revision must remain out of this public document and be captured in the private integration run/evidence record.
+**Terminal PM Agent status checked:** the connected private repository is still under active development. Its current checkpoint keeps Gate 1.5 open, `live_run_authorized=false`, and the ER-1 exhaustive post-integration review in progress. Treat it as an evolving external orchestrator, not a stable library to absorb.
 
-This document defines how to merge the useful orchestration/runtime ideas from the Terminal PM Agent into VibeLearn so VibeLearn can become a highly automated product-development and game-generation system.
+This document defines how VibeLearn should integrate with the evolving Terminal PM Agent through a narrow, versioned orchestration contract so VibeLearn can become a highly automated product-development and game-generation system without copying a moving internal architecture.
 
-It supersedes older statements that the orchestration system is only indefinite future work. It does **not** authorize a broad rewrite, a role explosion, autonomous production deployment, or abandoning the current VibeLearn product-quality gate. The integration must start as a thin vertical slice and grow only when a clear safety/correctness requirement or evidence from real runs justifies more machinery.
+It supersedes older statements that orchestration is only indefinite future work. It does **not** authorize a physical codebase merge, donor-module extraction, broad rewrite, role explosion, autonomous production deployment, or abandoning the current VibeLearn product-quality gate. The integration must start at the contract boundary and grow only when a clear safety/correctness requirement or evidence from real runs justifies more machinery.
 
 Read this with `AGENTS.md`, `CODEX.md`, `docs/STATE.md`, `docs/GAME-CREATION-PLATFORM.md`, `docs/CRITIC-POLICY.md`, `docs/ART-WORLD-DIRECTION-CRITIC.md` and the current user-review/evidence records.
 
@@ -27,6 +27,35 @@ Turn VibeLearn from a manually steered development workflow into an automated sy
 8. use expensive frontier intelligence only when cheap workers cannot resolve an important ambiguity.
 
 The system is not an agent hierarchy whose highest model declares truth. It is an **evidence-producing engineering system in which LLMs are search heuristics**.
+
+### 1.1 Current Terminal PM Agent status and architectural consequence
+
+The Terminal PM Agent is not a frozen dependency today. Its own current status explicitly says:
+
+- Gate 1.5 is open;
+- live runs are not authorized;
+- ER-1 exhaustive post-integration review is still in progress;
+- context/evidence/recovery/reconciliation boundaries are still active development;
+- production-readiness work is not complete.
+
+Therefore VibeLearn must **not fork or copy its orchestration internals now**.
+
+The near-term relationship is:
+
+```text
+VibeLearn                         Terminal PM Agent
+---------                         -----------------
+domain goal/spec        ----->    generic orchestration
+product constraints     adapter   workers/reviewers
+evaluation profiles     contract  sessions/tools
+build/outcome identity   <-----    evidence/run state
+human/model feedback              recovery/retries
+```
+
+VibeLearn should be able to survive substantial Terminal PM Agent refactors as long as the adapter contract remains compatible.
+
+This also creates a useful co-evolution loop: VibeLearn supplies real product-development and human-outcome failures; Terminal PM Agent can improve its generic supervision using those failures without VibeLearn inheriting every internal redesign.
+
 
 ---
 
@@ -60,62 +89,95 @@ Fan out only when risk or observed failure justifies it.
 
 ## 3. Core architecture
 
+The architectural boundary is between **VibeLearn domain/outcome ownership** and the **external orchestrator**.
+
 ```text
-                     VERSIONED GOAL / SPEC
-                              |
-                              v
-                       ORCHESTRATOR
-          state · context · budget · permissions · routing
-                              |
-                 +------------+------------+
-                 |                         |
-                 v                         v
-              WORKER                  REVIEWER
-          V4.1-class default      V4.1-class default
-                 |                         |
-                 +------------+------------+
-                              |
-                              v
-                    SANDBOXED TOOL PLANE
-         repo · shell · tests · browser · build · DB adapters
-                              |
-                              v
-                         ARTIFACT
-                              |
-                              v
-                  EVALUATION / REAL USE
-       CI · critic profiles · playtest · human · telemetry
-                              |
-                              v
-                           OUTCOME
-                              |
-                    bad / surprising?
-                              |
-                              v
-                          INCIDENT
-                              |
-                 diagnosis + experiments
-                              |
-              +---------------+---------------+
-              |                               |
-              v                               v
-        product change                  system change
-              |                    only if evidence supports it
-              +---------------+---------------+
-                              |
-                              v
-                         NEW RUN
+                  VIBELEARN
+     goal/spec · product constraints · evaluators
+             build identity · outcome feedback
+                         |
+                         v
+              ORCHESTRATOR ADAPTER
+       small · versioned · replaceable · typed
+                         |
+                         v
+              TERMINAL PM AGENT
+              (evolves separately)
+       state · context · routing · budgets
+       workers · reviewers · retries · recovery
+                         |
+                         v
+                SANDBOXED TOOL PLANE
+       repo · shell · tests · browser · build
+                         |
+                         v
+                 ARTIFACT + EVIDENCE
+                         |
+                         v
+              VIBELEARN EVALUATION
+       CI · critic profiles · playtest · human
+                         |
+                         v
+                      OUTCOME
+                         |
+                 bad / surprising?
+                         |
+                         v
+                     INCIDENT
+                         |
+             diagnosis + experiments
+                         |
+        product change / system hypothesis
+                         |
+                         v
+                     NEW RUN
 ```
 
-A single versioned run/evidence graph underlies development, review, outcome evaluation and incident learning. Do **not** build three independent “production”, “outcome” and “learning” architectures.
+VibeLearn owns the product-specific truth surface:
+
+- learning/game goals and constraints;
+- story/art/gameplay/learning evaluator contracts;
+- exact build/runtime identity;
+- learner/player outcome evidence;
+- human feedback and acceptance;
+- product incidents.
+
+Terminal PM Agent owns generic engineering orchestration:
+
+- worker/reviewer dispatch;
+- session/tool execution;
+- context/recovery/retry mechanics;
+- generic evidence/receipts;
+- provider/model routing;
+- generic run control.
+
+Do not duplicate Terminal PM Agent internals inside VibeLearn while they are still moving.
+
+A single versioned run/evidence lineage should connect both systems through references. VibeLearn does not need to store every internal orchestrator detail; it needs enough stable provenance to identify the exact external run, artifacts, evidence and outcome.
 
 ---
 
 ## 4. Intelligent roles
 
+### 4.0 Adapter contract
+
+Start with the smallest useful interface. Exact names may change, but the semantics should remain narrow:
+
+```text
+start_run(goal_ref, repo_ref, constraints, budget) -> run_id
+get_run(run_id) -> status + artifact/evidence refs
+submit_outcome(run_id, build_ref, observation) -> outcome_ref
+cancel_run(run_id) -> acknowledged/unknown/result
+```
+
+Add another operation only when a real workflow cannot be expressed safely with these primitives.
+
+The adapter must preserve unknown outcomes. A timeout or lost response is not permission to assume an action failed and dispatch it again.
+
+
 ### 4.1 Orchestrator
 
-The orchestrator is not another senior engineer that opines on domain correctness. It owns:
+The orchestrator is the external Terminal PM Agent (or a future compatible replacement), not a VibeLearn-internal subsystem. It is not another senior engineer that opines on domain correctness. It owns:
 
 - task/run state;
 - relevant context assembly;
@@ -778,153 +840,180 @@ If test X failed on commit A and passes on commit B, preserve both events.
 
 ---
 
-## 18. What to reuse from Terminal PM Agent
+## 18. Relationship to Terminal PM Agent while it is under development
 
-The donor repo contains many useful, already-tested ideas, but also substantial historical and verifier-specific complexity. **Do not copy the package wholesale.**
+The Terminal PM Agent is currently an **external evolving orchestrator and reference system**, not a donor package to extract from.
 
-### Reuse/adapt concepts and focused modules
+### What VibeLearn may rely on now
 
-Inspect and extract where useful:
-
-- command policy / capability gating;
-- terminal/background session management;
-- worktree isolation;
-- structured execution evidence;
-- session launch/action/exit receipts;
-- secret redaction/safety;
-- runtime/process identity;
-- unknown-outcome handling and recovery;
-- scenario/run metadata persistence;
-- provider/model adapter patterns;
-- bounded progress/retry concepts;
-- append-only telemetry/event ideas;
-- tool-call evidence and command hashing;
-- reconciliation before redispatch.
-
-Important donor lessons to preserve:
+Rely on architectural invariants and observable contract behavior, not module layout:
 
 - process existence is not proof of progress;
 - helper exit is not worker exit;
 - exit zero is not semantic success;
-- captured data is not proof of product improvement;
+- worker result is not completed user outcome;
+- captured evidence is not proof of product improvement;
 - unknown launch/action outcomes must be reconciled before retry;
 - controller/restart recovery must not duplicate work;
-- evidence must bind to exact candidate/runtime/context.
+- evidence must bind to the exact candidate/runtime/context;
+- generated execution requires bounded authority.
 
-### Do not port by default
+These are stable design lessons even if Terminal PM Agent refactors its internals.
 
-Do **not** transplant:
+### What VibeLearn must not do yet
 
-- the complete current Gate verifier/batch stack;
-- the donor repo's historical bug/review machinery;
-- every scenario-specific module;
-- Telegram/TUI/web surfaces VibeLearn does not need;
-- old PM memory schema as VibeLearn's canonical state;
-- unfinished spend ledger;
-- the donor repo's accumulated compatibility paths;
-- its current giant-module architecture/debt.
+Do **not**:
 
-Treat the donor as a **reference implementation and parts bin**.
+- copy Terminal PM Agent runtime/session/verifier modules into VibeLearn;
+- fork its persistence/recovery implementation;
+- mirror its current verifier batch architecture;
+- make VibeLearn depend on private internal module names;
+- treat its current head as a released SDK;
+- use its unfinished spend, provenance or Gate machinery as if generally solved;
+- block Terminal PM Agent refactoring because VibeLearn copied internal code.
 
-VibeLearn should own a smaller automation boundary shaped by VibeLearn's real workflow.
+### Co-evolution model
+
+VibeLearn should become a real product proving ground for the orchestrator:
+
+```text
+Terminal PM Agent
+       |
+       v
+VibeLearn development run
+       |
+       v
+real product outcome / human feedback
+       |
+       v
+incident + evidence
+       |
+       +----> VibeLearn product improvement
+       |
+       +----> Terminal PM Agent supervision improvement
+```
+
+A VibeLearn failure such as “tests passed but a first-time player still cannot understand the level” is valuable evidence about both the product and the supervisor/evaluator system.
+
+### Deeper-integration gate
+
+Do not require Terminal PM Agent to be “finished.” Instead, consider deeper code-level reuse only after the relevant boundary is demonstrably stable.
+
+Current indicative conditions are:
+
+- ER-1 exhaustive review is complete enough to close the boundaries VibeLearn would depend on;
+- Gate 1.5 or its successor demonstrates credible unattended/self-hosted supervision;
+- restart/recovery/evidence lineage works across the intended integration path;
+- unknown outcomes/retries are handled without duplicate effects;
+- there is no known near-term architectural rewrite of the specific boundary VibeLearn would embed.
+
+Re-evaluate these conditions against the Terminal PM Agent's current status at integration time. They are a decision gate, not a new subsystem.
 
 ---
 
 ## 19. Suggested VibeLearn code boundary
 
-Do not force this exact directory structure if the current code suggests a cleaner fit, but keep the conceptual boundary small.
+Keep the VibeLearn-side integration deliberately thin.
 
-A likely target is:
+A likely starting shape is:
 
 ```text
 automation/
-  orchestrator/
-  runtime/
-  evidence/
-  providers/
-  policies/
-  evaluators/
+  orchestrator_adapter.*
+  evaluation.*
+  outcome.*
+  incident.*
 ```
 
-Where:
+Responsibilities:
 
-- `orchestrator/` owns runs, routing, budgets, stopping/escalation;
-- `runtime/` owns worktrees/sandbox/session/tool execution;
-- `evidence/` owns run/evidence/finding/outcome/incident persistence;
-- `providers/` owns model/coding-agent adapters;
-- `policies/` owns tool permissions/release constraints;
-- `evaluators/` maps existing VibeLearn CI/critic/playtest contracts into reviewer/evaluation profiles.
+- `orchestrator_adapter` translates VibeLearn goals/constraints to the external orchestrator contract and maps run/artifact/evidence refs back;
+- `evaluation` maps existing VibeLearn CI/playtest/critic contracts to outcome evidence;
+- `outcome` links human/model/telemetry feedback to exact builds and runs;
+- `incident` records material escapes and their product/escape diagnosis.
 
-Do not create subpackages until code volume/responsibility actually requires them. A small first slice may live in fewer modules.
+Do **not** create VibeLearn copies of generic session management, provider routing, worktree lifecycle, retry/recovery or verifier scheduling unless real integration evidence proves the external contract cannot provide what VibeLearn requires.
+
+Even this directory split is optional. Start with fewer modules if the first slice remains clearer that way.
 
 ---
 
 ## 20. First vertical slice
 
-The first implementation must prove the architecture on **one real VibeLearn development task**, not build the universal automation platform.
+Because Terminal PM Agent currently disallows live runs, the first slice is **contract-first**, not a production orchestration run.
 
-Required flow:
+Prove locally that VibeLearn can express one real bounded development task through the adapter contract and can consume a representative external run result without knowing orchestrator internals.
+
+First slice:
+
+```text
+real VibeLearn task/spec
+  -> adapter request
+  -> fixture/stubbed orchestrator run state
+  -> artifact + evidence references
+  -> VibeLearn evaluation
+  -> accept/repair decision
+  -> outcome/incident linkage
+```
+
+The fixture should model at least:
+
+- successful completion;
+- reviewer-proven defect;
+- unresolved finding;
+- unknown action/session outcome;
+- resumed/reconciled outcome.
+
+Do not duplicate Terminal PM Agent logic to make the fixture realistic. The fixture validates the **boundary contract**.
+
+When Terminal PM Agent itself authorizes a suitable live/self-hosted run, replace the fixture with a real bounded VibeLearn task through the same adapter.
+
+The first live integration should still use the normal architecture:
 
 ```text
 bounded VibeLearn task
-  -> isolated worker execution
-  -> artifact/diff
+  -> Terminal PM Agent
+  -> economical worker
   -> independent reviewer
-       -> any criticism automatically attempts valid proof/reproduction
-  -> deterministic checks/evidence
-  -> accept or send back for repair
-  -> compact persisted run record
+       -> criticism implicitly attempts valid proof/reproduction
+  -> deterministic evidence
+  -> VibeLearn product evaluation
+  -> accept / repair
 ```
 
-Then prove one outcome-feedback path:
-
-```text
-accepted artifact/build
-  -> human or model outcome feedback says something is wrong
-  -> feedback links to exact build/run/session
-  -> incident record
-  -> cheap worker diagnosis + experiment
-  -> product fix
-  -> replay failed path
-```
-
-Do **not** require Astra for this slice. Astra integration should be exercised only when a real or deliberately constructed unresolved ambiguity justifies it.
+Do **not** require Astra. Astra is exercised only when a real unresolved ambiguity justifies it.
 
 ---
 
-## 21. Phased merge plan
+## 21. Phased integration plan
 
-### Phase 0 — baseline and extraction map
+### Phase 0 — define and freeze only the contract
 
-Before moving code:
+- record current VibeLearn build/test baseline;
+- inspect current Terminal PM Agent status and blockers;
+- define the minimal adapter request/result semantics;
+- define external run/artifact/evidence references;
+- define unknown-outcome behavior;
+- create contract fixtures;
+- do not move Terminal PM Agent code into VibeLearn.
 
-- freeze/record current VibeLearn test/build baseline;
-- record donor Terminal PM Agent source revision;
-- map donor modules/concepts to the minimal VibeLearn needs;
-- identify security boundaries and tools required by the first slice;
-- select one real bounded VibeLearn task;
-- do not disturb the current accepted/review candidate or Level 2 gate.
+**Exit:** VibeLearn can test the integration boundary without a live orchestrator.
 
-**Exit:** documented extraction map and baseline evidence. No speculative framework.
+### Phase 1 — first authorized external run
 
-### Phase 1 — worker/reviewer run loop
+Only when Terminal PM Agent's own current policy permits it:
 
-Implement only:
+- invoke one bounded real VibeLearn task through the adapter;
+- preserve exact external orchestrator revision/config in private run provenance;
+- consume artifact/evidence refs;
+- run VibeLearn's own product-specific evaluation;
+- verify retry/reconciliation behavior if an external outcome is unknown.
 
-- run ID/state;
-- bounded context packet;
-- worker invocation;
-- isolated execution/worktree;
-- reviewer invocation with implicit falsification/proof contract;
-- tool/test evidence capture;
-- accept/repair status;
-- compact provenance.
+**Exit:** one real VibeLearn task crosses the external boundary end-to-end without VibeLearn depending on Terminal PM Agent internals.
 
-**Exit:** one real VibeLearn task completes end-to-end and can be replayed/inspected from its run record.
+### Phase 2 — outcome and critic integration
 
-### Phase 2 — VibeLearn evaluation adapters
-
-Connect existing VibeLearn evidence rather than reinventing it:
+Connect existing VibeLearn evidence:
 
 - build/test suites;
 - browser/playtest artifacts;
@@ -932,9 +1021,9 @@ Connect existing VibeLearn evidence rather than reinventing it:
 - exact build/runtime identity;
 - user-review linkage.
 
-Add cheap computer-use evaluation only where the real rendered experience matters.
+Cheap computer-use evaluation is added only where the rendered experience matters.
 
-**Exit:** a candidate cannot be called accepted merely because code tests pass; outcome evidence is linked to the exact run/build.
+**Exit:** a candidate cannot be called accepted merely because engineering checks pass.
 
 ### Phase 3 — incident/escape loop
 
@@ -944,51 +1033,58 @@ Add:
 - diagnosis/escape summaries;
 - reproduction/replay;
 - product fix;
-- proposed system change as a versioned artifact;
-- replay of the original failure before system-change adoption.
+- optional orchestrator/system hypothesis;
+- replay of the original failure before a system-change proposal is adopted.
 
-**Exit:** demonstrate one deliberately seeded or real escaped failure whose product cause and pipeline escape cause can both be traced and repaired.
+**Exit:** one real or seeded escaped failure is traceable across VibeLearn and the external orchestrator boundary.
 
-### Phase 4 — scale only from evidence
+### Phase 4 — deeper coupling only if evidence justifies it
 
-Potential later additions:
+Possible later moves:
 
-- risk-based second reviewer;
+- richer adapter operations;
+- stronger bidirectional incident/evidence exchange;
+- risk-based second reviewers;
 - model diversity;
-- richer cost reservation/reconciliation;
-- historical failure corpus automation;
-- smarter context selection;
 - Astra evidence-packet escalation;
-- more autonomous release;
-- richer production telemetry.
+- automated failure-corpus replay;
+- selective shared libraries or module extraction **only after the relevant Terminal PM Agent boundary is stable and duplication is demonstrably cheaper than keeping it external**;
+- more autonomous release.
 
-Each addition needs either an obvious invariant or observed run evidence.
+Each addition needs an obvious invariant or observed run evidence.
 
 ---
 
 ## 22. First-slice acceptance criteria
 
-The first integrated automation slice is not accepted until all are true:
+The contract-first slice is accepted only when:
 
-1. a real VibeLearn task has a unique run identity;
-2. the worker runs with bounded context and permissions;
-3. generated code/tests execute in an isolated environment;
-4. reviewer starts independently from the worker's private reasoning;
-5. any substantive reviewer defect claim includes an attempted valid reproduction/proof;
-6. deterministic results are captured with exact candidate/environment provenance;
-7. reviewer/model agreement alone cannot override failing deterministic evidence;
-8. artifact acceptance points to the evidence that justified it;
-9. an outcome/feedback item can point back to the exact accepted run/build;
-10. an incident can be created without reconstructing history from chat transcripts;
-11. retry after an unknown tool/session outcome cannot silently duplicate work;
-12. no production secret is exposed directly to ordinary workers;
-13. no automated production deployment/policy rewrite occurs in this phase;
-14. model/tool budget limits exist;
-15. existing VibeLearn product tests/gates remain green or any baseline failure is explicitly preserved and attributed.
+1. a real VibeLearn task/spec can be serialized into the adapter request;
+2. VibeLearn does not import or depend on Terminal PM Agent internal modules;
+3. external `run_id`, artifact refs and evidence refs can be persisted and resolved;
+4. unknown external outcomes remain `unknown` until reconciled;
+5. a fixture can demonstrate worker success, reviewer-proven failure, unresolved review and recovered/resumed outcome;
+6. VibeLearn evaluation can accept/reject the returned artifact independently of the orchestrator's own success status;
+7. outcome/feedback can point to the exact VibeLearn build and external run;
+8. an incident can be created without reconstructing history from chat transcripts;
+9. credentials/secrets are not copied across the boundary as model-visible context;
+10. model/tool budgets are representable in the request/record even if the external orchestrator's richer spend ledger is still evolving;
+11. current VibeLearn product tests/gates remain unchanged or any baseline failure is explicitly preserved;
+12. no live Terminal PM Agent run is dispatched while its own current policy says live runs are unauthorized.
+
+The later **first live integration** additionally requires:
+
+- bounded worker permissions;
+- isolated generated execution;
+- independent reviewer context;
+- proof/reproduction for substantive reviewer defect claims;
+- exact candidate/environment provenance;
+- no duplicate retry after unknown effect;
+- no automated production deployment/policy rewrite.
 
 ---
 
-## 23. Six non-negotiable invariants
+## 23. Non-negotiable invariants
 
 1. **Everything important is versioned.**  
    Goal/spec, code, prompts/configs, model identity, harness/evaluator and build/runtime identity must be recoverable.
@@ -1002,6 +1098,8 @@ The first integrated automation slice is not accepted until all are true:
 5. **A system change caused by a failure must be replayed against that failure before adoption.**
 
 6. **No architectural complexity is added without a clear invariant or evidence from real runs that the simpler design is insufficient.**
+
+7. **VibeLearn must not depend on moving Terminal PM Agent internals when a stable adapter reference is sufficient.**
 
 ---
 
@@ -1050,17 +1148,17 @@ The long-term question is:
 An implementation agent receiving this document should:
 
 1. read `AGENTS.md`, `CODEX.md`, `docs/STATE.md` and this document;
-2. inspect the current VibeLearn repository rather than assuming this document's module suggestions already exist;
-3. inspect the connected private Terminal PM Agent donor repository at the privately recorded donor baseline, especially execution/session/evidence/recovery modules; do not copy the private repository URL, credentials or private-only evidence into this public repository;
-4. produce a **small extraction map** of donor capabilities to reuse/adapt versus leave behind;
-5. select the smallest real VibeLearn task that can prove the worker -> reviewer -> evidence loop;
-6. implement Phase 0/Phase 1 only;
-7. run existing VibeLearn build/tests and focused automation tests after each bounded change;
-8. preserve current Level 1/product review state; do not start Level 2 as a side effect of this architecture work;
-9. report observed deviations from this plan rather than hiding them behind abstractions;
-10. request/perform broader architecture only after the first real runs show where the simple design fails.
+2. inspect the current VibeLearn repository;
+3. inspect the current Terminal PM Agent status/checkpoint before relying on any capability;
+4. **do not copy or extract Terminal PM Agent modules** while its relevant architecture is still under active development;
+5. define the smallest adapter contract that VibeLearn actually needs;
+6. implement Phase 0 fixtures and contract tests only;
+7. preserve the current Level 1/product review state and do not start Level 2 as a side effect;
+8. when Terminal PM Agent later authorizes a suitable live run, exercise one bounded VibeLearn task through the same contract;
+9. feed real integration/product failures back as evidence instead of immediately adding new architecture;
+10. consider deeper code-level reuse only after the stability gate in section 18 is met for the boundary being reused.
 
-The first agent should **not** attempt to merge the entire Terminal PM Agent repository or implement every future role in `GAME-CREATION-PLATFORM.md`.
+The integration agent should optimize for **decoupling and replaceability**, not for making the two repositories look like one codebase.
 
 ---
 
@@ -1069,10 +1167,11 @@ The first agent should **not** attempt to merge the entire Terminal PM Agent rep
 The intended VibeLearn automation model is:
 
 ```text
-cheap worker searches for a solution
+VibeLearn defines product goal + outcome contract
+external Terminal PM Agent orchestrates cheap workers/reviewers
 cheap reviewer searches for a counterexample and proves its claims
 tools/runtime produce evidence
-product evaluators test the actual experience
+VibeLearn evaluators test the actual experience
 human/telemetry/model outcomes reveal escapes
 incidents trace both product cause and escape cause
 system changes are replayed before adoption
