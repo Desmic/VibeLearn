@@ -1,5 +1,24 @@
 # Bring Back the Words — story and progression treatment
 
+## 18 September: implemented prologue friendship/reveal slice
+
+Keep the direct-protagonist structure below. Lantern Night now starts with a
+round teal friend handing the golden protagonist a lantern with three colored
+lights. A tall coral friend watches. The player chooses **Send up our lantern**;
+it rises and the friends gather together: “Same time next year. All three of us.”
+This is an original shared ritual, applying the previously researched principle
+of establishing affection through behavior. It is not assessment evidence.
+
+The rupture separates these recognizable silhouettes. The protagonist keeps
+their chest module through limbo and the prison reveal; only the Warden removes
+it. The prison appears in four timed stages: floor, enclosing walls, huge locked
+exit, repair bench. Later mission signs/gates remain hidden during this sequence.
+Reduced motion presents the same final scene without requiring animated travel.
+The prologue ends at direct control; the tutorial and Level 1 remain separate.
+
+Current names remain provisional. This slice does not settle naming, prove
+emotional engagement with children, or supply a final user-acceptance verdict.
+
 ## 17 September 2026 user-directed rewrite — supersedes conflicting treatment below
 
 The current implemented opening was user-rejected. The next story pass must use a **directly controlled robot protagonist**, not a separate literal helper/player avatar. `Zip` is now a provisional working name rather than a fixed character decision.

@@ -1,7 +1,7 @@
 /* Bellweather / prison proof track: story, composition and semantic presentation. */
 import {characterControlProfile} from './game-character-spec.js';
 import {messageMachine,tokenTrack,smallTree,pavilion} from './workshop-props.js';
-import {lantern,gate,tower,planter} from './rescue-world-props.js';
+import {lantern,gate,tower,planter,companionRobot} from './rescue-world-props.js';
 import {makeWorldPackage} from './spec-game-world.js';
 
 const e=[];
@@ -33,12 +33,10 @@ for(let i=0;i<5;i++)addTo('bellweather-zone',lantern('sky-lantern-'+i,[-12+i*6,1
 
 /* Friends are intentionally separated in space and dressed differently so the
    protagonist does not read as duplicated. */
-e.push(
-  {id:'singer',parent:'bellweather-zone',asset:'robot',position:[5,0,2],scale:[.72,.72,.72],animation:'wave'},
-  {id:'friend-a',parent:'bellweather-zone',asset:'robot',position:[-5.5,0,3.5],scale:[.66,.66,.66],animation:'idle'}
-);
-part('friend-a-lantern','sphere','pinkGlow',[0,1.9,.15],[.35,.45,.35],{parent:'friend-a'});
-part('singer-voice','box','mint',[0,1,.5],[.36,.36,.18],{parent:'singer'});
+addTo('bellweather-zone',companionRobot('singer',[3.8,0,1],{color:'coral',height:2}));
+addTo('bellweather-zone',companionRobot('friend-a',[-3,0,1],{color:'teal',round:true,height:1.5}));
+e.push(...lantern('friendship-lantern',[-2.2,1.2,10.5],{scale:1.15,color:'glow'}));
+for(const [i,color] of ['gold','teal','coral'].entries())part('friendship-light-'+i,'sphere',color,[(i-1)*.19,0,.32],[.15,.19,.08],{parent:'friendship-lantern'});
 
 /* The playable prison is materially larger and calmer than the rejected square. */
 part('prison-floor','box','prison',[0,-.1,0],[18,.2,16],{parent:'prison-zone'});
@@ -74,10 +72,10 @@ function routeBoard(id,position,rotation,material,accent){
 routeBoard('notice-old',[-6.2,0,-11.5],20,'wood','gold');
 routeBoard('notice-parade',[6.2,0,-11.2],-20,'rose','pinkGlow');
 routeBoard('notice-today',[3.2,0,-16],-12,'teal','mint');
-addTo('prison-zone',messageMachine('socket',[0,0,3.2]));
-addTo('prison-zone',tokenTrack('words',[0,1.3,6.2],4));
-part('cable','box','gold',[-1.7,.15,2.6],[2.4,.1,.12],{parent:'prison-zone',rotation:[0,-18,0]});
-part('loose-plug','sphere','mint',[-.65,.3,3],[.4,.4,.4],{parent:'prison-zone'});
+addTo('prison-zone',messageMachine('socket',[-3.5,0,2]));
+addTo('prison-zone',tokenTrack('words',[-3.5,1.3,4.5],4));
+part('cable','box','gold',[-2,.15,2.6],[2.4,.1,.12],{parent:'prison-zone',rotation:[0,-18,0]});
+part('loose-plug','sphere','mint',[-1,.3,3],[.4,.4,.4],{parent:'prison-zone'});
 part('wrong-ring','torus','rose',[0,.12,-10.8],[2.1,.1,2.1],{parent:'prison-zone',enabled:false});
 part('reunion-ring','torus','mint',[0,.13,2.4],[2.2,.07,2.2],{parent:'prison-zone',enabled:false});
 part('route-glow','box','mint',[0,.08,-15.2],[1.8,.04,5.2],{parent:'prison-zone',enabled:false});
@@ -88,7 +86,7 @@ part('friend-heart-tip','cone','paper',[0,-.08,.42],[.4,.32,.05],{rotation:[180,
 
 /* A black visual field makes the teleport land as a limbo beat before the
    prison geometry is revealed. */
-part('limbo-backdrop','box','void',[0,4,-38],[24,12,.4],{enabled:false});
+part('limbo-backdrop','box','void',[0,0,-44],[160,160,.4],{enabled:false});
 
 /* One protagonist, used in story and gameplay. */
 e.push({id:'zip',asset:'robot',position:[0,0,-28],scale:[.9,.9,.9],animation:'idle'});
@@ -110,57 +108,70 @@ part('warden-crown','cone','gold',[0,3.75,0],[.82,.82,.68],{parent:'warden'});
 part('warden-hand','box','gold',[-1,1.8,.18],[.34,.9,.38],{parent:'warden'});
 part('stolen-voice','box','mint',[0,1.1,-27.5],[.62,.62,.62],{rotation:[0,30,15],enabled:false});
 
-export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'2',
+const revealGroups=[
+  ['prison-floor'],
+  ['prison-back','prison-left','prison-right','prison-ceiling-beam-a','prison-ceiling-beam-b'],
+  ['prison-light-a','prison-light-b','moon'],
+  ['socket','words','cable','loose-plug','friend-cube']
+];
+const revealParts=revealGroups.flat();
+
+export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'4',
   environment:{clearColor:'#172238',ambient:'#6c7694',exposure:1.05,toneMapping:'aces',fog:{type:'linear',color:'#8f91a7',start:38,end:125}},
   materials:{stone:{diffuse:'#d8b997'},paper:{diffuse:'#f9dfba'},gold:{diffuse:'#ce9d53',gloss:.45},coral:{diffuse:'#d67a69'},ink:{diffuse:'#273144'},indigo:{diffuse:'#4c5276'},rock:{diffuse:'#717b91'},teal:{diffuse:'#548e89'},rose:{diffuse:'#c87678'},leaf:{diffuse:'#477765'},mint:{diffuse:'#91d2af',emissive:'#60a990',emissiveIntensity:.25},wood:{diffuse:'#795755'},glow:{diffuse:'#ffe5ad',emissive:'#ffc97c',emissiveIntensity:1.25},pinkGlow:{diffuse:'#ffa58c',emissive:'#e88c70',emissiveIntensity:.8},redGlow:{diffuse:'#fa9f78',emissive:'#fc705c',emissiveIntensity:1.25},cloud:{diffuse:'#efd7cc'},haze:{diffuse:'#bda8bc'},dark:{diffuse:'#20283a'},prison:{diffuse:'#35445d'},blueGlow:{diffuse:'#9fdcff',emissive:'#76bfff',emissiveIntensity:1.8},void:{diffuse:'#070b12'}},
-  assets:{robot:{type:'container',src:'/assets/quaternius-animated-robot.glb',transform:{position:[0,-.08,0],scale:[.52,.52,.52]},animations:{idle:'RobotArmature|Robot_Idle',run:'RobotArmature|Robot_Running',yes:'RobotArmature|Robot_Yes',no:'RobotArmature|Robot_No',wave:'RobotArmature|Robot_Wave'},defaultAnimation:'idle'}},
+  assets:{robot:{type:'container',src:'/assets/quaternius-animated-robot.glb',transform:{position:[0,-.08,0],scale:[.52,.52,.52]},animations:{idle:'RobotArmature|Robot_Standing',run:'RobotArmature|Robot_Running',yes:'RobotArmature|Robot_Yes',no:'RobotArmature|Robot_No',wave:'RobotArmature|Robot_Wave'},defaultAnimation:'idle'}},
   entities:e,
   lights:[{id:'sunlight',type:'directional',color:'#ffd8aa',intensity:.9,rotation:[45,-35,0],castShadows:true},{id:'sky-light',type:'directional',color:'#a6bce4',intensity:.4,rotation:[50,150,0]}],
   cameras:{
-    home:{position:[15,12,30],lookAt:[0,1.5,10],fov:50,portrait:{position:[9,14,35],lookAt:[0,1.5,10],fov:50}},
+    home:{position:[15,12,30],lookAt:[0,1.5,10],fov:50,portrait:{position:[3,16,41],lookAt:[0,1.5,12],fov:50}},
     rupture:{position:[11,9,26],lookAt:[0,2,9],fov:48,portrait:{position:[7,12,31],lookAt:[0,2,9],fov:48}},
     limbo:{position:[5,4,-20],lookAt:[0,1,-28],fov:46,portrait:{position:[3.5,6,-18],lookAt:[0,1,-28],fov:46}},
-    reveal:{position:[10,7,-20],lookAt:[0,2.4,-36],fov:52,portrait:{position:[7,9,-17],lookAt:[0,2.5,-36],fov:50}},
-    theft:{position:[6,4.5,-23],lookAt:[0,1.8,-29],fov:45,portrait:{position:[4.5,6.5,-21],lookAt:[0,1.8,-29],fov:45}}
+    reveal:{position:[1,8,-16],lookAt:[0,2,-33],fov:52,portrait:{position:[1,13,-5],lookAt:[0,3,-32],fov:50}},
+    theft:{position:[1.5,5,-18],lookAt:[1.5,1.8,-30],fov:50,portrait:{position:[1.5,8,-9],lookAt:[1.5,1.8,-30],fov:50}}
   },
   states:{arrival:{camera:'reveal'}},
   player:characterControlProfile({entity:'zip',spawn:[0,0,-28],speed:3.2,surfaces:[
     {bounds:[-8.2,8.2,-38,-24],height:0},
     {bounds:[-8.2,8.2,-52,-38],height:0,whenVisible:'tutorial-route-open'}
-  ],camera:{yaw:0,pitch:25,distance:8,portraitDistance:10,minDistance:4,maxDistance:18,targetHeight:1.2}})
+  ],camera:{yaw:0,pitch:25,distance:8,portraitDistance:14,minDistance:4,maxDistance:18,targetHeight:1.2}})
 };
 
 const missionBase=()=>({
-  show:['zip','prison-zone'],
-  hide:['bellweather-zone','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','zip-voice','socket-core','socket-ring',...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
+  show:['zip','prison-zone','sun','star',...revealParts],
+  hide:['bellweather-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','zip-voice','socket-core','socket-ring',...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
   transforms:{'moon-door':{position:[0,0,0]},'sun-door':{position:[0,0,0]},'star-door':{position:[0,0,0]},zip:{position:[0,0,-28]}},
   animations:{zip:'idle'}
 });
 
 function opening(beat){
-  const p={show:['zip'],hide:['bellweather-zone','prison-zone','limbo-backdrop','rift','storm-flash','warden','stolen-voice','zip-voice'],transforms:{zip:{position:[0,0,10]}},animations:{zip:'idle'}};
+  const p={show:['zip',...revealParts],hide:['bellweather-zone','prison-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','zip-voice'],transforms:{zip:{position:[0,0,10]},singer:{position:[3.8,0,1]},'friend-a':{position:[-3,0,1]},'friendship-lantern':{position:[-2.2,1.2,10.5]},'moon-door':{position:[0,0,0]}},animations:{zip:'idle'}};
+  p.hide.push('sun','star','notice-old','notice-parade','notice-today','tutorial-route-open','wrong-ring','reunion-ring','route-glow');
   if(beat===0){
-    p.camera='home';p.show.push('bellweather-zone','zip-voice');p.animations.zip='wave';
-    p.timeline={duration:2500,cues:[{at:900,patch:{animations:{singer:'wave',zip:'yes'}}}],finish:{animations:{zip:'idle',singer:'idle'}}};
+    p.camera='home';p.show.push('bellweather-zone','zip-voice','friendship-lantern');p.animations.zip='wave';
+    p.timeline={duration:2200,moves:[{entity:'friendship-lantern',from:[-2.2,1.2,10.5],to:[-.8,1.1,10.5],at:600,duration:1100}],cues:[{at:1600,patch:{animations:{zip:'yes'}}}],finish:{animations:{zip:'idle'}}};
   }else if(beat===1){
     p.camera='rupture';p.show.push('bellweather-zone','zip-voice','rift','storm-flash');p.animations.zip='no';
     p.timeline={duration:3600,moves:[
       {entity:'zip',from:[0,0,10],to:[0,4,8],at:1300,duration:1300},
-      {entity:'singer',from:[5,0,2],to:[1,6,-1],at:1200,duration:1400},
-      {entity:'friend-a',from:[-5.5,0,3.5],to:[-1,6,-1],at:1200,duration:1400}
+      {entity:'singer',from:[3.8,0,1],to:[1,6,-1],at:1200,duration:1400},
+      {entity:'friend-a',from:[-3,0,1],to:[-1,6,-1],at:1200,duration:1400}
     ],cues:[{at:400,patch:{show:['storm-flash']}},{at:900,patch:{hide:['storm-flash']}},{at:1200,patch:{animations:{singer:'no','friend-a':'no'}}}],finish:{hide:['storm-flash']}};
   }else if(beat===2){
-    p.camera='limbo';p.show.push('limbo-backdrop');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
+    p.camera='limbo';p.show.push('limbo-backdrop','zip-voice');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
   }else if(beat===3){
-    p.camera='reveal';p.show.push('prison-zone');p.transforms.zip={position:[0,0,-28]};
+    p.camera='reveal';p.show=p.show.filter(id=>!revealParts.includes(id));
+    p.show.push('prison-zone','zip-voice','limbo-backdrop');p.hide.push(...revealParts);
+    p.transforms.zip={position:[0,0,-28]};
+    p.timeline={duration:3000,cues:revealGroups.map((show,i)=>({at:250+i*750,patch:{show}})),finish:{hide:['limbo-backdrop']}};
   }else if(beat===4){
-    p.camera='theft';p.show.push('prison-zone','warden','zip-voice');p.transforms.zip={position:[0,0,-28]};p.transforms.warden={position:[4,0,-31]};
+    p.camera='theft';p.show.push('prison-zone','warden','zip-voice');p.transforms.zip={position:[0,0,-28]};p.transforms.warden={position:[5,0,-33]};
+    p.transforms['stolen-voice']={position:[0,.9,-27.55]};
     p.timeline={duration:4700,moves:[
-      {entity:'warden',from:[5,0,-33],to:[2.6,0,-29.5],duration:1300},
-      {entity:'stolen-voice',from:[0,1,-27.5],to:[1.8,2.2,-29.2],at:1700,duration:950},
-      {entity:'warden',from:[2.6,0,-29.5],to:[5,0,-34],at:3200,duration:1200},
-      {entity:'stolen-voice',from:[1.8,2.2,-29.2],to:[4.5,3,-34],at:3200,duration:1200}
-    ],cues:[{at:1650,patch:{show:['stolen-voice'],hide:['zip-voice'],animations:{zip:'no'}}}],finish:{hide:['warden','stolen-voice'],animations:{zip:'idle'}}};
+      {entity:'warden',from:[5,0,-33],to:[1.4,0,-28],duration:1300},
+      {entity:'stolen-voice',from:[0,.9,-27.55],to:[.4,1.8,-27.8],at:1700,duration:950},
+      {entity:'warden',from:[1.4,0,-28],to:[3,0,-34],at:3200,duration:1200},
+      {entity:'stolen-voice',from:[.4,1.8,-27.8],to:[2,1.8,-33.8],at:3200,duration:1200}
+    ],cues:[{at:1650,patch:{show:['stolen-voice'],hide:['zip-voice'],animations:{zip:'no'}}}],finish:{animations:{zip:'idle'}}};
   }else{
     p.camera='reveal';p.show.push('prison-zone');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
   }
@@ -202,9 +213,11 @@ export const gameWorldManifest=pkg.gameWorldManifest;
 export const createGameWorld=pkg.createGameWorld;
 
 export const openingSpec={
-  id:'bellweather.opening.v2',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,
+  id:'bellweather.opening.v3',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,
   scenes:[
-    {beat:0,kicker:'BELLWEATHER · LANTERN NIGHT',title:'Bellweather is alive.',body:'Lanterns glow. Music carries over the rooftops. Zip is home with friends.'},
+    {beat:0,kicker:'BELLWEATHER · LANTERN NIGHT',title:'One lantern. Three friends.',body:'Your friend made this for the three of you. Send it into the sky.',
+      action:{target:'release-lantern',label:'Send up our lantern',patch:{show:['friendship-lantern'],animations:{zip:'wave'},timeline:{duration:2800,moves:[{entity:'friendship-lantern',from:[-.8,1.1,10.5],to:[0,5.5,8],duration:2600},{entity:'singer',from:[3.8,0,1],to:[2.4,0,1],duration:1000},{entity:'friend-a',from:[-3,0,1],to:[-1.8,0,1],duration:1000}],finish:{animations:{zip:'yes'}}}}},
+      success:{body:'Three lights rise above your home.',dialogue:'“Same time next year. All three of us.”'}},
     {beat:1,kicker:'WITHOUT WARNING',title:'The sky cracks open.',body:'Thunder. A white rift tears through the square—and pulls everyone away.'},
     {beat:2,kicker:'SOMEWHERE ELSE',title:'Silence.',body:'Zip wakes alone. No market. No friends. Bellweather is gone.'},
     {beat:3,kicker:'THEN THE LIGHTS COME ON',title:'This is not home.',body:'Cold walls. One enormous locked door. No obvious way back.',markers:[{entity:'moon-label',label:'SEALED EXIT',offset:[0,-8]}]},

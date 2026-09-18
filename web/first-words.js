@@ -2,6 +2,7 @@ import {getGameRuntime,createGameRuntime} from './game-runtime.js';
 import {openGameOpening} from './game-opening.js';
 import {createGameAudio} from './game-audio.js';
 import {createLearningSession} from './learning-session.js';
+import {createControlPractice} from './player-controls.js';
 import * as chapter from './first-words-world.js';
 
 const $=s=>document.querySelector(s),runtime=getGameRuntime(),audio=createGameAudio(),host=$('#world');
@@ -11,6 +12,7 @@ let reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,paused=false,
 // instantiate the prison mission first and then flash it while learner state resolves.
 let world=runtime.showStory(chapter,host,0,{reducedMotion:reduced});
 const session=createLearningSession(render);
+const practice=createControlPractice();
 const ours=()=>session.attempt?.snapshot?.word_machine?.version==='first-words-1';
 const view=()=>ours()?session.attempt.word_machine_state:initial;
 const text=(s,v)=>{$(s).textContent=v;};
@@ -44,6 +46,7 @@ function tutorialStage(s,complete){
 }
 function render(){
   const s=view(),a=session.attempt,complete=ours()&&a.status==='submitted';
+  practice.bind(a?.id,ours()&&!s.powered&&s.round===0&&!complete);
   $('#welcome').hidden=ours();$('#engine').hidden=!ours();$('.mission').classList.toggle('playing',ours());
   $('#error').hidden=!session.error;if(session.error)text('#error',session.error.code==='ACTIVE_ATTEMPT'?'This run is already active. Reload to resume it.':session.error.message);
   $('#retry').hidden=!session.pending||session.busy;
@@ -86,6 +89,18 @@ function render(){
   else scene='You have left the first chamber. Three route boards stand in the wider corridor, and a glowing five-point mark identifies one deeper gate.';
   host.setAttribute('aria-label',`Unknown prison beyond Bellweather. ${scene}`);
   text('#scene-description',`${scene} ${goal} ${detail} Input: ${s.context.join(' ')}. Output: ${s.output.join(' ')||'none'}.`);
+  const step=practice.step;$('#controls').classList.toggle('practicing',step!=='done');
+  if(step!=='done'){
+    const prompts={
+      move:['You are the golden robot.',host.clientWidth<700?'Use the stick at bottom left to move a little. Arrow keys work too.':'Use WASD or the arrow keys to take a few steps.'],
+      look:['Look around the room.','Drag empty space to turn the camera, or try the + zoom button.'],
+      menu:['Your menu is always nearby.','Open ☰ at the top right. You can pause, change sound or replay the story.']
+    };
+    const [title,instruction]=prompts[step];
+    text('#stage-name','TUTORIAL · '+step.toUpperCase());text('#goal',title);text('#detail',instruction);
+    text('#engine-label','GET YOUR BEARINGS');text('#scene-description',title+' '+instruction);
+    $('#actions').replaceChildren();button('Skip control practice','skip-controls',false);
+  }
 }
 function choices(title,detail,items){
   text('#choice-kicker','LEVEL 1 · ROUTE');text('#choice-title',title);text('#choice-detail',detail);$('#choices').replaceChildren();
@@ -94,6 +109,8 @@ function choices(title,detail,items){
 }
 async function act(action){
   if(blocked())return;
+  if(action==='skip-controls'){practice.skip();render();return;}
+  if(practice.step!=='done')return;
   await audio.unlock().catch(()=>{});
   if(action==='notices')return choices('Route signs','Choose one sign to put into your speech engine. The physical boards are optional shortcuts to the same choice.',[
     ['Old sign · “Take the Moon gate.”','scan-moon'],['Discarded parade notice · “Lantern parade at sunset.”','scan-parade'],['Current notice · “Moon route closed. The tower bell answers the five-point lantern mark.”','scan-star']]);
@@ -112,7 +129,10 @@ function showEnding(){
   text('#reflection',context+loop);dialog('#ending');
 }
 $('#start').onclick=()=>act('start');$('#rewind').onclick=()=>act('rewind');$('#retry').onclick=()=>session.retry();
-$('#menu-open').onclick=()=>dialog('#menu');
+$('#menu-open').onclick=()=>{if(practice.observe('menu'))render();dialog('#menu');};
+host.addEventListener('game-control-used',event=>{
+  if(ours()&&!inOpening&&!blocked()&&practice.observe(event.detail?.kind))render();
+});
 for(const marker of document.querySelectorAll('#markers .notice-marker'))marker.addEventListener('click',()=>{const action=marker.dataset.action;if(view().available_actions?.includes(action))act(action);});
 function togglePause(){paused=!paused;$('#paused').hidden=!paused;text('#pause',paused?'Resume the world':'Pause the world');pauseSystems();}
 $('#pause').onclick=()=>{$('#menu').close();togglePause();};$('#paused').onclick=togglePause;

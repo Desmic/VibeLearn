@@ -1,5 +1,30 @@
 # Learning OS — incremental implementation plan 2.0
 
+## Active chunk — 18 September 2026
+
+Friendship/reveal slice verified; next active chunk is control orientation in
+the separate tutorial. Fresh play went directly to repair and hid movement/look
+instructions behind an intrusive help panel. Add one short prompt at a time:
+actual movement -> camera look/zoom -> menu open/return -> existing repair loop.
+Allow skipping; persist only presentation progress per attempt, grant no learning
+credit, and preserve existing powered/saved runs. Verify keyboard/phone controls,
+reload, skip and the handoff before further tutorial/mission work.
+
+Next prologue slice: a friend gives the protagonist a three-light lantern; the
+player releases it and the friends celebrate before the rupture. Distinct round
+and tall companion silhouettes leave one unmistakable golden protagonist.
+Reveal the prison in stages (floor -> walls -> locked exit -> repair bench),
+with the same readable final state in reduced motion. Reuse the opening action,
+timeline and portable prop mechanisms. Verify fresh entry, action/replay/Back,
+saved-state isolation, muted/reduced-motion and phone/desktop compositions.
+
+Canonical checkout: `main`. The September 17 user review supersedes the historical
+execution entries below. Prologue -> separate tutorial with clean success ->
+Level 1 is the binding boundary. Finish the prologue staging/entry-recovery repair
+and inspect actual playback before extending tutorial or mission content.
+See `docs/PLAYTEST-20260917-LOCAL.md`. Internal quality gates remain unresolved;
+do not inherit earlier scores or deploy this work as an accepted candidate.
+
 **Latest instruction — 16 September 2026:** continue locally; deploy the latest verified
 checkpoint when the five-hour allowance reaches <=10% remaining. Follow the
 concise loop in `CODEX.md`: one playable chunk, immediate focused tests and

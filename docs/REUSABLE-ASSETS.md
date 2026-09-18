@@ -190,3 +190,14 @@ For each accepted chunk:
 6. add critic/regression coverage for the abstraction.
 
 Fast game creation comes from a growing library of proven pieces, not maximum abstraction on day one.
+# Prologue additions — 18 September 2026
+
+- `companionRobot` in `web/rescue-world-props.js`: portable, original primitive
+  robot silhouettes parameterized by color, round/rectangular shape and height.
+  Two current companions use it; the controlled golden robot retains its asset.
+- Existing lantern prefab, opening action and timeline mechanisms power the
+  shared lantern ritual. No new cinematic engine or later-level content.
+- Opening success data may override the body caption, removing instructions
+  after the action instead of piling more text onto them.
+- Prison reveal timing/groups are authored in the chapter package; shared runtime
+  and learner evidence remain independent. No third-party assets were added.

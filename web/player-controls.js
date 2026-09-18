@@ -5,6 +5,23 @@ const radians=n=>n*Math.PI/180;
 const formTarget=target=>target?.closest?.('button,input,select,textarea,a,summary,[contenteditable]');
 const typingTarget=target=>target?.closest?.('input,select,textarea,[contenteditable]');
 
+// Device-local control familiarity, never learner assessment or game progress.
+export function createControlPractice(){
+  const steps=['move','look','menu','done'];let key=null,step='done';
+  const save=()=>{try{localStorage.setItem(key,step);}catch(_){}};
+  return {
+    bind(id,enabled){
+      if(!enabled){key=null;step='done';return;}
+      const next='vibelearn.control-practice.v1:'+id;if(key===next)return;
+      key=next;let stored;try{stored=localStorage.getItem(key);}catch(_){}
+      step=steps.includes(stored)?stored:'move';
+    },
+    get step(){return step;},
+    observe(kind){if(step==='done'||kind!==step)return false;step=steps[steps.indexOf(step)+1];save();return true;},
+    skip(){step='done';if(key)save();}
+  };
+}
+
 export function validatePlayerProfile(profile,ids){
   const fail=message=>{throw new Error(`WorldSpec player: ${message}`);};
   const vector=(v,n)=>Array.isArray(v)&&v.length===n&&v.every(Number.isFinite);
@@ -29,6 +46,7 @@ export function createPlayerControls(host,profile,adapter){
   let orbit={target:[0,1,0],yaw:0,pitch:25,distance:15},shot=null,paused=false,moving=false,drag=null,suppressUntil=0;
   let stick=[0,0],stickPointer=null,lastFacing=0,disposed=false;
   const keys=new Set(),cleanups=[];
+  const used=kind=>host.dispatchEvent(new CustomEvent('game-control-used',{bubbles:true,detail:{kind}}));
   const listen=(target,event,fn,options)=>{target.addEventListener(event,fn,options);cleanups.push(()=>target.removeEventListener(event,fn,options));};
   const blocked=()=>paused||!host.isConnected||!host.getClientRects().length||host.closest('[inert]')||host.closest('[data-world-status="failed"],[data-world-status="loading"]')||host.closest('[data-game-input-blocked="true"]');
   const surfaceAt=(x,z)=>profile.surfaces.find(s=>(!s.whenVisible||adapter.isEntityEnabled(s.whenVisible))&&x>=s.bounds[0]&&x<=s.bounds[1]&&z>=s.bounds[2]&&z<=s.bounds[3]);
@@ -47,12 +65,12 @@ export function createPlayerControls(host,profile,adapter){
   function zoom(delta){
     if(mode==='third-person')distance=clamp(distance+delta,profile.camera.minDistance,profile.camera.maxDistance);
     else orbit.distance=clamp(orbit.distance+delta,3,36);
-    draw();
+    draw();used('look');
   }
   function rotate(dx,dy){
     if(mode==='third-person'){yaw-=dx*.22;pitch=clamp(pitch+dy*.16,5,70);}
     else{orbit.yaw-=dx*.22;orbit.pitch=clamp(orbit.pitch+dy*.16,5,70);}
-    draw();
+    draw();used('look');
   }
   function cameraOutsideSolids(target,eye){
     // A short segment sweep prevents the follow camera from crossing declared
@@ -87,7 +105,7 @@ export function createPlayerControls(host,profile,adapter){
     }
     if(Math.hypot(position[0]-old[0],position[2]-old[2])<.00001)return false;
     lastFacing=Math.atan2(dx,dz)*180/Math.PI;
-    adapter.setAvatar(position,lastFacing);return true;
+    adapter.setAvatar(position,lastFacing);used('move');return true;
   }
   function setShot(value){
     shot=value;const d=value.position.map((v,i)=>v-value.lookAt[i]);

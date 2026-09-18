@@ -50,7 +50,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   const refresh=()=>{
     if(closed)return;
     const s=scene();overlay.dataset.step=String(step);actionDone=completed.has(step);
-    for(const [selector,value] of [['.rgi-kicker',s.kicker],['#rgi-title',s.title],['#rgi-body',s.body],['#rgi-dialogue',actionDone?s.success?.dialogue||s.dialogue:s.dialogue],['#rgi-fact',actionDone?s.success?.fact||s.fact:s.fact]])overlay.querySelector(selector).textContent=value||'';
+    for(const [selector,value] of [['.rgi-kicker',s.kicker],['#rgi-title',s.title],['#rgi-body',actionDone?s.success?.body??s.body:s.body],['#rgi-dialogue',actionDone?s.success?.dialogue||s.dialogue:s.dialogue],['#rgi-fact',actionDone?s.success?.fact||s.fact:s.fact]])overlay.querySelector(selector).textContent=value||'';
     overlay.querySelector('#rgi-step').textContent=`${step+1} / ${spec.scenes.length}${replay?' · REPLAY':''}`;
     overlay.querySelector('#rgi-back').disabled=step===0;
     next.textContent=s.action&&!actionDone?s.action.label:step===spec.scenes.length-1?(replay?'Return to game':spec.finishLabel||'Begin'):'Continue →';

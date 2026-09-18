@@ -63,13 +63,27 @@ def main():
             failed_ctx=browser.new_context(viewport={'width':390,'height':844})
             failed=failed_ctx.new_page()
             failed.route('**/vendor/playcanvas.mjs',lambda route:route.abort())
-            failed.goto(url+'/first-words')
+            failed.goto(url+'/')
+            failed.wait_for_url('**/first-words',timeout=20000)
             expect(failed.get_by_role('button',name='Reload Bellweather',exact=True)).to_be_visible(timeout=20000)
             assert failed.locator('#rescue-game').count()==0
             assert failed.locator('svg').count()==0
             assert failed.locator('.rg-world').count()==0
             failed.screenshot(path=str(ROOT/'artifacts/level1-no-fallback-390.png'))
             failed_ctx.close()
+            # Exercise the hosted entry surface locally: missing engine imports
+            # must not prevent sign-in controls or explicit 3D recovery from booting.
+            entry_ctx=browser.new_context(viewport={'width':390,'height':844})
+            entry=entry_ctx.new_page()
+            entry.route('**/api/config',lambda route:route.fulfill(json={'hosted':True}))
+            entry.route('**/api/state',lambda route:route.fulfill(status=401,json={'message':'Sign in'}))
+            entry.route('**/vendor/playcanvas.mjs',lambda route:route.abort())
+            entry.goto(url+'/')
+            expect(entry.get_by_role('button',name='Retry 3D',exact=True)).to_be_visible(timeout=20000)
+            expect(entry.locator('#login-email')).to_be_enabled()
+            expect(entry.locator('#login-submit')).to_be_enabled()
+            assert entry.locator('svg').count()==0
+            entry_ctx.close()
             print('Level 1 entry, historical-draft continuity and no-fallback gate passed')
         finally:
             browser.close();stop_server(proc)

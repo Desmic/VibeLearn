@@ -1,4 +1,20 @@
 /* Portable scenery and interactable shapes. No learner state or engine objects. */
+export function companionRobot(id,position,{color='teal',round=false,height=1.7}={}){
+  const e=[{id,position}];
+  const part=(name,primitive,material,p,s)=>e.push({id:id+'-'+name,parent:id,primitive,material,position:p,scale:s});
+  part('body',round?'sphere':'box',color,[0,height*.43,0],[round?1.15:.7,height*.65,.65]);
+  part('head',round?'sphere':'box',color,[0,height*.85,0],[round?1.1:.8,height*.4,.7]);
+  part('face','box','ink',[0,height*.86,.36],[.65,.3,.08]);
+  for(const side of [-1,1]){
+    part('eye'+side,'sphere','glow',[side*.18,height*.9,.42],[.12,.12,.06]);
+    part('foot'+side,'box','ink',[side*.3,.12,.12],[.32,.24,.5]);
+    part('hand'+side,'sphere',color,[side*.7,height*.55,.18],[.3,.3,.3]);
+  }
+  part('antenna','cylinder','gold',[0,height*1.1,0],[.07,.32,.07]);
+  part('tip','sphere','glow',[0,height*1.2,0],[.18,.18,.18]);
+  return e;
+}
+
 export function lantern(id,position,{scale=1,color='glow',floating=false}={}){
   return [{id,position,scale:[scale,scale,scale],...(floating?{motion:{type:'bob',amplitude:.13,speed:.7}}:{})},
     {id:id+'-paper',parent:id,primitive:'sphere',material:color,position:[0,0,0],scale:[.65,.85,.65]},

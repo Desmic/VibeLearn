@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parent
 BROWSER_GROUPS = {
     "foundation": ["tests.level1_entry_browser"],
     "first-words-opening": ["tests.first_words_opening_browser"],
+    "first-words-tutorial": ["tests.control_practice_browser"],
     "first-words-controls": ["tests.level1_controls_browser"],
     "first-words-chapter": ["tests.level1_chapter_browser"],
     "first-words-readability": ["tests.first_words_readability_browser"],
@@ -17,6 +18,7 @@ BROWSER_GROUPS = {
     # Keep the combined command as the final integrated Level 1 regression.
     "first-words": [
         "tests.first_words_opening_browser",
+        "tests.control_practice_browser",
         "tests.level1_controls_browser",
         "tests.level1_chapter_browser",
         "tests.first_words_readability_browser",
@@ -30,7 +32,7 @@ BROWSER_GROUPS = {
     "legacy-word-machine": ["tests.word_machine_browser"],
     "legacy-first-words-complex": ["tests.first_words_browser"],
 }
-ACTIVE_LEVEL1_GROUPS = ["first-words-opening", "first-words-controls", "first-words-chapter", "first-words-readability", "first-words-lifecycle"]
+ACTIVE_LEVEL1_GROUPS = ["first-words-opening", "first-words-tutorial", "first-words-controls", "first-words-chapter", "first-words-readability", "first-words-lifecycle"]
 
 
 def main():

@@ -10,6 +10,8 @@ ROOT=Path(__file__).resolve().parents[1]
 
 
 def action(page,name,saved_text='Saved'):
+    if name=='Connect the power lead' and page.get_by_role('button',name='Skip control practice',exact=True).is_visible():
+        page.get_by_role('button',name='Skip control practice',exact=True).click()
     with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
         page.get_by_role('button',name=name,exact=True).click()
     assert saved.value.ok,saved.value.status

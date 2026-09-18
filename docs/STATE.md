@@ -1,5 +1,53 @@
 # Current state — LLM learning-game proof track
 
+## Friendship/reveal checkpoint — 18 September 2026
+
+On `main`, the next prologue chunk is implemented and verified: the player sends
+up a shared three-light lantern, companions have distinct teal/round and
+coral/tall silhouettes, and the prison is revealed in timed groups. Pausing the
+reveal exposed stray later-mission scenery; that was repaired. Phone play exposed
+a lantern/caption overlap; it was repaired and now has a projection-clearance
+regression check. Opening package v3, world package v4. Names remain provisional.
+
+Build, 152 application tests (seven skips), opening checks and post-save controls
+passed. Final opening evidence: `artifacts/prologue-friendship-clearance.log`.
+Manual play covered desktop, 390 animated, 360/430 reduced motion, pause/resume,
+scene replay and preserved saved tutorial output. No production deployment.
+
+The narrowly defined friendship/reveal slice is closed; this is not an overall
+9+ recommendation or user acceptance. Next chunk: inspect the separate tutorial
+handoff on a fresh disposable save, especially movement/look/interact guidance
+before the speech repair. Do not extend Level 1 or later levels ahead of that gate.
+Subjective audio mix, physical devices and novice engagement remain unverified.
+
+The earlier repair notes below are historical where this checkpoint supersedes
+their unresolved friendship/reveal findings.
+
+## Local repair checkpoint — 18 September 2026
+
+Continue on canonical `main`. The existing prologue/entry repair was resumed in
+place and manually replayed at desktop and 360/390/430 phone sizes. Entry now
+recovers when the engine import fails. Limbo backdrop, bench spacing and theft
+framing were checked; the voice module now remains present until the actual
+theft and follows a continuous retreat path. Phone home/theft shots were widened.
+Preview: http://127.0.0.1:8017/first-words, disposable review database preserved.
+
+**Prologue quality gate remains needs_revision.** Bellweather's social interaction
+and character distinction still need stronger visible attachment; the prison
+reveal remains an abrupt cut rather than the specified progressive reveal.
+Do not extend tutorial/Level 1 or inherit historical critic scores. Next work
+stays inside the prologue: stage a meaningful friendship beat and coordinated
+reveal, then repeat story/art/play review. Naming remains provisional.
+
+Build and application tests passed (152 run, seven skips). Entry recovery tests
+passed, including missing engine at `/` and a locally simulated hosted sign-in
+surface. That simulation is not production auth verification. The dedicated
+opening rerun and detailed evidence live in `PLAYTEST-20260917-LOCAL.md` and
+`artifacts/prologue-opening-final-20260918.log`. No deployment occurred here.
+
+The September 17 design/user-review record below remains authoritative where it
+does not conflict with this local repair checkpoint.
+
 ## Active checkpoint — 17 September 2026 IST
 
 Status: **user review / needs redesign before another Level 1 candidate.**

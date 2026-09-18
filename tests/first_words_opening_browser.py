@@ -20,9 +20,15 @@ def main():
             log('Prologue: navigate');page.goto(url+'/first-words')
             expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000)
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
-            expect(page.locator('#rgi-title')).to_have_text('Bellweather is alive.')
-            expect(page.locator('#rgi-body')).to_contain_text('Zip is home with friends')
+            expect(page.locator('#rgi-title')).to_have_text('One lantern. Three friends.')
+            expect(page.locator('#rgi-body')).to_contain_text('for the three of you')
             page.screenshot(path=str(out/'prologue-home-390.png'),timeout=15000)
+            before_lantern=page.evaluate('JSON.stringify(FirstWordsReview.state)')
+            page.get_by_role('button',name='Send up our lantern',exact=True).click()
+            expect(page.locator('#rgi-dialogue')).to_contain_text('All three of us')
+            until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before_lantern
+            page.screenshot(path=str(out/'prologue-lantern-release-390.png'),timeout=15000)
 
             log('Prologue: rupture');page.get_by_role('button',name='Continue →',exact=True).click()
             expect(page.locator('#rgi-title')).to_have_text('The sky cracks open.')
@@ -44,6 +50,13 @@ def main():
 
             log('Prologue: prison reveal');page.get_by_role('button',name='Continue →',exact=True).click()
             expect(page.locator('#rgi-title')).to_have_text('This is not home.')
+            page.get_by_role('button',name='Pause story motion',exact=True).click()
+            early=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
+                const w=getGameRuntime().world;return ['moon','sun','notice-old'].map(id=>w.projectEntity(id));}""")
+            assert early==[None,None,None],early
+            page.screenshot(path=str(out/'prologue-reveal-early-paused-390.png'),timeout=15000)
+            page.get_by_role('button',name='Resume story motion',exact=True).click()
+            until(page,'()=>!FirstWordsReview.runtime.world.animating')
             expect(page.get_by_role('button',name='SEALED EXIT',exact=True)).to_be_visible()
             page.screenshot(path=str(out/'prologue-prison-reveal-390.png'),timeout=15000)
 
@@ -58,6 +71,8 @@ def main():
             instance=page.evaluate('FirstWordsReview.runtime.instanceId')
             page.screenshot(path=str(out/'prologue-repair-handoff-390.png'),timeout=15000)
             page.get_by_role('button',name='Take control →',exact=True).click()
+            expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE')
+            page.get_by_role('button',name='Skip control practice',exact=True).click()
             expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
             expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 1/3')
             expect(page.locator('#saved')).to_have_text('Saved')
@@ -78,7 +93,18 @@ def main():
                 log(f'Prologue: fresh reduced-motion {width}')
                 ctx=browser.new_context(viewport={'width':width,'height':height},reduced_motion='reduce',has_touch=width<500)
                 q=ctx.new_page();q.set_default_timeout(15000);q.on('pageerror',lambda e:errors.append(str(e)));q.goto(url+'/first-words')
-                expect(q.locator('#rgi-title')).to_have_text('Bellweather is alive.',timeout=20000)
+                expect(q.locator('#rgi-title')).to_have_text('One lantern. Three friends.',timeout=20000)
+                q.get_by_role('button',name='Send up our lantern',exact=True).click()
+                expect(q.locator('#rgi-dialogue')).to_contain_text('All three of us')
+                clearance=q.evaluate("""async()=>{
+                    const {getGameRuntime}=await import('/game-runtime.js');
+                    const point=getGameRuntime().world.projectEntity('friendship-lantern');
+                    const top=document.querySelector('#rgi-world').getBoundingClientRect().top;
+                    const caption=document.querySelector('.rgi-scene-caption').getBoundingClientRect();
+                    return {visible:point?.visible,lanternY:top+(point?.y||0),captionBottom:caption.bottom};
+                }""")
+                assert clearance['visible'] and clearance['lanternY']>clearance['captionBottom']+16,clearance
+                q.screenshot(path=str(out/f'prologue-lantern-release-{width}.png'),timeout=15000)
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('The sky cracks open.')
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('Silence.')
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.get_by_role('button',name='SEALED EXIT',exact=True)).to_be_visible()
@@ -89,7 +115,7 @@ def main():
                 for selector in ['#rgi-title','#rgi-body','#rgi-next','#rgi-skip']:
                     b=q.locator(selector).bounding_box();assert b and b['x']>=0 and b['y']>=0 and b['x']+b['width']<=width+1 and b['y']+b['height']<=height+1,(selector,b)
                 q.screenshot(path=str(out/f'prologue-reduced-{width}.png'),timeout=15000)
-                q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000);ctx.close()
+                q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.get_by_role('button',name='Skip control practice',exact=True)).to_be_visible(timeout=15000);ctx.close()
             assert not errors,errors
             checks.append('Fresh 360/430/desktop reduced-motion preserves the same six story states and can skip safely into the separate tutorial without a 2D fallback.')
             (out/'first-words-opening-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'scope':'Prologue only. Audio lifecycle and phase changes are automated after an explicit player gesture; subjective mix/appeal, physical-phone feel and human acceptance remain unassessed.'},indent=2))

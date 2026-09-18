@@ -1,6 +1,3 @@
-import {createPlayCanvasWorld} from './playcanvas-backend.js';
-import {worldSpec} from './first-words-world.js';
-
 const $=selector=>document.querySelector(selector);
 const status=$('#entry-status');
 let world=null,recovery=null;
@@ -22,6 +19,10 @@ async function api(path,body){
 async function mountWorld(){
   const host=$('#auth-world'),worldStatus=$('#world-status');
   try{
+    // Keep sign-in, local routing and recovery alive even when 3D cannot load.
+    const [{createPlayCanvasWorld},{worldSpec}]=await Promise.all([
+      import('./playcanvas-backend.js'),import('./first-words-world.js')
+    ]);
     world=createPlayCanvasWorld(host,worldSpec,{interactive:false,pixelRatioCap:1.5,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches});
     if(!world.available)throw new Error(world.error||'PlayCanvas unavailable');
     // Entry shows Bellweather before the inciting incident. Keep the prison, rift
