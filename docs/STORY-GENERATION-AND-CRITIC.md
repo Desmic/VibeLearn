@@ -114,3 +114,30 @@ The story critic must evaluate narration separately from visual comprehension:
 
 A critic must not award story quality because narration accurately describes an
 event that the rendered world failed to show.
+
+## Causal attribution and semantic objects
+
+Story generation must explicitly distinguish:
+- visible known cause;
+- intentionally unknown cause;
+- intentionally misleading/ambiguous cause.
+
+When the story expects the player to understand that a character/antagonist
+caused an event, the storyboard must include observable causal evidence rather
+than relying on later exposition.
+
+Important abstract objects also need a **readability strategy**. For every major
+story/mechanic object specify how a cold player will recognize its role through
+some combination of:
+- attachment/location on a character/world system;
+- silhouette/material/light language;
+- prior introduction/use;
+- animation/transformation;
+- sound/effect;
+- interaction;
+- concise label/narration.
+
+A placeholder primitive is not a semantic design.
+
+The rendered-story critic first describes the object/event without semantic IDs
+or story treatment, then compares observed meaning against intended meaning.
