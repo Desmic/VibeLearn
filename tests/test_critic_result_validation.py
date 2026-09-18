@@ -14,8 +14,10 @@ class CriticResultValidationTests(unittest.TestCase):
         self.assignment={
             "schema":"vibelearn.critic-assignment.v1",
             "candidate_sha":self.sha,
+            "assignment_id":"sha256:"+"1"*64,
             "pass":"cold_observer",
             "status":"ready",
+            "required_evidence_groups":[["caption_blind_motion","interactive_trace"]],
             "allowed_evidence":copy.deepcopy(self.evidence),
             "allowed_modalities":["caption_blind_motion","audio_capture"],
             "forbidden_context":["story treatment","creator intent"],
@@ -25,6 +27,7 @@ class CriticResultValidationTests(unittest.TestCase):
         self.result={
             "schema":"vibelearn.critic-result.v1",
             "candidate_sha":self.sha,
+            "assignment_id":self.assignment["assignment_id"],
             "pass":"cold_observer",
             "verdict":"unresolved",
             "context_attestation":{
@@ -46,6 +49,16 @@ class CriticResultValidationTests(unittest.TestCase):
         self.assertEqual(result["pass"],"cold_observer")
         self.assertEqual(result["modality"],"cold_observer_report")
         self.assertEqual(result["verdict"],"unresolved")
+
+    def test_result_must_echo_exact_assignment_id(self):
+        self.result["assignment_id"]="sha256:"+"2"*64
+        with self.assertRaisesRegex(ValueError,"different assignment"):
+            validate_result(self.assignment,self.result)
+
+    def test_result_must_use_required_evidence_modality(self):
+        self.result["used_evidence"]=[copy.deepcopy(self.evidence[1])]
+        with self.assertRaisesRegex(ValueError,"did not use required evidence modality"):
+            validate_result(self.assignment,self.result)
 
     def test_result_cannot_use_unassigned_evidence(self):
         self.result["used_evidence"]=[{
