@@ -1,67 +1,168 @@
-# Critic handoff
+# Critic handoff — evidence-first pipeline
 
-**Active from 17 September 2026.** Read `CRITIC-POLICY.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `STATE.md`, `USER-REVIEW-20260917.md`, `GAME-OPENING-PROGRESSION.md` and `GAME-CREATION-PLATFORM.md` first.
+**Active from 18 September 2026.**
 
-## Instructions to the reviewer
+Read:
+- `EXPERIENCE-QUALITY-SYSTEM.md`
+- `CRITIC-POLICY.md`
+- `ART-WORLD-DIRECTION-CRITIC.md`
+- `STATE.md`
+- `CURRENT-GAME-CRITIC.md`
+- `GAME-OPENING-PROGRESSION.md`
+- `GAME-CREATION-PLATFORM.md`
 
-Review one exact candidate. Declare prior design/source knowledge honestly; do not call yourself a fresh novice if you already know the intended solution/story.
+Do **not** start from story treatment or creator rationale unless your generated
+critic assignment explicitly allows those sources.
 
-### 1. Cold story read
+## Reviewer execution contract
 
-Play the prologue without a walkthrough. Before reading source/design explanations, write what the scene actually communicated:
+A serious reviewer should not receive this repository as an unrestricted context
+dump.
 
-- what the normal world is;
-- who the player controls;
-- what changed;
-- what the antagonist did;
-- what the immediate obstacle/need is;
-- what to do next.
+The orchestrator must:
 
-Compare the rendered beats with the written storyboard. Text, animation, camera, light, sound and character reaction should describe the same causal event.
+1. start from one exact runtime candidate SHA;
+2. use that candidate's CI `review-evidence-index`;
+3. generate your pass assignment with `tools/build_critic_assignments.py`;
+4. launch a fresh reviewer session from that assignment capsule;
+5. create a harness-side execution receipt with
+   `tools/critic_execution_receipt.py`;
+6. provide only evidence/context allowed by the assignment;
+7. collect your raw `vibelearn.critic-result.v1` result;
+8. revalidate it with `tools/ingest_critic_results.py`.
 
-### 2. Art/world-direction pass
+Your result must echo the exact `assignment_id` and
+`execution_receipt_id`.
 
-Independently inspect:
+If required evidence is unavailable or ambiguous, return **unresolved**. Do not
+substitute a weaker modality.
 
-- world footprint and breathing room;
-- negative space;
-- prop/actor density;
-- protagonist silhouette/identity;
-- duplicate actors;
-- clipping/intersections;
-- landmarks/path readability;
-- default and alternate camera angles;
-- art/material/lighting cohesion;
-- atmosphere/state transitions;
-- phone/desktop composition.
+## Passes
 
-Walk/orbit/zoom beyond hero screenshots. If spreading the same content across a larger footprint would materially improve play, record spatial congestion as a blocker.
+The quality system intentionally separates passes.
 
-### 3. Tutorial/progression pass
+### Cold observer
 
-Verify the structure is actually:
+Starts from caption-blind/player-facing evidence before source/design intent.
 
-`prologue -> separate tutorial -> clean success -> Level 1 mission -> recoverable challenge -> payoff`
+Report:
+- what kind of place/world you perceive;
+- important characters/relationships;
+- ordinary activity;
+- what event occurred;
+- what appears to cause it;
+- what changed afterward;
+- who/what you control at the handoff;
+- what you think the next action is;
+- anything understood only because of explanatory text.
 
-For the current track, the player directly controls the robot protagonist. A separate literal helper/avatar is a design mismatch.
+Do not read source/story treatment in this pass.
 
-### 4. Gameplay/learning pass
+### Cinematic causality
 
-Inspect whole available experience: first action, mistake, recovery, later challenge, payoff, transfer, replay, save/resume, reset/logout and controls after save.
+Requires a validated cold-observer result plus motion evidence.
 
-Record two separate judgments:
+Judge:
+- visible cause/source;
+- anticipation;
+- character/environment reaction;
+- camera/VFX/lighting/atmosphere;
+- audio contribution when available;
+- persistent world-after consequence;
+- whether perceived magnitude matches narrative magnitude.
 
-- would a younger player stop and look?
-- would they understand what to do and want to continue?
+### Motion / audience
 
-Do not infer learning from completion. Inspect concept fidelity, assistance and changed-context transfer separately.
+Watch actual motion over time.
 
-### 5. Evidence discipline
+Judge:
+- idle/rest;
+- locomotion;
+- interaction/reaction;
+- cinematic acting;
+- loop repetition;
+- stylistic coherence;
+- unintended uncanny/creepy/twitchy reads for the target audience.
 
-Use desktop and 360/390/430 portrait where applicable. Record touch/keyboard, enlarged text, reduced motion and actual audio listening when claiming sound quality. Note reloads/workarounds. Mark unobserved states rather than filling them from source.
+Still screenshots cannot certify this pass.
 
-Write concrete failures and likely quit points before scores. A 9+ requires a strong counterexample attempt. No average can compensate for unclear story, cramped world, clipping, wrong embodiment, broken controls or shallow transfer.
+### Physicality
 
-The legacy JSON checker validates record structure/evidence only. It does **not** encode the independent art/world gate yet; a checker pass is insufficient if this handoff finds an art/world or progression blocker.
+Use interactive evidence.
 
-There is one final human critic: the current user. Agents/tools are internal reviewers only. Do not infer user acceptance or advance Level 2 because an internal review passes.
+Probe:
+- walls/props/doors;
+- opened/closed traversal;
+- camera geometry;
+- unusual approach angles;
+- visible solid objects versus actual collision.
+
+### Handoff / tutorial
+
+Use a fresh interactive path.
+
+At every transition answer:
+1. who/what is controlled now;
+2. what changed;
+3. current goal;
+4. available verb/control;
+5. one best next action;
+6. visible success signal.
+
+Each tutorial step needs target/control -> action -> success detector -> feedback.
+
+### Audio atmosphere
+
+Listen to the captured player-facing audio.
+
+A raw audio file is input evidence, not an audio-quality judgment. Record actual
+listening observations and return `audio_listening` through the validated critic
+result pipeline.
+
+### Learning / transfer
+
+Use authoritative replay/evidence, not completion alone.
+
+Judge concept fidelity, changed-context transfer, assistance, and whether human
+prediction/hints can incorrectly influence the authoritative model outcome.
+
+### Intent comparison
+
+Runs **after** a validated cold-observer result exists.
+
+Compare observed meaning against source/design intent. Do not rewrite the cold
+observations to fit the design.
+
+## Evidence discipline
+
+Match evidence to claim:
+- world comprehension -> cold report + caption-blind motion/interactive evidence;
+- motion -> motion evidence;
+- audio quality -> actual listening;
+- physicality/tutorial -> interactive trace;
+- learning -> authoritative replay;
+- art composition -> screenshots plus traversal/alternate cameras.
+
+Every result records observations before interpretation, uncertainties,
+counterexample attempt, blockers/retest, evidence actually used and harness
+execution receipt.
+
+## Release boundary
+
+Green CI is not creative readiness.
+
+Normal preview promotion requires:
+- exact-candidate successful technical run;
+- complete review index;
+- every required post-CI critic pass revalidated;
+- every required critic verdict = **pass**;
+- schema-v2 final review record = `ready_for_user_review`;
+- no explicit blocker;
+- candidate not human-rejected.
+
+An explicit user preview override may only bypass **missing/unresolved** review
+for a technically safe candidate. It may never bypass a `needs_revision`
+critic verdict or an explicit blocker.
+
+Only the current user's explicit verdict establishes product acceptance and
+permits Phase/Level advancement.
