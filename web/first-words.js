@@ -209,7 +209,8 @@ function frame(){
     if(marker.dataset.action){marker.disabled=Boolean(blocked()||!available);marker.classList.toggle('chosen',marker.dataset.clue===s.clue);}
     const tutorialTarget=marker.classList.contains('tutorial-target-marker');
     const targetMismatch=tutorialTarget&&(marker.dataset.anchor!==host.dataset.tutorialWorldTarget||!available);
-    marker.hidden=!point?.visible||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.anchor==='star-label'&&s.status==='success');
+    const guidable=tutorialTarget?Boolean(point?.inFront):Boolean(point?.visible);
+    marker.hidden=!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.anchor==='star-label'&&s.status==='success');
     if(point){
       const safeTop=Math.max(150,goal.bottom-rect.top+marker.offsetHeight+8);
       const safeBottom=Math.max(safeTop+12,tray.top-rect.top-12);
