@@ -164,8 +164,9 @@ Every mutating request should conceptually carry:
 
 ```yaml
 contract_version: "0.1"
-request_id: <unique request ref>
+request_id: <unique transport-attempt ref>
 idempotency_key: <stable key for this intended operation>
+intent_digest: <trusted SHA-256 of the intended operation payload>
 actor_ref: <transport-authenticated actor/service ref>
 purpose: <short machine-readable purpose>
 required_capabilities: []
@@ -175,9 +176,11 @@ extensions: {}
 Rules:
 
 - Actor identity comes from trusted transport/authentication, not model-generated text.
-- Reusing the same idempotency key with a materially different payload is an `IDEMPOTENCY_CONFLICT`.
+- `intent_digest` is computed by the trusted adapter/harness over the intended operation payload; it excludes transport-attempt identity such as `request_id` and the idempotency key itself.
+- Retrying the same intended operation may use a new `request_id`, but it must preserve the same `idempotency_key` and `intent_digest`.
+- Reusing the same idempotency key with a different `intent_digest` is an `IDEMPOTENCY_CONFLICT`.
 - A transport timeout does not prove the operation failed.
-- Mutating operations must be reconcilable by `request_id` or `idempotency_key`.
+- Mutating operations must be reconcilable by `request_id` or `idempotency_key`, with the expected `intent_digest` supplied during reconciliation.
 
 ---
 
@@ -242,9 +245,13 @@ Returns the latest authoritative run snapshot known to Terminal PM Agent.
 
 ### 7.4 `lookup_operation`
 
-Reconciles a mutating request by `request_id` or `idempotency_key`.
+Reconciles a mutating request by `request_id` or `idempotency_key`, together
+with the caller's expected `intent_digest`.
 
-This operation is mandatory because network/controller uncertainty must not cause duplicate effects.
+This operation is mandatory because network/controller uncertainty must not cause
+duplicate effects. A lookup that finds the same idempotency key under a different
+intent digest returns `IDEMPOTENCY_CONFLICT`, not the older result as though it
+belonged to the new payload.
 
 ### 7.5 `cancel_run`
 
@@ -276,6 +283,7 @@ Every mutating operation returns or can later reconcile to an operation receipt:
 operation_ref:
 request_id:
 idempotency_key:
+intent_digest:
 effect_status: rejected | acknowledged | effect_confirmed | effect_unknown
 run_ref: optional
 evidence_refs: []
@@ -290,11 +298,17 @@ Meaning:
 - `effect_confirmed`: requested effect has authoritative evidence.
 - `effect_unknown`: the system cannot currently prove whether the effect occurred.
 
-Critical invariant:
+Critical invariants:
 
 > `effect_unknown` is never automatically treated as safe-to-retry.
 
-Reconcile first.
+> A reconciled receipt is valid for a retry only when its `idempotency_key` and
+> `intent_digest` match the intended operation. The original receipt may carry a
+> different `request_id` because a later retry/reconciliation attempt is a new
+> transport attempt, not a new intended effect.
+
+Reconcile first. If the same key resolves to another intent digest, return
+`IDEMPOTENCY_CONFLICT`; never dispatch again to discover which effect wins.
 
 ---
 
