@@ -33,9 +33,9 @@ def main():
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before_lantern
             page.screenshot(path=str(out/'prologue-lantern-release-390.png'),timeout=15000)
 
-            log('Prologue: rupture');page.get_by_role('button',name='Continue →',exact=True).click()
-            expect(page.locator('#rgi-title')).to_have_text('The sky cracks open.')
-            page.get_by_role('button',name='Pause story motion').click()
+            log('Prologue: visible cause');page.get_by_role('button',name='Continue →',exact=True).click()
+            expect(page.locator('#rgi-title')).to_have_text('A shadow over Bellweather.')
+            until(page,'()=>!FirstWordsReview.runtime.world.animating')
             cause_before=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
                 const w=getGameRuntime().world;return {
                   warden:w.projectEntity('warden'),
@@ -45,8 +45,10 @@ def main():
             assert cause_before['warden'] and cause_before['warden']['visible'],cause_before
             assert cause_before['link'] and cause_before['link']['visible'],cause_before
             assert cause_before['rift'] is None,cause_before
-            page.screenshot(path=str(out/'prologue-rupture-cause-before-effect-390.png'),timeout=15000)
-            page.get_by_role('button',name='Resume story motion').click()
+            page.screenshot(path=str(out/'prologue-threat-cause-390.png'),timeout=15000)
+
+            log('Prologue: rupture effect');page.get_by_role('button',name='Continue →',exact=True).click()
+            expect(page.locator('#rgi-title')).to_have_text('The sky cracks open.')
             until(page,"""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
                 return Boolean(getGameRuntime().world.projectEntity('rift')?.visible);
             }""")
@@ -123,7 +125,7 @@ def main():
             until(page,"()=>FirstWordsReview.audio.phase==='repair'")
             assert page.evaluate('FirstWordsReview.runtime.instanceId')==instance
             assert page.evaluate("FirstWordsReview.runtime.mode")=='mission'
-            checks.append('Six causal prologue beats establish happy Bellweather, rupture, isolation, prison reveal, visible speech loss and repair handoff before the separate tutorial; the same runtime becomes direct-control mission play.')
+            checks.append('Seven causal prologue beats separate normal Bellweather, visible Warden cause, rupture effect, isolation, prison reveal, visible speech loss and repair handoff before the separate tutorial; the same runtime becomes direct-control mission play.')
             checks.append('The Bellweather score is not required before a gesture; the first Continue gesture unlocks bellweather-score-v2 and schedules bars before danger-phase assertions.')
 
             before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
@@ -153,6 +155,8 @@ def main():
                 vertical_clear=clearance['lanternY']>clearance['captionBottom']+16
                 assert clearance['visible'] and (horizontal_clear or vertical_clear),clearance
                 q.screenshot(path=str(out/f'prologue-lantern-release-{width}.png'),timeout=15000)
+                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('A shadow over Bellweather.')
+                q.screenshot(path=str(out/f'prologue-threat-reduced-{width}.png'),timeout=15000)
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('The sky cracks open.')
                 q.screenshot(path=str(out/f'prologue-rupture-reduced-{width}.png'),timeout=15000)
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('Silence.')
@@ -170,7 +174,7 @@ def main():
             video.save_as(str(out/'prologue-motion-390.webm'))
             assert (out/'prologue-motion-390.webm').exists()
             assert not errors,errors
-            checks.append('Fresh 360/430/desktop reduced-motion preserves the same six story states and can skip safely into the separate tutorial without a 2D fallback.')
+            checks.append('Fresh 360/430/desktop reduced-motion preserves the same seven story states and can skip safely into the separate tutorial without a 2D fallback.')
             cold_packet={
                 'schema':'vibelearn.cold-observer-evidence.v1',
                 'candidate_source':'GitHub Actions exact SHA supplies candidate identity',
@@ -178,8 +182,8 @@ def main():
                 'intentionally_omitted':['story treatment','storyboard rationale','intended causal explanation','creator critique scores'],
                 'evidence':{
                     'motion_video':'prologue-motion-390.webm',
-                    'phone_frames':['prologue-home-390.png','prologue-lantern-release-390.png','prologue-rupture-cause-before-effect-390.png','prologue-rupture-paused-390.png','prologue-rupture-complete-390.png','prologue-limbo-390.png','prologue-prison-reveal-390.png','prologue-speech-extraction-paused-390.png','prologue-speech-theft-390.png','prologue-repair-handoff-390.png'],
-                    'reduced_motion_frames':['prologue-rupture-reduced-360.png','prologue-rupture-reduced-430.png','prologue-rupture-reduced-1280.png'],
+                    'phone_frames':['prologue-home-390.png','prologue-lantern-release-390.png','prologue-threat-cause-390.png','prologue-rupture-paused-390.png','prologue-rupture-complete-390.png','prologue-limbo-390.png','prologue-prison-reveal-390.png','prologue-speech-extraction-paused-390.png','prologue-speech-theft-390.png','prologue-repair-handoff-390.png'],
+                    'reduced_motion_frames':['prologue-threat-reduced-360.png','prologue-threat-reduced-430.png','prologue-threat-reduced-1280.png','prologue-rupture-reduced-360.png','prologue-rupture-reduced-430.png','prologue-rupture-reduced-1280.png'],
                     'experience_modes':['opening','tutorial'],
                     'device':'Chromium emulation 390x844 touch plus reduced-motion 360/430/1280'
                 },
