@@ -89,6 +89,8 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertIn("evidence_run_id:",workflow)
         self.assertIn("review_record:",workflow)
         self.assertIn("build_review_index.py",workflow)
+        self.assertIn("ingest_critic_results.py",workflow)
+        self.assertIn('docs/reviews/results/$CANDIDATE_SHA',workflow)
         self.assertIn("check_release_gate.py",workflow)
         self.assertIn('gh","api"',workflow)
         self.assertIn("git merge-base --is-ancestor",workflow)
