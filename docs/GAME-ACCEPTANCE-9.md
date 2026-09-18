@@ -1,5 +1,33 @@
 # Game acceptance — the user's verdict is final
 
+## Current user review — 18 September 2026
+
+The user is now reviewing runtime
+`ad14c5aced6cf053c7617dfb03245506e1e9dad5` on Render.
+
+**Current verdict for the opening: needs revision. Review of the rest of Phase 1
+is still in progress.**
+
+The prior internal 9/10 story/art/gameplay/learning scores for this same runtime
+are invalidated as readiness claims by the user's direct review. They remain
+diagnostic evidence only.
+
+New user blockers:
+1. the opening does not visually establish Bellweather/world/setting well enough;
+2. captions and prior knowledge still carry too much story/world meaning;
+3. Zip's default idle/rest animation is stylistically inappropriate and may read
+   as unnatural/creepy to the target young audience.
+
+The creative-direction process has been updated to require caption-blind visual
+world comprehension and real-time animation/motion review.
+
+Do not repair/redeploy during the ongoing review unless necessary for the user to
+continue. Collect the remaining feedback first. No Level 2/public rollout/new
+phase begins while this review is open.
+
+## Earlier acceptance/readiness record
+
+
 ## User acceptance status
 
 The most recent explicit user verdict remains the **17 September 2026
