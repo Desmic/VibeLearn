@@ -88,6 +88,7 @@ class CriticReviewTests(unittest.TestCase):
             "cold_observer_report": "cold.json",
             "interactive_trace": "interactive.json",
             "motion_video": "motion.webm",
+            "caption_blind_motion": "caption-blind.webm",
             "audio_listening": "audio.txt",
             "screenshot": "screen.png",
             "runtime_trace": "runtime.json",
@@ -151,6 +152,15 @@ class CriticReviewTests(unittest.TestCase):
         (self.root / "assignment.json").write_text("assignment", encoding="utf-8")
         record["criteria"]["world_comprehension"]["evidence"] = [
             {"ref": "assignment.json", "modality": "review_assignment", "candidate_sha": self.sha},
+            {"ref": "motion.webm", "modality": "motion_video", "candidate_sha": self.sha},
+        ]
+        with self.assertRaisesRegex(ValueError, "world_comprehension: evidence needs"):
+            self.check(record)
+
+    def test_v2_world_comprehension_cannot_use_captioned_motion_only(self):
+        record = self.v2_record()
+        record["criteria"]["world_comprehension"]["evidence"] = [
+            {"ref": "cold.json", "modality": "cold_observer_report", "candidate_sha": self.sha},
             {"ref": "motion.webm", "modality": "motion_video", "candidate_sha": self.sha},
         ]
         with self.assertRaisesRegex(ValueError, "world_comprehension: evidence needs"):
