@@ -221,3 +221,39 @@ The current proof track should now establish, in order:
 7. separate cold-observer and design-intent critic passes.
 
 Do not begin Level 2 until Phase 1 proves these system capabilities.
+
+
+## Review record schema v2
+
+New serious game reviews should use `tools/check_critic_review.py` schema v2.
+Schema v1 remains readable only for historical records.
+
+V2 adds explicit criteria for:
+- world comprehension;
+- motion direction;
+- semantic-object readability;
+- audio atmosphere;
+- physicality;
+- transition/handoff clarity;
+- tutorial clarity.
+
+It also requires:
+- `review_order: cold_observer_then_intent`;
+- a description of what context was withheld from the cold observer;
+- exact-candidate binding on each evidence item;
+- evidence modalities that match the claim.
+
+Examples of modality rules:
+- motion direction cannot pass from screenshots alone;
+- physicality requires an interactive trace;
+- audio-atmosphere quality requires an actual listening report;
+- concept fidelity/transfer require authoritative replay evidence;
+- world comprehension requires a cold-observer report plus motion/interactive
+  evidence.
+
+The checker can validate evidence stored in an extracted CI artifact workspace
+using `--evidence-root`; large motion/screenshots do not need to be committed
+to the repository merely to satisfy review structure.
+
+A structurally valid v2 record still does **not** determine taste, product
+quality or user acceptance. It prevents known classes of unsupported claims.
