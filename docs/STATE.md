@@ -1,12 +1,13 @@
 # Current state — LLM learning-game proof track
 
-## Verified main + adapter-fixture checkpoint — 19 September 2026
+## Canonical main + completed adapter Phase 0 — 19 September 2026
 
-Last fully verified implementation checkpoint before this state-record update:
-`2bc82b5f2e9d12377fcceca9fc01362f873dab60`.
+Last fully verified **code-bearing canonical main** checkpoint before this
+state-record update:
+`40ec93f8b04cc7a3d88366d9195ec50555d9698f`.
 
-Exact GitHub Actions run `35390536902` passed:
-- foundation, including the full unit suite;
+Exact GitHub Actions run `35398208739` passed:
+- foundation, including the full unit/adapter suite;
 - first-words-opening;
 - first-words-tutorial;
 - first-words-controls;
@@ -15,8 +16,24 @@ Exact GitHub Actions run `35390536902` passed:
 - first-words-lifecycle;
 - exact-candidate review-index aggregation and sealed-capsule materialization.
 
-The exact review index reports these critic passes as ready for independent
-execution:
+Review-index artifact for that repository head:
+`10569881868`.
+
+### Game critic candidate remains SHA-bound separately
+
+The active **game/product critic candidate remains**
+`02d8e80e81df2e96262d75a17124a3a3d4ca483e`, whose exact Actions run
+`35391320627` passed all seven suites plus review-index before the automation
+Phase 0 merge.
+
+Do **not** transfer a critic result between `02d8e80...` and newer repository
+heads merely because the PlayCanvas/game files are unchanged. Continue the
+independent post-CI critic queue against one explicitly selected exact SHA; for
+the currently frozen queue that SHA is `02d8e80...`.
+
+The generated queue for that game candidate remains:
+
+**ready for genuinely independent execution**
 - cold_observer;
 - motion_audience;
 - physicality;
@@ -24,60 +41,90 @@ execution:
 - audio_atmosphere;
 - learning_transfer.
 
-These remain blocked by design until a validated cold-observer result exists:
+**blocked until a validated cold-observer result exists**
 - cinematic_causality;
 - intent_comparison.
 
-This is still **not** a creative-readiness, user-acceptance or deployment claim.
-The current chat/reviewer context already knows the intended story and prior user
-feedback, so it must not counterfeit the cold-observer result.
+The current chat/reviewer context already knows intended story and prior human
+findings. It is not a valid cold observer and must not manufacture that result.
 
-### Terminal PM adapter Phase 0
+### Terminal PM adapter Phase 0 — complete
 
-A fixture-only semantic adapter boundary now exists at
-`app/orchestrator_adapter.py`, with 13 focused tests in
-`tests/test_orchestrator_adapter.py`.
+The thin external-orchestrator v0.1 boundary is now merged on `main`:
 
-The slice proves only the v0.1 contract targets already authorized in
-`docs/ORCHESTRATOR-ADAPTER-CONTRACT.md`:
-- capability negotiation;
-- `start_run` request serialization without encoding worker topology;
-- idempotency/effect-unknown reconciliation before any retry;
-- conservative unknown cancel semantics;
-- `get_run` snapshot consumption;
-- multiple opaque required review profiles with no score averaging;
-- exact candidate/review/evidence linkage;
-- worker replacement lineage preservation;
-- VibeLearn product acceptance remaining independent from Terminal PM
-  orchestration completion;
-- product outcome -> incident -> child repair-run linkage;
-- hard budget requirements blocking when enforcement is unavailable;
-- additive extension data not gaining control authority.
+- `app/orchestrator_adapter.py`;
+- `tests/test_orchestrator_adapter.py`;
+- `tests/fixtures/orchestrator_adapter_v01.json`;
+- `docs/ORCHESTRATOR-ADAPTER-CONTRACT.md`.
 
-This is **not a live Terminal PM integration**. No HTTP/MCP/IPC transport,
-scheduler coupling, provider/model assumption, live run or production authority
-was added. Continue using contract fixtures until Terminal PM Agent's own
-execution policy authorizes a suitable live integration.
+The completed fixture-only slice has **27 focused adapter tests** plus serialized
+boundary fixtures covering:
+- capability negotiation for fresh dispatch;
+- hard reviewer capabilities derived from required review semantics;
+- restart-safe idempotency reconciliation bound to a trusted intent digest;
+- unknown start/cancel effects remaining unknown until authoritative
+  reconciliation;
+- retries reconciling before fresh capability checks;
+- typed opaque run/candidate/build/artifact references;
+- exact candidate/evidence/review binding;
+- multiple candidates requiring explicit active-candidate identity;
+- duplicate required review results failing closed;
+- worker replacement/recovery lineage;
+- hard budget/capability refusal rather than silent downgrade;
+- Terminal PM orchestration completion remaining distinct from VibeLearn product
+  acceptance;
+- outcome -> incident -> ordinary child repair-run lineage;
+- additive extension data never gaining control authority;
+- fixtures containing no model-visible credentials.
+
+No Terminal PM internal runtime/session/verifier/recovery modules were copied.
+
+### Current Terminal PM Agent boundary
+
+The connected private orchestrator repository was rechecked at
+`acc3a6d3580d8ea0715ff807434f973eff4f90d0`. Its authoritative checkpoint,
+updated 12 September 2026, says:
+- `gate_1_5: open`;
+- `live_run_authorized: false`;
+- ER-1 exhaustive review is active and incomplete;
+- the checkpoint is navigation/engineering status only and **never** live-run
+  authorization;
+- its next authorized work remains its own durable benchmark
+  admission/transport seam and public/synthetic qualification;
+- current benchmark approval does not authorize a Gate run, worker effect,
+  private upload or credential change.
+
+Therefore VibeLearn **Phase 0 is complete**, but the first real Terminal PM
+integration run (Phase 1) is blocked by the external orchestrator's own current
+execution policy. No live Terminal PM run was dispatched.
 
 ### Deployment/database boundary
 
-Render remains intentionally pinned to rejected
+Render remains intentionally pinned to the rejected runtime
 `ad14c5aced6cf053c7617dfb03245506e1e9dad5`; do not ask the user to review it
-again. No Render promotion and no Supabase schema/data mutation occurred in this
-checkpoint. Do not start Level 2.
+again.
+
+Supabase remains unchanged by this work. No production schema/data mutation,
+Render branch promotion or deployment occurred. Do not start Level 2.
 
 ### Next active work
 
-1. Preserve the exact candidate/evidence identity produced by CI.
-2. Run genuinely context-separated critic execution outside this contaminated
-   chat context; ingest results only with matching harness receipts.
-3. Unlock cinematic-causality and intent-comparison only after the cold-observer
-   dependency validates.
-4. Repair any `needs_revision` blocker and re-run the exact-candidate gates.
-5. In parallel, only continue Terminal PM integration at the fixture/contract
-   boundary until its own live-execution policy changes.
-6. Promote a replacement preview only after all required product critics pass;
-   Level 2 still requires explicit human acceptance.
+1. Execute the six ready post-CI critics in genuinely context-separated reviewer
+   sessions against the frozen game candidate `02d8e80...`, with sealed
+   capsules and harness execution receipts.
+2. Ingest/revalidate results sequentially. A `needs_revision` verdict blocks;
+   missing/unresolved evidence stays incomplete rather than being replaced by a
+   weaker modality.
+3. Unlock cinematic-causality and intent-comparison only after the validated
+   cold-observer dependency exists.
+4. Repair any critic blocker on a new exact candidate and repeat the required
+   evidence/review sequence.
+5. Do not add more Terminal PM/VibeLearn integration machinery merely to make
+   progress while live execution is externally forbidden. Resume Phase 1 only
+   when Terminal PM's current checkpoint authorizes a bounded live run through
+   the same adapter.
+6. Promote a replacement preview only after all required v2 critics pass and the
+   release gate succeeds. Level 2 still requires explicit human acceptance.
 
 ---
 
