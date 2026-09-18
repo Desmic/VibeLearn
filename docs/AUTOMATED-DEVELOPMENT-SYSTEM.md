@@ -1,9 +1,10 @@
 # VibeLearn automated development system — Terminal PM Agent orchestration contract
 
 **Status:** approved target architecture / decoupled integration handoff  
-**Date:** 18 September 2026  
-**VibeLearn baseline inspected:** `main` at `a150db3f31fb565ddc28cacf9f41e99ec3eebb16`; current reviewed runtime candidate remains `ad14c5aced6cf053c7617dfb03245506e1e9dad5` per `docs/STATE.md`.  
-**Terminal PM Agent status checked:** the connected private repository is still under active development. Its current checkpoint keeps Gate 1.5 open, `live_run_authorized=false`, and the ER-1 exhaustive post-integration review in progress. Treat it as an evolving external orchestrator, not a stable library to absorb.
+**Date:** 19 September 2026  
+**VibeLearn baseline inspected:** exact frozen `main` candidate `02d8e80e81df2e96262d75a17124a3a3d4ca483e`; deployed Render runtime remains the rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5` per `docs/STATE.md`.  
+**Phase 0 implementation proof:** fixture-only adapter branch was verified at `dff84f661fc388b1c8999307f4fe312d6fc9ef0b`, GitHub Actions run `35396734182`: all seven VibeLearn suites plus exact-candidate review-index/capsule materialization passed. PR #12 remains draft and unmerged so adapter work does not churn the exact game-review candidate on `main`.  
+**Terminal PM Agent status checked:** connected private repository `Desmic/terminal-agent-20260223023455` at `acc3a6d3580d8ea0715ff807434f973eff4f90d0`, checkpoint updated 12 September 2026. Its authoritative checkpoint says `gate_1_5: open`, `live_run_authorized: false`, ER-1 exhaustive review active/incomplete, and explicitly states the checkpoint is navigation/status only and never live-run authorization. Treat it as an evolving external orchestrator, not a stable library to absorb.
 
 This document defines how VibeLearn should integrate with the evolving Terminal PM Agent through a narrow, versioned orchestration contract so VibeLearn can become a highly automated product-development and game-generation system without copying a moving internal architecture.
 
@@ -30,13 +31,20 @@ The system is not an agent hierarchy whose highest model declares truth. It is a
 
 ### 1.1 Current Terminal PM Agent status and architectural consequence
 
-The Terminal PM Agent is not a frozen dependency today. Its own current status explicitly says:
+The Terminal PM Agent is not a frozen dependency today. Its exact 12 September
+checkpoint at `acc3a6d3580d8ea0715ff807434f973eff4f90d0` explicitly says:
 
 - Gate 1.5 is open;
-- live runs are not authorized;
-- ER-1 exhaustive post-integration review is still in progress;
-- context/evidence/recovery/reconciliation boundaries are still active development;
-- production-readiness work is not complete.
+- `live_run_authorized=false`;
+- ER-1 exhaustive review is active and incomplete;
+- the current checkpoint is navigation/engineering status only and is **never**
+  live-run authorization;
+- its next action is its own durable per-hop benchmark admission/transport seam,
+  with public/synthetic fixture qualification before any live admission;
+- no Gate run, private upload, worker effect or credential change is authorized
+  by the current benchmark approval;
+- context/evidence/recovery/reconciliation and production-readiness boundaries
+  remain active work.
 
 Therefore VibeLearn must **not fork or copy its orchestration internals now**.
 
@@ -991,15 +999,35 @@ Do **not** require Astra. Astra is exercised only when a real unresolved ambigui
 
 ### Phase 0 — define and freeze only the contract
 
-- record current VibeLearn build/test baseline;
-- inspect current Terminal PM Agent status and blockers;
-- define the minimal adapter request/result semantics;
-- define external run/artifact/evidence references;
-- define unknown-outcome behavior;
-- create contract fixtures;
-- do not move Terminal PM Agent code into VibeLearn.
+**Status: implemented and verified on the isolated adapter branch; do not merge
+into the frozen game-review candidate merely to mark the phase complete.**
 
-**Exit:** VibeLearn can test the integration boundary without a live orchestrator.
+Implemented/verified:
+- current VibeLearn baseline and exact Terminal PM checkpoint recorded;
+- minimal v0.1 adapter request/result semantics;
+- capability negotiation for fresh dispatch;
+- restart-safe idempotency reconciliation bound to a trusted intent digest;
+- unknown-effect handling that reconciles before retry and never assumes failure;
+- typed opaque run/candidate/build/artifact refs;
+- exact candidate/evidence/review identity with ambiguous candidates and duplicate
+  required reviews failing closed;
+- required review semantics deriving their hard reviewer capabilities rather than
+  relying on a duplicated caller hint;
+- VibeLearn product acceptance remaining independent of orchestrator completion;
+- outcome -> incident -> normal child repair-run lineage;
+- serialized fixtures for success, reviewer-proven defect, unresolved review,
+  worker replacement/recovery, budget/capability refusal and product rejection;
+- no Terminal PM internal modules copied into VibeLearn;
+- no live Terminal PM dispatch.
+
+Verification before this documentation-only status sync:
+`dff84f661fc388b1c8999307f4fe312d6fc9ef0b`, GitHub Actions
+`35396734182`, all seven suites + review-index passed.
+
+**Exit: satisfied for the fixture-only contract boundary.** VibeLearn can test
+the integration semantics without a live orchestrator. Phase 1 remains blocked
+by Terminal PM Agent's own `live_run_authorized=false` checkpoint, not by a
+missing VibeLearn Phase 0 adapter.
 
 ### Phase 1 — first authorized external run
 
