@@ -104,14 +104,15 @@ def load_index(path:Path):
     try:
         value=json.loads(path.read_text(encoding="utf-8"))
     except (OSError,json.JSONDecodeError) as exc:
-        raise ValueError(f"cannot read review index: {exc}") from exc
-    if value.get("schema")!="vibelearn.review-evidence-index.v1":
-        raise ValueError("unsupported review-index schema")
+        raise ValueError(f"cannot read review input: {exc}") from exc
+    if value.get("schema") not in ("vibelearn.review-evidence-index.v1","vibelearn.review-workspace.v1"):
+        raise ValueError("unsupported review input schema")
     return value
 
 def flatten_evidence(index):
     items=[]
-    for receipt in index.get("receipts") or []:
+    base=index.get("base_index") if index.get("schema")=="vibelearn.review-workspace.v1" else index
+    for receipt in base.get("receipts") or []:
         base=Path(receipt["receipt_ref"]).parent
         for item in receipt.get("evidence") or []:
             if not isinstance(item,dict):
@@ -120,6 +121,9 @@ def flatten_evidence(index):
             copy["ref"]=(base/str(item.get("ref",""))).as_posix()
             copy["suite"]=receipt["suite"]
             items.append(copy)
+    for item in index.get("supplemental_evidence") or []:
+        if isinstance(item,dict):
+            copy=dict(item);copy["suite"]="post-ci";items.append(copy)
     return items
 
 def build_assignments(index):
