@@ -45,6 +45,20 @@ class CriticExecutionReceiptTests(unittest.TestCase):
                 [outside],["assignment"]
             )
 
+    def test_assignment_capsule_must_be_present_in_supplied_context(self):
+        with self.assertRaisesRegex(ValueError,"include the assignment capsule"):
+            build_receipt(
+                self.assignment,"terminal-orchestrator","session-123",
+                [self.evidence[0]],["runtime only"]
+            )
+
+    def test_forbidden_context_label_is_detected_from_supplied_context(self):
+        with self.assertRaisesRegex(ValueError,"supplied forbidden context label"):
+            build_receipt(
+                self.assignment,"terminal-orchestrator","session-123",
+                [self.evidence[0]],["assignment","story treatment v4"]
+            )
+
     def test_forbidden_context_is_hard_rejected(self):
         with self.assertRaisesRegex(ValueError,"forbidden context"):
             build_receipt(
