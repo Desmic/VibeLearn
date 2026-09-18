@@ -33,7 +33,7 @@ def main():
                 page.get_by_role('button',name='Zoom camera in',exact=True).click()
                 expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MENU')
                 expect(page.locator('#world')).to_have_attribute('data-tutorial-focus','menu')
-                expect(page.locator('#menu-open')).to_have_class(/tutorial-focus/)
+                assert page.locator('#menu-open').evaluate("el=>el.classList.contains('tutorial-focus')")
                 page.screenshot(path=str(ROOT/f'artifacts/control-practice-menu-prompt-{width}.png'))
                 page.get_by_role('button',name='Open game menu',exact=True).click()
                 page.screenshot(path=str(ROOT/f'artifacts/control-practice-menu-open-{width}.png'))
