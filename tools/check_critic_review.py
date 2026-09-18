@@ -47,6 +47,18 @@ EVIDENCE_MODALITIES = {
     "source_inspection",
 }
 
+MODALITY_EXTENSIONS = {
+    "cold_observer_report": {".json", ".md", ".txt"},
+    "interactive_trace": {".json", ".zip"},
+    "motion_video": {".webm", ".mp4", ".mov"},
+    "audio_listening": {".json", ".md", ".txt"},
+    "screenshot": {".png", ".jpg", ".jpeg", ".webp"},
+    "runtime_trace": {".json", ".zip"},
+    "authoritative_replay": {".json", ".md"},
+    "ci_report": {".json", ".txt"},
+    "source_inspection": {".json", ".md", ".txt"},
+}
+
 # Each tuple is an AND requirement; alternatives inside a tuple are OR.
 CRITERION_MODALITIES = {
     "world_role_stakes": (("cold_observer_report",), ("motion_video", "interactive_trace")),
@@ -102,6 +114,10 @@ def evaluate(record, candidate, root=ROOT):
             path = (root / ref).resolve()
             require(path.is_relative_to(root.resolve()) and path.is_file(),
                     f"Missing or external evidence: {ref}")
+            if schema == 2:
+                allowed = MODALITY_EXTENSIONS.get(modality, set())
+                require(not allowed or path.suffix.lower() in allowed,
+                        f"{modality}: unsupported evidence file type {path.suffix.lower()}")
         if schema == 2 and criterion:
             for acceptable in CRITERION_MODALITIES.get(criterion, ()):
                 require(modalities.intersection(acceptable),
@@ -197,13 +213,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("record", type=Path)
     parser.add_argument("--candidate", required=True)
+    parser.add_argument("--evidence-root", type=Path, default=ROOT,
+                        help="Root containing extracted exact-candidate evidence files")
     parser.add_argument("--validate-only", action="store_true")
     args = parser.parse_args()
     try:
         record = json.loads(args.record.read_text(encoding="utf-8"))
         if not isinstance(record, dict):
             raise ValueError("Review must be an object")
-        result = evaluate(record, args.candidate)
+        result = evaluate(record, args.candidate, args.evidence_root)
     except (ValueError, OSError, TypeError) as exc:
         print(json.dumps({"status": "invalid_record", "error": str(exc)}))
         return 2
