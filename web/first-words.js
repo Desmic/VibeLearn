@@ -244,5 +244,13 @@ async function boot(){
     $('#loading').hidden=true;text('#start','Sign in to continue');$('#start').disabled=false;$('#start').onclick=()=>{location.assign('/');};text('#error',error.message);$('#error').hidden=false;
   }
 }
-window.FirstWordsReview={get state(){return view();},get runtime(){return runtime.stats();},get audio(){return audio.stats();}};
+window.FirstWordsReview={
+  get state(){return view();},
+  get runtime(){return runtime.stats();},
+  get audio(){return audio.stats();},
+  audioCapture:{
+    start:()=>audio.startCapture(),
+    stop:()=>audio.stopCapture()
+  }
+};
 window.addEventListener('pagehide',()=>audio.dispose(),{once:true});boot();
