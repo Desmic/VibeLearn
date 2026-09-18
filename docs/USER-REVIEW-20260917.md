@@ -260,3 +260,134 @@ default requirement for every generated game or every story beat.
 **Current implementation decision:** text narration now; narrator-voice support is
 a planned platform capability for future appropriate cases. Do not add voice
 generation to the current runtime while this user review is still in progress.
+
+
+### UR-17 — Major-event storytelling failed: rupture has no convincing event direction
+
+The user stopped further review after the rupture/prison/tutorial sequence because
+the opening still fails at a fundamental storytelling level.
+
+Observed:
+- "The sky cracks open" does not feel like a sky/world rupture;
+- no convincing thunder/light/VFX/atmosphere shift sells the event;
+- the robots mostly move/fly and then disappear;
+- the event lacks enough sensory/environmental consequence to feel major.
+
+This is not a request for more particle count. It is a **major-event direction**
+failure: a catastrophic story event needs coordinated cause, anticipation,
+character reaction, world reaction, camera, light/atmosphere, sound/effect and
+persistent consequence appropriate to its importance.
+
+**System correction:** generated/storyboarded major events must declare and be
+reviewed against an event-direction contract. The critic must watch the event in
+motion and judge whether the perceived magnitude matches the narrative magnitude.
+A caption naming thunder/rupture cannot compensate for an event that visually
+reads as "actors translate upward."
+
+### UR-18 — Antagonist causality is not communicated
+
+The user reports that the opening does not show that the evil robot caused the
+disruption. The Warden appears later, but the current presentation does not make
+the relationship between the rupture, imprisonment and antagonist legible.
+
+Whether a story intentionally withholds the culprit is a design choice. If the
+story intends the antagonist to be understood as the cause, the experience must
+show a causal chain or strong readable evidence.
+
+**System correction:** StoryWorldSpec / cinematic-event design must explicitly
+declare causal attribution:
+- known visible cause;
+- intentionally unknown cause;
+- misleading/ambiguous cause as a deliberate story device.
+
+Critics must compare the intended attribution with what a cold viewer actually
+infers. They must not fill the gap from story-doc knowledge.
+
+### UR-19 — Important story objects need semantic visual identity
+
+The speech engine being represented by a generic cube does not communicate
+"Zip's voice/speech capability" strongly enough for a major emotional/mechanical
+beat.
+
+The issue is general: abstract gameplay/story concepts cannot be assigned an
+arbitrary primitive and considered visually communicated.
+
+**System correction:** important semantic objects must declare a readability
+strategy—attachment/location, silhouette, material/light language, behavior,
+prior introduction, transformation, animation/effect, label/narration support,
+or another intentional cue. A generic primitive is acceptable only if the game
+has already taught the player what it means.
+
+Critics must ask a cold viewer what the object appears to be before reading its
+semantic ID.
+
+### UR-20 — World physicality failed: Zip can walk through visible objects
+
+The user's screenshot shows the controlled protagonist intersecting/passing
+through visible world props.
+
+This is both a runtime/system and critic failure:
+- collision was stored separately as optional player-profile obstacle data;
+- visible archetypes could therefore be rendered without physical presence;
+- critics did not perform adversarial traversal through major props.
+
+**System correction:** collision/physicality belongs to WorldSpec entities and
+reusable archetypes. Player/camera collision should be derived from enabled
+world colliders. Physicality review must deliberately push into walls, stations,
+doors, props and navigation edges.
+
+This is being repaired at the reusable runtime/archetype layer rather than with a
+Bellweather-specific obstacle list.
+
+### UR-21 — Opening -> tutorial handoff and tutorial clarity fail
+
+The user reports that the transition into tutorial feels wrong and the tutorial
+itself is not clear. The supplied screenshot shows incompatible experience
+states at once: tutorial HUD is visible while a lower card still asks the player
+to "Enter the prologue."
+
+This violates a platform-level state invariant.
+
+**System correction:** every transition must have one active experience mode,
+one immediate goal and one dominant next action. Opening, handoff, tutorial and
+mission UI must not overlap semantically.
+
+A reusable handoff contract must answer:
+1. what just happened;
+2. who/what the player controls now;
+3. the immediate objective;
+4. the currently available verb/control;
+5. the one recommended next action;
+6. the visible response that confirms success.
+
+Tutorial steps need an explicit world/control target, action, success detector
+and feedback—not merely instructional text.
+
+### UR-22 — Treat these as quality-system failures, not one-game defects
+
+The user explicitly asked that the system not overfit to the current game. The
+current critic "agents" are still primarily prompt/text disciplines and have
+repeatedly self-certified candidates that fail obvious human review.
+
+Required platform response:
+- extract generalized contracts from each failure;
+- prevent invalid states in schemas/runtime where possible;
+- gather stronger evidence (interactive traversal, motion, audio, transition
+  traces) instead of relying mostly on screenshots/source;
+- separate cold-observer review from design-intent review;
+- keep creator context from leaking into the first comprehension pass;
+- use critics to judge taste/comprehension after structural invalid states have
+  already been prevented by the platform.
+
+See `EXPERIENCE-QUALITY-SYSTEM.md`.
+
+## User review termination — 18 September 2026
+
+The user has decided **not to review this candidate any further**. There is enough
+evidence to reject the current Phase 1 experience and improve the system before
+presenting another candidate.
+
+Do not ask the user to continue testing `ad14c5a`. Continue development and
+system repair autonomously. Present a later candidate only after the revised
+quality system has been applied end-to-end and internal critics have stronger
+evidence than the process that passed `ad14c5a`.
