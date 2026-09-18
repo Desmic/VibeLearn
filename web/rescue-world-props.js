@@ -29,7 +29,7 @@ export function gate(id,position,{width=2.2,height=3.6,color='gold'}={}){
     part('pillar'+side,'cylinder','stone',[side*(width/2+.1),height/2,0],[.36,height,.36]);
     part('cap'+side,'sphere',color,[side*(width/2+.1),height,0],[.55,.55,.55]);
   }
-  part('arch','torus',color,[0,height-.45,0],[width+1,.16,width+1],{rotation:[90,0,0]});
+  part('arch','box',color,[0,height-.05,0],[width+.8,.28,.42]);
   e.push({id:id+'-door',parent:id,position:[0,0,0]});
   for(let i=0;i<7;i++)e.push({id:id+'-bar-'+i,parent:id+'-door',primitive:'cylinder',material:'ink',position:[(i-3)*width/7,height*.4,0],scale:[.09,height*.8,.09]});
   e.push({id:id+'-rail',parent:id+'-door',primitive:'box',material:color,position:[0,height*.64,0],scale:[width,.12,.13]});
