@@ -7,7 +7,8 @@ from pathlib import Path
 PASS_SPECS={
     "cold_observer":{
         "requires":[["caption_blind_motion","interactive_trace"]],
-        "allowed_modalities":["caption_blind_motion","motion_video","audio_capture","screenshot","runtime_trace"],
+        "allowed_modalities":["caption_blind_motion","motion_video","audio_capture","runtime_trace"],
+        "suite_roles":["opening"],
         "forbidden_context":["story treatment","storyboard rationale","creator intent","semantic source identifiers","prior critic scores","user review diagnosis"],
         "output_modality":"cold_observer_report",
         "questions":[
@@ -23,6 +24,7 @@ PASS_SPECS={
     "cinematic_causality":{
         "requires":[["cold_observer_report"],["motion_video"]],
         "allowed_modalities":["cold_observer_report","motion_video","screenshot","audio_capture"],
+        "suite_roles":["post-ci","opening"],
         "forbidden_context":["creator defense","prior numeric scores"],
         "output_modality":"critic_report",
         "questions":[
@@ -35,6 +37,7 @@ PASS_SPECS={
     "motion_audience":{
         "requires":[["motion_video"]],
         "allowed_modalities":["motion_video","screenshot"],
+        "suite_roles":["opening","controls"],
         "forbidden_context":["asset-source default animation rationale","prior numeric scores"],
         "output_modality":"critic_report",
         "questions":[
@@ -46,6 +49,7 @@ PASS_SPECS={
     "physicality":{
         "requires":[["interactive_trace"]],
         "allowed_modalities":["interactive_trace","runtime_trace","screenshot"],
+        "suite_roles":["controls"],
         "forbidden_context":["source-code collision intent"],
         "output_modality":"critic_report",
         "questions":[
@@ -57,6 +61,7 @@ PASS_SPECS={
     "handoff_tutorial":{
         "requires":[["interactive_trace"]],
         "allowed_modalities":["interactive_trace","motion_video","screenshot","runtime_trace"],
+        "suite_roles":["opening","tutorial","chapter"],
         "forbidden_context":["implementation state-machine details"],
         "output_modality":"critic_report",
         "questions":[
@@ -68,6 +73,7 @@ PASS_SPECS={
     "audio_atmosphere":{
         "requires":[["audio_capture"]],
         "allowed_modalities":["audio_capture","motion_video"],
+        "suite_roles":["opening"],
         "forbidden_context":["audio source-code implementation"],
         "output_modality":"audio_listening",
         "questions":[
@@ -80,6 +86,7 @@ PASS_SPECS={
     "learning_transfer":{
         "requires":[["authoritative_replay"]],
         "allowed_modalities":["authoritative_replay","interactive_trace","runtime_trace"],
+        "suite_roles":["chapter"],
         "forbidden_context":["expected answer labels beyond the task itself"],
         "output_modality":"critic_report",
         "questions":[
@@ -90,7 +97,8 @@ PASS_SPECS={
     },
     "intent_comparison":{
         "requires":[["cold_observer_report"],["source_inspection"]],
-        "allowed_modalities":["cold_observer_report","source_inspection","motion_video","screenshot"],
+        "allowed_modalities":["cold_observer_report","source_inspection","motion_video"],
+        "suite_roles":["post-ci","foundation","opening"],
         "forbidden_context":["prior numeric scores"],
         "output_modality":"critic_report",
         "questions":[
@@ -110,21 +118,32 @@ def load_index(path:Path):
         raise ValueError("unsupported review input schema")
     return value
 
+def suite_role(suite):
+    if suite=="foundation":
+        return "foundation"
+    if suite=="post-ci":
+        return "post-ci"
+    if isinstance(suite,str) and "-" in suite:
+        return suite.rsplit("-",1)[-1]
+    return suite
+
 def flatten_evidence(index):
     items=[]
-    base=index.get("base_index") if index.get("schema")=="vibelearn.review-workspace.v1" else index
-    for receipt in base.get("receipts") or []:
-        base=Path(receipt["receipt_ref"]).parent
+    root_index=index.get("base_index") if index.get("schema")=="vibelearn.review-workspace.v1" else index
+    for receipt in root_index.get("receipts") or []:
+        receipt_base=Path(receipt["receipt_ref"]).parent
+        suite=receipt["suite"]
         for item in receipt.get("evidence") or []:
             if not isinstance(item,dict):
                 continue
             copy=dict(item)
-            copy["ref"]=(base/str(item.get("ref",""))).as_posix()
-            copy["suite"]=receipt["suite"]
+            copy["ref"]=(receipt_base/str(item.get("ref",""))).as_posix()
+            copy["suite"]=suite
+            copy["suite_role"]=suite_role(suite)
             items.append(copy)
     for item in index.get("supplemental_evidence") or []:
         if isinstance(item,dict):
-            copy=dict(item);copy["suite"]="post-ci";items.append(copy)
+            copy=dict(item);copy["suite"]="post-ci";copy["suite_role"]="post-ci";items.append(copy)
     return items
 
 def build_assignments(index):
@@ -135,13 +154,21 @@ def build_assignments(index):
         by_modality.setdefault(item.get("modality"),[]).append(item)
     assignments={}
     for name,spec in PASS_SPECS.items():
+        roles=set(spec.get("suite_roles") or [])
+        eligible=[
+            item for item in evidence
+            if not roles or item.get("suite_role") in roles
+        ]
+        eligible_by_modality={}
+        for item in eligible:
+            eligible_by_modality.setdefault(item.get("modality"),[]).append(item)
         missing=[]
         for alternatives in spec["requires"]:
-            if not any(by_modality.get(modality) for modality in alternatives):
+            if not any(eligible_by_modality.get(modality) for modality in alternatives):
                 missing.append(alternatives)
         allowed=[]
         for modality in spec["allowed_modalities"]:
-            allowed.extend(by_modality.get(modality,[]))
+            allowed.extend(eligible_by_modality.get(modality,[]))
         assignment={
             "schema":"vibelearn.critic-assignment.v1",
             "candidate_sha":candidate,
@@ -151,6 +178,7 @@ def build_assignments(index):
             "missing_evidence":[list(group) for group in missing],
             "allowed_evidence":sorted(allowed,key=lambda item:(item.get("suite",""),item.get("ref",""))),
             "allowed_modalities":spec["allowed_modalities"],
+            "suite_roles":spec.get("suite_roles") or [],
             "forbidden_context":spec["forbidden_context"],
             "questions":spec["questions"],
             "expected_output_modality":spec["output_modality"],
