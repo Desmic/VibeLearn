@@ -1,6 +1,6 @@
 /* Portable scenery and interactable shapes. No learner state or engine objects. */
-export function companionRobot(id,position,{color='teal',round=false,height=1.7}={}){
-  const e=[{id,position}];
+export function companionRobot(id,position,{color='teal',round=false,height=1.7,motion=null}={}){
+  const e=[{id,position,...(motion?{motion}:{})}];
   const part=(name,primitive,material,p,s)=>e.push({id:id+'-'+name,parent:id,primitive,material,position:p,scale:s});
   part('body',round?'sphere':'box',color,[0,height*.43,0],[round?1.15:.7,height*.65,.65]);
   part('head',round?'sphere':'box',color,[0,height*.85,0],[round?1.1:.8,height*.4,.7]);
