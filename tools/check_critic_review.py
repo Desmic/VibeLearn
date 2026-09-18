@@ -47,6 +47,7 @@ EVIDENCE_MODALITIES = {
     "source_inspection",
     "review_assignment",
     "audio_capture",
+    "caption_blind_motion",
 }
 
 MODALITY_EXTENSIONS = {
@@ -61,6 +62,7 @@ MODALITY_EXTENSIONS = {
     "source_inspection": {".json", ".md", ".txt", ".tar"},
     "review_assignment": {".json", ".md", ".txt"},
     "audio_capture": {".wav", ".mp3", ".ogg", ".m4a", ".webm"},
+    "caption_blind_motion": {".webm", ".mp4", ".mov"},
 }
 
 # Each tuple is an AND requirement; alternatives inside a tuple are OR.
@@ -68,7 +70,7 @@ CRITERION_MODALITIES = {
     "world_role_stakes": (("cold_observer_report",), ("motion_video", "interactive_trace")),
     "visible_causality": (("motion_video", "interactive_trace"),),
     "attachment_pull": (("cold_observer_report",),),
-    "world_comprehension": (("cold_observer_report",), ("motion_video", "interactive_trace")),
+    "world_comprehension": (("cold_observer_report",), ("caption_blind_motion", "interactive_trace")),
     "motion_direction": (("motion_video", "interactive_trace"),),
     "semantic_readability": (("cold_observer_report",),),
     "audio_atmosphere": (("audio_listening",),),
