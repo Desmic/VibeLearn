@@ -1,5 +1,38 @@
 # Current state — LLM learning-game proof track
 
+## Live user review checkpoint — 18 September 2026
+
+Deployed runtime under review:
+`ad14c5aced6cf053c7617dfb03245506e1e9dad5`.
+
+The user's current review has **rejected the opening/creative direction** even
+though the preceding internal critic scored story/art/gameplay/learning 9/10.
+Those internal scores are now historical evidence of an insufficient rubric, not
+the current readiness state.
+
+Current user findings:
+- opening still does not make sense as a world/setting;
+- visuals and animation must establish Bellweather and its normal life rather
+  than asking captions to explain the place;
+- Zip's default rest/idle loop is an art-direction mismatch: exaggerated stock
+  motion reads like a retro-game "character is alive" convention and may feel
+  unnatural/creepy to kids or young adults in the current 3D style.
+
+The user is continuing to review the rest of Phase 1. **Do not rebuild or
+redeploy yet unless a defect prevents continued review.** Keep collecting
+feedback so the next repair pass addresses the experience coherently.
+
+The critic framework has already been corrected:
+- caption-blind visual world-comprehension is now required;
+- normal environmental life/purposeful background activity is reviewed;
+- animation/motion direction is a hard creative-direction gate;
+- stock/default idle loops must be judged for theme, personality, repetition,
+  physical plausibility and target-audience emotional read.
+
+No Level 2 work. No Phase 1 acceptance claim. Render stays on the current review
+candidate while the user continues the review.
+
+
 ## Automation integration direction — 18 September 2026
 
 The user has approved VibeLearn becoming a highly automated development/game-generation system, but the existing Terminal PM Agent is still under active development. `docs/AUTOMATED-DEVELOPMENT-SYSTEM.md` is the owning architecture/handoff.
