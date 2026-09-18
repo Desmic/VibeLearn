@@ -62,7 +62,7 @@ class RuntimeMigrationTests(unittest.TestCase):
         active = (
             'first-words.js', 'first-words-boot.js', 'first-words-world.js',
             'game-runtime.js', 'game-opening.js', 'tutorial-flow.js', 'experience-mode.js',
-            'world-spec.js', 'playcanvas-backend.js', 'player-controls.js', 'auth-game.js',
+            'world-marker-layout.js', 'world-spec.js', 'playcanvas-backend.js', 'player-controls.js', 'auth-game.js',
             'playcanvas.mjs', 'quaternius-animated-robot.glb'
         )
         for asset in active:
@@ -106,6 +106,7 @@ class RuntimeMigrationTests(unittest.TestCase):
         controls = (ROOT / 'web' / 'player-controls.js').read_text(encoding='utf-8')
         tutorial = (ROOT / 'web' / 'tutorial-flow.js').read_text(encoding='utf-8')
         modes = (ROOT / 'web' / 'experience-mode.js').read_text(encoding='utf-8')
+        marker_layout = (ROOT / 'web' / 'world-marker-layout.js').read_text(encoding='utf-8')
         opening = (ROOT / 'web' / 'game-opening.js').read_text(encoding='utf-8')
         props = (ROOT / 'web' / 'rescue-world-props.js').read_text(encoding='utf-8')
         world = (ROOT / 'web' / 'first-words-world.js').read_text(encoding='utf-8')
@@ -135,6 +136,8 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn("export function selectStateTutorialStep", tutorial)
         self.assertIn("export function tutorialStepSucceeded", tutorial)
         self.assertIn("export function createExperienceModeController", modes)
+        self.assertIn("export function placeWorldMarker", marker_layout)
+        self.assertIn("critical=false", marker_layout)
         self.assertNotIn("createTutorialFlow", controls)
         self.assertIn("export const controlTutorialSpec", world)
         self.assertIn("export const speechRepairTutorialSpec", world)
