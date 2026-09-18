@@ -108,7 +108,7 @@ export function validateStateTutorialSpec(spec){
     require(step&&typeof step==='object','state tutorial step must be an object');
     require(typeof step.id==='string'&&step.id.length>0&&!ids.has(step.id),'state tutorial step id is invalid or duplicated');
     ids.add(step.id);
-    for(const key of ['stage','title','detail']){
+    for(const key of ['stage','title','detail','feedback']){
       require(typeof step[key]==='string'&&step[key].trim(),`${step.id}.${key} is required`);
     }
     require(step.when&&typeof step.when==='object'&&!Array.isArray(step.when),`${step.id}.when is required`);
