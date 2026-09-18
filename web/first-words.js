@@ -16,6 +16,18 @@ const practice=createControlPractice();
 const ours=()=>session.attempt?.snapshot?.word_machine?.version==='first-words-1';
 const view=()=>ours()?session.attempt.word_machine_state:initial;
 const text=(s,v)=>{$(s).textContent=v;};
+const root=$('#adventure');
+function setExperienceMode(mode){
+  root.dataset.experienceMode=mode;
+  const playable=mode==='tutorial'||mode==='mission'||mode==='complete';
+  $('.mission').hidden=!playable;
+  $('#controls').hidden=mode==='opening'||mode==='loading';
+  $('#welcome').hidden=mode!=='entry';
+  $('#engine').hidden=!playable;
+  host.dataset.tutorialFocus=mode==='tutorial'?practice.step:'';
+  $('#menu-open').classList.toggle('tutorial-focus',mode==='tutorial'&&practice.step==='menu');
+}
+setExperienceMode('loading');
 const blocked=()=>!ready||paused||inOpening||session.busy||session.pending||runtime.stats().contextLost||world.stats().animating||document.querySelector('dialog[open]');
 function pauseSystems(){const value=paused||Boolean(document.querySelector('dialog[open]'));runtime.setPaused(value);audio.setPaused(value);}
 function dialog(selector){$(selector).showModal();pauseSystems();}
@@ -47,7 +59,9 @@ function tutorialStage(s,complete){
 function render(){
   const s=view(),a=session.attempt,complete=ours()&&a.status==='submitted';
   practice.bind(a?.id,ours()&&!s.powered&&s.round===0&&!complete);
-  $('#welcome').hidden=ours();$('#engine').hidden=!ours();$('.mission').classList.toggle('playing',ours());
+  if(inOpening){setExperienceMode('opening');return;}
+  const mode=!ours()?'entry':complete?'complete':s.round===0?'tutorial':'mission';
+  setExperienceMode(mode);$('.mission').classList.toggle('playing',ours());
   $('#error').hidden=!session.error;if(session.error)text('#error',session.error.code==='ACTIVE_ATTEMPT'?'This run is already active. Reload to resume it.':session.error.message);
   $('#retry').hidden=!session.pending||session.busy;
   const other=a?.status==='draft'&&!ours();$('#resume-other').hidden=true;
@@ -92,9 +106,9 @@ function render(){
   const step=practice.step;$('#controls').classList.toggle('practicing',step!=='done');
   if(step!=='done'){
     const prompts={
-      move:['You are the golden robot.',host.clientWidth<700?'Use the stick at bottom left to move a little. Arrow keys work too.':'Use WASD or the arrow keys to take a few steps.'],
-      look:['Look around the room.','Drag empty space to turn the camera, or try the + zoom button.'],
-      menu:['Your menu is always nearby.','Open ☰ at the top right. You can pause, change sound or replay the story.']
+      move:['You control Zip now.',host.clientWidth<700?'Move the highlighted stick at bottom left. Make Zip take a few steps.':'Use the highlighted WASD / arrow movement controls. Make Zip take a few steps.'],
+      look:['Now look around as Zip.','Drag the highlighted world view to turn the camera. The + / − controls zoom.'],
+      menu:['One last control: your game menu.','Open the highlighted ☰ button. That is where pause, sound and story replay live.']
     };
     const [title,instruction]=prompts[step];
     text('#stage-name','TUTORIAL · '+step.toUpperCase());text('#goal',title);text('#detail',instruction);
@@ -159,11 +173,12 @@ $('#reduced').checked=reduced;
 $('#reduced').onchange=e=>{reduced=e.target.checked;const camera=world.getPlayerView();runtime.disposeWorld({keepStage:true});world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced});world.restorePlayerView(camera);presented=null;render();};
 let openingSequence=0;
 function opening(replay=false){
-  const storyRuntime=replay?createGameRuntime():runtime;inOpening=true;audio.setPhase('home');
+  const storyRuntime=replay?createGameRuntime():runtime;inOpening=true;setExperienceMode('opening');audio.setPhase('home');
   const sequence=++openingSequence;
   const instance=openGameOpening({root:$('#adventure'),spec:chapter.openingSpec,runtime:storyRuntime,worldModule:chapter,replay,reducedMotion:reduced,onExit:async()=>{
-    observer.disconnect();inOpening=false;presented=null;world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced});pauseSystems();
-    if(!replay&&!ours())await session.start('ai-01-first-words');else render();
+    observer.disconnect();
+    if(!replay&&!ours())await session.start('ai-01-first-words');
+    inOpening=false;presented=null;world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced});pauseSystems();render();
   }});
   instance.element.classList.add('first-opening');
   const mute=document.createElement('button');mute.textContent=audio.preferences.muted?'Sound off':'Sound on';mute.setAttribute('aria-label','Toggle opening sound');
@@ -179,6 +194,8 @@ function opening(replay=false){
 }
 $('#replay').onclick=()=>{$('#menu').close();opening(true);};
 function frame(){
+  const mode=root.dataset.experienceMode;
+  if(!['tutorial','mission','complete'].includes(mode)){requestAnimationFrame(frame);return;}
   const s=view(),rect=host.getBoundingClientRect(),tray=$('#controls').getBoundingClientRect(),goal=$('.mission').getBoundingClientRect();
   const tools=host.querySelector('.game-view-tools'),stick=host.querySelector('.game-move-stick');
   if(tools){tools.style.bottom=(rect.bottom-tray.top+14)+'px';tools.style.gridTemplateColumns=tray.top-goal.bottom<225?'repeat(4,44px)':'44px';}if(stick)stick.style.bottom=(rect.bottom-tray.top+16)+'px';
