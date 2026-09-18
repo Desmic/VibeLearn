@@ -1,5 +1,85 @@
 # Current state — LLM learning-game proof track
 
+## Quality-system enforcement checkpoint — 18 September 2026
+
+The deployed runtime `ad14c5aced6cf053c7617dfb03245506e1e9dad5`
+remains **rejected** and is not the current development candidate. Do not ask the
+user to review it again and do not start Level 2.
+
+The active work on `main` is system repair. The last fully green integrated
+system-repair checkpoint before the newest review-schema/motion assertions is
+`6397770a4cf01ed0d72097b2ebc42323666f698d` (all seven CI suites green).
+Newer `main` commits extend evidence enforcement and are revalidated by CI
+before any release claim.
+
+### Implemented reusable protections
+
+These are now runtime/schema/test capabilities rather than critic-prompt wishes:
+
+- **world-owned physicality:** WorldSpec entities/archetypes declare colliders;
+  PlayCanvas derives live player/camera blocking from enabled transformed world
+  entities; browser tests deliberately drive the protagonist into a reusable
+  prop and require movement to stop;
+- **explicit character motion direction:** asset-backed controlled characters
+  must declare idle/move animation aliases and optional speeds; the proof
+  protagonist uses a deliberately subdued/frozen rest pose rather than silently
+  inheriting a stock idle loop; runtime evidence exposes active alias/speed;
+- **major-event direction metadata:** opening scenes can declare establishing,
+  major-event, transition, antagonist-action and handoff intent, causal
+  attribution, effect channels, persistent world-after state and causal lead;
+- **atmosphere/event channels:** cinematic patches can change environment,
+  camera impulse and semantic audio cues instead of relying on captions;
+- **semantic story objects:** major objects declare role/readability channels;
+  reusable capability-module/socket and source->effect link primitives exist;
+- **purposeful ambient activity:** WorldSpec supports reusable patrol activity so
+  normal-world life can be shown through behavior rather than static decoration;
+- **exclusive experience modes:** reusable `experience-mode.js` owns mutually
+  exclusive presentation surfaces;
+- **spec-driven tutorials:** reusable `tutorial-flow.js` owns tutorial
+  progression/persistence while game packages supply skills, prompts, focus,
+  success semantics and handoff data;
+- **world-target tutorial focus:** interaction onboarding can visibly point at
+  the actual world target rather than only a HUD button;
+- **motion evidence:** opening CI preserves a WebM motion artifact in addition to
+  screenshots and structured browser reports;
+- **cold-observer context separation:** CI emits a restricted evidence packet
+  that intentionally omits story treatment/creator rationale;
+- **critic schema v2:** new review records add world comprehension, motion
+  direction, semantic readability, audio atmosphere, physicality, handoff and
+  tutorial clarity. Evidence modality must match the claim and be exact-candidate
+  bound; the CLI can validate against an extracted CI evidence root.
+
+### What is intentionally *not* claimed
+
+No current creative/story 9/10 claim exists.
+
+The current assistant/reviewer already knows the intended story, so it is not a
+valid cold observer for this candidate. Under review schema v2:
+- `world_comprehension` stays unassessed until a genuinely context-restricted
+  reviewer produces a cold-observer report;
+- `audio_atmosphere` stays unassessed until actual listening evidence exists;
+- screenshots/source cannot substitute for motion/interactive/listening evidence.
+
+The newer opening implementation has stronger threat, rupture, speech targeting
+and speech-removal staging, but implementation evidence is **not** a creative
+pass.
+
+### Next active sequence
+
+1. finish exact-CI validation of the current `main` review/runtime changes;
+2. keep the opening/tutorial blocked from internal readiness until v2 evidence is
+   complete;
+3. run a truly context-restricted cold-observer review on the motion artifact;
+4. obtain real audio-listening evidence;
+5. run intent comparison, motion/audience, physicality, handoff/tutorial,
+   learning and technical gates using matching evidence modalities;
+6. repair any blocker and repeat on one exact SHA;
+7. only then deploy a replacement Phase 1 preview for the user.
+
+Render remains pinned to the rejected review build until a later candidate earns
+a new preview. No Level 2 work.
+
+
 ## System-repair checkpoint — 18 September 2026
 
 The current deployed runtime `ad14c5aced6cf053c7617dfb03245506e1e9dad5`
