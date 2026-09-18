@@ -120,6 +120,7 @@ def make_server(database, port=8000):
                 '/game-opening.js': ('game-opening.js', 'text/javascript'),
                 '/tutorial-flow.js': ('tutorial-flow.js', 'text/javascript'),
                 '/experience-mode.js': ('experience-mode.js', 'text/javascript'),
+                '/world-marker-layout.js': ('world-marker-layout.js', 'text/javascript'),
                 '/world-spec.js': ('world-spec.js', 'text/javascript'),
                 '/playcanvas-backend.js': ('playcanvas-backend.js', 'text/javascript'),
                 '/player-controls.js': ('player-controls.js', 'text/javascript'),
