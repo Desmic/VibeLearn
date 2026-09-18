@@ -19,7 +19,7 @@ def skip_opening_to_tutorial(page, *, skip_controls=False):
     expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
     if skip_controls:
         page.get_by_role('button',name='Skip control practice',exact=True).click()
-        expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 1/3',timeout=15000)
+        expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 1/4',timeout=15000)
         expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
 
 
@@ -40,6 +40,13 @@ def choose(page,open_label,choice):
     expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
 
 
+def world_action(page,name):
+    with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
+        page.get_by_role('button',name=name,exact=True).click()
+    assert saved.value.ok,saved.value.status
+    expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+
+
 def generate(page):
     action(page,'Make first word')
     for _ in range(3):action(page,'Next word')
@@ -47,17 +54,23 @@ def generate(page):
 
 
 def complete_tutorial(page):
-    action(page,'Connect the power lead')
-    expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 2/3')
-    expect(page.get_by_role('button',name='Scan the Moon lock',exact=True)).to_be_visible()
+    expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible()
+    world_action(page,'Connect the loose power lead')
+    expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 2/4')
+    expect(page.get_by_role('button',name='Scan the Moon lock in the world',exact=True)).to_be_visible()
     expect(page.get_by_role('button',name='Inspect the speech engine')).to_be_hidden()
-    action(page,'Scan the Moon lock')
-    expect(page.locator('#stage-name')).to_have_text('TUTORIAL · 3/3')
-    expect(page.locator('#detail')).to_contain_text('Make the sentence one piece at a time')
-    generate(page);until(page,'()=>!FirstWordsReview.runtime.world.animating')
+    world_action(page,'Scan the Moon lock in the world')
+    expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 3/4')
+    expect(page.get_by_role('button',name='Use the speech engine in the world',exact=True)).to_be_visible()
+    for _ in range(4):
+        world_action(page,'Use the speech engine in the world')
+    expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 4/4')
+    expect(page.get_by_role('button',name='Speak the completed command to the Moon gate',exact=True)).to_be_visible()
+    world_action(page,'Speak the completed command to the Moon gate')
+    until(page,'()=>!FirstWordsReview.runtime.world.animating')
     expect(page.locator('#stage-name')).to_have_text('TUTORIAL · COMPLETE')
     expect(page.locator('#goal')).to_have_text('You can speak again.')
-    expect(page.locator('#detail')).to_contain_text('real mission starts beyond it')
+    expect(page.locator('#detail')).to_contain_text('real mission')
 
 
 def main():
