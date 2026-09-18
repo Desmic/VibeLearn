@@ -13,6 +13,7 @@ class EvidenceReceiptTests(unittest.TestCase):
                 "cold-observer-opening-packet.json",
                 "cold-observer-opening-report.json",
                 "prologue-motion-390.webm",
+                "prologue-caption-blind-390.webm",
                 "prologue-home-390.png",
                 "first-words-opening-report.json",
                 "opening-trace.zip",
@@ -28,6 +29,7 @@ class EvidenceReceiptTests(unittest.TestCase):
             self.assertEqual(by_name["cold-observer-opening-packet.json"],"review_assignment")
             self.assertEqual(by_name["cold-observer-opening-report.json"],"cold_observer_report")
             self.assertEqual(by_name["prologue-motion-390.webm"],"motion_video")
+            self.assertEqual(by_name["prologue-caption-blind-390.webm"],"caption_blind_motion")
             self.assertEqual(by_name["prologue-home-390.png"],"screenshot")
             self.assertEqual(by_name["first-words-opening-report.json"],"runtime_trace")
             self.assertEqual(by_name["opening-trace.zip"],"interactive_trace")
