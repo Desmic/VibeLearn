@@ -2,7 +2,7 @@ import {getGameRuntime,createGameRuntime} from './game-runtime.js';
 import {openGameOpening} from './game-opening.js';
 import {createGameAudio} from './game-audio.js';
 import {createLearningSession} from './learning-session.js';
-import {createTutorialFlow} from './tutorial-flow.js';
+import {createTutorialFlow,selectStateTutorialStep} from './tutorial-flow.js';
 import {createExperienceModeController} from './experience-mode.js';
 import * as chapter from './first-words-world.js';
 
@@ -48,14 +48,11 @@ async function command(path,body={}){
   if(!response.ok)throw new Error(result.message||`Request failed (${response.status})`);
   return result;
 }
+const repairStep=s=>s.round===0?selectStateTutorialStep(chapter.speechRepairTutorialSpec,s):null;
 function tutorialStage(s,complete){
   if(complete)return['LEVEL 1 · COMPLETE','The deeper gate is open.','You restored enough speech to read the changing route and found the way forward.'];
-  if(s.round===0){
-    if(!s.powered)return['TUTORIAL · 1/3','Restore your speech engine.','Connect the loose power lead. The repair socket will light when it works.'];
-    if(s.status==='success')return['TUTORIAL · COMPLETE','You can speak again.','The first door is open. You know the basic loop; the real mission starts beyond it.'];
-    if(s.clue==='none')return['TUTORIAL · 2/3','Scan the Moon lock.','The large exit carries a Moon mark. Put that visible clue into your speech engine.'];
-    return['TUTORIAL · 3/3','Build the door command.','Make the sentence one piece at a time. Each new word joins the next input.'];
-  }
+  const repair=repairStep(s);
+  if(repair)return[repair.stage,repair.title,repair.detail];
   if(s.status==='success')return['LEVEL 1 · COMPLETE','Route found.','The changed context opened the deeper gate. Finish when you are ready.'];
   if(s.status==='wrong')return['LEVEL 1 · RECOVER','Wrong route.','Nothing is lost. Check the signs, use the current context, and try again.'];
   if(s.clue==='none')return['LEVEL 1 · FIRST MISSION','Find the current route.','Beyond the first door, three signs disagree. Decide what your speech engine should see.'];
@@ -84,21 +81,23 @@ function render(){
     }
     lastCue=key;
   }
+  const repair=repairStep(s);
   const [stage,goal,detail]=tutorialStage(s,complete);text('#stage-name',stage);text('#goal',goal);text('#detail',detail);
+  host.dataset.tutorialWorldTarget=repair?.focus==='world'?(repair.target||''):'';
+  host.dataset.tutorialInteractionStep=repair?.id||'';
   $('#output').replaceChildren();for(let i=0;i<4;i++){const span=document.createElement('span');span.textContent=s.output[i]||'·';if(!s.output[i])span.className='empty';$('#output').append(span);}
   text('#context',s.context.join(' ')||'Waiting for power.');
   text('#engine-label',complete?'YOUR SPEECH ENGINE · ROUTE OPEN':s.round===1?'YOUR SPEECH ENGINE · LEVEL 1':'YOUR SPEECH ENGINE · TUTORIAL');
   $('#inspect').hidden=s.round===0;
   $('#actions').replaceChildren();
   if(complete){button('Look deeper into the prison','ending');button('Play Level 1 again','again',false);}
-  else if(!s.powered)button('Connect the power lead','connect');
-  else if(s.status==='success')button(s.round===0?'Begin Level 1 →':'Finish Level 1 →',s.round===0?'next':'finish');
-  else if(s.status==='wrong')button(s.round===0?'Scan the Moon lock':'Check route signs',s.round===0?'scan-moon':'notices');
-  else if(s.round===0&&s.clue==='none')button('Scan the Moon lock','scan-moon');
+  else if(repair)button(repair.actionLabel,repair.primaryAction);
+  else if(s.status==='success')button('Finish Level 1 →','finish');
+  else if(s.status==='wrong')button('Check route signs','notices');
   else if(s.round===1&&s.clue==='none')button('Check route signs','notices');
   else if(s.round===1&&s.prediction==='none'){button('Predict the gate','predict');button('Ask for a hint','hint',false);}
   else if(s.round===1&&!s.available_actions?.includes('step')&&s.loop_prediction==='none'&&s.available_actions?.some(a=>a.startsWith('loop-')))button('Continue saved run','loop');
-  else{button(s.pieces===0?'Make first word':s.pieces<4?'Next word':'Speak to gate →',s.pieces<4?'step':'send');if(s.round===1&&s.pieces===0)button('Check route signs','notices',false);}
+  else{button(s.pieces<4?'Next word':'Speak to gate →',s.pieces<4?'step':'send');if(s.round===1&&s.pieces===0)button('Check route signs','notices',false);}
   $('#rewind').hidden=complete||!s.powered||s.status==='success'||s.pieces===0;
   text('#saved',session.busy?'Saving…':session.pending?'Not saved · retry available':complete?'Level saved · practice recorded':'Saved');
   let scene;
