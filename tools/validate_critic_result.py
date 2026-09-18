@@ -28,6 +28,9 @@ def validate_result(assignment:dict,result:dict):
     require(result.get("schema")=="vibelearn.critic-result.v1","unsupported critic-result schema")
     candidate=assignment.get("candidate_sha")
     require(isinstance(candidate,str) and HEX40.fullmatch(candidate),"assignment candidate SHA is invalid")
+    assignment_id=assignment.get("assignment_id")
+    require(isinstance(assignment_id,str) and assignment_id.startswith("sha256:"),"assignment_id is required")
+    require(result.get("assignment_id")==assignment_id,"critic result belongs to a different assignment")
     require(result.get("candidate_sha")==candidate,"critic result belongs to a different candidate")
     review_pass=assignment.get("pass")
     require(result.get("pass")==review_pass,"critic result belongs to a different pass")
@@ -74,10 +77,16 @@ def validate_result(assignment:dict,result:dict):
         for item in assignment.get("allowed_evidence") or []
         if isinstance(item,dict)
     }
+    used_modalities=set()
     for item in used:
         require(isinstance(item,dict),"used_evidence entries must be objects")
         key=(item.get("ref"),item.get("modality"),item.get("candidate_sha"))
         require(key in allowed,f"critic used evidence outside its assignment: {item.get('ref')}")
+        used_modalities.add(item.get("modality"))
+    for alternatives in assignment.get("required_evidence_groups") or []:
+        require(isinstance(alternatives,list) and alternatives,"assignment required-evidence group is invalid")
+        require(used_modalities.intersection(alternatives),
+                f"critic result did not use required evidence modality: {' or '.join(alternatives)}")
 
     expected=assignment.get("expected_output_modality")
     normalized_modality=PASS_RESULT_MODALITY.get(review_pass,expected)
@@ -87,6 +96,7 @@ def validate_result(assignment:dict,result:dict):
     return {
         "schema":"vibelearn.validated-critic-result.v1",
         "candidate_sha":candidate,
+        "assignment_id":assignment_id,
         "pass":review_pass,
         "modality":normalized_modality,
         "verdict":result["verdict"],
