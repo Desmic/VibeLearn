@@ -1,7 +1,7 @@
 /* Bellweather / prison proof track: story, composition and semantic presentation. */
 import {characterControlProfile} from './game-character-spec.js';
 import {messageMachine,tokenTrack,smallTree,pavilion} from './workshop-props.js';
-import {lantern,gate,tower,planter,companionRobot} from './rescue-world-props.js';
+import {lantern,gate,tower,planter,companionRobot,capabilityModule} from './rescue-world-props.js';
 import {makeWorldPackage} from './spec-game-world.js';
 
 const e=[];
@@ -92,7 +92,7 @@ part('limbo-backdrop','box','void',[0,0,-44],[160,160,.4],{enabled:false});
 
 /* One protagonist, used in story and gameplay. */
 e.push({id:'zip',asset:'robot',position:[0,0,-28],scale:[.9,.9,.9],animation:'idle'});
-part('zip-voice','box','mint',[0,1,.5],[.36,.36,.18],{parent:'zip',enabled:false});
+e.push(...capabilityModule('zip-voice',[0,1,.5],{parent:'zip',enabled:false}));
 
 /* Reusable dramatic interruption primitives. */
 e.push({id:'rift',position:[0,6.2,8],enabled:false});
@@ -116,7 +116,7 @@ part('warden-head','box','ink',[0,3,0],[1.35,.85,1],{parent:'warden'});
 part('warden-eye','box','redGlow',[0,3.05,.53],[.88,.11,.06],{parent:'warden'});
 part('warden-crown','cone','gold',[0,3.75,0],[.82,.82,.68],{parent:'warden'});
 part('warden-hand','box','gold',[-1,1.8,.18],[.34,.9,.38],{parent:'warden'});
-part('stolen-voice','box','mint',[0,1.1,-27.5],[.95,.95,.95],{rotation:[0,30,15],enabled:false});
+e.push(...capabilityModule('stolen-voice',[0,1.1,-27.5],{enabled:false}));
 
 const revealGroups=[
   ['prison-floor'],
