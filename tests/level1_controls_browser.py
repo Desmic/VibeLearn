@@ -37,6 +37,16 @@ def main():
             expect(page.locator('.game-player-controls')).to_have_attribute('data-control-mode','third-person',timeout=15000)
             expect(page.locator('.game-move-stick')).to_be_visible()
 
+            # A reusable world prop must be physical. The token track sits immediately
+            # left of the spawn; a sustained left input should stop at its collider
+            # rather than letting the protagonist pass through the visible geometry.
+            collision_start=position(page)
+            page.keyboard.down('KeyA');page.wait_for_timeout(1100);page.keyboard.up('KeyA');page.wait_for_timeout(120)
+            collision_stop=position(page)
+            assert collision_stop[0]>-1.65,(collision_start,collision_stop)
+            page.keyboard.down('KeyD');page.wait_for_timeout(650);page.keyboard.up('KeyD');page.wait_for_timeout(120)
+            assert position(page)[0]>collision_stop[0]+.4
+
             # A non-text game button may retain focus after interaction/reload. That
             # must not suppress direct protagonist movement; only typing targets do.
             page.get_by_role('button',name='Scan the Moon lock',exact=True).focus()
