@@ -5,6 +5,7 @@ from pathlib import Path
 
 from tools.check_critic_review import COVERAGE,V2_GATES,CRITERION_MODALITIES
 from tools.check_release_gate import gate
+from tools.ingest_critic_results import PASS_ORDER
 
 
 class ReleaseGateTests(unittest.TestCase):
@@ -40,6 +41,16 @@ class ReleaseGateTests(unittest.TestCase):
             "coverage":{name:{"status":"observed","note":"fixture","evidence":[ev("interactive_trace")]} for name in COVERAGE},
             "blockers":[]
         }
+        self.critic_results={
+            review_pass:{
+                "schema":"vibelearn.validated-critic-result.v1",
+                "candidate_sha":self.sha,
+                "pass":review_pass,
+                "modality":"critic_report",
+                "verdict":"pass",
+            }
+            for review_pass in PASS_ORDER
+        }
         self.status={
             "schema":"vibelearn.quality-status.v1","phase":"phase1_system_repair","level2_allowed":False,
             "rejected_candidates":[],"accepted_candidates":[],
@@ -53,22 +64,22 @@ class ReleaseGateTests(unittest.TestCase):
         }
 
     def test_v2_ready_candidate_can_be_previewed_without_acceptance(self):
-        result=gate(self.sha,"preview",self.status,self.review,self.root)
+        result=gate(self.sha,"preview",self.status,self.review,self.root,validated_critic_results=self.critic_results)
         self.assertEqual(result["status"],"allowed")
         self.assertEqual(result["authority"],"internal_v2_ready")
 
     def test_rejected_candidate_cannot_be_repreviewed(self):
         self.status["rejected_candidates"]=[self.sha]
         with self.assertRaisesRegex(ValueError,"explicitly rejected"):
-            gate(self.sha,"preview",self.status,self.review,self.root,explicit_preview_override=True)
+            gate(self.sha,"preview",self.status,self.review,self.root,explicit_preview_override=True,validated_critic_results=self.critic_results)
 
     def test_incomplete_preview_needs_explicit_user_override(self):
         self.review["criteria"]["audio_atmosphere"]["rating"]=None
         self.review["criteria"]["audio_atmosphere"].pop("evidence")
         self.review["criteria"]["audio_atmosphere"].pop("counterexample_attempt")
         with self.assertRaisesRegex(ValueError,"preview blocked"):
-            gate(self.sha,"preview",self.status,self.review,self.root)
-        result=gate(self.sha,"preview",self.status,self.review,self.root,explicit_preview_override=True)
+            gate(self.sha,"preview",self.status,self.review,self.root,validated_critic_results=self.critic_results)
+        result=gate(self.sha,"preview",self.status,self.review,self.root,explicit_preview_override=True,validated_critic_results=self.critic_results)
         self.assertEqual(result["authority"],"explicit_user_preview_override")
 
     def test_override_cannot_bypass_blocker(self):
@@ -80,8 +91,38 @@ class ReleaseGateTests(unittest.TestCase):
             "evidence":[{"ref":"interactive.json","modality":"interactive_trace","candidate_sha":self.sha}]
         }]
         with self.assertRaisesRegex(ValueError,"review_incomplete"):
-            gate(self.sha,"preview",self.status,self.review,self.root,explicit_preview_override=True)
+            gate(self.sha,"preview",self.status,self.review,self.root,explicit_preview_override=True,validated_critic_results=self.critic_results)
 
+
+    def test_ready_preview_requires_every_validated_critic_to_pass(self):
+        broken=dict(self.critic_results)
+        broken["cold_observer"]={**broken["cold_observer"],"verdict":"unresolved"}
+        with self.assertRaisesRegex(ValueError,"pass verdict from every critic"):
+            gate(self.sha,"preview",self.status,self.review,self.root,validated_critic_results=broken)
+
+    def test_needs_revision_critic_blocks_even_explicit_preview_override(self):
+        self.review["criteria"]["audio_atmosphere"]["rating"]=None
+        self.review["criteria"]["audio_atmosphere"].pop("evidence")
+        self.review["criteria"]["audio_atmosphere"].pop("counterexample_attempt")
+        broken=dict(self.critic_results)
+        broken["cinematic_causality"]={**broken["cinematic_causality"],"verdict":"needs_revision"}
+        with self.assertRaisesRegex(ValueError,"cannot bypass needs_revision"):
+            gate(self.sha,"preview",self.status,self.review,self.root,
+                 explicit_preview_override=True,validated_critic_results=broken)
+
+    def test_explicit_override_can_tolerate_missing_or_unresolved_but_not_failure(self):
+        self.review["criteria"]["audio_atmosphere"]["rating"]=None
+        self.review["criteria"]["audio_atmosphere"].pop("evidence")
+        self.review["criteria"]["audio_atmosphere"].pop("counterexample_attempt")
+        partial={
+            "cold_observer":{**self.critic_results["cold_observer"],"verdict":"unresolved"},
+            "physicality":self.critic_results["physicality"],
+        }
+        result=gate(self.sha,"preview",self.status,self.review,self.root,
+                    explicit_preview_override=True,validated_critic_results=partial)
+        self.assertEqual(result["authority"],"explicit_user_preview_override")
+        self.assertIn("cold_observer",result["unresolved_critics"])
+        self.assertTrue(result["missing_critics"])
 
     def test_preview_promotion_workflow_is_release_gate_driven(self):
         workflow=(Path(__file__).resolve().parents[1]/".github"/"workflows"/"promote-preview.yml").read_text(encoding="utf-8")
@@ -92,6 +133,7 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertIn("ingest_critic_results.py",workflow)
         self.assertIn('docs/reviews/results/$CANDIDATE_SHA',workflow)
         self.assertIn("check_release_gate.py",workflow)
+        self.assertIn("--critic-results-root /tmp/vibelearn-review-evidence/post-ci",workflow)
         self.assertIn('gh","api"',workflow)
         self.assertIn("git merge-base --is-ancestor",workflow)
         self.assertIn("deploy/render-supabase",workflow)
