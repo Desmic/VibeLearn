@@ -203,6 +203,21 @@ class PlayCanvasWorld {
     return false;
   }
 
+  _cameraImpulse(value={}){
+    if(this.reducedMotion||!this.canvas?.animate)return;
+    const duration=Math.max(80,Math.min(1600,Number(value.duration)||520));
+    const px=Math.max(1,Math.min(16,Number(value.intensity)||7));
+    this.canvas.getAnimations?.().filter(a=>a.id==='vibelearn-camera-impulse').forEach(a=>a.cancel());
+    const animation=this.canvas.animate([
+      {transform:'translate(0,0)'},
+      {transform:`translate(${-px}px,${px*.35}px)`},
+      {transform:`translate(${px*.8}px,${-px*.45}px)`},
+      {transform:`translate(${-px*.45}px,${px*.25}px)`},
+      {transform:'translate(0,0)'}
+    ],{duration,easing:'ease-out'});
+    animation.id='vibelearn-camera-impulse';
+  }
+
   _applyEnvironment(patch={}){
     const base=this.spec.environment||{},fog={...(base.fog||{type:'none'}),...(patch.fog||{})};
     const env={...base,...patch,fog};
@@ -404,6 +419,7 @@ class PlayCanvasWorld {
 
   applyPatch(patch={}){
     if(patch.environment)this._applyEnvironment(patch.environment);
+    if(patch.cameraImpulse)this._cameraImpulse(patch.cameraImpulse);
     for(const id of patch.show||[]){const entity=this.entities.get(id);if(entity)entity.enabled=true;}
     for(const id of patch.hide||[]){const entity=this.entities.get(id);if(entity)entity.enabled=false;}
     for(const [id,transform] of Object.entries(patch.transforms||{})){
