@@ -4,6 +4,7 @@ import {createGameAudio} from './game-audio.js';
 import {createLearningSession} from './learning-session.js';
 import {createTutorialFlow,selectStateTutorialStep} from './tutorial-flow.js';
 import {createExperienceModeController} from './experience-mode.js';
+import {placeWorldMarker} from './world-marker-layout.js';
 import * as chapter from './first-words-world.js';
 
 const $=s=>document.querySelector(s),runtime=getGameRuntime(),audio=createGameAudio(),host=$('#world');
@@ -210,20 +211,10 @@ function frame(){
     const targetMismatch=tutorialTarget&&(marker.dataset.anchor!==host.dataset.tutorialWorldTarget||!available);
     marker.hidden=!point?.visible||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.anchor==='star-label'&&s.status==='success');
     if(point){
-      marker.style.left=Math.max(40,Math.min(rect.width-40,point.x))+'px';
       const safeTop=Math.max(150,goal.bottom-rect.top+marker.offsetHeight+8);
       const safeBottom=Math.max(safeTop+12,tray.top-rect.top-12);
-      const desiredY=point.y-12;
-      if(tutorialTarget){
-        const clampedY=Math.max(safeTop,Math.min(safeBottom,desiredY));
-        marker.style.top=clampedY+'px';
-        const edge=desiredY<safeTop?'top':desiredY>safeBottom?'bottom':'';
-        marker.classList.toggle('edge-cued',Boolean(edge));marker.dataset.edge=edge;
-      }else{
-        marker.style.top=desiredY+'px';
-        marker.classList.remove('edge-cued');delete marker.dataset.edge;
-        if(point.y>tray.top-rect.top||point.y<safeTop)marker.hidden=true;
-      }
+      const placement=placeWorldMarker(marker,point,{viewportWidth:rect.width,safeTop,safeBottom,critical:tutorialTarget});
+      if(!tutorialTarget&&!placement.insideSafeArea)marker.hidden=true;
     }
   }
   requestAnimationFrame(frame);
