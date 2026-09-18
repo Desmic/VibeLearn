@@ -1,0 +1,184 @@
+{
+  "schema": "vibelearn.quality-failure-corpus.v1",
+  "incidents": [
+    {
+      "id": "qf-world-comprehension",
+      "symptom": "An opening can contain correct storyboard beats yet still fail to establish what kind of world/place the player is seeing.",
+      "generalized_failure": "Reviewers with design context infer missing setting information instead of measuring cold-start visual comprehension.",
+      "invariant": "A cold observer must be able to describe the setting, ordinary activity, important relationships and the disruptive change without creator rationale.",
+      "prevention_layers": [
+        "evidence",
+        "reviewer",
+        "world-spec"
+      ],
+      "mechanisms": [
+        "cold-observer packet before intent comparison",
+        "purposeful ambient activity primitives",
+        "caption-blind/motion review"
+      ],
+      "required_evidence": [
+        "cold_observer_report",
+        "motion_video"
+      ],
+      "regression_tests": [
+        "tests/first_words_opening_browser.py",
+        "tests/test_critic_review.py"
+      ]
+    },
+    {
+      "id": "qf-motion-direction",
+      "symptom": "A technically valid default idle loop can feel uncanny, creepy or stylistically wrong for the target audience.",
+      "generalized_failure": "Asset-bundled animation silently determines character personality and critics inspect silhouettes/stills instead of motion.",
+      "invariant": "Controlled characters require an explicit motion profile and motion-quality claims require observation over time.",
+      "prevention_layers": [
+        "schema",
+        "runtime",
+        "evidence",
+        "reviewer"
+      ],
+      "mechanisms": [
+        "explicit player idle/move aliases and speeds",
+        "runtime active-animation evidence",
+        "motion-video critic modality"
+      ],
+      "required_evidence": [
+        "motion_video",
+        "runtime_trace"
+      ],
+      "regression_tests": [
+        "tests/level1_controls_browser.py",
+        "tests/test_critic_review.py",
+        "tests/test_story3d_framework.py"
+      ]
+    },
+    {
+      "id": "qf-major-event-magnitude",
+      "symptom": "A catastrophic story event can reduce to actors translating/disappearing while captions claim thunder, rupture or danger.",
+      "generalized_failure": "Narrative importance is not compiled into coordinated visual/audio/environmental event direction.",
+      "invariant": "Major events must declare and render enough coordinated cause/reaction/environment/effect channels for perceived magnitude to match narrative magnitude.",
+      "prevention_layers": [
+        "schema",
+        "runtime",
+        "evidence",
+        "reviewer"
+      ],
+      "mechanisms": [
+        "opening direction contract",
+        "environment patches",
+        "camera impulse",
+        "semantic audio cues",
+        "motion evidence"
+      ],
+      "required_evidence": [
+        "motion_video",
+        "audio_listening"
+      ],
+      "regression_tests": [
+        "tests/first_words_opening_browser.py",
+        "tests/test_story3d_framework.py",
+        "tests/test_critic_review.py"
+      ]
+    },
+    {
+      "id": "qf-causal-attribution",
+      "symptom": "A story expects the player to know who caused an event even though the experience does not make the causal source perceptible.",
+      "generalized_failure": "Critics import antagonist causality from the storyboard instead of checking what a cold player infers.",
+      "invariant": "Known intended causes must visibly precede/connect to their effects unless ambiguity is deliberately specified.",
+      "prevention_layers": [
+        "schema",
+        "world-spec",
+        "evidence",
+        "reviewer"
+      ],
+      "mechanisms": [
+        "cause mode/entity metadata",
+        "cause lead timing",
+        "source-to-effect visual link",
+        "cold-observer question"
+      ],
+      "required_evidence": [
+        "cold_observer_report",
+        "motion_video"
+      ],
+      "regression_tests": [
+        "tests/first_words_opening_browser.py",
+        "tests/test_critic_review.py"
+      ]
+    },
+    {
+      "id": "qf-semantic-object-readability",
+      "symptom": "A major abstract story capability is represented by an arbitrary primitive that has no readable meaning.",
+      "generalized_failure": "Internal semantic IDs are mistaken for player comprehension.",
+      "invariant": "Major semantic objects need at least two intentional readability channels and a cold observer should infer their role from presentation/behavior.",
+      "prevention_layers": [
+        "schema",
+        "world-spec",
+        "reviewer"
+      ],
+      "mechanisms": [
+        "storyObject role/readability schema",
+        "capability-module/socket archetypes",
+        "target/removal staging"
+      ],
+      "required_evidence": [
+        "cold_observer_report",
+        "motion_video"
+      ],
+      "regression_tests": [
+        "tests/first_words_opening_browser.py",
+        "tests/test_story3d_framework.py"
+      ]
+    },
+    {
+      "id": "qf-world-physicality",
+      "symptom": "A protagonist can walk through visible solid props because rendered geometry and navigation blocking are authored separately.",
+      "generalized_failure": "Physicality is optional controller metadata rather than a property of world entities/archetypes.",
+      "invariant": "Visible solid world archetypes own their collider intent and interactive traversal must verify that world geometry behaves physically.",
+      "prevention_layers": [
+        "schema",
+        "runtime",
+        "world-spec",
+        "evidence"
+      ],
+      "mechanisms": [
+        "WorldSpec colliders",
+        "live transformed collider resolution",
+        "adversarial traversal test"
+      ],
+      "required_evidence": [
+        "interactive_trace"
+      ],
+      "regression_tests": [
+        "tests/level1_controls_browser.py",
+        "tests/test_story3d_framework.py"
+      ]
+    },
+    {
+      "id": "qf-handoff-tutorial-clarity",
+      "symptom": "Opening, tutorial and mission prompts can overlap, or tutorial text can name an action without identifying the actual target/control.",
+      "generalized_failure": "Experience modes and tutorial goals are presentation conventions instead of explicit runtime/spec contracts.",
+      "invariant": "Exactly one experience mode owns the player goal; each tutorial step binds one skill, target/control, action, success detector and feedback.",
+      "prevention_layers": [
+        "runtime",
+        "schema",
+        "ux",
+        "evidence"
+      ],
+      "mechanisms": [
+        "experience-mode controller",
+        "tutorial-flow contract",
+        "state-driven interaction tutorial",
+        "semantic world target focus"
+      ],
+      "required_evidence": [
+        "interactive_trace"
+      ],
+      "regression_tests": [
+        "tests/control_practice_browser.py",
+        "tests/level1_chapter_browser.py",
+        "tests/first_words_opening_browser.py",
+        "tests/test_story3d_framework.py"
+      ]
+    }
+  ]
+}
