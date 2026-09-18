@@ -1,7 +1,7 @@
 /* Bellweather / prison proof track: story, composition and semantic presentation. */
 import {characterControlProfile} from './game-character-spec.js';
 import {messageMachine,tokenTrack,smallTree,pavilion,deliveryParcel} from './workshop-props.js';
-import {lantern,gate,tower,planter,companionRobot,capabilityModule} from './rescue-world-props.js';
+import {lantern,gate,tower,planter,companionRobot,capabilityModule,capabilitySocket,eventLink} from './rescue-world-props.js';
 import {makeWorldPackage} from './spec-game-world.js';
 
 const e=[];
@@ -98,6 +98,7 @@ part('limbo-backdrop','box','void',[0,0,-44],[160,160,.4],{enabled:false});
 
 /* One protagonist, used in story and gameplay. */
 e.push({id:'zip',asset:'robot',position:[0,0,-28],scale:[.9,.9,.9],animation:'idle'});
+e.push(...capabilitySocket('zip-voice-socket',[0,1,.49],{parent:'zip'}));
 e.push(...capabilityModule('zip-voice',[0,1,.5],{parent:'zip',enabled:false}));
 
 /* Reusable dramatic interruption primitives. */
@@ -122,6 +123,7 @@ part('warden-head','box','ink',[0,3,0],[1.35,.85,1],{parent:'warden'});
 part('warden-eye','box','redGlow',[0,3.05,.53],[.88,.11,.06],{parent:'warden'});
 part('warden-crown','cone','gold',[0,3.75,0],[.82,.82,.68],{parent:'warden'});
 part('warden-hand','box','gold',[-1,1.8,.18],[.34,.9,.38],{parent:'warden'});
+e.push(...eventLink('warden-rift-link',[0,4.85,7.55],{length:2.5,radius:.1,enabled:false}));
 e.push(...capabilityModule('stolen-voice',[0,1.1,-27.5],{enabled:false}));
 
 const revealGroups=[
@@ -162,14 +164,14 @@ const missionBase=()=>({
 });
 
 function opening(beat){
-  const p={show:['zip',...revealParts],hide:['bellweather-zone','prison-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','zip-voice'],transforms:{zip:{position:[0,0,10]},singer:{position:[3.8,0,1]},'friend-a':{position:[-3,0,1]},'friendship-lantern':{position:[-2.2,1.2,10.5]},'moon-door':{position:[0,0,0]}},animations:{zip:'idle'}};
+  const p={show:['zip',...revealParts],hide:['bellweather-zone','prison-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','warden-rift-link','stolen-voice','zip-voice'],transforms:{zip:{position:[0,0,10]},singer:{position:[3.8,0,1]},'friend-a':{position:[-3,0,1]},'friendship-lantern':{position:[-2.2,1.2,10.5]},'moon-door':{position:[0,0,0]}},animations:{zip:'idle'}};
   p.hide.push('sun','star','notice-old','notice-parade','notice-today','tutorial-route-open','wrong-ring','reunion-ring','route-glow');
   if(beat===0){
     p.camera='home';p.environment={clearColor:'#172238',ambient:'#806f68',exposure:1.12,fog:{type:'linear',color:'#8f91a7',start:38,end:125}};p.show.push('bellweather-zone','zip-voice','friendship-lantern');p.animations.zip='wave';
     p.timeline={duration:2200,moves:[{entity:'friendship-lantern',from:[-2.2,1.2,10.5],to:[-.8,1.1,10.5],at:600,duration:1100}],cues:[{at:1600,patch:{animations:{zip:'yes'}}}],finish:{animations:{zip:'idle'}}};
   }else if(beat===1){
     p.camera='rupture';p.environment={clearColor:'#10172a',ambient:'#4a5068',exposure:.9,fog:{type:'linear',color:'#4e5c79',start:24,end:86}};
-    p.show.push('bellweather-zone','zip-voice','rift','storm-flash','warden');p.animations.zip='no';
+    p.show.push('bellweather-zone','zip-voice','rift','storm-flash','warden','warden-rift-link');p.animations.zip='no';
     p.transforms.warden={position:[0,3.1,7.15],scale:[.72,.72,.72]};
     p.timeline={duration:3900,moves:[
       {entity:'warden',from:[0,3.1,7.15],to:[0,3.7,7.7],at:500,duration:850},
@@ -183,10 +185,11 @@ function opening(beat){
       {at:520,patch:{environment:{clearColor:'#07101f',ambient:'#222d49',exposure:.62,fog:{type:'linear',color:'#263650',start:18,end:72}}}},
       {at:850,patch:{hide:['storm-flash']}},
       {at:1200,patch:{animations:{singer:'no','friend-a':'no'}}},
+      {at:1450,patch:{hide:['warden-rift-link']}},
       {at:2450,patch:{hide:['singer','friend-a','bellworker-a','bellworker-b']}},
       {at:2900,patch:{hide:['zip']}},
       {at:3250,patch:{hide:['warden']}}
-    ],finish:{hide:['storm-flash','zip','singer','friend-a','bellworker-a','bellworker-b','warden'],environment:{clearColor:'#03060d',ambient:'#111827',exposure:.35,fog:{type:'none'}}}};
+    ],finish:{hide:['storm-flash','zip','singer','friend-a','bellworker-a','bellworker-b','warden','warden-rift-link'],environment:{clearColor:'#03060d',ambient:'#111827',exposure:.35,fog:{type:'none'}}}};
   }else if(beat===2){
     p.camera='limbo';p.environment={clearColor:'#02040a',ambient:'#10131c',exposure:.35,fog:{type:'none'}};p.show.push('limbo-backdrop','zip-voice');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
   }else if(beat===3){
