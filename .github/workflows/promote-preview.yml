@@ -1,0 +1,117 @@
+name: Promote reviewed preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: Exact 40-character runtime candidate SHA
+        required: true
+        type: string
+      evidence_run_id:
+        description: Successful Verify hosted pilot run id for candidate_sha
+        required: true
+        type: string
+      review_record:
+        description: Path on main to exact-candidate schema-v2 review JSON
+        required: true
+        type: string
+      explicit_user_preview_override:
+        description: Use only when the user explicitly requests an incomplete-but-unblocked preview
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify evidence run belongs to the requested candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          EVIDENCE_RUN_ID: ${{ inputs.evidence_run_id }}
+        run: |
+          python - <<'PY'
+          import json, os, re, subprocess
+          candidate=os.environ["CANDIDATE_SHA"]
+          run_id=os.environ["EVIDENCE_RUN_ID"]
+          if not re.fullmatch(r"[0-9a-f]{40}",candidate):
+              raise SystemExit("candidate_sha must be an exact lowercase SHA")
+          data=json.loads(subprocess.check_output([
+              "gh","api",f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{run_id}"
+          ],text=True))
+          if data.get("head_sha")!=candidate:
+              raise SystemExit(f"evidence run SHA {data.get('head_sha')} != candidate {candidate}")
+          if data.get("conclusion")!="success":
+              raise SystemExit(f"evidence run conclusion is {data.get('conclusion')}, not success")
+          print(json.dumps({"candidate_sha":candidate,"run_id":run_id,"conclusion":"success"}))
+          PY
+
+      - name: Download exact-candidate evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ inputs.evidence_run_id }}
+          pattern: game-review-evidence-${{ inputs.candidate_sha }}-*
+          path: /tmp/vibelearn-review-evidence
+          github-token: ${{ github.token }}
+
+      - name: Rebuild and validate exact-candidate review index
+        env:
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        run: |
+          python tools/build_review_index.py \
+            --root /tmp/vibelearn-review-evidence \
+            --candidate "$CANDIDATE_SHA" \
+            --technical-result success \
+            --output /tmp/vibelearn-review-evidence-index.json
+
+      - name: Validate preview release gate
+        env:
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          REVIEW_RECORD: ${{ inputs.review_record }}
+          USER_OVERRIDE: ${{ inputs.explicit_user_preview_override }}
+        run: |
+          test -f "$REVIEW_RECORD" || { echo "Review record not found: $REVIEW_RECORD"; exit 1; }
+          EXTRA=""
+          if [ "$USER_OVERRIDE" = "true" ]; then
+            EXTRA="--explicit-user-preview-override"
+          fi
+          python tools/check_release_gate.py \
+            --candidate "$CANDIDATE_SHA" \
+            --mode preview \
+            --quality-status docs/quality-status.json \
+            --review-record "$REVIEW_RECORD" \
+            --evidence-root /tmp/vibelearn-review-evidence \
+            $EXTRA
+
+      - name: Ensure candidate belongs to main history
+        env:
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        run: |
+          git fetch origin main deploy/render-supabase
+          git cat-file -e "$CANDIDATE_SHA^{commit}"
+          git merge-base --is-ancestor "$CANDIDATE_SHA" origin/main
+
+      - name: Fast-forward reviewed candidate to Render preview branch
+        env:
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        run: |
+          git push origin "$CANDIDATE_SHA:refs/heads/deploy/render-supabase"
+
+      - name: Record promotion boundary
+        run: |
+          echo "Branch promotion passed. Render auto-deploy is intentionally off."
+          echo "Trigger/verify Render only through the authorized deployment adapter after this workflow succeeds."
