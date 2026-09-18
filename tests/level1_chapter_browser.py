@@ -81,15 +81,16 @@ def main():
             page.get_by_role('button',name='Stay here',exact=True).click();page.reload();expect(page.locator('#goal')).to_have_text('The deeper gate is open.',timeout=15000)
             checks.append('Level 1 begins only after tutorial completion, permits a normal wrong context choice, preserves it, then recovers through the current route clue and ends in the prison world.')
 
-            for width in (360,430):
-                ctx=browser.new_context(viewport={'width':width,'height':844},has_touch=True,reduced_motion='reduce');q=ctx.new_page();q.goto(url+'/first-words')
+            for width in (360,430,1280):
+                height=844 if width<500 else 800
+                ctx=browser.new_context(viewport={'width':width,'height':height},has_touch=width<500,reduced_motion='reduce');q=ctx.new_page();q.goto(url+'/first-words')
                 q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.locator('#saved')).to_have_text('Saved',timeout=15000)
                 complete_tutorial(q);action(q,'Begin Level 1 →')
                 choose(q,'Check route signs','Current notice · “Moon route closed. The tower bell answers the five-point lantern mark.”')
                 choose(q,'Predict the gate','Star');generate(q);action(q,'Finish Level 1 →','Level saved · practice recorded');expect(q.locator('#goal')).to_have_text('The deeper gate is open.',timeout=15000)
                 assert q.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 q.screenshot(path=str(out/f'level1-complete-{width}-reduced.png'));ctx.close()
-            checks.append('360/430 reduced-motion players follow the same separate tutorial and solve Level 1 without requiring camera skill.')
+            checks.append('360/430 phone and 1280 desktop reduced-motion players follow the same separate tutorial and solve Level 1 without requiring camera skill.')
             assert not errors,errors
             (out/'level1-chapter-report.json').write_text(json.dumps({'result':'passed','checks':checks,'page_errors':errors,'limits':'Automated Chromium emulation is not a novice human or physical-phone acceptance study.'},indent=2))
         finally:
