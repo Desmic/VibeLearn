@@ -58,7 +58,7 @@ MODALITY_EXTENSIONS = {
     "runtime_trace": {".json", ".zip"},
     "authoritative_replay": {".json", ".md"},
     "ci_report": {".json", ".txt"},
-    "source_inspection": {".json", ".md", ".txt"},
+    "source_inspection": {".json", ".md", ".txt", ".tar"},
     "review_assignment": {".json", ".md", ".txt"},
     "audio_capture": {".wav", ".mp3", ".ogg", ".m4a", ".webm"},
 }
