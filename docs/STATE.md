@@ -1,5 +1,14 @@
 # Current state — LLM learning-game proof track
 
+## Automation integration direction — 18 September 2026
+
+The user has now approved a **bounded merge of the existing Terminal PM Agent/orchestrator into VibeLearn** to turn the project into a highly automated development and game-generation system. `docs/AUTOMATED-DEVELOPMENT-SYSTEM.md` is the owning architecture/handoff.
+
+This supersedes older text that treated orchestration only as indefinite future work, but it does not authorize a wholesale donor-repo transplant, a fleet of permanent specialist agents, autonomous production deployment, or Level 2 work. Start with a thin real VibeLearn slice: economical worker -> independent reviewer with implicit falsification/proof -> evidence -> accept/repair, then add outcome/incident learning. Reuse Terminal PM execution/session/evidence/recovery ideas selectively and increase complexity only for an obvious invariant or evidence from real runs.
+
+The current Phase 1 runtime/review identity and user-acceptance gate below are unchanged by this architecture documentation.
+
+
 ## Exact Phase 1 review checkpoint — 18 September 2026
 
 Canonical development branch remains `main`. The reviewed **runtime candidate**
