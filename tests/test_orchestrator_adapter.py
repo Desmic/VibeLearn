@@ -260,7 +260,7 @@ class OrchestratorAdapterTests(unittest.TestCase):
         self.assertEqual(receipt["effect_status"], "acknowledged")
         self.assertEqual(
             [x[0] for x in transport.calls if x[0] in {"start_run", "lookup_operation"}],
-            ["start_run", "lookup_operation"],
+            ["lookup_operation", "start_run", "lookup_operation"],
         )
         self.assertEqual(sum(x[0] == "start_run" for x in transport.calls), 1)
 
