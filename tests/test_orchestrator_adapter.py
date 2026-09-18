@@ -179,10 +179,22 @@ class OrchestratorAdapterTests(unittest.TestCase):
         )
         self.assertTrue(success["ready_for_vibelearn_evaluation"])
         self.assertEqual(success["product_acceptance"], "undetermined")
+        self.assertEqual(success["candidate_ref"]["kind"], "candidate")
+        self.assertEqual(
+            success["candidate_ref"]["artifact_refs"][0]["kind"], "artifact"
+        )
         self.assertFalse(defect["ready_for_vibelearn_evaluation"])
         self.assertIn("contract-safety", defect["blocking_review_ids"])
         self.assertFalse(unresolved["ready_for_vibelearn_evaluation"])
         self.assertIn("contract-safety", unresolved["blocking_review_ids"])
+
+    def test_typed_opaque_refs_survive_outcome_and_incident_validation(self):
+        fixture = self.fixture()
+        outcome = validate_outcome_record(fixture["outcome"])
+        incident = validate_incident_record(fixture["incident"], outcome)
+        self.assertEqual(outcome["run_ref"]["system"], "terminal_pm")
+        self.assertEqual(outcome["build_ref"]["system"], "vibelearn")
+        self.assertEqual(incident["candidate_ref"]["kind"], "candidate")
 
     def test_serialized_outcome_and_incident_keep_exact_cross_system_lineage(self):
         fixture = self.fixture()
