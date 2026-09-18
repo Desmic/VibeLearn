@@ -48,6 +48,17 @@ def _require_text(value: Any, field: str) -> str:
     return value
 
 
+def _require_ref(value: Any, field: str) -> Any:
+    """Accept the draft contract's opaque text or typed cross-system ref."""
+    if isinstance(value, str) and value.strip():
+        return value
+    if isinstance(value, Mapping):
+        for key in ("system", "kind", "id"):
+            _require_text(value.get(key), f"{field}.{key}")
+        return copy.deepcopy(dict(value))
+    raise ContractError("INVALID_REFERENCE", f"{field} is required")
+
+
 def _receipt(value: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(value, Mapping) or value.get("effect_status") not in EFFECT_STATUSES:
         raise ContractError("INTERNAL_ERROR", "invalid operation receipt")
@@ -84,7 +95,10 @@ def validate_outcome_record(record: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(record, Mapping) or record.get("schema") != "vibelearn.automation-outcome.v0.1":
         raise ContractError("INVALID_REFERENCE", "unsupported automation outcome record")
     value = copy.deepcopy(dict(record))
-    for field in ("outcome_ref", "build_ref", "run_ref", "candidate_ref", "observation", "observed_at"):
+    _require_text(value.get("outcome_ref"), "outcome.outcome_ref")
+    for field in ("build_ref", "run_ref", "candidate_ref"):
+        _require_ref(value.get(field), f"outcome.{field}")
+    for field in ("observation", "observed_at"):
         _require_text(value.get(field), f"outcome.{field}")
     if value.get("source") not in OUTCOME_SOURCES:
         raise ContractError("INVALID_REFERENCE", "outcome.source is invalid")
@@ -101,11 +115,10 @@ def validate_incident_record(
     if not isinstance(record, Mapping) or record.get("schema") != "vibelearn.automation-incident.v0.1":
         raise ContractError("INVALID_REFERENCE", "unsupported automation incident record")
     value = copy.deepcopy(dict(record))
-    for field in (
-        "incident_ref", "outcome_ref", "build_ref", "originating_run_ref",
-        "candidate_ref", "problem_summary", "escape_summary",
-    ):
+    for field in ("incident_ref", "outcome_ref", "problem_summary", "escape_summary"):
         _require_text(value.get(field), f"incident.{field}")
+    for field in ("build_ref", "originating_run_ref", "candidate_ref"):
+        _require_ref(value.get(field), f"incident.{field}")
     if value.get("status") not in INCIDENT_STATUSES:
         raise ContractError("INVALID_REFERENCE", "incident.status is invalid")
     evidence = value.get("evidence_refs")
@@ -291,8 +304,7 @@ class VibeLearnAdapter:
             "run_ref": copy.deepcopy(run_ref),
             "expected_revision": expected_revision,
         }
-        if run_ref in (None, "", {}):
-            raise ContractError("INVALID_REFERENCE", "run_ref is required")
+        _require_ref(run_ref, "run_ref")
         self._remember_idempotency(request)
         intent_digest = self._intent_digest(request)
         existing = self._lookup_existing(
@@ -325,8 +337,7 @@ class VibeLearnAdapter:
         return self._validate_reconciled(found, idempotency_key, intent_digest, operation)
 
     def get_run(self, run_ref: Any, original_run_request: Mapping[str, Any]) -> dict[str, Any]:
-        if run_ref in (None, "", {}):
-            raise ContractError("INVALID_REFERENCE", "run_ref is required")
+        _require_ref(run_ref, "run_ref")
         return self.consume_run(self.transport.get_run(copy.deepcopy(run_ref)), original_run_request)
 
     @staticmethod
@@ -443,8 +454,8 @@ class VibeLearnAdapter:
         child["idempotency_key"] = _require_text(idempotency_key, "idempotency_key")
         child["purpose"] = "diagnose_and_repair_escaped_failure"
         run = child["run_request"]
-        run["parent_run_ref"] = copy.deepcopy(parent_run_ref)
-        run["incident_ref"] = copy.deepcopy(incident_ref)
+        run["parent_run_ref"] = _require_ref(parent_run_ref, "parent_run_ref")
+        run["incident_ref"] = _require_ref(incident_ref, "incident_ref")
         run["requested_outcome"] = _require_text(requested_outcome, "requested_outcome")
         run["context_refs"] = list(run.get("context_refs") or []) + copy.deepcopy(context_refs)
         run["repository"]["base_revision"] = _require_text(base_revision, "base_revision")
