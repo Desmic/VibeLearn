@@ -1,5 +1,7 @@
 # Game review — actual play is required
 
+**Current review target — 19 September 2026:** review exact frozen candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26`, not historical `6fea828...` or rejected deployed `ad14c5aced6cf053c7617dfb03245506e1e9dad5`. Use the sealed critic assignments/evidence described in `CRITIC-HANDOFF.md`. The current assistant context cannot serve as the cold observer. This supersedes conflicting candidate references below.
+
 **Active direction — 17 September 2026.** Follow `CRITIC-POLICY.md` and `ART-WORLD-DIRECTION-CRITIC.md`. The current user review of candidate `6fea828...` is `needs_revision`; prior internal 9s do not survive direct user rejection.
 
 ## Review the actual experience

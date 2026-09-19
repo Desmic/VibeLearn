@@ -1,5 +1,7 @@
 # Game acceptance — the user's verdict is final
 
+**Authoritative acceptance status — 19 September 2026:** Deployed runtime `ad14c5aced6cf053c7617dfb03245506e1e9dad5` remains rejected and must not be re-presented as the new build. A materially revised candidate is frozen at `92a5ecbdc803362ee1554fca6ae811adb155bc26` (run `35434565005`), but it is **not yet internally or human accepted**: the context-separated critic queue is still pending. Historical numeric 9/10 records below remain diagnostic only. No Level 2/public rollout/preview promotion until the required critic results are validated and the current user accepts the exact candidate (or a repaired successor).
+
 ## Current status — 18 September 2026
 
 Runtime `ad14c5aced6cf053c7617dfb03245506e1e9dad5` is **rejected**.
