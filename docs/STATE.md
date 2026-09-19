@@ -10,8 +10,16 @@ sealed review artifact is `10583163540`, named
 19 October 2026. This replaces 92a5ecbd as the current critic candidate; older
 candidate references below are history and their evidence is not transferable.
 
-Next: context-separated criticism of this exact candidate, then user review.
-The known reviewer startup-context limitation remains unresolved. Technical
+Two context-separated CLI reviews now completed and passed ingestion:
+`learning_transfer` and `physicality`, both **unresolved** due to missing
+observation coverage. Raw results and harness/access audits are stored in
+`reviews/results/471de882a01690fa50ac39455ad603fffd39cfdc/`. The standalone
+read-only CLI startup audit excludes the project context inherited by desktop
+subagents. See `REVIEW-20260919-INDEPENDENT-PREFLIGHT.md`.
+
+Next: repair the identified learning/physicality evidence gaps, then re-review
+with regenerated exact assignments; finish the remaining independent passes.
+No runtime defect was established by these two limited packets. Technical
 verification does not establish creative acceptance. Render was not deployed,
 Supabase was not changed, and Level 2/live Terminal PM integration remain deferred.
 

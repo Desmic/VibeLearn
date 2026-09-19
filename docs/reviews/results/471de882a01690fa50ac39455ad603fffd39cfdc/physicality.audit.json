@@ -1,0 +1,56 @@
+{
+  "schema": "vibelearn.local-review-audit.v1",
+  "pass": "physicality",
+  "candidate_sha": "471de882a01690fa50ac39455ad603fffd39cfdc",
+  "harness_session_id": "local-harness-85529c32-80d2-44a5-a454-a692b7675cb3",
+  "worker_thread_id": "01a0b9b8-dbd8-7573-9213-923e222b4a70",
+  "execution_receipt_id": "sha256:26d0998bd0fe443d18f5151b1e02ce35e4fb6f152ddf2d22f179f39291b35aa6",
+  "configuration": {
+    "ignore_user_config": true,
+    "project_doc_max_bytes": 0,
+    "memories": false,
+    "sandbox": "read-only",
+    "ephemeral": true,
+    "cli_auth_credentials_store": "keyring",
+    "forced_login_method": "chatgpt",
+    "model": "gpt-6-astra"
+  },
+  "startup_context_audit": "No project instructions, design, prior conversation, feedback or scores reported; generic agent/skill/tool instructions remain. Same audit repeated by the reviewing worker before evidence reads.",
+  "evidence_accesses": [
+    {
+      "command": "\"C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.exe\" -Command 'Get-Content README.md, assignment.json, capsule.json'",
+      "exit_code": 0
+    },
+    {
+      "command": "\"C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.exe\" -Command 'Get-Content -LiteralPath evidence/000-4ad68a08cbc5.json'",
+      "exit_code": 0
+    }
+  ],
+  "other_reviewer_tool_calls": [],
+  "prompt_sha256": "cbb3eec7ddcb4b3f58117bf03167d5ec4875d62ce9110c31b198583243d6f2ef",
+  "events_sha256": "ff21d586bb8d40536a1f9caf8e133ca6dd9e36cb4a543bd64845833f822c2860",
+  "limits": "Configuration and recorded accesses support context isolation; this is not an OS-enforced read allowlist or a cryptographic proof of model independence.",
+  "explicit_image_attachments": [
+    {
+      "capsule_ref": "evidence/001-5b2cd28846cb.png",
+      "sha256": "200d427395f4b0e4bfb5ab3b4f0c8f4d0ff97b22980b61c1910c9f3c236b7405",
+      "ref": "game-review-evidence-471de882a01690fa50ac39455ad603fffd39cfdc-first-words-controls/artifacts/level1-controls-after-save-390.png"
+    },
+    {
+      "capsule_ref": "evidence/002-a5704e731b47.png",
+      "sha256": "4a75540f2c4a1b2cbeaa7d458112946979285b981a36f80499536df102c6e810",
+      "ref": "game-review-evidence-471de882a01690fa50ac39455ad603fffd39cfdc-first-words-controls/artifacts/level1-controls-collision-390.png"
+    },
+    {
+      "capsule_ref": "evidence/003-c167bb05c67c.png",
+      "sha256": "0e55f7e88392d659a689c672fd7b38628ae53c8765176c4c8c7ba8510bbbdeee",
+      "ref": "game-review-evidence-471de882a01690fa50ac39455ad603fffd39cfdc-first-words-controls/artifacts/level1-controls-orbit-390.png"
+    },
+    {
+      "capsule_ref": "evidence/004-25dfc2b02fa6.png",
+      "sha256": "9fbe80ffd0b77125267a344607db4681fd3b960f1483ed4cbbdc6f9135a4c6b1",
+      "ref": "game-review-evidence-471de882a01690fa50ac39455ad603fffd39cfdc-first-words-controls/artifacts/level1-controls-zoom-390.png"
+    }
+  ],
+  "excluded_prior_execution": "Earlier physicality execution was not ingested because image tool calls were absent from JSONL output; this fresh repeat receives all four images explicitly."
+}

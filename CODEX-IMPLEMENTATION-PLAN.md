@@ -1,5 +1,15 @@
 # Learning OS — incremental implementation plan 2.0
 
+**Independent evidence checkpoint — 19 September 2026:** Fresh, audited CLI
+learning and physicality reviews of `471de882...` were ingested as unresolved.
+Next bounded work is evidence repair: pinned learning concept/scope, intermediate
+generation, controlled hints/predictions and final assessment; synchronized
+multi-angle prop/wall/gate traversal and continuous camera sweeps. Keep probes
+spec-driven and use actual browser play. Do not change runtime behavior without
+an observed defect or treat unresolved as approval. Remaining media/handoff
+passes and cold-observer dependencies remain open. See
+`docs/REVIEW-20260919-INDEPENDENT-PREFLIGHT.md`.
+
 **Current review checkpoint — 19 September 2026:** Repaired candidate
 `471de882a01690fa50ac39455ad603fffd39cfdc` passed exact CI run `35440122451`
 (all seven suites plus review-index). Sealed artifact `10583163540` is retained

@@ -61,6 +61,12 @@ stop if unrelated product/creator context is present. Do not issue an
 `assignment_only` execution receipt for that session. See
 `REPAIR-20260919-MARKER-CLEARANCE.md` for the local diagnostic record.
 
+A subsequently audited, read-only standalone CLI session can run evidence-only
+passes without those inherited project instructions. See
+`REVIEW-20260919-INDEPENDENT-PREFLIGHT.md` for its configuration, startup audit,
+access limitations and actual results. This does not clear unavailable media
+modalities or make the current informed conversation an independent critic.
+
 The orchestrator must:
 
 1. start from one exact runtime candidate SHA;

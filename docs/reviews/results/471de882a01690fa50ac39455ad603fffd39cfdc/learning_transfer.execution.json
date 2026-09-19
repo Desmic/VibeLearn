@@ -1,0 +1,32 @@
+{
+  "schema": "vibelearn.critic-execution-receipt.v1",
+  "candidate_sha": "471de882a01690fa50ac39455ad603fffd39cfdc",
+  "pass": "learning_transfer",
+  "assignment_id": "sha256:fef62fba2931f63c4090c310ac61ebcf4705bd102e87a9396c88908aa9c029be",
+  "capsule_id": "sha256:6d1b23f20aac5f238bc99dd0e6309b0442b57127252d9e6fa97ff982fa48244a",
+  "executor_id": "codex-cli-fresh-read-only",
+  "session_id": "local-harness-9ddf6613-9831-496d-bc2a-04f157328c52",
+  "context_mode": "assignment_only",
+  "supplied_evidence": [
+    {
+      "ref": "game-review-evidence-471de882a01690fa50ac39455ad603fffd39cfdc-first-words-chapter/artifacts/level1-authoritative-replay.json",
+      "modality": "authoritative_replay",
+      "candidate_sha": "471de882a01690fa50ac39455ad603fffd39cfdc"
+    },
+    {
+      "ref": "game-review-evidence-471de882a01690fa50ac39455ad603fffd39cfdc-first-words-chapter/artifacts/first-words-chapter-interaction-trace.json",
+      "modality": "interactive_trace",
+      "candidate_sha": "471de882a01690fa50ac39455ad603fffd39cfdc"
+    },
+    {
+      "ref": "game-review-evidence-471de882a01690fa50ac39455ad603fffd39cfdc-first-words-chapter/artifacts/level1-chapter-report.json",
+      "modality": "runtime_trace",
+      "candidate_sha": "471de882a01690fa50ac39455ad603fffd39cfdc"
+    }
+  ],
+  "supplied_context": [
+    "assignment"
+  ],
+  "forbidden_context_supplied": [],
+  "receipt_id": "sha256:0a42d127092489d29245d9557c76dc8960d6e59c3b0f00b8dba149fc765e776b"
+}

@@ -1,0 +1,42 @@
+{
+  "schema": "vibelearn.critic-execution-receipt.v1",
+  "candidate_sha": "471de882a01690fa50ac39455ad603fffd39cfdc",
+  "pass": "physicality",
+  "assignment_id": "sha256:eb23a66d211b47c227947d72bd9138580b16c113cb5fcab005698f9257140156",
+  "capsule_id": "sha256:e7744a61ae67ca61d48370cfbe938f9ad1d3f96803fcc3edb7270bf96edf133a",
+  "executor_id": "codex-cli-fresh-read-only-attached-images",
+  "session_id": "local-harness-85529c32-80d2-44a5-a454-a692b7675cb3",
+  "context_mode": "assignment_only",
+  "supplied_evidence": [
+    {
+      "ref": "game-review-evidence-471de882a01690fa50ac39455ad603fffd39cfdc-first-words-controls/artifacts/first-words-controls-interaction-trace.json",
+      "modality": "interactive_trace",
+      "candidate_sha": "471de882a01690fa50ac39455ad603fffd39cfdc"
+    },
+    {
+      "ref": "game-review-evidence-471de882a01690fa50ac39455ad603fffd39cfdc-first-words-controls/artifacts/level1-controls-after-save-390.png",
+      "modality": "screenshot",
+      "candidate_sha": "471de882a01690fa50ac39455ad603fffd39cfdc"
+    },
+    {
+      "ref": "game-review-evidence-471de882a01690fa50ac39455ad603fffd39cfdc-first-words-controls/artifacts/level1-controls-collision-390.png",
+      "modality": "screenshot",
+      "candidate_sha": "471de882a01690fa50ac39455ad603fffd39cfdc"
+    },
+    {
+      "ref": "game-review-evidence-471de882a01690fa50ac39455ad603fffd39cfdc-first-words-controls/artifacts/level1-controls-orbit-390.png",
+      "modality": "screenshot",
+      "candidate_sha": "471de882a01690fa50ac39455ad603fffd39cfdc"
+    },
+    {
+      "ref": "game-review-evidence-471de882a01690fa50ac39455ad603fffd39cfdc-first-words-controls/artifacts/level1-controls-zoom-390.png",
+      "modality": "screenshot",
+      "candidate_sha": "471de882a01690fa50ac39455ad603fffd39cfdc"
+    }
+  ],
+  "supplied_context": [
+    "assignment"
+  ],
+  "forbidden_context_supplied": [],
+  "receipt_id": "sha256:26d0998bd0fe443d18f5151b1e02ce35e4fb6f152ddf2d22f179f39291b35aa6"
+}

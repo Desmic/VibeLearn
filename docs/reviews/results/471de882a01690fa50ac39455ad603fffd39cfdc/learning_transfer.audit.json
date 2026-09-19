@@ -1,0 +1,33 @@
+{
+  "schema": "vibelearn.local-review-audit.v1",
+  "pass": "learning_transfer",
+  "candidate_sha": "471de882a01690fa50ac39455ad603fffd39cfdc",
+  "harness_session_id": "local-harness-9ddf6613-9831-496d-bc2a-04f157328c52",
+  "worker_thread_id": "01a0b9b3-4631-7b83-9dda-e1fb825afaeb",
+  "execution_receipt_id": "sha256:0a42d127092489d29245d9557c76dc8960d6e59c3b0f00b8dba149fc765e776b",
+  "configuration": {
+    "ignore_user_config": true,
+    "project_doc_max_bytes": 0,
+    "memories": false,
+    "sandbox": "read-only",
+    "ephemeral": true,
+    "cli_auth_credentials_store": "keyring",
+    "forced_login_method": "chatgpt",
+    "model": "gpt-6-astra"
+  },
+  "startup_context_audit": "No project instructions, design, prior conversation, feedback or scores reported; generic agent/skill/tool instructions remain. Same audit repeated by the reviewing worker before evidence reads.",
+  "evidence_accesses": [
+    {
+      "command": "\"C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.exe\" -Command 'Get-Content -LiteralPath README.md, assignment.json, capsule.json'",
+      "exit_code": 0
+    },
+    {
+      "command": "\"C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.exe\" -Command 'Get-Content -LiteralPath evidence/000-4fea384f6720.json, evidence/001-d1512a28848c.json, evidence/002-173e0d697672.json'",
+      "exit_code": 0
+    }
+  ],
+  "other_reviewer_tool_calls": [],
+  "prompt_sha256": "ef467c70c14bbfa1e8667bff394b4bf1d649f76f41f8c7beba593ae56d4637e5",
+  "events_sha256": "8ff447c6bfab3720d3c0a1980c68297c5023a7921e73e5e65c49ac9661dfed46",
+  "limits": "Configuration and recorded accesses support context isolation; this is not an OS-enforced read allowlist or a cryptographic proof of model independence."
+}
