@@ -253,7 +253,7 @@ Do not build a speculative universal generator. Use the current LLM track to pro
 
 Then demonstrate selected pieces in a materially different synthetic/second world before calling them general.
 
-## Future multi-agent creation pipeline
+## Automation/orchestration integration
 
 Longer term agents may own:
 
@@ -271,7 +271,10 @@ Longer term agents may own:
 
 Agents exchange versioned specs/artifacts/evidence. Creator agents do not self-certify. Critic agents never establish user acceptance.
 
-This is future work. Preserve the boundaries now; do not stop current proof-track development to implement the orchestration platform.
+Phase 0 of the external-orchestrator boundary is now implemented and merged.
+Live execution is still blocked by Terminal PM's own `live_run_authorized=false`
+checkpoint. Preserve the boundary and do not add deeper coupling until that
+policy changes or real integration evidence proves the thin contract insufficient.
 
 ## Portability acceptance
 

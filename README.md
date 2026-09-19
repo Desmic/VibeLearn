@@ -42,7 +42,7 @@ For compatible modes, Play Canvas should keep the same stage/world/runtime and c
 
 **PlayCanvas Engine is the active backend.** Three.js and older 2D/2.5D paths are legacy/migration only; active 3D failure must fail closed with explicit retry/error.
 
-## Reusable Three.js world framework
+## Historical Three.js world framework / migration context
 
 The user explicitly requires a **Three.js framework that makes future stories/fantasy settings easy to integrate**.
 
@@ -137,7 +137,7 @@ Open `http://127.0.0.1:8000`. Local mode uses SQLite/browser-scoped development 
 - `web/play-canvas.js` / `web/play-canvas.css` — persistent game surface/stage lifecycle
 - `web/story3d-runtime.js` — reusable Three.js renderer/device/camera/lifecycle infrastructure
 - `web/story3d-world-host.js` — world adapter/package capability boundary
-- `web/rescue-story3d.js` — Echo Forge-specific current world implementation
+- `web/rescue-story3d.js` — historical Echo Forge Three.js world implementation
 - `web/rescue-intro.js` — first-touch story state/player controls
 - `web/rescue-game.js` / `web/rescue-chapter1.js` — seven-signal game and Chapter 1 tutorial focus
 - `tests/` — deterministic, PostgreSQL, hosted, browser, Play Canvas and Story3D verification

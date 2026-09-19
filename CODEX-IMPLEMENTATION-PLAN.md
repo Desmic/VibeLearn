@@ -2,9 +2,9 @@
 
 **Authoritative gate — 19 September 2026:** Implementation is frozen for post-CI product criticism. Exact critic candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26`; exact CI/review-index run `35434565005`; sealed bundle `10581437727` retained through 19 October 2026. Ready first-wave passes: cold observer, motion/audience, physicality, handoff/tutorial, audio/atmosphere, learning/transfer. Cinematic causality and intent comparison remain dependency-blocked until a validated cold-observer result is ingested. Terminal PM adapter Phase 0 is complete/merged; live execution remains externally unauthorized. Render remains on rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5`; no Level 2. **All older “active chunk/next build” sections below are implementation history unless a later critic blocker explicitly reopens them.**
 
-## Active chunk — 18 September 2026
+## Completed implementation chunk — 18 September 2026
 
-Friendship/reveal slice verified; next active chunk is control orientation in
+Friendship/reveal slice was verified; the then-next chunk was control orientation in
 the separate tutorial. Fresh play went directly to repair and hid movement/look
 instructions behind an intrusive help panel. Add one short prompt at a time:
 actual movement -> camera look/zoom -> menu open/return -> existing repair loop.
@@ -64,7 +64,7 @@ Read, in order, `docs/STATE.md`, `docs/GAME-RUNTIME-ARCHITECTURE.md`, `docs/STOR
 
 ## 1. Product north star
 
-VibeLearn is a **general system for generating effective learning games/worlds for arbitrary subjects and concepts**. Relay Rescue/Echo Forge is only the current authored reference slice.
+VibeLearn is a **general system for generating effective learning games/worlds for arbitrary subjects and concepts**. How LLMs Work / The First Words is the current proof track; Relay Rescue/Echo Forge is a historical authored reference and migration baseline.
 
 The durable generation boundary is:
 

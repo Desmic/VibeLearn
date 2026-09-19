@@ -117,11 +117,13 @@ Reuse should enable materially different games, not reskins.
 
 XP/practice progress is not mastery. Assistance, prior exposure and independent performance remain distinct. Missing evidence remains unknown. Game completion/animation/world state do not establish learning by themselves.
 
-## Future agents
+## Agent/orchestration boundary
 
 The platform should eventually support coordinated agents for research, ideation, creation, art/world direction, implementation, critic roles, tests and CI/CD. Agents operate on versioned specs/artifacts and cannot self-certify.
 
-That is future platform work. First prove the game-creation model manually/tool-assisted on this track.
+The thin Terminal PM adapter Phase 0 is now implemented and merged, but live
+orchestration remains externally unauthorized. The current track must still pass
+the sealed critic queue and human review before broader automation work expands.
 
 ## Acceptance
 

@@ -144,11 +144,14 @@ Research and cultural references are valid ideation inputs. Review must ensure:
 - shipped characters/names/designs/dialogue/music remain original rather than confusingly derivative;
 - references support personality/joy rather than becoming a collage of borrowed IP.
 
-## Future critic agents
+## Critic-agent execution boundary
 
-VibeLearn may later use independent agents for story, art/world, gameplay, learning, test and CI/CD review. Creator agents must not self-certify their own output. Agent outputs need exact candidate IDs, evidence and reproducible counterexamples.
-
-This is future platform work; current proof-track quality comes first.
+VibeLearn now generates exact-candidate critic assignments and sealed evidence
+capsules, but those still require a genuinely fresh reviewer backend/session.
+Creator/current-context agents must not self-certify. Reviewer outputs require
+exact candidate/assignment/receipt identity, evidence actually supplied by the
+harness and reproducible counterexamples. The current chat is not a valid cold
+observer.
 
 ## Technical checker boundary
 

@@ -7,13 +7,14 @@
 Rejected deployed runtime:
 `ad14c5aced6cf053c7617dfb03245506e1e9dad5`.
 
-Current exact green system-repair candidate:
+Historical system-repair checkpoint:
 `ddfbaca219f712e241e47941806ecd8f7aeff190`  
-Exact CI/review-index run:
+Historical CI/review-index run:
 `35384949480`.
 
-The current candidate is **technically/systemically qualified for post-CI
-criticism**, not creatively accepted or preview-ready.
+That checkpoint established the quality-system mechanisms described below. It is
+not the active critic target; use the authoritative 19 September target at the
+top of this file.
 
 ## What is proven on this SHA
 
