@@ -1,5 +1,7 @@
 # Codex task: implement and present the first Learning OS slice
 
+**Status — historical handoff:** This file preserves the original first-slice Phase 0/1 plan. It is not the current execution authority. As of 19 September 2026 the frozen critic candidate is `92a5ecbdc803362ee1554fca6ae811adb155bc26`; read `AGENTS.md`, `CODEX.md`, `CODEX-IMPLEMENTATION-PLAN.md`, `docs/STATE.md`, and `docs/CRITIC-HANDOFF.md` before acting.
+
 ## Current product amendment — story is a gated subsystem
 
 This file preserves the original Phase 0/1 implementation handoff, but later user feedback materially changes how any current/future learner-facing course is realized. Read `docs/STATE.md` and `docs/STORY-GENERATION-AND-CRITIC.md` before using the older presentation guidance below.
