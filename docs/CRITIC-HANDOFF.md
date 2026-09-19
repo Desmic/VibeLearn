@@ -2,6 +2,36 @@
 
 **Active from 18 September 2026.**
 
+## Current frozen execution target
+
+Operator/orchestrator metadata only — **do not inject this whole handoff into a
+reviewer session**.
+
+- candidate SHA: `92a5ecbdc803362ee1554fca6ae811adb155bc26`;
+- exact technical/evidence run: `35434565005`;
+- sealed review-index/capsule artifact: `10581437727`;
+- artifact name:
+  `review-evidence-index-92a5ecbdc803362ee1554fca6ae811adb155bc26`;
+- artifact retention: through **19 October 2026**;
+- canonical repository `main` may contain later documentation-only commits;
+  those do not change this review target.
+
+Ready first-wave passes:
+- `cold_observer`;
+- `motion_audience`;
+- `physicality`;
+- `handoff_tutorial`;
+- `audio_atmosphere`;
+- `learning_transfer`.
+
+Dependency-blocked until a validated cold-observer result is ingested:
+- `cinematic_causality`;
+- `intent_comparison`.
+
+Do not regenerate assignments merely because `main` advanced. Use this exact
+candidate artifact until a real critic blocker requires a new candidate or an
+explicit product decision changes the frozen review target.
+
 Read:
 - `EXPERIENCE-QUALITY-SYSTEM.md`
 - `CRITIC-POLICY.md`
