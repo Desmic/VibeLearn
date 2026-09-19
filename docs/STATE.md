@@ -1,5 +1,20 @@
 # Current state — LLM learning-game proof track
 
+## Current verified repair candidate — 19 September 2026
+
+The marker-clearance and shared-renderer repairs are committed on canonical
+`main` at `471de882a01690fa50ac39455ad603fffd39cfdc`. Exact CI run
+`35440122451` passed all seven suites and review-index aggregation. The new
+sealed review artifact is `10583163540`, named
+`review-evidence-index-471de882a01690fa50ac39455ad603fffd39cfdc`, retained through
+19 October 2026. This replaces 92a5ecbd as the current critic candidate; older
+candidate references below are history and their evidence is not transferable.
+
+Next: context-separated criticism of this exact candidate, then user review.
+The known reviewer startup-context limitation remains unresolved. Technical
+verification does not establish creative acceptance. Render was not deployed,
+Supabase was not changed, and Level 2/live Terminal PM integration remain deferred.
+
 ## Local shared-renderer repair — 19 September 2026
 
 Continued work reproduced the graphics warning in an unrelated synthetic world:

@@ -1,5 +1,11 @@
 # Learning OS — incremental implementation plan 2.0
 
+**Current review checkpoint — 19 September 2026:** Repaired candidate
+`471de882a01690fa50ac39455ad603fffd39cfdc` passed exact CI run `35440122451`
+(all seven suites plus review-index). Sealed artifact `10583163540` is retained
+through 19 October. This supersedes the older frozen candidate below. Next is
+isolated criticism and user review, not further level or integration expansion.
+
 **Active bounded renderer repair — 19 September 2026:** Reproduced zero-size
 drawing buffers and WebGL error 1286 with an unrelated primitive world hidden
 and detached between mounts. Keep buffer sizing owned by the shared backend,

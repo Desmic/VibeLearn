@@ -1,5 +1,10 @@
 # Shared renderer lifecycle repair — 19 September 2026
 
+Final remote verification: candidate `471de882a01690fa50ac39455ad603fffd39cfdc`,
+CI run `35440122451`, all seven suites and review-index passed. Sealed review
+artifact `10583163540` is retained through 19 October. The local observations
+below preceded that commit; independent criticism and user acceptance remain open.
+
 ## Scope and reproduction
 
 The user authorized continuing the reliability/reuse pass, including actual

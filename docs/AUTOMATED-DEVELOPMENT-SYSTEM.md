@@ -2,8 +2,8 @@
 
 **Status:** approved target architecture / decoupled integration handoff  
 **Date:** 19 September 2026  
-**VibeLearn critic candidate:** frozen at `92a5ecbdc803362ee1554fca6ae811adb155bc26`; exact run `35434565005` passed all seven suites plus review-index, and critic evidence is retained for 30 days. Deployed Render runtime remains the rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5` per `docs/STATE.md`.  
-**Phase 0 implementation proof:** PR #12 was squash-merged as `40ec93f8b04cc7a3d88366d9195ec50555d9698f`; its exact main run `35398208739` passed all seven VibeLearn suites plus review-index/capsule materialization. The later frozen critic candidate `92a5ecbd...` contains that adapter unchanged and only extends CI evidence retention.  
+**VibeLearn critic candidate:** frozen at `471de882a01690fa50ac39455ad603fffd39cfdc`; exact run `35440122451` passed all seven suites plus review-index, and critic evidence is retained for 30 days. Deployed Render runtime remains the rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5` per `docs/STATE.md`.
+**Phase 0 implementation proof:** PR #12 was squash-merged as `40ec93f8b04cc7a3d88366d9195ec50555d9698f`; its exact main run `35398208739` passed all seven VibeLearn suites plus review-index/capsule materialization. The current repaired critic candidate `471de882...` contains that adapter unchanged; its runtime repairs do not expand integration scope.
 **Terminal PM Agent status checked:** connected private repository `Desmic/terminal-agent-20260223023455` at `acc3a6d3580d8ea0715ff807434f973eff4f90d0`, checkpoint updated 12 September 2026. Its authoritative checkpoint says `gate_1_5: open`, `live_run_authorized: false`, ER-1 exhaustive review active/incomplete, and explicitly states the checkpoint is navigation/status only and never live-run authorization. Treat it as an evolving external orchestrator, not a stable library to absorb.
 
 This document defines how VibeLearn should integrate with the evolving Terminal PM Agent through a narrow, versioned orchestration contract so VibeLearn can become a highly automated product-development and game-generation system without copying a moving internal architecture.
@@ -1000,7 +1000,7 @@ Do **not** require Astra. Astra is exercised only when a real unresolved ambigui
 ### Phase 0 — define and freeze only the contract
 
 **Status: complete and merged on `main` as `40ec93f8b04cc7a3d88366d9195ec50555d9698f`.
-The frozen game-review candidate `92a5ecbd...` already contains the adapter.**
+The current game-review candidate `471de882...` already contains the adapter.**
 
 Implemented/verified:
 - current VibeLearn baseline and exact Terminal PM checkpoint recorded;

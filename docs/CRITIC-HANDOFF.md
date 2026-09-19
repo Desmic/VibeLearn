@@ -7,14 +7,17 @@
 Operator/orchestrator metadata only — **do not inject this whole handoff into a
 reviewer session**.
 
-- candidate SHA: `92a5ecbdc803362ee1554fca6ae811adb155bc26`;
-- exact technical/evidence run: `35434565005`;
-- sealed review-index/capsule artifact: `10581437727`;
+- candidate SHA: `471de882a01690fa50ac39455ad603fffd39cfdc`;
+- exact technical/evidence run: `35440122451`;
+- sealed review-index/capsule artifact: `10583163540`;
 - artifact name:
-  `review-evidence-index-92a5ecbdc803362ee1554fca6ae811adb155bc26`;
+  `review-evidence-index-471de882a01690fa50ac39455ad603fffd39cfdc`;
 - artifact retention: through **19 October 2026**;
 - canonical repository `main` may contain later documentation-only commits;
   those do not change this review target.
+
+This replaces 92a5ecbd after evidence-backed marker and renderer repairs.
+The old bundle remains historical; do not transfer its reviews to this candidate.
 
 Ready first-wave passes:
 - `cold_observer`;
