@@ -1,12 +1,11 @@
 # Current state — LLM learning-game proof track
 
-## Canonical main + completed adapter Phase 0 — 19 September 2026
+## Frozen critic candidate + completed adapter Phase 0 — 19 September 2026
 
-Last fully verified **code-bearing canonical main** checkpoint before this
-state-record update:
-`40ec93f8b04cc7a3d88366d9195ec50555d9698f`.
+The exact **game/product critic candidate is now frozen at**
+`92a5ecbdc803362ee1554fca6ae811adb155bc26`.
 
-Exact GitHub Actions run `35398208739` passed:
+Exact GitHub Actions run `35434565005` passed:
 - foundation, including the full unit/adapter suite;
 - first-words-opening;
 - first-words-tutorial;
@@ -16,22 +15,18 @@ Exact GitHub Actions run `35398208739` passed:
 - first-words-lifecycle;
 - exact-candidate review-index aggregation and sealed-capsule materialization.
 
-Review-index artifact for that repository head:
-`10569881868`.
+Exact review-index artifact:
+- artifact ID `10581437727`;
+- candidate SHA `92a5ecbdc803362ee1554fca6ae811adb155bc26`;
+- retained until **19 October 2026**.
 
-### Game critic candidate remains SHA-bound separately
+The only change from the prior green canonical head `b320723...` to this
+candidate is CI artifact retention in `.github/workflows/verify.yml`; no
+game/runtime/test/source behavior changed. The evidence lifetime was extended
+from seven days to thirty days because genuinely independent reviewer execution
+is not currently available inside this chat.
 
-The active **game/product critic candidate remains**
-`02d8e80e81df2e96262d75a17124a3a3d4ca483e`, whose exact Actions run
-`35391320627` passed all seven suites plus review-index before the automation
-Phase 0 merge.
-
-Do **not** transfer a critic result between `02d8e80...` and newer repository
-heads merely because the PlayCanvas/game files are unchanged. Continue the
-independent post-CI critic queue against one explicitly selected exact SHA; for
-the currently frozen queue that SHA is `02d8e80...`.
-
-The generated queue for that game candidate remains:
+### Post-CI critic queue
 
 **ready for genuinely independent execution**
 - cold_observer;
@@ -45,12 +40,18 @@ The generated queue for that game candidate remains:
 - cinematic_causality;
 - intent_comparison.
 
+All critic results must remain bound to the exact candidate, assignment and
+harness execution receipt. Do not transfer a result from an older or newer SHA
+merely because game files appear equivalent.
+
 The current chat/reviewer context already knows intended story and prior human
 findings. It is not a valid cold observer and must not manufacture that result.
 
-### Terminal PM adapter Phase 0 — complete
+### Terminal PM adapter Phase 0 — complete and merged
 
-The thin external-orchestrator v0.1 boundary is now merged on `main`:
+The thin external-orchestrator v0.1 boundary is merged on canonical `main`
+(squash merge `40ec93f8b04cc7a3d88366d9195ec50555d9698f`) and is included in the
+frozen critic candidate above:
 
 - `app/orchestrator_adapter.py`;
 - `tests/test_orchestrator_adapter.py`;
@@ -110,8 +111,8 @@ Render branch promotion or deployment occurred. Do not start Level 2.
 ### Next active work
 
 1. Execute the six ready post-CI critics in genuinely context-separated reviewer
-   sessions against the frozen game candidate `02d8e80...`, with sealed
-   capsules and harness execution receipts.
+   sessions against frozen candidate `92a5ecbd...`, with sealed capsules and
+   harness execution receipts.
 2. Ingest/revalidate results sequentially. A `needs_revision` verdict blocks;
    missing/unresolved evidence stays incomplete rather than being replaced by a
    weaker modality.
@@ -119,11 +120,13 @@ Render branch promotion or deployment occurred. Do not start Level 2.
    cold-observer dependency exists.
 4. Repair any critic blocker on a new exact candidate and repeat the required
    evidence/review sequence.
-5. Do not add more Terminal PM/VibeLearn integration machinery merely to make
+5. Keep `92a5ecbd...` frozen for product review; documentation-only commits
+   after it do not become critic candidates automatically.
+6. Do not add more Terminal PM/VibeLearn integration machinery merely to make
    progress while live execution is externally forbidden. Resume Phase 1 only
    when Terminal PM's current checkpoint authorizes a bounded live run through
    the same adapter.
-6. Promote a replacement preview only after all required v2 critics pass and the
+7. Promote a replacement preview only after all required v2 critics pass and the
    release gate succeeds. Level 2 still requires explicit human acceptance.
 
 ---
