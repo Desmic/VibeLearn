@@ -43,7 +43,7 @@ jobs:
         with:
           name: review-source-${{ github.event.pull_request.head.sha || github.sha }}
           path: artifacts/review-source.tar
-          retention-days: 3
+          retention-days: 30
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -78,7 +78,7 @@ jobs:
             artifacts/*.tar
             artifacts/*trace.zip
             web/vendor/*
-          retention-days: 7
+          retention-days: 30
 
   review-index:
     if: always()
@@ -124,4 +124,4 @@ jobs:
             /tmp/vibelearn-review-index/*.json
             /tmp/vibelearn-review-index/critic-assignments/*.json
             /tmp/vibelearn-review-index/critic-capsules/**
-          retention-days: 7
+          retention-days: 30
