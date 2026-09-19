@@ -1,5 +1,7 @@
 # First slice completion report — 6 September 2026
 
+**Authoritative status — 19 September 2026:** This file is a historical Phase 1 implementation report, not the current execution plan. Current exact critic candidate is `92a5ecbdc803362ee1554fca6ae811adb155bc26` (run `35434565005`), awaiting independent post-CI critics and then user review. Render still serves rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5`; no Level 2/Phase 2 work is authorized. Read `STATE.md`, `CODEX.md`, and `CRITIC-HANDOFF.md` before acting on any older “current/next” wording below.
+
 **Current review amendment — 14 September 2026:** The eab1614 review is complete with changes requested. Implement the camera/input/login/mobile contract next, preserving all seven signals and authoritative assessment. Verify with actual computer/browser interaction plus full CI before manual deployment. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
 
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.

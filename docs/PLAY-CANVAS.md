@@ -1,5 +1,7 @@
 # Legacy Play Canvas migration contract
 
+**19 September 2026 clarification:** This remains a **legacy/migration document**. The active game path is PlayCanvas Engine only; no 2D/Three.js gameplay fallback is allowed. Frozen critic candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26` is the current review target. Any “current user contract” wording below is historical and subordinate to `STATE.md` / `GAME-RUNTIME-ARCHITECTURE.md`.
+
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
 
 **Status:** legacy/migration document · superseded strategically on 12 September 2026  
