@@ -16,13 +16,13 @@ accepted by the user.
 ## Historical acceptance/readiness record
 
 
-## Current user review — 18 September 2026
+## Historical concluded user review — 18 September 2026
 
-The user is now reviewing runtime
-`ad14c5aced6cf053c7617dfb03245506e1e9dad5` on Render.
-
-**Current verdict for the opening: needs revision. Review of the rest of Phase 1
-is still in progress.**
+The user reviewed runtime
+`ad14c5aced6cf053c7617dfb03245506e1e9dad5` on Render and **stopped the review
+early because the experience exposed systemic storytelling, motion, physicality
+and tutorial failures**. The candidate is rejected; no later internal score can
+restore readiness for that SHA.
 
 The prior internal 9/10 story/art/gameplay/learning scores for this same runtime
 are invalidated as readiness claims by the user's direct review. They remain
@@ -37,29 +37,23 @@ New user blockers:
 The creative-direction process has been updated to require caption-blind visual
 world comprehension and real-time animation/motion review.
 
-Do not repair/redeploy during the ongoing review unless necessary for the user to
-continue. Collect the remaining feedback first. No Level 2/public rollout/new
-phase begins while this review is open.
+The review is concluded. Do not re-present this runtime as a new review build.
+The replacement must pass the revised evidence-first critic pipeline before
+another user review. No Level 2/public rollout/new phase begins meanwhile.
 
 ## Earlier acceptance/readiness record
 
 
 ## User acceptance status
 
-The most recent explicit user verdict remains the **17 September 2026
-needs_revision** verdict for historical runtime
-`6fea8287aa5f078a5836902478320699e54571a9`.
+The most recent explicit user verdict is the **18 September 2026 rejection** of
+`ad14c5aced6cf053c7617dfb03245506e1e9dad5`. The earlier 17 September
+`needs_revision` verdict for `6fea8287aa5f078a5836902478320699e54571a9`
+remains historical evidence for that predecessor and for the process lessons it
+exposed. Neither verdict is transferred to the new frozen candidate; that
+candidate must earn its own critic results and user verdict.
 
-That verdict exposed duplicate/ambiguous characters, clipping, weak rendered
-story causality, wrong tutorial/Level-1 boundaries, cramped scale, wrong player
-embodiment and a missing independent art/world critic. It remains authoritative
-for that candidate and for the process lessons it created.
-
-The user has **not yet reviewed or accepted** the materially revised runtime
-`ad14c5aced6cf053c7617dfb03245506e1e9dad5`. Do not silently transfer either the old rejection or an
-internal pass into a user verdict.
-
-## Current internal candidate
+## Historical internal candidate that was later user-rejected
 
 Exact runtime `ad14c5aced6cf053c7617dfb03245506e1e9dad5`, reviewed on exact CI run
 `35335042617`:

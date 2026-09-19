@@ -338,9 +338,9 @@ This does not make LLM independence cryptographically provable, but it moves
 context separation from reviewer self-description into a traceable, deterministic
 harness artifact.
 
-## Exact green system-repair checkpoint
+## Historical exact green system-repair checkpoint
 
-Candidate `ddfbaca219f712e241e47941806ecd8f7aeff190`, GitHub Actions run
+Historical candidate `ddfbaca219f712e241e47941806ecd8f7aeff190`, GitHub Actions run
 `35384949480`, passed all seven technical/browser suites plus review-index
 aggregation.
 
