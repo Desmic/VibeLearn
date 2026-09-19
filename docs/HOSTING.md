@@ -1,5 +1,7 @@
 # Private Render + Supabase pilot
 
+**Current infrastructure checkpoint — 19 September 2026:** Render remains live on exact rejected source `ad14c5aced6cf053c7617dfb03245506e1e9dad5` (deployment `dep-damhjg6k1f9s7393d650`), with auto-deploy disabled. Frozen critic candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26` is **not deployed**. Supabase remains on migrations `20260907073952`, `20260907102455`, `20260907102517`, `20260909132331`, `20260916161700`; no database/data mutation was made by the 18–19 September quality/adapter work. Preview promotion must first pass `promote-preview.yml` for the exact candidate/evidence run; Render deployment is then a separate explicit action. September 7 auth/bootstrap details below are historical unless explicitly reverified.
+
 **Current review amendment — 14 September 2026:** The next verified deployment must include the shared camera/input and 3D entry assets in both hosted/local allowlists. Keep vendor generation of engine, models and repair ZIP, auto-deploy OFF, exact SHA verification and existing Supabase configuration. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).
 
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
@@ -38,6 +40,8 @@ The Free project in `ap-south-1` has these applied migrations:
 - `20260907073952_vibelearn_hosted_schema`
 - `20260907102455_harden_hosted_schema_access`
 - `20260907102517_cover_hosted_foreign_keys`
+- `20260909132331_learner_scoped_progress_reset`
+- `20260916161700_draft_per_mission`
 
 `vibelearn_app` is deliberately NOLOGIN. The deployment login `vibelearn_login`
 exists, can log in, inherits `vibelearn_app`, and is neither superuser nor BYPASSRLS.

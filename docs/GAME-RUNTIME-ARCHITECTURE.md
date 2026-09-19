@@ -1,5 +1,7 @@
 # Game runtime architecture — engine-neutral game/world compiler
 
+**Current implementation checkpoint — 19 September 2026:** PlayCanvas Engine is the active backend; Three.js and older 2D/2.5D paths are legacy/migration only. The reusable physicality/event/semantic-object/handoff/tutorial/mode contracts are exercised by frozen candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26`. The thin Terminal PM adapter Phase 0 is merged, but its external orchestrator still reports `live_run_authorized=false`; no live orchestration run is authorized. The next product gate is independent criticism, not more runtime architecture.
+
 **Active architecture — 17 September 2026.** Read `GAME-CREATION-PLATFORM.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `GAME-OPENING-PROGRESSION.md`, `REUSABLE-ASSETS.md`, `ART-WORLD-DIRECTION-CRITIC.md` and `STATE.md`.
 
 ## Decision

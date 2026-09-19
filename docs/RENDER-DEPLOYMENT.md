@@ -1,5 +1,7 @@
 # Render pilot deployment — 2026-09-07
 
+**Current deployment checkpoint — 19 September 2026:** Live Render source is intentionally still rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5` via deployment `dep-damhjg6k1f9s7393d650`. Frozen critic candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26` (run `35434565005`) is **not deployed**. Auto-deploy remains disabled. Promotion requires candidate-scoped validated critics + schema-v2 review record through `promote-preview.yml`; no Render/Supabase mutation occurred during the 18–19 September quality-system/Terminal-PM-adapter work. September 7 setup/sign-in sections below are historical deployment history.
+
 ## Sign-in follow-up deployment
 
 Candidate b9d57bb4d33c1c8ddfe03f20d38318fc36b87a92 adds safe sign-in diagnostics,

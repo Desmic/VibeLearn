@@ -1,5 +1,7 @@
 # VibeLearn game-creation platform — product direction
 
+**Current platform checkpoint — 19 September 2026:** The current proof candidate is `92a5ecbdc803362ee1554fca6ae811adb155bc26` with exact run `35434565005`. Phase 0 of the thin Terminal PM adapter is **implemented and merged**, not merely a future target; live Phase 1 integration remains blocked by Terminal PM's own `live_run_authorized=false` policy. The next proof obligation is independent critic execution + human review, not broader generator/orchestrator expansion.
+
 **Active product direction — 17 September 2026.** The primary product is learner-facing: a learner requests a goal and VibeLearn creates a personalized game on demand. This supersedes a creator-operated studio as the first customer experience. Read with `LEARNER-ON-DEMAND-AND-REPAIR.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `GAME-RUNTIME-ARCHITECTURE.md`, `GAME-AS-COURSE.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`.
 
 ## North star

@@ -1,5 +1,7 @@
 # Critic policy — observed play, independent disciplines, then the user's verdict
 
+**Current execution target — 19 September 2026:** candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26`, exact run `35434565005`, sealed assignment/capsule artifact `10581437727`. Execute the ready post-CI passes through `CRITIC-HANDOFF.md`; do not silently substitute later documentation heads. The current chat is contaminated by design intent/prior feedback and is **not** a valid cold observer.
+
 **Active policy — 17 September 2026.** The September 17 user review invalidated the prior internal `ready_for_user_review` recommendation for candidate `6fea828...`. The internal checker passed a build with duplicate/ambiguous characters, visible clipping, insufficient story communication, wrong tutorial boundary, cramped world scale and the wrong player-embodiment model. That proves the checker/critic process was necessary but insufficient.
 
 The user is the sole final human product critic. Their explicit verdict overrides every internal score, agent judgment, CI result and deployment state.
