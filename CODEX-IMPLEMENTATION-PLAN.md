@@ -1,5 +1,7 @@
 # Learning OS — incremental implementation plan 2.0
 
+**Authoritative gate — 19 September 2026:** Implementation is frozen for post-CI product criticism. Exact critic candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26`; exact CI/review-index run `35434565005`; sealed bundle `10581437727` retained through 19 October 2026. Ready first-wave passes: cold observer, motion/audience, physicality, handoff/tutorial, audio/atmosphere, learning/transfer. Cinematic causality and intent comparison remain dependency-blocked until a validated cold-observer result is ingested. Terminal PM adapter Phase 0 is complete/merged; live execution remains externally unauthorized. Render remains on rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5`; no Level 2. **All older “active chunk/next build” sections below are implementation history unless a later critic blocker explicitly reopens them.**
+
 ## Active chunk — 18 September 2026
 
 Friendship/reveal slice verified; next active chunk is control orientation in

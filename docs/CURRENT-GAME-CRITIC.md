@@ -1,5 +1,7 @@
 # Current game critic — independent v2 execution is the active gate
 
+**Authoritative critic target — 19 September 2026:** exact frozen candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26`; exact technical/evidence run `35434565005`; sealed review-index/capsule artifact `10581437727`, retained through 19 October 2026. All seven technical/browser suites plus review-index passed. Ready passes: `cold_observer`, `motion_audience`, `physicality`, `handoff_tutorial`, `audio_atmosphere`, `learning_transfer`. `cinematic_causality` and `intent_comparison` remain blocked until a validated cold-observer result exists. Later documentation-only `main` commits do not replace this review target. The older system-repair SHA below is historical.
+
 **18 September 2026.**
 
 Rejected deployed runtime:

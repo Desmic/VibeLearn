@@ -1,5 +1,7 @@
 # How LLMs Work — current proof learning track
 
+**Authoritative current gate — 19 September 2026:** The design below has been realized far enough to freeze candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26` (run `35434565005`). The next step is independent post-CI criticism, not another speculative design/build pass. Do not churn Zip/naming, prologue, tutorial or Level 1 unless a critic or the user proves a real blocker. Render still serves rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5`; do not start Level 2. Terminal PM Phase 0 is merged; live orchestration is still externally blocked.
+
 **Active direction — 17 September 2026.** Read `GAME-CREATION-PLATFORM.md`, `LLM-RESCUE-STORY.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `COURSE-GENERATION-GAME-SYSTEM.md` and `STATE.md` first.
 
 This track is the **proof case for the VibeLearn game-creation platform**. The immediate goal is not to mass-produce episodes or build the future multi-agent generator. It is to prove that one learning track can be genuinely appealing, teach real concepts through play, and leave behind reusable worlds/assets/mechanics/critic infrastructure.

@@ -1,5 +1,7 @@
 # vibeLearn — delivery workflow
 
+**Authoritative execution gate — 19 September 2026:** Do not create another game candidate merely to keep coding. Frozen critic target: `92a5ecbdc803362ee1554fca6ae811adb155bc26` (run `35434565005`, bundle `10581437727`). The next product step is genuinely context-separated critic execution/ingestion via `docs/CRITIC-HANDOFF.md`; implementation resumes only for an evidence-backed blocker. Render remains on rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5`. Level 2 and live Terminal PM integration remain blocked. This supersedes conflicting next-chunk wording below.
+
 Read `AGENTS.md` and the active checkpoint in `docs/STATE.md`. Detailed architecture,
 story and critic policy live in linked docs; this file defines how work proceeds.
 

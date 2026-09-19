@@ -1,10 +1,12 @@
 # VibeLearn · game-first learning system
 
+**Authoritative checkpoint — 19 September 2026:** The active proof track is **How LLMs Work / Episode 1: The First Words** in Bellweather on the PlayCanvas-only active path. Frozen post-CI critic candidate: `92a5ecbdc803362ee1554fca6ae811adb155bc26`; exact run: `35434565005`; sealed critic bundle: `10581437727`, retained through 19 October 2026. Render still serves rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5`; no newer candidate is deployed. Terminal PM adapter Phase 0 is merged and verified; live Terminal PM execution remains blocked by the external system's `live_run_authorized=false` checkpoint. **This paragraph supersedes conflicting “current/next” wording below; older Relay Rescue/Echo Forge and Three.js sections are historical/migration context.** Read `docs/STATE.md` and `docs/CRITIC-HANDOFF.md` first.
+
 **Current review amendment — 14 September 2026:** Current refinement adds third-person exploration, free camera controls, consistent 3D entry and full-screen mobile play to the reusable learning-game foundation. See the current contract and verification status; implementation is not accepted merely because it deploys. Read [GAME-CAMERA-INPUT.md](docs/GAME-CAMERA-INPUT.md).
 
 **Current user contract — 13 September 2026:** Read [docs/GAME-OPENING-PROGRESSION.md](docs/GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.
 
-VibeLearn is a **general system for turning subjects/courses into source-grounded learning games**, not a course website decorated with XP. The current private Phase 1 reference is **Relay Rescue: The Echo Forge**, a seven-signal reliability adventure.
+VibeLearn is a **general system for turning subjects/courses into source-grounded learning games**, not a course website decorated with XP. The current private proof track is **How LLMs Work / The First Words**; Relay Rescue / Echo Forge is historical reference material.
 
 Start with [`CODEX-IMPLEMENTATION-PLAN.md`](CODEX-IMPLEMENTATION-PLAN.md) and [`docs/STATE.md`](docs/STATE.md). Current product/runtime authority also includes [`docs/STORY-GENERATION-AND-CRITIC.md`](docs/STORY-GENERATION-AND-CRITIC.md), [`docs/GAME-AS-COURSE.md`](docs/GAME-AS-COURSE.md), [`docs/GAME-UX-SYSTEM.md`](docs/GAME-UX-SYSTEM.md), [`docs/COURSE-GENERATION-GAME-SYSTEM.md`](docs/COURSE-GENERATION-GAME-SYSTEM.md), [`docs/PLAY-CANVAS.md`](docs/PLAY-CANVAS.md), and [`docs/THREE-STORY-FRAMEWORK.md`](docs/THREE-STORY-FRAMEWORK.md).
 
@@ -38,7 +40,7 @@ Story, exploration, missions, visible consequence/recovery, progression, buildin
 
 For compatible modes, Play Canvas should keep the same stage/world/runtime and change state/camera/HUD rather than spawning a new course-specific renderer.
 
-Three.js, 2D and 2.5D are rendering backends inside Play Canvas.
+**PlayCanvas Engine is the active backend.** Three.js and older 2D/2.5D paths are legacy/migration only; active 3D failure must fail closed with explicit retry/error.
 
 ## Reusable Three.js world framework
 
