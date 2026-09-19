@@ -13,11 +13,15 @@ def log(message):print(message,flush=True)
 
 def main():
     out=ROOT/'artifacts';out.mkdir(exist_ok=True);checks=[];errors=[]
+    def observe_graphics(message):
+        if 'GL_INVALID_FRAMEBUFFER_OPERATION' in message.text or 'Framebuffer is incomplete' in message.text:
+            errors.append(message.text)
     with tempfile.TemporaryDirectory() as temp,sync_playwright() as p:
         proc,url=start_server(Path(temp)/'opening.db');browser=p.chromium.launch()
         try:
             context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,record_video_dir=str(Path(temp)/'video'),record_video_size={'width':390,'height':844})
             page=context.new_page();page.set_default_timeout(15000);page.on('pageerror',lambda e:errors.append(str(e)))
+            page.on('console',observe_graphics)
             log('Prologue: navigate');page.goto(url+'/first-words')
             expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000)
             expect(page.locator('#adventure')).to_have_attribute('data-experience-mode','opening')
@@ -157,7 +161,7 @@ def main():
             for width,height in [(360,800),(430,932),(1280,800)]:
                 log(f'Prologue: fresh reduced-motion {width}')
                 ctx=browser.new_context(viewport={'width':width,'height':height},reduced_motion='reduce',has_touch=width<500)
-                q=ctx.new_page();q.set_default_timeout(15000);q.on('pageerror',lambda e:errors.append(str(e)));q.goto(url+'/first-words')
+                q=ctx.new_page();q.set_default_timeout(15000);q.on('pageerror',lambda e:errors.append(str(e)));q.on('console',observe_graphics);q.goto(url+'/first-words')
                 expect(q.locator('#rgi-title')).to_have_text('One lantern. Three friends.',timeout=20000)
                 q.get_by_role('button',name='Send up our lantern',exact=True).click()
                 expect(q.locator('#rgi-dialogue')).to_contain_text('All three of us')

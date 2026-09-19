@@ -1,5 +1,44 @@
 # Current state — LLM learning-game proof track
 
+## Local shared-renderer repair — 19 September 2026
+
+Continued work reproduced the graphics warning in an unrelated synthetic world:
+hiding/detaching the canvas caused AUTO sizing to create a zero-size framebuffer.
+The shared backend now owns explicit sizing and retains valid dimensions while
+hidden. A real-browser lifecycle regression covers portrait and landscape
+remounts; the opening suite now checks framebuffer console errors as well.
+Build, 265 application tests (seven skips) and all seven active browser groups
+passed; manual browser play covered opening/replay/tutorial return and desktop
+resizing. Full browser results and local evidence are in
+`REPAIR-20260919-RENDERER-LIFECYCLE.md`. This remains local repair work, with the
+same exact-candidate/isolated-critic/user gates and deferred integration below.
+
+## Local control-clearance repair — 19 September 2026
+
+The user requested continued improvements after syncing `main` to `e328760`.
+Informed diagnostic play found that a tutorial target marker could cover the
+phone movement stick: touching backward hit the power-connection action instead.
+The shared marker helper now uses the full label footprint and occupied HUD
+rectangles. A regression reproduced the failure before repair and passed at
+360/390/430 widths afterward, including actual touch movement with unchanged
+learning state. Manual replay confirmed the original hit-target defect is fixed.
+Build, 265 application tests (seven skips) and all seven active browser groups
+passed. The integrated run exposed a frame-dependent collision-test setup;
+reload-before-contact and a sustained-input assertion repaired that test without
+changing collision rules.
+
+This is a local repair on top of `e328760`, not a new accepted or deployed
+candidate. The archived `92a5ecbd...` evidence below remains unchanged and cannot
+certify the modified runtime. Final local verification is recorded in
+`REPAIR-20260919-MARKER-CLEARANCE.md`; a replacement release still needs exact-SHA
+CI evidence, genuinely isolated critics and the existing preview/user gates.
+
+Fresh no-history reviewer sessions were tested, but both inherited repository
+instructions before evidence consumption. They stopped without results or
+receipts. Independent review remains incomplete; do not assume a no-history
+subagent satisfies assignment-only context. Terminal PM integration stays
+deferred, and no Render/Supabase or Level 2 work occurred.
+
 ## Frozen critic candidate + completed adapter Phase 0 — 19 September 2026
 
 The exact **game/product critic candidate is now frozen at**

@@ -8,12 +8,62 @@ from tests.browser_check import start_server, stop_server
 ROOT=Path(__file__).resolve().parents[1]
 
 
+def check_marker_control_clearance(page,ctx,width,trace):
+    # Walk away from the repair target using real input. Its off-screen cue must
+    # not steal touches intended for either the movement stick or camera tools.
+    page.keyboard.down('KeyW')
+    try:
+        # Poll through evaluate: wait_for_function uses eval under this older
+        # Playwright version, which the game's strict CSP correctly rejects.
+        for _ in range(120):
+            page.wait_for_timeout(100)
+            if page.evaluate('FirstWordsReview.runtime.world.player.position[2]') < -36.4:
+                break
+        else:
+            raise AssertionError('Walking did not reach the closed-gate approach')
+    finally:
+        page.keyboard.up('KeyW')
+    marker=page.get_by_role('button',name='Connect the loose power lead',exact=True)
+    expect(marker).to_be_visible()
+    page.wait_for_timeout(100)
+    probe=page.evaluate('''() => {
+      const marker=document.querySelector('.tutorial-target-marker:not([hidden])');
+      const rect=marker.getBoundingClientRect();
+      const backward=document.querySelector('[aria-label="Move backward"]');
+      const b=backward.getBoundingClientRect();
+      const point={x:b.x+b.width/2,y:b.y+b.height/2};
+      const hit=document.elementFromPoint(point.x,point.y);
+      const controls=[...document.querySelectorAll('.game-move-stick,.game-view-tools')]
+        .map(n=>n.getBoundingClientRect()).filter(r=>r.width&&r.height);
+      return {marker:rect.toJSON(),point,hit:hit?.getAttribute('aria-label'),
+        overlaps:controls.some(r=>rect.left<r.right&&rect.right>r.left&&rect.top<r.bottom&&rect.bottom>r.top),
+        inside:rect.left>=0&&rect.right<=innerWidth};
+    }''')
+    page.screenshot(path=str(ROOT/f'artifacts/tutorial-marker-clearance-{width}.png'))
+    assert probe['inside'] and not probe['overlaps'],probe
+    assert probe['hit']=='Move backward',probe
+    before=page.evaluate('({position:FirstWordsReview.runtime.world.player.position,state:JSON.stringify(FirstWordsReview.state)})')
+    cdp=ctx.new_cdp_session(page)
+    cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[dict(probe['point'],radiusX=4,radiusY=4,force=1,id=1)]})
+    try:
+        page.wait_for_timeout(350)
+    finally:
+        cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+        cdp.detach()
+    after=page.evaluate('({position:FirstWordsReview.runtime.world.player.position,state:JSON.stringify(FirstWordsReview.state)})')
+    assert after['position'][2]>before['position'][2]+.05,(before,after)
+    assert after['state']==before['state'],(before,after)
+    trace.append({'width':width,'step':'offscreen-target-control-clearance','probe':probe,
+                  'action':'touch backward movement control','before':before['position'],
+                  'after':after['position'],'learning_state_unchanged':True,'passed':True})
+
+
 def main():
     trace=[]
     with tempfile.TemporaryDirectory() as temp,sync_playwright() as p:
         proc,url=start_server(Path(temp)/'practice.db');browser=p.chromium.launch()
         try:
-            for width in (1280,390):
+            for width in (1280,390,360,430):
                 ctx=browser.new_context(viewport={'width':width,'height':844},has_touch=width<500)
                 page=ctx.new_page();page.goto(url+'/first-words')
                 page.get_by_role('button',name='Skip opening',exact=True).click()
@@ -51,6 +101,8 @@ def main():
                 assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
                 expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible()
                 page.screenshot(path=str(ROOT/f'artifacts/control-practice-handoff-{width}.png'))
+                if width<500:
+                    check_marker_control_clearance(page,ctx,width,trace)
                 with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
                     page.get_by_role('button',name='Connect the loose power lead',exact=True).click()
                 assert saved.value.ok,saved.value.status

@@ -55,11 +55,25 @@ def main():
             # A reusable world prop must be physical. The token track sits immediately
             # left of the spawn; a sustained left input should stop at its collider
             # rather than letting the protagonist pass through the visible geometry.
+            # The animation probe above advances along Z by a frame-rate-dependent
+            # amount and can leave the prop's lane. Reload the saved run to restore
+            # the authored spawn before probing contact; don't weaken the boundary.
+            page.reload()
+            expect(page.locator('#loading')).to_be_hidden(timeout=15000)
+            expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+            expect(page.locator('.game-player-controls')).to_have_attribute('data-control-mode','third-person',timeout=15000)
             collision_start=position(page)
             page.keyboard.down('KeyA');page.wait_for_timeout(1100);page.keyboard.up('KeyA');page.wait_for_timeout(120)
             collision_stop=position(page)
             assert collision_stop[0]>-1.65,(collision_start,collision_stop)
-            trace.append({'action':'hold KeyA into visible token-track prop','before':collision_start,'after':collision_stop,'assertion':'player stops before penetrating collider','passed':True})
+            assert collision_stop[0]<collision_start[0]-.2,(collision_start,collision_stop)
+            page.keyboard.down('KeyA');page.wait_for_timeout(450);page.keyboard.up('KeyA');page.wait_for_timeout(120)
+            collision_held=position(page)
+            assert distance(collision_stop,collision_held)<.03,(collision_stop,collision_held)
+            page.screenshot(path=str(out/'level1-controls-collision-390.png'))
+            trace.append({'action':'hold KeyA into visible token-track prop, then continue holding',
+                          'before':collision_start,'after':collision_stop,'continued_input':collision_held,
+                          'assertion':'player approaches, stops before collider and remains blocked under sustained input','passed':True})
             page.keyboard.down('KeyD');page.wait_for_timeout(650);page.keyboard.up('KeyD');page.wait_for_timeout(120)
             assert position(page)[0]>collision_stop[0]+.4
 

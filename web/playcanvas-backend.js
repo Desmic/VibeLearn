@@ -90,9 +90,11 @@ class PlayCanvasWorld {
     });
     this.app=app;
     app.graphicsDevice.maxPixelRatio=dpr;
+    // The container observer owns buffer sizing. AUTO samples clientWidth on
+    // every frame, which becomes zero while a persistent stage is hidden or
+    // detached during a handoff, producing incomplete WebGL framebuffers.
+    app.setCanvasResolution(pc.RESOLUTION_FIXED,1,1);
     app.setCanvasFillMode(pc.FILLMODE_NONE,1,1);
-    app.setCanvasResolution(pc.RESOLUTION_AUTO,1,1);
-    app.start();
 
     const environment=this.spec.environment||{};
     if(environment.ambient)app.scene.ambientLight=color(environment.ambient);
@@ -126,14 +128,13 @@ class PlayCanvasWorld {
     this._resize=()=>{
       if(this.disposed)return;
       let rect=host.getBoundingClientRect();
-      if((rect.width<1||rect.height<1)&&host.parentElement)rect=host.parentElement.getBoundingClientRect();
+      if(!host.isConnected||rect.width<1||rect.height<1)return;
       const width=Math.max(1,Math.round(rect.width));
       const height=Math.max(1,Math.round(rect.height));
       // Embedded worlds must be sized from their containing game surface, not
       // from window defaults. FILLMODE_NONE makes that contract explicit.
       app.resizeCanvas(width,height);
-      app.setCanvasResolution(pc.RESOLUTION_AUTO,width,height);
-      app.updateCanvasSize();
+      app.setCanvasResolution(pc.RESOLUTION_FIXED,width,height);
       this.picker?.resize(width,height);
       // Camera composition is presentation intent in WorldSpec. Re-evaluate the
       // active semantic camera when the surface crosses portrait/landscape.
@@ -164,6 +165,7 @@ class PlayCanvasWorld {
       canvas.addEventListener('webglcontextlost',()=>this.controls?.setPaused(true));
       canvas.addEventListener('webglcontextrestored',()=>this.controls?.setPaused(this.paused));
     }
+    app.start();
   }
 
   _entityVisible(entity){

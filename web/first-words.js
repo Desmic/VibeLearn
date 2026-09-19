@@ -202,6 +202,9 @@ function frame(){
   const s=view(),rect=host.getBoundingClientRect(),tray=$('#controls').getBoundingClientRect(),goal=$('.mission').getBoundingClientRect();
   const tools=host.querySelector('.game-view-tools'),stick=host.querySelector('.game-move-stick');
   if(tools){tools.style.bottom=(rect.bottom-tray.top+14)+'px';tools.style.gridTemplateColumns=tray.top-goal.bottom<225?'repeat(4,44px)':'44px';}if(stick)stick.style.bottom=(rect.bottom-tray.top+16)+'px';
+  const avoidRects=[tools,stick,host.querySelector('.game-controls-help')]
+    .filter(node=>node&&!node.hidden).map(node=>node.getBoundingClientRect())
+    .filter(r=>r.width&&r.height).map(r=>({left:r.left-rect.left,right:r.right-rect.left,top:r.top-rect.top,bottom:r.bottom-rect.top}));
   $('#actions').querySelectorAll('button').forEach(b=>b.disabled=Boolean(blocked()));$('#rewind').disabled=Boolean(blocked());
   for(const marker of $('#markers').children){
     const point=world.projectEntity(marker.dataset.anchor),wrongRound=marker.dataset.round!==undefined&&Number(marker.dataset.round)!==s.round;
@@ -211,11 +214,11 @@ function frame(){
     const targetMismatch=tutorialTarget&&(marker.dataset.anchor!==host.dataset.tutorialWorldTarget||!available);
     const guidable=tutorialTarget?Boolean(point?.inFront):Boolean(point?.visible);
     marker.hidden=!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.anchor==='star-label'&&s.status==='success');
-    if(point){
+    if(point&&!marker.hidden){
       const safeTop=Math.max(150,goal.bottom-rect.top+marker.offsetHeight+8);
       const safeBottom=Math.max(safeTop+12,tray.top-rect.top-12);
-      const placement=placeWorldMarker(marker,point,{viewportWidth:rect.width,safeTop,safeBottom,critical:tutorialTarget});
-      if(!tutorialTarget&&!placement.insideSafeArea)marker.hidden=true;
+      const placement=placeWorldMarker(marker,point,{viewportWidth:rect.width,safeTop,safeBottom,critical:tutorialTarget,avoidRects});
+      if(!placement.placed||(!tutorialTarget&&!placement.insideSafeArea))marker.hidden=true;
     }
   }
   requestAnimationFrame(frame);

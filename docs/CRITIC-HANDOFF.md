@@ -49,6 +49,15 @@ critic assignment explicitly allows those sources.
 A serious reviewer should not receive this repository as an unrestricted context
 dump.
 
+Before launching a review, verify the harness's actual initial context. Disabling
+conversation history does not necessarily remove automatically supplied repository
+instructions. On 19 September, two no-history subagents inherited AGENTS.md and
+stopped before opening their capsules. Neither produced a valid independent
+result. A startup context audit must therefore precede evidence consumption;
+stop if unrelated product/creator context is present. Do not issue an
+`assignment_only` execution receipt for that session. See
+`REPAIR-20260919-MARKER-CLEARANCE.md` for the local diagnostic record.
+
 The orchestrator must:
 
 1. start from one exact runtime candidate SHA;

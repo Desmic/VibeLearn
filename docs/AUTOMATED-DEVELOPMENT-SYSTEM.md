@@ -999,8 +999,8 @@ Do **not** require Astra. Astra is exercised only when a real unresolved ambigui
 
 ### Phase 0 — define and freeze only the contract
 
-**Status: implemented and verified on the isolated adapter branch; do not merge
-into the frozen game-review candidate merely to mark the phase complete.**
+**Status: complete and merged on `main` as `40ec93f8b04cc7a3d88366d9195ec50555d9698f`.
+The frozen game-review candidate `92a5ecbd...` already contains the adapter.**
 
 Implemented/verified:
 - current VibeLearn baseline and exact Terminal PM checkpoint recorded;
@@ -1020,9 +1020,9 @@ Implemented/verified:
 - no Terminal PM internal modules copied into VibeLearn;
 - no live Terminal PM dispatch.
 
-Verification before this documentation-only status sync:
-`dff84f661fc388b1c8999307f4fe312d6fc9ef0b`, GitHub Actions
-`35396734182`, all seven suites + review-index passed.
+Historical pre-merge verification: `dff84f661fc388b1c8999307f4fe312d6fc9ef0b`,
+GitHub Actions `35396734182`. Merged verification: `40ec93f8...`, run
+`35398208739`; all seven suites + review-index/capsule materialization passed.
 
 **Exit: satisfied for the fixture-only contract boundary.** VibeLearn can test
 the integration semantics without a live orchestrator. Phase 1 remains blocked
@@ -1181,8 +1181,8 @@ An implementation agent receiving this document should:
 2. inspect the current VibeLearn repository;
 3. inspect the current Terminal PM Agent status/checkpoint before relying on any capability;
 4. **do not copy or extract Terminal PM Agent modules** while its relevant architecture is still under active development;
-5. define the smallest adapter contract that VibeLearn actually needs;
-6. implement Phase 0 fixtures and contract tests only;
+5. read the existing v0.1 adapter contract and completed Phase 0 fixtures;
+6. preserve that boundary; add integration machinery only when an authorized run or a concrete correctness defect requires it;
 7. preserve the current Level 1/product review state and do not start Level 2 as a side effect;
 8. when Terminal PM Agent later authorizes a suitable live run, exercise one bounded VibeLearn task through the same contract;
 9. feed real integration/product failures back as evidence instead of immediately adding new architecture;

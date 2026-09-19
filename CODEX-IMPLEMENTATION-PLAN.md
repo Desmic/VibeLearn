@@ -1,5 +1,27 @@
 # Learning OS — incremental implementation plan 2.0
 
+**Active bounded renderer repair — 19 September 2026:** Reproduced zero-size
+drawing buffers and WebGL error 1286 with an unrelated primitive world hidden
+and detached between mounts. Keep buffer sizing owned by the shared backend,
+retain valid dimensions while hidden, and resize on visible remount. Success:
+nonzero buffers/no framebuffer warnings through hide/show/detach/remount,
+correct portrait/landscape sizing, and actual opening/replay/tutorial play.
+Build, 265 application tests (seven skips), all seven active browser groups and
+manual opening/replay/tutorial/desktop-resize checks passed. See
+`docs/REPAIR-20260919-RENDERER-LIFECYCLE.md`. Exact-revision CI and isolated
+critics remain promotion requirements; no Level 2 or live adapter work.
+
+**Local repair checkpoint — 19 September 2026:** The user requested continued improvements.
+Informed local play reproduced a control-blocking defect: the edge-clamped
+tutorial marker overlaps the phone movement stick and intercepts backward taps.
+Shared marker/HUD clearance is repaired, with a before-fix browser reproduction,
+360/390/430 checks and saved-state regression. Build, 265 application tests
+(seven skips) and all seven active browser groups passed locally. The existing
+collision test also now reloads before contact and checks sustained blocking.
+This is not independent criticism
+or approval of the frozen candidate; new runtime changes need new exact-candidate
+evidence before promotion. See `docs/REPAIR-20260919-MARKER-CLEARANCE.md`.
+
 **Authoritative gate — 19 September 2026:** Implementation is frozen for post-CI product criticism. Exact critic candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26`; exact CI/review-index run `35434565005`; sealed bundle `10581437727` retained through 19 October 2026. Ready first-wave passes: cold observer, motion/audience, physicality, handoff/tutorial, audio/atmosphere, learning/transfer. Cinematic causality and intent comparison remain dependency-blocked until a validated cold-observer result is ingested. Terminal PM adapter Phase 0 is complete/merged; live execution remains externally unauthorized. Render remains on rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5`; no Level 2. **All older “active chunk/next build” sections below are implementation history unless a later critic blocker explicitly reopens them.**
 
 ## Completed implementation chunk — 18 September 2026
