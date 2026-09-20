@@ -1,5 +1,10 @@
 # Art and world-direction critic
 
+**Design reference — 20 September 2026:** Apply `LIVING-WORLD-DESIGN.md`: curiosity,
+embodiment, visible purpose, attachment, agency, coherent beauty and payoff. These
+are general design/review principles, not a requirement for high-end graphics or
+a particular genre. Motion/audio review remains deferred under `STATE.md`.
+
 **Active scope update — 20 September 2026:** The user temporarily parks motion-quality
 and audio review, trusting the engine/code for motion provisionally. Continue native
 GUI play and broader art/world review now. Record motion/audio as deferred and

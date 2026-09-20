@@ -20,6 +20,7 @@ PASS_SPECS={
             "What major event happens and what appears to cause it?",
             "What changes persist afterward?",
             "At the first playable handoff, who do you control and what should you do next?",
+            "What drew your curiosity, what did you choose to try, and what did you discover?",
             "List anything understood only because of explanatory text."
         ]
     },
@@ -39,6 +40,8 @@ PASS_SPECS={
             "Does camera movement preserve composition, protagonist visibility and readable depth rather than hiding problems?",
             "At phone sizes, do framing, spatial relationships, controls and world landmarks remain legible?",
             "Do materials, lighting, color, geometry and motion form one cohesive art direction across the opening, tutorial and mission?",
+            "What visible purpose, relationship or trace of history makes this place specific; what response or consequence did you actually observe?",
+            "Does exploration reveal something meaningful, and does visual detail support that discovery rather than obstruct it?",
             "Attempt an alternate-angle or scale counterexample; keep any unobserved dimension unassessed."
         ]
     },
@@ -113,6 +116,7 @@ PASS_SPECS={
         "questions":[
             "Does the mechanic faithfully represent the target concept?",
             "Does changed context require transfer rather than repetition?",
+            "Does the target knowledge improve a meaningful player decision with a visible consequence, or is the task merely a quiz gate?",
             "Can learner prediction/hints accidentally control or inflate the authoritative result?"
         ]
     },

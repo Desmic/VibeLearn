@@ -1,5 +1,10 @@
 # VibeLearn game-creation platform — product direction
 
+**Design reference — 20 September 2026:** Apply `LIVING-WORLD-DESIGN.md`: curiosity,
+embodiment, visible purpose, attachment, agency, coherent beauty and payoff. These
+are general design/review principles, not a requirement for high-end graphics or
+a particular genre. Motion/audio review remains deferred under `STATE.md`.
+
 **Current platform checkpoint — 19 September 2026:** The current proof candidate is `471de882a01690fa50ac39455ad603fffd39cfdc` with exact run `35440122451`. Phase 0 of the thin Terminal PM adapter is **implemented and merged**, not merely a future target; live Phase 1 integration remains blocked by Terminal PM's own `live_run_authorized=false` policy. The next proof obligation is independent critic execution + human review, not broader generator/orchestrator expansion.
 
 **Active product direction — 17 September 2026.** The primary product is learner-facing: a learner requests a goal and VibeLearn creates a personalized game on demand. This supersedes a creator-operated studio as the first customer experience. Read with `LEARNER-ON-DEMAND-AND-REPAIR.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `GAME-RUNTIME-ARCHITECTURE.md`, `GAME-AS-COURSE.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`.

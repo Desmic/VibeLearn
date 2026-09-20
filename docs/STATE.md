@@ -1,5 +1,12 @@
 # Current state — LLM learning-game proof track
 
+**Creative direction — 20 September 2026:** The user requests inspiration from
+Zelda, Rockstar, The Witcher 3 and Expedition 33: a beautiful living world and
+meaningful play over cutting-edge graphics. `LIVING-WORLD-DESIGN.md` records sourced
+principles, authoring decisions and observable critic questions. Opening staging
+and phone composition remain the next bounded repair; this research is not a
+completed visual improvement or a readiness upgrade.
+
 **Active scope update — 20 September 2026:** The user temporarily parks motion-quality
 and audio review, trusting the engine/code for motion provisionally. Continue native
 GUI play and broader art/world review now. Record motion/audio as deferred and

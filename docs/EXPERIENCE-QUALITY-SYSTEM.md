@@ -1,5 +1,10 @@
 # Experience quality system — evidence before scores
 
+**Design reference — 20 September 2026:** Apply `LIVING-WORLD-DESIGN.md`: curiosity,
+embodiment, visible purpose, attachment, agency, coherent beauty and payoff. These
+are general design/review principles, not a requirement for high-end graphics or
+a particular genre. Motion/audio review remains deferred under `STATE.md`.
+
 **Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer
 across all critic lanes, including mandatory art/world direction, with actual GUI
 play and video recordings as complementary evidence. Preserve separate lane
