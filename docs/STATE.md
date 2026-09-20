@@ -36,7 +36,8 @@ completion still does not establish mastery. Native Astra regression play reache
 the distinct ending after deliberate wrong choices and a pre-feedback reload.
 That informed run is not an independent acceptance review.
 
-Build and 350 application tests pass (7 skips). Final focused UI tests pass. Updated chapter, opening,
+Frozen candidate `7856b054c3f3671764c32e6cb7da2ff14d363daa` passed build and
+356 application tests (7 skips). Final focused UI tests pass. Updated chapter, opening,
 tutorial, controls, readability, lifecycle and foundation checks pass. Physicality
 had a slow setup timeout; the unchanged standalone rerun passed. Both outcomes
 are retained.
@@ -46,8 +47,29 @@ full journey and visible relay commitments through reload. Its final UI findings
 were repaired and rechecked by native Astra at desktop and phone sizes.
 Astra is now the initial route for every critic task; explicit art/world assignment
 and release ingestion are covered by 65 focused tests.
-No final candidate is frozen or internally accepted yet. Audio listening and
-continuous-motion quality remain unassessed where the tools cannot deliver them.
+The single fresh-context Astra review is complete: **needs revision**, not internally
+accepted. Full journey, deliberate mistake/recovery, pre-feedback reload and ending
+persistence worked. Story and art/world scored 7; tutorial/chapter/learning scored 8.
+Speech-module identity still depends on captions, inhabited-world behavior is weak,
+and panels dominate embodied play. Motion, actual listening and full physicality
+remain unassessed. See `experiments/20260920-astra-consolidated-review.md`.
+The local opening repair now shows communication from the attached object before
+removal and a failed attempt afterward, using reusable props and timeline patches.
+Build and 356 tests pass; informed native play rechecked all opening beats through
+the separate tutorial, with phone theft/handoff composition. The opening browser
+group also passed. A critic recheck remains outstanding. No new
+acceptance is implied; world life and embodied play findings remain open.
+
+Further bounded repair: a synthetic real-engine test reproduced zero-speed blend
+freezing and sparse animation channels retaining old limb poses. Shared backend
+now keeps the blend clock running, holds only the authored clip, and fills missing
+transform channels from each asset's bind pose. Wave→rest and run→rest return
+exactly to the same pose. This regression is in the active foundation group.
+Native keyboard movement/replay confirmed the repaired rest and phone bubble
+clearance. The consolidated critic could not access a browser in its session;
+its supplemental screenshot review remains explicitly incomplete. Independent
+acceptance, world life, embodied play and required media gates are still open.
+
 
 Luna missed the distinct ending and placed a requested reload before rather than
 after a committed prediction. Independent audit corrected its report. Its later

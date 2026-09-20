@@ -29,6 +29,8 @@ def main():
             expect(page.locator('#controls')).to_be_hidden()
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
             expect(page.locator('#rgi-title')).to_have_text('One lantern. Three friends.')
+            speech=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');return Object.fromEntries(['zip-speech','mira-speech','zip-speech-link','zip-silence'].map(id=>[id,getGameRuntime().world.projectEntity(id)?.visible||false]));}""")
+            assert speech=={'zip-speech':True,'mira-speech':True,'zip-speech-link':True,'zip-silence':False},speech
             expect(page.locator('#rgi-body')).to_contain_text('for the three of you')
             page.screenshot(path=str(out/'prologue-home-390.png'),timeout=15000)
             before_lantern=page.evaluate('JSON.stringify(FirstWordsReview.state)')
@@ -120,6 +122,8 @@ def main():
             assert removal['attached'] is None,removal
             assert removal['module'] and removal['module']['visible'],removal
             assert removal['warden'] and removal['warden']['visible'],removal
+            speech=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');return Object.fromEntries(['zip-speech','mira-speech','zip-speech-link','zip-silence'].map(id=>[id,getGameRuntime().world.projectEntity(id)?.visible||false]));}""")
+            assert speech=={'zip-speech':False,'mira-speech':False,'zip-speech-link':False,'zip-silence':True},speech
             page.screenshot(path=str(out/'prologue-speech-removed-390.png'),timeout=15000)
             captured=page.evaluate("()=>FirstWordsReview.audioCapture.stop()")
             assert captured and captured['bytes']>1000,captured
@@ -202,13 +206,19 @@ def main():
             # explanatory scene captions are visually suppressed so reviewers
             # must first infer world/causality from staging, animation and effects.
             blind_ctx=browser.new_context(viewport={'width':390,'height':844},has_touch=True,record_video_dir=str(Path(temp)/'blind-video'),record_video_size={'width':390,'height':844})
+            # Install blindness in the document response, before its first paint.
+            # Hiding existing nodes after goto leaked opening captions into video.
+            def blind_document(route):
+                response=route.fetch()
+                html=response.text()
+                assert '</head>' in html
+                style='<link rel="stylesheet" href="/blind-review.css">'
+                route.fulfill(response=response,body=html.replace('</head>',style+'</head>',1))
+            blind_ctx.route('**/blind-review.css',lambda route:route.fulfill(status=200,content_type='text/css',body='.rgi-kicker,#rgi-title,#rgi-body,#rgi-dialogue,#rgi-fact{visibility:hidden!important}'))
+            blind_ctx.route('**/first-words',blind_document)
             blind=blind_ctx.new_page();blind.set_default_timeout(15000);blind.goto(url+'/first-words')
             expect(blind.locator('#rgi-intro')).to_be_visible(timeout=20000)
-            blind.evaluate("""()=>{
-              for(const selector of ['.rgi-kicker','#rgi-title','#rgi-body','#rgi-dialogue','#rgi-fact']){
-                for(const node of document.querySelectorAll(selector))node.hidden=true;
-              }
-            }""")
+            expect(blind.locator('#rgi-title')).to_be_hidden()
             until(blind,'()=>!FirstWordsReview.runtime.world.animating')
             blind.locator('#rgi-next').click();until(blind,'()=>!FirstWordsReview.runtime.world.animating')
             for _ in range(7):

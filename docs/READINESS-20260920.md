@@ -33,7 +33,8 @@ headers do not freeze implementation of evidence-backed repairs.
 - **Evidence-backed repairs implemented:** shared gate symbols and validated
   chapter checkpoints; package-specific corridor/payoff staging; version-2 relay
   transfer with predictions committed before feedback and immutable first-choice
-  evidence. Version-1 saves stay compatible. Build and 350 tests pass (7 skips), including final UI repairs. All active
+  evidence. Version-1 saves stay compatible. Candidate `7856b05` passed build and
+  356 tests (7 skips), including final UI repairs. All active
   browser modules pass; physicality required an unchanged standalone retry after
   a slow movement-setup timeout. The independent learning audit reproduced both
   actual saved evidence capsules exactly.
@@ -43,10 +44,13 @@ headers do not freeze implementation of evidence-backed repairs.
 - **Model calibration:** Luna completed bounded relay actions but missed the ending
   and the required reload timing without self-signaling. Keep independent coverage
   audit mandatory. Its later unavailable browser is a setup failure, not a game defect.
-- **Remaining:** inspect fresh cold creative and
-  independent learning reviews; repair/recheck blockers; assess required media
-  honestly; freeze the resulting candidate and bind schema-v2 evidence. Earlier
-  clean-candidate evidence cannot certify this working tree.
+- **Consolidated Astra review complete:** actual full GUI journey and saved evidence
+  checked after cold observations. Verdict needs revision: speech-object meaning,
+  inhabited-world behavior and panel-dominated play remain weak. Art/world is 7,
+  not accepted. Motion/audio/full physicality remain unassessed.
+- **Remaining:** repair/recheck the opening first; then later observed blockers;
+  assess required media honestly; freeze the replacement candidate and bind
+  schema-v2 evidence. The frozen candidate cannot certify subsequent changes.
 
 Readiness is conjunctive: no averaging across failed or unassessed gates. The
 user remains the final product critic.

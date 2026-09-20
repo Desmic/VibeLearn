@@ -105,6 +105,24 @@ export function capabilityModule(id,position,{parent=null,color='mint',accent='g
 }
 
 
+/* A spatial speech mark, independent of character, language and story package.
+   The empty crossed variant makes loss of communication visible without captions. */
+export function speechBubble(id,position,{parent=null,scale=1,color='paper',ink='ink',failed=false,enabled=false}={}){
+  if(!Number.isFinite(scale)||scale<=0)throw new Error('Speech bubble scale must be positive.');
+  const root={id,position,scale:[scale,scale,scale],enabled};
+  if(parent)root.parent=parent;
+  const e=[root];
+  const part=(name,primitive,material,p,s,rotation=[0,0,0])=>e.push({id:id+'-'+name,parent:id,primitive,material,position:p,scale:s,rotation});
+  part('balloon','sphere',color,[0,0,0],[1.7,.85,.14]);
+  part('tail','cone',color,[-.45,-.48,0],[.35,.55,.13],[0,0,160]);
+  if(failed){
+    part('silence','box',ink,[0,0,.1],[.85,.09,.06],[0,0,30]);
+  }else{
+    for(let i=0;i<3;i++)part('word-'+i,'box',ink,[(i-1)*.34,0,.1],[.22,.12,.06]);
+  }
+  return e;
+}
+
 export function capabilitySocket(id,position,{parent=null,accent='gold',enabled=true}={}){
   const root={id,position,enabled,storyObject:{role:'capability-socket',importance:'minor',readability:['attachment','silhouette']}};
   if(parent)root.parent=parent;

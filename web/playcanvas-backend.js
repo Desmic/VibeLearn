@@ -349,6 +349,17 @@ class PlayCanvasWorld {
     // wrappers whose .resource is the AnimTrack. Older engine examples exposed
     // tracks directly, so accept both shapes at this compiler boundary.
     const tracks=(asset.resource.animations||[]).map(value=>value?.resource||value).filter(Boolean);
+    // Sparse imported clips omit joints that stay at their bind pose. Give each
+    // assigned clip those constant channels so previous gestures cannot leak in.
+    const defaults=new Map();
+    for(const track of tracks)for(const curve of track.curves)for(const path of curve.paths){
+      if(path.component!=='graph')continue;
+      const node=instance.findByPath(path.entityPath)||instance.findByPath(path.entityPath.slice(1));
+      if(!node)continue;
+      const property=path.propertyPath[0];
+      const value=property==='localRotation'?node.getLocalRotation():property==='localPosition'?node.getLocalPosition():property==='localScale'?node.getLocalScale():null;
+      if(value)defaults.set(JSON.stringify(path),{path,value:property==='localRotation'?[value.x,value.y,value.z,value.w]:[value.x,value.y,value.z]});
+    }
     const byName=new Map(tracks.map(track=>[track.name,track]));
     instance.addComponent('anim',{activate:true,speed:this.reducedMotion?0:1});
     for(const [alias,trackName] of aliases){
@@ -357,7 +368,14 @@ class PlayCanvasWorld {
         const available=[...byName.keys()].filter(Boolean).join(', ')||'(none)';
         throw new Error(`animation track ${trackName} missing for alias ${alias}; available: ${available}`);
       }
-      instance.anim.assignAnimation(alias,track,undefined,1,true);
+      const present=new Set(track.curves.flatMap(curve=>curve.paths.map(path=>JSON.stringify(path))));
+      const inputs=[...track.inputs],outputs=[...track.outputs],curves=[...track.curves];
+      for(const [key,{path,value}] of defaults)if(!present.has(key)){
+        curves.push(new pc.AnimCurve([path],inputs.length,outputs.length,pc.INTERPOLATION_STEP));
+        inputs.push(new pc.AnimData(1,[0]));outputs.push(new pc.AnimData(value.length,value));
+      }
+      const complete=new pc.AnimTrack(track.name,track.duration,inputs,outputs,curves,new pc.AnimEvents(track.events));
+      instance.anim.assignAnimation(alias,complete,undefined,this._animationSpeed(def.id,alias),true);
     }
   }
 
@@ -375,7 +393,9 @@ class PlayCanvasWorld {
     if(!anim?.baseLayer)return;
     const def=this.entityDefinitions.get(entityId)||{};
     const duration=Number.isFinite(blendTime)?blendTime:(Number.isFinite(def.animationBlendTime)?def.animationBlendTime:.18);
-    anim.speed=this.reducedMotion?0:this._animationSpeed(entityId,alias);
+    // Hold an authored pose at the clip level. Stopping the whole component
+    // also freezes its blend clock, leaving the previous gesture on screen.
+    anim.speed=this.reducedMotion?0:1;
     anim.baseLayer.transition(alias,this.reducedMotion?0:duration);
     anim.playing=!this.paused;
     this.activeAnimations.set(entityId,alias);
@@ -583,7 +603,7 @@ class PlayCanvasWorld {
       player:this.controls?.stats()||null,
       playerAnimation:playerEntityId?{
         alias:this.activeAnimations.get(playerEntityId)||null,
-        speed:playerAnim?.speed??null,
+        speed:playerAnim?playerAnim.speed*this._animationSpeed(playerEntityId,this.activeAnimations.get(playerEntityId)):null,
         playing:playerAnim?.playing??null
       }:null,
       deviceType:this.app.graphicsDevice?.deviceType||'unknown',canvasCount:this.host.querySelectorAll('canvas').length,

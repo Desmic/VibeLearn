@@ -1,7 +1,7 @@
 /* Bellweather / prison proof track: story, composition and semantic presentation. */
 import {characterControlProfile} from './game-character-spec.js';
 import {messageMachine,tokenTrack,smallTree,pavilion,deliveryParcel} from './workshop-props.js';
-import {lantern,gate,tower,planter,companionRobot,capabilityModule,capabilitySocket,eventLink} from './rescue-world-props.js';
+import {lantern,gate,tower,planter,companionRobot,capabilityModule,capabilitySocket,eventLink,speechBubble} from './rescue-world-props.js';
 import {makeWorldPackage} from './spec-game-world.js';
 
 const e=[];
@@ -103,6 +103,11 @@ part('limbo-backdrop','box','void',[0,0,-44],[160,160,.4],{enabled:false});
 e.push({id:'zip',asset:'robot',position:[0,0,-28],scale:[.9,.9,.9],animation:'idle'});
 e.push(...capabilitySocket('zip-voice-socket',[0,1,.49],{parent:'zip'}));
 e.push(...capabilityModule('zip-voice',[0,1,.5],{parent:'zip',enabled:false}));
+e.push(...speechBubble('zip-speech',[.95,3.35,.6],{parent:'zip',scale:.9}));
+e.push(...speechBubble('mira-speech',[-1.1,3.15,.4],{parent:'singer',scale:.9,ink:'coral'}));
+e.push(...speechBubble('zip-silence',[.95,3.35,.6],{parent:'zip',scale:.9,failed:true,ink:'rose'}));
+e.push(...eventLink('zip-speech-link',[0,1,.6],[.55,2.8,.6],{material:'mint',segments:4,radius:.09,enabled:false}).map((item,i)=>i===0?{...item,parent:'zip'}:item));
+const speechMarks=['zip-speech','mira-speech','zip-silence','zip-speech-link'];
 
 /* Reusable dramatic interruption primitives. */
 e.push({id:'rift',position:[0,6.2,8],enabled:false});
@@ -138,7 +143,7 @@ const revealGroups=[
 ];
 const revealParts=revealGroups.flat();
 
-export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'5',
+export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'6',
   environment:{clearColor:'#172238',ambient:'#6c7694',exposure:1.05,toneMapping:'aces',fog:{type:'linear',color:'#8f91a7',start:38,end:125}},
   materials:{stone:{diffuse:'#d8b997'},paper:{diffuse:'#f9dfba'},gold:{diffuse:'#ce9d53',gloss:.45},coral:{diffuse:'#d67a69'},ink:{diffuse:'#273144'},indigo:{diffuse:'#4c5276'},rock:{diffuse:'#717b91'},teal:{diffuse:'#548e89'},rose:{diffuse:'#c87678'},leaf:{diffuse:'#477765'},mint:{diffuse:'#91d2af',emissive:'#60a990',emissiveIntensity:.25},wood:{diffuse:'#795755'},glow:{diffuse:'#ffe5ad',emissive:'#ffc97c',emissiveIntensity:1.25},pinkGlow:{diffuse:'#ffa58c',emissive:'#e88c70',emissiveIntensity:.8},redGlow:{diffuse:'#fa9f78',emissive:'#fc705c',emissiveIntensity:1.25},cloud:{diffuse:'#efd7cc'},haze:{diffuse:'#bda8bc'},dark:{diffuse:'#20283a'},prison:{diffuse:'#35445d'},blueGlow:{diffuse:'#9fdcff',emissive:'#76bfff',emissiveIntensity:1.8},void:{diffuse:'#070b12'}},
   assets:{robot:{type:'container',src:'/assets/quaternius-animated-robot.glb',transform:{position:[0,-.08,0],scale:[.52,.52,.52]},animations:{idle:'RobotArmature|Robot_Standing',run:'RobotArmature|Robot_Running',yes:'RobotArmature|Robot_Yes',no:'RobotArmature|Robot_No',wave:'RobotArmature|Robot_Wave'},defaultAnimation:'idle'}},
@@ -162,17 +167,21 @@ export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'
 
 const missionBase=()=>({
   show:['zip','prison-zone','sun','star',...revealParts],
-  hide:['bellweather-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','zip-voice','socket-core','socket-ring',...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
+  hide:[...speechMarks,'bellweather-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','zip-voice','socket-core','socket-ring',...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
   transforms:{'moon-door':{position:[0,0,0]},'sun-door':{position:[0,0,0]},'star-door':{position:[0,0,0]},zip:{position:[0,0,-28]}},
   animations:{zip:'idle'}
 });
 
 function opening(beat){
   const p={show:['zip',...revealParts],hide:['bellweather-zone','prison-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','warden-rift-link','voice-extract-link','stolen-voice','zip-voice'],transforms:{zip:{position:[0,0,10]},singer:{position:[3.8,0,1]},'friend-a':{position:[-3,0,1]},'friendship-lantern':{position:[-2.2,1.2,10.5]},'moon-door':{position:[0,0,0]}},animations:{zip:'idle'}};
-  p.hide.push('sun','star','notice-old','notice-parade','notice-today','tutorial-route-open','wrong-ring','reunion-ring','route-glow');
+  p.hide.push(...speechMarks,'sun','star','notice-old','notice-parade','notice-today','tutorial-route-open','wrong-ring','reunion-ring','route-glow');
   if(beat===0){
     p.camera='home';p.environment={clearColor:'#172238',ambient:'#806f68',exposure:1.12,fog:{type:'linear',color:'#8f91a7',start:38,end:125}};p.show.push('bellweather-zone','zip-voice','friendship-lantern');p.animations.zip='wave';
-    p.timeline={duration:2200,moves:[{entity:'friendship-lantern',from:[-2.2,1.2,10.5],to:[-.8,1.1,10.5],at:600,duration:1100}],cues:[{at:1600,patch:{animations:{zip:'yes'}}}],finish:{animations:{zip:'idle'}}};
+    p.timeline={duration:3400,moves:[{entity:'friendship-lantern',from:[-2.2,1.2,10.5],to:[-.8,1.1,10.5],at:600,duration:1100}],cues:[
+      {at:400,patch:{show:['zip-speech','zip-speech-link']}},
+      {at:1600,patch:{show:['mira-speech'],hide:['zip-speech','zip-speech-link'],animations:{zip:'yes'}}},
+      {at:2600,patch:{show:['zip-speech','zip-speech-link']}}
+    ],finish:{show:['zip-speech','mira-speech','zip-speech-link'],animations:{zip:'idle'}}};
   }else if(beat===1){
     p.camera='rupture';p.environment={clearColor:'#151d30',ambient:'#665d68',exposure:1.0,fog:{type:'linear',color:'#72788c',start:32,end:110}};
     p.show.push('bellweather-zone','zip-voice','friendship-lantern','warden');p.animations.zip='no';
@@ -215,7 +224,7 @@ function opening(beat){
     p.camera='theft';p.environment={clearColor:'#080b13',ambient:'#332b3b',exposure:.68,fog:{type:'linear',color:'#26283a',start:16,end:76}};
     p.show.push('prison-zone','warden','zip-voice','voice-extract-link');
     p.transforms.zip={position:[0,0,-28]};p.transforms.warden={position:[1.4,0,-28],scale:[1,1,1]};p.animations.zip='no';
-    p.timeline={duration:1500,moves:[{entity:'warden',from:[5,0,-33],to:[1.4,0,-28],duration:1200}],finish:{animations:{zip:'no'}}};
+    p.timeline={duration:1500,moves:[{entity:'warden',from:[5,0,-33],to:[1.4,0,-28],duration:1200}],finish:{show:['zip-speech','zip-speech-link'],animations:{zip:'no'}}};
   }else if(beat===6){
     p.camera='theft';p.environment={clearColor:'#080b13',ambient:'#332b3b',exposure:.68,fog:{type:'linear',color:'#26283a',start:16,end:76}};
     p.show.push('prison-zone','warden','stolen-voice','voice-extract-link');p.hide.push('zip-voice');
@@ -225,7 +234,7 @@ function opening(beat){
       {entity:'stolen-voice',from:[0,1,-27.5],to:[1.55,2,-28.45],at:250,duration:1200},
       {entity:'warden',from:[1.4,0,-28],to:[3,0,-34],at:1550,duration:1200},
       {entity:'stolen-voice',from:[1.55,2,-28.45],to:[2.15,1.9,-33.8],at:1550,duration:1200}
-    ],cues:[{at:1350,patch:{hide:['voice-extract-link']}}],finish:{hide:['voice-extract-link'],animations:{zip:'idle'}}};
+    ],cues:[{at:1350,patch:{hide:['voice-extract-link']}},{at:2750,patch:{show:['zip-silence'],animations:{zip:'wave'}}}],finish:{show:['zip-silence'],hide:['voice-extract-link'],animations:{zip:'wave'}}};
   }else{
     p.camera='reveal';p.environment={clearColor:'#0c1220',ambient:'#46536b',exposure:.85,fog:{type:'linear',color:'#34415a',start:20,end:88}};p.show.push('prison-zone');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
   }
@@ -377,7 +386,7 @@ export const speechRepairTutorialSpec={
 };
 
 export const openingSpec={
-  id:'bellweather.opening.v6',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
+  id:'bellweather.opening.v7',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
   scenes:[
     {beat:0,audioPhase:'home',kicker:'BELLWEATHER · LANTERN NIGHT',title:'One lantern. Three friends.',body:'You are Zip. Mira made this lantern for the three of you. Send it into the sky.',
       direction:{kind:'establishing',channels:['world','character','camera','interaction','narration'],worldAfter:'The shared lantern is launched and the three friends have visibly acted together.'},
