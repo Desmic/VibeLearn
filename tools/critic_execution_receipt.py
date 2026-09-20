@@ -10,6 +10,7 @@ import re
 from pathlib import Path
 
 from tools.materialize_critic_capsule import validate_capsule
+from tools.native_play_execution import validate_native_execution, validate_native_artifacts
 
 HEX40=re.compile(r"^[0-9a-f]{40}$")
 
@@ -21,7 +22,7 @@ def digest_receipt(value:dict):
 
 def build_receipt(assignment:dict,executor_id:str,session_id:str,supplied_evidence:list,
                   supplied_context:list|None=None,forbidden_context_supplied:list|None=None,
-                  capsule_id:str|None=None):
+                  capsule_id:str|None=None,native_execution:dict|None=None):
     if assignment.get("schema")!="vibelearn.critic-assignment.v1":
         raise ValueError("unsupported critic assignment schema")
     candidate=assignment.get("candidate_sha")
@@ -82,6 +83,14 @@ def build_receipt(assignment:dict,executor_id:str,session_id:str,supplied_eviden
         "supplied_context":context_labels,
         "forbidden_context_supplied":[],
     }
+    if "execution_requirements" in assignment:
+        validate_native_execution(assignment["execution_requirements"], native_execution,
+                                  candidate_sha=candidate, assignment_id=assignment_id,
+                                  session_id=session_id.strip())
+        value["schema"]="vibelearn.critic-execution-receipt.v2"
+        value["native_execution"]=native_execution
+    elif native_execution is not None:
+        raise ValueError("native execution requires an explicit assignment contract")
     value["receipt_id"]=digest_receipt(value)
     return value
 
@@ -94,8 +103,9 @@ def validate_receipt(assignment:dict,receipt:dict):
         receipt.get("supplied_context") or [],
         receipt.get("forbidden_context_supplied") or [],
         receipt.get("capsule_id"),
+        receipt.get("native_execution"),
     )
-    if receipt.get("schema")!="vibelearn.critic-execution-receipt.v1":
+    if receipt.get("schema")!=expected["schema"]:
         raise ValueError("unsupported critic execution receipt schema")
     if receipt.get("candidate_sha")!=expected["candidate_sha"] or receipt.get("pass")!=expected["pass"]:
         raise ValueError("execution receipt belongs to another candidate/pass")
@@ -124,6 +134,8 @@ def main():
     parser.add_argument("--capsule-dir",type=Path,required=True,
                         help="Validated sealed capsule mounted into the reviewer session")
     parser.add_argument("--output",type=Path,required=True)
+    parser.add_argument("--native-capture-root",type=Path,
+                        help="Required for native assignments; retained harness captures are verified before sealing")
     args=parser.parse_args()
     try:
         assignment=load(args.assignment);manifest=load(args.context_manifest)
@@ -147,7 +159,12 @@ def main():
             manifest.get("supplied_context") or ["assignment"],
             manifest.get("forbidden_context_supplied") or [],
             capsule.get("capsule_id"),
+            manifest.get("native_execution"),
         )
+        if "execution_requirements" in assignment:
+            if args.native_capture_root is None:
+                raise ValueError("native capture root is required")
+            validate_native_artifacts(receipt["native_execution"], args.native_capture_root)
     except ValueError as exc:
         print(json.dumps({"status":"invalid_critic_execution","error":str(exc)}))
         return 2

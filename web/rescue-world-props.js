@@ -21,7 +21,7 @@ export function lantern(id,position,{scale=1,color='glow',floating=false}={}){
     ...[-1,1].map((s,i)=>({id:id+'-rim-'+i,parent:id,primitive:'cylinder',material:'gold',position:[0,s*.37,0],scale:[.34,.08,.34]})),
     {id:id+'-tassel',parent:id,primitive:'cone',material:'rose',position:[0,-.65,0],scale:[.1,.4,.1]}];
 }
-export function gate(id,position,{width=2.2,height=3.6,color='gold'}={}){
+export function gate(id,position,{width=2.2,height=3.6,color='gold',symbol=null,symbolHeight=height*.42,symbolSize=Math.min(width*.4,1.4)}={}){
   const e=[{id,position}];
   const part=(name,primitive,material,p,s,extra={})=>e.push({id:id+'-'+name,parent:id,primitive,material,position:p,scale:s,...extra});
   part('threshold','box','paper',[0,.08,0],[width+.8,.16,1.5]);
@@ -35,6 +35,39 @@ export function gate(id,position,{width=2.2,height=3.6,color='gold'}={}){
   e.push({id:id+'-rail',parent:id+'-door',primitive:'box',material:color,position:[0,height*.64,0],scale:[width,.12,.13]});
   part('seal','cylinder',color,[0,height+.4,0],[.8,.15,.8],{rotation:[90,0,0]});
   e.push({id:id+'-label',parent:id,position:[0,height+.8,.1]});
+  if(symbol){
+    if(!['moon','sun','star'].includes(symbol))throw new Error(`Unknown gate symbol: ${symbol}`);
+    if(!Number.isFinite(symbolHeight)||!Number.isFinite(symbolSize)||symbolSize<=0)throw new Error('Gate symbol needs a finite height and positive size.');
+    const mark=id+'-mark';
+    // Door parenting keeps the sign and the opening route physically connected.
+    e.push({id:mark,parent:id+'-door',position:[0,symbolHeight,.38],scale:[symbolSize,symbolSize,symbolSize]});
+    const shape=(name,primitive,p,s,rotation=[0,0,0])=>e.push({id:mark+'-'+name,parent:mark,primitive,material:'glow',position:p,scale:s,rotation});
+    const line=(name,a,b,thickness)=>{
+      const dx=b[0]-a[0],dy=b[1]-a[1];
+      shape(name,'box',[(a[0]+b[0])/2,(a[1]+b[1])/2,0],[Math.hypot(dx,dy)+.008,thickness,.055],[0,0,Math.atan2(dy,dx)*180/Math.PI]);
+    };
+    if(symbol==='moon'){
+      // A tapered luminous crescent, with open negative space on its right.
+      // No dark masking disk: the opening remains empty from oblique views too.
+      const count=28;
+      for(let i=0;i<count;i++){
+        const point=t=>{const a=(55+250*t)*Math.PI/180;return[Math.cos(a)*.38,Math.sin(a)*.38];};
+        line('crescent-'+i,point(i/count),point((i+1)/count),.012+.19*Math.sin(Math.PI*(i+.5)/count));
+      }
+    }else if(symbol==='sun'){
+      shape('disk','cylinder',[0,0,0],[.49,.055,.49],[90,0,0]);
+      for(let i=0;i<8;i++){
+        const a=i*Math.PI/4;
+        line('ray-'+i,[Math.cos(a)*.33,Math.sin(a)*.33],[Math.cos(a)*.49,Math.sin(a)*.49],.055);
+      }
+    }else{
+      const points=Array.from({length:5},(_,i)=>{const a=Math.PI/2+i*Math.PI*2/5;return[Math.cos(a)*.5,Math.sin(a)*.5];});
+      for(let i=0;i<5;i++){
+        shape('point-'+i,'sphere',[...points[i],0],[.1,.1,.065]);
+        line('line-'+i,points[i],points[(i+2)%5],.045);
+      }
+    }
+  }
   return e;
 }
 export function tower(id,position,{scale=1,color='stone'}={}){

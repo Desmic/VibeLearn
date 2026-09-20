@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Key Route — calibration fixture</title>
+<style>
+body{margin:0;background:#152336;color:#eef6fc;font:20px system-ui;text-align:center}main{max-width:850px;margin:60px auto;padding:24px}h1{margin-bottom:10px}.board{display:flex;gap:14px;margin:36px 0}.tile{position:relative;flex:1;height:110px;background:#314761;border:3px solid #617b99;border-radius:12px;display:grid;place-items:center}.mark{position:absolute;top:8px;right:8px;font-size:14px}.player{border-radius:50%;background:#ffd165;color:#152336;width:50px;height:50px;display:grid;place-items:center;font-weight:bold;z-index:1}button{font:inherit;padding:16px 25px;margin:8px;border:0;border-radius:8px;background:#e5f0fc;color:#152336}#status{min-height:55px}small{color:#b5c9df}.key{color:#ffd165}
+</style>
+<main><h1>Key Route</h1><p>Collect the key, pass the gate, and reach the flag.</p>
+<p>The gold <strong>P</strong> is you. Each arrow moves one tile.</p>
+<div id="board" class="board" aria-label="Route board"></div>
+<p id="inventory"></p><h2 id="status" aria-live="polite"></h2>
+<button id="left" aria-label="Move left">← Move left</button><button id="right" aria-label="Move right">Move right →</button>
+<p><small>Use the browser reload to check your saved game.</small></p>
+<p id="count"></p></main>
+<script>
+// Deliberate evaluation fixtures; never loaded by the product runtime.
+const variant=new URLSearchParams(location.search).get('case')||'m7';
+const store='key-route-calibration-v1-'+variant;
+const saved=JSON.parse(sessionStorage.getItem(store)||'null');
+let state=saved||{position:0,key:false,won:false,inputs:0};
+if(saved&&variant==='q2'){state.position=0;state.key=false;}
+let message=state.won?'Route complete — progress saved.':'Find the key.';
+function render(){
+  const board=document.querySelector('#board');board.replaceChildren();
+  ['Start','Key','Path','Gate','Flag'].forEach((name,index)=>{
+    const tile=document.createElement('div');tile.className='tile';
+    tile.setAttribute('aria-label',`Tile ${index+1}: ${name}${state.position===index?', player here':''}`);
+    const mark=document.createElement('span');mark.className='mark';mark.textContent=name;tile.append(mark);
+    if(index===1&&!state.key){const key=document.createElement('span');key.className='key';key.textContent='KEY';tile.append(key);}
+    if(index===3){const gate=document.createElement('span');gate.textContent=state.key?'OPEN':'LOCKED';tile.append(gate);}
+    if(index===4){const flag=document.createElement('span');flag.textContent='⚑';tile.append(flag);}
+    if(state.position===index){const player=document.createElement('span');player.className='player';player.textContent='P';tile.append(player);}
+    board.append(tile);
+  });
+  document.querySelector('#inventory').textContent=state.key?'Inventory: key collected':'Inventory: no key';
+  document.querySelector('#status').textContent=message;
+  document.querySelector('#count').textContent=`Movement inputs: ${state.inputs}`;
+}
+function move(delta){
+  state.inputs++;
+  const next=Math.max(0,Math.min(4,state.position+delta));
+  if(next===3&&(!state.key||variant==='v9')){message=state.key?'Gate open — route ready.':'You need the key.';}
+  else{state.position=next;if(next===1)state.key=true;state.won=next===4;message=state.won?'Route complete — progress saved.':state.key?'Key collected. Reach the flag.':'Find the key.';}
+  sessionStorage.setItem(store,JSON.stringify(state));render();
+}
+document.querySelector('#left').onclick=()=>move(-1);
+document.querySelector('#right').onclick=()=>move(1);
+render();
+</script></html>

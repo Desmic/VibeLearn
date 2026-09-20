@@ -100,6 +100,12 @@ class ReleaseGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"pass verdict from every critic"):
             gate(self.sha,"preview",self.status,self.review,self.root,validated_critic_results=broken)
 
+    def test_ready_preview_cannot_omit_art_world_direction(self):
+        incomplete=dict(self.critic_results)
+        del incomplete['art_world_direction']
+        with self.assertRaisesRegex(ValueError,'all validated critic passes: art_world_direction'):
+            gate(self.sha,'preview',self.status,self.review,self.root,validated_critic_results=incomplete)
+
     def test_needs_revision_critic_blocks_even_explicit_preview_override(self):
         self.review["criteria"]["audio_atmosphere"]["rating"]=None
         self.review["criteria"]["audio_atmosphere"].pop("evidence")

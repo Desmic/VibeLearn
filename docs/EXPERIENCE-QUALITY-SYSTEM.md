@@ -1,5 +1,12 @@
 # Experience quality system — evidence before scores
 
+**Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer
+across all critic lanes, including mandatory art/world direction, with actual GUI
+play and video recordings as complementary evidence. Preserve separate lane
+judgments and cold observations before intent. Use the existing Codex session for
+now; future Terminal PM owns orchestration. Luna-first wording below is historical.
+See `ASTRA-REVIEW-WORKFLOW.md`. Unsupported evidence remains unassessed.
+
 **Implementation checkpoint — 19 September 2026:** The prevention/evidence mechanisms in this system are implemented far enough to produce frozen candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26`; run `35434565005` passed all seven suites plus review-index. The unresolved gate is **actual context-separated reviewer judgment** using sealed bundle `10581437727`, not another prompt-only critic or more schema work. Repair only evidence-backed blockers; do not begin Level 2 before critic + human acceptance.
 
 **Active direction — 18 September 2026.** This document defines the reusable

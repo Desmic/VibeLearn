@@ -1,5 +1,298 @@
 # Current state — LLM learning-game proof track
 
+**Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer
+across all critic lanes, including mandatory art/world direction, with actual GUI
+play and video recordings as complementary evidence. Preserve separate lane
+judgments and cold observations before intent. Use the existing Codex session for
+now; future Terminal PM owns orchestration. Luna-first wording below is historical.
+See `ASTRA-REVIEW-WORKFLOW.md`. Unsupported evidence remains unassessed.
+
+## Active completion scope — 20 September 2026
+
+The user now requests completion of both the reusable system and the full entry
+through Level 1 journey, including prologue and separate tutorial. Follow
+`READINESS-20260920.md`. Finish real repair/review proof, integrated verification,
+native play and independent criticism; repair observed blockers. Final user review
+still precedes Level 2 and deployment promotion. Historical candidate headers below
+are evidence history, not a prohibition on the newly authorized work.
+
+## Active repair and verification results — 20 September 2026
+
+The supervised repair-return proof is complete: actual fresh GUI captures,
+independent evidence review, and `evidence_repair_qualified`; product acceptance
+remains undetermined. See `experiments/20260920-native-repair-return.md`.
+The old next-step statements below are historical.
+
+Cold play exposed missing gate identity and a false spatial handoff. Repairs add
+parameterized shared gate symbols and validated once-per-chapter player checkpoints;
+package-specific placements remain outside shared controllers. The tutorial Moon
+is now distinct, Level 1 starts in its corridor, and the opened gate reveals a
+supported signal receiver with Mira's reply. The opening identifies Mira earlier.
+
+A versioned Level 1 relay now asks the player to select between timestamped notes,
+predict the destination and next input before feedback, then recover if needed.
+Old version-1 saves retain their pinned rules. First choices survive correction;
+completion still does not establish mastery. Native Astra regression play reached
+the distinct ending after deliberate wrong choices and a pre-feedback reload.
+That informed run is not an independent acceptance review.
+
+Build and 350 application tests pass (7 skips). Final focused UI tests pass. Updated chapter, opening,
+tutorial, controls, readability, lifecycle and foundation checks pass. Physicality
+had a slow setup timeout; the unchanged standalone rerun passed. Both outcomes
+are retained.
+Independent learning review confirms both actual saved capsules recompute exactly,
+first errors remain preserved and old saves resume. Fresh cold play verified the
+full journey and visible relay commitments through reload. Its final UI findings
+were repaired and rechecked by native Astra at desktop and phone sizes.
+Astra is now the initial route for every critic task; explicit art/world assignment
+and release ingestion are covered by 65 focused tests.
+No final candidate is frozen or internally accepted yet. Audio listening and
+continuous-motion quality remain unassessed where the tools cannot deliver them.
+
+Luna missed the distinct ending and placed a requested reload before rather than
+after a committed prediction. Independent audit corrected its report. Its later
+browser-tool failure is a separate setup limitation. These observations reinforce
+mandatory external checkpoint auditing, not confidence-only fallback.
+
+## Repair-return review gate — 20 September 2026
+
+Added `tools/qualify_native_repair.py`: a returned native run must use a fresh
+worker session on the same build/assignment. Its actual retained record and
+captures are sealed through the existing critic capsule mechanism. The review
+assignment binds the repair request intent, native record digest and worker
+identity. Qualification requires a separate reviewer executor/session and a
+receipt/result for that exact capsule. A pass must account for every capture
+and cannot override incomplete native coverage. Unresolved stays unresolved;
+the output never grants product acceptance or dispatch authority.
+
+Repeated explicitly budgeted proposals preserve one blocking native review
+instead of failing on its reserved identity. 138 focused tests pass, including
+stale reviews, self-review, reused sessions, changed captures and incomplete
+coverage. These are controlled protocol fixtures, not a newly qualified live
+executor or a new independent GUI review. The capture inbox also now consumes
+bounded rejected form bodies before closing, addressing an intermittent Windows
+connection abort observed during the suite.
+
+Next system proof: a supervised fresh repair with real captures and a separate
+context-limited reviewer through this gate. Terminal PM/provider dispatch remains
+disabled. No game feature, product runtime or deployment was changed.
+
+## Evidence-repair adapter proposal — 20 September 2026
+
+Connected native coverage to the existing v0.1 worker/reviewer request boundary
+with `tools/build_native_repair_proposal.py`. It recomputes gaps from the source
+execution and verifies retained capture hashes rather than trusting edited
+follow-up prose. Incomplete evidence produces a draft child request with exact
+source identity/digest, unchanged build, explicit capped budget, no repository
+write scope, retained parent review/policy requirements and an added independent
+native-evidence review. Child sessions replay the full contract; old screenshots
+are diagnostic context, not new observations.
+
+The new capability must be negotiated; existing unsupported transports reject
+before start. The proposal grants no dispatch authority and invokes no provider
+or Terminal PM service. 129 focused tests passed, including the existing adapter
+and native pipeline. A fixture-parent compatibility check using the real completed
+capture run returned `no_evidence_repair_needed` and no child request.
+See `NATIVE-PLAY-EXECUTION-CONTRACT.md` for the handoff boundary. Next is executor
+qualification against this capability and independent review of repaired evidence,
+under an explicit configured execution policy; not more game-specific features.
+
+## Actual native screenshots connected to supervision — 20 September 2026
+
+Added a loopback-only screenshot inbox and scoped image import into the existing
+supervisor bridge. Actual CUA screenshot bytes now reach retained run artifacts;
+the bridge checks their digest and image signature, copies them into the run,
+and records typed observations. It emits coverage and bounded capture-repair
+follow-ups, without automatic dispatch or changing the critic verdict.
+
+Verified through a real browser session on the disposable fixture: text-only
+evidence blocked a game click; the imported before screenshot permitted it;
+missing after evidence generated `collect_and_verify`; the imported after image
+cleared coverage; further input was refused. One actual game input, two retained
+native JPEGs, one AX observation, zero final gaps. All capture hashes validated.
+95 focused tests pass, including same-origin inbox and scoped import checks.
+See `experiments/20260920-native-capture-connection.md`.
+
+This closes the supervised image-retention gap, not autonomous execution/tool
+isolation. Checkpoint meaning and capture provenance still trust the supervisor.
+Next: feed these bounded evidence follow-ups into the worker/reviewer adapter
+under an explicit execution policy, preserving independent acceptance and the
+existing no-live-Terminal-PM boundary. No game runtime or deployment changed.
+
+## System-first capture coverage gate — 20 September 2026
+
+Latest user priority: build the general system; the game is its proof case.
+Converted the observed missing-screenshot failure into reusable task-defined
+capture rules in the existing native execution contract. Rules bind a checkpoint
+to a capture modality and before/after boundary of an action occurrence. The
+guard refuses an action with a missing required pre-input capture. Result
+validation rejects a pass with wrong, missing, late or stale capture coverage;
+unresolved results retain machine-readable gaps for evidence repair.
+90 focused tests pass across capture coverage, native execution, supervision,
+routing, assignments, receipts, capsules and result ingestion. These verify the
+system contract with synthetic records, not new gameplay or release readiness.
+
+This is a system contract change, not another game feature or live dispatcher.
+Text-only supervision now explicitly emits AX captures; it cannot claim a
+screenshot requirement is met. Trusted executor capture metadata/semantic audit
+are still required. See `NATIVE-PLAY-EXECUTION-CONTRACT.md` for the schema and
+limits. Next system step: integrate an executor that supplies actual typed native
+captures and consumes coverage gaps under the configured execution policy;
+retain Luna bounded work, Astra creative ownership, and independent acceptance.
+Terminal PM Phase 0 remains implemented; live orchestration remains deferred.
+
+## Direct Luna GUI ambiguity probe — 20 September 2026
+
+Luna directly played a disposable alternate game fixture in three predefined
+variants, without fault hints or source access. It rejected a misleading saved
+message, accepted a truly restored completed board, and left a blocked route
+unresolved. Root independently corroborated the three behaviors through CUA.
+False-clear conclusions: 0/2 problematic cases; supported clear: 1/1 control.
+These tiny authored cases do not establish a reliability rate.
+
+The post-run audit found missing pre-reload screenshots in both completed cases;
+correct conclusions did not imply complete evidence compliance. Direct CUA was
+not guard-intercepted. Preserve that distinction from the previous supervised
+bridge. See `experiments/20260920-luna-ambiguity-results.md` and its frozen
+protocol. Use Luna provisionally for bounded visible-state/save checks with
+coverage audit; Astra owns creative direction and unresolved judgment. Next
+useful probe is harder visual/timing play with enforced capture/action coverage.
+No product runtime, deployment or Terminal PM integration changed.
+
+## First supervised guarded Luna GUI check — 20 September 2026
+
+Connected the input guard to a manual supervisor bridge and exercised it against
+the running game. Luna chose an ending-panel click and reload; the bridge counted
+two successful inputs and four observations. Astra executed each permitted CUA
+action and independently verified both checkpoints. Luna requested an observation
+during loading and stopped on completion. A separate supervisor stop probe was
+refused before a browser call. 79 focused tests passed; retained capture hashes
+and the execution record validated. The 80 runtime files still match the prior
+dirty-build comparison manifest.
+
+See `experiments/20260920-luna-supervised-guard.md`. This is a supervised semantic
+UI check with transcribed AX excerpts, not isolated autonomous native execution,
+a new full model comparison, or candidate approval. Luna's loading response was
+prompted with explicit observation guidance. No reliability rate follows from it.
+Next calibration: predefined ambiguous/missing checkpoint cases and an unrelated
+game under the same budgets, measuring silent false-clear results as well as
+self-signalled uncertainty. Astra still owns whole-experience creative direction;
+Terminal PM integration remains deferred.
+
+## Native execution guard and receipt gate — 20 September 2026
+
+Added a harness-owned in-process input guard and wired native execution through
+assignment generation, v2 execution receipts and critic-result validation.
+Counts come from attempted-input events; failed inputs consume budget, fresh
+observations are required, concurrent calls cannot exceed the ceiling, and
+verified completion stops padding. Native passes need successful input, assigned
+checkpoint coverage and a final observation. CLI sealing checks capture bytes.
+76 focused tests passed; no game runtime or deployment change.
+
+See `NATIVE-PLAY-EXECUTION-CONTRACT.md`. This is a tested execution/evidence
+boundary; direct CUA calls are not intercepted. The newer supervised bridge
+experiment above now exercises guarded decisions with manual dispatch.
+No old experiment is retroactively
+certified. Terminal PM live integration remains deferred.
+
+## Creative-direction ownership and uncertainty fallback — 20 September 2026
+
+Latest user direction: Astra owns whole-experience creative-direction criticism;
+Luna performs bounded checks and signals unresolved judgments for Astra fallback.
+Self-signals alone are not yet reliable enough for acceptance: the earlier full
+run silently missed its ending checkpoint. Require observation coverage and
+independent audit of clear results during calibration; distinguish missing tools
+from reasoning uncertainty. Updated critic/system docs and `LUNA-ROUTING-POLICY.md`.
+
+`tools/critic_task_policy.py` is a pure offline recommendation helper, not a live
+dispatcher or execution attestation. Creative work starts with Astra; missing
+capabilities request setup repair; Luna uncertainty/conflicts request Astra;
+missing evidence requests audit; verified defects request game repair. Astra's
+unresolved result stays unresolved. Fourteen policy tests plus nineteen existing
+receipt/result tests passed (33 total). No runtime or deployment change.
+
+A new live Luna traversal probe reported unresolved rather than using completed
+level text as evidence of crossing a doorway. See
+`experiments/20260920-luna-traversal-uncertainty.md`. Correct uncertainty in this
+case is encouraging, not a measured reliability rate. Execution counters and
+action evidence still need trusted harness integration; do not claim this helper
+enforces live limits or validates a model's account of its actions.
+The traversal audit corrected 12 claimed inputs to 18, exceeding its 15-input
+ceiling. Treat it as useful uncertainty evidence with failed protocol compliance,
+not a clean pass. External counters/stopping controls remain necessary.
+
+## Luna task-routing boundary — 20 September 2026
+
+The user wants evidence for when Luna is sufficient, not just a full-run model
+comparison. `LUNA-ROUTING-POLICY.md` now separates task execution, acceptance and
+tool capability. A fresh six-input Luna GUI critique with explicit stopping
+rules avoided padding and labelled physical movement/audio unassessed. It
+supports scoped screen/camera checks, not complete open-ended physicality review.
+Four synthetic claim-audit cases respected the supported/unsupported evidence
+boundary; a fifth correctly rejected model escalation as a fix for missing tools.
+See `experiments/20260920-luna-routing-calibration.md` for limits and rubric caveat.
+
+Use Luna provisionally for guided play, bounded recovery, checkpoint checks and
+structured evidence triage, with audit. Use stronger review for unresolved
+contradictions/broad criticism; neither model alone grants final acceptance.
+No reliable defect-discovery rate or cost advantage was measured. The policy is
+manual; live stopping/checkpoint enforcement is still the next pipeline slice.
+No game runtime change, deployment or live Terminal PM integration in this slice.
+
+## Full Luna / Astra GUI experiment — 19 September 2026
+
+Both models played the frozen local build through the full available journey
+using actual CUA browser inputs, separate disposable saves and cookie hosts.
+Astra used 44 inputs including wrong-route recovery, ending and reload/resume.
+Luna reached saved completion in 42 inputs, then mistakenly padded its run to
+the 120-input ceiling; its missed final story panel was observed in a separate
+one-click Luna follow-up. Its initial count and ending claims were corrected by
+audit. This is diagnostic evidence, not a blind capability/cost benchmark.
+See `experiments/20260919-gui-comparison.md` and the individual run reports.
+
+The main observed difference was budget/evidence discipline; both handled the
+guided game loop. Next: enforce observed completion checkpoints, separate input
+and observation counts, stop-on-success budgets and executor access preflight
+in the general native critic boundary. Reproduce the observed Level 1
+text/camera-location mismatch after the frozen comparison. Existing regression
+failure below remains unresolved. No deployment or live Terminal PM integration.
+
+## Latest direction: native computer-use critic agents — 19 September 2026
+
+The user clarified that the general system needs agents which actively play
+through computer/browser UI, choosing actions from observations. Screenshots,
+recordings and deterministic tests support that loop, rather than replace it.
+Luna handles suitable bounded tasks; Astra handles escalation when insufficient.
+See `NATIVE-COMPUTER-USE-CRITICS.md`. This applies now, before future Terminal PM
+integration. A bounded Luna browser-use diagnostic completed, followed by root
+play through the visible IAB. See `REVIEW-20260919-NATIVE-PLAY.md`. Inherited
+context prevents a cold independent verdict. A stale root page resumed Luna's
+saved progress after reload, demonstrating that a new tab is not save isolation.
+
+Existing capsule/receipt tooling does not yet attest live action execution.
+Next: add the execution-mode/capability/action-evidence boundary and prove it on
+unrelated task fixtures. Do not call the native critic pipeline fully integrated.
+
+The previous local regression run passed build, 268 application tests (seven
+skips), foundation/opening/tutorial/controls including physicality, then failed
+in the chapter group's fresh-entry check waiting for `#rgi-intro`. Readability
+and lifecycle were not reached in that run. This remains unresolved; no fully
+green integrated candidate, new sealed CI bundle or deployment is claimed.
+
+## Active local camera/hint and evidence repair — 19 September 2026
+
+Evidence preparation reproduced two runtime defects through actual browser play:
+wall-side camera clipping into the protagonist and a saved hint with no visible
+help. The shared camera now preserves profile-based clearance, including portrait
+framing, and refreshes collider bounds once per draw. The saved hint is visible.
+Learning evidence includes intermediate generation and controlled comparisons;
+physicality evidence includes continuous timestamped movement and camera video.
+Build, application tests and dedicated physicality checks passed; integrated
+browser verification failed at the chapter fresh-entry check described above.
+See `REPAIR-20260919-CAMERA-AND-EVIDENCE.md`.
+The older exact candidate below does not certify this modified runtime. No
+deployment, Level 2 or live Terminal PM integration is authorized by this repair.
+
 ## Current verified repair candidate — 19 September 2026
 
 The marker-clearance and shared-renderer repairs are committed on canonical

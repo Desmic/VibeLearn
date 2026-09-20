@@ -1,5 +1,30 @@
 # Critic policy — observed play, independent disciplines, then the user's verdict
 
+**Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer
+across all critic lanes, including mandatory art/world direction, with actual GUI
+play and video recordings as complementary evidence. Preserve separate lane
+judgments and cold observations before intent. Use the existing Codex session for
+now; future Terminal PM owns orchestration. Luna-first wording below is historical.
+See `ASTRA-REVIEW-WORKFLOW.md`. Unsupported evidence remains unassessed.
+
+**Model roles — 20 September 2026 user direction:** Astra directly owns
+whole-experience creative-direction criticism (story, art/world, atmosphere,
+pacing and coherence). Luna performs bounded GUI play/checks and evidence
+collection, with Astra fallback when it signals an unresolved judgment. Missing
+tools require setup repair; missing observations block acceptance even when Luna
+reports confidence. See `LUNA-ROUTING-POLICY.md`. Self-reported uncertainty is
+useful but is not yet proven sufficient to catch silent misses. Preserve
+independent discipline gates and the user's final judgment.
+
+**Required execution mode — 19 September 2026 user clarification:** Native
+computer/browser-use agents actively play the generated experience. Screenshots,
+recordings, traces and tests collaborate with that play and cannot substitute
+for it. Use Luna for bounded tasks and Astra escalation where needed. Follow
+`NATIVE-COMPUTER-USE-CRITICS.md`; distinguish live play, evidence-only analysis
+and cold-context independence. Existing artifact-receipt validation alone does
+not certify this execution mode. This requirement applies before future Terminal
+PM integration and across games, not only this proof track.
+
 **Current execution target — 19 September 2026:** candidate `471de882a01690fa50ac39455ad603fffd39cfdc`, exact run `35440122451`, sealed assignment/capsule artifact `10583163540`. Execute the ready post-CI passes through `CRITIC-HANDOFF.md`; do not silently substitute later documentation heads. The current chat is contaminated by design intent/prior feedback and is **not** a valid cold observer.
 
 **Active policy — 17 September 2026.** The September 17 user review invalidated the prior internal `ready_for_user_review` recommendation for candidate `6fea828...`. The internal checker passed a build with duplicate/ambiguous characters, visible clipping, insufficient story communication, wrong tutorial boundary, cramped world scale and the wrong player-embodiment model. That proves the checker/critic process was necessary but insufficient.

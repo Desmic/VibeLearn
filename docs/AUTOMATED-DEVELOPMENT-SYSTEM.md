@@ -1,5 +1,27 @@
 # VibeLearn automated development system — Terminal PM Agent orchestration contract
 
+**Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer
+across all critic lanes, including mandatory art/world direction, with actual GUI
+play and video recordings as complementary evidence. Preserve separate lane
+judgments and cold observations before intent. Use the existing Codex session for
+now; future Terminal PM owns orchestration. Luna-first wording below is historical.
+See `ASTRA-REVIEW-WORKFLOW.md`. Unsupported evidence remains unassessed.
+
+**20 September system-first direction:** The game is proof of the reusable
+system, not the sole deliverable. The current implementation slice converts
+native-play experiment failures into task-defined capture coverage enforcement
+in the existing critic pipeline. See `NATIVE-PLAY-EXECUTION-CONTRACT.md`:
+Luna handles bounded work; Astra owns creative direction; missing evidence is
+an explicit repair obligation rather than a confident pass. Phase 0 remains
+implemented, and no new live-provider or Terminal PM dispatch is implied.
+
+The native evidence pipeline now generates offline v0.1 repair proposals through
+`tools/build_native_repair_proposal.py`, with a negotiated capability extension,
+fresh-session replay, bounded proposed budget and independent evidence review.
+This uses the existing worker/reviewer boundary without copying orchestration
+internals. See `NATIVE-PLAY-EXECUTION-CONTRACT.md`; proposal creation is not live
+execution authority, and the external executor is not yet qualified for it.
+
 **Status:** approved target architecture / decoupled integration handoff  
 **Date:** 19 September 2026  
 **VibeLearn critic candidate:** frozen at `471de882a01690fa50ac39455ad603fffd39cfdc`; exact run `35440122451` passed all seven suites plus review-index, and critic evidence is retained for 30 days. Deployed Render runtime remains the rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5` per `docs/STATE.md`.
@@ -513,6 +535,22 @@ Use deterministic assertions wherever possible:
 - known spatial or UI invariants where measurable.
 
 ### 9.2 Visual/interactive evaluation
+
+**20 September user decision:** Whole-experience creative direction is assigned
+directly to Astra. The cheap-first path below applies to bounded play/checks,
+not to the story/art/world/pacing synthesis. For these evaluator tasks, Luna's
+unresolved signal requests Astra review; a missing capability requests setup
+repair, and a confident result still needs checkpoint/evidence audit. This
+supersedes older blanket escalation-only wording for creative evaluators, not
+the separate worker-system policy in section 10. Follow `LUNA-ROUTING-POLICY.md`.
+
+**19 September user clarification:** Apply
+`NATIVE-COMPUTER-USE-CRITICS.md` now. Computer-use evaluators must actually play
+through the visible interface and adapt to observations. They collaborate with
+screenshots, recordings and deterministic checks. The following routing diagram
+is a cost policy, not permission to replace live play with a script or postpone
+it until Terminal PM Phase 2. Luna is the default for suitable bounded play tasks;
+Astra is available for unresolved tasks needing stronger reasoning.
 
 For actual browser/game inspection, treat computer-use evaluators as an **outcome-evaluation adapter**, not the default code-worker model.
 
@@ -1051,7 +1089,9 @@ Connect existing VibeLearn evidence:
 - exact build/runtime identity;
 - user-review linkage.
 
-Cheap computer-use evaluation is added only where the rendered experience matters.
+Connect the already-required native computer/browser-use evaluation to Terminal
+PM dispatch here. Local interactive critic play begins before this integration;
+see `NATIVE-COMPUTER-USE-CRITICS.md`.
 
 **Exit:** a candidate cannot be called accepted merely because engineering checks pass.
 

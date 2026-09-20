@@ -15,7 +15,7 @@ let reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,paused=false,
 let world=runtime.showStory(chapter,host,0,{reducedMotion:reduced});
 const session=createLearningSession(render);
 const practice=createTutorialFlow(chapter.controlTutorialSpec);
-const ours=()=>session.attempt?.snapshot?.word_machine?.version==='first-words-1';
+const ours=()=>['first-words-1','first-words-2'].includes(session.attempt?.snapshot?.word_machine?.version);
 const view=()=>ours()?session.attempt.word_machine_state:initial;
 const text=(s,v)=>{$(s).textContent=v;};
 const root=$('#adventure');
@@ -51,7 +51,13 @@ async function command(path,body={}){
 }
 const repairStep=s=>s.round===0?selectStateTutorialStep(chapter.speechRepairTutorialSpec,s):null;
 function tutorialStage(s,complete){
-  if(complete)return['LEVEL 1 · COMPLETE','The deeper gate is open.','You restored enough speech to read the changing route and found the way forward.'];
+  if(complete)return['LEVEL 1 · COMPLETE',s.relay_stage==='done'?'Mira heard you.':'The deeper gate is open.',s.relay_stage==='done'?'Your friend is alive. The receiver holds her reply while you plan the way deeper inside.':'You restored enough speech to read the changing route and found the way forward.'];
+  if(s.round===1&&s.status==='success'&&s.relay_stage!==undefined){
+    if(s.relay_stage==='none')return['LEVEL 1 · A SIGNAL','Someone is still out there.','A receiver glows beyond the open gate. Try to reach your friend.'];
+    if(s.relay_stage==='done')return['LEVEL 1 · MESSAGE DELIVERED','Mira answers.','Your message reached her holding area. The way to your friends is still sealed, but you are no longer alone.'];
+    if(s.relay_stage==='revealed')return['LEVEL 1 · RELAY',s.relay_context==='yard'?'The receiver finds Mira.':'No reply from that holding area.',s.relay_context==='yard'?'Your message reached the place in the later note. Send it to Mira.':'Compare the two timestamps and try again. Your first decisions are kept.'];
+    return['LEVEL 1 · RELAY','Find where Mira is waiting.',s.relay_case?.goal||'Use the two notes to send a message.'];
+  }
   const repair=repairStep(s);
   if(repair)return[repair.stage,repair.title,repair.detail];
   if(s.status==='success')return['LEVEL 1 · COMPLETE','Route found.','The changed context opened the deeper gate. Finish when you are ready.'];
@@ -86,29 +92,67 @@ function render(){
   const [stage,goal,detail]=tutorialStage(s,complete);text('#stage-name',stage);text('#goal',goal);text('#detail',detail);
   host.dataset.tutorialWorldTarget=controlStep==='done'&&repair?.focus==='world'?(repair.target||''):'';
   host.dataset.tutorialInteractionStep=controlStep==='done'?(repair?.id||''):'';
-  $('#output').replaceChildren();for(let i=0;i<4;i++){const span=document.createElement('span');span.textContent=s.output[i]||'·';if(!s.output[i])span.className='empty';$('#output').append(span);}
-  text('#context',s.context.join(' ')||'Waiting for power.');
-  text('#engine-label',complete?'YOUR SPEECH ENGINE · ROUTE OPEN':s.round===1?'YOUR SPEECH ENGINE · LEVEL 1':'YOUR SPEECH ENGINE · TUTORIAL');
-  $('#inspect').hidden=s.round===0;
+  const relay=s.relay_stage&&s.relay_stage!=='none';
+  const shownOutput=relay?s.relay_output:s.output;
+  $('#output').replaceChildren();for(let i=0;i<(relay?3:4);i++){const span=document.createElement('span');span.textContent=shownOutput[i]||'·';if(!shownOutput[i])span.className='empty';$('#output').append(span);}
+  text('#context',relay?[s.relay_case.base,s.relay_case.notes[s.relay_context]||'Choose a note.',['revealed','done'].includes(s.relay_stage)?s.relay_case.prefix:''].filter(Boolean).join(' '):s.context.join(' ')||'Waiting for power.');
+  text('#engine-label',relay?'PRISON RELAY · YOUR SPEECH ENGINE':complete?'YOUR SPEECH ENGINE · ROUTE OPEN':s.round===1?'YOUR SPEECH ENGINE · LEVEL 1':'YOUR SPEECH ENGINE · TUTORIAL');
+  $('#inspect').hidden=s.round===0||Boolean(relay);
   $('#actions').replaceChildren();
   if(complete){button('Look deeper into the prison','ending');button('Play Level 1 again','again',false);}
+  else if(s.relay_stage==='done')button('Finish Level 1 →','finish');
+  else if(s.relay_stage==='revealed'){
+    if(s.relay_context==='yard')button('Send the message to Mira','relay-finish');
+    else button('Read the relay notes again','relay-notes');
+    const feedback=document.createElement('p');feedback.setAttribute('role','status');
+    feedback.textContent=`The selected note produced ${s.relay_output.join(' ')}. ${s.relay_prediction===s.relay_context?'Your destination prediction matched.':'The engine followed the selected note, not your destination prediction.'} ${s.relay_input_prediction==='growing'?'The next prediction used the input plus Meet.':'The next prediction also needs Meet, the word already generated.'}`;
+    $('#actions').append(feedback);
+  }
+  else if(relay){
+    if(s.relay_context==='none')button('Read the two relay notes','relay-notes');
+    else if(s.relay_prediction==='none'){button('Predict the message destination','relay-predict');button('Change the note','relay-notes',false);}
+    else if(s.relay_input_prediction==='none')button('Predict the next input','relay-input');
+    else button('Run the relay','relay-run');
+  }
+  else if(s.round===1&&s.status==='success'&&s.relay_stage==='none')button('Answer the signal','relay-start');
   else if(repair)button(repair.actionLabel,repair.primaryAction);
   else if(s.status==='success')button('Finish Level 1 →','finish');
   else if(s.status==='wrong')button('Check route signs','notices');
   else if(s.round===1&&s.clue==='none')button('Check route signs','notices');
-  else if(s.round===1&&s.prediction==='none'){button('Predict the gate','predict');button('Ask for a hint','hint',false);}
+  else if(s.round===1&&s.prediction==='none'){
+    button('Predict the gate','predict');
+    if(s.hinted){
+      const hint=document.createElement('p');hint.setAttribute('role','status');
+      hint.dataset.learningHint='route';
+      hint.textContent='Hint: Read the INPUT above. The engine uses the sign you selected, even if another sign is newer. Which gate does that selected context point toward?';
+      $('#actions').append(hint);
+    }else button('Ask for a hint','hint',false);
+  }
   else if(s.round===1&&!s.available_actions?.includes('step')&&s.loop_prediction==='none'&&s.available_actions?.some(a=>a.startsWith('loop-')))button('Continue saved run','loop');
   else{button(s.pieces===0?'Make first word':s.pieces<4?'Next word':'Speak to gate →',s.pieces<4?'step':'send');if(s.round===1&&s.pieces===0)button('Check route signs','notices',false);}
+  if(relay&&s.relay_stage==='choosing'&&s.relay_prediction!=='none'){
+    const committed=document.createElement('p');committed.dataset.relayCommitment='true';
+    committed.textContent=`Your prediction: ${s.relay_prediction==='yard'?'Bell Yard':'Lantern Loft'}.`;
+    if(s.relay_input_prediction!=='none')committed.textContent+=` Your next-input choice: ${s.relay_input_prediction==='growing'?'request, note, and Meet':'request and note, unchanged'}.`;
+    $('#actions').append(committed);
+  }
+  if(!relay&&s.round===1&&s.prediction!=='none'&&s.status==='building'){
+    const committed=document.createElement('p');committed.dataset.routeCommitment='true';
+    committed.textContent=`Your first route prediction: ${{moon:'Moon',star:'Star',sun:'Sun'}[s.prediction]}.`;
+    $('#actions').append(committed);
+  }
   $('#rewind').hidden=complete||!s.powered||s.status==='success'||s.pieces===0;
   text('#saved',session.busy?'Saving…':session.pending?'Not saved · retry available':complete?'Level saved · practice recorded':'Saved');
   let scene;
-  if(complete)scene='You stand in the unknown prison at the open Star gate. A route continues deeper inside.';
-  else if(s.round===0&&s.status!=='success')scene='You are the robot in the prison chamber. A huge Moon-marked exit blocks the way out, and a smaller Sun hatch sits to one side.';
+  if(complete)scene=s.relay_stage==='done'?'The Star gate is open. Mira’s reply glows on the receiver beyond it. A route continues deeper inside.':'The Star gate is open. A broken signal from your friends glows beyond it. A route continues deeper inside.';
+  else if(s.round===0&&s.status!=='success')scene='You are Zip, the robot in the prison chamber. A huge Moon-marked exit blocks the way out.';
   else if(s.round===0)scene='The Moon door is open. Your speech engine works again, and a corridor leads into the first mission.';
   else if(s.status==='success')scene='The Star gate is open deeper in the prison.';
-  else scene='You have left the first chamber. Three route boards stand in the wider corridor, and a glowing five-point mark identifies one deeper gate.';
+  else scene='Beyond the first chamber, three route boards stand in the wider corridor. A glowing five-point mark identifies the deeper gate.';
   host.setAttribute('aria-label',`Unknown prison beyond Bellweather. ${scene}`);
-  text('#scene-description',`${scene} ${goal} ${detail} Input: ${s.context.join(' ')}. Output: ${s.output.join(' ')||'none'}.`);
+  text('#scene-description',`${scene} ${goal} ${detail} Input: ${$('#context').textContent}. Output: ${shownOutput.join(' ')||'none'}.`);
+  const signal=$('[data-signal="friend"]');
+  signal.textContent=s.relay_stage==='done'?'Mira: “Zip? You found me.”':'“Hel—p.” · Mira’s signal';
   const step=controlStep;$('#controls').classList.toggle('practicing',step!=='done');
   if(step!=='done'){
     const current=practice.current;
@@ -121,7 +165,7 @@ function render(){
   }
 }
 function choices(title,detail,items){
-  text('#choice-kicker','LEVEL 1 · ROUTE');text('#choice-title',title);text('#choice-detail',detail);$('#choices').replaceChildren();
+  text('#choice-kicker',view().relay_stage&&view().relay_stage!=='none'?'LEVEL 1 · RELAY':'LEVEL 1 · ROUTE');text('#choice-title',title);text('#choice-detail',detail);$('#choices').replaceChildren();
   for(const [label,action] of items){const b=document.createElement('button');b.textContent=label;b.onclick=async()=>{$('#choice').close();await act(action);};$('#choices').append(b);}
   dialog('#choice');
 }
@@ -130,6 +174,10 @@ async function act(action){
   if(action==='skip-controls'){practice.skip();render();return;}
   if(practice.step!=='done')return;
   await audio.unlock().catch(()=>{});
+  if(action==='relay-notes')return choices('Two notes from Mira',view().relay_case.goal,
+    Object.entries(view().relay_case.notes).map(([place,note])=>[note,'relay-context-'+place]));
+  if(action==='relay-predict')return choices('Where will the message say to meet?','Predict from the note you put into the engine, before running it.',[['Lantern Loft','relay-predict-loft'],['Bell Yard','relay-predict-yard']]);
+  if(action==='relay-input')return choices('The relay has started with “Meet”.','What will the next word prediction receive? Commit your choice before seeing the result.',[['The request and selected note, unchanged','relay-input-original'],['The request, selected note, and Meet','relay-input-growing']]);
   if(action==='notices')return choices('Route signs','Choose one sign to put into your speech engine. The physical boards are optional shortcuts to the same choice.',[
     ['Old sign · “Take the Moon gate.”','scan-moon'],['Discarded parade notice · “Lantern parade at sunset.”','scan-parade'],['Current notice · “Moon route closed. The tower bell answers the five-point lantern mark.”','scan-star']]);
   if(action==='predict')return choices('Which gate will your engine say?','Predict the output from only the context you chose. Your first prediction is saved before the machine runs.',[['Moon','predict-moon'],['Star','predict-star'],['Sun','predict-sun']]);
@@ -144,7 +192,11 @@ function showEnding(){
   const result=session.attempt?.assessment?.transfer_observations;
   const context=result?(result.relevant_context?'You found the current clue and mapped its five-point mark to the Star gate.':'Your first context choice was stale or unrelated; you recovered without erasing it.') : '';
   const loop=result?.loop_prediction&&result.loop_prediction!=='none'?(result.loop_correct?' You predicted that each new word joins the next input.':' The next prediction receives the growing input, not the original input alone.'):' You watched each new word become part of the next input.';
-  text('#reflection',context+loop);dialog('#ending');
+  const relay=session.attempt?.assessment?.relay_transfer_observations;
+  const relayReflection=relay?` In the relay, ${relay.relevant_context?'your first note located Mira':'you recovered from an earlier location without erasing that choice'}. ${relay.input_prediction_correct?'You predicted that Meet joins the next input.':'The relay showed that Meet joins the next input.'}`:'';
+  text('#reflection',context+loop+relayReflection);
+  text('#ending-signal',relay?'The receiver flickers. “Zip? You found me.” Mira is still trapped, but now she can hear you.':'A broken message flickers from the receiver beyond the gate: “Hel—p.”');
+  dialog('#ending');
 }
 $('#start').onclick=()=>act('start');$('#rewind').onclick=()=>act('rewind');$('#retry').onclick=()=>session.retry();
 $('#menu-open').onclick=()=>{if(practice.observe('menu'))render();dialog('#menu');};
@@ -212,13 +264,14 @@ function frame(){
     if(marker.dataset.action){marker.disabled=Boolean(blocked()||!available);marker.classList.toggle('chosen',marker.dataset.clue===s.clue);}
     const tutorialTarget=marker.classList.contains('tutorial-target-marker');
     const targetMismatch=tutorialTarget&&(marker.dataset.anchor!==host.dataset.tutorialWorldTarget||!available);
-    const guidable=tutorialTarget?Boolean(point?.inFront):Boolean(point?.visible);
-    marker.hidden=!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.anchor==='star-label'&&s.status==='success');
+    const critical=tutorialTarget||marker.dataset.critical==='true';
+    const guidable=critical?Boolean(point?.inFront):Boolean(point?.visible);
+    marker.hidden=!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.classList.contains('notice-marker')&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
     if(point&&!marker.hidden){
       const safeTop=Math.max(150,goal.bottom-rect.top+marker.offsetHeight+8);
       const safeBottom=Math.max(safeTop+12,tray.top-rect.top-12);
-      const placement=placeWorldMarker(marker,point,{viewportWidth:rect.width,safeTop,safeBottom,critical:tutorialTarget,avoidRects});
-      if(!placement.placed||(!tutorialTarget&&!placement.insideSafeArea))marker.hidden=true;
+      const placement=placeWorldMarker(marker,point,{viewportWidth:rect.width,safeTop,safeBottom,critical,avoidRects});
+      if(!placement.placed||(!critical&&!placement.insideSafeArea))marker.hidden=true;
     }
   }
   requestAnimationFrame(frame);

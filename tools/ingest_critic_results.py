@@ -8,6 +8,7 @@ from tools.validate_critic_result import validate_result
 
 PASS_ORDER=(
     "cold_observer",
+    "art_world_direction",
     "motion_audience",
     "physicality",
     "handoff_tutorial",

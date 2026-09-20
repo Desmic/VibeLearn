@@ -5,6 +5,56 @@ const radians=n=>n*Math.PI/180;
 const formTarget=target=>target?.closest?.('button,input,select,textarea,a,summary,[contenteditable]');
 const typingTarget=target=>target?.closest?.('input,select,textarea,[contenteditable]');
 
+export function followCameraClearance(profile,aspect){
+  const body=profile.body||{radius:.32,height:1.6},camera=profile.camera;
+  // Portrait profiles request a wider contextual view. Preserve that framing
+  // proportion when a wall constrains the camera, instead of collapsing both
+  // landscape and portrait to the same close view of the protagonist.
+  const framingScale=aspect<.9?Math.max(1,(camera.portraitDistance??camera.distance)/camera.distance):1;
+  return Math.max(camera.minDistance,body.height*1.5,body.radius*3)*framingScale;
+}
+
+// Preserve the requested horizontal bearing: camera-relative movement must not
+// reverse when a wall forces the follow camera upward. Sweep in world units so
+// zooming out cannot make thin geometry disappear between samples.
+export function resolveFollowCamera(target,{yaw,pitch,distance,minClearance},blocked){
+  const sweep=elevation=>{
+    const az=radians(yaw),el=radians(elevation);
+    const direction=[Math.sin(az)*Math.cos(el),Math.sin(el),Math.cos(az)*Math.cos(el)];
+    const steps=Math.ceil(distance/.05);let safe=0;
+    for(let i=1;i<=steps;i++){
+      const d=distance*i/steps,p=target.map((v,k)=>v+direction[k]*d);
+      if(blocked(...p))break;
+      safe=d;
+    }
+    return {eye:target.map((v,k)=>v+direction[k]*safe),distance:safe,pitch:elevation};
+  };
+  const minimum=Math.min(distance,minClearance),requested=sweep(pitch);
+  let result=requested;
+  if(result.distance<minimum){
+    // Find the first safe elevated arc, then refine its boundary. Keeping the
+    // bearing fixed also makes alternating wall sides behave symmetrically.
+    let previous=pitch;
+    for(let elevation=Math.min(89,pitch+5);;elevation=Math.min(89,elevation+5)){
+      const candidate=sweep(elevation);
+      if(candidate.distance>=minimum){
+        let low=previous,high=elevation;
+        for(let i=0;i<7;i++){
+          const mid=(low+high)/2,probe=sweep(mid);
+          if(probe.distance>=minimum){high=mid;result=probe;}else low=mid;
+        }
+        if(result.distance<minimum)result=candidate;
+        break;
+      }
+      if(candidate.distance>result.distance)result=candidate;
+      if(elevation===89)break;
+      previous=elevation;
+    }
+  }
+  return {...result,target:[...target],yaw,adjusted:result.pitch!==pitch||result.distance<distance,
+    clearanceSatisfied:result.distance>=minimum};
+}
+
 export function validatePlayerProfile(profile,ids){
   const fail=message=>{throw new Error(`WorldSpec player: ${message}`);};
   const vector=(v,n)=>Array.isArray(v)&&v.length===n&&v.every(Number.isFinite);
@@ -28,9 +78,9 @@ export function validatePlayerProfile(profile,ids){
 }
 
 export function createPlayerControls(host,profile,adapter){
-  let mode='orbit',key=null,position=[...profile.spawn],yaw=profile.camera.yaw,pitch=profile.camera.pitch,distance=profile.camera.distance;
+  let mode='orbit',key=null,checkpoint=null,position=[...profile.spawn],yaw=profile.camera.yaw,pitch=profile.camera.pitch,distance=profile.camera.distance;
   let orbit={target:[0,1,0],yaw:0,pitch:25,distance:15},shot=null,paused=false,moving=false,drag=null,suppressUntil=0;
-  let stick=[0,0],stickPointer=null,lastFacing=0,disposed=false;
+  let stick=[0,0],stickPointer=null,lastFacing=0,disposed=false,presentedCamera=null;
   const keys=new Set(),cleanups=[];
   const used=kind=>host.dispatchEvent(new CustomEvent('game-control-used',{bubbles:true,detail:{kind}}));
   const listen=(target,event,fn,options)=>{target.addEventListener(event,fn,options);cleanups.push(()=>target.removeEventListener(event,fn,options));};
@@ -59,23 +109,18 @@ export function createPlayerControls(host,profile,adapter){
     else{orbit.yaw-=dx*.22;orbit.pitch=clamp(orbit.pitch+dy*.16,5,70);}
     draw();used('look');
   }
-  function cameraOutsideSolids(target,eye){
-    // A short segment sweep prevents the follow camera from crossing declared
-    // walls. These bounds are authored presentation data, not physics evidence.
-    let safe=[...target];
-    for(let i=1;i<=40;i++){
-      const t=i/40,p=target.map((v,k)=>v+(eye[k]-v)*t);
-      if(p[1]<-.2||adapter.isCameraBlocked?.(...p)||(profile.obstacles||[]).some(b=>p[0]>b[0]-.15&&p[0]<b[3]+.15&&p[1]>b[1]-.15&&p[1]<b[4]+.15&&p[2]>b[2]-.15&&p[2]<b[5]+.15))break;
-      safe=p;
-    }
-    return safe;
-  }
   function draw(){
     if(disposed||!shot)return;
     const third=mode==='third-person',target=third?[position[0],position[1]+profile.camera.targetHeight,position[2]]:orbit.target;
     const az=radians(third?yaw:orbit.yaw),el=radians(third?pitch:orbit.pitch),d=third?distance:orbit.distance;
     let eye=[target[0]+Math.sin(az)*Math.cos(el)*d,target[1]+Math.sin(el)*d,target[2]+Math.cos(az)*Math.cos(el)*d];
-    if(third)eye=cameraOutsideSolids(target,eye);
+    if(third){
+      const worldBlocked=adapter.getCameraBlocker?.()||((x,y,z)=>adapter.isCameraBlocked?.(x,y,z));
+      const cameraBlocked=(x,y,z)=>y<-.2||worldBlocked(x,y,z)||(profile.obstacles||[]).some(b=>x>b[0]-.15&&x<b[3]+.15&&y>b[1]-.15&&y<b[4]+.15&&z>b[2]-.15&&z<b[5]+.15);
+      presentedCamera=resolveFollowCamera(target,{yaw,pitch,distance,
+        minClearance:followCameraClearance(profile,host.clientWidth/Math.max(1,host.clientHeight))},cameraBlocked);
+      eye=presentedCamera.eye;
+    }else presentedCamera={eye:[...eye],target:[...target],yaw:orbit.yaw,pitch:orbit.pitch,distance:d,adjusted:false,clearanceSatisfied:true};
     adapter.setCamera(eye,target,third?58:shot.fov);
     host.dataset.cameraMode=mode;
   }
@@ -134,16 +179,26 @@ export function createPlayerControls(host,profile,adapter){
     setShot,
     setMode(value,nextKey){
       const changed=mode!==value||key!==nextKey;mode=value;key=nextKey;
-      if(changed){release();if(value==='third-person'){position=[...profile.spawn];adapter.setAvatar(position,0);yaw=profile.camera.yaw;pitch=profile.camera.pitch;distance=defaultDistance();}}
+      if(changed){checkpoint=null;release();if(value==='third-person'){position=[...profile.spawn];adapter.setAvatar(position,0);yaw=profile.camera.yaw;pitch=profile.camera.pitch;distance=defaultDistance();}}
       overlay.dataset.controlMode=mode;draw();
     },
     restoreAvatar(){if(mode==='third-person')adapter.setAvatar(position,lastFacing);},
     snapshot(){return {mode,key,position:[...position],yaw,pitch,distance,lastFacing};},
+    // Authored chapter boundaries place the player once, never on each puzzle
+    // update. The normal collision/surface checks also apply to this handoff.
+    setCheckpoint(value){
+      if(!value||typeof value.id!=='string'||!value.id.trim())return false;
+      if(checkpoint===value.id)return true;
+      const restored=this.restore({...this.snapshot(),position:value.position,
+        yaw:value.yaw??profile.camera.yaw,pitch:value.pitch??profile.camera.pitch,lastFacing:value.facing??0});
+      if(restored)checkpoint=value.id;
+      return Boolean(restored);
+    },
     restore(value){
       if(!value||value.mode!==mode||value.key!==key||!Array.isArray(value.position)||value.position.length!==3||!value.position.every(Number.isFinite)||![value.yaw,value.pitch,value.distance,value.lastFacing].every(Number.isFinite))return;
       const surface=surfaceAt(value.position[0],value.position[2]);
       if(!surface||solidAt(value.position[0],surface.height,value.position[2]))return;
-      release();position=[value.position[0],surface.height,value.position[2]];yaw=value.yaw;pitch=clamp(value.pitch,5,70);distance=clamp(value.distance,profile.camera.minDistance,profile.camera.maxDistance);lastFacing=value.lastFacing;adapter.setAvatar(position,lastFacing);draw();
+      release();position=[value.position[0],surface.height,value.position[2]];yaw=value.yaw;pitch=clamp(value.pitch,5,70);distance=clamp(value.distance,profile.camera.minDistance,profile.camera.maxDistance);lastFacing=value.lastFacing;adapter.setAvatar(position,lastFacing);draw();return true;
     },
     setPaused(value){paused=Boolean(value);if(paused)release();},
     update(dt){
@@ -155,7 +210,7 @@ export function createPlayerControls(host,profile,adapter){
       }
       draw();
     },
-    stats(){return{mode,position:[...position],yaw,pitch,distance,moving};},
+    stats(){return{mode,position:[...position],yaw,pitch,distance,moving,presentedCamera:presentedCamera?{...presentedCamera,eye:[...presentedCamera.eye],target:[...presentedCamera.target]}:null};},
     dispose(){disposed=true;release();cleanups.forEach(fn=>fn());overlay.remove();delete host.dataset.cameraMode;}
   };
 }

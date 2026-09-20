@@ -55,17 +55,20 @@ part('prison-ceiling-beam-a','box','indigo',[-4.6,7.4,-1],[.3,.3,14],{parent:'pr
 part('prison-ceiling-beam-b','box','indigo',[4.6,7.4,-1],[.3,.3,14],{parent:'prison-zone'});
 part('prison-light-a','sphere','blueGlow',[-6.8,5.3,-6.8],[.35,.35,.35],{parent:'prison-zone'});
 part('prison-light-b','sphere','blueGlow',[6.8,5.3,-6.8],[.35,.35,.35],{parent:'prison-zone'});
-addTo('prison-zone',gate('moon',[0,0,-7],{width:6,height:7,color:'gold'}));
-addTo('prison-zone',gate('sun',[6.3,0,-11],{width:2.2,height:3.2,color:'rose'}));
-addTo('prison-zone',gate('star',[0,0,-18],{width:4.2,height:5.2,color:'teal'}));
+addTo('prison-zone',gate('moon',[0,0,-7],{width:6,height:7,color:'gold',symbol:'moon',symbolHeight:3.1,symbolSize:2.2}));
+addTo('prison-zone',gate('sun',[6.3,0,-11],{width:2.2,height:3.2,color:'rose',symbol:'sun',symbolSize:1.1}));
+addTo('prison-zone',gate('star',[0,0,-18],{width:4.2,height:5.2,color:'teal',symbol:'star',symbolHeight:2.1,symbolSize:1.4}));
 e.find(entity=>entity.id==='star-label').position=[0,2.2,.35];
-e.push({id:'star-mark',parent:'star',position:[0,2.1,.38]});
-const starPoints=Array.from({length:5},(_,i)=>{const a=-Math.PI/2+i*Math.PI*2/5;return[Math.cos(a)*.7,Math.sin(a)*.7];});
-for(const [i,[x,y]] of starPoints.entries())part(`star-mark-point-${i}`,'sphere','glow',[x,y,0],[.14,.14,.08],{parent:'star-mark'});
-for(let i=0;i<5;i++){
-  const a=starPoints[i],b=starPoints[(i+2)%5],dx=b[0]-a[0],dy=b[1]-a[1];
-  part(`star-mark-line-${i}`,'box','glow',[(a[0]+b[0])/2,(a[1]+b[1])/2,-.015],[Math.hypot(dx,dy),.06,.04],{parent:'star-mark',rotation:[0,0,Math.atan2(dy,dx)*180/Math.PI]});
-}
+part('route-floor','box','prison',[0,-.1,-14],[18,.2,16],{parent:'prison-zone',enabled:false});
+for(const side of [-1,1])part('route-wall-'+side,'box','dark',[side*9,4,-14],[.35,8,16],{parent:'prison-zone',enabled:false,collider:{shape:'box'}});
+// A receiver beyond the exit provides a visible destination for the final signal.
+e.push({id:'friend-signal',parent:'prison-zone',position:[0,1.4,-20.4],enabled:false});
+part('friend-signal-shell','box','teal',[0,0,0],[1.5,1.1,.3],{parent:'friend-signal'});
+part('friend-signal-post','cylinder','ink',[0,-.95,0],[.16,1.1,.16],{parent:'friend-signal'});
+part('friend-signal-foot','box','teal',[0,-1.34,0],[.9,.12,.6],{parent:'friend-signal'});
+part('friend-signal-screen','box','blueGlow',[0,.05,.18],[1.15,.65,.06],{parent:'friend-signal',motion:{type:'pulse',amplitude:.08,speed:1.2}});
+for(const side of [-1,1])part('friend-signal-eye-'+side,'sphere','ink',[side*.23,.08,.23],[.13,.13,.06],{parent:'friend-signal'});
+e.push({id:'friend-signal-label',parent:'friend-signal',position:[0,1.05,.2]});
 part('tutorial-route-open','box','mint',[0,.02,-12.4],[4,.04,10],{parent:'prison-zone',enabled:false});
 
 function routeBoard(id,position,rotation,material,accent){
@@ -135,7 +138,7 @@ const revealGroups=[
 ];
 const revealParts=revealGroups.flat();
 
-export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'4',
+export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'5',
   environment:{clearColor:'#172238',ambient:'#6c7694',exposure:1.05,toneMapping:'aces',fog:{type:'linear',color:'#8f91a7',start:38,end:125}},
   materials:{stone:{diffuse:'#d8b997'},paper:{diffuse:'#f9dfba'},gold:{diffuse:'#ce9d53',gloss:.45},coral:{diffuse:'#d67a69'},ink:{diffuse:'#273144'},indigo:{diffuse:'#4c5276'},rock:{diffuse:'#717b91'},teal:{diffuse:'#548e89'},rose:{diffuse:'#c87678'},leaf:{diffuse:'#477765'},mint:{diffuse:'#91d2af',emissive:'#60a990',emissiveIntensity:.25},wood:{diffuse:'#795755'},glow:{diffuse:'#ffe5ad',emissive:'#ffc97c',emissiveIntensity:1.25},pinkGlow:{diffuse:'#ffa58c',emissive:'#e88c70',emissiveIntensity:.8},redGlow:{diffuse:'#fa9f78',emissive:'#fc705c',emissiveIntensity:1.25},cloud:{diffuse:'#efd7cc'},haze:{diffuse:'#bda8bc'},dark:{diffuse:'#20283a'},prison:{diffuse:'#35445d'},blueGlow:{diffuse:'#9fdcff',emissive:'#76bfff',emissiveIntensity:1.8},void:{diffuse:'#070b12'}},
   assets:{robot:{type:'container',src:'/assets/quaternius-animated-robot.glb',transform:{position:[0,-.08,0],scale:[.52,.52,.52]},animations:{idle:'RobotArmature|Robot_Standing',run:'RobotArmature|Robot_Running',yes:'RobotArmature|Robot_Yes',no:'RobotArmature|Robot_No',wave:'RobotArmature|Robot_Wave'},defaultAnimation:'idle'}},
@@ -232,10 +235,19 @@ function opening(beat){
 function present(s,prev){
   if(typeof s==='number')return opening(s);
   const p=missionBase();
+  // The shared control owns the actor between authored chapter checkpoints.
+  // Puzzle renders must not snap the visible actor back to the original spawn.
+  delete p.transforms.zip;
+  if(s.round===0&&s.status!=='success'){
+    p.show=p.show.filter(id=>!['star','sun'].includes(id));
+    p.hide.push('star','sun');
+  }
+  p.playerCheckpoint={id:s.round===0?'repair-chamber':'route-corridor',position:s.round===0?[0,0,-28]:[0,0,-43]};
+  p.hide.push('route-floor','route-wall--1','route-wall-1','friend-signal');
   if(s.powered)p.show.push('zip-voice','socket-core','socket-ring');
   for(let i=0;i<(s.pieces||0);i++)p.show.push(`words-piece-${i}`);
   const tutorialComplete=s.round===1||s.status==='success';
-  if(tutorialComplete){p.transforms['moon-door']={position:[0,7.8,0]};p.show.push('tutorial-route-open','zip-voice');}
+  if(tutorialComplete){p.transforms['moon-door']={position:[0,7.8,0]};p.show.push('tutorial-route-open','zip-voice','route-floor','route-wall--1','route-wall-1');}
   if(s.round===1&&s.status!=='success')p.show.push('notice-old','notice-parade','notice-today');
   if(s.status==='wrong'){
     p.show.push('wrong-ring');p.animations.zip='no';
@@ -247,7 +259,7 @@ function present(s,prev){
       p.show.push('reunion-ring','tutorial-route-open');p.animations.zip='yes';
       if(prev?.status!=='success')p.timeline={duration:2500,moves:[{entity:'moon-door',from:[0,0,0],to:[0,7.8,0],duration:1200}],cues:[{at:1250,patch:{show:['tutorial-route-open'],animations:{zip:'yes'}}}],finish:{animations:{zip:'idle'}}};
     }else{
-      p.show.push('route-glow','tutorial-route-open');p.transforms['star-door']={position:[0,6.5,0]};p.animations.zip='yes';
+      p.show.push('route-glow','tutorial-route-open','friend-signal');p.transforms['star-door']={position:[0,6.5,0]};p.animations.zip='yes';
       if(prev?.status!=='success')p.timeline={duration:2600,moves:[{entity:'star-door',from:[0,0,0],to:[0,6.5,0],duration:1300}],finish:{animations:{zip:'yes'}}};
     }
   }
@@ -276,7 +288,7 @@ export const controlTutorialSpec={
       success:'protagonist position changed',
       title:'You control Zip now.',
       instructions:{
-        desktop:'Use the highlighted WASD / arrow movement controls. Make Zip take a few steps.',
+        desktop:'Press W, A, S, D or the arrow keys on your keyboard. Make Zip take a few steps.',
         touch:'Move the highlighted stick at bottom left. Make Zip take a few steps. Arrow keys work too.'
       }
     },
@@ -367,13 +379,13 @@ export const speechRepairTutorialSpec={
 export const openingSpec={
   id:'bellweather.opening.v6',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
   scenes:[
-    {beat:0,audioPhase:'home',kicker:'BELLWEATHER · LANTERN NIGHT',title:'One lantern. Three friends.',body:'Your friend made this for the three of you. Send it into the sky.',
+    {beat:0,audioPhase:'home',kicker:'BELLWEATHER · LANTERN NIGHT',title:'One lantern. Three friends.',body:'You are Zip. Mira made this lantern for the three of you. Send it into the sky.',
       direction:{kind:'establishing',channels:['world','character','camera','interaction','narration'],worldAfter:'The shared lantern is launched and the three friends have visibly acted together.'},
       action:{target:'release-lantern',label:'Send up our lantern',patch:{show:['friendship-lantern'],animations:{zip:'wave'},timeline:{duration:2800,moves:[{entity:'friendship-lantern',from:[-.8,1.1,10.5],to:[0,4.7,8],duration:2600},{entity:'singer',from:[3.8,0,1],to:[2.4,0,1],duration:1000},{entity:'friend-a',from:[-3,0,1],to:[-1.8,0,1],duration:1000}],finish:{animations:{zip:'yes'}}}}},
       success:{body:'Three lights rise above your home.',dialogue:'“Same time next year. All three of us.”'}},
     {beat:1,audioPhase:'danger',audioCue:'capture',kicker:'ABOVE THE SQUARE',title:'A shadow over Bellweather.',body:'A black machine rises above the tower. Red light reaches into the sky.',
       direction:{kind:'antagonist-action',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','vfx','audio','narration'],worldAfter:'The Warden is visibly acting on the sky while Bellweather reacts.'}},
-    {beat:2,audioPhase:'danger',audioCue:'rupture',kicker:'THUNDER ANSWERS',title:'The sky cracks open.',body:'The tear opens where the Warden reached—and the square is ripped apart.',
+    {beat:2,audioPhase:'danger',audioCue:'rupture',kicker:'THUNDER ANSWERS',title:'The sky cracks open.',body:'The tear opens where the Warden reached. Zip and the others are pulled into the dark.',
       direction:{kind:'major-event',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','lighting','vfx','audio','narration'],worldAfter:'Bellweather is disrupted and Zip plus both friends are gone from the square.'}},
     {beat:3,audioPhase:'danger',kicker:'SOMEWHERE ELSE',title:'Silence.',body:'Zip wakes alone. No market. No friends. Bellweather is gone.',
       direction:{kind:'transition',channels:['world','character','camera','lighting','narration'],worldAfter:'Zip is isolated in an unknown dark location.'}},

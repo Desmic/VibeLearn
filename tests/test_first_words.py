@@ -2,10 +2,11 @@ import copy
 import json
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 from uuid import uuid4
 from app import service, word_machine, first_words
-from app.content import freeze
+from app.content import freeze, CONTENT, MISSION_INDEX
 from app.storage import migrate, transaction
 
 FIRST=['connect','scan-moon']+['step']*4+['send']
@@ -13,6 +14,9 @@ EXIT=['next','scan-star','predict-star']+['step']*4+['send']
 
 class FirstWordsTests(unittest.TestCase):
     def setUp(self):
+        # Run the original contract unchanged against an explicitly pinned v1.
+        self.content_patch=patch.dict(MISSION_INDEX,{first_words.MISSION_ID:first_words.build_content_v1(CONTENT)})
+        self.content_patch.start();self.addCleanup(self.content_patch.stop)
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
         self.path=Path(self.tmp.name)/'test.db';migrate(self.path)
         _,self.learner=service.create_session(self.path)
@@ -132,5 +136,116 @@ class FirstWordsTests(unittest.TestCase):
         _,other=service.create_session(self.path);body['expected_revision']=self.attempt['revision']
         with self.assertRaises(service.DomainError) as error:service.command(self.path,other,'save',body)
         self.assertEqual(error.exception.code,'NOT_FOUND')
+
+class FirstWordsV2Tests(unittest.TestCase):
+    action = FirstWordsTests.action
+
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
+        self.path=Path(self.tmp.name)/'test.db';migrate(self.path)
+        _,self.learner=service.create_session(self.path)
+        self.attempt=service.command(self.path,self.learner,'start',{'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':first_words.MISSION_ID})
+
+    def relay(self,context='yard',prediction='yard',input_prediction='growing'):
+        for move in ['relay-context-'+context,'relay-predict-'+prediction,'relay-input-'+input_prediction,'relay-run']:
+            self.action(move)
+
+    def test_gate_presentation_and_actions_use_pinned_v2_rule_effects(self):
+        snapshot=freeze('LEARN',first_words.MISSION_ID)
+        rules=snapshot['word_machine']['rules']
+        # This frozen variant appends two pieces per step and needs a full
+        # sentence before send. Replaying against today's v1 rules would show
+        # only 'Open the' and incorrectly omit the legal send action.
+        rules['actions']['step']['effects'][0]['value']=2
+        rules['actions']['step']['when']=first_words.both(
+            rules['actions']['step']['when'],
+            {'op':'lt','left':first_words.field('pieces'),'right':3})
+        view=word_machine.replay(snapshot,{'moves':['connect','scan-moon','step','step']})
+        self.assertEqual(view['pieces'],4)
+        self.assertEqual(view['output'],['Open','the','Moon','gate'])
+        self.assertEqual(view['context'][-4:],view['output'])
+        self.assertIn('send',view['available_actions'])
+        self.assertNotIn('step',view['available_actions'])
+        after=word_machine.replay(snapshot,{'moves':['connect','scan-moon','step','step','send']})
+        self.assertEqual(after['status'],'success')
+        self.assertIn('next',after['available_actions'])
+
+    def test_new_case_required_and_choices_locked_before_feedback(self):
+        self.assertEqual(self.attempt['snapshot']['word_machine']['version'],'first-words-2')
+        for move in FIRST+EXIT:self.action(move)
+        self.assertFalse(self.attempt['word_machine_state']['complete'])
+        with self.assertRaises(service.DomainError):self.action('finish')
+        self.action('relay-start');self.action('relay-context-yard')
+        with self.assertRaises(service.DomainError):self.action('relay-run')
+        self.action('relay-predict-loft')
+        with self.assertRaises(service.DomainError):self.action('relay-context-loft')
+        with self.assertRaises(service.DomainError):self.action('relay-predict-yard')
+        with self.assertRaises(service.DomainError):self.action('relay-run')
+        self.action('relay-input-original')
+        self.assertEqual(self.attempt['word_machine_state']['relay_output'],[])
+        self.attempt=service.state(self.path,self.learner)['attempt']
+        self.assertEqual(self.attempt['word_machine_state']['relay_prediction'],'loft')
+        self.action('relay-run')
+        self.assertEqual(self.attempt['word_machine_state']['relay_output'],['Meet','at','Yard'])
+        self.action('relay-finish');self.action('finish')
+        result=self.attempt['assessment'];observation=result['relay_transfer_observations']
+        self.assertFalse(observation['prediction_matches_supplied_context'])
+        self.assertFalse(observation['input_prediction_correct'])
+        self.assertTrue(observation['first_decisions_before_case_feedback'])
+        self.assertEqual(result['mastery'],'unknown');self.assertEqual(result['independence'],'assisted')
+        self.assertEqual(observation['assistance'],'unknown')
+
+    def test_recovery_cannot_replace_first_changed_case_choices(self):
+        for move in FIRST+EXIT+['relay-start']:self.action(move)
+        self.relay('loft','loft','original')
+        with self.assertRaises(service.DomainError):self.action('relay-finish')
+        self.attempt=service.state(self.path,self.learner)['attempt']
+        self.relay();self.action('relay-finish');body=self.action('finish')
+        observation=self.attempt['assessment']['relay_transfer_observations']
+        self.assertEqual(observation['context_choice'],'loft')
+        self.assertFalse(observation['relevant_context'])
+        self.assertTrue(observation['prediction_matches_supplied_context'])
+        self.assertFalse(observation['input_prediction_correct'])
+        self.assertEqual(observation['final_context'],'yard')
+        self.assertEqual(service.command(self.path,self.learner,'submit',body),self.attempt)
+        with transaction(self.path) as db:
+            self.assertEqual(db.execute('SELECT count(*) FROM evidence').fetchone()[0],1)
+            with self.assertRaises(Exception):db.execute("UPDATE evidence SET result='{}'")
+
+    def test_unobserved_changed_case_is_not_correct_and_ids_are_preserved(self):
+        from app.assessment import evaluate
+        snapshot=freeze('LEARN',first_words.MISSION_ID)
+        old=first_words.build_content_v1(CONTENT)
+        for name in ('activity','frame','binding','rubric'):
+            self.assertEqual(snapshot[name]['id'],old[name]['id'])
+            self.assertEqual(snapshot[name]['revision'],2)
+        self.assertEqual(snapshot['family_id'],old['family_id'])
+        result=evaluate(snapshot,self.attempt['response'],[])
+        observation=result['relay_transfer_observations']
+        self.assertIsNone(observation['relevant_context'])
+        self.assertIsNone(observation['input_prediction_correct'])
+        self.assertFalse(observation['first_decisions_before_case_feedback'])
+        self.assertEqual(result['mastery'],'unknown')
+
+    def test_v1_mid_command_resumes_under_v2_catalog_with_identical_result(self):
+        from app.assessment import evaluate
+        _,self.learner=service.create_session(self.path)
+        with patch.dict(MISSION_INDEX,{first_words.MISSION_ID:first_words.build_content_v1(CONTENT)}):
+            self.attempt=service.command(self.path,self.learner,'start',{'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':first_words.MISSION_ID})
+            for move in FIRST+EXIT[:4]:self.action(move)
+        saved_snapshot=copy.deepcopy(self.attempt['snapshot'])
+        self.attempt=service.state(self.path,self.learner)['attempt']
+        self.assertEqual(self.attempt['snapshot'],saved_snapshot)
+        self.assertEqual(self.attempt['snapshot']['word_machine']['version'],'first-words-1')
+        for move in EXIT[4:]:self.action(move)
+        self.assertTrue(self.attempt['word_machine_state']['complete'])
+        self.assertNotIn('relay-start',self.attempt['word_machine_state']['available_actions'])
+        self.action('finish')
+        self.assertNotIn('relay_transfer_observations',self.attempt['assessment'])
+        with transaction(self.path) as db:
+            row=db.execute('SELECT capsule,result FROM evidence WHERE attempt_id=?',(self.attempt['id'],)).fetchone()
+        capsule=json.loads(row['capsule'])
+        recomputed=evaluate(capsule['snapshot'],capsule['response'],capsule['assistance'])
+        self.assertEqual(recomputed,json.loads(row['result']))
 
 if __name__=='__main__':unittest.main()

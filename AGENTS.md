@@ -1,6 +1,6 @@
 # vibeLearn — agent instructions
 
-**Current gate — 19 September 2026:** Frozen critic candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26`; next product step is context-separated critic execution/ingestion, not another implementation chunk. Later docs-only `main` commits do not replace that candidate. Render remains on the rejected deployed runtime; no Level 2.
+**Current gate — 19 September 2026:** Read `docs/STATE.md` for exact candidate and local repair status; historical candidate headers are not authority over later user direction. Native computer/browser-use agents must actively play generated games now. Use one fresh-context GPT-6 Astra reviewer across all critic lanes; art/world direction is mandatory. Follow docs/ASTRA-REVIEW-WORKFLOW.md. Use current Codex usage; future Terminal PM owns orchestration. Tests, screenshots and recordings collaborate with active play; they cannot replace it. Read `docs/NATIVE-COMPUTER-USE-CRITICS.md`. Future Terminal PM integration remains planned, not a prerequisite for this gate. No Level 2 or deployment promotion without the existing review gates.
 
 Read `docs/STATE.md` first. **`main` is the canonical development branch.** Do not create a new branch for routine iteration, review, research, or fixes. Use another branch only when isolation is materially necessary, and merge it back into `main` promptly. `deploy/render-supabase` is the pinned deployment branch and may intentionally lag `main`. Older `game/*` and `phase1/*` branches are historical unless the user explicitly revives one.
 

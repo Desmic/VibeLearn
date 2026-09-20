@@ -39,6 +39,9 @@ export function makeWorldPackage(spec,present,{cinematic=false}={}){
         if(!engine.available)return;
         cancelAnimationFrame(frame);transition=null;timeline=null;
         engine.applyPatch(patch);
+        if(mode==='mission'&&patch.playerCheckpoint&&!engine.setPlayerCheckpoint(patch.playerCheckpoint)){
+          throw new Error('The authored player checkpoint is outside the playable world.');
+        }
         if(patch.timeline){
           const plan=patch.timeline;
           if(reducedMotion){

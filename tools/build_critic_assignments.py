@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from tools.native_play_execution import validate_requirements
 
 PASS_SPECS={
     "cold_observer":{
@@ -19,6 +20,25 @@ PASS_SPECS={
             "What changes persist afterward?",
             "At the first playable handoff, who do you control and what should you do next?",
             "List anything understood only because of explanatory text."
+        ]
+    },
+    "art_world_direction":{
+        "requires":[["cold_observer_report"],["interactive_trace"]],
+        "allowed_modalities":["cold_observer_report","interactive_trace","screenshot","motion_video","runtime_trace"],
+        "suite_roles":["opening","tutorial","controls","chapter","post-ci"],
+        "forbidden_context":["creator defense","prior numeric scores"],
+        "output_modality":"critic_report",
+        "questions":[
+            "Use the cold observer's actual perception before interpreting design intent; which visual meanings were missing?",
+            "Does world scale give characters, props, routes and events believable proportions?",
+            "Do negative space, prop density and landmark spacing give the playable world breathing room?",
+            "Does focal hierarchy make the important character, event and next action readable without explanatory labels?",
+            "Are silhouettes distinct and landmarks recognizable from multiple playable viewpoints?",
+            "Does interactive traversal expose intersecting geometry, floating props, clipping or disconnected visible routes?",
+            "Does camera movement preserve composition, protagonist visibility and readable depth rather than hiding problems?",
+            "At phone sizes, do framing, spatial relationships, controls and world landmarks remain legible?",
+            "Do materials, lighting, color, geometry and motion form one cohesive art direction across the opening, tutorial and mission?",
+            "Attempt an alternate-angle or scale counterexample; keep any unobserved dimension unassessed."
         ]
     },
     "cinematic_causality":{
@@ -48,7 +68,7 @@ PASS_SPECS={
     },
     "physicality":{
         "requires":[["interactive_trace"]],
-        "allowed_modalities":["interactive_trace","runtime_trace","screenshot"],
+        "allowed_modalities":["interactive_trace","runtime_trace","screenshot","motion_video"],
         "suite_roles":["controls"],
         "forbidden_context":["source-code collision intent"],
         "output_modality":"critic_report",
@@ -146,7 +166,11 @@ def flatten_evidence(index):
             copy=dict(item);copy["suite"]="post-ci";copy["suite_role"]="post-ci";items.append(copy)
     return items
 
-def build_assignments(index):
+def build_assignments(index,native_requirements=None):
+    if native_requirements is None:
+        native_requirements={}
+    if not isinstance(native_requirements,dict) or set(native_requirements)-PASS_SPECS.keys():
+        raise ValueError("native requirements must map known critic passes")
     candidate=index.get("candidate_sha")
     evidence=flatten_evidence(index)
     by_modality={}
@@ -184,6 +208,8 @@ def build_assignments(index):
             "expected_output_modality":spec["output_modality"],
             "instruction":"Report observations before interpretation. If required evidence is missing or ambiguous, return unresolved rather than substituting weaker evidence."
         }
+        if name in native_requirements:
+            assignment["execution_requirements"]=validate_requirements(native_requirements[name])
         digest_payload={key:value for key,value in assignment.items() if key!="assignment_id"}
         assignment["assignment_id"]="sha256:"+hashlib.sha256(
             json.dumps(digest_payload,sort_keys=True,separators=(",",":")).encode("utf-8")
@@ -195,11 +221,14 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--index",type=Path,required=True)
     parser.add_argument("--output-dir",type=Path,required=True)
+    parser.add_argument("--native-requirements",type=Path,
+                        help="JSON mapping critic passes to required native GUI execution contracts")
     args=parser.parse_args()
     try:
         index=load_index(args.index)
-        assignments=build_assignments(index)
-    except ValueError as exc:
+        native=json.loads(args.native_requirements.read_text(encoding="utf-8")) if args.native_requirements else None
+        assignments=build_assignments(index,native)
+    except (ValueError,OSError) as exc:
         print(json.dumps({"status":"invalid_critic_assignment","error":str(exc)}))
         return 2
     args.output_dir.mkdir(parents=True,exist_ok=True)

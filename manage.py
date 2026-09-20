@@ -11,7 +11,7 @@ BROWSER_GROUPS = {
     "foundation": ["tests.level1_entry_browser", "tests.renderer_lifecycle_browser"],
     "first-words-opening": ["tests.first_words_opening_browser"],
     "first-words-tutorial": ["tests.control_practice_browser"],
-    "first-words-controls": ["tests.level1_controls_browser"],
+    "first-words-controls": ["tests.level1_controls_browser", "tests.physicality_browser"],
     "first-words-chapter": ["tests.level1_chapter_browser"],
     "first-words-readability": ["tests.first_words_readability_browser"],
     "first-words-lifecycle": ["tests.level1_lifecycle_browser"],
@@ -20,6 +20,7 @@ BROWSER_GROUPS = {
         "tests.first_words_opening_browser",
         "tests.control_practice_browser",
         "tests.level1_controls_browser",
+        "tests.physicality_browser",
         "tests.level1_chapter_browser",
         "tests.first_words_readability_browser",
         "tests.level1_lifecycle_browser",
@@ -57,7 +58,7 @@ def main():
         if not compileall.compile_dir(ROOT / "tests", quiet=1):
             return 1
         for script in sorted((ROOT / "web").glob("*.js")):
-            subprocess.run(["node", "--input-type=module", "--check"], input=script.read_text(encoding="utf-8"), text=True, check=True)
+            subprocess.run(["node", "--input-type=module", "--check"], input=script.read_text(encoding="utf-8"), text=True, encoding="utf-8", check=True)
         # Parsing alone cannot catch a generated/reused world package that refers
         # to a missing material/entity/camera. Validate the active engine-neutral
         # package before the expensive Chromium matrix so package compatibility
@@ -68,7 +69,7 @@ import {validateWorldSpec} from './web/world-spec.js';
 validateWorldSpec(worldSpec);
 console.log('Active WorldSpec validated.');
 """
-        subprocess.run(["node", "--input-type=module"], input=world_validation, text=True, check=True, cwd=ROOT)
+        subprocess.run(["node", "--input-type=module"], input=world_validation, text=True, encoding="utf-8", check=True, cwd=ROOT)
         from app.manifest import manifest
         (ROOT / "artifacts").mkdir(exist_ok=True)
         (ROOT / "artifacts" / "build-manifest.json").write_text(json.dumps(manifest(), indent=2), encoding="utf-8")

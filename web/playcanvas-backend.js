@@ -14,6 +14,18 @@ const TONE_MAPPINGS={
   aces:pc.TONEMAP_ACES,aces2:pc.TONEMAP_ACES2,neutral:pc.TONEMAP_NEUTRAL
 };
 
+// One snapshot per camera solve, not per ray sample. A new solve observes moved
+// or hidden geometry; no bounds are cached across frames or scene changes.
+export function snapshotCameraBlocker(entityIds,boundsForEntity){
+  const solids=[];
+  for(const id of entityIds){
+    const bounds=boundsForEntity(id);
+    if(bounds&&bounds.collider.blocksCamera!==false)solids.push({min:[...bounds.min],max:[...bounds.max]});
+  }
+  return (x,y,z)=>solids.some(({min,max})=>
+    x>min[0]-.15&&x<max[0]+.15&&y>min[1]-.15&&y<max[1]+.15&&z>min[2]-.15&&z<max[2]+.15);
+}
+
 function unavailable(error){
   const message=error instanceof Error?error.message:String(error);
   return {available:false,error:message,setState(){},applyPatch(){},setPaused(){},replay(){},async pickEntityIdsAt(){return[];},async pickEntityAt(){return null;},stats(){return{available:false,error:message,engine:'playcanvas'};},dispose(){}};
@@ -156,6 +168,7 @@ class PlayCanvasWorld {
         isEntityEnabled:id=>this._entityVisible(this.entities.get(id)),
         isPlayerBlocked:(x,y,z,body)=>this._playerBlocked(x,y,z,body),
         isCameraBlocked:(x,y,z)=>this._cameraBlocked(x,y,z),
+        getCameraBlocker:()=>snapshotCameraBlocker(this.entities.keys(),id=>this._colliderBounds(id)),
         setAvatar:(position,yaw)=>{const entity=this.entities.get(this.spec.player.entity);entity?.setLocalPosition(...position);entity?.setLocalEulerAngles(0,yaw,0);},
         setCamera:(position,target,fov)=>{this.camera.setPosition(...position);this.camera.lookAt(...target);if(fov)this.camera.camera.fov=fov;},
         setMoving:value=>this._setPlayerMoving(value)
@@ -197,12 +210,7 @@ class PlayCanvasWorld {
   }
 
   _cameraBlocked(x,y,z){
-    for(const id of this.entities.keys()){
-      const bounds=this._colliderBounds(id);if(!bounds||bounds.collider.blocksCamera===false)continue;
-      const {min,max}=bounds;
-      if(x>min[0]-.15&&x<max[0]+.15&&y>min[1]-.15&&y<max[1]+.15&&z>min[2]-.15&&z<max[2]+.15)return true;
-    }
-    return false;
+    return snapshotCameraBlocker(this.entities.keys(),id=>this._colliderBounds(id))(x,y,z);
   }
 
   _cameraImpulse(value={}){
@@ -451,6 +459,7 @@ class PlayCanvasWorld {
 
   setControlMode(mode,key){this.controls?.setMode(mode,key);}
   getPlayerView(){return this.controls?.snapshot()||null;}
+  setPlayerCheckpoint(value){return this.controls?.setCheckpoint(value)||false;}
   restorePlayerView(value){this.controls?.restore(value);}
   bindMarkers(provider){this.markerProvider=provider;}
   _updateMarkers(){

@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 
 from tools.critic_execution_receipt import validate_receipt
+from tools.native_play_execution import validate_native_execution
 
 HEX40=re.compile(r"^[0-9a-f]{40}$")
 PASS_RESULT_MODALITY={
@@ -40,6 +41,18 @@ def validate_result(assignment:dict,result:dict,execution_receipt:dict|None=None
     require(result.get("verdict") in ALLOWED_VERDICTS,"invalid critic verdict")
     require(isinstance(execution_receipt,dict),"critic execution receipt is required")
     normalized_receipt=validate_receipt(assignment,execution_receipt)
+    native = None
+    if "execution_requirements" in assignment:
+        native = validate_native_execution(
+            assignment["execution_requirements"], normalized_receipt.get("native_execution"),
+            candidate_sha=candidate, assignment_id=assignment_id,
+            session_id=normalized_receipt["session_id"])
+        if result["verdict"] == "pass":
+            require(native["input_count"] > 0, "native pass needs actual input")
+            require(native["successful_input_count"] > 0, "native pass needs a successful input dispatch")
+            require(not native["missing_checkpoints"], "native pass is missing checkpoints")
+            require(not native["capture_gaps"], "native pass is missing required capture coverage")
+            require(native["observed_after_last_input"], "native pass needs final observation")
     capsule_id=normalized_receipt.get("capsule_id")
     require(isinstance(capsule_id,str) and re.fullmatch(r"sha256:[0-9a-f]{64}",capsule_id),
             "sealed critic capsule is required")
@@ -126,6 +139,7 @@ def validate_result(assignment:dict,result:dict,execution_receipt:dict|None=None
         "uncertainties":result["uncertainties"],
         "counterexample_attempt":result["counterexample_attempt"],
         "blockers":blockers,
+        **({"native_coverage": native} if native is not None else {}),
     }
 
 def main():

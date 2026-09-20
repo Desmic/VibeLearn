@@ -1,5 +1,18 @@
 # vibeLearn — delivery workflow
 
+**Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer
+across all critic lanes, including mandatory art/world direction, with actual GUI
+play and video recordings as complementary evidence. Preserve separate lane
+judgments and cold observations before intent. Use the existing Codex session for
+now; future Terminal PM owns orchestration. Luna-first wording below is historical.
+See `docs/ASTRA-REVIEW-WORKFLOW.md`. Unsupported evidence remains unassessed.
+
+**Latest user clarification — 19 September 2026:** Require actual agent-directed
+computer/browser play for player-experience criticism. The agent observes visible
+UI, chooses actions and adapts; fixed scripts and artifact-only review are supporting
+evidence. Use Luna for suitable bounded tasks, Astra when insufficient. Apply
+`docs/NATIVE-COMPUTER-USE-CRITICS.md` now; future Terminal PM dispatch stays deferred.
+
 **Authoritative execution gate — 19 September 2026:** Do not create another game candidate merely to keep coding. After evidence-backed marker and renderer repairs, the verified critic target is `471de882a01690fa50ac39455ad603fffd39cfdc` (run `35440122451`, bundle `10583163540`). The next product step is genuinely context-separated critic execution/ingestion via `docs/CRITIC-HANDOFF.md`; implementation resumes only for an evidence-backed blocker. Render remains on rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5`. Level 2 and live Terminal PM integration remain blocked. This supersedes conflicting next-chunk wording below.
 
 Read `AGENTS.md` and the active checkpoint in `docs/STATE.md`. Detailed architecture,

@@ -1,5 +1,41 @@
 # Learning OS — incremental implementation plan 2.0
 
+**Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer
+across all critic lanes, including mandatory art/world direction, with actual GUI
+play and video recordings as complementary evidence. Preserve separate lane
+judgments and cold observations before intent. Use the existing Codex session for
+now; future Terminal PM owns orchestration. Luna-first wording below is historical.
+See `docs/ASTRA-REVIEW-WORKFLOW.md`. Unsupported evidence remains unassessed.
+
+**System-first priority — 20 September 2026 user clarification:** Build reusable
+creation/review/execution boundaries; the current game is a proof case. The
+Luna experiments exposed missing capture coverage despite correct conclusions.
+The current bounded slice therefore adds task-defined capture modality and
+action-relative timing checks to the existing guard/receipt/result pipeline.
+Success: missing pre-action screenshots block dispatch, incomplete evidence
+blocks pass, and unresolved results expose repairable coverage gaps. Do not
+substitute more game-specific examples for completing this system boundary.
+Live provider/Terminal PM dispatch still requires its configured execution policy.
+
+**Latest priority — 19 September 2026 user clarification:** Native computer/browser-
+use critic agents are part of the general system now. Update and follow
+`docs/NATIVE-COMPUTER-USE-CRITICS.md`: bounded Luna play, evidence-backed Astra
+escalation, active UI actions plus captures/tests, and separate independence
+audits. Next system slice is an execution-mode/capability/action-evidence contract
+in the existing critic pipeline. Future Terminal PM integration remains planned;
+it must not defer current interactive play or lead to game-specific evaluator logic.
+
+**Observed repair scope — 19 September 2026:** Informed browser play during
+evidence preparation reproduced a follow camera entering the protagonist near
+a side wall, plus a hint request that saved without showing help. Repair shared
+camera clearance using authored control/body profiles (including portrait
+framing), refresh collision bounds once per draw, and display the saved hint.
+Success requires actual desktop/phone replay, recovery away from walls, visible
+hint persistence, unchanged assessment semantics, synthetic alternate-layout
+tests, and integrated verification. Record continuous physicality and expanded
+learning evidence for a replacement exact candidate; do not promote the old
+candidate's critic results to the modified runtime.
+
 **Independent evidence checkpoint — 19 September 2026:** Fresh, audited CLI
 learning and physicality reviews of `471de882...` were ingested as unresolved.
 Next bounded work is evidence repair: pinned learning concept/scope, intermediate

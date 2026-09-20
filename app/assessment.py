@@ -43,7 +43,7 @@ def independence_label(response, assistance):
 
 
 def evaluate(snapshot, response, assistance):
-    if snapshot['policies']['assessment'] == 'first-words-1':
+    if snapshot['policies']['assessment'] in ('first-words-1', 'first-words-2'):
         from app.first_words import evaluate as evaluate_first_words
         return evaluate_first_words(snapshot, response, independence_label(response, assistance))
     if snapshot["policies"]["assessment"] == "word-machine-v1":

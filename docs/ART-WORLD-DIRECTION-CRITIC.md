@@ -1,5 +1,12 @@
 # Art and world-direction critic
 
+**Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer
+across all critic lanes, including mandatory art/world direction, with actual GUI
+play and video recordings as complementary evidence. Preserve separate lane
+judgments and cold observations before intent. Use the existing Codex session for
+now; future Terminal PM owns orchestration. Luna-first wording below is historical.
+See `ASTRA-REVIEW-WORKFLOW.md`. Unsupported evidence remains unassessed.
+
 **Active from 17 September 2026.** This is an independent product-review discipline for VibeLearn game candidates. It complements story, gameplay and learning critics; it does not replace them and it does not determine user acceptance.
 
 The September 17 user review exposed failures that the previous critic pass missed: a congested play area, duplicate/ambiguous character presentation, a character intersecting a table, and attractive imagery that did not yet become a world someone wanted to play in. Those are not minor rendering bugs; they are art/world-direction failures.
@@ -179,3 +186,12 @@ For any opening/character review, include:
 3. a note describing the world's normal background activity before disruption;
 4. a target-audience motion read ("calm", "playful", "creepy", "twitchy",
    "mechanical", etc.) and whether that matches intent.
+
+
+## Executable lane
+
+`tools/build_critic_assignments.py` now emits `art_world_direction`, requiring a
+cold observer report plus interactive trace. Screenshots alone cannot satisfy it.
+`tools/ingest_critic_results.py` includes this lane in the required release order.
+One fresh Astra reviewer may execute it alongside the other lanes; it retains
+its own evidence, findings and verdict. No extra model instance is required.

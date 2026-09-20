@@ -1,5 +1,13 @@
 # Critic handoff — evidence-first pipeline
 
+**Interactive execution requirement — 19 September 2026:** Use
+`NATIVE-COMPUTER-USE-CRITICS.md`. Provision a pinned runnable preview and actual
+computer/browser tools as well as the permitted evidence capsule. An artifact-
+ready assignment is not automatically live-play ready. Preflight tools/context,
+record actions and observations, use Luna for bounded tasks and escalate to Astra
+when needed. Evidence-only CLI review remains supplementary for interactive
+criteria. The current receipt schema does not attest live play; do not infer it.
+
 **Active from 18 September 2026.**
 
 ## Current frozen execution target
