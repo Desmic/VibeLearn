@@ -18,6 +18,26 @@ are evidence history, not a prohibition on the newly authorized work.
 
 ## Active repair and verification results — 20 September 2026
 
+Review infrastructure follow-up: the user-authorized fresh top-level projectless
+Astra task has browser access and has demonstrated actual movement, camera/menu
+and tutorial inputs. Child-provider attachment remains unresolved; the top-level
+path is a verified workaround. The bounded cold opening/tutorial review completed
+on disposable port 8067, runtime candidate `817598c`, reaching Begin Level 1 with
+20 GUI inputs and 30 screenshots. It found overlapping Scan/Speak world markers,
+caption-dependent meaning, dark silhouette loss and panel dominance; no progression
+blocker. Native-run recording/listening remain unavailable. See the media capability
+experiment for the source task and scope. New supervised bridge runs
+require a scoped preflight report; recording does not qualify media inspection.
+Build and 365 application tests pass (seven skips). No game acceptance upgrade.
+
+Media/browser capability research is recorded in
+`experiments/20260920-media-review-capabilities.md`: no documented Astra audio/video
+input flag; Gemini video/audio and GPT-Audio-1.5 are unbenchmarked supporting-tool
+candidates, not enabled providers. Parent IAB blank-page creation works. Reviewer
+provider inventory remains empty and blank-page creation fails both before and
+after a successful CUA reset. Host-side cause unresolved; no game/server dependency.
+No game readiness score changes follow from this research.
+
 Latest bounded follow-up after local `1f00f30`: the opening now shows an actual
 flower delivery using existing workers and timeline primitives, with persistent
 handoff and correct rewind restoration. Native review found and repaired a shared

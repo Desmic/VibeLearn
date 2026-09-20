@@ -14,13 +14,19 @@ from pathlib import Path
 
 from tools.native_play_execution import NativePlayGuard, validate_native_execution, capture_repair_steps
 from tools.native_capture_inbox import MAX_CAPTURE_BYTES, screenshot_extension
+from tools.native_preflight import assess_preflight
 
 
 async def supervise(config, root, reader, emit, capture_root=None):
+    preflight = assess_preflight(config["requirements"], config["identity"], config.get("preflight"))
+    if not preflight["ready"]:
+        raise ValueError("native preflight incomplete: " + ", ".join(preflight["missing_checks"]))
+    # Ignore caller-asserted capability names; derive them from scoped probe results.
+    identity = dict(config["identity"], capabilities=preflight["verified_capabilities"])
     root = Path(root)
     root.mkdir(parents=True, exist_ok=False)
     (root / "config.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
-    guard = NativePlayGuard(config["requirements"], **config["identity"])
+    guard = NativePlayGuard(config["requirements"], **identity)
     observations = 0
     capture_root = Path(capture_root).resolve() if capture_root is not None else None
 

@@ -14,6 +14,12 @@ reintroducing a cheaper model for a narrow task.
 Use the existing signed-in Codex app's subagent capability, with Astra and
 `fork_turns="none"`. This starts without the parent's conversation history.
 It does not erase system/tool instructions or create filesystem isolation.
+On this host the child session can lack a browser provider even when the parent
+has one. A user-authorized fresh top-level projectless Astra task successfully
+passed blank-page creation, accessibility and screenshot checks on 20 September.
+Use that verified session path when child-provider preflight fails; actual game
+input must still be checked. Creating a new user-owned task requires the user's
+explicit request. Do not fork implementation history into the reviewer.
 Provide only a minimal public task packet: exact build, disposable entry URL,
 audience, scope, checkpoints, tools and action/time ceilings. No winning actions,
 source, story treatment, prior findings or scores before cold observations.
@@ -55,6 +61,21 @@ at sufficient density for the claim, or another verified playback observation
 capability. Sparse stills cannot certify continuous motion. Audio quality requires
 actual listening; captions, source and amplitude statistics cannot substitute.
 Record exactly what was inspected and flag unsupported lanes to the user.
+
+Capability research and the proposed media calibration experiment are recorded in
+`experiments/20260920-media-review-capabilities.md`. No documented Astra flag enables
+direct audio/video input. A future qualified media analyzer may supply timestamped
+observations to the single Astra reviewer; distinguish that indirect evidence from
+the reviewer's own perception. This does not authorize external inference.
+
+Preflight the actual reviewer session, not just the parent: provider discovery,
+tab creation, visible input response, screenshots, capture, temporal inspection and
+audio inspection are separate checks. On unavailable browser providers, retain the
+exact failure and allow one documented recovery before stopping that review run.
+An empty tab list is normal; an empty provider list is a different failure.
+The supervised execution bridge now enforces a session/build/assignment/model-bound
+preflight. See `NATIVE-PLAY-EXECUTION-CONTRACT.md`; media capture and inspection are
+separate requirements. This does not authenticate supervisor-supplied observations.
 
 ## Quota and future orchestrator
 

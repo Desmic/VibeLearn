@@ -5,6 +5,7 @@ from pathlib import Path
 
 from tools.supervised_native_play import supervise
 from tools.native_play_execution import validate_native_artifacts
+from tests.test_native_preflight import fixture_preflight
 
 
 class SupervisedBridgeTests(unittest.IsolatedAsyncioTestCase):
@@ -17,6 +18,7 @@ class SupervisedBridgeTests(unittest.IsolatedAsyncioTestCase):
                          "session_id": "session", "capabilities": ["ax", "click"],
                          "model": "test-model"},
         }
+        config["preflight"] = fixture_preflight(config)
         queue = [dict(op="observe", text="Start"), dict(op="input", action="click", target=2),
                  dict(op="observe", text="Result"), dict(op="input", action="click", target=3),
                  dict(op="stop")]

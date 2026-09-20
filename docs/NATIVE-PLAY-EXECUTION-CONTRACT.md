@@ -171,6 +171,31 @@ arguments for `NativePlayGuard`; optional provenance explains the source build
 and capture method. The output directory must be new; interrupted runs cannot
 be resumed or overwritten through this bridge.
 
+New supervised runs also require a `preflight` object with schema
+`vibelearn.native-preflight.v1`, matching `candidate_sha`, `assignment_id`,
+`session_id` and `model`. Its `checks` mapping contains `tool_access`,
+`browser_provider`, `tab_creation`, `visible_input_response`, and each required
+capability name (for example `screenshot` and `click`). Each check contains
+`status` (`verified`, `unavailable`, or `unverified`) and a nonempty `observation`
+retaining the actual tool response/probe finding or the reason it was not run.
+Blank-page creation does not establish visible input response.
+
+When the assignment requires media review, set `requirements.review_modalities`
+to `motion_video` and/or `audio`. This separately requires `motion_capture` and
+`motion_inspection`, or `audio_capture` and `audio_inspection`, respectively.
+An existing recording does not establish inspection capability. Use
+`python -m tools.native_preflight --config CONFIG` for an offline assessment;
+exit 2 means capabilities are incomplete. The supervised bridge rejects incomplete
+or differently scoped reports before reading input, issuing permits or creating
+the run directory. Its capability list is derived from the report, not the old
+caller-asserted identity list. Historical receipts remain readable; starting a
+new run from an old config now requires fresh preflight evidence.
+
+The report trusts the supervisor's observations and is not cryptographic proof
+of tool execution, nor evidence of product quality. Low-level guard callers remain
+responsible for their own trusted preflight; direct CUA is not intercepted. A new
+review session must use a new session identity and rerun its probes.
+
 Send `observe` with visible capture `text`, then `input` with `action` and its
 parameters. Only after the bridge emits a `permit_id` may the supervisor execute
 exactly that one native action. Send `ack` with the matching permit ID and boolean

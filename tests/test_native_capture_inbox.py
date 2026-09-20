@@ -13,6 +13,7 @@ from tools.native_capture_inbox import retain_capture, handler
 from tools.supervised_native_play import supervise
 from tools.native_play_execution import capture_repair_steps, validate_native_artifacts
 from tests import test_native_capture_coverage as coverage
+from tests.test_native_preflight import fixture_preflight
 
 PNG = base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aJ1sAAAAASUVORK5CYII=')
 
@@ -47,6 +48,7 @@ class CaptureImportTests(unittest.IsolatedAsyncioTestCase):
     async def test_import_checks_scope_digest_and_copies_immutable_bytes(self):
         config = dict(requirements=coverage.requirements(), identity=dict(
             coverage.native.IDENTITY, model="test", capabilities=["screenshot", "reload"]))
+        config["preflight"] = fixture_preflight(config)
         with tempfile.TemporaryDirectory() as parent:
             staging = Path(parent) / "staging"
             staging.mkdir()
