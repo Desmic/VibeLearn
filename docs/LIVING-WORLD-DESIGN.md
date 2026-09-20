@@ -9,13 +9,21 @@ response, spatial readability and visible consequences remain in scope.
 
 ## Reference research
 
+The expanded [ten-game study](GAME-REFERENCE-STUDY.md) is the current research
+dossier: score/platform selection, concrete gameplay and developer evidence,
+conflicting approaches, transfer limits and critic experiments. The
+[future research-agent stage](GAME-RESEARCH-PIPELINE.md) defines its reusable
+handoff without adding orchestration now. The initial notes below remain a
+short introduction; the expanded dossier records current evidence coverage.
+
 These are design interpretations informed by developer sources, not a claim that
 one formula explains every player's enjoyment. Sources were checked 20 September
 2026. The initial pass did not examine gameplay footage and was insufficient for the
 new Zelda reference. The follow-up read both official presentation transcripts and
 inspected selected gameplay frames; see
 `experiments/20260920-ocarina-gameplay-study.md` for timestamps and limitations.
-No reference game was played. The other references remain developer-source studies.
+No reference game was played. The expanded study adds gameplay transcripts and
+selected Expedition 33 frames; each entry states what was actually examined.
 
 - **Zelda: make three-dimensional action understandable.** Nintendo's Ocarina
   developer discussion describes the importance of spatial experience and targeting.

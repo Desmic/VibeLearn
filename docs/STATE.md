@@ -1,5 +1,16 @@
 # Current state — LLM learning-game proof track
 
+**Research expansion — 20 September 2026:** The current step is the user's requested
+ten-game research study. `GAME-REFERENCE-STUDY.md` records platform-specific
+Metacritic selection, gameplay/developer transcript evidence, concrete mechanisms,
+tradeoffs and testable applications to existing critic lanes. It distinguishes
+the original Ocarina score from the upcoming remake demonstration and records
+unavailable transcripts and partial coverage. `GAME-RESEARCH-PIPELINE.md` defines
+the future separate research-agent handoff; it is planned, not implemented or
+dispatched. This changes design guidance, not runtime readiness. After research,
+resume the bounded opening/phone-composition repairs and cold native verification
+before expanding the tutorial or Level 1 work.
+
 **Creative direction — 20 September 2026:** The user requests inspiration from
 Zelda, Rockstar, The Witcher 3 and Expedition 33: a beautiful living world and
 meaningful play over cutting-edge graphics. `LIVING-WORLD-DESIGN.md` records sourced

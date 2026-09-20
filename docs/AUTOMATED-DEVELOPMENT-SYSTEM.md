@@ -1,5 +1,11 @@
 # VibeLearn automated development system — Terminal PM Agent orchestration contract
 
+**Research-stage direction — 20 September 2026:** The user requests a future
+separate game-research agent stage. `GAME-RESEARCH-PIPELINE.md` defines the proposed
+brief -> sourced techniques -> creative-direction handoff, with the initial
+ten-game dossier in `GAME-REFERENCE-STUDY.md`. This is documentation of a planned
+boundary, not a new executor, live run or change to the existing critic gates.
+
 **Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer
 across all critic lanes, including mandatory art/world direction, with actual GUI
 play and video recordings as complementary evidence. Preserve separate lane
