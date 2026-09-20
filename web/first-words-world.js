@@ -33,18 +33,18 @@ for(let i=0;i<5;i++)addTo('bellweather-zone',lantern('sky-lantern-'+i,[-12+i*6,1
 
 /* A delivery has a recipient and a persistent outcome, not an endless patrol.
    Staging stays package data; shared timeline moves/cues perform the handoff. */
-addTo('bellweather-zone',companionRobot('bellworker-a',[-4.8,0,-6],{color:'wood',height:1.15}));
-addTo('bellweather-zone',companionRobot('bellworker-b',[3.8,0,-6],{color:'leaf',round:true,height:1.05}));
+addTo('bellweather-zone',companionRobot('bellworker-a',[-3.8,0,-4],{color:'wood',height:1.15}));
+addTo('bellweather-zone',companionRobot('bellworker-b',[1.8,0,-4],{color:'leaf',round:true,height:1.05}));
 for(const [id,parent,position] of [
   ['bellworker-a-parcel','bellworker-a',[.65,.65,.2]],
   ['bellworker-b-parcel','bellworker-b',[-.95,.65,.2]]
 ])e.push(...deliveryParcel(id,parent,position).map(item=>item.id.endsWith('-book')||item.id==='bellworker-b-parcel'?{...item,enabled:false}:item));
 
-/* Friends are intentionally separated in space and dressed differently so the
-   protagonist does not read as duplicated. */
-addTo('bellweather-zone',companionRobot('singer',[3.8,0,1],{color:'coral',height:2}));
-addTo('bellweather-zone',companionRobot('friend-a',[-3,0,1],{color:'teal',round:true,height:1.5}));
-e.push(...lantern('friendship-lantern',[-2.2,1.2,10.5],{scale:1.15,color:'glow'}));
+/* A close social triangle gives the shared lantern a visible recipient.
+   Distinct silhouettes and breathing room keep each friend legible on phones. */
+addTo('bellweather-zone',companionRobot('singer',[2.2,0,.5],{color:'coral',height:2}));
+addTo('bellweather-zone',companionRobot('friend-a',[-2.2,0,.5],{color:'teal',round:true,height:1.5}));
+e.push(...lantern('friendship-lantern',[1.9,1.2,10.7],{scale:1.15,color:'glow'}));
 for(const [i,color] of ['gold','teal','coral'].entries())part('friendship-light-'+i,'sphere',color,[(i-1)*.19,0,.32],[.15,.19,.08],{parent:'friendship-lantern'});
 
 /* The playable prison is materially larger and calmer than the rejected square. */
@@ -146,14 +146,14 @@ const revealGroups=[
 ];
 const revealParts=revealGroups.flat();
 
-export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'8',
+export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'9',
   environment:{clearColor:'#172238',ambient:'#6c7694',exposure:1.05,toneMapping:'aces',fog:{type:'linear',color:'#8f91a7',start:38,end:125}},
   materials:{stone:{diffuse:'#d8b997'},paper:{diffuse:'#f9dfba'},gold:{diffuse:'#ce9d53',gloss:.45},coral:{diffuse:'#d67a69'},ink:{diffuse:'#273144'},indigo:{diffuse:'#4c5276'},rock:{diffuse:'#717b91'},teal:{diffuse:'#548e89'},rose:{diffuse:'#c87678'},leaf:{diffuse:'#477765'},mint:{diffuse:'#91d2af',emissive:'#60a990',emissiveIntensity:.25},wood:{diffuse:'#795755'},glow:{diffuse:'#ffe5ad',emissive:'#ffc97c',emissiveIntensity:1.25},pinkGlow:{diffuse:'#ffa58c',emissive:'#e88c70',emissiveIntensity:.8},redGlow:{diffuse:'#fa9f78',emissive:'#fc705c',emissiveIntensity:1.25},cloud:{diffuse:'#efd7cc'},haze:{diffuse:'#bda8bc'},dark:{diffuse:'#20283a'},prison:{diffuse:'#35445d'},blueGlow:{diffuse:'#9fdcff',emissive:'#76bfff',emissiveIntensity:1.8},void:{diffuse:'#070b12'}},
   assets:{robot:{type:'container',src:'/assets/quaternius-animated-robot.glb',transform:{position:[0,-.08,0],scale:[.52,.52,.52]},animations:{idle:'RobotArmature|Robot_Standing',run:'RobotArmature|Robot_Running',yes:'RobotArmature|Robot_Yes',no:'RobotArmature|Robot_No',wave:'RobotArmature|Robot_Wave'},defaultAnimation:'idle'}},
   entities:e,
   lights:[{id:'sunlight',type:'directional',color:'#ffd8aa',intensity:.9,rotation:[45,-35,0],castShadows:true},{id:'sky-light',type:'directional',color:'#a6bce4',intensity:.4,rotation:[50,150,0]}],
   cameras:{
-    home:{position:[10,8,25],lookAt:[0,1.4,10],fov:46,portrait:{position:[3,10,32],lookAt:[0,1.4,10],fov:46}},
+    home:{position:[7,5.6,23],lookAt:[0,1.6,10.7],fov:46,portrait:{position:[4.8,5.8,26],lookAt:[0,1.6,10.7],fov:46}},
     rupture:{position:[11,9,26],lookAt:[0,2,9],fov:48,portrait:{position:[7,12,31],lookAt:[0,2,9],fov:48}},
     limbo:{position:[5,4,-20],lookAt:[0,1,-28],fov:46,portrait:{position:[3.5,6,-18],lookAt:[0,1,-28],fov:46}},
     reveal:{position:[1,8,-16],lookAt:[0,2,-33],fov:52,portrait:{position:[1,13,-5],lookAt:[0,3,-32],fov:50}},
@@ -176,22 +176,22 @@ const missionBase=()=>({
 });
 
 function opening(beat){
-  const p={show:['zip',...revealParts],hide:['bellweather-zone','prison-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','warden-rift-link','voice-extract-link','stolen-voice','zip-voice'],transforms:{zip:{position:[0,0,10]},singer:{position:[3.8,0,1]},'friend-a':{position:[-3,0,1]},'friendship-lantern':{position:[-2.2,1.2,10.5]},'moon-door':{position:[0,0,0]}},animations:{zip:'idle'}};
+  const p={show:['zip',...revealParts],hide:['bellweather-zone','prison-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','warden-rift-link','voice-extract-link','stolen-voice','zip-voice'],transforms:{zip:{position:[0,0,10]},singer:{position:[2.2,0,.5]},'friend-a':{position:[-2.2,0,.5]},'friendship-lantern':{position:[1.9,1.2,10.7]},'moon-door':{position:[0,0,0]}},animations:{zip:'idle'}};
   p.hide.push(...speechMarks,'sun','star','notice-old','notice-parade','notice-today','tutorial-route-open','wrong-ring','reunion-ring','route-glow');
   // Explicitly restore the cast after a prior rupture/replay hid individuals.
   p.show.push('singer','friend-a','bellworker-a','bellworker-b','bellworker-b-parcel');
   p.hide.push('bellworker-a-parcel');
-  Object.assign(p.transforms,{'bellworker-a':{position:[-6.8,0,-6]},'bellworker-b':{position:[3.8,0,-6]},'bellworker-b-parcel':{position:[0,.8,.55]}});
+  Object.assign(p.transforms,{'bellworker-a':{position:[-3.8,0,-4]},'bellworker-b':{position:[1.8,0,-4]},'bellworker-b-parcel':{position:[0,.8,.55]}});
   if(beat===0){
     p.camera='home';p.environment={clearColor:'#172238',ambient:'#806f68',exposure:1.12,fog:{type:'linear',color:'#8f91a7',start:38,end:125}};p.show.push('bellweather-zone','zip-voice','friendship-lantern');p.animations.zip='wave';
     p.show=p.show.filter(id=>id!=='bellworker-b-parcel');p.hide=p.hide.filter(id=>id!=='bellworker-a-parcel');
     p.show.push('bellworker-a-parcel');p.hide.push('bellworker-b-parcel');
-    p.transforms['bellworker-a']={position:[-4.8,0,-6]};p.transforms['bellworker-b-parcel']={position:[-.95,.65,.2]};
+    p.transforms['bellworker-a']={position:[-3.8,0,-4]};p.transforms['bellworker-b-parcel']={position:[-.95,.65,.2]};
     p.timeline={duration:4600,moves:[
-      {entity:'friendship-lantern',from:[-2.2,1.2,10.5],to:[-.8,1.1,10.5],at:600,duration:1100},
-      {entity:'bellworker-a',from:[-4.8,0,-6],to:[2.2,0,-6],at:100,duration:1800},
+      {entity:'friendship-lantern',from:[1.9,1.2,10.7],to:[1.25,1.2,10.7],at:600,duration:1100},
+      {entity:'bellworker-a',from:[-3.8,0,-4],to:[.2,0,-4],at:100,duration:1800},
       {entity:'bellworker-b-parcel',from:[-.95,.65,.2],to:[0,.8,.55],at:2000,duration:700},
-      {entity:'bellworker-a',from:[2.2,0,-6],to:[-6.8,0,-6],at:2800,duration:1500}
+      {entity:'bellworker-a',from:[.2,0,-4],to:[-3.8,0,-4],at:2800,duration:1500}
     ],cues:[
       {at:400,patch:{show:['zip-speech','zip-speech-link']}},
       {at:1600,patch:{show:['mira-speech'],hide:['zip-speech','zip-speech-link'],animations:{zip:'yes'}}},
@@ -201,7 +201,7 @@ function opening(beat){
   }else if(beat===1){
     p.camera='rupture';p.environment={clearColor:'#151d30',ambient:'#665d68',exposure:1.0,fog:{type:'linear',color:'#72788c',start:32,end:110}};
     p.show.push('bellweather-zone','zip-voice','friendship-lantern','warden');p.animations.zip='no';
-    p.transforms['friendship-lantern']={position:[0,4.7,8]};
+    p.transforms['friendship-lantern']={position:[0,3.7,8]};
     p.transforms.warden={position:[0,2.8,7.0],scale:[.72,.72,.72]};
     p.timeline={duration:1800,moves:[
       {entity:'warden',from:[0,2.8,7.0],to:[0,3.7,7.7],at:150,duration:900}
@@ -214,11 +214,11 @@ function opening(beat){
     p.show.push('bellweather-zone','zip-voice','warden','warden-rift-link');p.animations.zip='no';
     p.transforms.warden={position:[0,3.7,7.7],scale:[.72,.72,.72]};
     p.timeline={duration:4000,moves:[
-      {entity:'bellworker-a',from:[-6.8,0,-6],to:[-.8,3.8,7.4],at:900,duration:1500},
-      {entity:'bellworker-b',from:[3.8,0,-6],to:[.9,4.1,7.5],at:950,duration:1450},
+      {entity:'bellworker-a',from:[-3.8,0,-4],to:[-.8,3.8,7.4],at:900,duration:1500},
+      {entity:'bellworker-b',from:[1.8,0,-4],to:[.9,4.1,7.5],at:950,duration:1450},
       {entity:'zip',from:[0,0,10],to:[0,4.7,8],at:1050,duration:1300},
-      {entity:'singer',from:[3.8,0,1],to:[1.1,5.4,7.5],at:950,duration:1400},
-      {entity:'friend-a',from:[-3,0,1],to:[-1.1,4.6,7.2],at:950,duration:1400}
+      {entity:'singer',from:[2.2,0,.5],to:[1.1,5.4,7.5],at:950,duration:1400},
+      {entity:'friend-a',from:[-2.2,0,.5],to:[-1.1,4.6,7.2],at:950,duration:1400}
     ],cues:[
       {at:220,patch:{show:['rift','storm-flash'],cameraImpulse:{duration:760,intensity:10},environment:{clearColor:'#e8f4ff',ambient:'#d6e8ff',exposure:2.15,fog:{type:'linear',color:'#b8d5ef',start:18,end:68}}}},
       {at:520,patch:{environment:{clearColor:'#07101f',ambient:'#222d49',exposure:.62,fog:{type:'linear',color:'#263650',start:18,end:72}}}},
@@ -402,11 +402,11 @@ export const speechRepairTutorialSpec={
 };
 
 export const openingSpec={
-  id:'bellweather.opening.v7',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
+  id:'bellweather.opening.v8',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
   scenes:[
     {beat:0,audioPhase:'home',kicker:'BELLWEATHER · LANTERN NIGHT',title:'One lantern. Three friends.',body:'You are Zip. Mira made this lantern for the three of you. Send it into the sky.',
       direction:{kind:'establishing',channels:['world','character','camera','interaction','narration'],worldAfter:'The shared lantern is launched and the three friends have visibly acted together.'},
-      action:{target:'release-lantern',label:'Send up our lantern',patch:{show:['friendship-lantern','bellworker-b-parcel'],hide:['bellworker-a-parcel'],transforms:{'bellworker-a':{position:[-6.8,0,-6]},'bellworker-b-parcel':{position:[0,.8,.55]}},animations:{zip:'wave'},timeline:{duration:2800,moves:[{entity:'friendship-lantern',from:[-.8,1.1,10.5],to:[0,4.7,8],duration:2600},{entity:'singer',from:[3.8,0,1],to:[2.4,0,1],duration:1000},{entity:'friend-a',from:[-3,0,1],to:[-1.8,0,1],duration:1000}],finish:{animations:{zip:'yes'}}}}},
+      action:{target:'release-lantern',label:'Send up our lantern',patch:{show:['friendship-lantern','bellworker-b-parcel'],hide:['bellworker-a-parcel'],transforms:{'bellworker-a':{position:[-3.8,0,-4]},'bellworker-b-parcel':{position:[0,.8,.55]}},animations:{zip:'wave'},timeline:{duration:2800,moves:[{entity:'friendship-lantern',from:[1.25,1.2,10.7],to:[0,3.7,8],duration:2600},{entity:'singer',from:[2.2,0,.5],to:[1.8,0,.5],duration:1000},{entity:'friend-a',from:[-2.2,0,.5],to:[-1.8,0,.5],duration:1000}],finish:{animations:{zip:'yes'}}}}},
       success:{body:'Three lights rise above your home.',dialogue:'“Same time next year. All three of us.”'}},
     {beat:1,audioPhase:'danger',audioCue:'capture',kicker:'ABOVE THE SQUARE',title:'A shadow over Bellweather.',body:'A black machine rises above the tower. Red light reaches into the sky.',
       direction:{kind:'antagonist-action',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','vfx','audio','narration'],worldAfter:'The Warden is visibly acting on the sky while Bellweather reacts.'}},

@@ -1,5 +1,17 @@
 # Current state — LLM learning-game proof track
 
+**Opening composition iteration — 20 September 2026:** Research checkpoint
+`5ceef14` is pushed to `origin/main`. The subsequent local world-v9/opening-v8
+iteration tightens the social group and home camera, clears the lantern from
+Zip's face and wrapped captions, and keeps background delivery within framing.
+Build, 369 application tests (seven skips), and final opening browser regression
+pass. A separate Astra native recheck confirms clearer shared activity and phone
+group framing, but 360px control overlap, caption competition, Warden/tower
+hierarchy and ambiguous background activity still need repair. See
+`experiments/20260920-opening-composition-repair.md` for exact test scope, candidate
+file hash and reviewer evidence. This is a scoped improvement, not opening or
+whole-game acceptance. Continue these opening repairs before later expansion.
+
 **Research expansion — 20 September 2026:** The current step is the user's requested
 ten-game research study. `GAME-REFERENCE-STUDY.md` records platform-specific
 Metacritic selection, gameplay/developer transcript evidence, concrete mechanisms,
