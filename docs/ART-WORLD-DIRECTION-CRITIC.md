@@ -1,5 +1,13 @@
 # Art and world-direction critic
 
+**Active scope update — 20 September 2026:** The user temporarily parks motion-quality
+and audio review, trusting the engine/code for motion provisionally. Continue native
+GUI play and broader art/world review now. Record motion/audio as deferred and
+unassessed, never passed; do not pursue media-provider integration for this scope.
+This does not defer composition across camera positions, visual world-state contrast,
+controls or spatial readability. Full readiness remains distinct from this scoped
+art pass; Level 2 and deployment promotion remain gated.
+
 **Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer
 across all critic lanes, including mandatory art/world direction, with actual GUI
 play and video recordings as complementary evidence. Preserve separate lane
@@ -123,7 +131,29 @@ One critic cannot compensate for another. “Beautiful but not playable” fails
 
 ## Current automation boundary
 
-The existing JSON critic checker does not yet encode this independent gate. Until it is extended, this document is a manual/internal hard gate: any unresolved art/world-direction blocker means `needs_revision` even if the legacy checker returns `ready_for_user_review`.
+Assignment generation, result validation and schema-v2 readiness now share six explicit
+art dimensions in `tools/art_world_rubric.py`. They cover dimensions 1–13 above:
+spatial composition (scale, density, geometry, alternate angles); focal identity;
+landmark navigation; visual cohesion (including atmosphere, reuse and performance);
+environmental storytelling; and device composition. Motion direction remains a
+separate criterion, temporarily deferred by the user.
+
+Each art result must include a `dimensions` object keyed by these six names. Each
+entry supplies `status` (`pass`, `needs_revision`, `unassessed`), `observation`, and
+structured `evidence` from its supplied/used evidence. Assessed dimensions require
+cold-observer and interactive evidence. A pass also requires a
+`counterexample_attempt`. Missing dimensions or foreign evidence are rejected.
+An unassessed dimension prevents a pass; a failing dimension requires an overall
+`needs_revision` plus a concrete blocker/retest. Normalized reports preserve these
+findings. Schema-v2 readiness requires a separate art gate with cold-observer and
+interactive evidence for each criterion; scores cannot average away a failure.
+Older records are historical and must be completed before qualifying a new candidate.
+
+These checks enforce review completeness and evidence boundaries, not visual truth.
+They cannot detect a dishonest or mistaken observation. Astra must actually inspect
+the supplied experience, preserve uncertainty, and justify each claim; user judgment
+remains final. Invoke the standalone checker as before, or via
+`python -m tools.check_critic_review`.
 
 Future critic agents may automate parts of this review (camera sweeps, intersection checks, density metrics, visual comparisons), but human/user judgment remains final.
 

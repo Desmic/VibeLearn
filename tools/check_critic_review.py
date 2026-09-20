@@ -3,6 +3,10 @@ import argparse
 import json
 import re
 from pathlib import Path
+if __package__:
+    from tools.art_world_rubric import ART_WORLD_CRITERIA
+else:
+    from art_world_rubric import ART_WORLD_CRITERIA
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -16,6 +20,7 @@ V1_GATES = {
 GATES = V1_GATES
 
 V2_GATES = {
+    "art_world_direction": tuple(ART_WORLD_CRITERIA),
     "rendered_story": ("world_role_stakes", "visible_causality", "attachment_pull"),
     "creative_direction": (
         "world_comprehension", "motion_direction", "semantic_readability", "audio_atmosphere"
@@ -69,6 +74,8 @@ MODALITY_EXTENSIONS = {
 
 # Each tuple is an AND requirement; alternatives inside a tuple are OR.
 CRITERION_MODALITIES = {
+    **{name: (("cold_observer_report",), ("interactive_trace",))
+       for name in ART_WORLD_CRITERIA},
     "world_role_stakes": (("cold_observer_report",), ("motion_video", "interactive_trace")),
     "visible_causality": (("motion_video", "interactive_trace"),),
     "attachment_pull": (("cold_observer_report",),),

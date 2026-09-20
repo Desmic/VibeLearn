@@ -8,6 +8,7 @@ from tools.critic_execution_receipt import build_receipt
 from tools.ingest_critic_results import PASS_ORDER, ingest
 from tools.materialize_critic_capsule import materialize
 from tools.validate_critic_result import validate_result
+from tools.art_world_rubric import ART_WORLD_CRITERIA
 
 
 class ArtWorldCriticTests(unittest.TestCase):
@@ -53,7 +54,41 @@ class ArtWorldCriticTests(unittest.TestCase):
             'observations':['Synthetic geometry observation.'],'interpretation':'Synthetic scoped conclusion.',
             'uncertainties':[],'counterexample_attempt':'Synthetic alternate angle check.',
             'blockers':[],'used_evidence':used}
+        result['dimensions'] = {name: {
+            'status':'pass', 'observation':'Synthetic dimension observation.',
+            'evidence':list(used), 'counterexample_attempt':'Synthetic alternate view.'
+        } for name in ART_WORLD_CRITERIA}
         return result,receipt
+
+    def test_art_dimensions_cannot_be_omitted_unknown_or_use_unsupplied_evidence(self):
+        assignment=build_assignments(self.index(['cold_observer_report','interactive_trace']))['art_world_direction']
+        self.assertEqual(assignment['required_dimensions'], ART_WORLD_CRITERIA)
+        with tempfile.TemporaryDirectory() as temp:
+            for change, message in (
+                ('omitted', 'every required dimension'),
+                ('unknown', 'weakest dimension'),
+                ('foreign', 'belong to used_evidence'),
+                ('counterexample', 'counterexample attempt'),
+            ):
+                with self.subTest(change=change):
+                    result,receipt=self.bundle(Path(temp)/change,assignment,assignment['allowed_evidence'])
+                    dimension=result['dimensions']['spatial_composition']
+                    if change=='omitted': del result['dimensions']['spatial_composition']
+                    if change=='unknown': dimension['status']='unassessed'
+                    if change=='foreign': dimension['evidence']=[{'ref':'foreign.json'}]
+                    if change=='counterexample': dimension['counterexample_attempt']=''
+                    with self.assertRaisesRegex(ValueError,message):
+                        validate_result(assignment,result,receipt)
+
+    def test_unassessed_art_stays_unresolved_and_findings_survive_normalization(self):
+        assignment=build_assignments(self.index(['cold_observer_report','interactive_trace']))['art_world_direction']
+        with tempfile.TemporaryDirectory() as temp:
+            result,receipt=self.bundle(Path(temp),assignment,assignment['allowed_evidence'])
+            result['dimensions']['device_composition']={
+                'status':'unassessed','observation':'Phone was not inspected.','evidence':[]}
+            result['verdict']='unresolved'
+            normalized=validate_result(assignment,result,receipt)
+            self.assertEqual(normalized['dimensions'],result['dimensions'])
 
     def test_screenshot_only_result_cannot_pass_a_ready_art_assignment(self):
         assignment=build_assignments(self.index(['cold_observer_report','interactive_trace','screenshot']))['art_world_direction']

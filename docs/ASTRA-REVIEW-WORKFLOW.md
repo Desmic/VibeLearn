@@ -1,5 +1,13 @@
 # One Astra reviewer, separate critic lanes
 
+**Active scope update — 20 September 2026:** The user temporarily parks motion-quality
+and audio review, trusting the engine/code for motion provisionally. Continue native
+GUI play and broader art/world review now. Record motion/audio as deferred and
+unassessed, never passed; do not pursue media-provider integration for this scope.
+This does not defer composition across camera positions, visual world-state contrast,
+controls or spatial readability. Full readiness remains distinct from this scoped
+art pass; Level 2 and deployment promotion remain gated.
+
 Active user decision, 20 September 2026. Supersedes Luna-first routing.
 
 Use one fresh GPT-6 Astra reviewer for the main generated-game review. Keep every

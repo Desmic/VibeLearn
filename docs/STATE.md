@@ -1,5 +1,13 @@
 # Current state — LLM learning-game proof track
 
+**Active scope update — 20 September 2026:** The user temporarily parks motion-quality
+and audio review, trusting the engine/code for motion provisionally. Continue native
+GUI play and broader art/world review now. Record motion/audio as deferred and
+unassessed, never passed; do not pursue media-provider integration for this scope.
+This does not defer composition across camera positions, visual world-state contrast,
+controls or spatial readability. Full readiness remains distinct from this scoped
+art pass; Level 2 and deployment promotion remain gated.
+
 **Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer
 across all critic lanes, including mandatory art/world direction, with actual GUI
 play and video recordings as complementary evidence. Preserve separate lane
@@ -15,6 +23,20 @@ through Level 1 journey, including prologue and separate tutorial. Follow
 native play and independent criticism; repair observed blockers. Final user review
 still precedes Level 2 and deployment promotion. Historical candidate headers below
 are evidence history, not a prohibition on the newly authorized work.
+
+## Art/world enforcement follow-up — 20 September 2026
+
+The shared art rubric now requires six separate dimensions in assignments and
+submitted art results, and an explicit art/world gate in schema-v2 readiness.
+Missing scope, unsupplied evidence and a passing verdict over an unassessed dimension
+are rejected. This validates evidence contracts, not visual quality. See
+`experiments/20260920-art-world-enforcement.md` for broader art priorities and scope.
+The runtime is unchanged from `323c95e`. The existing fresh Astra task completed
+22 GUI inputs across opening scenes 1–3, tutorial and Level 1 entry at desktop and
+390px: route-clue discoverability, doorway occlusion, caption-dependent relationships,
+dark silhouettes and phone focal hierarchy need work. Full chapter, 360/430 and
+performance were not covered. The linked experiment retains scope and retests.
+Build and 369 application tests pass (seven skips). No product readiness upgrade.
 
 ## Active repair and verification results — 20 September 2026
 

@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 from tools.native_play_execution import validate_requirements
+from tools.art_world_rubric import ART_WORLD_CRITERIA
 
 PASS_SPECS={
     "cold_observer":{
@@ -208,6 +209,8 @@ def build_assignments(index,native_requirements=None):
             "expected_output_modality":spec["output_modality"],
             "instruction":"Report observations before interpretation. If required evidence is missing or ambiguous, return unresolved rather than substituting weaker evidence."
         }
+        if name == "art_world_direction":
+            assignment["required_dimensions"] = ART_WORLD_CRITERIA.copy()
         if name in native_requirements:
             assignment["execution_requirements"]=validate_requirements(native_requirements[name])
         digest_payload={key:value for key,value in assignment.items() if key!="assignment_id"}

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from tools.critic_execution_receipt import validate_receipt
 from tools.native_play_execution import validate_native_execution
+from tools.art_world_rubric import ART_WORLD_CRITERIA
 
 HEX40=re.compile(r"^[0-9a-f]{40}$")
 PASS_RESULT_MODALITY={
@@ -116,6 +117,40 @@ def validate_result(assignment:dict,result:dict,execution_receipt:dict|None=None
         require(used_modalities.intersection(alternatives),
                 f"critic result did not use required evidence modality: {' or '.join(alternatives)}")
 
+    dimensions = None
+    if review_pass == "art_world_direction":
+        dimensions = result.get("dimensions")
+        require(isinstance(dimensions, dict) and set(dimensions) == set(ART_WORLD_CRITERIA),
+                "art/world result must address every required dimension")
+        used_keys = {(e.get("ref"), e.get("modality"), e.get("candidate_sha")) for e in used}
+        statuses = set()
+        for name, dimension in dimensions.items():
+            require(isinstance(dimension, dict), f"{name}: dimension must be an object")
+            status = dimension.get("status")
+            require(status in {"pass", "needs_revision", "unassessed"}, f"{name}: invalid dimension status")
+            statuses.add(status)
+            require(isinstance(dimension.get("observation"), str) and dimension["observation"].strip(),
+                    f"{name}: observation or explicit evidence gap is required")
+            refs = dimension.get("evidence")
+            require(isinstance(refs, list), f"{name}: evidence must be a list")
+            for ref in refs:
+                require(isinstance(ref, dict) and
+                        (ref.get("ref"), ref.get("modality"), ref.get("candidate_sha")) in used_keys,
+                        f"{name}: dimension evidence must belong to used_evidence")
+            if status != "unassessed":
+                require(bool(refs), f"{name}: assessed dimension needs evidence")
+                modalities = {ref.get("modality") for ref in refs}
+                require({"cold_observer_report", "interactive_trace"} <= modalities,
+                        f"{name}: assessed dimension needs cold-observer and interactive evidence")
+            if status == "pass":
+                require(isinstance(dimension.get("counterexample_attempt"), str)
+                        and dimension["counterexample_attempt"].strip(),
+                        f"{name}: passing dimension needs a counterexample attempt")
+        expected_verdict = ("needs_revision" if "needs_revision" in statuses else
+                            "unresolved" if "unassessed" in statuses else "pass")
+        require(result["verdict"] == expected_verdict,
+                "art/world verdict must reflect its weakest dimension")
+
     expected=assignment.get("expected_output_modality")
     normalized_modality=PASS_RESULT_MODALITY.get(review_pass,expected)
     require(isinstance(normalized_modality,str) and normalized_modality,
@@ -139,6 +174,7 @@ def validate_result(assignment:dict,result:dict,execution_receipt:dict|None=None
         "uncertainties":result["uncertainties"],
         "counterexample_attempt":result["counterexample_attempt"],
         "blockers":blockers,
+        **({"dimensions": dimensions} if dimensions is not None else {}),
         **({"native_coverage": native} if native is not None else {}),
     }
 

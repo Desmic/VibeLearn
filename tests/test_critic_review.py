@@ -147,6 +147,24 @@ class CriticReviewTests(unittest.TestCase):
         self.assertEqual(result["user_acceptance"], "not_determined_by_tool")
         self.assertEqual(set(result["gate_minimums"]), set(V2_GATES))
 
+    def test_v2_art_failure_cannot_be_averaged_away(self):
+        record = self.v2_record()
+        record['criteria']['spatial_composition']['rating'] = 8
+        result = self.check(record)
+        self.assertEqual(result['status'], 'needs_revision')
+        self.assertEqual(result['gate_minimums']['art_world_direction'], 8)
+
+    def test_v2_art_cannot_be_omitted_or_certified_by_screenshot(self):
+        record = self.v2_record()
+        del record['criteria']['focal_identity']
+        with self.assertRaises(ValueError):
+            self.check(record)
+        record = self.v2_record()
+        record['criteria']['focal_identity']['evidence'] = [{
+            'ref':'screen.png','modality':'screenshot','candidate_sha':self.sha}]
+        with self.assertRaisesRegex(ValueError, 'focal_identity: evidence needs'):
+            self.check(record)
+
     def test_v2_review_assignment_cannot_substitute_for_cold_observer_report(self):
         record = self.v2_record()
         (self.root / "assignment.json").write_text("assignment", encoding="utf-8")
