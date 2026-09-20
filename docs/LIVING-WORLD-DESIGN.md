@@ -11,18 +11,23 @@ response, spatial readability and visible consequences remain in scope.
 
 These are design interpretations informed by developer sources, not a claim that
 one formula explains every player's enjoyment. Sources were checked 20 September
-2026. No reference game was played or video perceptually reviewed in this research.
+2026. The initial pass did not examine gameplay footage and was insufficient for the
+new Zelda reference. The follow-up read both official presentation transcripts and
+inspected selected gameplay frames; see
+`experiments/20260920-ocarina-gameplay-study.md` for timestamps and limitations.
+No reference game was played. The other references remain developer-source studies.
 
 - **Zelda: make three-dimensional action understandable.** Nintendo's Ocarina
   developer discussion describes the importance of spatial experience and targeting.
   Our takeaway: camera, controls, scale and attention must work together so a player
   can form an intention and carry it out. New abilities should invite experiments.
   [Nintendo developer interview](https://www.nintendo.com/en-gb/Iwata-Asks/Iwata-Asks-The-Legend-of-Zelda-Ocarina-of-Time-3D/Vol-5-Mr-Shigeru-Miyamoto/5-A-Sword-Sorcery-Tale-Admired-Worldwide/5-A-Sword-Sorcery-Tale-Admired-Worldwide-224778.html)
-- **Upcoming Zelda reference:** Nintendo identifies the Ocarina of Time remake
-  for Switch 2, due November 5, 2026, including revised movement/camera and remodeled
-  locations. Treat announced features as reference possibilities; the unreleased
-  game's quality is not yet established by our research.
-  [Official announcement](https://www.nintendo.com/us/whatsnew/the-legend-of-zelda-40th-anniversary-celebration-revealed-in-new-nintendo-direct-presentation/)
+- **New Zelda gameplay reference:** Read the actual
+  [Aonuma demonstration](https://www.youtube.com/watch?v=PQvD3p2yGwc), not just its
+  release announcement. Our application priorities are capability transfer,
+  readable recovery, spatial orientation with optional assistance, relationships
+  supported by play and dialogue, room to linger, and consequential world states.
+  The timestamped study separates source observations from our design proposals.
 - **Rockstar: connect activities, place and consequence.** Rockstar's RDR2 overview
   explicitly connects story, action, exploration and choice. Our interpretation is
   to give places a purpose beyond the next objective, and let ordinary interactions
