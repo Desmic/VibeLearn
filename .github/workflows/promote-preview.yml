@@ -72,7 +72,7 @@ jobs:
         env:
           CANDIDATE_SHA: ${{ inputs.candidate_sha }}
         run: |
-          python tools/build_review_index.py \
+          python -m tools.build_review_index \
             --root /tmp/vibelearn-review-evidence \
             --candidate "$CANDIDATE_SHA" \
             --technical-result success \
@@ -90,7 +90,7 @@ jobs:
           else
             RESULTS_ROOT="$EMPTY"
           fi
-          python tools/ingest_critic_results.py \
+          python -m tools.ingest_critic_results \
             --index /tmp/vibelearn-review-evidence-index.json \
             --results-root "$RESULTS_ROOT" \
             --output-root /tmp/vibelearn-review-evidence
@@ -106,7 +106,7 @@ jobs:
           if [ "$USER_OVERRIDE" = "true" ]; then
             EXTRA="--explicit-user-preview-override"
           fi
-          python tools/check_release_gate.py \
+          python -m tools.check_release_gate \
             --candidate "$CANDIDATE_SHA" \
             --mode preview \
             --quality-status docs/quality-status.json \

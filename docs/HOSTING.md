@@ -1,5 +1,13 @@
 # Private Render + Supabase pilot
 
+**Latest deployment � 20 September 2026:** Explicitly user-requested private review
+version `74455fd7f22d6a423eb93b070bd2c9a37d0953d7` is live (deploy
+`dep-dao21bn40ujc73djt40g`). Auto-deploy remains off; database configuration and
+schema were not changed. Health and exact served runtime files verified; native
+browser entry rendered. Open quality/CI findings and the one-off deployment
+authority are recorded in [the deployment record](experiments/20260920-user-requested-deployment.md).
+This supersedes the deployed-SHA statement below, not the future review gates.
+
 **Current infrastructure checkpoint — 19 September 2026:** Render remains live on exact rejected source `ad14c5aced6cf053c7617dfb03245506e1e9dad5` (deployment `dep-damhjg6k1f9s7393d650`), with auto-deploy disabled. Frozen critic candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26` is **not deployed**. Supabase remains on migrations `20260907073952`, `20260907102455`, `20260907102517`, `20260909132331`, `20260916161700`; no database/data mutation was made by the 18–19 September quality/adapter work. Preview promotion must first pass `promote-preview.yml` for the exact candidate/evidence run; Render deployment is then a separate explicit action. September 7 auth/bootstrap details below are historical unless explicitly reverified.
 
 **Current review amendment — 14 September 2026:** The next verified deployment must include the shared camera/input and 3D entry assets in both hosted/local allowlists. Keep vendor generation of engine, models and repair ZIP, auto-deploy OFF, exact SHA verification and existing Supabase configuration. Read [GAME-CAMERA-INPUT.md](GAME-CAMERA-INPUT.md).

@@ -61,7 +61,7 @@ jobs:
         if: always()
         run: |
           mkdir -p artifacts
-          python tools/build_evidence_receipt.py \
+          python -m tools.build_evidence_receipt \
             --root artifacts \
             --candidate "${{ github.event.pull_request.head.sha || github.sha }}" \
             --suite "${{ matrix.suite }}" \
@@ -99,7 +99,7 @@ jobs:
       - name: Build exact-candidate review index
         run: |
           mkdir -p /tmp/vibelearn-review-index
-          python tools/build_review_index.py \
+          python -m tools.build_review_index \
             --root /tmp/vibelearn-review-evidence \
             --candidate "${{ github.event.pull_request.head.sha || github.sha }}" \
             --technical-result "${{ needs.tests.result }}" \
@@ -107,7 +107,7 @@ jobs:
       - name: Build context-separated critic assignments
         run: |
           mkdir -p /tmp/vibelearn-review-index/critic-assignments
-          python tools/build_critic_assignments.py \
+          python -m tools.build_critic_assignments \
             --index "/tmp/vibelearn-review-index/review-evidence-index-${{ github.event.pull_request.head.sha || github.sha }}.json" \
             --output-dir /tmp/vibelearn-review-index/critic-assignments
       - name: Materialize sealed capsules for ready critic passes

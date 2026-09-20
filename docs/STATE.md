@@ -1,5 +1,17 @@
 # Current state — LLM learning-game proof track
 
+**Explicit review deployment � 20 September 2026:** User requested commit, push
+and deployment of this checkpoint. Render is live on `74455fd7f22d6a423eb93b070bd2c9a37d0953d7`
+(deploy `dep-dao21bn40ujc73djt40g`), with auto-deploy off. Public health, exact
+served runtime files and native browser entry rendering pass. Authenticated hosted
+play was not repeated. Art/world findings remain open, motion/audio deferred,
+and this deployment is not user acceptance or a normal promotion-gate pass.
+See `experiments/20260920-user-requested-deployment.md` for authority and checks.
+The exact candidate's CI failed package-tool imports and the physicality setup
+walk. Continued system work fixes workflow package invocation and tests actual
+entrypoints without PYTHONPATH. Physicality passed locally but failed again in CI;
+its cause remains unresolved and must be investigated before declaring CI ready.
+
 **Opening composition iteration — 20 September 2026:** Research checkpoint
 `5ceef14` is pushed to `origin/main`. The subsequent local world-v9/opening-v8
 iteration tightens the social group and home camera, clears the lantern from
