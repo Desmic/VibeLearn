@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 from tests.browser_check import start_server, stop_server
+from tests.level1_chapter_browser import action
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -67,7 +68,7 @@ def main():
                 ctx=browser.new_context(viewport={'width':width,'height':844},has_touch=width<500)
                 page=ctx.new_page();page.goto(url+'/first-words')
                 page.get_by_role('button',name='Skip opening',exact=True).click()
-                expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE')
+                expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE',timeout=20000)
                 trace.append({'width':width,'step':'move','focus':'move','passed':True})
                 expect(page.locator('#world')).to_have_attribute('data-tutorial-focus','move')
                 expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_hidden()
@@ -109,12 +110,23 @@ def main():
                 expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 2/4')
                 trace.append({'width':width,'step':'repair-connect-complete','next':'scan','passed':True})
                 page.reload();expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 2/4')
+                # Scan and speak share the same physical anchor. Only the current
+                # tutorial action may occupy it, including after a saved reload.
+                expect(page.locator('.tutorial-target-marker:not([hidden])')).to_have_count(1)
+                action(page,'Scan the Moon lock')
+                for label in ['Make first word']+['Next word']*3:
+                    action(page,label)
+                expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 4/4')
+                expect(page.get_by_role('button',name='Scan the Moon lock in the world',exact=True)).to_be_hidden()
+                expect(page.get_by_role('button',name='Speak the completed command to the Moon gate',exact=True)).to_be_visible()
+                expect(page.locator('.tutorial-target-marker:not([hidden])')).to_have_count(1)
+                trace.append({'width':width,'step':'shared-anchor-current-action-only','passed':True})
                 ctx.close()
 
             ctx=browser.new_context(viewport={'width':360,'height':800})
             page=ctx.new_page();page.goto(url+'/first-words')
             page.get_by_role('button',name='Skip opening',exact=True).click()
-            expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE')
+            expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE',timeout=20000)
             before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
             page.get_by_role('button',name='Skip control practice',exact=True).click()
             expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 1/4')

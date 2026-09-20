@@ -18,6 +18,22 @@ are evidence history, not a prohibition on the newly authorized work.
 
 ## Active repair and verification results — 20 September 2026
 
+Bounded tutorial repair after `7962ec7`: world-marker visibility now matches the
+spec's current primary action as well as its anchor, so Scan/Speak cannot occupy
+the same tutorial target together. Shared player controls offer an opt-in front
+character view using the existing collision-aware camera; it does not move/turn
+the actor or modify learning evidence. The current world opts in (WorldSpec v8).
+The same fresh top-level Astra reviewer rechecked desktop and 390px phone by GUI:
+both fixes worked, Recenter worked, and no control overlap was seen (19 inputs).
+Its retained report is `artifacts/readiness-20260920/marker-front-critic-recheck.md`.
+Remaining presentation concerns: similar camera icons and a phone edge target
+visible while its gate is out of view. Motion/listening and overall acceptance
+remain open; these targeted repairs do not close the art/world gate.
+Build, 365 application tests (seven skips), active controls, four-width tutorial
+and 200% text readability checks pass. See
+`experiments/20260920-tutorial-marker-front-view.md` for retained setup timeouts
+and the bounded cold-load wait repair.
+
 Review infrastructure follow-up: the user-authorized fresh top-level projectless
 Astra task has browser access and has demonstrated actual movement, camera/menu
 and tutorial inputs. Child-provider attachment remains unresolved; the top-level

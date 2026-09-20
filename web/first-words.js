@@ -91,6 +91,7 @@ function render(){
   const repair=repairStep(s),controlStep=practice.step;
   const [stage,goal,detail]=tutorialStage(s,complete);text('#stage-name',stage);text('#goal',goal);text('#detail',detail);
   host.dataset.tutorialWorldTarget=controlStep==='done'&&repair?.focus==='world'?(repair.target||''):'';
+  host.dataset.tutorialWorldAction=controlStep==='done'&&repair?.focus==='world'?(repair.primaryAction||''):'';
   host.dataset.tutorialInteractionStep=controlStep==='done'?(repair?.id||''):'';
   const relay=s.relay_stage&&s.relay_stage!=='none';
   const shownOutput=relay?s.relay_output:s.output;
@@ -253,7 +254,7 @@ function frame(){
   if(!['tutorial','mission','complete'].includes(mode)){requestAnimationFrame(frame);return;}
   const s=view(),rect=host.getBoundingClientRect(),tray=$('#controls').getBoundingClientRect(),goal=$('.mission').getBoundingClientRect();
   const tools=host.querySelector('.game-view-tools'),stick=host.querySelector('.game-move-stick');
-  if(tools){tools.style.bottom=(rect.bottom-tray.top+14)+'px';tools.style.gridTemplateColumns=tray.top-goal.bottom<225?'repeat(4,44px)':'44px';}if(stick)stick.style.bottom=(rect.bottom-tray.top+16)+'px';
+  if(tools){tools.style.bottom=(rect.bottom-tray.top+14)+'px';tools.style.gridTemplateColumns=tray.top-goal.bottom<225?`repeat(${tools.querySelectorAll('button:not([hidden])').length},44px)`:'44px';}if(stick)stick.style.bottom=(rect.bottom-tray.top+16)+'px';
   const avoidRects=[tools,stick,host.querySelector('.game-controls-help')]
     .filter(node=>node&&!node.hidden).map(node=>node.getBoundingClientRect())
     .filter(r=>r.width&&r.height).map(r=>({left:r.left-rect.left,right:r.right-rect.left,top:r.top-rect.top,bottom:r.bottom-rect.top}));
@@ -263,7 +264,7 @@ function frame(){
     const available=marker.dataset.action?s.available_actions?.includes(marker.dataset.action):true;
     if(marker.dataset.action){marker.disabled=Boolean(blocked()||!available);marker.classList.toggle('chosen',marker.dataset.clue===s.clue);}
     const tutorialTarget=marker.classList.contains('tutorial-target-marker');
-    const targetMismatch=tutorialTarget&&(marker.dataset.anchor!==host.dataset.tutorialWorldTarget||!available);
+    const targetMismatch=tutorialTarget&&(marker.dataset.anchor!==host.dataset.tutorialWorldTarget||marker.dataset.action!==host.dataset.tutorialWorldAction||!available);
     const critical=tutorialTarget||marker.dataset.critical==='true';
     const guidable=critical?Boolean(point?.inFront):Boolean(point?.visible);
     marker.hidden=!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.classList.contains('notice-marker')&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');

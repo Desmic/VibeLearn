@@ -52,6 +52,15 @@ def main():
             assert idle_again['alias']=='idle' and idle_again['speed']==0,idle_again
             trace.append({'action':'release KeyW','observation':idle_again,'assertion':'movement returns to subdued idle','passed':True})
 
+            before_inspect=page.evaluate('({position:FirstWordsReview.runtime.world.player.position,state:JSON.stringify(FirstWordsReview.state)})')
+            page.get_by_role('button',name='View character from front',exact=True).click()
+            after_inspect=page.evaluate('({position:FirstWordsReview.runtime.world.player.position,state:JSON.stringify(FirstWordsReview.state),yaw:FirstWordsReview.runtime.world.player.yaw})')
+            assert before_inspect['position']==after_inspect['position']
+            assert before_inspect['state']==after_inspect['state']
+            assert abs(abs(after_inspect['yaw'])-180)<1,after_inspect
+            page.screenshot(path=str(out/'level1-character-front-390.png'))
+            trace.append({'action':'inspect character after moving away','observation':after_inspect,'assertion':'front camera without movement or learning-state mutation','passed':True})
+
             # A reusable world prop must be physical. The token track sits immediately
             # left of the spawn; a sustained left input should stop at its collider
             # rather than letting the protagonist pass through the visible geometry.

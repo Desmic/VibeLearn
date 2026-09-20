@@ -74,6 +74,7 @@ export function validatePlayerProfile(profile,ids){
   const c=profile.camera;
   if(!c||![c.yaw,c.pitch,c.distance,c.minDistance,c.maxDistance,c.targetHeight].every(Number.isFinite)||c.minDistance<1||c.maxDistance>40||c.minDistance>=c.maxDistance||c.distance<c.minDistance||c.distance>c.maxDistance||c.pitch<5||c.pitch>70)fail('camera limits are invalid');
   if(c.portraitDistance!==undefined&&(!Number.isFinite(c.portraitDistance)||c.portraitDistance<c.minDistance||c.portraitDistance>c.maxDistance))fail('portrait camera distance is invalid');
+  if(c.inspectCharacter!==undefined&&typeof c.inspectCharacter!=='boolean')fail('character inspection option must be boolean');
   return profile;
 }
 
@@ -91,6 +92,13 @@ export function createPlayerControls(host,profile,adapter){
   const overlay=document.createElement('div');overlay.className='game-player-controls';
   overlay.innerHTML='<div class="game-view-tools" role="group" aria-label="Camera controls"><button type="button" data-view="recenter" aria-label="Recenter camera">◎</button><button type="button" data-view="in" aria-label="Zoom camera in">+</button><button type="button" data-view="out" aria-label="Zoom camera out">−</button><button type="button" data-view="help" aria-label="Movement controls" aria-expanded="false">?</button></div><div class="game-move-stick" role="group" aria-label="Move player"><span class="game-stick-knob"></span><span class="game-stick-label">MOVE</span><button type="button" data-step="forward" aria-label="Move forward">↑</button><button type="button" data-step="left" aria-label="Move left">←</button><button type="button" data-step="back" aria-label="Move backward">↓</button><button type="button" data-step="right" aria-label="Move right">→</button></div><p class="game-controls-help" hidden><strong>Explore the world.</strong><span>WASD / arrows: move · Drag the world: look · Wheel: zoom.</span><span>On phones, use the movement stick and drag the world to look. Tap ◎ to recenter. Use the highlighted task controls to interact.</span></p>';
   host.append(overlay);
+  // Optional character inspection is presentation-only and uses the same camera
+  // collision solver. It never turns or teleports the controlled protagonist.
+  if(profile.camera.inspectCharacter){
+    const inspect=document.createElement('button');inspect.type='button';inspect.dataset.view='character';
+    inspect.textContent='◉';inspect.setAttribute('aria-label','View character from front');inspect.title='View character from front';
+    overlay.querySelector('.game-view-tools').append(inspect);
+  }
   const stickEl=overlay.querySelector('.game-move-stick'),knob=overlay.querySelector('.game-stick-knob'),help=overlay.querySelector('.game-controls-help');
   function release(){keys.clear();stick=[0,0];stickPointer=null;drag=null;knob.style.transform='translate(0,0)';}
   const defaultDistance=()=>host.clientWidth/Math.max(1,host.clientHeight)<.9?(profile.camera.portraitDistance??profile.camera.distance):profile.camera.distance;
@@ -148,6 +156,9 @@ export function createPlayerControls(host,profile,adapter){
     const button=event.target.closest('button');if(!button)return;event.stopPropagation();
     if(blocked())return;
     if(button.dataset.view==='recenter')recenter();
+    if(button.dataset.view==='character'&&mode==='third-person'){
+      yaw=lastFacing;pitch=profile.camera.pitch;distance=defaultDistance();draw();used('look');
+    }
     if(button.dataset.view==='in')zoom(-.8);
     if(button.dataset.view==='out')zoom(.8);
     if(button.dataset.view==='help'){help.hidden=!help.hidden;button.setAttribute('aria-expanded',String(!help.hidden));}
@@ -180,6 +191,7 @@ export function createPlayerControls(host,profile,adapter){
     setMode(value,nextKey){
       const changed=mode!==value||key!==nextKey;mode=value;key=nextKey;
       if(changed){checkpoint=null;release();if(value==='third-person'){position=[...profile.spawn];adapter.setAvatar(position,0);yaw=profile.camera.yaw;pitch=profile.camera.pitch;distance=defaultDistance();}}
+      const inspect=overlay.querySelector('[data-view="character"]');if(inspect)inspect.hidden=mode!=='third-person';
       overlay.dataset.controlMode=mode;draw();
     },
     restoreAvatar(){if(mode==='third-person')adapter.setAvatar(position,lastFacing);},
