@@ -18,6 +18,17 @@ are evidence history, not a prohibition on the newly authorized work.
 
 ## Active repair and verification results — 20 September 2026
 
+Latest bounded follow-up after local `1f00f30`: the opening now shows an actual
+flower delivery using existing workers and timeline primitives, with persistent
+handoff and correct rewind restoration. Native review found and repaired a shared
+cinematic resize bug that moved the actor to its gameplay position. Build, 356
+application tests (seven skips), opening browser checks and a settled-resize probe
+pass. Desktop/phone native replay is recorded; the independent reviewer still
+cannot acquire a browser, including through the documented iab entry point. No
+acceptance upgrade. Next: physical interaction/panel composition and outstanding
+critic/media gates. Retained evidence: `artifacts/readiness-20260920/town-repair/`.
+
+
 The supervised repair-return proof is complete: actual fresh GUI captures,
 independent evidence review, and `evidence_repair_qualified`; product acceptance
 remains undetermined. See `experiments/20260920-native-repair-return.md`.

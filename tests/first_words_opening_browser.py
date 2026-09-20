@@ -31,6 +31,14 @@ def main():
             expect(page.locator('#rgi-title')).to_have_text('One lantern. Three friends.')
             speech=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');return Object.fromEntries(['zip-speech','mira-speech','zip-speech-link','zip-silence'].map(id=>[id,getGameRuntime().world.projectEntity(id)?.visible||false]));}""")
             assert speech=={'zip-speech':True,'mira-speech':True,'zip-speech-link':True,'zip-silence':False},speech
+            delivery=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');const w=getGameRuntime().world;return ['bellworker-a-parcel','bellworker-b-parcel'].map(id=>w.projectEntity(id)?.visible||false);}""")
+            assert delivery==[False,True],delivery
+            # Resize the existing story world: do not restore a gameplay spawn
+            # over the cinematic actor placement when switching aspect ratios.
+            for width,height in [(1280,720),(390,844)]:
+                page.set_viewport_size({'width':width,'height':height})
+                until(page,"""async()=>{await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);const {getGameRuntime}=await import('/game-runtime.js');return Boolean(getGameRuntime().world.projectEntity('zip')?.visible);}""")
+
             expect(page.locator('#rgi-body')).to_contain_text('for the three of you')
             page.screenshot(path=str(out/'prologue-home-390.png'),timeout=15000)
             before_lantern=page.evaluate('JSON.stringify(FirstWordsReview.state)')
@@ -74,6 +82,19 @@ def main():
                 const w=getGameRuntime().world;return ['zip','singer','friend-a'].map(id=>w.projectEntity(id));}""")
             assert vanished==[None,None,None],vanished
             page.screenshot(path=str(out/'prologue-rupture-complete-390.png'),timeout=15000)
+            # Rewind on the same runtime after individual actors were hidden.
+            # Menu replay creates a new runtime and cannot prove this reset.
+            page.locator('#rgi-back').click()
+            page.locator('#rgi-back').click()
+            until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            restored=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');return ['zip','singer','friend-a','bellworker-a','bellworker-b','bellworker-b-parcel'].map(id=>getGameRuntime().world.projectEntity(id)!==null);}""")
+            assert all(restored),restored
+            if page.locator('#rgi-next').inner_text()=='Send up our lantern':
+                page.locator('#rgi-next').click();until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            for _ in range(2):
+                page.locator('#rgi-next').click()
+                until(page,'()=>!FirstWordsReview.runtime.world.animating')
+
 
             log('Prologue: limbo');page.get_by_role('button',name='Continue →',exact=True).click()
             expect(page.locator('#rgi-title')).to_have_text('Silence.')

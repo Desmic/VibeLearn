@@ -96,3 +96,34 @@ foundation group. Original failure is retained in
 After these repairs, build, 356 application tests (seven skips), the opening
 browser group and the synthetic pose regression passed. Retained recordings and
 source hashes: `artifacts/readiness-20260920/pose-repair/verification.json`.
+
+## Next bounded slice: purposeful background activity
+
+Replace the two workers' aimless patrol with a visible flower delivery behind the
+friend group. Reuse the existing delivery prop and timeline moves/cues: the courier
+approaches, the pot changes hands at a shared position, the recipient brings it
+closer and the courier leaves. Keep the main lantern interaction dominant. Reset
+all positions/visibility on replay; reduced motion must show the delivered outcome.
+The normal activity must stop at the rupture, leaving an empty square. This is a
+concrete repair attempt, not an assertion that world-life criticism now passes.
+
+
+Delivery is implemented with the existing two workers, flower prop and timeline
+moves/cues. Both workers occupy a separate background row; the courier leaves the
+central composition after handoff. Rewinding restores individually hidden actors,
+and a completed lantern action also restores the already-delivered pot.
+
+Native phone/desktop resizing exposed another shared defect: the package adapter
+restored the gameplay player position while fitting an authored cinematic shot.
+It now leaves story shots to the cinematic camera and only fits the gameplay view
+in mission mode. Zip remained visible during actual same-scene phone→desktop
+review. An automated check waits two rendered frames after each resize.
+
+Build, all 356 application tests (seven skipped), the opening browser group and
+the focused settled-resize check pass. Native parent play observed the pot on the
+courier before delivery, on the recipient afterward, the empty disrupted square,
+and rewind. These are informed observations, not continuous-motion certification.
+Bound media/source hashes are in `artifacts/readiness-20260920/town-repair/verification.json`.
+The sole critic also tried the documented iab entry point; its session still had
+no browser. No new independent score or acceptance is claimed. Required art/world,
+physical play, full motion and audio gates remain open.

@@ -10,7 +10,9 @@ export function makeWorldPackage(spec,present,{cinematic=false}={}){
       if(engine.available)engine.setControlMode('third-person',spec.id);
       let portrait=null;
       const fit=()=>{
-        if(!engine.available||!spec.player?.camera?.portraitDistance)return;
+        // Authored story shots own actor positions. Restoring the gameplay view
+        // during a cinematic resize would also restore its old player position.
+        if(mode==='story'||!engine.available||!spec.player?.camera?.portraitDistance)return;
         const next=host.clientWidth/Math.max(1,host.clientHeight)<.9;
         if(next===portrait)return;portrait=next;
         const view=engine.getPlayerView();
