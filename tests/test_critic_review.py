@@ -208,6 +208,16 @@ class CriticReviewTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "physicality: evidence needs"):
             self.check(record)
 
+    def test_v2_presentation_integration_requires_mechanical_budget_report(self):
+        record = self.v2_record()
+        record["criteria"]["presentation_integration"]["evidence"] = [
+            {"ref": "interactive.json", "modality": "interactive_trace", "candidate_sha": self.sha},
+            {"ref": "cold.json", "modality": "cold_observer_report", "candidate_sha": self.sha},
+            {"ref": "screen.png", "modality": "screenshot", "candidate_sha": self.sha},
+        ]
+        with self.assertRaisesRegex(ValueError, "presentation_integration: evidence needs"):
+            self.check(record)
+
     def test_v2_requires_cold_observer_before_intent(self):
         record = self.v2_record()
         record["review_order"] = "intent_first"

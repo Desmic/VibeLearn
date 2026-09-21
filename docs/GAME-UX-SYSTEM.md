@@ -7,6 +7,13 @@ review before prototyping, native GUI alignment before release. The current runt
 is not compliant; screenshots, test passes and deployment do not imply acceptance.
 Motion/audio remain deferred; no Level 2 or automatic deployment.
 
+**Presentation contract — 22 September 2026:** the surface ladder, measurable
+on-screen budgets (B1–B5), interaction rules (I1–I5) and critic probes live in
+`GAME-PRESENTATION-GUIDE.md`. They are enforced by
+`tools/check_presentation_budget.py` (mechanical, exact candidate) and the
+`presentation_integration` critic criterion, not by prose preference. Any rule in
+this file about HUD/interaction is interpreted through that guide.
+
 **Active direction — 17 September 2026.** Read `GAME-CREATION-PLATFORM.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`.
 
 ## Product standard

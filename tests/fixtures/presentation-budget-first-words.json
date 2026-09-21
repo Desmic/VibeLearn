@@ -1,0 +1,24 @@
+{
+  "path": "/first-words",
+  "states": [
+    {
+      "name": "prologue-opening-desktop",
+      "goto": true,
+      "wait_text": "One lantern. Three friends.",
+      "focal": "zip"
+    },
+    {
+      "name": "prologue-rupture-desktop",
+      "clicks": ["Send up our lantern", "Continue →"],
+      "wait_text": "A shadow over Bellweather.",
+      "focal": "zip"
+    },
+    {
+      "name": "prologue-opening-phone",
+      "viewport": [390, 844],
+      "goto": true,
+      "wait_text": "One lantern. Three friends.",
+      "focal": "zip"
+    }
+  ]
+}

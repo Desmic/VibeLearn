@@ -1,5 +1,26 @@
 # Current state — LLM learning-game proof track
 
+**Presentation-system correction — 22 September 2026 (supersedes the readiness
+claim below):** The user rated the `5d0e8c2` candidate 1/10 with two screenshots:
+the prologue HUD is unchanged (large DOM text overlay over the world + permanent
+utility bar) and the anchored stage card intrudes into the 3D view, clipping off
+the top of the viewport. The internal 9/10 lane record certified exactly the
+failure the 21 September correction had already named; prose rules and a
+declaration-only design gate let it through. System response, general not
+per-game: `docs/GAME-PRESENTATION-GUIDE.md` (surface ladder P1–P3, measurable
+budgets B1–B5, interaction rules I1–I5, worker checklist, critic probes CP1–CP6),
+mechanical enforcement via `tools/check_presentation_budget.py` (scenario-driven,
+measures real pages) and a required `presentation_integration` criterion in
+schema-v2 critic records (budget report + interactive trace + cold observer +
+capture). First measured truth for the current build: prologue states cover
+**38–43% of the viewport** with screen-space UI against a 15% budget, with
+clipped controls (`artifacts/presentation-budget-5d0e8c2.json`). The record
+`docs/reviews/2026-09-21-first-words-5d0e8c2.json` is retained as history but no
+longer validates under the strengthened gate — correctly, since it certifies a
+rejected presentation. The game itself is not patched cosmetically first; the
+HUD/interaction redesign follows the guide as the next bounded chunk. 387 unit
+tests and the build pass at this change; no Level 2, no deployment.
+
 **World-anchored first-words readiness candidate — 21 September 2026:** Branch
 `docs-readthrough-20260921` candidate `5d0e8c25219713879f75070ad04b8503ff3882ce`
 implements the v4 world-anchored reading design (single anchored stage card, in-world

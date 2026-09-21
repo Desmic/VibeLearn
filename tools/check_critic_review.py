@@ -28,6 +28,7 @@ V2_GATES = {
     "first_touch": (
         "orientation_action", "hud_readability", "controls",
         "physicality", "transition_handoff", "tutorial_clarity",
+        "presentation_integration",
     ),
     "whole_chapter": ("meaningful_agency", "progression_recovery", "world_continuity"),
     "learning": ("concept_fidelity", "fresh_transfer"),
@@ -89,6 +90,10 @@ CRITERION_MODALITIES = {
     "physicality": (("interactive_trace",),),
     "transition_handoff": (("interactive_trace",),),
     "tutorial_clarity": (("interactive_trace",),),
+    # docs/GAME-PRESENTATION-GUIDE.md: a mechanical budget report on the exact
+    # candidate plus live play, cold observation and captures. Prose approval of a
+    # detached HUD was the 21 September failure this criterion exists to block.
+    "presentation_integration": (("ci_report",), ("interactive_trace",), ("cold_observer_report",), ("screenshot",)),
     "meaningful_agency": (("interactive_trace",),),
     "progression_recovery": (("interactive_trace",),),
     "world_continuity": (("motion_video", "interactive_trace"),),
