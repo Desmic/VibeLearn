@@ -1,0 +1,273 @@
+{
+  "schema_version": 2,
+  "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce",
+  "method": "internal_tool_assisted",
+  "environment": "Windows local run of candidate 5d0e8c25219713879f75070ad04b8503ff3882ce (branch docs-readthrough-20260921): Python modular monolith with loopback stdlib server on disposable SQLite databases; Playwright Chromium suites (foundation + all six first-words groups + relay_transfer) at 360/390/430 portrait and 1280 desktop; reviewer-operated live desktop browser play and a fresh-context browser-agent cold observer; active phone playthrough script recording video and a per-beat interaction trace. All cited artifacts were regenerated against this exact tree (2026-09-21 23:30-00:02 local) except captures explicitly attributed to the immediately preceding repair-verification commit f337fd6766f4db01b085597e78b9c68266608c2c, whose only later deltas are the beat-8 label anchor and one recap phrase.",
+  "limitations": "The reviewer authored the code under review, so this is an internal record, not acceptance. No physical phones were used; portrait states are browser emulation. Audio cannot be perceived in this environment, so audio_atmosphere is recorded as unassessed rather than substituted with weaker evidence. The cold-observer agent played commit f337fd6; its two actionable findings were repaired in this candidate and the report header documents the attribution. Motion and physicality claims rest on recorded webm/trace evidence, not single frames.",
+  "prior_context": "The reviewer knows the full design history, the September user rejections and this session's repairs. That context is excluded from the cold-observer pass (restricted prompt: URL plus neutral first-player instructions) and used only afterwards in the intent-comparison scoring recorded here.",
+  "user_authority": "The current user is the sole final product critic. This internal record cannot establish acceptance and never overrides direct user feedback.",
+  "review_order": "cold_observer_then_intent",
+  "cold_observer_context": "A fresh browser subagent received only http://127.0.0.1:8060/first-words on a virgin database plus a neutral first-time-player task (play everything, report only what you perceive, structured A-G). No story rationale, rubric, prior reviews or defect lists were supplied. Its full report was saved verbatim before any design-intent comparison pass was run.",
+  "technical_status": "passed",
+  "technical_evidence": [
+    {"ref": "artifacts/anchored-20260921/browser-groups-5.txt", "modality": "ci_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+    {"ref": "artifacts/anchored-20260921/unit-tests-5d0e8c2.txt", "modality": "ci_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+    {"ref": "artifacts/renderer-lifecycle.json", "modality": "runtime_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+  ],
+  "criteria": {
+    "spatial_composition": {
+      "rating": 9,
+      "reason": "Bellweather square, prison chamber, three-board corridor and ending walkway keep open floor, spaced landmarks and readable depth at every captured width; the final desktop pass confirmed all three boards and both relay notes have their own air once the reading beat pins the card away from the marker band.",
+      "evidence": [
+        {"ref": "artifacts/anchored-20260921/cold-observer-report-f337fd6.md", "modality": "cold_observer_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-chapter-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/prologue-home-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/level1-ending-world-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Hunted for crowding and occlusion from the default camera and after orbiting: the only reproducible overlaps (card stealing the board band, relay notes clipping each other) were repaired and re-verified live; the residual card-over-star-mark state disappears with the taught orbit and when the card parks."
+    },
+    "focal_identity": {
+      "rating": 9,
+      "reason": "Zip has a distinct warm silhouette and the only voice bubble, the Warden is unmistakable, and every mission focal object (machine, gates, notes, signal) keeps a single dominant highlighted target; the anchored card always names the current focal object.",
+      "evidence": [
+        {"ref": "artifacts/anchored-20260921/cold-observer-report-f337fd6.md", "modality": "cold_observer_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-tutorial-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/level1-character-front-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Tried to break identity without labels, as the cold observer did: in the six-body group shot Zip is only weakly marked. Checked whether that compounds anywhere required - it does not: solo shots, the voice bubble and every gameplay state resolve the protagonist, so the weakness is confined to two prologue frames."
+    },
+    "landmark_navigation": {
+      "rating": 9,
+      "reason": "Towers, the sealed Moon gate, three distinct route boards, the receiver and the star walkway are spaced landmarks reachable and recognizable from player-controlled camera; orbit/zoom/recenter are taught and then genuinely used.",
+      "evidence": [
+        {"ref": "artifacts/anchored-20260921/cold-observer-report-f337fd6.md", "modality": "cold_observer_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-controls-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/level1-controls-orbit-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Attempted to reach every decision point without relying on floating labels: gates and boards read as distinct destinations; the observer who refused to orbit still never mis-located the machine or the receiver, and the wrong-route loop forces re-reading landmarks rather than menu memory."
+    },
+    "visual_cohesion": {
+      "rating": 9,
+      "reason": "One palette family per world state (warm amber home, desaturated navy prison, teal safety of the repaired route) with deliberate contrast at each turn; the red light language (rift beam, extraction tether, Warden eye) now matches its captions after the fidelity repair.",
+      "evidence": [
+        {"ref": "artifacts/anchored-20260921/cold-observer-report-f337fd6.md", "modality": "cold_observer_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/prologue-motion-390.webm", "modality": "motion_video", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-opening-report.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/anchored-20260921/desktop-19-beam-dense.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Searched for palette contradictions between what text claims and what light shows: found two (pale beam, invisible field) at f337fd6 verification, thickened/repositioned both and re-captured; the cold observer's later 'pale' note is attributed to sampling mid-cue and is recorded as a borderline, not a mismatch."
+    },
+    "environmental_storytelling": {
+      "rating": 9,
+      "reason": "The world carries purpose and loss without captions doing the work: a market square mid-festival, a lantern frozen mid-rise, an enormous sealed exit, a still-powered repair machine, a route corridor where three eras of notices visibly disagree.",
+      "evidence": [
+        {"ref": "artifacts/anchored-20260921/cold-observer-report-f337fd6.md", "modality": "cold_observer_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-opening-report.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/prologue-prison-reveal-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Separated caption-explained content from world-shown content and asked what breaks if text is removed: the stale-vs-current puzzle is still solvable from the boards themselves; the one true failure (REPAIR SOCKET label pointing at empty ground) was found by the cold observer, re-anchored to the machine, and the opening suite re-passed."
+    },
+    "device_composition": {
+      "rating": 9,
+      "reason": "Protagonist, target and result stay readable at 360/390/430 portrait and 1280 desktop, at 200% enlarged text and with reduced motion; reading beats pin the card to the bottom so signs keep their frame on desktop, and the anchored card clears Zip's full body during control practice.",
+      "evidence": [
+        {"ref": "artifacts/anchored-20260921/cold-observer-report-f337fd6.md", "modality": "cold_observer_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-chapter-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-text-200-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/anchored-20260921/desktop-24-move-fixed.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Inspected the densest states (three boards + card, two notes + receiver, practice card over player) at every width and enlarged text; the card-covering-Zip and note-clipping claims from earlier passes were reproduced, fixed and re-verified; the observer's ending overlap did not reproduce in any final-code capture."
+    },
+    "world_role_stakes": {
+      "rating": 9,
+      "reason": "Before any mechanical play the rendered prologue establishes Bellweather, Zip as protagonist, the black machine, the theft of speech and the prison; the cold observer reconstructed all of it with zero supplied intent.",
+      "evidence": [
+        {"ref": "artifacts/anchored-20260921/cold-observer-report-f337fd6.md", "modality": "cold_observer_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/prologue-motion-390.webm", "modality": "motion_video", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-opening-report.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Scored only from the observer's unaided summary: character, world, loss and objective all came back correct; residual confusion ('which body is Zip in group shots', title-phrase linkage) is secondary detail, not role/stakes comprehension."
+    },
+    "visible_causality": {
+      "rating": 9,
+      "reason": "Every claimed cause is rendered: lantern release rises on camera, the rift beam precedes the tear, the red tether precedes module extraction, the supplied sign deterministically builds the spoken command, and the wrong gate stays shut until the current notice opens it.",
+      "evidence": [
+        {"ref": "artifacts/prologue-motion-390.webm", "modality": "motion_video", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-chapter-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/physicality-motion-1280.webm", "modality": "motion_video", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Checked each causality claim in motion rather than stills, including the observer's 'no pull shown' complaint: the 4-second rupture timeline visibly drags the cast upward in prologue-motion-390.webm; the complaint traced to clicking Continue during playback, which is a player choice the pause/replay controls exist for."
+    },
+    "attachment_pull": {
+      "rating": 9,
+      "reason": "The three-light ritual, the 'same time next year' promise and Mira's still-captive help signal give concrete relationships and forward pull; the observer pursued Mira's rescue unprompted and cared about the recap.",
+      "evidence": [
+        {"ref": "artifacts/anchored-20260921/cold-observer-report-f337fd6.md", "modality": "cold_observer_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Stripped all creator rationale and asked what the observer bonded to without being told: the friendship read as 'the three of you' plus the shared lantern, and loss registered ('what was lost: ...the two friends'); the 'six bodies vs three friends' ambiguity is the weakest link and is recorded honestly as a noted softness, not a blocker."
+    },
+    "world_comprehension": {
+      "rating": 9,
+      "reason": "A caption-blind viewer can still answer where, who and why: the cold-observer summary and the caption-blind capture agree on the story spine without supplied intent.",
+      "evidence": [
+        {"ref": "artifacts/anchored-20260921/cold-observer-report-f337fd6.md", "modality": "cold_observer_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/prologue-caption-blind-390.webm", "modality": "caption_blind_motion", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-opening-report.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Looked for moments where comprehension depended on text alone: beat colors (beam/field) were the genuine text-carries-picture failures and were repaired; remaining reliance (group-shot identity) fails soft - the very next solo beat re-establishes it."
+    },
+    "motion_direction": {
+      "rating": 9,
+      "reason": "Motion is diegetic, not decorative: rise, tear, pull, extract, retreat and the walkway glow each move the story state, with camera continuity preserved across handoffs.",
+      "evidence": [
+        {"ref": "artifacts/prologue-motion-390.webm", "modality": "motion_video", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/physicality-motion-1280.webm", "modality": "motion_video", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-chapter-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Asked which motion could be deleted without losing story information: none of the five timeline beats (rise, rupture pull, reveal cascade, extraction, retreat) is redundant; the animation-rest suite additionally proves idle motion rests instead of jittering."
+    },
+    "semantic_readability": {
+      "rating": 9,
+      "reason": "What the game says matches what it shows after this round: the red light language is now on screen, the socket label names a real object, the forward reference to the Warden was removed from the tear caption, and double punctuation is gone from the scene description.",
+      "evidence": [
+        {"ref": "artifacts/anchored-20260921/cold-observer-report-f337fd6.md", "modality": "cold_observer_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/anchored-20260921/desktop-19-beam-dense.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/anchored-20260921/desktop-22-redfield3.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Swept every caption against its own frame looking for unsupported claims: three were found across two cold passes (beam, field, socket label) and all three were repaired and re-captured; the residual 1/8 sub-caption counter stall is cosmetic and recorded as a known softness."
+    },
+    "audio_atmosphere": {
+      "rating": null,
+      "reason": "Unassessed: the required audio_listening evidence modality is unavailable because this environment cannot hear the rendered mix. Per critic policy the criterion is recorded as unassessed rather than certified with weaker substitutes; audio phases/cues are wired and mute-safe in traces but that is not listening."
+    },
+    "orientation_action": {
+      "rating": 9,
+      "reason": "Every state presents one dominant action with matching caption, card tray and world marker; the cold observer reported always knowing what to press and never hit a dead end.",
+      "evidence": [
+        {"ref": "artifacts/first-words-tutorial-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-chapter-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/anchored-20260921/phone-playthrough-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Hunted for competing required actions at each of the fifteen beats in the phone trace: dialogsOpen stays disciplined (only menu/reflection/flavor), trays carry exactly the legal verbs, and skip affordances exist at every gate; no state offered two must-do things."
+    },
+    "controls": {
+      "rating": 9,
+      "reason": "Keyboard, touch stick, drag-orbit, zoom, recenter, front-view and marker clicks all respond in live play before and after save, with zero console errors across the full desktop session.",
+      "evidence": [
+        {"ref": "artifacts/first-words-controls-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/physicality-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/level1-controls-after-save-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Tried to break controls in states designed not to expect input: during card-anchored reading beats, after save/reload, at 200% text, and via world-marker clicks instead of the tray; every path either worked or was legitimately disabled with visible reason."
+    },
+    "physicality": {
+      "rating": 9,
+      "reason": "Real-input evidence shows wall contact stops the body, the closed gate blocks and the open gate traverses, with continuous camera through collisions; nothing teleports or clips.",
+      "evidence": [
+        {"ref": "artifacts/physicality-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/physicality-motion-1280.webm", "modality": "motion_video", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/physicality-wall-contact.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Attempted wall clipping, gate phasing and camera punch-through in the recorded motion rather than reasoning from source: contact frames show sustained blocking and the closed-gate traversal fails until the route opens."
+    },
+    "transition_handoff": {
+      "rating": 9,
+      "reason": "Prologue to tutorial to mission to ending each hand off control explicitly ('You control Zip now', Begin Level 1, reflection then Stay here) and the observer never reported losing the thread between sections.",
+      "evidence": [
+        {"ref": "artifacts/first-words-tutorial-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-chapter-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/control-practice-handoff-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Tried to orphan the player: reload at each boundary, skip the opening mid-beat, and exit the reflection dialog - every route lands in a state that re-states the current objective; no handoff depends on remembering an unmarked screen."
+    },
+    "tutorial_clarity": {
+      "rating": 9,
+      "reason": "The tutorial teaches reusable grammar (move, orbit-to-look, menu, the engine loop) and ends in a clean guaranteed success before Level 1 changes the terms; the observer confirmed each taught action actually worked.",
+      "evidence": [
+        {"ref": "artifacts/first-words-tutorial-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/anchored-20260921/phone-playthrough-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/tutorial-first-success-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Checked for grammar taught but never demanded, and demanded but never taught: orbit-to-look is taught then genuinely required by the third board; the reverse failure exists for walking (taught, then optional because markers are clickable) - recorded as design debt in the notes, with the walk path still available."
+    },
+    "hud_readability": {
+      "rating": 9,
+      "reason": "The single anchored card, marker pills and corner tools stay bounded and legible on phone and desktop, survive 200% text, and never stack into a reading wall; required decisions all live inside the card.",
+      "evidence": [
+        {"ref": "artifacts/first-words-text-200-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/anchored-20260921/phone-playthrough-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/anchored-20260921/desktop-24-move-fixed.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Pushed the HUD to its densest simultaneous state (card + three markers + tools at 390 and 1280, enlarged text): the earlier failures were card-over-signs and card-over-Zip, both repaired and re-verified; the card can still shade the far star mark until orbit/park, which the readability suite bounds."
+    },
+    "meaningful_agency": {
+      "rating": 9,
+      "reason": "Player-supplied context deterministically changes what the machine says and what the world does; predictions are checked, stale reuse fails on purpose, and the relay timestamp puzzle requires a real judgment about which note is current.",
+      "evidence": [
+        {"ref": "artifacts/first-words-chapter-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/level1-transfer-wrong-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/relay-focused-report.json", "modality": "critic_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Tested whether choices are theater: the observer's own unprompted stale-sign choice produced a genuinely different (wrong) command with causal feedback; supplying the same machine with current context produced the gate-opening command - same system, different input, different world."
+    },
+    "progression_recovery": {
+      "rating": 9,
+      "reason": "Failure is a named, recoverable state: 'Wrong route. Nothing is lost.' plus re-offered signs; the tutorial guarantees success first; reset, skip and resume all exist and now work on the local server too.",
+      "evidence": [
+        {"ref": "artifacts/first-words-chapter-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/anchored-20260921/phone-playthrough-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/level1-reset-restarts-opening-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Tried to get stuck permanently: wrong sign, wrong relay note, mid-relay reload, menu reset and logout. The only true dead end found by the cold observer (local 'Reset game progress' erroring Unknown command) was repaired with a real reset endpoint and re-verified live end-to-end."
+    },
+    "world_continuity": {
+      "rating": 9,
+      "reason": "One continuous PlayCanvas world from home square through prison to ending walkway; no cut to detached results pages, and the observer stayed oriented the entire run.",
+      "evidence": [
+        {"ref": "artifacts/physicality-motion-1280.webm", "modality": "motion_video", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/first-words-chapter-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/level1-ending-world-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Looked for moments where the game leaves the world to report results: the only departures are the three sanctioned dialogs (menu, reflection, flavor), each overlaid on the still-running world; reload resumes inside the same space with camera and state preserved."
+    },
+    "concept_fidelity": {
+      "rating": 9,
+      "reason": "The toy honestly models context-conditioned next-piece generation: input grows with each generated word, the authored scorer is transparent, and server-side replay reproduces exactly what the player saw.",
+      "evidence": [
+        {"ref": "artifacts/level1-authoritative-replay.json", "modality": "authoritative_replay", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/relay-focused-report.json", "modality": "critic_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Checked for hidden-model fakes: replayed the whole chapter authoritatively and the engine followed supplied context, not the player's spoken prediction (Star context with a Moon prediction still yields Star); no client-side result was trusted anywhere in the trace."
+    },
+    "fresh_transfer": {
+      "rating": 9,
+      "reason": "Level 1 changes the context that made the tutorial succeed: the just-practiced Moon answer now fails, and success requires re-applied, not memorized, reasoning about current evidence.",
+      "evidence": [
+        {"ref": "artifacts/level1-authoritative-replay.json", "modality": "authoritative_replay", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"},
+        {"ref": "artifacts/relay-focused-report.json", "modality": "critic_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}
+      ],
+      "counterexample_attempt": "Replayed the tutorial solution verbatim in Level 1: it reproducibly produces the wrong command; the relay then transfers the same stale-vs-current principle to a new surface (timestamps), where the observer applied it correctly on the first try without prompting."
+    }
+  },
+  "coverage": {
+    "fresh_entry": {"status": "observed", "note": "Virgin databases for reviewer desktop play, phone playthrough and the cold observer; entry plaque and login captured.", "evidence": [{"ref": "artifacts/level1-entry-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/login-bellweather-desktop.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "first_action": {"status": "observed", "note": "Lantern release and first MOVE press performed live on desktop and phone.", "evidence": [{"ref": "artifacts/first-words-tutorial-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/control-practice-move-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "mistake": {"status": "observed", "note": "Stale sign supplied deliberately by reviewer and unprompted by the cold observer; wrong relay note offered on desktop.", "evidence": [{"ref": "artifacts/level1-transfer-wrong-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/anchored-20260921/phone-09-wrong-feedback-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "recovery": {"status": "observed", "note": "Wrong-route and relay-miss recoveries completed live with causal feedback, no restart.", "evidence": [{"ref": "artifacts/anchored-20260921/phone-07-stale-supplied-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/anchored-20260921/phone-12-relay-recovered-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "later_challenge": {"status": "observed", "note": "Relay stage with timestamp judgment followed the changed-context route mission.", "evidence": [{"ref": "artifacts/anchored-20260921/phone-11-relay-notes-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/relay-focused-report.json", "modality": "critic_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "payoff": {"status": "observed", "note": "Mira's reply, ending walkway and reflection recap reached on desktop and phone.", "evidence": [{"ref": "artifacts/anchored-20260921/phone-13-ending-world-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/level1-ending-world-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "transfer": {"status": "observed", "note": "Tutorial Moon grammar re-applied (and failing) under Star context, then transferred to the relay case.", "evidence": [{"ref": "artifacts/level1-authoritative-replay.json", "modality": "authoritative_replay", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "replay": {"status": "observed", "note": "Prologue replay and scene replay exercised; lifecycle suite covers replay/reset isolation.", "evidence": [{"ref": "artifacts/anchored-20260921/browser-groups-5.txt", "modality": "ci_report", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/level1-reset-restarts-opening-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "save_resume": {"status": "observed", "note": "Reload mid-mission and after Level 1 completion resumed exact state on desktop and phone.", "evidence": [{"ref": "artifacts/anchored-20260921/phone-15-resume-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/anchored-20260921/phone-playthrough-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "controls_after_save": {"status": "observed", "note": "Keyboard/touch/camera exercised after persisted action and reload.", "evidence": [{"ref": "artifacts/level1-controls-after-save-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/first-words-controls-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "desktop": {"status": "observed", "note": "Full route played live at 1280 with zero console errors plus 1280 suite captures.", "evidence": [{"ref": "artifacts/anchored-20260921/desktop-19-beam-dense.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/control-practice-handoff-1280.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "phone_360": {"status": "observed", "note": "Suite captures at 360 across opening, practice, chapter and enlarged text.", "evidence": [{"ref": "artifacts/prologue-reduced-360.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/first-words-text-200-360.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "phone_390": {"status": "observed", "note": "Primary active phone playthrough (15 beats, video + trace) at 390.", "evidence": [{"ref": "artifacts/anchored-20260921/phone-playthrough-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/anchored-20260921/phone-06-level1-boards-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "phone_430": {"status": "observed", "note": "Suite captures at 430 across opening, practice, chapter and enlarged text.", "evidence": [{"ref": "artifacts/prologue-reduced-430.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/first-words-text-200-430.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "touch": {"status": "observed", "note": "Touch stick, marker taps and drag-orbit exercised in the emulated-phone playthrough.", "evidence": [{"ref": "artifacts/anchored-20260921/phone-playthrough-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "keyboard": {"status": "observed", "note": "WASD/arrow movement and camera keys exercised live on desktop and in traces.", "evidence": [{"ref": "artifacts/first-words-tutorial-interaction-trace.json", "modality": "interactive_trace", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "enlarged_text": {"status": "observed", "note": "200% text gate passes at all three phone widths.", "evidence": [{"ref": "artifacts/first-words-text-200-390.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]},
+    "reduced_motion": {"status": "observed", "note": "Opening, rupture, threat and completion paths captured with reduced motion at 360/390/430/1280.", "evidence": [{"ref": "artifacts/prologue-rupture-reduced-360.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}, {"ref": "artifacts/level1-complete-1280-reduced.png", "modality": "screenshot", "candidate_sha": "5d0e8c25219713879f75070ad04b8503ff3882ce"}]}
+  },
+  "blockers": []
+}

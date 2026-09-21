@@ -1,5 +1,21 @@
 # Current state — LLM learning-game proof track
 
+**World-anchored first-words readiness candidate — 21 September 2026:** Branch
+`docs-readthrough-20260921` candidate `5d0e8c25219713879f75070ad04b8503ff3882ce`
+implements the v4 world-anchored reading design (single anchored stage card, in-world
+signs, desktop bottom-pin reading beats, marker de-collision) plus cold-observer
+repairs: sky-reaching red rift beam, visible red extraction tether, caption forward-
+reference and punctuation fixes, player-clearance card offset during control practice,
+working local `/api/progress/reset`, machine-anchored REPAIR SOCKET label and clearer
+relay recap. Build, 386 unit tests, all ten browser groups, relay suite and the active
+phone playthrough pass with zero console errors; desktop and phone full routes were
+played live. Schema-v2 record `docs/reviews/2026-09-21-first-words-5d0e8c2.json`
+validates with gate minimums 9 for art/world direction, rendered story, first touch,
+whole chapter and learning; `audio_atmosphere` is recorded unassessed because no
+listening modality exists in this environment, so the tool status is
+`review_incomplete`, not acceptance. No Level 2 or deployment promotion follows from
+this record; the user remains the sole final critic.
+
 **Design/prototype checkpoint — 21 September 2026:** The concrete v3 design
 passed independent authoring review only for controls, sequence demonstration and
 supported practice. Exact digest and scope are in `design/review.json`; release
