@@ -9,7 +9,7 @@ from app import service
 from app.manifest import manifest
 from urllib.parse import urlsplit
 
-from app.storage import migrate
+from app.storage import migrate, transaction
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -79,6 +79,13 @@ def make_server(database, port=8000):
                     raise service.DomainError("UNAUTHENTICATED", "Open a local session first.", 401)
                 if path.startswith("/api/commands/"):
                     return self.send(200, service.command(database, learner, path.rsplit("/", 1)[1], body))
+                if path == "/api/progress/reset":
+                    if body != {"confirmation": "RESET_PROGRESS"}:
+                        raise service.DomainError("CONFIRMATION_REQUIRED", "Confirm the full progress reset in the game first.", 400)
+                    with transaction(database, learner=learner, lock=True) as db:
+                        for table in ("reviews", "rewards", "evidence", "assistance", "checkpoints", "commands", "attempts"):
+                            db.execute(f"DELETE FROM {table} WHERE learner_id=?", (learner,))
+                    return self.send(200, service.state(database, learner))
                 raise service.DomainError("NOT_FOUND", "Unknown command.", 404)
             except service.DomainError as error:
                 return self.send(error.status, {"error": error.code, "message": error.message})

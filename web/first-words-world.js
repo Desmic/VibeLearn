@@ -140,9 +140,9 @@ part('warden-head','box','ink',[0,3,0],[1.35,.85,1],{parent:'warden'});
 part('warden-eye','box','redGlow',[0,3.05,.53],[.88,.11,.06],{parent:'warden'});
 part('warden-crown','cone','gold',[0,3.75,0],[.82,.82,.68],{parent:'warden'});
 part('warden-hand','box','gold',[-1,1.8,.18],[.34,.9,.38],{parent:'warden'});
-e.push(...eventLink('warden-rift-link',[-.7,4.4,7.3],[0,6.2,8],{material:'redGlow',segments:8,radius:.13,enabled:false}));
+e.push(...eventLink('warden-rift-link',[0,6.5,7.8],[-.3,9.8,8.3],{material:'redGlow',segments:16,radius:.26,enabled:false}));
 e.push(...capabilityModule('stolen-voice',[0,1.1,-27.5],{enabled:false}));
-e.push(...eventLink('voice-extract-link',[0,1,-27.5],[.45,1.85,-27.82],{material:'blueGlow',segments:6,radius:.1,enabled:false}));
+e.push(...eventLink('voice-extract-link',[0,1.05,-27.5],[.8,1.7,-27.98],{material:'redGlow',segments:12,radius:.22,enabled:false}));
 
 const revealGroups=[
   ['prison-floor'],
@@ -152,7 +152,7 @@ const revealGroups=[
 ];
 const revealParts=revealGroups.flat();
 
-export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'10',
+export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'11',
   environment:{clearColor:'#172238',ambient:'#6c7694',exposure:1.05,toneMapping:'aces',fog:{type:'linear',color:'#8f91a7',start:38,end:125}},
   materials:{stone:{diffuse:'#d8b997'},paper:{diffuse:'#f9dfba'},gold:{diffuse:'#ce9d53',gloss:.45},coral:{diffuse:'#d67a69'},ink:{diffuse:'#273144'},indigo:{diffuse:'#4c5276'},rock:{diffuse:'#717b91'},teal:{diffuse:'#548e89'},rose:{diffuse:'#c87678'},leaf:{diffuse:'#477765'},mint:{diffuse:'#91d2af',emissive:'#60a990',emissiveIntensity:.25},wood:{diffuse:'#795755'},glow:{diffuse:'#ffe5ad',emissive:'#ffc97c',emissiveIntensity:1.25},pinkGlow:{diffuse:'#ffa58c',emissive:'#e88c70',emissiveIntensity:.8},redGlow:{diffuse:'#fa9f78',emissive:'#fc705c',emissiveIntensity:1.25},cloud:{diffuse:'#efd7cc'},haze:{diffuse:'#bda8bc'},dark:{diffuse:'#20283a'},prison:{diffuse:'#35445d'},blueGlow:{diffuse:'#9fdcff',emissive:'#76bfff',emissiveIntensity:1.8},void:{diffuse:'#070b12'}},
   assets:{robot:{type:'container',src:'/assets/quaternius-animated-robot.glb',transform:{position:[0,-.08,0],scale:[.52,.52,.52]},animations:{idle:'RobotArmature|Robot_Standing',run:'RobotArmature|Robot_Running',yes:'RobotArmature|Robot_Yes',no:'RobotArmature|Robot_No',wave:'RobotArmature|Robot_Wave'},defaultAnimation:'idle'}},
@@ -418,7 +418,7 @@ export const openingSpec={
       success:{body:'Three lights rise above your home.',dialogue:'“Same time next year. All three of us.”'}},
     {beat:1,audioPhase:'danger',audioCue:'capture',kicker:'ABOVE THE SQUARE',title:'A shadow over Bellweather.',body:'A black machine rises above the tower. Red light reaches into the sky.',
       direction:{kind:'antagonist-action',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','vfx','audio','narration'],worldAfter:'The Warden is visibly acting on the sky while Bellweather reacts.'}},
-    {beat:2,audioPhase:'danger',audioCue:'rupture',kicker:'THUNDER ANSWERS',title:'The sky cracks open.',body:'The tear opens where the Warden reached. Zip and the others are pulled into the dark.',
+    {beat:2,audioPhase:'danger',audioCue:'rupture',kicker:'THUNDER ANSWERS',title:'The sky cracks open.',body:'The tear opens where the black machine reached. Zip and the others are pulled into the dark.',
       direction:{kind:'major-event',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','lighting','vfx','audio','narration'],worldAfter:'Bellweather is disrupted and Zip plus both friends are gone from the square.'}},
     {beat:3,audioPhase:'danger',kicker:'SOMEWHERE ELSE',title:'Silence.',body:'Zip wakes alone. No market. No friends. Bellweather is gone.',
       direction:{kind:'transition',channels:['world','character','camera','lighting','narration'],worldAfter:'Zip is isolated in an unknown dark location.'}},

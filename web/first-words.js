@@ -168,7 +168,7 @@ function render(){
   else if(s.status==='success')scene='The Star gate is open deeper in the prison.';
   else scene='Beyond the first chamber, three route boards stand in the wider corridor. A glowing five-point mark identifies the deeper gate.';
   host.setAttribute('aria-label',`Unknown prison beyond Bellweather. ${scene}`);
-  text('#scene-description',`${scene} ${goal} ${detail} Input: ${$('#context').textContent}. Output: ${shownOutput.join(' ')||'none'}.`);
+  text('#scene-description',`${scene} ${goal} ${detail} Input: ${$('#context').textContent.replace(/\.+$/,'')}. Output: ${shownOutput.join(' ')||'none'}.`);
   const signal=$('[data-signal="friend"]');
   signal.textContent=s.relay_stage==='done'?'Mira: “Zip? You found me.”':'“Hel—p.” · Mira’s signal';
   const step=controlStep;$('#engine').classList.toggle('practicing',step!=='done');
@@ -275,7 +275,7 @@ function frame(){
   card.classList.toggle('parked-reading',Boolean(anchored&&reading&&mobile));
   if(!anchored){card.style.left='';card.style.top='';}
   else if(reading){card.style.left='';card.style.top='';}
-  else{const placed=placeWorldMarker(card,point,{viewportWidth:rect.width,safeTop:mobile?64:88,safeBottom:Math.max(rect.height-bottomReserve,mobile?430:500),critical:true,xPadding:Math.min((card.offsetWidth||360)/2+10,rect.width/2-10),yOffset:18,avoidRects:playRects});
+  else{const placed=placeWorldMarker(card,point,{viewportWidth:rect.width,safeTop:mobile?64:88,safeBottom:Math.max(rect.height-bottomReserve,mobile?430:500),critical:true,xPadding:Math.min((card.offsetWidth||360)/2+10,rect.width/2-10),yOffset:card.dataset.anchor==='zip'?200:18,avoidRects:playRects});
     if(mobile){card.style.left='';if(placed&&placed.placed)card.style.top=Math.max(64,Math.min(placed.y,rect.height*.4)-(card.offsetHeight||0))+'px';}}
   const cardRect=card.getBoundingClientRect();
   const cardOccupiesTop=(cardRect.top-rect.top)<150;
