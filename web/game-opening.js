@@ -46,15 +46,28 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   overlay.dataset.openingId=spec.id;
   overlay.dataset.openingReplay=String(replay);
   overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-labelledby','rgi-title');
-  overlay.innerHTML=`<div class="rgi-shell"><div class="rgi-storybar"><span></span><b></b><small id="rgi-step"></small></div>
-    <div class="rgi-visual" id="rgi-world"><div class="rgi-markers"></div><div class="rgi-scene-caption"><span class="rgi-kicker"></span><h2 id="rgi-title"></h2><p id="rgi-body"></p><blockquote id="rgi-dialogue"></blockquote><div class="rgi-fact" id="rgi-fact" role="status"></div></div></div>
-    <div class="rgi-progress" aria-label="Story progress"></div><div class="rgi-controls"><div class="rgi-nav"><button id="rgi-back" type="button">← Back</button><button id="rgi-next" type="button" class="rg-primary"></button></div><div class="rgi-utilities"><button id="rgi-replay-beat" type="button">↻ Replay scene</button><button id="rgi-pause" type="button" aria-label="Pause story motion">Pause</button><button id="rgi-skip" type="button"></button></div></div></div>`;
+  // Presentation contract (docs/GAME-PRESENTATION-GUIDE.md): the world carries the
+  // scene; text is one fading subtitle line, controls are contextual and sparse.
+  overlay.innerHTML=`<div class="rgi-shell">
+    <div class="rgi-visual" id="rgi-world"><div class="rgi-markers"></div>
+      <div class="rgi-scene-caption sr-only"><span class="rgi-kicker"></span><h2 id="rgi-title"></h2><blockquote id="rgi-dialogue"></blockquote></div>
+      <div class="rgi-subtitle" role="status"><p id="rgi-body"></p><div class="rgi-fact" id="rgi-fact"></div></div>
+      <span class="rgi-paused-badge" aria-hidden="true">PAUSED</span>
+      <div class="rgi-corner"><button id="rgi-replay-beat" type="button" aria-label="Replay scene">↻</button><button id="rgi-pause" type="button" aria-label="Pause story motion">⏸</button><button id="rgi-skip" type="button"></button></div>
+      <small id="rgi-step" class="sr-only"></small></div>
+    <div class="rgi-progress" aria-label="Story progress"></div><div class="rgi-controls"><div class="rgi-nav"><button id="rgi-back" type="button">← Back</button><button id="rgi-next" type="button" class="rg-primary"></button></div></div></div>`;
   root.append(overlay);
-  overlay.querySelector('.rgi-storybar>span').textContent=spec.title;
-  overlay.querySelector('.rgi-storybar>b').textContent=spec.subtitle||'';
   const progress=overlay.querySelector('.rgi-progress');
   spec.scenes.forEach(()=>progress.append(document.createElement('i')));
   const host=overlay.querySelector('#rgi-world'),next=overlay.querySelector('#rgi-next'),pause=overlay.querySelector('#rgi-pause');
+  const subtitle=overlay.querySelector('.rgi-subtitle');
+  let subtitleTimer=0;
+  const showSubtitle=()=>{
+    clearTimeout(subtitleTimer);
+    if(reduced){subtitle.classList.add('show');return;}
+    subtitle.classList.add('show');
+    subtitleTimer=setTimeout(()=>subtitle.classList.remove('show'),5500);
+  };
   const reduced=typeof reducedMotion==='boolean'?reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches;
   let step=0,closed=false,paused=false,world=null,actionDone=false,picking=false,frame=0;
   const completed=new Set();
@@ -75,6 +88,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
     for(const [selector,value] of [['.rgi-kicker',s.kicker],['#rgi-title',s.title],['#rgi-body',actionDone?s.success?.body??s.body:s.body],['#rgi-dialogue',actionDone?s.success?.dialogue||s.dialogue:s.dialogue],['#rgi-fact',actionDone?s.success?.fact||s.fact:s.fact]])overlay.querySelector(selector).textContent=value||'';
     overlay.querySelector('#rgi-step').textContent=`${step+1} / ${spec.scenes.length}${replay?' · REPLAY':''}`;
     overlay.querySelector('#rgi-back').disabled=step===0;
+    overlay.querySelector('#rgi-back').hidden=step===0;
     next.textContent=s.action&&!actionDone?s.action.label:step===spec.scenes.length-1?(replay?'Return to game':spec.finishLabel||'Begin'):'Continue →';
     if(s.action&&!actionDone)next.dataset.storyAction=s.action.target;else delete next.dataset.storyAction;
     progress.querySelectorAll('i').forEach((n,i)=>{n.classList.toggle('current',i===step);n.classList.toggle('on',i<=step);});
@@ -82,6 +96,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
     if(actionDone&&s.action?.patch)world.applyPresentation?.(s.action.patch);
     gate?.set(host,available()?'ready':'failed');
     next.disabled=!ready();
+    showSubtitle();
     const markers=overlay.querySelector('.rgi-markers');markers.replaceChildren();
     for(const marker of s.markers||[]){
       if(actionDone&&marker.hideWhenDone)continue;
@@ -133,12 +148,13 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   host.addEventListener('game-runtime-restored',refresh);
   next.onclick=performAction;
   overlay.querySelector('#rgi-back').onclick=()=>{if(step>0){step--;refresh();}};
-  overlay.querySelector('#rgi-skip').textContent=replay?'Return to game':'Skip opening';
+  overlay.querySelector('#rgi-skip').textContent=replay?'Return':'Skip';
+  overlay.querySelector('#rgi-skip').setAttribute('aria-label',replay?'Return to game':'Skip opening');
   overlay.querySelector('#rgi-skip').onclick=()=>close(replay?'return':'skip');
   overlay.querySelector('#rgi-replay-beat').onclick=()=>{completed.delete(step);refresh();};
   pause.hidden=reduced;
   pause.onclick=()=>{
-    paused=!paused;runtime.setPaused(paused);pause.textContent=paused?'Resume':'Pause';pause.setAttribute('aria-label',paused?'Resume story motion':'Pause story motion');overlay.classList.toggle('rgi-paused',paused);
+    paused=!paused;runtime.setPaused(paused);pause.textContent=paused?'▶':'⏸';pause.setAttribute('aria-label',paused?'Resume story motion':'Pause story motion');overlay.classList.toggle('rgi-paused',paused);
     next.disabled=!ready();
     for(const marker of overlay.querySelectorAll('.rgi-target'))marker.disabled=!ready();
   };

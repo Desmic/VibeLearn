@@ -1,5 +1,27 @@
 # Current state — LLM learning-game proof track
 
+**Zelda-style presentation experiment played — 22 September 2026 (follows the
+correction below):** Per the user's direction (research-backed, non-invasive,
+world-belonging info delivery; take the most sensible guess now; document it),
+the opening and control-practice presentation was rebuilt on the shared layer:
+fading bottom subtitle replaces the title/paragraph overlay (full text stays
+screen-reader available), icon corner cluster replaces the utility bar, gameplay
+chrome never rides the cinematic, and the practice card becomes a transparent
+floating prompt at the character. Measured with the budget tool on real pages:
+prologue desktop screen-space UI **38.4% → 6.1%**, phone **43.3% → 12.8%**,
+tutorial prompt desktop **7.9%**; phone **19.2%** under the newly documented
+B1 touch-input allowance (≤20%, direct-input affordances only). Zero clipped
+elements, over-length blocks or dead visible controls in all five measured
+states. Decision record with research, reversible guesses and open questions:
+`docs/PRESENTATION-EXPERIMENT-ZELDA-20260922.md`. Gates at this change: build,
+387 unit tests, and all active browser groups (opening, tutorial, controls,
+physicality, chapter, readability, lifecycle, entry, renderer, animation) pass;
+legacy-group suites `opening_contract_browser`/`word_machine_browser` fail on
+routes retired in `c1be3ec` (pre-existing, untouched). Next bounded chunk per
+the record: ambient story advancement (no Continue button), diegetic opt-in
+machine panel, then re-measure and replay before any readiness claim. No
+Level 2, no deployment.
+
 **Presentation-system correction — 22 September 2026 (supersedes the readiness
 claim below):** The user rated the `5d0e8c2` candidate 1/10 with two screenshots:
 the prologue HUD is unchanged (large DOM text overlay over the world + permanent

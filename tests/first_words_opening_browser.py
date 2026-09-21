@@ -194,13 +194,14 @@ def main():
                     const {getGameRuntime}=await import('/game-runtime.js');
                     const point=getGameRuntime().world.projectEntity('friendship-lantern');
                     const top=document.querySelector('#rgi-world').getBoundingClientRect().top;
-                    const nodes=[...document.querySelectorAll('.rgi-scene-caption .rgi-kicker,#rgi-title,#rgi-body,#rgi-dialogue,#rgi-fact')].filter(n=>n.textContent.trim());
+                    const nodes=[...document.querySelectorAll('#rgi-body,#rgi-fact')].filter(n=>n.textContent.trim());
                     const rects=nodes.map(n=>n.getBoundingClientRect());
-                    const textBounds={left:Math.min(...rects.map(r=>r.left)),right:Math.max(...rects.map(r=>r.right)),bottom:Math.max(...rects.map(r=>r.bottom))};
-                    return {visible:point?.visible,lanternX:point?.x||0,lanternY:top+(point?.y||0),captionLeft:textBounds.left,captionRight:textBounds.right,captionBottom:textBounds.bottom};
+                    const textBounds={left:Math.min(...rects.map(r=>r.left)),right:Math.max(...rects.map(r=>r.right)),top:Math.min(...rects.map(r=>r.top)),bottom:Math.max(...rects.map(r=>r.bottom))};
+                    return {visible:point?.visible,lanternX:point?.x||0,lanternY:top+(point?.y||0),captionLeft:textBounds.left,captionRight:textBounds.right,captionTop:textBounds.top,captionBottom:textBounds.bottom};
                 }""")
                 horizontal_clear=clearance['lanternX']<clearance['captionLeft']-16 or clearance['lanternX']>clearance['captionRight']+16
-                vertical_clear=clearance['lanternY']>clearance['captionBottom']+16
+                # The subtitle band owns the bottom; the focal lantern rises above it.
+                vertical_clear=clearance['lanternY']<clearance['captionTop']-16
                 assert clearance['visible'] and (horizontal_clear or vertical_clear),clearance
                 q.screenshot(path=str(out/f'prologue-lantern-release-{width}.png'),timeout=15000)
                 q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('A shadow over Bellweather.')

@@ -171,7 +171,7 @@ function render(){
   text('#scene-description',`${scene} ${goal} ${detail} Input: ${$('#context').textContent.replace(/\.+$/,'')}. Output: ${shownOutput.join(' ')||'none'}.`);
   const signal=$('[data-signal="friend"]');
   signal.textContent=s.relay_stage==='done'?'Mira: “Zip? You found me.”':'“Hel—p.” · Mira’s signal';
-  const step=controlStep;$('#engine').classList.toggle('practicing',step!=='done');
+  const step=controlStep;$('#engine').classList.toggle('practicing',step!=='done');$('#engine').classList.toggle('prompt',step!=='done');
   // Sign-reading beats must not let the card steal the boards' airtime.
   const readingBeat=step==='done'&&((s.round===1&&s.clue==='none')||(s.round===1&&s.status==='wrong')||(relay&&s.relay_stage==='choosing'&&s.relay_context==='none'));
   $('#engine').classList.toggle('compact',readingBeat);
@@ -249,9 +249,9 @@ function opening(replay=false){
     inOpening=false;presented=null;world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced});pauseSystems();render();
   }});
   instance.element.classList.add('first-opening');
-  const mute=document.createElement('button');mute.textContent=audio.preferences.muted?'Sound off':'Sound on';mute.setAttribute('aria-label','Toggle opening sound');
+  const mute=document.createElement('button');mute.textContent=audio.preferences.muted?'♪̶':'♪';mute.setAttribute('aria-label','Toggle opening sound');
   mute.setAttribute('aria-pressed',String(audio.preferences.muted));
-  mute.onclick=()=>{audio.setPreference('muted',!audio.preferences.muted);mute.textContent=audio.preferences.muted?'Sound off':'Sound on';mute.setAttribute('aria-pressed',String(audio.preferences.muted));syncAudio();};instance.element.querySelector('.rgi-utilities').append(mute);
+  mute.onclick=()=>{audio.setPreference('muted',!audio.preferences.muted);mute.textContent=audio.preferences.muted?'♪̶':'♪';mute.setAttribute('aria-pressed',String(audio.preferences.muted));syncAudio();};instance.element.querySelector('.rgi-corner').prepend(mute);
   const observer=new MutationObserver(()=>{
     const step=Number(instance.element.dataset.step),scene=chapter.openingSpec.scenes[step]||{};
     audio.setPhase(scene.audioPhase||'home');
@@ -276,7 +276,9 @@ function frame(){
   if(!anchored){card.style.left='';card.style.top='';}
   else if(reading){card.style.left='';card.style.top='';}
   else{const placed=placeWorldMarker(card,point,{viewportWidth:rect.width,safeTop:mobile?64:88,safeBottom:Math.max(rect.height-bottomReserve,mobile?430:500),critical:true,xPadding:Math.min((card.offsetWidth||360)/2+10,rect.width/2-10),yOffset:card.dataset.anchor==='zip'?200:18,avoidRects:playRects});
-    if(mobile){card.style.left='';if(placed&&placed.placed)card.style.top=Math.max(64,Math.min(placed.y,rect.height*.4)-(card.offsetHeight||0))+'px';}}
+    // B3 containment: a tall card must not clip at the viewport top; park it low.
+    if(!placed||!placed.placed||placed.y-(card.offsetHeight||0)<8){card.classList.add('parked');card.style.left='';card.style.top='';}
+    else if(mobile){card.style.left='';card.style.top=Math.max(64,Math.min(placed.y,rect.height*.4)-(card.offsetHeight||0))+'px';}}
   const cardRect=card.getBoundingClientRect();
   const cardOccupiesTop=(cardRect.top-rect.top)<150;
   const avoidRects=[...playRects,{left:cardRect.left-rect.left,right:cardRect.right-rect.left,top:cardRect.top-rect.top,bottom:cardRect.bottom-rect.top}];

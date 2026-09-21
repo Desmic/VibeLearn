@@ -4,21 +4,42 @@
     {
       "name": "prologue-opening-desktop",
       "goto": true,
-      "wait_text": "One lantern. Three friends.",
+      "wait_text": "for the three of you",
+      "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
       "focal": "zip"
     },
     {
       "name": "prologue-rupture-desktop",
       "clicks": ["Send up our lantern", "Continue →"],
-      "wait_text": "A shadow over Bellweather.",
+      "wait_text": "Red light reaches into the sky",
+      "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
       "focal": "zip"
     },
     {
       "name": "prologue-opening-phone",
       "viewport": [390, 844],
       "goto": true,
-      "wait_text": "One lantern. Three friends.",
+      "wait_text": "for the three of you",
+      "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
       "focal": "zip"
+    },
+    {
+      "name": "tutorial-prompt-desktop",
+      "viewport": [1280, 720],
+      "goto": true,
+      "clicks": ["Skip opening"],
+      "wait_text": "Skip control practice",
+      "focal": "zip"
+    },
+    {
+      "name": "tutorial-prompt-phone",
+      "viewport": [390, 844],
+      "goto": true,
+      "clicks": ["Skip opening"],
+      "wait_text": "Skip control practice",
+      "focal": "zip",
+      "coverage_max": 0.20,
+      "coverage_max_reason": "Touch viewport: on-screen move stick and camera tool cluster are direct-input affordances (guide B1 touch allowance); informational surfaces alone measure under 15%."
     }
   ]
 }

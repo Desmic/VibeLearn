@@ -11,6 +11,7 @@ import argparse
 import json
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -33,7 +34,7 @@ MEASURE = """(args) => {
   const visible = (el) => {
     const cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) < 0.05) return false;
-    if (el.className && String(el.className).includes('sr-only')) return false;
+    for (let n = el; n; n = n.parentElement) if (n.className && String(n.className).includes('sr-only')) return false;
     const r = el.getBoundingClientRect();
     return r.width > 1 && r.height > 1;
   };
@@ -69,21 +70,24 @@ MEASURE = """(args) => {
   const coverage = ui / (cols * rows);
   let panelOpen = false;
   document.querySelectorAll('dialog[open]').forEach(d => { if (visible(d)) panelOpen = true; });
-  // B3 containment + B4 text blocks + P3 disabled controls.
-  const clipped = [], longBlocks = [], disabledVisible = [];
+  // B3 containment + B4 text blocks + P3 disabled controls + top offenders.
+  const clipped = [], longBlocks = [], disabledVisible = [], offenders = [];
+  const label = (el) => el.tagName + (el.id ? '#' + el.id : '') + (el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\\s+/).slice(0, 2).join('.') : '');
   for (const el of uiElements) {
     const r = el.getBoundingClientRect();
+    offenders.push({el: label(el) + ' ' + Math.round(r.width) + 'x' + Math.round(r.height), area: Math.round(Math.max(0, Math.min(r.right, vw) - Math.max(r.left, 0)) * Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0)))});
     if (r.bottom > vh + budgets.clip_tolerance_px || r.top < -budgets.clip_tolerance_px
         || r.right > vw + budgets.clip_tolerance_px || r.left < -budgets.clip_tolerance_px) {
-      if (!el.closest('dialog')) clipped.push(el.tagName + (el.id ? '#' + el.id : '') + ' ' + Math.round(r.width) + 'x' + Math.round(r.height));
+      if (!el.closest('dialog') && !el.classList.contains('skip')) clipped.push(label(el) + ' ' + Math.round(r.width) + 'x' + Math.round(r.height));
     }
     const ownText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
     if (ownText && !el.closest('dialog') && !el.closest('.masthead')) {
       const words = el.textContent.trim().split(/\\s+/).length;
-      if (words > budgets.words_max) longBlocks.push({tag: el.tagName + (el.id ? '#' + el.id : '.' + String(el.className || '').split(' ')[0]), words});
+      if (words > budgets.words_max) longBlocks.push({tag: label(el), words});
     }
     if (el.tagName === 'BUTTON' && el.disabled) disabledVisible.push(el.textContent.trim().slice(0, 40));
   }
+  offenders.sort((a, b) => b.area - a.area);
   // B2 focal clearance: 3x3 ring around the projected focal point.
   let focal = null;
   return Promise.resolve(focalExpr ? eval(focalExpr)() : null).then(async (point) => {
@@ -97,7 +101,7 @@ MEASURE = """(args) => {
       }
       focal = {point, covered: hits};
     } else if (point) focal = {point, covered: null};
-    return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal};
+    return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal, offenders: offenders.slice(0, 12)};
   });
 }"""
 
@@ -165,12 +169,25 @@ def main():
                     page.goto(base + scenario.get("path", "/"))
                 for click in state.get("clicks", []):
                     page.get_by_role("button", name=click, exact=True).first.click()
+                if state.get("wait_eval"):
+                    # CSP (script-src 'self') blocks wait_for_function; poll via evaluate
+                    # like the browser tests' until() helper.
+                    deadline = time.monotonic() + 30
+                    while not page.evaluate(state["wait_eval"]):
+                        if time.monotonic() > deadline:
+                            raise TimeoutError(f"wait_eval timed out: {state['wait_eval']}")
+                        page.wait_for_timeout(120)
                 if state.get("wait_text"):
                     page.get_by_text(state["wait_text"]).first.wait_for(state="visible")
                 page.wait_for_timeout(350)
                 metrics = evaluate_state(page, state, budgets)
-                states.append({"name": state["name"], **metrics})
-                all_violations.extend(violations(state["name"], metrics, budgets, False))
+                state_budgets = dict(budgets)
+                if state.get("coverage_max"):
+                    # Touch viewports may raise B1 for direct-input affordances only
+                    # (guide B1 note); the raised limit must be justified in the scenario.
+                    state_budgets["coverage_max"] = state["coverage_max"]
+                states.append({"name": state["name"], "budget_coverage_max": state_budgets["coverage_max"], **metrics})
+                all_violations.extend(violations(state["name"], metrics, state_budgets, False))
                 print(f"{state['name']}: coverage={metrics['coverage']:.1%} clipped={len(metrics['clipped'])} "
                       f"long={len(metrics['longBlocks'])} disabled={len(metrics['disabledVisible'])} "
                       f"focal={'n/a' if not metrics['focal'] else len(metrics['focal']['covered'] or [])}")

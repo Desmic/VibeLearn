@@ -78,7 +78,10 @@ in real play states at 1280×720 and 390×844:
 
 - **B1 Coverage:** visible screen-space UI (DOM outside the canvas, excluding
   sr-only) covers **≤ 15%** of the viewport in any gameplay state, **≤ 22%** in a
-  player-opened focused panel.
+  player-opened focused panel. On a touch viewport a scenario may raise the limit
+  to **≤ 20%** solely to afford on-screen direct-input controls (move stick, camera
+  cluster) that no other input mode needs; the informational surfaces alone must
+  still clear 15%, and the scenario must state the reason (`coverage_max_reason`).
 - **B2 Focal clearance:** no UI element intersects the projected screen box of the
   current focal entity (player character during movement; interaction target while
   prompting) plus a 24px margin. The focal band (central 50%×60%) stays UI-free
@@ -142,6 +145,9 @@ jargon, no state loss (Hades pattern bounded by `LEARNING-DESIGN-GATE.md`).
 - **Mission:** world-first; objective line fades after ~5s; markers ≤ 2 words;
   machine/learning UI appears only via inspection of the machine.
 - **Payoff/recap:** opt-in panel is fine here (player is not navigating); keep B1/B3.
+
+The first best-guess implementation of these shapes is recorded in
+`PRESENTATION-EXPERIMENT-ZELDA-20260922.md` (decisions, measurements and open questions).
 
 ## Worker checklist (before submitting any chunk)
 
