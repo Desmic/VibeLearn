@@ -513,10 +513,12 @@ class PlayCanvasWorld {
     return null;
   }
 
-  projectEntity(id){
+  projectEntity(id,offset=[0,0,0]){
     const entity=this.entities.get(id);
     if(!entity||!entity.enabled||!this.available)return null;
-    const point=this.camera.camera.worldToScreen(entity.getPosition());
+    const world=entity.getPosition().clone();
+    if(Array.isArray(offset))world.add(new pc.Vec3(offset[0]||0,offset[1]||0,offset[2]||0));
+    const point=this.camera.camera.worldToScreen(world);
     const rect=this.canvas.getBoundingClientRect();
     const inFront=point.z>0;
     return {x:point.x,y:point.y,inFront,visible:inFront&&point.x>=0&&point.x<=rect.width&&point.y>=0&&point.y<=rect.height};

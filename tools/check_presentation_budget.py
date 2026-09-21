@@ -26,10 +26,11 @@ BUDGETS = {
     "words_max": 24,               # B4/P2: per visible text block
     "focal_margin_px": 24,         # B2: focal clearance ring
     "disabled_visible_max": 0,     # P3: no visible non-actionable controls
+    "presence_min_share": 0.12,    # B6: story subject screen presence
 }
 
-MEASURE = """(args) => {
-  const {focalExpr, budgets} = args;
+MEASURE = """async (args) => {
+  const {budgets} = args;
   const vw = innerWidth, vh = innerHeight;
   const visible = (el) => {
     const cs = getComputedStyle(el);
@@ -89,34 +90,46 @@ MEASURE = """(args) => {
   }
   offenders.sort((a, b) => b.area - a.area);
   // B2 focal clearance: 3x3 ring around the projected focal point.
+  // Plain data in, dynamic import inside the injected function: the page CSP
+  // forbids eval(), so expression-string injection is not an option.
   let focal = null;
-  return Promise.resolve(focalExpr ? eval(focalExpr)() : null).then(async (point) => {
-    if (point && point.visible) {
-      const hits = [];
-      for (const [dx, dy] of [[0,0],[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]) {
-        const x = point.x + dx * budgets.focal_margin_px * 2, y = point.y + dy * budgets.focal_margin_px * 2;
-        if (x < 0 || y < 0 || x >= vw || y >= vh) continue;
-        const el = document.elementFromPoint(x, y);
-        if (el && !isWorld(el) && visible(el)) hits.push(el.tagName + (el.id ? '#' + el.id : ''));
+  let presence = null;
+  if (args.focal || args.presence) {
+    const {getGameRuntime} = await import('/game-runtime.js');
+    const w = getGameRuntime().world;
+    const r = document.querySelector('canvas').getBoundingClientRect();
+    if (args.focal && w?.projectEntity) {
+      const p = w.projectEntity(args.focal);
+      if (p) {
+        const point = {x: p.x + r.left, y: p.y + r.top, inFront: p.inFront, visible: p.visible};
+        if (point.visible) {
+          const hits = [];
+          for (const [dx, dy] of [[0,0],[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]) {
+            const x = point.x + dx * budgets.focal_margin_px * 2, y = point.y + dy * budgets.focal_margin_px * 2;
+            if (x < 0 || y < 0 || x >= vw || y >= vh) continue;
+            const el = document.elementFromPoint(x, y);
+            if (el && !isWorld(el) && visible(el)) hits.push(el.tagName + (el.id ? '#' + el.id : ''));
+          }
+          focal = {point, covered: hits};
+        } else focal = {point, covered: null};
       }
-      focal = {point, covered: hits};
-    } else if (point) focal = {point, covered: null};
-    return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal, offenders: offenders.slice(0, 12)};
-  });
+    }
+    if (args.presence && w?.projectEntity) {
+      const base = w.projectEntity(args.presence.entity);
+      const top = w.projectEntity(args.presence.entity, [0, args.presence.height, 0]);
+      if (base && top) presence = {share: Math.abs(top.y - base.y) / r.height, visible: base.visible && top.visible};
+    }
+  }
+  return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal, presence, offenders: offenders.slice(0, 12)};
 }"""
 
 
 def evaluate_state(page, scenario_state, budgets):
-    focal_expr = None
-    if scenario_state.get("focal"):
-        entity = json.dumps(scenario_state["focal"])
-        focal_expr = (
-            "async()=>{const{getGameRuntime}=await import('/game-runtime.js');"
-            f"const p=getGameRuntime().world.projectEntity({entity});"
-            "if(!p)return null;const r=document.querySelector('canvas').getBoundingClientRect();"
-            "return {x:p.x+r.left,y:p.y+r.top,inFront:p.inFront,visible:p.visible};}"
-        )
-    return page.evaluate(MEASURE, {"focalExpr": focal_expr, "budgets": budgets})
+    return page.evaluate(MEASURE, {
+        "focal": scenario_state.get("focal"),
+        "presence": scenario_state.get("presence"),
+        "budgets": budgets,
+    })
 
 
 def violations(state_name, metrics, budgets, panel_allowed):
@@ -133,6 +146,9 @@ def violations(state_name, metrics, budgets, panel_allowed):
     focal = metrics.get("focal")
     if focal and focal.get("covered"):
         found.append(f"{state_name}: B2 focal entity covered by {focal['covered'][:4]}")
+    presence = metrics.get("presence")
+    if presence and presence["share"] < budgets["presence_min_share"]:
+        found.append(f"{state_name}: B6 subject presence {presence['share']:.1%} < {budgets['presence_min_share']:.0%}")
     return found
 
 
@@ -190,7 +206,8 @@ def main():
                 all_violations.extend(violations(state["name"], metrics, state_budgets, False))
                 print(f"{state['name']}: coverage={metrics['coverage']:.1%} clipped={len(metrics['clipped'])} "
                       f"long={len(metrics['longBlocks'])} disabled={len(metrics['disabledVisible'])} "
-                      f"focal={'n/a' if not metrics['focal'] else len(metrics['focal']['covered'] or [])}")
+                      f"focal={'n/a' if not metrics['focal'] else len(metrics['focal']['covered'] or [])} "
+                      f"presence={'n/a' if not metrics['presence'] else format(metrics['presence']['share'], '.1%')}")
             browser.close()
         finally:
             if proc:

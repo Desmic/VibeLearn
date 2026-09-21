@@ -6,7 +6,8 @@
       "goto": true,
       "wait_text": "for the three of you",
       "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
-      "focal": "zip"
+      "focal": "zip",
+      "presence": {"entity": "singer", "height": 2.0}
     },
     {
       "name": "prologue-rupture-desktop",
@@ -21,7 +22,8 @@
       "goto": true,
       "wait_text": "for the three of you",
       "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
-      "focal": "zip"
+      "focal": "zip",
+      "presence": {"entity": "singer", "height": 2.0}
     },
     {
       "name": "tutorial-prompt-desktop",

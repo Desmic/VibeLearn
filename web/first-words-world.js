@@ -23,7 +23,8 @@ addTo('bellweather-zone',pavilion('market',[-11,0,5],'rose'));
 addTo('bellweather-zone',pavilion('bookshop',[11,0,3],'teal'));
 for(const side of [-1,1]){
   for(let i=0;i<3;i++)addTo('bellweather-zone',planter(`plants-${side}-${i}`,[side*(8.5+i*1.2),0,8-i*4],1+i*.08));
-  addTo('bellweather-zone',smallTree('tree-'+side,[side*13.2,0,9],2));
+  // Trunks must sit inside the island plate (r 14.5); canopies may lean over the rim.
+  addTo('bellweather-zone',smallTree('tree-'+side,[side*10.5,0,8.5],2));
 }
 for(let i=0;i<8;i++){
   const x=-10.5+i*3;
@@ -159,7 +160,7 @@ export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'
   entities:e,
   lights:[{id:'sunlight',type:'directional',color:'#ffd8aa',intensity:.9,rotation:[45,-35,0],castShadows:true},{id:'sky-light',type:'directional',color:'#a6bce4',intensity:.4,rotation:[50,150,0]}],
   cameras:{
-    home:{position:[7,5.6,23],lookAt:[0,1.6,10.7],fov:46,portrait:{position:[4.8,5.8,26],lookAt:[0,1.6,10.7],fov:46}},
+    home:{position:[3.5,3.6,16.9],lookAt:[0,1.6,10.7],fov:46,portrait:{position:[4,4.8,22.5],lookAt:[0,1.6,10.7],fov:50}},
     rupture:{position:[11,9,26],lookAt:[0,2,9],fov:48,portrait:{position:[7,12,31],lookAt:[0,2,9],fov:48}},
     limbo:{position:[5,4,-20],lookAt:[0,1,-28],fov:46,portrait:{position:[3.5,6,-18],lookAt:[0,1,-28],fov:46}},
     reveal:{position:[1,8,-16],lookAt:[0,2,-33],fov:52,portrait:{position:[1,13,-5],lookAt:[0,3,-32],fov:50}},

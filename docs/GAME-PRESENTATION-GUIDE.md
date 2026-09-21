@@ -92,6 +92,14 @@ in real play states at 1280×720 and 390×844:
   action button visible at a time; secondary actions ≤ 2 and icon/labelled-small.
 - **B5 Touch ergonomics (phone):** interactive elements ≥ 44px, inside the bottom
   thumb zone or top corners; nothing critical in the middle band the thumb covers.
+- **B6 Subject presence:** the story subject of a shot (the character or object the
+  beat is about) must occupy **≥ 12%** of canvas height, measured by projecting its
+  world position and top point through the live camera
+  (`world.projectEntity(id, [0, height, 0])`). A passing UI budget with a thumbnail
+  subject is still a failed shot — wide "map view" framings read as content, not
+  story. Related world rule: props must be **planted inside the terrain they stand
+  on** (trunk position within the plate footprint); a floating prop is a defect even
+  when it never enters a framed shot.
 
 Budget violations are defects, not preferences. A critic may rate `hud_readability`
 or `presentation_integration` ≥ 9 only with a passing budget report on the exact
@@ -157,6 +165,8 @@ The first best-guess implementation of these shapes is recorded in
 3. Ask: "If I delete this text, does the player still know what to do?" If yes,
    delete it; if no, stage it in the world instead.
 4. Check every overlay against B2 while the character moves and the camera orbits.
+5. Check every opening/cinematic beat against B6 in a live capture: is the subject
+   big enough to read emotion, and are its feet (and nearby props) on the ground?
 
 ## Critic probes (fresh context, actual play — not source reading)
 
@@ -180,7 +190,7 @@ unassessed; screenshots of a static frame do not certify B2 (movement/orbit requ
 
 | Rule | Mechanism |
 | --- | --- |
-| P1–P3, I1–I5, B1–B5 | `tools/check_presentation_budget.py` (mechanical, exact candidate) + live critic observation |
+| P1–P3, I1–I5, B1–B6 | `tools/check_presentation_budget.py` (mechanical, exact candidate) + live critic observation |
 | Design-time surface declaration | `tools/check_learning_design.py` (existing attention/focus contract) |
 | Review-time certification | `presentation_integration` criterion in `check_critic_review.py` V2 gates — requires budget report + interactive trace + cold-observer + live capture |
 | Worker behavior | this section referenced from `AGENTS.md` build order and `GAME-UX-SYSTEM.md` |

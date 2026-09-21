@@ -1,5 +1,24 @@
 # Current state — LLM learning-game proof track
 
+**Opening shot composition + B6 presence budget — 22 September 2026 (follows the
+Zelda experiment below):** The user's play of the redesigned opening caught what
+no UI budget could: the desktop home shot was a zoomed-out map view (each friend
+≈3–6% of canvas height) and the two island trees were planted off the plate
+(radius ≈16 vs 14.5) with trunks dangling over the void. Fixed in the world
+(trees → `[±10.5, 0, 8.5]`; home camera reframed to a medium shot, desktop
+`[3.5,3.6,16.9]`, portrait `[4,4.8,22.5]` fov 50 — first portrait tightening
+pushed Mira out of the narrow frame, so every subject's projection is verified
+at both sizes). Generalised as budget **B6 subject presence ≥ 12%** in
+`tools/check_presentation_budget.py` (scenario key `presence: {entity, height}`)
+measured through a new reusable primitive `world.projectEntity(id, [0, height, 0])`
+(playcanvas-backend.js + spec-game-world.js). Re-measured presence: desktop
+≈5% → **32.8%**, phone ≈8% → **16.4%**; all five states still pass B1–B6 with
+zero clipped/long/disabled/focal hits. Guide updated (B6, worker checklist,
+enforcement map) and decision record extended: *a passing UI budget with a
+thumbnail subject is still a failed shot; props must be planted inside the
+terrain they stand on*. Gates at this change: build, 387 unit tests, opening and
+all active browser groups pass. No Level 2, no deployment.
+
 **Zelda-style presentation experiment played — 22 September 2026 (follows the
 correction below):** Per the user's direction (research-backed, non-invasive,
 world-belonging info delivery; take the most sensible guess now; document it),

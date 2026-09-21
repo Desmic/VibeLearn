@@ -59,6 +59,41 @@ rungs live there. Numbers come from `tools/check_presentation_budget.py` reports
 Clipped elements, over-length text blocks and disabled visible controls: **0** in
 all five measured states. Focal clearance measured clean (focal=0 hits).
 
+## Follow-up the same day — the shot itself was wrong
+
+The user's first play of the redesigned opening rated the *chrome* fixed but
+rejected the *frame*: "it is zoomed out view of opening sequence, simple question
+where are the trees planted?" Two distinct defects, neither caught by any
+coverage/focal/clipping budget:
+
+1. **Thumbnail subjects.** The desktop home camera sat ~16m from a three-character
+   cluster: each friend occupied 3–6% of canvas height — a map view, not a story
+   shot. Reframed to a medium shot: desktop home `[7,5.6,23] → [3.5,3.6,16.9]`,
+   portrait `[4.8,5.8,26] → [4,4.8,22.5]` with fov 50 (the first portrait tightening
+   pushed Mira off the narrow frame — presence alone is not sufficient, all three
+   subjects must stay in frame; verified by projecting every subject at both sizes).
+2. **Unplanted props.** `smallTree('tree-±1', [±13.2, 0, 9])` sat at radius ≈16
+   while the island plate is radius 14.5 — trunks dangled over the void. Moved to
+   `[±10.5, 0, 8.5]` (r ≈ 13.5, inside the plate; canopies may lean over the rim).
+
+**System response (the point):** generalised the defect class into budget **B6
+subject presence ≥ 12%** (`tools/check_presentation_budget.py`, scenario key
+`presence: {entity, height}`) measured through a new reusable engine primitive
+`world.projectEntity(id, [0, height, 0])` (playcanvas-backend.js +
+spec-game-world.js passthrough). Re-measured after reframing:
+
+| State | Subject presence (was → now) | B6 ≥ 12% |
+| --- | --- | --- |
+| Prologue opening — desktop (Mira) | ≈5% → **32.8%** | pass |
+| Prologue opening — phone (Mira) | ≈8% → **16.4%** | pass |
+
+Lesson recorded in the guide: **a passing UI budget with a thumbnail subject is
+still a failed shot**, and props must be planted inside the terrain they stand on.
+
+Final gate run (this candidate): all five states pass B1–B6 with
+coverage 6.1 / 6.6 / 12.8 / 7.9 / 19.2%, zero clipped/long/disabled/focal hits;
+opening + all active browser groups, 387 unit tests and build green.
+
 ## Honest caveats / next chunk
 
 - This is the *most sensible guess*, not a validated convention. The player still
@@ -82,7 +117,8 @@ all five measured states. Focal clearance measured clean (focal=0 hits).
 ## Reuse (system, not game)
 
 Every decision above lives in the **shared** layer: `game-opening.js` markup/
-timers, `rescue-intro.css` presentation, the `.prompt`/`.parked` card modes, and
-the budget tool's scenario schema (`coverage_max` + `coverage_max_reason` for
-documented touch allowances). The next title inherits them by importing the same
+timers, `rescue-intro.css` presentation, the `.prompt`/`.parked` card modes, the
+budget tool's scenario schema (`coverage_max` + `coverage_max_reason` for
+documented touch allowances; `presence` for B6) and the `projectEntity(id, offset)`
+measurement API any world can implement. The next title inherits them by importing the same
 two files; nothing here is first-words-specific except the copy.

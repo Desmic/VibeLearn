@@ -74,7 +74,7 @@ export function makeWorldPackage(spec,present,{cinematic=false}={}){
           if(!engine.available||status.assetsFailed||status.assetsPending)throw Error('The courier could not load. Reload the workshop to try again.');
         },
         setPaused(value){paused=Boolean(value);last=performance.now();engine.setPaused(paused||document.hidden);},
-        projectEntity:id=>engine.projectEntity(id),pickSemanticAt:(x,y)=>engine.pickEntityAt(x,y),
+        projectEntity:(id,offset)=>engine.projectEntity(id,offset),pickSemanticAt:(x,y)=>engine.pickEntityAt(x,y),
         getPlayerView:()=>engine.getPlayerView(),restorePlayerView:value=>engine.restorePlayerView(value),
         replay(){if(previous!==null)update(previous);},
         stats:()=>({...engine.stats(),packageAdapter:'world-spec',animating:Boolean(transition||timeline)}),
