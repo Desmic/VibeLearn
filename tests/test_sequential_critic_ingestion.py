@@ -1,10 +1,14 @@
+import hashlib
+import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 from tools.build_critic_assignments import build_assignments
 from tools.critic_execution_receipt import build_receipt
-from tools.ingest_critic_results import ingest
+from tools.ingest_critic_results import ingest, read_raw_results
 from tools.materialize_critic_capsule import materialize
 
 
@@ -98,6 +102,53 @@ class SequentialCriticIngestionTests(unittest.TestCase):
             "blockers":blockers or [],
         }
         return result,receipt,manifest
+
+    def test_design_binding_is_only_in_later_intent_comparison(self):
+        original=build_assignments(self.index)
+        bound=build_assignments(self.index,learning_design_sha256='c'*64)
+        self.assertEqual(original['cold_observer'],bound['cold_observer'])
+        self.assertNotEqual(original['intent_comparison']['assignment_id'],bound['intent_comparison']['assignment_id'])
+        self.assertEqual(bound['intent_comparison']['learning_design_sha256'],'c'*64)
+        with self.assertRaisesRegex(ValueError,'SHA256'):
+            build_assignments(self.index,learning_design_sha256='not-a-hash')
+
+    def test_native_v2_roundtrip_preserves_exact_requirements_in_cli(self):
+        native = {'cold_observer':dict(mode='native_gui',max_inputs=1,
+                  required_capabilities=['screenshot','click'],required_checkpoints=['opening'])}
+        assignment = build_assignments(self.index,native)['cold_observer']
+        execution = dict(schema='vibelearn.native-play.v1',candidate_sha=self.sha,
+                         assignment_id=assignment['assignment_id'],session_id='native-fixture',
+                         model='fixture',verified_capabilities=['screenshot','click'],
+                         events=[dict(kind='observation',ref='before.png',sha256=hashlib.sha256(b'before').hexdigest()),
+                                 dict(kind='input',action='click',outcome='succeeded'),
+                                 dict(kind='observation',ref='after.png',sha256=hashlib.sha256(b'after').hexdigest())],
+                         checkpoints={'opening':'after.png'})
+        receipt = build_receipt(assignment,'fixture-harness','native-fixture',assignment['allowed_evidence'],
+                                capsule_id='sha256:'+'b'*64,native_execution=execution)
+        raw = dict(schema='vibelearn.critic-result.v1',candidate_sha=self.sha,
+                   assignment_id=assignment['assignment_id'],execution_receipt_id=receipt['receipt_id'],
+                   **{'pass':'cold_observer'},verdict='pass',
+                   context_attestation=dict(allowed_context_only=True,observations_before_interpretation=True,notes='Fixture'),
+                   used_evidence=assignment['allowed_evidence'],observations=['Fixture'],interpretation='Fixture',
+                   uncertainties=[],counterexample_attempt='Fixture',blockers=[])
+        input_root=self.root/'raw';input_root.mkdir()
+        for name,value in [('result',raw),('receipt',receipt)]:
+            (input_root/(name+'.json')).write_text(json.dumps(value),encoding='utf-8')
+        results,receipts=read_raw_results(input_root)
+        self.assertEqual(receipts['cold_observer']['schema'],'vibelearn.critic-execution-receipt.v2')
+        with self.assertRaisesRegex(ValueError,'different assignment'):
+            ingest(self.index,results,receipts)
+        _,normalized=ingest(self.index,results,receipts,native)
+        self.assertEqual(normalized['cold_observer']['native_coverage']['successful_input_count'],1)
+        index_path=self.root/'index.json';index_path.write_text(json.dumps(self.index),encoding='utf-8')
+        native_path=self.root/'native.json';native_path.write_text(json.dumps(native),encoding='utf-8')
+        output=self.root/'output'
+        process=subprocess.run([sys.executable,'-m','tools.ingest_critic_results','--index',str(index_path),
+            '--results-root',str(input_root),'--output-root',str(output),'--native-requirements',str(native_path)],
+            capture_output=True,text=True,cwd=Path(__file__).resolve().parents[1])
+        self.assertEqual(process.returncode,0,process.stdout+process.stderr)
+        regenerated=json.loads((output/'critic-assignments/cold_observer.json').read_text(encoding='utf-8'))
+        self.assertEqual(regenerated['assignment_id'],assignment['assignment_id'])
 
     def test_cold_result_unlocks_cinematic_and_intent_in_same_ingestion(self):
         cold_assignment=build_assignments(self.index)["cold_observer"]

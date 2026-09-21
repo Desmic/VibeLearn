@@ -370,3 +370,11 @@ These are ordered hypotheses to test against the existing native findings, not
 completed game improvements. Motion/audio review remain deferred. No readiness
 upgrade, Level 2, deployment or live Terminal PM run follows from this study.
 The future separate research stage is specified in `GAME-RESEARCH-PIPELINE.md`.
+
+## Application correction — 21 September 2026
+
+The user finding confirms our research-to-design handoff failed: teaching and
+spatial-explanation principles existed but were not an upstream gate. See
+LEARNING-DESIGN-GATE.md for the implemented learning/attention contract. Research
+decisions now map to named design encounters and failure probes. This is system
+enforcement of a design artifact, not proof the current game implements it.

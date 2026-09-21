@@ -1,6 +1,6 @@
 # Private Render + Supabase pilot
 
-**Latest deployment — 20 September 2026:** Explicitly user-requested private review
+**Latest deployment â€” 20 September 2026:** Explicitly user-requested private review
 version `74455fd7f22d6a423eb93b070bd2c9a37d0953d7` is live (deploy
 `dep-dao21bn40ujc73djt40g`). Auto-deploy remains off; database configuration and
 schema were not changed. Health and exact served runtime files verified; native

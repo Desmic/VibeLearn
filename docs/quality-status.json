@@ -4,13 +4,14 @@
   "level2_allowed": false,
   "deployed_preview": {
     "candidate_sha": "74455fd7f22d6a423eb93b070bd2c9a37d0953d7",
-    "verdict": "needs_revision",
-    "user_review_complete": false,
-    "note": "Explicit user-requested private review deployment on 20 September. Art/world revisions and CI physicality setup failure remain open; motion/audio deferred. See docs/experiments/20260920-user-requested-deployment.md."
+    "verdict": "rejected",
+    "user_review_complete": true,
+    "note": "21 September: user reports convoluted learning progression, detached bottom HUD and non-obvious upper-left guidance; system/design repair must precede game repair."
   },
   "rejected_candidates": [
     "6fea8287aa5f078a5836902478320699e54571a9",
-    "ad14c5aced6cf053c7617dfb03245506e1e9dad5"
+    "ad14c5aced6cf053c7617dfb03245506e1e9dad5",
+    "74455fd7f22d6a423eb93b070bd2c9a37d0953d7"
   ],
   "accepted_candidates": [],
   "policy": {
@@ -18,6 +19,7 @@
     "preview_requires_status": "ready_for_user_review",
     "phase_advance_requires_human_acceptance": true,
     "manual_preview_override_requires_explicit_user_request": true,
-    "manual_preview_override_forbidden_for_known_rejected_candidate": true
+    "manual_preview_override_forbidden_for_known_rejected_candidate": true,
+    "learning_design_required": true
   }
 }

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from tools.check_critic_review import evaluate
 from tools.ingest_critic_results import PASS_ORDER
+from tools.check_learning_design import check_design_gate
 
 HEX40=re.compile(r"^[0-9a-f]{40}$")
 
@@ -40,7 +41,8 @@ def read_validated_critic_results(root:Path|None,candidate:str):
     return results
 
 def gate(candidate:str,mode:str,status_record:dict,review_record:dict|None,evidence_root:Path,
-         explicit_preview_override:bool=False,validated_critic_results:dict|None=None):
+         explicit_preview_override:bool=False,validated_critic_results:dict|None=None,
+         learning_design:dict|None=None,learning_design_review:dict|None=None):
     def require(ok,message):
         if not ok: raise ValueError(message)
 
@@ -54,6 +56,11 @@ def gate(candidate:str,mode:str,status_record:dict,review_record:dict|None,evide
 
     if candidate in rejected:
         raise ValueError("candidate is explicitly rejected by human review")
+
+    if policy.get('learning_design_required') is True:
+        require(learning_design is not None, 'learning design required by release policy')
+        check_design_gate(learning_design, learning_design_review, stage='release',
+                          candidate=candidate, evidence_root=evidence_root)
 
     if mode=="phase-advance":
         require(status_record.get("level2_allowed") is True,
@@ -126,6 +133,8 @@ def main():
     parser.add_argument("--evidence-root",type=Path,default=Path("."))
     parser.add_argument("--critic-results-root",type=Path)
     parser.add_argument("--explicit-user-preview-override",action="store_true")
+    parser.add_argument("--learning-design",type=Path)
+    parser.add_argument("--learning-design-review",type=Path)
     args=parser.parse_args()
     try:
         status_record=load_json(args.quality_status)
@@ -134,7 +143,9 @@ def main():
         result=gate(
             args.candidate,args.mode,status_record,review_record,args.evidence_root,
             explicit_preview_override=args.explicit_user_preview_override,
-            validated_critic_results=critic_results
+            validated_critic_results=critic_results,
+            learning_design=load_json(args.learning_design) if args.learning_design else None,
+            learning_design_review=load_json(args.learning_design_review) if args.learning_design_review else None
         )
     except ValueError as exc:
         print(json.dumps({"status":"blocked","error":str(exc)}))

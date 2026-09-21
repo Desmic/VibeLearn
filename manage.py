@@ -38,6 +38,9 @@ ACTIVE_LEVEL1_GROUPS = ["first-words-opening", "first-words-tutorial", "first-wo
 
 def main():
     command = sys.argv[1] if len(sys.argv) > 1 else "serve"
+    if command == 'design-gate':
+        from tools.check_learning_design import main as design_gate
+        return design_gate(sys.argv[2:])
     if command == "vendor":
         # Current Level 1 is PlayCanvas-only. Do not download the retired Three.js
         # runtime into active builds; its historical source remains in Git only.
@@ -51,6 +54,10 @@ def main():
     if command == "vendor-legacy-three":
         return subprocess.call([sys.executable, "tools/vendor_three.py"], cwd=ROOT)
     if command == "build":
+        # A repair/draft remains buildable. Structural validity is not permission
+        # to implement the design or a product-readiness judgment.
+        from tools.check_learning_design import load, validate_design
+        print(json.dumps(validate_design(load(ROOT / 'design' / 'learning-design.json'))))
         from tools.package_repair import build as package_repair
         package_repair()
         if not compileall.compile_dir(ROOT / "app", quiet=1):
@@ -92,7 +99,7 @@ console.log('Active WorldSpec validated.');
         "test": ["-m", "unittest", "discover", "-s", "tests", "-v"],
     }
     if command not in commands:
-        print("Usage: python manage.py [vendor|vendor-legacy-three|build|test|browser|serve --port 8000 --db path]")
+        print("Usage: python manage.py [design-gate|vendor|vendor-legacy-three|build|test|browser|serve --port 8000 --db path]")
         return 2
     return subprocess.call([sys.executable, *commands[command]], cwd=ROOT)
 

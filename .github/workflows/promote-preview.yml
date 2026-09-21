@@ -106,10 +106,13 @@ jobs:
           if [ "$USER_OVERRIDE" = "true" ]; then
             EXTRA="--explicit-user-preview-override"
           fi
+          git show "$CANDIDATE_SHA:design/learning-design.json" > /tmp/candidate-learning-design.json
           python -m tools.check_release_gate \
             --candidate "$CANDIDATE_SHA" \
             --mode preview \
             --quality-status docs/quality-status.json \
+            --learning-design /tmp/candidate-learning-design.json \
+            --learning-design-review design/review.json \
             --review-record "$REVIEW_RECORD" \
             --evidence-root /tmp/vibelearn-review-evidence \
             --critic-results-root /tmp/vibelearn-review-evidence/post-ci \

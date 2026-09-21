@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 from tools.native_play_execution import validate_requirements
 from tools.art_world_rubric import ART_WORLD_CRITERIA
@@ -91,7 +92,9 @@ PASS_SPECS={
         "questions":[
             "At each transition, is there one mode, one goal and one best next action?",
             "Does each tutorial step bind a visible target/control, action, success signal and feedback?",
-            "Can a fresh player proceed without expert knowledge of the UI?"
+            "Can a fresh player proceed without expert knowledge of the UI?",
+            "Follow the actual attention path: are the goal, available action and visible response discoverable at the current object or character, or split across detached screen regions?",
+            "Do inspection, offscreen recovery, touch and keyboard preserve the same clear interaction without tiny world text or hidden controls?"
         ]
     },
     "audio_atmosphere":{
@@ -115,6 +118,8 @@ PASS_SPECS={
         "output_modality":"critic_report",
         "questions":[
             "Does the mechanic faithfully represent the target concept?",
+            "What must the player know before each encounter, where was it introduced and practiced, and what new reasoning does the next encounter require?",
+            "Attempt success by waiting, repeated highlighted clicks and superficial clue patterns; distinguish progress from evidence of understanding.",
             "Does changed context require transfer rather than repetition?",
             "Does the target knowledge improve a meaningful player decision with a visible consequence, or is the task merely a quiz gate?",
             "Can learner prediction/hints accidentally control or inflate the authoritative result?"
@@ -128,6 +133,7 @@ PASS_SPECS={
         "output_modality":"critic_report",
         "questions":[
             "Compare cold-observer interpretation against intended design.",
+            "After the cold pass, compare the exact learning design step by step: progression, decisions, assistance, situated goal/action/feedback, recovery and transfer. Cite native before/after captures; source labels do not prove alignment.",
             "Identify intended meanings the rendered experience failed to communicate.",
             "Do not rewrite the cold report to fit intent."
         ]
@@ -171,7 +177,9 @@ def flatten_evidence(index):
             copy=dict(item);copy["suite"]="post-ci";copy["suite_role"]="post-ci";items.append(copy)
     return items
 
-def build_assignments(index,native_requirements=None):
+def build_assignments(index,native_requirements=None,learning_design_sha256=None):
+    if learning_design_sha256 is not None and (not isinstance(learning_design_sha256,str) or not re.fullmatch(r"[0-9a-f]{64}",learning_design_sha256)):
+        raise ValueError("learning design digest must be SHA256")
     if native_requirements is None:
         native_requirements={}
     if not isinstance(native_requirements,dict) or set(native_requirements)-PASS_SPECS.keys():
@@ -217,6 +225,8 @@ def build_assignments(index,native_requirements=None):
             assignment["required_dimensions"] = ART_WORLD_CRITERIA.copy()
         if name in native_requirements:
             assignment["execution_requirements"]=validate_requirements(native_requirements[name])
+        if name == "intent_comparison" and learning_design_sha256 is not None:
+            assignment["learning_design_sha256"] = learning_design_sha256
         digest_payload={key:value for key,value in assignment.items() if key!="assignment_id"}
         assignment["assignment_id"]="sha256:"+hashlib.sha256(
             json.dumps(digest_payload,sort_keys=True,separators=(",",":")).encode("utf-8")
@@ -230,11 +240,12 @@ def main():
     parser.add_argument("--output-dir",type=Path,required=True)
     parser.add_argument("--native-requirements",type=Path,
                         help="JSON mapping critic passes to required native GUI execution contracts")
+    parser.add_argument("--learning-design-sha256",help="Bind the later intent comparison to the exact design; never supply it to cold observation")
     args=parser.parse_args()
     try:
         index=load_index(args.index)
         native=json.loads(args.native_requirements.read_text(encoding="utf-8")) if args.native_requirements else None
-        assignments=build_assignments(index,native)
+        assignments=build_assignments(index,native,args.learning_design_sha256)
     except (ValueError,OSError) as exc:
         print(json.dumps({"status":"invalid_critic_assignment","error":str(exc)}))
         return 2

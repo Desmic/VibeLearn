@@ -1,5 +1,12 @@
 # VibeLearn game UX system — the game is the course
 
+**System-first correction — 21 September 2026:** The user rejects the current
+learning progression and detached gameplay HUD/guidance. Repair the learning and
+interaction design boundary before game implementation. Follow `LEARNING-DESIGN-GATE.md`: exact-design
+review before prototyping, native GUI alignment before release. The current runtime
+is not compliant; screenshots, test passes and deployment do not imply acceptance.
+Motion/audio remain deferred; no Level 2 or automatic deployment.
+
 **Active direction — 17 September 2026.** Read `GAME-CREATION-PLATFORM.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`.
 
 ## Product standard
@@ -30,7 +37,7 @@ Level 1 is the first actual mission and should not feel like onboarding.
 
 ## Story before interface
 
-For every course, begin with a compelling world/premise and player role before deciding the final mission UI.
+Begin with explicit learning outcomes, prerequisites and a reviewed decision/feedback sequence. Develop a compelling world, premise and player role around that sequence before choosing the final interaction presentation. Revisit both when native play reveals confusion.
 
 Text, dialogue, animation, camera, sound, lighting and world-state changes must describe the same visible events. Do not rely on caption cards to compensate for an unchanged scene.
 

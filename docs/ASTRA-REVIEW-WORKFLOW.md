@@ -1,5 +1,10 @@
 # One Astra reviewer, separate critic lanes
 
+**Upstream design gate — 21 September 2026:** Before game implementation, review
+`LEARNING-DESIGN-GATE.md` and the exact learning design independently. This is a
+design review, not cold gameplay evidence. Later GUI review must still begin cold;
+only its intent-comparison pass receives the design and compares each step.
+
 **Active scope update — 20 September 2026:** The user temporarily parks motion-quality
 and audio review, trusting the engine/code for motion provisionally. Continue native
 GUI play and broader art/world review now. Record motion/audio as deferred and

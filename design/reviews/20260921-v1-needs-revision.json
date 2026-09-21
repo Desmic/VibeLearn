@@ -1,0 +1,15 @@
+{
+  "schema": "vibelearn.learning-design-review.v1",
+  "design_sha256": "2a2209418fa411608068a8413016f7dd6cfd47b3da1397fa0f7236d806ee9637",
+  "reviewer": "astra-learning-design-audit",
+  "context_separation": "Fresh subagent /root/learning_design_audit; read contract and proposed design. Design/source review only, not cold GUI evidence.",
+  "verdict": "needs_revision",
+  "blockers": [
+    "Draft lacks complete novice-facing examples and misconception-based alternatives for the two concepts and transfer.",
+    "Generic copied inspection behavior does not resolve entry, opening and moment-to-moment device interactions."
+  ],
+  "findings": {},
+  "runtime_alignment": {
+    "verdict": "unassessed"
+  }
+}

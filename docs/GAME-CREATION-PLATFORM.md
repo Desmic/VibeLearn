@@ -1,5 +1,12 @@
 # VibeLearn game-creation platform — product direction
 
+**System-first correction — 21 September 2026:** The user rejects the current
+learning progression and detached gameplay HUD/guidance. Repair the learning and
+interaction design boundary before game implementation. Follow `LEARNING-DESIGN-GATE.md`: exact-design
+review before prototyping, native GUI alignment before release. The current runtime
+is not compliant; screenshots, test passes and deployment do not imply acceptance.
+Motion/audio remain deferred; no Level 2 or automatic deployment.
+
 **Design reference — 20 September 2026:** Apply `LIVING-WORLD-DESIGN.md`: curiosity,
 embodiment, visible purpose, attachment, agency, coherent beauty and payoff. These
 are general design/review principles, not a requirement for high-end graphics or

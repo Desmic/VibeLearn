@@ -1,0 +1,471 @@
+{
+  "schema": "vibelearn.learning-design.v1",
+  "id": "llm-first-principles",
+  "version": "3-draft",
+  "author": "codex-implementation",
+  "audience": "Beginners who can read short everyday instructions; prior LLM knowledge is not assumed.",
+  "starting_knowledge": "Reading simple messages; movement and interaction are taught separately.",
+  "learning_promise": "Identify the complete input used at the next generation step, and choose task-relevant context while distinguishing what supplied information supports from what the task requires.",
+  "scope_limits": "Reviewed-design proposal only, not current runtime compliance. Two concepts in an authored word-piece toy; no mastery, delayed-retention or far-transfer claim. Real tokens may be smaller than words and real models may produce different continuations. No training or attention mechanism is taught. Motion/audio quality remain deferred.",
+  "outcomes": [
+    {
+      "id": "sequence",
+      "observable_capability": "Identify the original input plus already-generated pieces as the next step input.",
+      "misconception": "Every step starts again from the original request alone.",
+      "success_evidence": "Commit a next-input prediction on a changed case before the model reveals it; record assistance and first choice.",
+      "prerequisites": []
+    },
+    {
+      "id": "context",
+      "observable_capability": "Choose task-relevant context, identify what information the supplied note supports, and diagnose a task failure caused by unsuitable information.",
+      "misconception": "The model automatically has all relevant world information, or completing a fluent message guarantees the task succeeds.",
+      "success_evidence": "Commit context selection and a source-supported inference before feedback. Report relevance and source-consistency separately; do not score guessed real-model wording.",
+      "prerequisites": [
+        "sequence"
+      ]
+    }
+  ],
+  "sequence": [
+    {
+      "id": "arrival",
+      "phase": "entry",
+      "role": "orientation",
+      "player_goal": "Enter or resume Bellweather.",
+      "decision": "Activate Enter the story on the immediately visible entry plaque.",
+      "feedback": "Entry shows loading in the same plaque, then opens the prologue or saved checkpoint.",
+      "outcomes": [],
+      "recovery": "Retry entry without resetting an existing attempt.",
+      "assistance": "Account and accessibility help only.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "entry-plaque",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "world_anchor",
+          "anchor": "entry-plaque",
+          "critical": true,
+          "purpose": "Enter or resume Bellweather.",
+          "reveal": "Visible on page load; no movement, orbit or discovery required. Account controls remain ordinary accessible fields composed beside the entrance.",
+          "dismiss": "Submit entry; sign-in errors stay next to the relevant field, without changing progress.",
+          "offscreen_recovery": "Keep this focal interaction framed; on inspection exit restore the previous exploration view and an object-local return cue. Do not pin its instructions to a distant corner.",
+          "keyboard": "Focusable semantic controls; interact, tab and escape; same actions as touch.",
+          "touch": "Stable reachable targets at least 44 CSS pixels; no hover requirement.",
+          "readability": "360–430px portrait and desktop; enlarged text reflows in object inspection without clipping. Screen-reader equivalent preserves feedback and choice.",
+          "presentation": "scene_focus",
+          "focus_transition": "Entry plaque is the focal region; dissolve to the shared lantern scene only after load succeeds."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus"
+    },
+    {
+      "id": "opening",
+      "phase": "prologue",
+      "role": "orientation",
+      "player_goal": "Release the lantern with Mira; understand why finding her matters.",
+      "decision": "Mira holds one side and asks Zip to release the other; tap or focus the lantern and activate Release together.",
+      "feedback": "The shared lantern rises; both friends look toward it. After the disruption, the missing friend and damaged speech device motivate the first playable task.",
+      "outcomes": [],
+      "recovery": "Replay is non-destructive; skipping still leads to the separate controls tutorial. No learning credit.",
+      "assistance": "Story text is locally placed by the active character or scene focus.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "shared-lantern",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "character_dialogue",
+          "anchor": "shared-lantern",
+          "critical": true,
+          "purpose": "Release the lantern with Mira; understand why finding her matters.",
+          "reveal": "Frame Zip, Mira and their lantern together. Mira’s one-line invitation sits beside her/lantern, with Release together beside the shared action. Subsequent event text follows its current focal character.",
+          "dismiss": "Release advances the shared beat. Skip prologue is in the accessible game menu; a short local handoff names the immediate task.",
+          "offscreen_recovery": "Keep this focal interaction framed; on inspection exit restore the previous exploration view and an object-local return cue. Do not pin its instructions to a distant corner.",
+          "keyboard": "Focusable semantic controls; interact, tab and escape; same actions as touch.",
+          "touch": "Stable reachable targets at least 44 CSS pixels; no hover requirement.",
+          "readability": "360–430px portrait and desktop; enlarged text reflows in object inspection without clipping. Screen-reader equivalent preserves feedback and choice.",
+          "presentation": "scene_focus",
+          "focus_transition": "The camera carries attention from the lantern to the disruption and then to Zip and the damaged device. Never ask for an offscreen action."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus"
+    },
+    {
+      "id": "controls",
+      "phase": "tutorial",
+      "role": "orientation",
+      "player_goal": "Reach the damaged speech device and reconnect its power.",
+      "decision": "Move, look, inspect, then connect its visible loose power lead.",
+      "feedback": "The socket lights and the device wakes; this restores power, not automatic mastery or a working rescue signal.",
+      "outcomes": [],
+      "recovery": "An accessible Focus device control frames the target if lost. Practice can be replayed or skipped without implying conceptual understanding.",
+      "assistance": "Contextual control hints; skipping records control practice only, no learning outcome.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "speech-device",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "world_anchor",
+          "anchor": "speech-device",
+          "critical": true,
+          "purpose": "Reach and inspect the speech device.",
+          "reveal": "Only movement guidance beside Zip first; reaching the device replaces it with Inspect. Inspection frames the loose lead and its socket; Connect power appears beside them.",
+          "dismiss": "Return to world closes inspection. The reconnected lead remains connected; reinspection starts at the current stage.",
+          "offscreen_recovery": "Keep this focal interaction framed; on inspection exit restore the previous exploration view and an object-local return cue. Do not pin its instructions to a distant corner.",
+          "keyboard": "Focusable semantic controls; interact, tab and escape; same actions as touch.",
+          "touch": "Stable reachable targets at least 44 CSS pixels; no hover requirement.",
+          "readability": "360–430px portrait and desktop; enlarged text reflows in object inspection without clipping. Screen-reader equivalent preserves feedback and choice.",
+          "presentation": "object_local",
+          "focus_transition": "Zip movement cue -> device inspection cue -> lead/socket; hide each prior cue before the next. Connect lights the device; keep the camera here for the greeting."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus"
+    },
+    {
+      "id": "sequence-demo",
+      "phase": "tutorial",
+      "role": "introduce",
+      "player_goal": "Make the repaired device greet Mira.",
+      "decision": "Run one piece at a time and observe what is used next.",
+      "feedback": "Hello joins the request on the input rail before my is produced; then my joins before friend.",
+      "outcomes": [
+        "sequence"
+      ],
+      "recovery": "Keep the first choice immutable. Give the explicit contrast below after a mistake, then allow retry; do not move the player or hide the object.",
+      "assistance": "Explicit demonstration, not assessed. The device explains one change per advance; no prediction is required.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "speech-device",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "object_inspection",
+          "anchor": "speech-device",
+          "critical": true,
+          "purpose": "Make the device say a short message.",
+          "reveal": "At the device nameplate: Try the saved greeting. One Make a piece control sits on the output lever. Input rail remains visible. After each click freeze the new input assembly until the next click. No answer choices.",
+          "dismiss": "Return to world always closes the inspection without answering a question or discarding a choice. Reinspect resumes this exact step.",
+          "offscreen_recovery": "Keep this focal interaction framed; on inspection exit restore the previous exploration view and an object-local return cue. Do not pin its instructions to a distant corner.",
+          "keyboard": "Focusable semantic controls; interact, tab and escape; same actions as touch.",
+          "touch": "Stable reachable targets at least 44 CSS pixels; no hover requirement.",
+          "readability": "Portrait frames one device front. Stack its request rail, output socket and lever within one camera composition; reveal only the current explanatory line. Desktop keeps the full device and room context. Keyboard focus order follows the visible states; screen-reader descriptions announce the same changes. No overlap with movement/camera controls.",
+          "presentation": "contextual_inspection",
+          "focus_transition": "Nameplate -> output piece -> joined input rail. Use one local explanatory line after each advance; no competing mission text."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus",
+      "worked_example": {
+        "situation": "After reconnecting power, the device offers a saved greeting from before Mira disappeared. Her small portrait is clearly marked Saved greeting; she is not physically present.",
+        "starting_state": "Request card: Say a short greeting. Generated pieces: none. A label reads: This practice device follows a prepared example. Its pieces are whole words.",
+        "player_action": "Press Make a piece. Hello emerges. A short local note says: The next step receives the request AND Hello. Press Next piece, then Finish greeting.",
+        "visible_result": "Input begins [Say a short greeting.]. Hello emerges; next input becomes [Say a short greeting.] [Hello]. Then my emerges; next input becomes [Say a short greeting.] [Hello] [my]. Finally friend emerges. The old portrait acknowledges the completed greeting; the live receiver remains silent.",
+        "why": "Each piece extends the available sequence before another is generated. A simple visible before/after comparison is held until the player advances; movement animation is not required to understand it.",
+        "misconception_response": "There is no wrong answer in this demonstration. Replay the step to see that the old pieces remain. An optional local note states real LLMs predict tokens, which need not be whole words, and can produce different continuations."
+      },
+      "assessment_boundary": {
+        "claim": "guided_observation",
+        "before_answer_feedback": "No prediction or commitment required. Demonstrate the assembled input and each new piece openly; this is teaching, not assessment.",
+        "preserve": "First selection per decision, case identity, supplied context, output, revision and help before selection remain immutable.",
+        "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
+      }
+    },
+    {
+      "id": "sequence-practice",
+      "phase": "tutorial",
+      "role": "practice",
+      "player_goal": "Help the device finish a gate request.",
+      "decision": "Predict what input the next step will receive after Open.",
+      "feedback": "Reveal the request plus Open as next input, explain the player’s selection, then generate the and gate.",
+      "outcomes": [
+        "sequence"
+      ],
+      "recovery": "Keep the first choice immutable. Give the explicit contrast below after a mistake, then allow retry; do not move the player or hide the object.",
+      "assistance": "Three choices at the device, with no correctness highlight. Optional hint after a first choice counts as help.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "speech-device",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "object_inspection",
+          "anchor": "speech-device",
+          "critical": true,
+          "purpose": "Finish a second short message.",
+          "reveal": "The device shows request and output Open separately. Three input-tray previews appear directly at its input socket; the actual combined rail is covered. Selecting a tray is reversible until Check my prediction.",
+          "dismiss": "Return to world always closes the inspection without answering a question or discarding a choice. Reinspect resumes this exact step.",
+          "offscreen_recovery": "Keep this focal interaction framed; on inspection exit restore the previous exploration view and an object-local return cue. Do not pin its instructions to a distant corner.",
+          "keyboard": "Focusable semantic controls; interact, tab and escape; same actions as touch.",
+          "touch": "Stable reachable targets at least 44 CSS pixels; no hover requirement.",
+          "readability": "Portrait uses three vertically arranged readable trays inside the inspected device face. The output Open remains visible; 200% text can scroll this inspection while the current question and commit control remain reachable. Desktop keeps the full device and room context. Keyboard focus order follows the visible states; screen-reader descriptions announce the same changes. No overlap with movement/camera controls.",
+          "presentation": "contextual_inspection",
+          "focus_transition": "Input-tray choice -> committed comparison at that socket -> output pieces and practice latch. After feedback, remove choices before showing Continue."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus",
+      "worked_example": {
+        "situation": "A small practice latch opens only after the complete prepared message; no failure cost.",
+        "starting_state": "Request card: Ask for the gate to open. Output rail: Open. The assembled NEXT INPUT rail is covered until the player commits.",
+        "player_action": "On the device, select one prediction tray: request only; Open only; request plus Open. Commit Check my prediction, then run the remaining example.",
+        "visible_result": "Reveal [Ask for the gate to open.] [Open] as the actual next input. Generate the, then gate; the practice latch opens after the full message.",
+        "why": "The correct prediction includes both the original request and every generated piece. The latch is a story consequence, not a mastery score.",
+        "misconception_response": "Request only: That leaves out what the engine has already said. Open only: That loses the request. Show the omitted part beside the selected tray, then allow supported retry. The prediction never changes the engine’s authoritative input."
+      },
+      "assessment_boundary": {
+        "claim": "assisted_practice",
+        "before_answer_feedback": "No correctness cues, completed input assembly or destination reveal until the corresponding prediction is committed.",
+        "preserve": "First selection per decision, case identity, supplied context, output, revision and help before selection remain immutable.",
+        "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
+      }
+    },
+    {
+      "id": "context-contrast",
+      "phase": "mission",
+      "role": "introduce",
+      "player_goal": "See what information a supplied note can contribute.",
+      "decision": "Compare what two different notes say about a route.",
+      "feedback": "Each supplied note is paired with an illustrative continuation that uses its destination; the task can still require a different destination.",
+      "outcomes": [
+        "context"
+      ],
+      "recovery": "Keep the first choice immutable. Give the explicit contrast below after a mistake, then allow retry; do not move the player or hide the object.",
+      "assistance": "Explicit side-by-side comparison; no independent evidence claimed.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "speech-device",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "object_inspection",
+          "anchor": "speech-device",
+          "critical": true,
+          "purpose": "Make a message fit the immediate situation.",
+          "reveal": "Two physical note cards sit in holders beside the input slot. Inspecting each reveals its complete text next to that holder. Run A/Run B uses the same lever; Compare reveals two paired rows on the calibration board.",
+          "dismiss": "Return to world always closes the inspection without answering a question or discarding a choice. Reinspect resumes this exact step.",
+          "offscreen_recovery": "Keep this focal interaction framed; on inspection exit restore the previous exploration view and an object-local return cue. Do not pin its instructions to a distant corner.",
+          "keyboard": "Focusable semantic controls; interact, tab and escape; same actions as touch.",
+          "touch": "Stable reachable targets at least 44 CSS pixels; no hover requirement.",
+          "readability": "Portrait compares two short stacked pairs on the same board; no simultaneous duplicate console. Text reflows rather than shrinking. Desktop keeps the full device and room context. Keyboard focus order follows the visible states; screen-reader descriptions announce the same changes. No overlap with movement/camera controls.",
+          "presentation": "contextual_inspection",
+          "focus_transition": "Supplied note -> its paired prepared reply. Compare hides the lever choices and makes both pairs readable together. Return to device restores the same camera."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus",
+      "worked_example": {
+        "situation": "The powered device has an offline calibration board. A small practice map uses North and South docks, not live people or a new rescue task.",
+        "starting_state": "Fixed request: Tell the courier where to bring the lantern. Note A: Lantern deliveries go to North dock. Note B: Lantern deliveries go to South dock. A device label reads: Prepared examples show possible continuations, not guaranteed replies.",
+        "player_action": "Place Note A in the input slot, then Note B. Observe the destination each note supplies; press Compare to keep both examples visible.",
+        "visible_result": "A is paired with Bring it North; B with Bring it South. Each pair occupies one row of the physical calibration board. The live receiver stays silent.",
+        "why": "Context changes the information available to a model. These are authored examples, not a rule that a real model blindly copies a note or always produces this wording.",
+        "misconception_response": "A local explanation says: A real model may respond differently, or point out a mismatch. Here we are checking what information the note supplies, not guessing exact words. The device cannot use an unsupplied note merely because you saw it in the room."
+      },
+      "assessment_boundary": {
+        "claim": "guided_observation",
+        "before_answer_feedback": "No prediction required. Reveal both supplied notes and illustrative responses; this is an explicit comparison, not independent evidence.",
+        "preserve": "First selection per decision, case identity, supplied context, output, revision and help before selection remain immutable.",
+        "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
+      }
+    },
+    {
+      "id": "context-practice",
+      "phase": "mission",
+      "role": "practice",
+      "player_goal": "Prepare a route draft for contacting Mira.",
+      "decision": "Supply a relevant signal note, then identify the destination supported by that selected note.",
+      "feedback": "Show whether the note concerns Mira and which destination it supplies. Save a draft on the silent receiver; Mira does not answer yet.",
+      "outcomes": [
+        "context"
+      ],
+      "recovery": "Keep the first choice immutable. Give the explicit contrast below after a mistake, then allow retry; do not move the player or hide the object.",
+      "assistance": "Before reveal, both notes are equally legible and have no answer highlighting. Optional help asks who the task concerns. Record first choices and assistance.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "speech-device",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "object_inspection",
+          "anchor": "speech-device",
+          "critical": true,
+          "purpose": "Repair a message based on an irrelevant note.",
+          "reveal": "The receiver shows Prepare a route draft. Two intercepted notes sit beside the input slot. After selecting one, only that note and Garden/Tower inference choices appear at the slot. Check the draft commits.",
+          "dismiss": "Return to world always closes the inspection without answering a question or discarding a choice. Reinspect resumes this exact step.",
+          "offscreen_recovery": "Keep this focal interaction framed; on inspection exit restore the previous exploration view and an object-local return cue. Do not pin its instructions to a distant corner.",
+          "keyboard": "Focusable semantic controls; interact, tab and escape; same actions as touch.",
+          "touch": "Stable reachable targets at least 44 CSS pixels; no hover requirement.",
+          "readability": "Portrait stages context selection and source-consistency sequentially in the receiver frame. Preserve request and selected note during the inference; do not show irrelevant controls. Desktop keeps the full device and room context. Keyboard focus order follows the visible states; screen-reader descriptions announce the same changes. No overlap with movement/camera controls.",
+          "presentation": "contextual_inspection",
+          "focus_transition": "Request+notes -> selected-note inference -> paired feedback -> saved draft and visible cracked lens. The next goal appears beside the damaged lens after old choices disappear."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus",
+      "worked_example": {
+        "situation": "Two intercepted notes are clipped beside the receiver. Its cracked signal lens prevents a live reply; the current task is to prepare a draft.",
+        "starting_state": "Request: Prepare a message for Mira. Note A: Mira is held by the garden. Note B: Tavi is held by the tower. No timestamps, CURRENT labels or fixed answer position. Mira remains missing.",
+        "player_action": "Place one note in the device. Answer at the same slot: Which place does the note YOU supplied name? Select Garden or Tower, then Check the draft.",
+        "visible_result": "Mira note -> Garden identified, route draft ready. Tavi note -> Tower identified, draft concerns someone else. A local device indication reads Draft only - signal lens broken. Neither branch sends a delivery or shows Mira receiving anything.",
+        "why": "Relevance and source-consistency are separate. Tavi plus Tower is source-consistent but does not provide Mira’s destination. No exact language-model continuation is graded.",
+        "misconception_response": "After commitment, the selected note stays beside the request. Feedback identifies the named person and place, then offers a retry. Wrong source-consistency is distinguished from wrong relevance; the task never teaches newest note always wins."
+      },
+      "assessment_boundary": {
+        "claim": "assisted_practice",
+        "before_answer_feedback": "No correctness cues, completed input assembly or destination reveal until the corresponding prediction is committed.",
+        "preserve": "First selection per decision, case identity, supplied context, output, revision and help before selection remain immutable.",
+        "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
+      }
+    },
+    {
+      "id": "changed-problem",
+      "phase": "mission",
+      "role": "transfer",
+      "player_goal": "Supply the repair transmitter with the information needed for a replacement lens.",
+      "decision": "Supply one inventory note, identify the crate named by that note, then predict the full next input after two generated pieces.",
+      "feedback": "Reveal the full request, selected note and both generated pieces. The prepared example requests the named crate; the matching replacement lens restores the receiver.",
+      "outcomes": [
+        "sequence",
+        "context"
+      ],
+      "recovery": "A wrong delivery is returned without penalty. Reinspect the actual supplied note and retry; first choices and help remain separate from final success.",
+      "assistance": "No answer highlighting or next-input assembly before the corresponding choice. The first two generated pieces are the same in both branches and reveal no destination.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "repair-transmitter",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "object_inspection",
+          "anchor": "repair-transmitter",
+          "critical": true,
+          "purpose": "Use the repair transmitter to fetch the right replacement part.",
+          "reveal": "Repair transmitter frames the cracked lens and two inventory cards. After note and crate inference are committed, show Fetch and from on its output rail. Reveal next-input tray choices at its covered input socket; do not reveal the combined rail.",
+          "dismiss": "Return to world preserves staged choices; after feedback, retry is local to the transmitter.",
+          "offscreen_recovery": "Keep this focal interaction framed; on inspection exit restore the previous exploration view and an object-local return cue. Do not pin its instructions to a distant corner.",
+          "keyboard": "Focusable semantic controls; interact, tab and escape; same actions as touch.",
+          "touch": "Stable reachable targets at least 44 CSS pixels; no hover requirement.",
+          "readability": "Portrait stages these states in the same device inspection. Show both generated pieces and the three input trays legibly for the input decision. Reflow/scroll within the object view; keep Return to world reachable and preserve state. Desktop keeps the full device and room context. Keyboard focus order follows the visible states; screen-reader descriptions announce the same changes. No overlap with movement/camera controls.",
+          "presentation": "contextual_inspection",
+          "focus_transition": "Lens/request+inventory -> selected-note inference -> two generated pieces -> input prediction -> comparison and drawer part -> installed lens. One decision at a time, all at the same bench."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus",
+      "changed_situation": "Change from a person/destination delivery to a replacement-part/supply lookup. The same growing-input rule applies. This is near transfer within the toy, not broad real-world LLM transfer.",
+      "shortcut_probe": "Try recency, fixed positions, repeated clicking, request-only input, latest-piece-only input and notes treated as automatically available. Option order varies deterministically by case. First wrong guesses remain wrong even if retry succeeds.",
+      "evidence_limit": "First context relevance, source-consistency and all-history input prediction are separate observations. Correct reading of a supplied note does not prove real-model output prediction; one changed toy case does not establish mastery or retention.",
+      "commit_before_feedback": true,
+      "worked_example": {
+        "situation": "The route draft is ready but the receiver cannot answer through a cracked lens. A maintenance transmitter and two inventory cards sit on the same repair bench.",
+        "starting_state": "Request: Ask for a replacement lens. Note A: Replacement lenses are in the blue crate. Note B: Spare wicks are in the copper crate. Neither note is newer; order varies. The device identifies this as another prepared example.",
+        "player_action": "Supply a note. At the input slot choose which crate THAT note names: Blue or Copper. Commit this inference. The prepared example produces Fetch and from, without revealing a crate. Now choose the next input: request+note only; request+note+from; or request+note+Fetch+from. Commit before the combined input is revealed.",
+        "visible_result": "Next input is request+selected note+Fetch+from regardless of the learner’s prediction. The next illustrated piece is Blue or Copper for the supplied note. The maintenance drawer offers the corresponding part; a wick cannot repair a cracked lens. Replacing the lens enables the final reply.",
+        "why": "All generated history, not only the latest piece, joins the original input. Choosing the relevant inventory note and reading what it supports are separately assessed. The example illustrates one possible continuation; a real model could reject a mismatched note rather than request a wick.",
+        "misconception_response": "Wick note+Copper is source-consistent but irrelevant to a lens request. Omitting both words loses generated history; retaining from but dropping Fetch loses earlier history. Show the omitted pieces after commitment. Prediction choices never change model input or output; first choices and help are retained."
+      },
+      "assessment_boundary": {
+        "claim": "bounded_first_decisions",
+        "before_answer_feedback": "No correctness cues, completed input assembly or destination reveal until the corresponding prediction is committed.",
+        "preserve": "First selection per decision, case identity, supplied context, output, revision and help before selection remain immutable.",
+        "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
+      }
+    },
+    {
+      "id": "consequence",
+      "phase": "payoff",
+      "role": "orientation",
+      "player_goal": "See that the repaired signal reaches Mira.",
+      "decision": "Inspect the receiver’s reply, then return to exploring the current room.",
+      "feedback": "With a relevant route draft and the replacement lens installed, Mira’s first LIVE reply appears beside the receiver image. She is alive but still held elsewhere. The receiver remains repaired; Level 2 remains sealed.",
+      "outcomes": [],
+      "recovery": "Reopen the reply without replaying or resetting. No next-level entry exists.",
+      "assistance": "Optional recap; no Level 2 access or mastery claim.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "message-receiver",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "character_dialogue",
+          "anchor": "message-receiver",
+          "critical": true,
+          "purpose": "See that the repaired signal reaches Mira.",
+          "reveal": "Light and a restrained local cue draw attention to the receiver after the communication succeeds. The short reply appears beside it, not in a top-left completion panel.",
+          "dismiss": "Close reply returns to the room. Replay belongs in the game menu; the only immediate local action is Return to room.",
+          "offscreen_recovery": "Keep this focal interaction framed; on inspection exit restore the previous exploration view and an object-local return cue. Do not pin its instructions to a distant corner.",
+          "keyboard": "Focusable semantic controls; interact, tab and escape; same actions as touch.",
+          "touch": "Stable reachable targets at least 44 CSS pixels; no hover requirement.",
+          "readability": "360–430px portrait and desktop; enlarged text reflows in object inspection without clipping. Screen-reader equivalent preserves feedback and choice.",
+          "presentation": "object_local",
+          "focus_transition": "The transmitter response leads the eye to the receiver. Keep the same characters and persistent repaired objects in view."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus"
+    }
+  ],
+  "research_decisions": [
+    {
+      "id": "portal-teaching",
+      "source_locator": "docs/GAME-REFERENCE-STUDY.md §6; Valve commentary 5:41–6:09 and 7:35–8:28",
+      "observation": "The study records a lesson revision because waiting could produce success without the relevant decision.",
+      "adaptation": "Separate demonstration, supported practice and changed-case decisions; permit reordering or deleting encounters.",
+      "failure_probe": "Try waiting and following highlights without predicting anything.",
+      "limit": "An authored design and an expert reviewer cannot establish novice learning.",
+      "steps": [
+        "sequence-demo",
+        "sequence-practice",
+        "changed-problem"
+      ],
+      "verification": "Try waiting and following highlights without predicting anything.",
+      "cost": "Author and test one small coherent loop before rebuilding the chapter.",
+      "exclusions": "No new orchestration, copied reference assets or photorealism requirement.",
+      "review_lanes": [
+        "learning",
+        "gameplay",
+        "art_world"
+      ]
+    },
+    {
+      "id": "situated-attention",
+      "source_locator": "docs/GAME-REFERENCE-STUDY.md §6, 1:41–2:34; user screenshot and instruction 2026-09-21",
+      "observation": "The commentary describes replacing a hard-to-explain setup with a physical reveal. The user screenshot shows goal, world and action panel separated.",
+      "adaptation": "Place goals, actions and feedback at the active device, character or explicit object-inspection view.",
+      "failure_probe": "Look only at the active object: can the next action and its response be discovered? Test phone framing and enlarged text.",
+      "limit": "Our interface rule is a design decision supported by the user finding; the source does not establish that every HUD must be diegetic.",
+      "steps": [
+        "controls",
+        "context-practice",
+        "consequence"
+      ],
+      "verification": "Look only at the active object: can the next action and its response be discovered? Test phone framing and enlarged text.",
+      "cost": "Author and test one small coherent loop before rebuilding the chapter.",
+      "exclusions": "No new orchestration, copied reference assets or photorealism requirement.",
+      "review_lanes": [
+        "learning",
+        "gameplay",
+        "art_world"
+      ]
+    }
+  ],
+  "prototype_scope": {
+    "steps": [
+      "controls",
+      "sequence-demo",
+      "sequence-practice"
+    ],
+    "purpose": "Test one short, understandable device interaction before implementing the mission. Use disposable local state, no learner API writes; keep the current saved journey intact.",
+    "not_authorized_by_design_pass": "A design pass permits the bounded prototype, not release, Level 2 or claims that a novice has learned."
+  },
+  "art_world_direction": {
+    "device_identity": "The speech device has an unmistakable input rail, a speaker and an output rail; avoid arbitrary decorative cubes. Its state is readable by shape and labels, not color alone.",
+    "composition": "One device-scale inspection focus. On desktop the whole device and some surrounding room remain visible. On phones reframe the device, use sequential reveal and readable semantic controls anchored to its rails; never shrink the full desktop dashboard into a bottom box.",
+    "reference_limit": "Portal spatial explanation motivates showing cause near effect, but does not prescribe this invented device. Preserve Bellweather materials and character attachment; no copied assets.",
+    "verification": "Cold observer must locate the device, distinguish input/output, predict the next action and notice the result on 360–430px and desktop. Text enlargement and keyboard must not lose an action."
+  }
+}

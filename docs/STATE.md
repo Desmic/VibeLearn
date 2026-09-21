@@ -1,6 +1,28 @@
 # Current state — LLM learning-game proof track
 
-**Explicit review deployment � 20 September 2026:** User requested commit, push
+**Design/prototype checkpoint — 21 September 2026:** The concrete v3 design
+passed independent authoring review only for controls, sequence demonstration and
+supported practice. Exact digest and scope are in `design/review.json`; release
+remains blocked. `web/lab/speech-device.html` is an unfinished disposable local
+prototype using the shared PlayCanvas engine and parameterized sequence practice.
+Native inspection reached its room; movement/inspection and phone behavior still
+need repair and full play. It is not integrated into the saved adventure or deployed.
+Serve locally with `python -m http.server 8046 --bind 127.0.0.1 --directory web`.
+Earlier draft-rejection notes below are historical; runtime rejection remains active.
+
+**System-first correction — 21 September 2026:** The user rejects the current
+learning progression and detached gameplay HUD/guidance. Repair the learning and
+interaction design boundary before game implementation. Follow `LEARNING-DESIGN-GATE.md`: exact-design
+review before prototyping, native GUI alignment before release. The current runtime
+is not compliant; screenshots, test passes and deployment do not imply acceptance.
+Motion/audio remain deferred; no Level 2 or automatic deployment.
+The learning/attention contract, prototype/release checks and native ingestion
+repairs are implemented locally and tested. Independent review rejects the draft
+until concrete examples and step-specific presentation are supplied. See
+`experiments/20260921-learning-design-system-repair.md`; no game/runtime acceptance
+or deployment follows from this system checkpoint.
+
+**Explicit review deployment — 20 September 2026:** User requested commit, push
 and deployment of this checkpoint. Render is live on `74455fd7f22d6a423eb93b070bd2c9a37d0953d7`
 (deploy `dep-dao21bn40ujc73djt40g`), with auto-deploy off. Public health, exact
 served runtime files and native browser entry rendering pass. Authenticated hosted

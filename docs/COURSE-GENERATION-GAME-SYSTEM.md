@@ -1,5 +1,12 @@
 # Course generation produces playable teaching systems
 
+**System-first correction — 21 September 2026:** The user rejects the current
+learning progression and detached gameplay HUD/guidance. Repair the learning and
+interaction design boundary before game implementation. Follow `LEARNING-DESIGN-GATE.md`: exact-design
+review before prototyping, native GUI alignment before release. The current runtime
+is not compliant; screenshots, test passes and deployment do not imply acceptance.
+Motion/audio remain deferred; no Level 2 or automatic deployment.
+
 **Active platform direction — 17 September 2026.** Read `GAME-CREATION-PLATFORM.md`, `LEARNER-ON-DEMAND-AND-REPAIR.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`. The product is learner-facing and creates personalized games on demand. This document defines production of those games; an internal authoring studio is supporting infrastructure, not the first learner experience. The current How-LLMs-Work track is the quality/reuse proof case, not the final product shape.
 
 ## North star
