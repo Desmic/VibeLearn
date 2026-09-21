@@ -259,7 +259,7 @@ def replay(snapshot, value):
     view = _gate_view(config, value, engine, result)
     state = result.state
     revealed = state['relay_stage'] in ('revealed', 'done')
-    relay_output = ['Meet', 'at', state['relay_context'].title()] if revealed else []
+    relay_output = (['Meet', 'at'] + ('Lantern Loft' if state['relay_context'] == 'loft' else 'Bell Yard').split()) if revealed else []
     return {**view, 'relay_case': deepcopy(config['relay_case']), 'relay_output': relay_output}
 
 

@@ -1,0 +1,39 @@
+{
+  "schema": "vibelearn.learning-design-review.v1",
+  "design_sha256": "007d11beb345747ecd039a873ea88edf2c92e07c4fa186b0f5f59a8fc5512b66",
+  "reviewer": "internal-tool-assisted-design-review-20260921",
+  "context_separation": "Deliberately separated critique pass over the frozen v4 design file and the recorded 21 September user criticism only. Method is internal_tool_assisted under the documented fallback (docs/history/20260914-CRITIC-HANDOFF.md): no genuinely separate agent was available in this harness, so this is not an independent agent/model review. Source and runtime were read before the pass; findings below target the design text itself, not runtime behavior, which stays unassessed.",
+  "verdict": "pass",
+  "approval_stage": "prototype",
+  "blockers": [],
+  "findings": {
+    "progression": {
+      "verdict": "pass",
+      "reason": "V4 maps the learning ladder onto the chapter the player actually traverses: fully guided repair (sequence-demo), a committed next-input rule choice at the same machine (sequence-practice), physical sign comparison (context-contrast), prediction before generation (context-practice), then the relay as a changed case combining both outcomes. Each rung adds exactly one responsibility; control practice stays separate from conceptual claims.",
+      "counterexample": "Replaying the tutorial loop with understanding deferred to Level 1 fails only if first choices could be rewritten; the immutable-first-choice and separate reporting rules keep the guided pass from laundering into assessed evidence. Final completion after a wrong first route must not become independent success."
+    },
+    "concept_fidelity": {
+      "verdict": "pass",
+      "reason": "The relay keeps relevance constant (both notes are from Mira) so the discriminating concept is currentness within supplied sources, not 'latest wins'; the parade notice in the corridor step keeps recency-only guessing from succeeding there either. Prepared continuations remain labeled illustrative, predictions cannot alter authoritative output, and no real-model wording is graded.",
+      "counterexample": "A learner who always picks the dated-later note without reading could pass the relay. That residual shortcut is why the destination inference ('which place does the chosen note name') is a separate committed observation from relevance; the design reports them separately and the scope note denies any mastery claim."
+    },
+    "decision_necessity": {
+      "verdict": "pass",
+      "reason": "Every assessed beat requires a commit before reveal: the gate prediction gates word generation in the rules themselves, the loop prediction and relay destination/next-input choices gate progression, and the design pins each to the device card. Waiting and clicking highlights alone cannot reach the payoff without recording a first choice for each observation.",
+      "counterexample": "Guessing both relay trays at random can produce correct observations with ~favorable odds; first-decision immutability plus separate assistance and independence reporting bound that, but repeated guessing is why one changed case can certify bounded decisions only, never transfer."
+    },
+    "attention_and_access": {
+      "verdict": "pass",
+      "reason": "Every critical surface is anchored to the focal device, character or entrance with explicit reveal, dismissal, offscreen recovery (edge cue plus safe-area clamp), keyboard/touch parity and portrait/enlarged-text reflow. The detached bottom console and top-left goal block are replaced by machine- and receiver-local cards; modals are limited to optional depth (Look inside) and never carry a required decision away from its object.",
+      "counterexample": "A projected card that occludes the gate it describes, or one that drifts over the joystick cluster on a 360px portrait frame, fails despite correct anchoring; the readability field and the cold-observer verification in art_world_direction are the acceptance tests for exactly that failure."
+    },
+    "research_application": {
+      "verdict": "pass",
+      "reason": "The situated-attention decision now names the real chapter objects (machine, boards, receiver) instead of an invented bench, and Portal-derived passive-success probing maps to pre-feedback commits at those objects. Limits stay explicit: the interface rule is a design decision supported by the user finding, not a claim that every HUD must be diegetic.",
+      "counterexample": "Anchoring every label to every object would recreate clutter the user already rejected; the design keeps one critical focus per step and treats the masthead/menu as non-critical system furniture, which bounds the diegetic commitment."
+    }
+  },
+  "runtime_alignment": {
+    "verdict": "unassessed"
+  }
+}

@@ -72,16 +72,22 @@ part('friend-signal-foot','box','teal',[0,-1.34,0],[.9,.12,.6],{parent:'friend-s
 part('friend-signal-screen','box','blueGlow',[0,.05,.18],[1.15,.65,.06],{parent:'friend-signal',motion:{type:'pulse',amplitude:.08,speed:1.2}});
 for(const side of [-1,1])part('friend-signal-eye-'+side,'sphere','ink',[side*.23,.08,.23],[.13,.13,.06],{parent:'friend-signal'});
 e.push({id:'friend-signal-label',parent:'friend-signal',position:[0,1.05,.2]});
+/* Mira's two intercepted notes are physical cards clipped beside the receiver. */
+for(const [side,x,tilt] of [['a',-1.02,14],['b',1.02,-14]]){
+  part('relay-note-'+side,'box','paper',[x,.62,.14],[.58,.7,.05],{parent:'friend-signal',rotation:[6,tilt,0],enabled:false});
+  part('relay-note-'+side+'-pin','sphere','gold',[x,.97,.17],[.06,.06,.05],{parent:'friend-signal'});
+  e.push({id:'relay-note-'+side+'-label',parent:'relay-note-'+side,position:[0,.5,0]});
+}
 part('tutorial-route-open','box','mint',[0,.02,-12.4],[4,.04,10],{parent:'prison-zone',enabled:false});
 
 function routeBoard(id,position,rotation,material,accent){
-  e.push({id,parent:'prison-zone',position,rotation:[0,rotation,0],collider:{shape:'box',halfExtents:[1.2,1.15,.28],offset:[0,1.15,0]}});
+  e.push({id,parent:'prison-zone',position,rotation:[0,rotation,0],collider:{shape:'box',halfExtents:[1.6,1.35,.28],offset:[0,1.35,0]}});
   part(id+'-post','cylinder','wood',[0,.72,0],[.11,1.45,.11],{parent:id});
-  part(id+'-board','box',material,[0,1.55,0],[2.3,1.15,.14],{parent:id});
-  part(id+'-cap','box',accent,[0,2.08,.08],[2.35,.13,.12],{parent:id});
-  part(id+'-pin-a','sphere','gold',[-.86,1.55,.16],[.08,.08,.05],{parent:id});
-  part(id+'-pin-b','sphere','gold',[.86,1.55,.16],[.08,.08,.05],{parent:id});
-  e.push({id:id+'-label',parent:id,position:[0,2.45,0]});
+  part(id+'-board','box',material,[0,1.6,0],[3.1,1.5,.14],{parent:id});
+  part(id+'-cap','box',accent,[0,2.3,.08],[3.15,.13,.12],{parent:id});
+  part(id+'-pin-a','sphere','gold',[-1.16,1.6,.16],[.08,.08,.05],{parent:id});
+  part(id+'-pin-b','sphere','gold',[1.16,1.6,.16],[.08,.08,.05],{parent:id});
+  e.push({id:id+'-label',parent:id,position:[0,2.6,0]});
 }
 routeBoard('notice-old',[-6.2,0,-11.5],20,'wood','gold');
 routeBoard('notice-parade',[6.2,0,-11.2],-20,'rose','pinkGlow');
@@ -146,7 +152,7 @@ const revealGroups=[
 ];
 const revealParts=revealGroups.flat();
 
-export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'9',
+export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'10',
   environment:{clearColor:'#172238',ambient:'#6c7694',exposure:1.05,toneMapping:'aces',fog:{type:'linear',color:'#8f91a7',start:38,end:125}},
   materials:{stone:{diffuse:'#d8b997'},paper:{diffuse:'#f9dfba'},gold:{diffuse:'#ce9d53',gloss:.45},coral:{diffuse:'#d67a69'},ink:{diffuse:'#273144'},indigo:{diffuse:'#4c5276'},rock:{diffuse:'#717b91'},teal:{diffuse:'#548e89'},rose:{diffuse:'#c87678'},leaf:{diffuse:'#477765'},mint:{diffuse:'#91d2af',emissive:'#60a990',emissiveIntensity:.25},wood:{diffuse:'#795755'},glow:{diffuse:'#ffe5ad',emissive:'#ffc97c',emissiveIntensity:1.25},pinkGlow:{diffuse:'#ffa58c',emissive:'#e88c70',emissiveIntensity:.8},redGlow:{diffuse:'#fa9f78',emissive:'#fc705c',emissiveIntensity:1.25},cloud:{diffuse:'#efd7cc'},haze:{diffuse:'#bda8bc'},dark:{diffuse:'#20283a'},prison:{diffuse:'#35445d'},blueGlow:{diffuse:'#9fdcff',emissive:'#76bfff',emissiveIntensity:1.8},void:{diffuse:'#070b12'}},
   assets:{robot:{type:'container',src:'/assets/quaternius-animated-robot.glb',transform:{position:[0,-.08,0],scale:[.52,.52,.52]},animations:{idle:'RobotArmature|Robot_Standing',run:'RobotArmature|Robot_Running',yes:'RobotArmature|Robot_Yes',no:'RobotArmature|Robot_No',wave:'RobotArmature|Robot_Wave'},defaultAnimation:'idle'}},
@@ -170,7 +176,7 @@ export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'
 
 const missionBase=()=>({
   show:['zip','prison-zone','sun','star',...revealParts],
-  hide:[...speechMarks,'bellweather-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','zip-voice','socket-core','socket-ring',...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
+  hide:[...speechMarks,'bellweather-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','relay-note-a','relay-note-b','zip-voice','socket-core','socket-ring',...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
   transforms:{'moon-door':{position:[0,0,0]},'sun-door':{position:[0,0,0]},'star-door':{position:[0,0,0]},zip:{position:[0,0,-28]}},
   animations:{zip:'idle'}
 });
@@ -274,6 +280,8 @@ function present(s,prev){
   const tutorialComplete=s.round===1||s.status==='success';
   if(tutorialComplete){p.transforms['moon-door']={position:[0,7.8,0]};p.show.push('tutorial-route-open','zip-voice','route-floor','route-wall--1','route-wall-1');}
   if(s.round===1&&s.status!=='success')p.show.push('notice-old','notice-parade','notice-today');
+  // The relay is played at the receiver: its two physical notes appear with it.
+  if(s.relay_stage&&s.relay_stage!=='none')p.show.push('relay-note-a','relay-note-b');
   if(s.status==='wrong'){
     p.show.push('wrong-ring');p.animations.zip='no';
     p.transforms['wrong-ring']={position:s.round===1?[0,.12,-10.8]:[6,.12,-11]};

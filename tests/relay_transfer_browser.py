@@ -18,26 +18,26 @@ def assert_commitment_layout(page, selector):
         page.set_viewport_size({'width':width,'height':height})
         note=page.locator(selector)
         expect(note).to_be_visible()
-        button=page.locator('#actions > button.primary')
-        expect(button).to_be_visible()
+        expect(page.locator('#actions > button').first).to_be_visible()
         bounds=page.evaluate('''selector=>{
           const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,bottom:r.bottom};};
           return {actions:rect(document.querySelector('#actions')),
-            button:rect(document.querySelector('#actions > button.primary')),
+            buttons:[...document.querySelectorAll('#actions > button')].map(e=>rect(e)),
             note:rect(document.querySelector(selector))};
         }''',selector)
-        assert bounds['button']['width']>=bounds['actions']['width']-2,bounds
-        assert bounds['note']['y']>=bounds['button']['bottom']-1,bounds
+        for button in bounds['buttons']:
+            assert button['width']>=bounds['actions']['width']-2,(button,bounds)
+            assert bounds['note']['y']>=button['bottom']-1,(button,bounds)
     page.set_viewport_size({'width':390,'height':844})
 
 
 def commit_relay_for_review(page):
     action(page,'Answer the signal')
-    choose(page,'Read the two relay notes',re.compile('18:20'))
-    choose(page,'Predict the message destination','Bell Yard')
-    choose(page,'Predict the next input','The request, selected note, and Meet')
-    expect(page.get_by_role('button',name='Run the relay',exact=True)).to_be_visible()
-    expect(page.locator('#output .empty')).to_have_count(3)
+    choose(page,re.compile('18:20'))
+    choose(page,'Predict: message goes to the Bell Yard')
+    choose(page,'Predict: each step also receives Meet')
+    expect(page.get_by_role('button',name='Run the relay →',exact=True)).to_be_visible()
+    expect(page.locator('#output .empty')).to_have_count(4)
     assert_commitment_layout(page,'[data-relay-commitment]')
 
 
@@ -53,15 +53,15 @@ def main():
             skip_opening_to_tutorial(page)
             complete_tutorial(page)
             action(page,'Begin Level 1 →')
-            choose(page,'Check route signs','Current notice · “Moon route closed. The tower bell answers the five-point lantern mark.”')
-            choose(page,'Predict the gate','Star')
+            choose(page,"Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”")
+            choose(page,'Predict: the machine will say Star')
             summary=page.locator('[data-route-commitment]')
             expect(summary).to_contain_text('Star')
             expect(page.locator('#output .empty')).to_have_count(4)
             assert_commitment_layout(page,'[data-route-commitment]')
             page.reload()
             expect(summary).to_contain_text('Star',timeout=20000)
-            expect(page.get_by_role('button',name='Make first word',exact=True)).to_be_visible()
+            expect(page.get_by_role('button',name='Predict: each step also receives every generated word',exact=True)).to_be_visible()
             assert page.evaluate('FirstWordsReview.state.prediction')=='star'
             expect(page.locator('#output .empty')).to_have_count(4)
             assert_commitment_layout(page,'[data-route-commitment]')

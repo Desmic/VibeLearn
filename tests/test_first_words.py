@@ -186,7 +186,7 @@ class FirstWordsV2Tests(unittest.TestCase):
         self.attempt=service.state(self.path,self.learner)['attempt']
         self.assertEqual(self.attempt['word_machine_state']['relay_prediction'],'loft')
         self.action('relay-run')
-        self.assertEqual(self.attempt['word_machine_state']['relay_output'],['Meet','at','Yard'])
+        self.assertEqual(self.attempt['word_machine_state']['relay_output'],['Meet','at','Bell','Yard'])
         self.action('relay-finish');self.action('finish')
         result=self.attempt['assessment'];observation=result['relay_transfer_observations']
         self.assertFalse(observation['prediction_matches_supplied_context'])
