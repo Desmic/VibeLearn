@@ -200,7 +200,7 @@ function showEnding(){
   const context=result?(result.relevant_context?'You found the current clue and mapped its five-point mark to the Star gate.':'Your first context choice was stale or unrelated; you recovered without erasing it.') : '';
   const loop=result?.loop_prediction&&result.loop_prediction!=='none'?(result.loop_correct?' You predicted that each new word joins the next input.':' The next prediction receives the growing input, not the original input alone.'):' You watched each new word become part of the next input.';
   const relay=session.attempt?.assessment?.relay_transfer_observations;
-  const relayReflection=relay?` In the relay, ${relay.relevant_context?'your first note located Mira':'you recovered from an earlier location without erasing that choice'}. ${relay.input_prediction_correct?'You predicted that Meet joins the next input.':'The relay showed that Meet joins the next input.'}`:'';
+  const relayReflection=relay?` In the relay, ${relay.relevant_context?'the note you offered located Mira':'you recovered from an earlier location without erasing that choice'}. ${relay.input_prediction_correct?'You predicted that Meet joins the next input.':'The relay showed that Meet joins the next input.'}`:'';
   text('#reflection',context+loop+relayReflection);
   text('#ending-signal',relay?'The receiver flickers. “Zip? You found me.” Mira is still trapped, but now she can hear you.':'A broken message flickers from the receiver beyond the gate: “Hel—p.”');
   dialog('#ending');

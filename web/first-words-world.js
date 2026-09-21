@@ -431,6 +431,6 @@ export const openingSpec={
       direction:{kind:'antagonist-action',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','vfx','audio','narration'],worldAfter:'Zip’s chest socket is visibly empty and the removed speech module ends with the Warden.'}},
     {beat:7,audioPhase:'repair',kicker:'ONE THING STILL WORKS',title:'Get the words back.',body:'A repair socket still has power. Restore enough speech to open the door.',
       direction:{kind:'handoff',channels:['world','character','camera','interaction','narration'],worldAfter:'Direct control begins with one clear repair objective and target.'},
-      markers:[{entity:'loose-plug',label:'REPAIR SOCKET',offset:[0,-8]}]}
+      markers:[{entity:'socket',label:'REPAIR SOCKET',offset:[0,-8]}]}
   ]
 };
