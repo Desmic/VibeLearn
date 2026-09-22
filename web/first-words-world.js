@@ -424,6 +424,7 @@ export const openingSpec={
   scenes:[
     {beat:0,audioPhase:'home',kicker:'BELLWEATHER · LANTERN NIGHT',title:'One lantern. Three friends.',body:'You are Zip. Mira made this lantern for the three of you. Send it into the sky.',
       direction:{kind:'establishing',channels:['world','character','camera','interaction','narration'],worldAfter:'The shared lantern is launched and the three friends have visibly acted together.'},
+      markers:[{entity:'friendship-lantern',label:'Send up our lantern',target:'release-lantern',offset:[0,-8]}],
       action:{target:'release-lantern',label:'Send up our lantern',patch:{show:['friendship-lantern','bellworker-b-parcel'],hide:['bellworker-a-parcel'],transforms:{'bellworker-a':{position:[-3.8,0,-4]},'bellworker-b-parcel':{position:[0,.8,.55]}},animations:{zip:'wave'},timeline:{duration:2800,moves:[{entity:'friendship-lantern',from:[1.25,1.2,10.7],to:[0,3.7,8],duration:2600},{entity:'singer',from:[2.2,0,.5],to:[1.8,0,.5],duration:1000},{entity:'friend-a',from:[-2.2,0,.5],to:[-1.8,0,.5],duration:1000}],finish:{animations:{zip:'yes'}}}}},
       success:{body:'Three lights rise above your home.',dialogue:'“Same time next year. All three of us.”'}},
     {beat:1,audioPhase:'danger',audioCue:'capture',kicker:'ABOVE THE SQUARE',title:'A shadow over Bellweather.',body:'A black machine rises above the tower. Red light reaches into the sky.',

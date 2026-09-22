@@ -178,21 +178,43 @@ MEASURE = """async (args) => {
       }
     }
   }
-  return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, markerClash, offenders: offenders.slice(0, 12)};
+  // B8 control surface (interaction model, guide I6): in a cinematic/story state the
+  // only permitted painted controls are the corner system cluster and diegetic world
+  // markers. Any other painted button/link is a stray menu-style control (the 22 Sep
+  // "Take control / ← Back" bottom-bar defect class). Geometry-only budgets passed it.
+  const strayControls = [];
+  if (args.b8 && args.b8.enabled) {
+    // The site-wide skip-to-content link (.skip) is a WCAG keyboard escape hatch
+    // parked off-screen until focus — an accessibility affordance the guide permits
+    // on every page, not a painted game control, so it is allow-listed here (as B3
+    // already exempts it from clipping).
+    const allow = args.b8.allow || ['.rgi-corner', '.rgi-markers', '#markers', '.skip'];
+    for (const el of document.querySelectorAll('button, [role="button"], a[href]')) {
+      if (!visible(el)) continue;
+      if (allow.some(sel => el.closest(sel))) continue;
+      strayControls.push((el.id ? '#' + el.id : el.tagName.toLowerCase()) + ' “' + el.textContent.trim().slice(0, 28) + '”');
+    }
+  }
+  return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, markerClash, strayControls, offenders: offenders.slice(0, 12)};
 }"""
 
 
 def evaluate_state(page, scenario_state, budgets):
+    b8 = {"enabled": bool(scenario_state.get("cinematic"))}
+    if scenario_state.get("control_allow"):
+        b8["allow"] = scenario_state["control_allow"]
     return page.evaluate(MEASURE, {
         "focal": scenario_state.get("focal"),
         "presence": scenario_state.get("presence"),
         "subject": scenario_state.get("subject"),
         "markers": scenario_state.get("markers"),
+        "b8": b8,
         "budgets": budgets,
     })
 
 
-def violations(state_name, metrics, budgets, panel_allowed):
+def violations(state_name, metrics, budgets, panel_allowed, scenario_state=None):
+    scenario_state = scenario_state or {}
     found = []
     # panel_allowed: the scenario state declares an explicitly player-opened
     # focused panel (guide B1: opt-in panels get the raised budget). An open
@@ -217,6 +239,13 @@ def violations(state_name, metrics, budgets, panel_allowed):
     cover = metrics.get("subjectCover")
     if cover and cover["covers"]:
         found.append(f"{state_name}: B7 markers cover the scene subject: {cover['covers'][:4]}")
+    if scenario_state.get("cinematic"):
+        stray = metrics.get("strayControls") or []
+        # I6 accessibility carve-out: reduced-motion play may paint exactly one
+        # explicit advance control (no auto-advance); motion-allowed play, zero.
+        max_stray = 1 if scenario_state.get("reduced_motion") else 0
+        if len(stray) > max_stray:
+            found.append(f"{state_name}: B8 non-diegetic control in cinematic frame (guide I6): {stray[:4]}")
     return found
 
 
@@ -300,12 +329,13 @@ def main():
                     # (guide B1 note); the raised limit must be justified in the scenario.
                     state_budgets["coverage_max"] = state["coverage_max"]
                 states.append({"name": state["name"], "budget_coverage_max": state_budgets["coverage_max"], **metrics})
-                all_violations.extend(violations(state["name"], metrics, state_budgets, bool(state.get("panel_open"))))
+                all_violations.extend(violations(state["name"], metrics, state_budgets, bool(state.get("panel_open")), state))
                 print(f"{state['name']}: coverage={metrics['coverage']:.1%} clipped={len(metrics['clipped'])} "
                       f"long={len(metrics['longBlocks'])} disabled={len(metrics['disabledVisible'])} "
                       f"focal={'n/a' if not metrics['focal'] else len(metrics['focal']['covered'] or [])} "
                       f"presence={'n/a' if not metrics['presence'] else format(metrics['presence']['share'], '.1%')} "
                       f"markerClash={len(metrics['markerClash'])} "
+                      f"stray={len(metrics['strayControls'])} "
                       f"subjectCover={'n/a' if not metrics['subjectCover'] else len(metrics['subjectCover']['covers'])}")
             browser.close()
         finally:

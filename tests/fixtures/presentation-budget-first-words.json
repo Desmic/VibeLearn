@@ -4,6 +4,7 @@
     {
       "name": "prologue-opening-desktop",
       "goto": true,
+      "cinematic": true,
       "wait_text": "for the three of you",
       "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
       "focal": "zip",
@@ -14,6 +15,7 @@
     },
     {
       "name": "prologue-rupture-desktop",
+      "cinematic": true,
       "steps": [
         {"click": "Send up our lantern"},
         {"wait_eval": "()=>document.querySelector('#rgi-title').textContent==='A shadow over Bellweather.'", "timeout": 90000}
@@ -24,6 +26,7 @@
     },
     {
       "name": "prologue-limbo-desktop",
+      "cinematic": true,
       "steps": [
         {
           "wait_eval": "()=>document.querySelector('#rgi-title').textContent==='Silence.'",
@@ -39,6 +42,7 @@
     },
     {
       "name": "prologue-opening-phone",
+      "cinematic": true,
       "viewport": [
         390,
         844

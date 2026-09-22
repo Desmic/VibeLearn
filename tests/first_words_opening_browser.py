@@ -188,13 +188,13 @@ def main():
             expect(page.get_by_role('button',name='REPAIR SOCKET',exact=True)).to_be_visible()
             instance=page.evaluate('FirstWordsReview.runtime.instanceId')
             page.screenshot(path=str(out/'prologue-repair-handoff-390.png'),timeout=15000)
-            # The handoff beat is interactive: tapping the world neither advances
-            # nor closes it; only the explicit control does.
+            # Rule I6: the handoff is ambient. Motion play paints NO "Take control"
+            # button; a tap on the world hands control to the player (the reduced-motion
+            # single control below is the only place that affordance is visible).
+            expect(page.locator('#rgi-next')).to_be_hidden()
+            until(page,'()=>!FirstWordsReview.runtime.world.animating')
             tap_world(page)
-            expect(page.locator('#rgi-intro')).to_be_visible()
-            expect(page.locator('#rgi-title')).to_have_text('Get the words back.')
-            page.get_by_role('button',name='Take control →',exact=True).click()
-            expect(page.locator('#rgi-intro')).to_have_count(0)
+            expect(page.locator('#rgi-intro')).to_have_count(0,timeout=20000)
             expect(page.locator('#adventure')).to_have_attribute('data-experience-mode','tutorial')
             expect(page.locator('#welcome')).to_be_hidden()
             expect(page.locator('#engine')).to_be_visible()
@@ -209,7 +209,7 @@ def main():
             assert page.evaluate("FirstWordsReview.runtime.mode")=='mission'
             checks.append('Eight causal prologue beats separate normal Bellweather, visible Warden cause, rupture effect, isolation, prison reveal, speech targeting, capability removal and repair handoff before the separate tutorial; the same runtime becomes direct-control mission play.')
             checks.append('The Bellweather score is not required before a gesture; the first story advance unlocks bellweather-score-v2 and schedules bars before danger-phase assertions.')
-            checks.append('Plain story beats carry no persistent advance control: they advance ambiently once motion settles, a paused beat holds indefinitely, a world tap moves a beat on immediately, action beats and the final handoff keep explicit affordances, and reduced-motion play never auto-advances.')
+            checks.append('Plain story beats carry no persistent advance control: they advance ambiently once motion settles, a paused beat holds indefinitely, a world tap moves a beat on immediately, story actions are performed on their diegetic world marker (never a bottom button), the final handoff is ambient (a world tap hands control over, no painted button in motion play), and reduced-motion play never auto-advances but paints exactly one explicit control (WCAG 2.2.4).')
 
             before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
             log('Prologue: replay preserves draft');page.get_by_role('button',name='Open game menu').click();page.get_by_role('button',name='Replay the prologue',exact=True).click()
@@ -239,9 +239,10 @@ def main():
                 vertical_clear=clearance['lanternY']<clearance['captionTop']-16
                 assert clearance['visible'] and (horizontal_clear or vertical_clear),clearance
                 q.screenshot(path=str(out/f'prologue-lantern-release-{width}.png'),timeout=15000)
-                # Reduced motion must not auto-advance content (WCAG 2.2.4): a
-                # plain beat waits for input indefinitely.
-                expect(q.locator('#rgi-next')).to_be_hidden()
+                # WCAG 2.2.4: reduced motion never auto-advances (the beat waits for
+                # input indefinitely), so rule I6 paints exactly one explicit control.
+                expect(q.locator('#rgi-next')).to_be_visible()
+                expect(q.get_by_role('button',name='Continue →',exact=True)).to_be_enabled()
                 q.wait_for_timeout(12000)
                 expect(q.locator('#rgi-title')).to_have_text('One lantern. Three friends.')
                 advance_beat(q,'A shadow over Bellweather.')
@@ -285,10 +286,12 @@ def main():
             expect(blind.locator('#rgi-title')).to_be_hidden()
             until(blind,'()=>!FirstWordsReview.runtime.world.animating')
             blind.get_by_role('button',name='Send up our lantern',exact=True).click();until(blind,'()=>!FirstWordsReview.runtime.world.animating')
-            # Ambient pacing then plays the whole captioned sequence with zero
-            # further input; the video shows the world carrying the story alone.
-            expect(blind.locator('#rgi-next')).to_be_visible(timeout=420000)
-            expect(blind.locator('#rgi-intro')).to_be_visible()
+            # Rule I6: ambient pacing then carries the WHOLE captioned sequence with
+            # zero further input - plain beats auto-advance and the final handoff
+            # ambient-closes into the tutorial. Motion play shows no advance control.
+            expect(blind.locator('#rgi-next')).to_be_hidden()
+            expect(blind.locator('#rgi-intro')).to_have_count(0,timeout=420000)
+            expect(blind.locator('#adventure')).to_have_attribute('data-experience-mode','tutorial')
             blind_video=blind.video
             blind_ctx.close()
             blind_video.save_as(str(out/'prologue-caption-blind-390.webm'))

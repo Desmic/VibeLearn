@@ -109,6 +109,18 @@ in real play states at 1280×720 and 390×844:
   stacked into one column over the receiver at the payoff beat — under B2/B3/B1 the
   state measured clean because those check single surfaces, not mutual marker
   collision or subject occlusion by labels.
+- **B8 Control surface (interaction model):** in a motion-allowed cinematic/story
+  state, **no painted DOM control may sit in the bottom-centre nav band**, and **no
+  painted DOM button may carry a world/story verb** (its accessible name must not
+  match the beat's action/handoff label) — those actions belong to a diegetic world
+  marker. Only system verbs in the corner cluster (menu / audio / pause / skip /
+  look-back) are permitted as persistent chrome. The reduced-motion single-control
+  carve-out (I6) is declared in the scenario (`reduced_motion: true`) and exempts
+  exactly one action control. The site-wide keyboard skip link (`.skip`) is an
+  accessibility escape hatch parked off-screen until focus, not painted game chrome,
+  so it is allow-listed like the corner cluster and world markers. This is the mechanical gate that was missing when
+  geometry-only budgets certified a permanent bottom button bar as "≤ 15% coverage,
+  passed."
 
 Budget violations are defects, not preferences. A critic may rate `hud_readability`
 or `presentation_integration` ≥ 9 only with a passing budget report on the exact
@@ -139,6 +151,37 @@ relocate to a free anchor or a transient status line repeats the content (rung 5
 **Rule I5 (failure talks in world language).** Error/recovery feedback is one short
 line near the failed action, naming what to do next; no stack of alerts, no
 jargon, no state loss (Hades pattern bounded by `LEARNING-DESIGN-GATE.md`).
+
+**Rule I6 (ambient, world-first control surface).** Advancement and story actions are
+performed *in the world*, never from a persistent control bar. Concretely, in a
+cinematic/story state:
+
+- There is **no persistent bottom-centre control bar** and **no permanent "Back /
+  Next" nav pair**. A always-visible nav button is the exact "permanent dashboard"
+  P3 forbids; the 22 September rejection ("what is this Take control / Back at the
+  bottom centre?") is this defect resurfacing because the shared opening controller
+  hard-coded a `.rgi-nav` bar.
+- A plain beat advances **ambiently** (auto once motion settles + a content-paced
+  dwell), or by tapping the world, or by keyboard. It shows no advance control.
+- A story-action beat ("raise the lantern") is performed by **acting on the world
+  object** — its diegetic spatial marker (rung 3/4) or tapping the object itself —
+  not a DOM button that *names* the world verb. A DOM button describing a world
+  action violates I1 even when it is the only way to proceed.
+- The final **handoff is ambient**: the world simply becomes live and direct-control
+  begins; at most a brief fading cue (rung 5), never a painted "Take control" button.
+- **Accessibility carve-out (not a loophole):** when the player has
+  `prefers-reduced-motion`, ambient auto-advance is suppressed (WCAG 2.2.4), so a
+  *single* clearly-labelled visible control is **required** and is correct, not a
+  defect. Reduced-motion play may show exactly one explicit action control per beat;
+  motion-allowed play must show zero painted action/advance chrome.
+
+**Why this matters** (the evidence behind I1/I6): diegetic, lowest-rung delivery is
+what keeps the player *inside* the fiction. Persistent non-diegetic chrome is the
+strongest immersion breaker there is — it forces a "cognitive separation between
+player and character" and reminds the player they are "manipulating software rather
+than surviving a lived environment" (diegetic-UI analyses; Dead Space / Metro). The
+BOTW/ToTK opening hours teach and advance through the world with almost no UI; a
+bottom bar that talks to the player is the pattern those games deliberately removed.
 
 ## Information presentation (what goes where)
 
@@ -207,7 +250,7 @@ unassessed; screenshots of a static frame do not certify B2 (movement/orbit requ
 
 | Rule | Mechanism |
 | --- | --- |
-| P1–P3, I1–I5, B1–B7 | `tools/check_presentation_budget.py` (mechanical, exact candidate) + live critic observation |
+| P1–P3, I1–I6, B1–B8 | `tools/check_presentation_budget.py` (mechanical, exact candidate) + live critic observation |
 | Design-time surface declaration | `tools/check_learning_design.py` (existing attention/focus contract) |
 | Review-time certification | `presentation_integration` criterion in `check_critic_review.py` V2 gates — requires budget report + interactive trace + cold-observer + live capture |
 | Worker behavior | this section referenced from `AGENTS.md` build order and `GAME-UX-SYSTEM.md` |

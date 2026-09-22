@@ -47,15 +47,19 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   overlay.dataset.openingReplay=String(replay);
   overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-labelledby','rgi-title');
   // Presentation contract (docs/GAME-PRESENTATION-GUIDE.md): the world carries the
-  // scene; text is one fading subtitle line, controls are contextual and sparse.
+  // scene; text is one fading subtitle line; controls are contextual and sparse.
+  // Rule I6: no persistent bottom-centre control bar. Advancement is ambient/tap/
+  // keyboard; story actions are performed on their diegetic world marker. Only the
+  // corner cluster (system verbs) and world markers are painted chrome; a single
+  // explicit control appears solely for prefers-reduced-motion (WCAG 2.2.4).
   overlay.innerHTML=`<div class="rgi-shell">
     <div class="rgi-visual" id="rgi-world"><div class="rgi-markers"></div>
       <div class="rgi-scene-caption sr-only"><span class="rgi-kicker"></span><h2 id="rgi-title"></h2><blockquote id="rgi-dialogue"></blockquote></div>
       <div class="rgi-subtitle" role="status"><p id="rgi-body"></p><div class="rgi-fact" id="rgi-fact"></div></div>
       <span class="rgi-paused-badge" aria-hidden="true">PAUSED</span>
-      <div class="rgi-corner"><button id="rgi-replay-beat" type="button" aria-label="Replay scene">↻</button><button id="rgi-pause" type="button" aria-label="Pause story motion">⏸</button><button id="rgi-skip" type="button"></button></div>
+      <div class="rgi-corner"><button id="rgi-back" type="button" aria-label="Previous scene">‹</button><button id="rgi-replay-beat" type="button" aria-label="Replay scene">↻</button><button id="rgi-pause" type="button" aria-label="Pause story motion">⏸</button><button id="rgi-skip" type="button"></button></div>
       <small id="rgi-step" class="sr-only"></small></div>
-    <div class="rgi-progress" aria-label="Story progress"></div><div class="rgi-controls"><div class="rgi-nav"><button id="rgi-back" type="button">← Back</button><button id="rgi-next" type="button" class="rg-primary" hidden></button></div></div></div>`;
+    <div class="rgi-progress" aria-label="Story progress"></div><button id="rgi-next" type="button" class="rg-primary" hidden></button></div>`;
   root.append(overlay);
   const progress=overlay.querySelector('.rgi-progress');
   spec.scenes.forEach(()=>progress.append(document.createElement('i')));
@@ -79,8 +83,10 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   const scene=()=>spec.scenes[step];
   const available=()=>Boolean(world?.available&&!runtime.stats().contextLost);
   const ready=()=>!paused&&available()&&(!spec.waitForMotion||!world.stats?.().animating);
-  const ambientBeat=()=>{const s=scene();return !(s.action&&!actionDone)&&step<spec.scenes.length-1;};
-  const advance=()=>{if(closed||paused||!ready()||!ambientBeat())return;armedMs=0;step++;refresh();};
+  // A beat is ambient when its story action is already satisfied (or there is none).
+  // Ambient beats advance themselves; the final beat ambient-closes into the game.
+  const ambientBeat=()=>{const s=scene();return !(s.action&&!actionDone);};
+  const advance=()=>{if(closed||paused||!ready()||!ambientBeat())return;armedMs=0;if(step<spec.scenes.length-1){step++;refresh();}else close('complete');};
   const close=(reason='cancel')=>{
     if(closed)return;closed=true;cancelAnimationFrame(frame);
     if(replay)runtime.dispose();else runtime.detach();
@@ -95,8 +101,13 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
     overlay.querySelector('#rgi-step').textContent=`${step+1} / ${spec.scenes.length}${replay?' · REPLAY':''}`;
     overlay.querySelector('#rgi-back').disabled=step===0;
     overlay.querySelector('#rgi-back').hidden=step===0;
-    next.textContent=s.action&&!actionDone?s.action.label:step===spec.scenes.length-1?(replay?'Return to game':spec.finishLabel||'Begin'):'Continue →';
-    next.hidden=ambientBeat();
+    // Rule I6: motion-allowed play paints no advance/action button — the world marker
+    // performs actions and beats advance ambiently/on tap/keyboard. Only when
+    // prefers-reduced-motion suppresses auto-advance does a single "Continue"/handoff
+    // control appear, and only on ambient beats (a pending action is still done in the
+    // world, never from this button).
+    next.textContent=step===spec.scenes.length-1?(replay?'Return to game':spec.finishLabel||'Begin'):'Continue →';
+    next.hidden=!reduced||!ambientBeat();
     if(ambientBeat()){
       const s2=scene();
       dwellMs=Math.min(20000,12000+40*((s2.body||'').length+(s2.dialogue||'').length+(s2.fact||'').length));
@@ -110,14 +121,24 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
     next.disabled=!ready();
     showSubtitle();
     const markers=overlay.querySelector('.rgi-markers');markers.replaceChildren();
+    let actionableRendered=false;
+    const addMarker=(cfg,{actionable}={})=>{
+      const n=document.createElement('button');n.type='button';n.className=`rgi-marker ${cfg.tone||''}`;n.textContent=cfg.label;n.dataset.entity=cfg.entity;
+      n.dataset.offsetX=String(cfg.offset?.[0]||0);n.dataset.offsetY=String(cfg.offset?.[1]||0);
+      n.disabled=!actionable;n.tabIndex=actionable?0:-1;
+      if(actionable){n.classList.add('rgi-target');n.onclick=()=>performAction();actionableRendered=true;}
+      markers.append(n);
+    };
     for(const marker of s.markers||[]){
       if(actionDone&&marker.hideWhenDone)continue;
-      const n=document.createElement('button');n.type='button';n.className=`rgi-marker ${marker.tone||''}`;n.textContent=marker.label;n.dataset.entity=marker.entity;
-      n.dataset.offsetX=String(marker.offset?.[0]||0);n.dataset.offsetY=String(marker.offset?.[1]||0);
-      const actionable=s.action&&!actionDone&&marker.target===s.action.target;
-      n.disabled=!actionable;n.tabIndex=actionable?0:-1;
-      if(actionable){n.classList.add('rgi-target');n.onclick=()=>performAction();}
-      markers.append(n);
+      addMarker(marker,{actionable:Boolean(s.action&&!actionDone&&marker.target===s.action.target)});
+    }
+    // System guarantee (rule I6, every future title): a pending story action always
+    // gets a diegetic world affordance, synthesised from the action when the content
+    // package did not author one — never a DOM bottom button. Anchor is the action's
+    // marker entity (falls back to the semantic target, which is often an entity id).
+    if(s.action&&!actionDone&&!actionableRendered){
+      addMarker({entity:s.action.anchor||s.action.marker||s.action.target,label:s.action.label,offset:[0,-8]},{actionable:true});
     }
   };
   const performAction=()=>{
