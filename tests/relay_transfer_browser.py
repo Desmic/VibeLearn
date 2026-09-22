@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 from tests.browser_check import start_server, stop_server
 from tests.level1_chapter_browser import (
-    skip_opening_to_tutorial, complete_tutorial, action, choose, generate, complete_relay,
+    skip_opening_to_tutorial, complete_tutorial, action, choose, generate, complete_relay, open_card,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -60,6 +60,7 @@ def main():
             expect(page.locator('#output .empty')).to_have_count(4)
             assert_commitment_layout(page,'[data-route-commitment]')
             page.reload()
+            open_card(page)
             expect(summary).to_contain_text('Star',timeout=20000)
             expect(page.get_by_role('button',name='Predict: each step also receives every generated word',exact=True)).to_be_visible()
             assert page.evaluate('FirstWordsReview.state.prediction')=='star'

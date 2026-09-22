@@ -28,7 +28,19 @@ def skip_opening_to_tutorial(page, *, skip_controls=False):
         expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
 
 
+def open_card(page):
+    # The Level 1 stage card is opt-in behind a world-anchored machine toggle
+    # (diegetic presentation contract). Flow helpers open it the way a player
+    # would; idempotent so tutorial beats (always-open) are unaffected.
+    if page.locator('#engine').is_visible():return
+    toggle=page.locator('#markers [data-machine-toggle]')
+    expect(toggle).to_be_visible(timeout=15000)
+    toggle.click()
+    expect(page.locator('#engine')).to_be_visible(timeout=15000)
+
+
 def action(page,name,saved_text='Saved'):
+    open_card(page)
     if name=='Connect the power lead' and page.get_by_role('button',name='Skip control practice',exact=True).is_visible():
         page.get_by_role('button',name='Skip control practice',exact=True).click()
     with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
@@ -42,6 +54,7 @@ def choose(page,choice):
     # World-anchored trays put every required decision in the stage card; a
     # choice is one button click with one saved command, no modal. Scoped to
     # #actions because matching world signs are separate clickable surfaces.
+    open_card(page)
     with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
         page.locator('#actions').get_by_role('button',name=choice,exact=isinstance(choice,str)).click()
     assert saved.value.ok,saved.value.status
@@ -184,7 +197,13 @@ def main():
 
             action(page,'Begin Level 1 →')
             expect(page.locator('#stage-name')).to_have_text('LEVEL 1 · FIRST MISSION')
+            # Opening beat rides the world: the sign boards and the machine toggle carry
+            # it; the panel must not auto-summon over the corridor.
+            expect(page.locator('#engine')).to_be_hidden()
+            expect(page.locator('#machine-toggle')).to_be_visible(timeout=15000)
+            expect(page.locator('#machine-toggle')).to_contain_text('Find the current route')
             trace.append({'phase':'tutorial-to-level1','mode':page.locator('#adventure').get_attribute('data-experience-mode'),'passed':True})
+            open_card(page)
             expect(page.get_by_role('button',name='Inspect the speech engine')).to_be_visible()
             choose(page,'Supply the old sign · “Take the Moon gate.”')
             expect(page.locator('#context')).to_contain_text('Old route')
@@ -214,7 +233,11 @@ def main():
             assert submitted['assessment']['mastery']=='unknown'
             expect(page.locator('#goal')).to_have_text('Mira heard you.',timeout=15000)
             expect(page.locator('#ending')).not_to_be_visible();page.screenshot(path=str(out/'level1-ending-world-390.png'))
+            open_card(page)
             page.get_by_role('button',name='Look deeper into the prison',exact=True).click();expect(page.locator('#ending')).to_be_visible()
+            # One primary action per screen: the opt-in panel folds away behind the
+            # focused epilogue dialog.
+            expect(page.locator('#engine')).to_be_hidden()
             expect(page.locator('#reflection')).to_contain_text('first context choice was stale')
             expect(page.locator('#reflection')).to_contain_text('predicted that each new word joins the next input')
             page.get_by_role('button',name='Stay here',exact=True).click();page.reload();expect(page.locator('#goal')).to_have_text('Mira heard you.',timeout=15000)
@@ -232,6 +255,7 @@ def main():
                     action(q,'Ask for a hint')
                     expect(q.locator('[data-learning-hint]')).to_contain_text('uses the sign you supplied')
                     q.reload()
+                    open_card(q)
                     expect(q.locator('[data-learning-hint]')).to_be_visible(timeout=15000)
                 after_hint=q.evaluate('FirstWordsReview.state')
                 visible_hint=q.locator('[data-learning-hint]').inner_text() if hint else None

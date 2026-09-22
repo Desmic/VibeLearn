@@ -1,6 +1,19 @@
 /* Reusable projected world-marker placement with HUD-safe clamping. */
 'use strict';
 
+// Viewport-space top limit below persistent page chrome (mastheads, toolbars).
+// Callers pass the live chrome nodes so marker safe areas follow real rendered
+// heights instead of guessed constants.
+export function chromeClearance(nodes,{margin=8,fallback=76}={}){
+  let max=Number.isFinite(fallback)?fallback:76;
+  for(const node of nodes||[]){
+    if(!node||node.hidden)continue;
+    const r=node.getBoundingClientRect();
+    if(r.width&&r.height)max=Math.max(max,r.bottom+margin);
+  }
+  return max;
+}
+
 export function placeWorldMarker(marker,point,{
   viewportWidth,
   safeTop,

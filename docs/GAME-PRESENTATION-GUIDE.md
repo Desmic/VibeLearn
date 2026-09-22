@@ -151,7 +151,14 @@ jargon, no state loss (Hades pattern bounded by `LEARNING-DESIGN-GATE.md`).
 - **Tutorial:** demonstrate in-world, prompt contextually (≤ 6 words), success is
   the teaching; text explains nothing the player didn't just do.
 - **Mission:** world-first; objective line fades after ~5s; markers ≤ 2 words;
-  machine/learning UI appears only via inspection of the machine.
+  machine/learning UI appears only via inspection of the machine. Canonical shape
+  (validated in First Words, reuse it): a world-anchored toggle on the focal object
+  carries the current goal as its label (rung 3) and opens the decision panel
+  (rung 5); the panel folds back to the toggle; status feedback re-opens the panel
+  once so the ephemeral cue is seen; a focused dialog folds the panel away so only
+  one primary action is ever on screen; while the panel is open its own world choice
+  markers fold away too (the panel owns that decision — Rule I3). Auto-summoned
+  persistent panels over the play space are a P3/B1 defect, not a style choice.
 - **Payoff/recap:** opt-in panel is fine here (player is not navigating); keep B1/B3.
 
 The first best-guess implementation of these shapes is recorded in

@@ -7,40 +7,255 @@
       "wait_text": "for the three of you",
       "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
       "focal": "zip",
-      "presence": {"entity": "singer", "height": 2.0}
+      "presence": {
+        "entity": "singer",
+        "height": 2.0
+      }
     },
     {
       "name": "prologue-rupture-desktop",
-      "clicks": ["Send up our lantern", "Continue →"],
+      "clicks": [
+        "Send up our lantern",
+        "Continue →"
+      ],
       "wait_text": "Red light reaches into the sky",
       "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
       "focal": "zip"
     },
     {
       "name": "prologue-opening-phone",
-      "viewport": [390, 844],
+      "viewport": [
+        390,
+        844
+      ],
       "goto": true,
       "wait_text": "for the three of you",
       "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
       "focal": "zip",
-      "presence": {"entity": "singer", "height": 2.0}
+      "presence": {
+        "entity": "singer",
+        "height": 2.0
+      }
     },
     {
       "name": "tutorial-prompt-desktop",
-      "viewport": [1280, 720],
+      "viewport": [
+        1280,
+        720
+      ],
       "goto": true,
-      "clicks": ["Skip opening"],
+      "clicks": [
+        "Skip opening"
+      ],
       "wait_text": "Skip control practice",
       "focal": "zip"
     },
     {
+      "name": "mission-intro-closed",
+      "steps": [
+        {
+          "click": "Skip control practice",
+          "timeout": 45000
+        },
+        {
+          "click": "Connect the power lead"
+        },
+        {
+          "click": "Scan the Moon lock"
+        },
+        {
+          "click": "Make first word"
+        },
+        {
+          "click": "Next word"
+        },
+        {
+          "click": "Next word"
+        },
+        {
+          "click": "Next word"
+        },
+        {
+          "click": "Speak to gate →"
+        },
+        {
+          "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
+          "timeout": 60000
+        },
+        {
+          "click": "Begin Level 1 →"
+        },
+        {
+          "wait_text": "Find the current route",
+          "timeout": 45000
+        }
+      ],
+      "wait_eval": "()=>{const t=document.querySelector('#machine-toggle');return t&&!t.hidden&&document.querySelector('#engine').hidden&&!FirstWordsReview.runtime.world.animating;}",
+      "focal": "zip"
+    },
+    {
+      "name": "mission-panel-opened",
+      "steps": [
+        {
+          "click": "Open the message machine"
+        },
+        {
+          "wait_text": "Supply the old sign"
+        }
+      ],
+      "panel_open": true,
+      "coverage_max": 0.22,
+      "coverage_max_reason": "The player explicitly opened the message-machine panel (guide B1 focused opt-in panel budget); the default closed state measures under 15%. B2 focal clearance is enforced on the default closed states; while the player has deliberately opened the machine it is itself the focus of attention."
+    },
+    {
+      "name": "mission-recover-opened",
+      "steps": [
+        {
+          "click": "Supply the old sign · “Take the Moon gate.”"
+        },
+        {
+          "click": "Predict: the machine will say Moon"
+        },
+        {
+          "click": "Predict: each step also receives every generated word"
+        },
+        {
+          "click": "Make first word"
+        },
+        {
+          "click": "Next word"
+        },
+        {
+          "click": "Next word"
+        },
+        {
+          "click": "Next word"
+        },
+        {
+          "click": "Speak to gate →"
+        },
+        {
+          "wait_eval": "()=>FirstWordsReview.state.status==='wrong'&&!FirstWordsReview.runtime.world.animating",
+          "timeout": 60000
+        },
+        {
+          "wait_text": "Wrong route."
+        }
+      ],
+      "panel_open": true,
+      "coverage_max": 0.22,
+      "coverage_max_reason": "Wrong-route feedback auto-opens the panel so the recovery cue is seen (player-opened budget); no permanent panel exists before feedback. B2 focal clearance is enforced on the default closed states; while the player has deliberately opened the machine it is itself the focus of attention."
+    },
+    {
+      "name": "mission-signal-opened",
+      "steps": [
+        {
+          "click": "Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”"
+        },
+        {
+          "click": "Make first word"
+        },
+        {
+          "click": "Next word"
+        },
+        {
+          "click": "Next word"
+        },
+        {
+          "click": "Next word"
+        },
+        {
+          "click": "Speak to gate →"
+        },
+        {
+          "wait_eval": "()=>FirstWordsReview.state.status==='success'&&!FirstWordsReview.runtime.world.animating",
+          "timeout": 60000
+        },
+        {
+          "wait_text": "Someone is still out there."
+        }
+      ],
+      "panel_open": true,
+      "coverage_max": 0.22,
+      "coverage_max_reason": "Success feedback auto-opens the panel for the A SIGNAL beat; the world keeps the open gate behind it. B2 focal clearance is enforced on the default closed states; while the player has deliberately opened the machine it is itself the focus of attention."
+    },
+    {
+      "name": "relay-folded",
+      "steps": [
+        {
+          "click": "Answer the signal"
+        },
+        {
+          "wait_eval": "()=>FirstWordsReview.state.relay_stage==='choosing'",
+          "timeout": 45000
+        },
+        {
+          "click": "Put the machine away"
+        },
+        {
+          "wait_eval": "()=>document.querySelector('#engine').hidden",
+          "timeout": 15000
+        }
+      ],
+      "focal": "zip"
+    },
+    {
+      "name": "complete-closed",
+      "steps": [
+        {
+          "click": "Offer Mira's 18:20 note about the Bell Yard to the receiver"
+        },
+        {
+          "wait_eval": "()=>FirstWordsReview.state.relay_context==='yard'",
+          "timeout": 30000
+        },
+        {
+          "click": "Predict: message goes to the Bell Yard"
+        },
+        {
+          "click": "Predict: each step also receives Meet"
+        },
+        {
+          "click": "Run the relay →"
+        },
+        {
+          "wait_eval": "()=>FirstWordsReview.state.relay_stage==='revealed'&&!FirstWordsReview.runtime.world.animating",
+          "timeout": 60000
+        },
+        {
+          "click": "Send the message to Mira"
+        },
+        {
+          "wait_eval": "()=>FirstWordsReview.state.relay_stage==='done'",
+          "timeout": 45000
+        },
+        {
+          "click": "Finish Level 1 →"
+        },
+        {
+          "wait_eval": "()=>document.querySelector('#adventure').dataset.experienceMode==='complete'&&!FirstWordsReview.runtime.world.animating",
+          "timeout": 60000
+        },
+        {
+          "wait_text": "Mira heard you.",
+          "timeout": 30000
+        }
+      ],
+      "focal": "zip"
+    },
+    {
       "name": "tutorial-prompt-phone",
-      "viewport": [390, 844],
+      "viewport": [
+        390,
+        844
+      ],
       "goto": true,
-      "clicks": ["Skip opening"],
+      "clicks": [
+        "Skip opening"
+      ],
       "wait_text": "Skip control practice",
       "focal": "zip",
-      "coverage_max": 0.20,
+      "coverage_max": 0.2,
       "coverage_max_reason": "Touch viewport: on-screen move stick and camera tool cluster are direct-input affordances (guide B1 touch allowance); informational surfaces alone measure under 15%."
     }
   ]

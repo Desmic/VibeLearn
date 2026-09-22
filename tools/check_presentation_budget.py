@@ -57,8 +57,8 @@ MEASURE = """async (args) => {
     if (painted) uiElements.push(el);
   }
   // B1 coverage: union of painted UI rects rasterized on a grid (no double count,
-  // independent of pointer-events).
-  const cols = 96, rows = 54;
+  // independent of pointer-events). A finer grid reduces per-rect round-up bias.
+  const cols = 160, rows = 90;
   const grid = new Uint8Array(cols * rows);
   for (const el of uiElements) {
     const r = el.getBoundingClientRect();
@@ -74,11 +74,26 @@ MEASURE = """async (args) => {
   // B3 containment + B4 text blocks + P3 disabled controls + top offenders.
   const clipped = [], longBlocks = [], disabledVisible = [], offenders = [];
   const label = (el) => el.tagName + (el.id ? '#' + el.id : '') + (el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\\s+/).slice(0, 2).join('.') : '');
+  // B3 containment is per scroll surface: content deliberately scrolled outside
+  // its own opt-in panel is contained by the panel, not clipped by the viewport.
+  const scrollClipped = (el) => {
+    const r = el.getBoundingClientRect();
+    for (let n = el.parentElement; n; n = n.parentElement) {
+      const cs = getComputedStyle(n);
+      if (cs.overflowY !== 'visible' || cs.overflowX !== 'visible') {
+        const a = n.getBoundingClientRect();
+        if (r.top < a.top - budgets.clip_tolerance_px || r.bottom > a.bottom + budgets.clip_tolerance_px
+          || r.left < a.left - budgets.clip_tolerance_px || r.right > a.right + budgets.clip_tolerance_px) return true;
+      }
+    }
+    return false;
+  };
   for (const el of uiElements) {
     const r = el.getBoundingClientRect();
     offenders.push({el: label(el) + ' ' + Math.round(r.width) + 'x' + Math.round(r.height), area: Math.round(Math.max(0, Math.min(r.right, vw) - Math.max(r.left, 0)) * Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0)))});
-    if (r.bottom > vh + budgets.clip_tolerance_px || r.top < -budgets.clip_tolerance_px
-        || r.right > vw + budgets.clip_tolerance_px || r.left < -budgets.clip_tolerance_px) {
+    if ((r.bottom > vh + budgets.clip_tolerance_px || r.top < -budgets.clip_tolerance_px
+        || r.right > vw + budgets.clip_tolerance_px || r.left < -budgets.clip_tolerance_px)
+        && !scrollClipped(el)) {
       if (!el.closest('dialog') && !el.classList.contains('skip')) clipped.push(label(el) + ' ' + Math.round(r.width) + 'x' + Math.round(r.height));
     }
     const ownText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
@@ -134,7 +149,10 @@ def evaluate_state(page, scenario_state, budgets):
 
 def violations(state_name, metrics, budgets, panel_allowed):
     found = []
-    limit = budgets["panel_coverage_max"] if metrics["panelOpen"] else budgets["coverage_max"]
+    # panel_allowed: the scenario state declares an explicitly player-opened
+    # focused panel (guide B1: opt-in panels get the raised budget). An open
+    # <dialog> is detected automatically; anchored opt-in cards are not.
+    limit = budgets["panel_coverage_max"] if (metrics["panelOpen"] or panel_allowed) else budgets["coverage_max"]
     if metrics["coverage"] > limit:
         found.append(f"{state_name}: B1 coverage {metrics['coverage']:.1%} > {limit:.0%}")
     if metrics["clipped"]:
@@ -150,6 +168,27 @@ def violations(state_name, metrics, budgets, panel_allowed):
     if presence and presence["share"] < budgets["presence_min_share"]:
         found.append(f"{state_name}: B6 subject presence {presence['share']:.1%} < {budgets['presence_min_share']:.0%}")
     return found
+
+
+def wait_for_eval(page, expression, timeout_ms):
+    # CSP (script-src 'self') blocks wait_for_function; poll via evaluate
+    # like the browser tests' until() helper.
+    deadline = time.monotonic() + timeout_ms / 1000
+    while not page.evaluate(expression):
+        if time.monotonic() > deadline:
+            raise TimeoutError(f"wait_eval timed out: {expression}")
+        page.wait_for_timeout(120)
+
+
+def wait_for_text(page, text, timeout_ms):
+    # Any visible element may carry the line: opt-in presentation duplicates text
+    # on hidden surfaces, so ".first" would lock onto an invisible copy.
+    matches = page.get_by_text(text).locator('visible=true')
+    deadline = time.monotonic() + timeout_ms / 1000
+    while matches.count() == 0:
+        if time.monotonic() > deadline:
+            raise TimeoutError(f"wait_text timed out with no visible match: {text}")
+        page.wait_for_timeout(120)
 
 
 def main():
@@ -183,18 +222,21 @@ def main():
                     page.set_default_timeout(20000)
                 if state.get("goto"):
                     page.goto(base + scenario.get("path", "/"))
+                # "steps" plays an interleaved click/wait chain so a scenario can
+                # reach deep play states, not just the first screen of a chunk.
+                for step in state.get("steps", []):
+                    if "click" in step:
+                        page.get_by_role("button", name=step["click"], exact=True).first.click(timeout=step.get("timeout", 30000))
+                    elif "wait_text" in step:
+                        wait_for_text(page, step["wait_text"], step.get("timeout", 30000))
+                    elif "wait_eval" in step:
+                        wait_for_eval(page, step["wait_eval"], step.get("timeout", 45000))
                 for click in state.get("clicks", []):
                     page.get_by_role("button", name=click, exact=True).first.click()
                 if state.get("wait_eval"):
-                    # CSP (script-src 'self') blocks wait_for_function; poll via evaluate
-                    # like the browser tests' until() helper.
-                    deadline = time.monotonic() + 30
-                    while not page.evaluate(state["wait_eval"]):
-                        if time.monotonic() > deadline:
-                            raise TimeoutError(f"wait_eval timed out: {state['wait_eval']}")
-                        page.wait_for_timeout(120)
+                    wait_for_eval(page, state["wait_eval"], 30000)
                 if state.get("wait_text"):
-                    page.get_by_text(state["wait_text"]).first.wait_for(state="visible")
+                    wait_for_text(page, state["wait_text"], 20000)
                 page.wait_for_timeout(350)
                 metrics = evaluate_state(page, state, budgets)
                 state_budgets = dict(budgets)
@@ -203,7 +245,7 @@ def main():
                     # (guide B1 note); the raised limit must be justified in the scenario.
                     state_budgets["coverage_max"] = state["coverage_max"]
                 states.append({"name": state["name"], "budget_coverage_max": state_budgets["coverage_max"], **metrics})
-                all_violations.extend(violations(state["name"], metrics, state_budgets, False))
+                all_violations.extend(violations(state["name"], metrics, state_budgets, bool(state.get("panel_open"))))
                 print(f"{state['name']}: coverage={metrics['coverage']:.1%} clipped={len(metrics['clipped'])} "
                       f"long={len(metrics['longBlocks'])} disabled={len(metrics['disabledVisible'])} "
                       f"focal={'n/a' if not metrics['focal'] else len(metrics['focal']['covered'] or [])} "

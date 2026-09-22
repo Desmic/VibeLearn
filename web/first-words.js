@@ -4,12 +4,15 @@ import {createGameAudio} from './game-audio.js';
 import {createLearningSession} from './learning-session.js';
 import {createTutorialFlow,selectStateTutorialStep} from './tutorial-flow.js';
 import {createExperienceModeController} from './experience-mode.js';
-import {placeWorldMarker} from './world-marker-layout.js';
+import {placeWorldMarker,chromeClearance} from './world-marker-layout.js';
 import * as chapter from './first-words-world.js';
 
 const $=s=>document.querySelector(s),runtime=getGameRuntime(),audio=createGameAudio(),host=$('#world');
 const initial={round:0,pieces:0,status:'building',powered:false,output:[],context:[],moves:0};
 let reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,paused=false,inOpening=false,ready=false,presented=null,lastCue=null;
+// The mission/complete stage card is opt-in: a world-anchored machine toggle carries
+// the short goal while closed, and the card opens for the player or on feedback beats.
+let cardOpen=false,cardStateKey='',lastExperienceMode=null;
 // Fresh entry mounts the first prologue composition behind the loading layer. Do not
 // instantiate the prison mission first and then flash it while learner state resolves.
 let world=runtime.showStory(chapter,host,0,{reducedMotion:reduced});
@@ -37,9 +40,17 @@ const experience=createExperienceModeController(root,{
 const setExperienceMode=mode=>experience.set(mode);
 setExperienceMode('loading');
 const blocked=()=>!ready||paused||inOpening||session.busy||session.pending||runtime.stats().contextLost||world.stats().animating||document.querySelector('dialog[open]');
+function syncCardVisibility(){
+  const mode=root.dataset.experienceMode;
+  if(!['tutorial','mission','complete'].includes(mode)){$('#machine-toggle').hidden=true;return;}
+  const open=(mode==='tutorial'||cardOpen)&&!document.querySelector('dialog[open]');
+  $('#engine').hidden=!open;
+  $('#card-close').hidden=!(open&&mode!=='tutorial');
+  $('#machine-toggle').hidden=open||Boolean(document.querySelector('dialog[open]'));
+}
 function pauseSystems(){const value=paused||Boolean(document.querySelector('dialog[open]'));runtime.setPaused(value);audio.setPaused(value);}
-function dialog(selector){$(selector).showModal();pauseSystems();}
-document.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',pauseSystems));
+function dialog(selector){$(selector).showModal();pauseSystems();syncCardVisibility();}
+document.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',()=>{pauseSystems();syncCardVisibility();}));
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 document.addEventListener('pointerdown',()=>audio.unlock().catch(()=>{}),{capture:true});
 document.addEventListener('keydown',()=>audio.unlock().catch(()=>{}),{capture:true});
@@ -82,15 +93,19 @@ function tutorialStage(s,complete){
 function render(){
   const s=view(),a=session.attempt,complete=ours()&&a.status==='submitted';
   practice.bind(a?.id,ours()&&!s.powered&&s.round===0&&!complete);
-  if(inOpening){setExperienceMode('opening');return;}
+  if(inOpening){setExperienceMode('opening');syncCardVisibility();return;}
   const mode=!ours()?'entry':complete?'complete':s.round===0?'tutorial':'mission';
   setExperienceMode(mode);
+  if(lastExperienceMode!==mode){lastExperienceMode=mode;cardOpen=false;}
   $('#error').hidden=!session.error;if(session.error)text('#error',session.error.code==='ACTIVE_ATTEMPT'?'This run is already active. Reload to resume it.':session.error.message);
   $('#retry').hidden=!session.pending||session.busy;
   const other=a?.status==='draft'&&!ours();$('#resume-other').hidden=true;
   if(other){$('#start').disabled=false;text('#start','Enter the prologue →');}
-  if(!ours())return;
+  if(!ours()){syncCardVisibility();return;}
   const key=a.id+':'+a.revision;
+  const feedbackBeat=!complete&&(s.status==='wrong'||s.relay_stage==='revealed'||(s.round===1&&s.status==='success'));
+  if(feedbackBeat&&cardStateKey!==key)cardOpen=true;
+  cardStateKey=key;
   if(!inOpening&&presented!==key){
     world=runtime.showMission(chapter,host,s,{reducedMotion:reduced});presented=key;pauseSystems();
     audio.setPhase(complete?'complete':s.status==='success'?'reunion':'repair');
@@ -106,6 +121,8 @@ function render(){
   const [stage,goal,detail]=tutorialStage(s,complete);text('#stage-name',stage);text('#goal',goal);text('#detail',detail);
   $('#engine').dataset.anchor=controlStep!=='done'?'zip':(relay||(complete&&s.relay_stage==='done'))?'friend-signal':'socket';
   $('#engine').setAttribute('aria-label',controlStep!=='done'?'Control practice':'Message machine');
+  $('#machine-toggle').dataset.anchor=$('#engine').dataset.anchor;
+  text('#machine-toggle',goal);
   host.dataset.tutorialWorldTarget=controlStep==='done'&&repair?.focus==='world'?(repair.target||''):'';
   host.dataset.tutorialWorldAction=controlStep==='done'&&repair?.focus==='world'?(repair.primaryAction||''):'';
   host.dataset.tutorialInteractionStep=controlStep==='done'?(repair?.id||''):'';
@@ -184,6 +201,7 @@ function render(){
     text('#engine-label','GET YOUR BEARINGS');text('#scene-description',title+' '+instruction);
     $('#actions').replaceChildren();button('Skip control practice','skip-controls',false);
   }
+  syncCardVisibility();
 }
 async function act(action){
   if(blocked())return;
@@ -210,6 +228,8 @@ function flavor(title,detail){
   dialog('#choice');
 }
 $('#start').onclick=()=>act('start');$('#rewind').onclick=()=>act('rewind');$('#retry').onclick=()=>session.retry();
+$('#card-close').onclick=()=>{cardOpen=false;syncCardVisibility();};
+$('#machine-toggle').onclick=()=>{cardOpen=true;syncCardVisibility();};
 $('#menu-open').onclick=()=>{if(practice.observe('menu'))render();dialog('#menu');};
 host.addEventListener('game-control-used',event=>{
   if(ours()&&!inOpening&&!blocked()&&practice.observe(event.detail?.kind))render();
@@ -268,9 +288,10 @@ function frame(){
   const bottomReserve=mobile?190:104;
   $('#actions').querySelectorAll('button').forEach(b=>b.disabled=Boolean(blocked()));$('#rewind').disabled=Boolean(blocked());
   const playRects=[localRect(host.querySelector('.game-view-tools'),rect),localRect(host.querySelector('.game-move-stick'),rect),localRect(host.querySelector('.game-controls-help'),rect)].filter(Boolean);
-  const point=world.projectEntity(card.dataset.anchor||'socket');
+  const chromeTop=chromeClearance([document.querySelector('.masthead')],{fallback:76});
+  const point=card.hidden?null:world.projectEntity(card.dataset.anchor||'socket');
   const anchored=point&&point.inFront;
-  card.classList.toggle('parked',!anchored);
+  card.classList.toggle('parked',Boolean(point)&&!anchored);
   const reading=card.classList.contains('compact');
   card.classList.toggle('parked-reading',Boolean(anchored&&reading&&mobile));
   if(!anchored){card.style.left='';card.style.top='';}
@@ -279,33 +300,51 @@ function frame(){
     // B3 containment: a tall card must not clip at the viewport top; park it low.
     if(!placed||!placed.placed||placed.y-(card.offsetHeight||0)<8){card.classList.add('parked');card.style.left='';card.style.top='';}
     else if(mobile){card.style.left='';card.style.top=Math.max(64,Math.min(placed.y,rect.height*.4)-(card.offsetHeight||0))+'px';}}
-  const cardRect=card.getBoundingClientRect();
-  const cardOccupiesTop=(cardRect.top-rect.top)<150;
-  const avoidRects=[...playRects,{left:cardRect.left-rect.left,right:cardRect.right-rect.left,top:cardRect.top-rect.top,bottom:cardRect.bottom-rect.top}];
-  const safeTop=cardOccupiesTop?Math.max(76,cardRect.bottom-rect.top+10):76;
-  const safeBottom=Math.max(safeTop+12,Math.min(cardOccupiesTop?rect.height:cardRect.top-rect.top-12,rect.height-bottomReserve));
+  const avoidRects=[...playRects];
+  let safeTop=chromeTop,safeBottom=Math.max(chromeTop+12,rect.height-bottomReserve);
+  if(!card.hidden){
+    const cardRect=card.getBoundingClientRect();
+    const cardOccupiesTop=(cardRect.top-rect.top)<150;
+    safeTop=cardOccupiesTop?Math.max(chromeTop,cardRect.bottom-rect.top+10):chromeTop;
+    safeBottom=Math.max(safeTop+12,Math.min(cardOccupiesTop?rect.height:cardRect.top-rect.top-12,rect.height-bottomReserve));
+    avoidRects.push({left:cardRect.left-rect.left,right:cardRect.right-rect.left,top:cardRect.top-rect.top,bottom:cardRect.bottom-rect.top});
+  }
   const relay=Boolean(s.relay_stage&&s.relay_stage!=='none');
   for(const marker of $('#markers').children){
     const anchor=world.projectEntity(marker.dataset.anchor),wrongRound=marker.dataset.round!==undefined&&Number(marker.dataset.round)!==s.round;
     const available=marker.dataset.action?s.available_actions?.includes(marker.dataset.action):true;
-    if(marker.dataset.action){marker.disabled=Boolean(blocked()||!available);marker.classList.toggle('chosen',marker.dataset.clue===s.clue);}
+    // P3: a visible world sign must never read as a dead control. Signs whose
+    // action is currently spent stay readable and click-inert (the act() guards
+    // no-op), they do not appear disabled.
+    if(marker.dataset.action){marker.disabled=Boolean(blocked());marker.classList.toggle('chosen',marker.dataset.clue===s.clue);}
     const tutorialTarget=marker.classList.contains('tutorial-target-marker');
     const targetMismatch=tutorialTarget&&(marker.dataset.anchor!==host.dataset.tutorialWorldTarget||marker.dataset.action!==host.dataset.tutorialWorldAction||!available);
     const critical=tutorialTarget||marker.dataset.critical==='true';
     const guidable=critical?Boolean(anchor?.inFront):Boolean(anchor?.visible);
-    marker.hidden=!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&!relay)||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
-    if(anchor&&!marker.hidden){
+    const toggleMarker=marker.dataset.machineToggle!==undefined;
+    if(toggleMarker){
+      // The machine toggle is the opt-in door while the card is away; it never
+      // disappears with the camera, it parks, and a focused dialog owns the screen.
+      marker.hidden=card.hidden&&!document.querySelector('dialog[open]')?Boolean(inOpening||!ours()):true;
+      marker.classList.toggle('parked',!(anchor&&anchor.inFront));
+    // I3: while the machine panel is open it owns the decision; its world
+    // choice markers fold away (they return when the panel is put away).
+    }else marker.hidden=(!card.hidden&&marker.classList.contains('notice-marker'))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&!relay)||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
+    if(anchor&&!marker.hidden&&!(toggleMarker&&marker.classList.contains('parked'))){
       const placement=placeWorldMarker(marker,anchor,{viewportWidth:rect.width,safeTop,safeBottom,critical,avoidRects});
       if(!placement.placed||(!critical&&!placement.insideSafeArea))marker.hidden=true;
       else{const footprint=marker.getBoundingClientRect();avoidRects.push({left:footprint.left-rect.left,right:footprint.right-rect.left,top:footprint.top-rect.top,bottom:footprint.bottom-rect.top});}
-    }
+    }else if(toggleMarker&&marker.classList.contains('parked')){marker.style.left='';marker.style.top='';}
   }
   requestAnimationFrame(frame);
 }
 host.addEventListener('click',async e=>{
   if(blocked()||e.target.closest('button,.game-player-controls'))return;
   const target=await world.pickSemanticAt(e.clientX,e.clientY),s=view();
-  if(target==='loose-plug'||target?.startsWith('socket')){if(!s.powered)act('connect');else if(s.available_actions?.includes('step'))act('step');}
+  if(target==='loose-plug'||target?.startsWith('socket')){
+    if($('#engine').hidden){cardOpen=true;syncCardVisibility();return;}
+    if(!s.powered)act('connect');else if(s.available_actions?.includes('step'))act('step');
+  }
   if(target?.startsWith('moon')&&s.available_actions?.includes('scan-moon'))act('scan-moon');
   const noticeAction=target?.startsWith('notice-old')?'scan-moon':target?.startsWith('notice-parade')?'scan-parade':target?.startsWith('notice-today')?'scan-star':null;
   if(noticeAction&&s.available_actions?.includes(noticeAction))act(noticeAction);
