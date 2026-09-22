@@ -26,10 +26,18 @@ other measured state (report `artifacts/presentation-budget.json`); full active
 browser suite (entry, renderer-lifecycle, animation-rest, opening incl. ambient/
 diegetic/reduced-motion blocks, control-practice, controls, physicality, chapter,
 readability, lifecycle). Motion/actual-listening remain deferred/unassessed per the
-20-Sep scope. **Next bounded step: relaunch the fresh-context Astra native GUI
-re-review bound to `071591a`** to confirm the ambient+dietic interaction model reads
-well in play before any readiness claim. No user acceptance, no Level 2, no
-deployment; the user remains sole final critic.
+20-Sep scope. **Independent cold-observer re-review is currently BLOCKED by the known
+host capability gap, not by the candidate:** a fresh-context reviewer session
+(`b7c5aebe`, report `docs/reviews/2026-09-23-cold-observer-071591a.md`, not written)
+ran the mandated capability preflight against the live repaired build on
+`127.0.0.1:8765/first-words`, confirmed navigation + structural snapshot work, then
+**stopped without a verdict** because every screenshot fails with
+`NATIVE_BROWSER_VIEWPORT_UNAVAILABLE` (in-app Browser surface `viewport=0x0,
+visibilityState=hidden`). It correctly refused to substitute a DOM snapshot or to read
+source for a subjective WebGL review, so no cold-observer lane is being marked
+assessed. This needs a visible in-app Browser surface (a human/client action) or the
+user's own playthrough — the user remains sole final critic. No user acceptance, no
+Level 2, no deployment.
 
 **Opening shot composition + B6 presence budget — 22 September 2026 (follows the
 Zelda experiment below):** The user's play of the redesigned opening caught what
