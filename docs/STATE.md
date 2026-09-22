@@ -1,5 +1,36 @@
 # Current state — LLM learning-game proof track
 
+**Ambient + diegetic interaction model (system repair) — 22/23 September 2026:**
+The user vetoed the `4556f84`/`071591a`-era candidate over the shared opening
+controller painting a persistent bottom-centre "Take control / ← Back" bar —
+exactly the interface-coupling the interaction/info/tutorial research and
+`GAME-PRESENTATION-GUIDE.md` already forbid. Treated as a system (not game) defect
+because `web/game-opening.js` is imported by every title. Root-cause rebuild to a
+**fully ambient + diegetic** model: plain beats advance on their own once motion
+settles (+content-paced dwell, or tap/keyboard), the final handoff is ambient with
+only a brief fading cue, pending story actions are performed on their **diegetic
+world marker** (the controller synthesises one whenever a package omits it, so no
+title can fall back to a DOM button), and the corner cluster (back/replay/pause/skip)
+is the only persistent chrome. A single painted advance control now appears **solely**
+under `prefers-reduced-motion` (WCAG 2.2.4, which cannot auto-advance). Frame height
+no longer reserves a bar: prologue screen-space UI drops ~11% → ~4%. Generalised
+upstream so geometry-only budgets can never re-certify a button bar: new guide rule
+**I6** (ambient world-first control surface, with the diegetic-UI rationale) and
+mechanical **B8** in `tools/check_presentation_budget.py` (in cinematic states flags
+any painted non-diegetic control; allow-lists only the corner cluster, world markers
+and the off-screen keyboard skip link; `reduced_motion: true` exempts exactly one
+control). Candidate **`071591a`** (branch `docs-readthrough-20260921`, pushed).
+Gates at this change all green: `build`; 387 unit tests (7 skips); budget tool
+reports **`stray=0` / passed** across all four cinematic prologue states and every
+other measured state (report `artifacts/presentation-budget.json`); full active
+browser suite (entry, renderer-lifecycle, animation-rest, opening incl. ambient/
+diegetic/reduced-motion blocks, control-practice, controls, physicality, chapter,
+readability, lifecycle). Motion/actual-listening remain deferred/unassessed per the
+20-Sep scope. **Next bounded step: relaunch the fresh-context Astra native GUI
+re-review bound to `071591a`** to confirm the ambient+dietic interaction model reads
+well in play before any readiness claim. No user acceptance, no Level 2, no
+deployment; the user remains sole final critic.
+
 **Opening shot composition + B6 presence budget — 22 September 2026 (follows the
 Zelda experiment below):** The user's play of the redesigned opening caught what
 no UI budget could: the desktop home shot was a zoomed-out map view (each friend
