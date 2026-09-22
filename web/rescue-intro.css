@@ -21,6 +21,7 @@
 .rgi-progress{display:flex;gap:6px;padding:0 18px}.rgi-progress i{flex:1;background:#234550;border-radius:3px}.rgi-progress i.on{background:#719f94}.rgi-progress i.current{background:#f4ce81}
 .rgi-controls{display:flex;align-items:center;justify-content:center;gap:12px;max-width:1100px;width:100%;margin:auto;padding:10px 18px 12px;box-sizing:border-box}
 .rgi-nav{display:flex;gap:8px;align-items:center}.rgi-controls button{min-height:44px;padding:10px 15px;border:1px solid #5c7a7c;border-radius:9px;background:#17343e;color:#e9eee5;font:700 .78rem ui-sans-serif;cursor:pointer}
+.rgi-controls button[hidden]{display:none!important}
 .rgi-controls .rg-primary{min-width:225px;background:#f0cd86;color:#102d35;border-color:#ffe9b3}
 .rgi-controls button:disabled{opacity:.4;cursor:default}.rgi-controls button:focus-visible,.rgi-marker:focus-visible,.rgi-corner button:focus-visible{outline:3px solid #fff0a9;outline-offset:3px}
 .rgi-markers{position:absolute;z-index:6;inset:0;pointer-events:none}

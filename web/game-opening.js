@@ -55,7 +55,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
       <span class="rgi-paused-badge" aria-hidden="true">PAUSED</span>
       <div class="rgi-corner"><button id="rgi-replay-beat" type="button" aria-label="Replay scene">↻</button><button id="rgi-pause" type="button" aria-label="Pause story motion">⏸</button><button id="rgi-skip" type="button"></button></div>
       <small id="rgi-step" class="sr-only"></small></div>
-    <div class="rgi-progress" aria-label="Story progress"></div><div class="rgi-controls"><div class="rgi-nav"><button id="rgi-back" type="button">← Back</button><button id="rgi-next" type="button" class="rg-primary"></button></div></div></div>`;
+    <div class="rgi-progress" aria-label="Story progress"></div><div class="rgi-controls"><div class="rgi-nav"><button id="rgi-back" type="button">← Back</button><button id="rgi-next" type="button" class="rg-primary" hidden></button></div></div></div>`;
   root.append(overlay);
   const progress=overlay.querySelector('.rgi-progress');
   spec.scenes.forEach(()=>progress.append(document.createElement('i')));
@@ -70,11 +70,17 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   };
   const reduced=typeof reducedMotion==='boolean'?reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches;
   let step=0,closed=false,paused=false,world=null,actionDone=false,picking=false,frame=0;
+  // Ambient advancement: a plain story beat advances itself once its motion has
+  // settled and the reading dwell elapses; any input (tap, key, action) can
+  // advance sooner. Reduced motion never auto-advances (pause/stop/hide).
+  let armedMs=0,dwellMs=10000,lastTick=0;
   const completed=new Set();
   const gate=window.GameWorldStatus;
   const scene=()=>spec.scenes[step];
   const available=()=>Boolean(world?.available&&!runtime.stats().contextLost);
   const ready=()=>!paused&&available()&&(!spec.waitForMotion||!world.stats?.().animating);
+  const ambientBeat=()=>{const s=scene();return !(s.action&&!actionDone)&&step<spec.scenes.length-1;};
+  const advance=()=>{if(closed||paused||!ready()||!ambientBeat())return;armedMs=0;step++;refresh();};
   const close=(reason='cancel')=>{
     if(closed)return;closed=true;cancelAnimationFrame(frame);
     if(replay)runtime.dispose();else runtime.detach();
@@ -90,6 +96,12 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
     overlay.querySelector('#rgi-back').disabled=step===0;
     overlay.querySelector('#rgi-back').hidden=step===0;
     next.textContent=s.action&&!actionDone?s.action.label:step===spec.scenes.length-1?(replay?'Return to game':spec.finishLabel||'Begin'):'Continue →';
+    next.hidden=ambientBeat();
+    if(ambientBeat()){
+      const s2=scene();
+      dwellMs=Math.min(20000,12000+40*((s2.body||'').length+(s2.dialogue||'').length+(s2.fact||'').length));
+      armedMs=0;
+    }
     if(s.action&&!actionDone)next.dataset.storyAction=s.action.target;else delete next.dataset.storyAction;
     progress.querySelectorAll('i').forEach((n,i)=>{n.classList.toggle('current',i===step);n.classList.toggle('on',i<=step);});
     world=runtime.showStory(worldModule,host,s.beat,{reducedMotion:reduced,paused});
@@ -117,6 +129,9 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   };
   const updateMarkers=()=>{
     if(closed)return;
+    const now=performance.now(),dt=lastTick?Math.min(250,now-lastTick):0;lastTick=now;
+    if(!reduced&&ambientBeat()&&ready()){armedMs+=dt;if(armedMs>=dwellMs)advance();}
+    else armedMs=0;
     next.disabled=!ready();
     overlay.querySelector('#rgi-back').disabled=step===0||!available();
     overlay.querySelector('#rgi-replay-beat').disabled=!available();pause.disabled=!available();
@@ -141,7 +156,10 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
     frame=requestAnimationFrame(updateMarkers);
   };
   host.addEventListener('pointerup',async event=>{
-    if(closed||paused||picking||actionDone||!scene().action||event.target.closest('.rgi-scene-caption,.rgi-marker,.game-world-status,.game-player-controls'))return;
+    if(closed||paused||picking)return;
+    if(event.target.closest('.rgi-scene-caption,.rgi-marker,.rgi-corner,.rgi-progress,.game-world-status,.game-player-controls'))return;
+    if(ambientBeat()){advance();return;}
+    if(actionDone||!scene().action)return;
     const s=scene();picking=true;
     try{const target=await world?.pickSemanticAt?.(event.clientX,event.clientY);if(!closed&&s===scene()&&target===s.action.target)performAction();}finally{picking=false;}
   });
@@ -160,6 +178,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   };
   overlay.addEventListener('keydown',event=>{
     if(event.key==='Escape'){event.preventDefault();close(replay?'return':'skip');}
+    if((event.key==='ArrowRight'||event.key===' '||event.key==='Enter')&&ambientBeat()&&(event.target===overlay||event.target===host)){event.preventDefault();advance();}
     if(event.key==='Tab'){
       const nodes=[...overlay.querySelectorAll('button:not(:disabled)')].filter(n=>!n.hidden&&n.getClientRects().length);
       const first=nodes[0],last=nodes.at(-1);

@@ -11,6 +11,26 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def log(message):print(message,flush=True)
 
+def tap_world(page):
+    # Ambient advancement: a tap anywhere on the story world moves the beat on.
+    # Top-left corner is outside markers, corner controls and the caption band.
+    box=page.locator('#rgi-world').bounding_box()
+    page.mouse.click(box['x']+10,box['y']+10)
+
+def hold(page):
+    # Pause owns the beat for evidence work: no auto-advance while held.
+    page.get_by_role('button',name='Pause story motion',exact=True).click()
+
+def release(page):
+    page.get_by_role('button',name='Resume story motion',exact=True).click()
+    until(page,'()=>!FirstWordsReview.runtime.world.animating')
+
+def advance_beat(page,title):
+    # Reduced-motion play never auto-advances; a tap on the world moves it on.
+    until(page,'()=>!FirstWordsReview.runtime.world.animating')
+    tap_world(page)
+    expect(page.locator('#rgi-title')).to_have_text(title,timeout=20000)
+
 def main():
     out=ROOT/'artifacts';out.mkdir(exist_ok=True);checks=[];errors=[]
     def observe_graphics(message):
@@ -51,9 +71,9 @@ def main():
             assert capture_started['state']=='recording',capture_started
             page.screenshot(path=str(out/'prologue-lantern-release-390.png'),timeout=15000)
 
-            log('Prologue: visible cause');page.get_by_role('button',name='Continue →',exact=True).click()
-            expect(page.locator('#rgi-title')).to_have_text('A shadow over Bellweather.')
+            log('Prologue: visible cause');expect(page.locator('#rgi-title')).to_have_text('A shadow over Bellweather.',timeout=45000)
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            hold(page)
             cause_before=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
                 const w=getGameRuntime().world;return {
                   warden:w.projectEntity('warden'),
@@ -64,19 +84,25 @@ def main():
             assert cause_before['link'] and cause_before['link']['visible'],cause_before
             assert cause_before['rift'] is None,cause_before
             page.screenshot(path=str(out/'prologue-threat-cause-390.png'),timeout=15000)
+            # The plain beat offers no persistent control; the tap moves it on.
+            expect(page.locator('#rgi-next')).to_be_hidden()
+            release(page);tap_world(page)
 
-            log('Prologue: rupture effect');page.get_by_role('button',name='Continue →',exact=True).click()
-            expect(page.locator('#rgi-title')).to_have_text('The sky cracks open.')
+            log('Prologue: rupture effect');expect(page.locator('#rgi-title')).to_have_text('The sky cracks open.',timeout=45000)
             until(page,"""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
                 return Boolean(getGameRuntime().world.projectEntity('rift')?.visible);
             }""")
             until(page,"()=>FirstWordsReview.audio.ready && FirstWordsReview.audio.version==='bellweather-score-v2' && FirstWordsReview.audio.scheduledBars>0")
             until(page,"()=>FirstWordsReview.audio.phase==='danger'")
-            page.get_by_role('button',name='Pause story motion').click()
+            hold(page)
             until(page,"()=>FirstWordsReview.audio.state==='suspended'")
-            assert page.get_by_role('button',name='Continue →',exact=True).is_disabled()
+            expect(page.locator('#rgi-next')).to_be_hidden()
+            # A paused beat holds indefinitely - well past the ambient dwell -
+            # so the player is never run off a scene mid-reading.
+            page.wait_for_timeout(15000)
+            expect(page.locator('#rgi-title')).to_have_text('The sky cracks open.')
             page.screenshot(path=str(out/'prologue-rupture-paused-390.png'),timeout=15000)
-            page.get_by_role('button',name='Resume story motion').click()
+            release(page)
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
             vanished=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
                 const w=getGameRuntime().world;return ['zip','singer','friend-a'].map(id=>w.projectEntity(id));}""")
@@ -84,38 +110,40 @@ def main():
             page.screenshot(path=str(out/'prologue-rupture-complete-390.png'),timeout=15000)
             # Rewind on the same runtime after individual actors were hidden.
             # Menu replay creates a new runtime and cannot prove this reset.
+            hold(page)
             page.locator('#rgi-back').click()
             page.locator('#rgi-back').click()
-            until(page,'()=>!FirstWordsReview.runtime.world.animating')
             restored=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');return ['zip','singer','friend-a','bellworker-a','bellworker-b','bellworker-b-parcel'].map(id=>getGameRuntime().world.projectEntity(id)!==null);}""")
             assert all(restored),restored
-            if page.locator('#rgi-next').inner_text()=='Send up our lantern':
-                page.locator('#rgi-next').click();until(page,'()=>!FirstWordsReview.runtime.world.animating')
-            for _ in range(2):
-                page.locator('#rgi-next').click()
-                until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            # Released at the (already completed) home beat: the ambient timer
+            # walks shadow -> rupture -> limbo with no further input at all,
+            # which is the whole point of the presentation contract.
+            release(page)
+            expect(page.locator('#rgi-title')).to_have_text('A shadow over Bellweather.',timeout=90000)
+            expect(page.locator('#rgi-title')).to_have_text('The sky cracks open.',timeout=90000)
 
 
-            log('Prologue: limbo');page.get_by_role('button',name='Continue →',exact=True).click()
-            expect(page.locator('#rgi-title')).to_have_text('Silence.')
+            log('Prologue: limbo');expect(page.locator('#rgi-title')).to_have_text('Silence.',timeout=90000)
             expect(page.locator('#rgi-body')).to_contain_text('Zip wakes alone')
+            hold(page)
             page.screenshot(path=str(out/'prologue-limbo-390.png'),timeout=15000)
+            release(page);tap_world(page)
 
-            log('Prologue: prison reveal');page.get_by_role('button',name='Continue →',exact=True).click()
-            expect(page.locator('#rgi-title')).to_have_text('This is not home.')
-            page.get_by_role('button',name='Pause story motion',exact=True).click()
+            log('Prologue: prison reveal');expect(page.locator('#rgi-title')).to_have_text('This is not home.',timeout=45000)
+            hold(page)
             early=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
                 const w=getGameRuntime().world;return ['moon','sun','notice-old'].map(id=>w.projectEntity(id));}""")
             assert early==[None,None,None],early
             page.screenshot(path=str(out/'prologue-reveal-early-paused-390.png'),timeout=15000)
-            page.get_by_role('button',name='Resume story motion',exact=True).click()
+            release(page)
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
             expect(page.get_by_role('button',name='SEALED EXIT',exact=True)).to_be_visible()
             page.screenshot(path=str(out/'prologue-prison-reveal-390.png'),timeout=15000)
+            tap_world(page)
 
-            log('Prologue: speech target');page.get_by_role('button',name='Continue →',exact=True).click()
-            expect(page.locator('#rgi-title')).to_have_text('It finds your voice.')
+            log('Prologue: speech target');expect(page.locator('#rgi-title')).to_have_text('It finds your voice.',timeout=45000)
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            hold(page)
             targeted=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
                 const w=getGameRuntime().world;return {
                   socket:w.projectEntity('zip-voice-socket'),
@@ -128,10 +156,11 @@ def main():
             assert targeted['link'] and targeted['link']['visible'],targeted
             assert targeted['removed'] is None,targeted
             page.screenshot(path=str(out/'prologue-speech-targeted-390.png'),timeout=15000)
+            release(page);tap_world(page)
 
-            log('Prologue: speech removal');page.get_by_role('button',name='Continue →',exact=True).click()
-            expect(page.locator('#rgi-title')).to_have_text('It tears the module free.')
+            log('Prologue: speech removal');expect(page.locator('#rgi-title')).to_have_text('It tears the module free.',timeout=45000)
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            hold(page)
             removal=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');
                 const w=getGameRuntime().world;return {
                   socket:w.projectEntity('zip-voice-socket'),
@@ -153,12 +182,17 @@ def main():
             assert (out/'prologue-event-audio.webm').stat().st_size==captured['bytes']
             page.get_by_role('button',name='Toggle opening sound').click()
             assert page.evaluate('FirstWordsReview.audio.preferences.muted')
+            release(page);tap_world(page)
 
-            log('Prologue: repair handoff');page.get_by_role('button',name='Continue →',exact=True).click()
-            expect(page.locator('#rgi-title')).to_have_text('Get the words back.')
+            log('Prologue: repair handoff');expect(page.locator('#rgi-title')).to_have_text('Get the words back.',timeout=45000)
             expect(page.get_by_role('button',name='REPAIR SOCKET',exact=True)).to_be_visible()
             instance=page.evaluate('FirstWordsReview.runtime.instanceId')
             page.screenshot(path=str(out/'prologue-repair-handoff-390.png'),timeout=15000)
+            # The handoff beat is interactive: tapping the world neither advances
+            # nor closes it; only the explicit control does.
+            tap_world(page)
+            expect(page.locator('#rgi-intro')).to_be_visible()
+            expect(page.locator('#rgi-title')).to_have_text('Get the words back.')
             page.get_by_role('button',name='Take control →',exact=True).click()
             expect(page.locator('#rgi-intro')).to_have_count(0)
             expect(page.locator('#adventure')).to_have_attribute('data-experience-mode','tutorial')
@@ -174,7 +208,8 @@ def main():
             assert page.evaluate('FirstWordsReview.runtime.instanceId')==instance
             assert page.evaluate("FirstWordsReview.runtime.mode")=='mission'
             checks.append('Eight causal prologue beats separate normal Bellweather, visible Warden cause, rupture effect, isolation, prison reveal, speech targeting, capability removal and repair handoff before the separate tutorial; the same runtime becomes direct-control mission play.')
-            checks.append('The Bellweather score is not required before a gesture; the first Continue gesture unlocks bellweather-score-v2 and schedules bars before danger-phase assertions.')
+            checks.append('The Bellweather score is not required before a gesture; the first story advance unlocks bellweather-score-v2 and schedules bars before danger-phase assertions.')
+            checks.append('Plain story beats carry no persistent advance control: they advance ambiently once motion settles, a paused beat holds indefinitely, a world tap moves a beat on immediately, action beats and the final handoff keep explicit affordances, and reduced-motion play never auto-advances.')
 
             before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
             log('Prologue: replay preserves draft');page.get_by_role('button',name='Open game menu').click();page.get_by_role('button',name='Replay the prologue',exact=True).click()
@@ -204,15 +239,22 @@ def main():
                 vertical_clear=clearance['lanternY']<clearance['captionTop']-16
                 assert clearance['visible'] and (horizontal_clear or vertical_clear),clearance
                 q.screenshot(path=str(out/f'prologue-lantern-release-{width}.png'),timeout=15000)
-                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('A shadow over Bellweather.')
+                # Reduced motion must not auto-advance content (WCAG 2.2.4): a
+                # plain beat waits for input indefinitely.
+                expect(q.locator('#rgi-next')).to_be_hidden()
+                q.wait_for_timeout(12000)
+                expect(q.locator('#rgi-title')).to_have_text('One lantern. Three friends.')
+                advance_beat(q,'A shadow over Bellweather.')
                 q.screenshot(path=str(out/f'prologue-threat-reduced-{width}.png'),timeout=15000)
-                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('The sky cracks open.')
+                advance_beat(q,'The sky cracks open.')
                 q.screenshot(path=str(out/f'prologue-rupture-reduced-{width}.png'),timeout=15000)
-                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('Silence.')
-                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.get_by_role('button',name='SEALED EXIT',exact=True)).to_be_visible()
-                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('It finds your voice.')
-                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.locator('#rgi-title')).to_have_text('It tears the module free.')
-                q.get_by_role('button',name='Continue →',exact=True).click();expect(q.get_by_role('button',name='REPAIR SOCKET',exact=True)).to_be_visible()
+                advance_beat(q,'Silence.')
+                advance_beat(q,'This is not home.')
+                expect(q.get_by_role('button',name='SEALED EXIT',exact=True)).to_be_visible()
+                advance_beat(q,'It finds your voice.')
+                advance_beat(q,'It tears the module free.')
+                advance_beat(q,'Get the words back.')
+                expect(q.get_by_role('button',name='REPAIR SOCKET',exact=True)).to_be_visible()
                 expect(q.get_by_role('button',name='Take control →',exact=True)).to_be_enabled()
                 assert q.evaluate('document.documentElement.scrollWidth<=innerWidth && document.documentElement.scrollHeight<=innerHeight')
                 for selector in ['#rgi-title','#rgi-body','#rgi-next','#rgi-skip']:
@@ -242,9 +284,10 @@ def main():
             expect(blind.locator('#rgi-intro')).to_be_visible(timeout=20000)
             expect(blind.locator('#rgi-title')).to_be_hidden()
             until(blind,'()=>!FirstWordsReview.runtime.world.animating')
-            blind.locator('#rgi-next').click();until(blind,'()=>!FirstWordsReview.runtime.world.animating')
-            for _ in range(7):
-                blind.locator('#rgi-next').click();until(blind,'()=>!FirstWordsReview.runtime.world.animating')
+            blind.get_by_role('button',name='Send up our lantern',exact=True).click();until(blind,'()=>!FirstWordsReview.runtime.world.animating')
+            # Ambient pacing then plays the whole captioned sequence with zero
+            # further input; the video shows the world carrying the story alone.
+            expect(blind.locator('#rgi-next')).to_be_visible(timeout=420000)
             expect(blind.locator('#rgi-intro')).to_be_visible()
             blind_video=blind.video
             blind_ctx.close()

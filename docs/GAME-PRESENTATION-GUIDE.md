@@ -146,8 +146,7 @@ jargon, no state loss (Hades pattern bounded by `LEARNING-DESIGN-GATE.md`).
 ## Stage-specific shapes
 
 - **Entry plaque:** ≤ 1 sentence + 1 action. Fades into the world; not a landing page.
-- **Prologue/cinematic:** letterboxed world, rungs 1–3 only; controls reduced to
-  Back/Skip per UI-UX rules; zero gameplay chrome visible.
+- **Prologue/cinematic:** letterboxed world, rungs 1–3 only; controls reduced to Back/Skip per UI-UX rules; zero gameplay chrome visible. Plain beats carry **no persistent advance control**: the beat advances ambiently once its motion settles and a content-paced dwell elapses (tap-anywhere and keyboard advance it sooner); pause holds a beat indefinitely; reduced-motion play never auto-advances (WCAG 2.2.4); story-action and final handoff beats keep an explicit affordance. A pinned "Continue" button on plain beats is a defect.
 - **Tutorial:** demonstrate in-world, prompt contextually (≤ 6 words), success is
   the teaching; text explains nothing the player didn't just do.
 - **Mission:** world-first; objective line fades after ~5s; markers ≤ 2 words;

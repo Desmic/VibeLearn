@@ -14,9 +14,9 @@
     },
     {
       "name": "prologue-rupture-desktop",
-      "clicks": [
-        "Send up our lantern",
-        "Continue →"
+      "steps": [
+        {"click": "Send up our lantern"},
+        {"wait_eval": "()=>document.querySelector('#rgi-title').textContent==='A shadow over Bellweather.'", "timeout": 90000}
       ],
       "wait_text": "Red light reaches into the sky",
       "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
