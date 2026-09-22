@@ -332,6 +332,7 @@ async function boot(){
 window.FirstWordsReview={
   get state(){return view();},
   get runtime(){return runtime.stats();},
+  get colliders(){return runtime.colliderSnapshot();},
   get audio(){return audio.stats();},
   audioCapture:{
     start:()=>audio.startCapture(),

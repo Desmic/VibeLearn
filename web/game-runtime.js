@@ -89,6 +89,8 @@ class GameRuntimeController{
   }
   replay(){this.world?.replay?.();}
   setPaused(value){this.world?.setPaused?.(value);}
+  // Live world geometry for play-evidence tools (see backend colliderSnapshot).
+  colliderSnapshot(){return this.world?.colliderSnapshot?.()||[];}
   detach(){
     if(this.target){
       this.target.classList.remove('play-canvas-ready','play-canvas-failed','play-canvas-target');

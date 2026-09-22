@@ -4,11 +4,37 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def install_frame_counter(page):
+    page.evaluate("""()=>{if(window.__qaf)return;window.__qaf={n:0};
+      const tick=()=>{window.__qaf.n++;requestAnimationFrame(tick)};requestAnimationFrame(tick);}""")
+
+
+def rendered_frames(page):
+    return page.evaluate('window.__qaf?.n||0')
+
+
+def wait_frames(page, count, timeout_ms=15000):
+    """Hold real input across actually-rendered frames, not wall-clock guesses.
+
+    Headless software WebGL can render several times slower than real time.
+    Millisecond-timed input windows then starve movement integration at
+    random, failing play-evidence tests against correct game physics. The
+    keyboard/mouse input stays real; only the sampling becomes frame-deterministic.
+    """
+    install_frame_counter(page)
+    start = rendered_frames(page)
+    deadline = time.monotonic() + timeout_ms / 1000
+    while rendered_frames(page) - start < count:
+        assert time.monotonic() < deadline, f'renderer starved: {count} frame(s) did not render within {timeout_ms}ms'
+        page.wait_for_timeout(25)
 
 
 def start_server(database, port=0):

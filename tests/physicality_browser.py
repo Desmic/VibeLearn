@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright, expect
-from tests.browser_check import start_server, stop_server
+from tests.browser_check import start_server, stop_server, wait_frames
 from tests.level1_chapter_browser import skip_opening_to_tutorial, complete_tutorial
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,23 +21,54 @@ def label(page, text):
 
 
 def hold(page, key, duration):
+    # duration milliseconds is translated into rendered frames so slow
+    # software-WebGL rendering cannot starve movement integration.
     page.keyboard.down(key)
     try:
-        page.wait_for_timeout(duration)
+        wait_frames(page, max(1, round(duration / 100)))
     finally:
         page.keyboard.up(key)
     page.wait_for_timeout(120)
 
 
+def step(page, key):
+    # One keyboard-driven step: hold the key until a rendered frame actually
+    # integrates the input. A real keypress still produces the movement; the
+    # wait makes setup walking deterministic on frame-starved renderers, while
+    # a genuinely blocked position times out instead of drifting silently.
+    before = player(page)['position']
+    page.keyboard.down(key)
+    deadline = time.monotonic() + 3
+    while player(page)['position'] == before:
+        if time.monotonic() >= deadline:
+            page.keyboard.up(key)
+            return False
+        wait_frames(page, 1)
+    page.keyboard.up(key)
+    return True
+
+
 def walk_to(page, x, z):
     # Setups use normal movement, never teleport/restore presentation state.
     page.get_by_role('button', name='Recenter camera', exact=True).click()
+    wait_frames(page, 1)
     for axis, target, negative, positive in ((0, x, 'KeyA', 'KeyD'), (2, z, 'KeyW', 'KeyS')):
-        deadline = time.monotonic() + 60
+        deadline = time.monotonic() + 90
         while abs(player(page)['position'][axis] - target) > .18:
             assert time.monotonic() < deadline, (target, player(page))
             current = player(page)['position'][axis]
-            hold(page, negative if current > target else positive, 60)
+            key = negative if current > target else positive
+            if not step(page, key):
+                # Key held for seconds without one unit of movement: a real
+                # obstruction. Live collider geometry pinpoints what occupies
+                # the attempted step so setup walks cannot mask a physicality
+                # regression or a stray collider.
+                stuck = player(page)
+                near = [c for c in page.evaluate('FirstWordsReview.colliders')
+                        if c['min'][0] - .8 < stuck['position'][0] < c['max'][0] + .8
+                        and c['min'][2] - .8 < stuck['position'][2] < c['max'][2] + .8]
+                raise AssertionError((target, stuck, near))
+            page.wait_for_timeout(60)
 
 
 def stationary_under_input(page, key):

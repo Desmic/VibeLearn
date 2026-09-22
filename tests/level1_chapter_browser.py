@@ -15,9 +15,12 @@ def skip_opening_to_tutorial(page, *, skip_controls=False):
     expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000)
     page.get_by_role('button',name='Skip opening',exact=True).click()
     expect(page.locator('#rgi-intro')).to_have_count(0,timeout=15000)
-    expect(page.locator('#adventure')).to_have_attribute('data-experience-mode','tutorial',timeout=15000)
-    expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE',timeout=15000)
-    expect(page.get_by_role('button',name='Skip control practice',exact=True)).to_be_visible(timeout=15000)
+    # The opening handoff advances through rAF-driven beats; a software-WebGL
+    # renderer can take many seconds per beat, so allow generous time without
+    # changing what is asserted.
+    expect(page.locator('#adventure')).to_have_attribute('data-experience-mode','tutorial',timeout=30000)
+    expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE',timeout=30000)
+    expect(page.get_by_role('button',name='Skip control practice',exact=True)).to_be_visible(timeout=30000)
     expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
     if skip_controls:
         page.get_by_role('button',name='Skip control practice',exact=True).click()

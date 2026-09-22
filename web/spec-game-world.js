@@ -75,6 +75,7 @@ export function makeWorldPackage(spec,present,{cinematic=false}={}){
         },
         setPaused(value){paused=Boolean(value);last=performance.now();engine.setPaused(paused||document.hidden);},
         projectEntity:(id,offset)=>engine.projectEntity(id,offset),pickSemanticAt:(x,y)=>engine.pickEntityAt(x,y),
+        colliderSnapshot:()=>engine.colliderSnapshot?.()||[],
         getPlayerView:()=>engine.getPlayerView(),restorePlayerView:value=>engine.restorePlayerView(value),
         replay(){if(previous!==null)update(previous);},
         stats:()=>({...engine.stats(),packageAdapter:'world-spec',animating:Boolean(transition||timeline)}),

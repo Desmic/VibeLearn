@@ -213,6 +213,20 @@ class PlayCanvasWorld {
     return snapshotCameraBlocker(this.entities.keys(),id=>this._colliderBounds(id))(x,y,z);
   }
 
+  // Live physical geometry for play-evidence tools: every currently-visible
+  // collider in world space, read from synchronized transforms. This is a
+  // diagnostic accessor, deliberately outside stats() so sampled traces stay
+  // small while critics can still verify contact claims against real geometry.
+  colliderSnapshot(){
+    const round=value=>Math.round(value*10000)/10000;
+    return [...this.entities.keys()].flatMap(id=>{
+      const bounds=this._colliderBounds(id);
+      if(!bounds)return [];
+      return [{id,blocksPlayer:bounds.collider.blocksPlayer!==false,blocksCamera:bounds.collider.blocksCamera!==false,
+        min:bounds.min.map(round),max:bounds.max.map(round)}];
+    });
+  }
+
   _cameraImpulse(value={}){
     if(this.reducedMotion||!this.canvas?.animate)return;
     const duration=Math.max(80,Math.min(1600,Number(value.duration)||520));
