@@ -1,0 +1,274 @@
+{
+  "schema_version": 2,
+  "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8",
+  "method": "internal_tool_assisted",
+  "environment": "Windows local run of candidate 210a663c80800f69eb68905817fb68f0dd7ee7c8 against the already-running disposable server at http://127.0.0.1:8765/first-words. Reviewer drove a fresh-profile Playwright Chromium (software WebGL ~4 fps) at 1280x720 desktop and 390x844 phone portrait; full live playthrough from fresh visitor entry through prologue, tutorial, Level 1 route mission, wrong-route recovery, relay with a stale-note mistake and recovery, ending, mid-state reload, menu, sound toggle, diegetic pause and controls reference. Screenshots and DOM dumps captured by the reviewer at 66 checkpoints.",
+  "limitations": "Honest perception boundaries for this record: (1) audio cannot be perceived by this reviewer at all, so audio_atmosphere is unassessed with rating null and no weaker substitute was used; (2) the user explicitly deferred motion/animation-quality review this cycle, so motion_direction is unassessed with rating null - the reviewer also has no video-perception path and did not inspect the pre-existing webm frame-by-frame; (3) physicality was probed only by ordinary walking during required steps, not by systematic wall/gate penetration attempts at every boundary; (4) phone 360/430 widths, 200% enlarged text, reduced-motion play and actual touch-stick input were NOT exercised and are recorded as not_checked; (5) pre-existing captures cited (prologue PNGs, opening report, budget JSON, gate report) are dated the candidate day and referenced by the gate report as run against this exact tree, but were produced by the project's own tooling, not this reviewer; the reviewer's primary evidence is its own live play. The reviewer authored no code in this session and read no source.",
+  "prior_context": "None before the cold pass. This reviewer received only the entry URL and neutral first-player instructions; phase 1 was restricted to what the running page displayed. No story treatment, design docs, rubrics, prior review records, scores or source code were read before the cold report was saved. Presentation/critic guides were read only in phase 2 for format and criterion definitions.",
+  "user_authority": "The current user is the sole final product critic. This internal record cannot establish acceptance, never overrides direct user feedback, and its scores are diagnostic only.",
+  "review_order": "cold_observer_then_intent",
+  "cold_observer_context": "Brand-new visitor on a virgin browser profile at http://127.0.0.1:8765/first-words. The reviewer played the entire available chapter, deliberately made two wrong choices and recovered both, reloaded mid-state, and recorded only what the running experience communicated. The cold report docs/reviews/2026-09-22-first-words-210a663-COLD.md was written and saved before any repo documentation was opened, and is not rewritten afterwards.",
+  "technical_status": "passed",
+  "technical_evidence": [
+    {"ref": "artifacts/play-20260922/gate-report-210a663.json", "modality": "ci_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+    {"ref": "artifacts/play-20260922/presentation-budget-ambient.json", "modality": "ci_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+  ],
+  "criteria": {
+    "spatial_composition": {
+      "rating": 7,
+      "reason": "The Bellweather platform, prison chamber, three-board corridor and star walkway keep open floor, spaced landmarks and real negative space at ordinary camera angles; nothing intersected or floated during the reviewer's walks. But the ending state stacks four world labels (18:00 note, Mira reply, machine toggle, 18:20 note) into one dense vertical column over the gate, and the prologue limbo beat is an almost featureless void. Competent composition with a material congestion defect at the payoff.",
+      "evidence": [
+        {"ref": "docs/reviews/2026-09-22-first-words-210a663-COLD.md", "modality": "cold_observer_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c33-level1.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c60-finish2.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "focal_identity": {
+      "rating": 8,
+      "reason": "Zip's warm bronze silhouette is unmistakable and the only chest-glow carrier; the Warden reads as a distinct tall black figure; each mission state keeps one highlighted focal object (repair socket, machine toggle, receiver). Weakened at the ending where the label column competes with and covers the receiver, the actual subject of the beat, and in the prologue group shot where three similar-bodied robots need caption help to sort friend roles.",
+      "evidence": [
+        {"ref": "docs/reviews/2026-09-22-first-words-210a663-COLD.md", "modality": "cold_observer_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c01-open.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c58-ending2.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "landmark_navigation": {
+      "rating": 8,
+      "reason": "Lighthouse towers, the Moon-marked gate, the star gate, the receiver and the sun corridor are spaced, recognizable destinations; the reviewer never mis-located the machine, boards or receiver and formed a stable mental map from player-controlled views. The ending label pile slightly degrades the receiver as a landmark after the payoff, and the prison rooms are so dark that distant landmarks rely on marker glows.",
+      "evidence": [
+        {"ref": "docs/reviews/2026-09-22-first-words-210a663-COLD.md", "modality": "cold_observer_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c32-after.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c45-gateopen.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "visual_cohesion": {
+      "rating": 8,
+      "reason": "One coherent shape/material family (faceted low-poly robots and props) with deliberate state contrast: warm amber home, desaturated navy prison, teal of the repaired route. The palette language reads as intentional rather than assembled. Held back from higher by the very sparse prison rooms where cohesion is carried mostly by emptiness, and by the ending's UI-color label cluster sitting on top of the scene.",
+      "evidence": [
+        {"ref": "docs/reviews/2026-09-22-first-words-210a663-COLD.md", "modality": "cold_observer_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/prologue-home-390.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/prologue-prison-reveal-390.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "environmental_storytelling": {
+      "rating": 7,
+      "reason": "Strong world-carried meaning in the mission: three physically disagreeing notice boards, a still-powered repair socket, a gate that visibly stays shut to a stale command, a receiver that raises its arms on delivery. But the prologue limbo/prison beats lean heavily on captions (the void 'Silence' beat shows almost nothing spatially), and the tutorial plays as a panel game where the world is mostly backdrop, so the environment carries less of the story than the boards and gates do.",
+      "evidence": [
+        {"ref": "docs/reviews/2026-09-22-first-words-210a663-COLD.md", "modality": "cold_observer_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c04.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c33-level1.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "device_composition": {
+      "rating": 6,
+      "reason": "At 390x844 the game remains playable - touch D-pad, camera rail and legible text - but the ending label stack occupies roughly the top 40% of the portrait frame, overlapping each other and completely hiding the receiver, the emotional subject of the beat; protagonist and result are readable in most states but the payoff composition collapses on a narrow screen. Only 390 portrait was exercised by this reviewer; 360/430 and enlarged text are not_checked.",
+      "evidence": [
+        {"ref": "docs/reviews/2026-09-22-first-words-210a663-COLD.md", "modality": "cold_observer_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c63-phone.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c62-reload2.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "world_role_stakes": {
+      "rating": 8,
+      "reason": "With zero supplied intent the reviewer reconstructed the spine from the rendered prologue: a festival night with three friends and one shared lantern, a sky-tearing consequence, a Warden that physically tears the speech module from Zip's chest, waking alone in a prison, and the concrete need to restore speech to open the door. Role, loss and objective all landed. Held back by the limbo beats where the visuals thin out to a void and the captions carry the situation.",
+      "evidence": [
+        {"ref": "docs/reviews/2026-09-22-first-words-210a663-COLD.md", "modality": "cold_observer_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c05.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c13-beat8.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "visible_causality": {
+      "rating": 8,
+      "reason": "Causes are rendered where they matter most: the supplied sign deterministically builds the spoken command word by word with the INPUT line visibly growing, the wrong command leaves the gate shut, the current notice opens it on camera, and the recovery screen states the causal chain in world language. The prologue's big event (tear + module extraction) is staged with the module physically moving into the Warden's grasp. Not higher because the lantern-to-catastrophe link plays mostly as caption + lights rather than a legible causal chain in the frame.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-authoritative-replay-210a663.md", "modality": "authoritative_replay", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c42-spoke-wrong.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "attachment_pull": {
+      "rating": 8,
+      "reason": "The 'same time next year. All three of us.' promise, the single lantern made for three friends, and Mira's broken 'Hel-p.' signal gave the reviewer a real want: find her. The ending line 'you are no longer alone' plus the receiver raising its arms paid a small but genuine beat, and the reviewer pursued it without prompting. Moderate rather than strong because the two other friends are barely characterized before the loss, so the pull centers on one name.",
+      "evidence": [
+        {"ref": "docs/reviews/2026-09-22-first-words-210a663-COLD.md", "modality": "cold_observer_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c03-next1.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c58-ending2.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "world_comprehension": {
+      "rating": 8,
+      "reason": "A cold viewer can answer where (lantern festival town, then a prison under a Warden), who (Zip, a robot whose voice was torn out), and why (the lantern night ended in abduction; speech is the key back to the world) from the rendered sequence alone. The mission's stale-vs-fresh sign logic also reads without doc knowledge. Residual reliance on captions is concentrated in the limbo beats.",
+      "evidence": [
+        {"ref": "docs/reviews/2026-09-22-first-words-210a663-COLD.md", "modality": "cold_observer_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "motion_direction": {
+      "rating": null,
+      "reason": "Unassessed: the user explicitly deferred motion/animation-quality review this cycle, and this reviewer additionally has no video-perception path; sparse screenshots cannot certify motion claims, so per policy the lane is recorded unassessed rather than substituted with weaker evidence."
+    },
+    "semantic_readability": {
+      "rating": 8,
+      "reason": "Key objects carry their meaning before labels: a Moon-marked gate reads as the Moon gate, the five-point mark reads as the star route, the repair socket sits on a real workbench, the receiver is a robot with a speech bubble. The REPAIR SOCKET and SEALED EXIT markers anchor to actual objects. Weakened by the unlabeled camera-glyph rail (◎ ? ◉ opaque until the '?' card) and by the ending bubble cluster where three speech-style pills compete.",
+      "evidence": [
+        {"ref": "docs/reviews/2026-09-22-first-words-210a663-COLD.md", "modality": "cold_observer_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c66-help.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c33-level1.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "audio_atmosphere": {
+      "rating": null,
+      "reason": "Unassessed: this reviewer cannot perceive audio. The ♫ mute and the Music/Sound-effects checkboxes exist and change state in live play, but wiring is not listening; per critic policy the lane is recorded unassessed rather than certified with weaker substitutes."
+    },
+    "orientation_action": {
+      "rating": 8,
+      "reason": "Every state presented exactly one obvious next verb (Send up our lantern, Take control, Connect the power lead, Scan, Make first word, Supply..., Speak to gate, Answer the signal, Run the relay, Send to Mira) and the reviewer never hit a dead end or wondered where to look to act. Held back by the ending state where four stacked affordances/labels compete for 'what now' and by the dark rooms offering few visual affordances beyond the glowing marker.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c21-tut.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "hud_readability": {
+      "rating": 7,
+      "reason": "Text is legible at desktop size, the goal card and machine panel are clearly typeset, the transient 'Saved' line and the 'Paused · resume' pill are clean. But the machine card is a large center panel that covers Zip and much of the world while open, and the ending label stack overlaps itself and the scene - readability of individual surfaces is good, composure of simultaneous surfaces is not.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-out/c35-machineopen.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c60-finish2.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "controls": {
+      "rating": 8,
+      "reason": "Keyboard movement, pointer-drag camera orbit, zoom buttons, recenter, front view, marker/board taps, menu, mute, pause and the phone D-pad all responded in live play, before and after reload. The one-at-a-time control tutorial matched what the body then did. Held back by glyph-only discoverability on the camera rail and by the slow software renderer making continuous camera feel choppy (an environment limit, noted honestly).",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c14-control.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c66-help.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "physicality": {
+      "rating": 7,
+      "reason": "In ordinary play the body stayed on the platform and carpet, stopped at the room edges, and the closed gate read as blocking until the correct command opened it; no penetration or teleport was observed. Recorded at 7 rather than higher because this reviewer probed physicality only while performing required steps - no systematic wall/gate/prop penetration sweep was run on this candidate.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c15-walk.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "transition_handoff": {
+      "rating": 8,
+      "reason": "Each boundary names the change: 'You control Zip now' at prologue->tutorial, 'The real mission now changes the context and removes most of the guidance' at tutorial->Level 1, and 'Finish Level 1' into the open-world ending. The reviewer always knew who it controlled and what the current goal was. The tutorial-to-mission shift is the roughest edge: attention moves from a dominant center card back to the world without a beat that says 'put the panel away and look around'.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c14-control.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c33-level1.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "tutorial_clarity": {
+      "rating": 8,
+      "reason": "The tutorial teaches reusable grammar (move, camera drag, zoom, menu, the engine loop) one action at a time, each step completes on the player's own successful action, a skip escape exists at every step, and it ends in a clean guaranteed success ('You can speak again') before Level 1 changes the terms. The reviewer never guessed a control. Held back because the teaching happens mostly inside a large card rather than in the world, so the grammar transfers to the panel more than to the space.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c24-makeword.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c31-spoke.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "presentation_integration": {
+      "rating": 7,
+      "reason": "The mechanical budget report on this exact candidate passes (coverage within budget in all 11 states, no clipping, no long blocks, focal clear), and the design genuinely rides the low rungs: world-anchored notice boards and markers, the machine opened from a world toggle whose label carries the goal, opt-in panel, fold-away markers, diegetic pause, transient Saved line. But live cold play found a real integration defect the tool cannot measure: at the ending four world labels stack over each other and the receiver (Rule I3 overlapping-markers defect), and during the tutorial the center card is the primary surface with the world as backdrop.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/presentation-budget-ambient.json", "modality": "ci_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/gate-report-210a663.json", "modality": "ci_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "docs/reviews/2026-09-22-first-words-210a663-COLD.md", "modality": "cold_observer_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c60-finish2.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c63-phone.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "meaningful_agency": {
+      "rating": 9,
+      "reason": "Player decisions are real and consequential: the sign you supply deterministically decides what the machine says and which gate opens; predictions are recorded and checked against the run; the relay separates 'you predicted the machine' from 'you found Mira'; nothing is theater - the same machine produces different worlds from different supplied context.",
+      "counterexample_attempt": "Tried to prove the choices were cosmetic: supplied the deliberately wrong sign and the wrong relay note; both produced genuinely different machine output and different world outcomes (wrong command, gate stayed shut, no reply from the holding area), and the correct-context replays produced the opening outcomes. No path was found where an ignored decision still succeeded.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-authoritative-replay-210a663.md", "modality": "authoritative_replay", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "progression_recovery": {
+      "rating": 9,
+      "reason": "Failure is a named, lossless, explained state at every layer: 'Wrong route. Nothing is lost.' with re-offered signs and a causal sentence; 'No reply from that holding area... your first decisions are kept'; the machine card's '↶ Try again' rewinds word state; mid-run reload restored the exact end state; menu offers reset and prologue replay. Difficulty grows by removing help (Level 1 says 'now with less help'), not by adding UI.",
+      "counterexample_attempt": "Tried to get permanently stuck or lose progress: wrong sign, wrong relay note, rewinding a half-built command, reloading mid-mission, pausing, and toggling sound - every path returned to a live, explained decision point, and the reloaded state preserved all prior choices. No dead end was found.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c42-spoke-wrong.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c52-relayout.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c62-reload2.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "world_continuity": {
+      "rating": 8,
+      "reason": "One continuous world from home platform through prison chamber, corridor and star gate to the ending walkway; the gate you open stays open, the boards remain in the space, and a reload resumes inside the same scene with state intact. The machine card and menu are overlays on the running world, not separate result pages. Held back slightly by the tutorial's card-dominant framing, which reads as a different attentional mode from the world.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c46-relay.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c61-reload.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "concept_fidelity": {
+      "rating": 9,
+      "reason": "The message machine honestly embodies context-conditioned next-word generation: the INPUT visibly grows with every generated word, the completed command is exactly what the supplied sign implies, and the relay reproduces the same rule on a new surface. Predictions stay separate from authoritative results - the server's output, not the player's hope, decides the gate. The model is simple but it does not fake or leak the 'right' answer.",
+      "counterexample_attempt": "Checked whether the machine secretly steers toward the correct answer or rewards prediction instead of context: supplying a stale sign still produced a stale command that failed the world even when the destination prediction matched; supplying current context produced the working command. The generator completed whatever context it was given, both times, in replay.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-authoritative-replay-210a663.md", "modality": "authoritative_replay", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    },
+    "fresh_transfer": {
+      "rating": 9,
+      "reason": "Level 1 changes the context that made the tutorial succeed: the just-practiced 'Open the Moon gate' answer is reproducibly wrong in the new corridor, and success requires re-deriving from current evidence. The relay then transfers the same stale-vs-current principle to a genuinely new surface (timestamps and a moved friend), where the reviewer applied it unprompted. Help is faded ('now with less help') rather than replaced with more UI.",
+      "counterexample_attempt": "Attempted the memorized-recipe path first: replaying the tutorial's exact Moon command in Level 1 failed on purpose, and clicking the same UI sequence with the stale relay note also failed; only re-reading the changed evidence produced success. The one soft spot is that the correct option is always offered explicitly in the panel, so transfer is cued at the choice point even though it is earned at the reading step.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-authoritative-replay-210a663.md", "modality": "authoritative_replay", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    }
+  },
+  "coverage": {
+    "fresh_entry": {"status": "observed", "note": "Virgin browser profile; fresh visitor played immediately from the prologue entry plaque.", "evidence": [{"ref": "artifacts/play-20260922/astra-out/c01-open.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}, {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "first_action": {"status": "observed", "note": "Lantern gesture button and first WASD movement performed live.", "evidence": [{"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}, {"ref": "artifacts/play-20260922/astra-out/c15-walk.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "mistake": {"status": "observed", "note": "Two deliberate wrong choices: stale Moon sign in the route mission and stale 18:00 note in the relay.", "evidence": [{"ref": "artifacts/play-20260922/astra-out/c42-spoke-wrong.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}, {"ref": "artifacts/play-20260922/astra-out/c52-relayout.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "recovery": {"status": "observed", "note": "Recovered both mistakes in-place with causal feedback and no state loss; 'Try again' rewound the half-built command too.", "evidence": [{"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}, {"ref": "artifacts/play-20260922/astra-out/c43-todaysig.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "later_challenge": {"status": "observed", "note": "Relay timestamp judgment with faded help followed the changed-context route mission.", "evidence": [{"ref": "artifacts/play-20260922/astra-out/c46-relay.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}, {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "payoff": {"status": "observed", "note": "Mira answers, ending walkway and 'Finish Level 1' reached live on desktop.", "evidence": [{"ref": "artifacts/play-20260922/astra-out/c58-ending2.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "transfer": {"status": "observed", "note": "Tutorial Moon command replayed verbatim in Level 1 fails; principle re-applied to relay timestamps without prompting.", "evidence": [{"ref": "artifacts/play-20260922/astra-authoritative-replay-210a663.md", "modality": "authoritative_replay", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "replay": {"status": "observed", "note": "Prologue beats replayed via ← Back / forward re-advance. The menu's 'Replay the prologue' button was seen but not clicked; beat-level replay was exercised directly.", "evidence": [{"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}, {"ref": "artifacts/play-20260922/astra-out/c09-back.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "save_resume": {"status": "observed", "note": "Reload at Level 1 end state restored exact progression (open star gate, relay notes, receiver reply, machine label).", "evidence": [{"ref": "artifacts/play-20260922/astra-out/c62-reload2.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}, {"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "controls_after_save": {"status": "observed", "note": "After the mid-state reload the reviewer exercised menu open/close, diegetic pause/resume, the '?' card and viewport resize successfully.", "evidence": [{"ref": "artifacts/play-20260922/astra-out/c65-paused.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "desktop": {"status": "observed", "note": "Entire chapter played live at 1280x720.", "evidence": [{"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "phone_360": {"status": "not_checked", "note": "Not exercised by this reviewer; only 390 portrait was opened live."},
+    "phone_390": {"status": "observed", "note": "390x844 portrait inspected at the ending state; D-pad present, label stack defect reproduced there.", "evidence": [{"ref": "artifacts/play-20260922/astra-out/c63-phone.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "phone_430": {"status": "not_checked", "note": "Not exercised by this reviewer."},
+    "touch": {"status": "not_checked", "note": "Touch controls render in the 390 viewport but this reviewer did not dispatch touch input; movement was still keyboard-driven."},
+    "keyboard": {"status": "observed", "note": "WASD and arrow movement exercised live.", "evidence": [{"ref": "artifacts/play-20260922/astra-play-trace-210a663.json", "modality": "interactive_trace", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}]},
+    "enlarged_text": {"status": "not_checked", "note": "200% text not exercised by this reviewer (project readability suite covers it but that is not this reviewer's observation)."},
+    "reduced_motion": {"status": "not_checked", "note": "Reduced-motion checkbox exists in the menu; not enabled during this play."}
+  },
+  "blockers": [
+    {
+      "finding": "Level 1 ending state: four world labels (18:00 relay note, Mira reply bubble, 'Mira heard you' machine toggle, 18:20 relay note) stack into one vertical column at top-center, overlapping each other and the gate frame and completely occluding the receiver robot - the emotional subject of the payoff beat (presentation guide Rule I3: overlapping markers that each need reading are a defect). Reproduced at 1280x720 and 390x844, and again after reload.",
+      "retest": "Reloaded the page at the same state and re-opened it from the mission end: the stack persists at both viewports and the receiver stays hidden behind the toggle/notes; no camera recenter or pause state resolves it. Repair should relocate or fold the finished relay notes and separate the reply bubble from the toggle so the receiver reads.",
+      "evidence": [
+        {"ref": "artifacts/play-20260922/astra-out/c60-finish2.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c62-reload2.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "artifacts/play-20260922/astra-out/c63-phone.png", "modality": "screenshot", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"},
+        {"ref": "docs/reviews/2026-09-22-first-words-210a663-COLD.md", "modality": "cold_observer_report", "candidate_sha": "210a663c80800f69eb68905817fb68f0dd7ee7c8"}
+      ]
+    }
+  ]
+}
