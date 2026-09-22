@@ -26,8 +26,9 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 #engine.practicing #output,#engine.practicing .input,#engine.practicing #inspect,#engine.practicing .foot{display:none}
 /* Reading beats keep the world band open: the card carries only the question while the signs are read. */
 #engine.compact #output,#engine.compact .foot{display:none}
-/* Reading beats pin the compact card to the bottom band so in-world signs keep the space above it. */
-@media (min-width:701px){#engine.compact{left:50%;top:auto;bottom:16px;transform:translateX(-50%)}}
+/* Reading beats pin the compact card to the bottom band so in-world signs keep the space above it;
+   world-focus tutorial steps pin it too but keep the machine's output visible. */
+@media (min-width:701px){#engine.compact,#engine.world-focus{left:50%;top:auto;bottom:16px;transform:translateX(-50%)}}
 /* Opening owns one full viewport; gameplay chrome underneath stays hidden (inert and occluded). */
 .first-opening .rgi-visual{min-height:0}.first-opening .rgi-progress{position:absolute;left:18px;right:18px;top:auto;bottom:84px;height:3px;padding:0}
 .game-opening-active .masthead,.game-opening-active #markers{display:none}

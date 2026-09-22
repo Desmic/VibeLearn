@@ -106,8 +106,17 @@ part('friend-heart-b','sphere','paper',[.12,.08,.42],[.22,.22,.05],{parent:'frie
 part('friend-heart-tip','cone','paper',[0,-.08,.42],[.4,.32,.05],{rotation:[180,0,0],parent:'friend-cube'});
 
 /* A black visual field makes the teleport land as a limbo beat before the
-   prison geometry is revealed. */
+   prison geometry is revealed. The beat still carries its story spatially:
+   a last fragment of ground underfoot, the dead lantern, and Bellweather's
+   broken silhouettes — the caption is not the only carrier (review 210a663). */
 part('limbo-backdrop','box','void',[0,0,-44],[160,160,.4],{enabled:false});
+const limboProps=['limbo-isle','limbo-rim','limbo-shard-a','limbo-shard-b','limbo-lantern','limbo-ember'];
+part('limbo-isle','cylinder','stone',[0,-.34,-28],[3.4,.5,3.4],{enabled:false});
+part('limbo-rim','cylinder','gold',[0,-.6,-28],[3.7,.06,3.7],{enabled:false});
+part('limbo-shard-a','box','dark',[-8.5,1.6,-37],[1.5,7,.9],{enabled:false,rotation:[4,0,16]});
+part('limbo-shard-b','box','dark',[9.2,.8,-39],[2.4,4.4,.8],{enabled:false,rotation:[0,0,-11]});
+e.push(...lantern('limbo-lantern',[1.7,.2,-26.6],{scale:.6,color:'paper'}).map(item=>({enabled:false,...item})));
+part('limbo-ember','sphere','blueGlow',[1.7,.34,-26.4],[.1,.1,.1],{enabled:false,motion:{type:'pulse',amplitude:.05,speed:.8}});
 
 /* One protagonist, used in story and gameplay. */
 e.push({id:'zip',asset:'robot',position:[0,0,-28],scale:[.9,.9,.9],animation:'idle'});
@@ -153,7 +162,7 @@ const revealGroups=[
 ];
 const revealParts=revealGroups.flat();
 
-export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'11',
+export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'12',
   environment:{clearColor:'#172238',ambient:'#6c7694',exposure:1.05,toneMapping:'aces',fog:{type:'linear',color:'#8f91a7',start:38,end:125}},
   materials:{stone:{diffuse:'#d8b997'},paper:{diffuse:'#f9dfba'},gold:{diffuse:'#ce9d53',gloss:.45},coral:{diffuse:'#d67a69'},ink:{diffuse:'#273144'},indigo:{diffuse:'#4c5276'},rock:{diffuse:'#717b91'},teal:{diffuse:'#548e89'},rose:{diffuse:'#c87678'},leaf:{diffuse:'#477765'},mint:{diffuse:'#91d2af',emissive:'#60a990',emissiveIntensity:.25},wood:{diffuse:'#795755'},glow:{diffuse:'#ffe5ad',emissive:'#ffc97c',emissiveIntensity:1.25},pinkGlow:{diffuse:'#ffa58c',emissive:'#e88c70',emissiveIntensity:.8},redGlow:{diffuse:'#fa9f78',emissive:'#fc705c',emissiveIntensity:1.25},cloud:{diffuse:'#efd7cc'},haze:{diffuse:'#bda8bc'},dark:{diffuse:'#20283a'},prison:{diffuse:'#35445d'},blueGlow:{diffuse:'#9fdcff',emissive:'#76bfff',emissiveIntensity:1.8},void:{diffuse:'#070b12'}},
   assets:{robot:{type:'container',src:'/assets/quaternius-animated-robot.glb',transform:{position:[0,-.08,0],scale:[.52,.52,.52]},animations:{idle:'RobotArmature|Robot_Standing',run:'RobotArmature|Robot_Running',yes:'RobotArmature|Robot_Yes',no:'RobotArmature|Robot_No',wave:'RobotArmature|Robot_Wave'},defaultAnimation:'idle'}},
@@ -162,7 +171,7 @@ export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'
   cameras:{
     home:{position:[3.5,3.6,16.9],lookAt:[0,1.6,10.7],fov:46,portrait:{position:[4,4.8,22.5],lookAt:[0,1.6,10.7],fov:50}},
     rupture:{position:[11,9,26],lookAt:[0,2,9],fov:48,portrait:{position:[7,12,31],lookAt:[0,2,9],fov:48}},
-    limbo:{position:[5,4,-20],lookAt:[0,1,-28],fov:46,portrait:{position:[3.5,6,-18],lookAt:[0,1,-28],fov:46}},
+    limbo:{position:[3.6,2.3,-23.6],lookAt:[0,1.15,-28],fov:44,portrait:{position:[3,3.4,-24],lookAt:[0,1.15,-28],fov:48}},
     reveal:{position:[1,8,-16],lookAt:[0,2,-33],fov:52,portrait:{position:[1,13,-5],lookAt:[0,3,-32],fov:50}},
     theft:{position:[2.5,4,-18],lookAt:[1.2,1.7,-29],fov:44,portrait:{position:[2.5,6,-14],lookAt:[1.2,1.7,-29],fov:44}}
   },
@@ -177,14 +186,14 @@ export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'
 
 const missionBase=()=>({
   show:['zip','prison-zone','sun','star',...revealParts],
-  hide:[...speechMarks,'bellweather-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','relay-note-a','relay-note-b','zip-voice','socket-core','socket-ring',...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
+  hide:[...speechMarks,'bellweather-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','relay-note-a','relay-note-b','zip-voice','socket-core','socket-ring',...limboProps,...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
   transforms:{'moon-door':{position:[0,0,0]},'sun-door':{position:[0,0,0]},'star-door':{position:[0,0,0]},zip:{position:[0,0,-28]}},
   animations:{zip:'idle'}
 });
 
 function opening(beat){
   const p={show:['zip',...revealParts],hide:['bellweather-zone','prison-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','warden-rift-link','voice-extract-link','stolen-voice','zip-voice'],transforms:{zip:{position:[0,0,10]},singer:{position:[2.2,0,.5]},'friend-a':{position:[-2.2,0,.5]},'friendship-lantern':{position:[1.9,1.2,10.7]},'moon-door':{position:[0,0,0]}},animations:{zip:'idle'}};
-  p.hide.push(...speechMarks,'sun','star','notice-old','notice-parade','notice-today','tutorial-route-open','wrong-ring','reunion-ring','route-glow');
+  p.hide.push(...speechMarks,'sun','star','notice-old','notice-parade','notice-today','tutorial-route-open','wrong-ring','reunion-ring','route-glow',...limboProps);
   // Explicitly restore the cast after a prior rupture/replay hid individuals.
   p.show.push('singer','friend-a','bellworker-a','bellworker-b','bellworker-b-parcel');
   p.hide.push('bellworker-a-parcel');
@@ -237,7 +246,7 @@ function opening(beat){
       {at:3350,patch:{hide:['warden']}}
     ],finish:{hide:['storm-flash','zip','singer','friend-a','bellworker-a','bellworker-b','warden','warden-rift-link'],environment:{clearColor:'#03060d',ambient:'#111827',exposure:.35,fog:{type:'none'}}}};
   }else if(beat===3){
-    p.camera='limbo';p.environment={clearColor:'#02040a',ambient:'#10131c',exposure:.35,fog:{type:'none'}};p.show.push('limbo-backdrop','zip-voice');p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
+    p.camera='limbo';p.environment={clearColor:'#02040a',ambient:'#181d2a',exposure:.45,fog:{type:'none'}};p.show.push('limbo-backdrop','zip-voice',...limboProps);p.transforms.zip={position:[0,0,-28]};p.animations.zip='idle';
   }else if(beat===4){
     p.camera='reveal';p.environment={clearColor:'#070b12',ambient:'#2b354a',exposure:.72,fog:{type:'linear',color:'#202a3b',start:18,end:82}};p.show=p.show.filter(id=>!revealParts.includes(id));
     p.show.push('prison-zone','zip-voice','limbo-backdrop');p.hide.push(...revealParts);
@@ -405,7 +414,7 @@ export const speechRepairTutorialSpec={
       detail:'The first door is open. The real mission now changes the context and removes most of the guidance.',
       feedback:'Level 1 becomes available beyond the opened route.',
       when:{round:0,status:'success'},success:{round:{gte:1}},
-      focus:'none',actions:['next'],primaryAction:'next',actionLabel:'Begin Level 1 →'
+      target:'moon-label',focus:'world',actions:['next'],primaryAction:'next',actionLabel:'Begin Level 1 →'
     }
   ]
 };

@@ -1,5 +1,6 @@
 """Active player-entry contract: Bellweather -> First Words, PlayCanvas only."""
 import tempfile
+import time
 from pathlib import Path
 from uuid import uuid4
 from playwright.sync_api import sync_playwright, expect
@@ -50,10 +51,19 @@ def main():
             expect(q.locator('#rgi-intro')).to_be_visible(timeout=20000)
             q.get_by_role('button',name='Skip opening',exact=True).click()
             expect(q.locator('#saved')).to_have_text('Saved',timeout=15000)
-            current=old.request.get(url+'/api/state')
-            assert current.ok
-            active=current.json()['attempt']
-            assert active['snapshot']['mission']['id']=='ai-01-first-words'
+            # The page supersedes a legacy draft with its own start command; poll
+            # the authoritative state instead of racing the POST (a loaded
+            # machine under suite contention can delay it past a fixed wait).
+            deadline=time.monotonic()+45
+            active=None
+            while time.monotonic()<deadline:
+                current=old.request.get(url+'/api/state')
+                assert current.ok
+                active=current.json()['attempt']
+                if active and active['snapshot']['mission']['id']=='ai-01-first-words' and active['id']!=legacy_id:
+                    break
+                time.sleep(.4)
+            assert active and active['snapshot']['mission']['id']=='ai-01-first-words'
             assert active['id']!=legacy_id
             q.reload();expect(q.locator('#rgi-intro')).to_have_count(0);expect(q.locator('#saved')).to_have_text('Saved',timeout=15000)
             old.close()

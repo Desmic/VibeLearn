@@ -100,6 +100,15 @@ in real play states at 1280×720 and 390×844:
   story. Related world rule: props must be **planted inside the terrain they stand
   on** (trunk position within the plate footprint); a floating prop is a defect even
   when it never enters a framed shot.
+- **B7 Marker declutter:** visible anchored world labels must not overlap each
+  other (4px tolerance) and must not cover the projected body box of the scene's
+  subject (>8% of it). The reusable measurement is `projectedEntityBox` in
+  `web/world-marker-layout.js`: games seed the marker layout's avoid rects with the
+  current subject box so labels relocate around it with edge cues instead of
+  burying it. The 21 September/22 September failure this blocks: four relay labels
+  stacked into one column over the receiver at the payoff beat — under B2/B3/B1 the
+  state measured clean because those check single surfaces, not mutual marker
+  collision or subject occlusion by labels.
 
 Budget violations are defects, not preferences. A critic may rate `hud_readability`
 or `presentation_integration` ≥ 9 only with a passing budget report on the exact
@@ -119,7 +128,9 @@ briefly pin one prompt; the pin dismisses on success.
 
 **Rule I3 (one decision per moment).** Exactly one primary action is offered per
 state; alternatives appear on inspection or after the primary resolves. Overlapping
-markers that each need reading are a defect (see B2/B4).
+markers that each need reading are a defect (see B2/B4/B7). Once a world ephemera's
+decision is consumed, its label folds away — the physical prop may stay in the
+world, but spent notes must never keep competing with the payoff they produced.
 
 **Rule I4 (reversible camera, never gated reading).** Information may be spatially
 placed, but camera dexterity must never be a prerequisite to finish a step: markers
@@ -196,7 +207,7 @@ unassessed; screenshots of a static frame do not certify B2 (movement/orbit requ
 
 | Rule | Mechanism |
 | --- | --- |
-| P1–P3, I1–I5, B1–B6 | `tools/check_presentation_budget.py` (mechanical, exact candidate) + live critic observation |
+| P1–P3, I1–I5, B1–B7 | `tools/check_presentation_budget.py` (mechanical, exact candidate) + live critic observation |
 | Design-time surface declaration | `tools/check_learning_design.py` (existing attention/focus contract) |
 | Review-time certification | `presentation_integration` criterion in `check_critic_review.py` V2 gates — requires budget report + interactive trace + cold-observer + live capture |
 | Worker behavior | this section referenced from `AGENTS.md` build order and `GAME-UX-SYSTEM.md` |

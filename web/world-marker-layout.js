@@ -1,6 +1,23 @@
 /* Reusable projected world-marker placement with HUD-safe clamping. */
 'use strict';
 
+// Screen-space box of a world entity, measured by projecting anchor offsets
+// through the same projectEntity the markers use. Lets marker layouts keep a
+// scene's subject clear of labels (guide B2 subject clearance / B7).
+// Returns a rect in projectEntity space, or null when not measurable.
+export function projectedEntityBox(world,id,{
+  top=[0,1.5,.25],bottom=[0,-1.5,.25],left=[-1.1,0,.25],right=[1.1,0,.25],margin=0
+}={}){
+  if(!world?.projectEntity)return null;
+  const points=[top,bottom,left,right].map(offset=>world.projectEntity(id,offset));
+  if(points.some(p=>!p||!p.inFront))return null;
+  const [t,b,l,r]=points;
+  return{
+    left:Math.min(l.x,r.x)-margin,right:Math.max(l.x,r.x)+margin,
+    top:Math.min(t.y,b.y)-margin,bottom:Math.max(t.y,b.y)+margin
+  };
+}
+
 // Viewport-space top limit below persistent page chrome (mastheads, toolbars).
 // Callers pass the live chrome nodes so marker safe areas follow real rendered
 // heights instead of guessed constants.

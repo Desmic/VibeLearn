@@ -4,7 +4,7 @@ import {createGameAudio} from './game-audio.js';
 import {createLearningSession} from './learning-session.js';
 import {createTutorialFlow,selectStateTutorialStep} from './tutorial-flow.js';
 import {createExperienceModeController} from './experience-mode.js';
-import {placeWorldMarker,chromeClearance} from './world-marker-layout.js';
+import {placeWorldMarker,chromeClearance,projectedEntityBox} from './world-marker-layout.js';
 import * as chapter from './first-words-world.js';
 
 const $=s=>document.querySelector(s),runtime=getGameRuntime(),audio=createGameAudio(),host=$('#world');
@@ -192,6 +192,9 @@ function render(){
   // Sign-reading beats must not let the card steal the boards' airtime.
   const readingBeat=step==='done'&&((s.round===1&&s.clue==='none')||(s.round===1&&s.status==='wrong')||(relay&&s.relay_stage==='choosing'&&s.relay_context==='none'));
   $('#engine').classList.toggle('compact',readingBeat);
+  // World-focus tutorial steps: the world marker carries the verb, so the card
+  // rides in the bottom band instead of dominating the scene (ladder rungs 1-3).
+  $('#engine').classList.toggle('world-focus',s.round===0&&step==='done'&&practice.current?.focus==='world');
   if(step!=='done'){
     const current=practice.current;
     const title=current?.title||current?.skill||'Try the highlighted control.';
@@ -292,10 +295,10 @@ function frame(){
   const point=card.hidden?null:world.projectEntity(card.dataset.anchor||'socket');
   const anchored=point&&point.inFront;
   card.classList.toggle('parked',Boolean(point)&&!anchored);
-  const reading=card.classList.contains('compact');
-  card.classList.toggle('parked-reading',Boolean(anchored&&reading&&mobile));
+  const banded=card.classList.contains('compact')||card.classList.contains('world-focus');
+  card.classList.toggle('parked-reading',Boolean(anchored&&card.classList.contains('compact')&&mobile));
   if(!anchored){card.style.left='';card.style.top='';}
-  else if(reading){card.style.left='';card.style.top='';}
+  else if(banded){card.style.left='';card.style.top='';}
   else{const placed=placeWorldMarker(card,point,{viewportWidth:rect.width,safeTop:mobile?64:88,safeBottom:Math.max(rect.height-bottomReserve,mobile?430:500),critical:true,xPadding:Math.min((card.offsetWidth||360)/2+10,rect.width/2-10),yOffset:card.dataset.anchor==='zip'?200:18,avoidRects:playRects});
     // B3 containment: a tall card must not clip at the viewport top; park it low.
     if(!placed||!placed.placed||placed.y-(card.offsetHeight||0)<8){card.classList.add('parked');card.style.left='';card.style.top='';}
@@ -310,6 +313,12 @@ function frame(){
     avoidRects.push({left:cardRect.left-rect.left,right:cardRect.right-rect.left,top:cardRect.top-rect.top,bottom:cardRect.bottom-rect.top});
   }
   const relay=Boolean(s.relay_stage&&s.relay_stage!=='none');
+  // Subject clearance: during the relay the receiver owns the scene; labels
+  // yield to its screen box instead of burying it (guide B2, review 210a663).
+  if(relay){
+    const subject=projectedEntityBox(world,'friend-signal',{top:[0,1.35,.25],bottom:[0,-1.45,.25],left:[-.95,0,.25],right:[.95,0,.25],margin:8});
+    if(subject)avoidRects.push(subject);
+  }
   for(const marker of $('#markers').children){
     const anchor=world.projectEntity(marker.dataset.anchor),wrongRound=marker.dataset.round!==undefined&&Number(marker.dataset.round)!==s.round;
     const available=marker.dataset.action?s.available_actions?.includes(marker.dataset.action):true;
@@ -329,7 +338,7 @@ function frame(){
       marker.classList.toggle('parked',!(anchor&&anchor.inFront));
     // I3: while the machine panel is open it owns the decision; its world
     // choice markers fold away (they return when the panel is put away).
-    }else marker.hidden=(!card.hidden&&marker.classList.contains('notice-marker'))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&!relay)||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
+    }else marker.hidden=(!card.hidden&&marker.classList.contains('notice-marker'))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
     if(anchor&&!marker.hidden&&!(toggleMarker&&marker.classList.contains('parked'))){
       const placement=placeWorldMarker(marker,anchor,{viewportWidth:rect.width,safeTop,safeBottom,critical,avoidRects});
       if(!placement.placed||(!critical&&!placement.insideSafeArea))marker.hidden=true;

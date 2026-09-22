@@ -23,6 +23,21 @@
       "focal": "zip"
     },
     {
+      "name": "prologue-limbo-desktop",
+      "steps": [
+        {
+          "wait_eval": "()=>document.querySelector('#rgi-title').textContent==='Silence.'",
+          "timeout": 180000
+        }
+      ],
+      "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
+      "focal": "zip",
+      "presence": {
+        "entity": "zip",
+        "height": 1.55
+      }
+    },
+    {
       "name": "prologue-opening-phone",
       "viewport": [
         390,
@@ -197,7 +212,16 @@
           "timeout": 15000
         }
       ],
-      "focal": "zip"
+      "focal": "zip",
+      "markers": "#markers > [data-anchor]",
+      "screenshot": "artifacts/play-20260922/b7-relay-folded.png",
+      "subject": {
+        "entity": "friend-signal",
+        "top": [0, 1.35, 0.25],
+        "bottom": [0, -1.45, 0.25],
+        "left": [-0.95, 0, 0.25],
+        "right": [0.95, 0, 0.25]
+      }
     },
     {
       "name": "complete-closed",
@@ -241,7 +265,16 @@
           "timeout": 30000
         }
       ],
-      "focal": "zip"
+      "focal": "zip",
+      "markers": "#markers > [data-anchor]",
+      "screenshot": "artifacts/play-20260922/b7-complete-closed.png",
+      "subject": {
+        "entity": "friend-signal",
+        "top": [0, 1.35, 0.25],
+        "bottom": [0, -1.45, 0.25],
+        "left": [-0.95, 0, 0.25],
+        "right": [0.95, 0, 0.25]
+      }
     },
     {
       "name": "tutorial-prompt-phone",

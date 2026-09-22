@@ -27,6 +27,8 @@ BUDGETS = {
     "focal_margin_px": 24,         # B2: focal clearance ring
     "disabled_visible_max": 0,     # P3: no visible non-actionable controls
     "presence_min_share": 0.12,    # B6: story subject screen presence
+    "marker_overlap_px": 4,        # B7: anchored labels must not pile up
+    "subject_cover_max": 0.08,     # B7: marker share of the subject's screen box
 }
 
 MEASURE = """async (args) => {
@@ -109,7 +111,8 @@ MEASURE = """async (args) => {
   // forbids eval(), so expression-string injection is not an option.
   let focal = null;
   let presence = null;
-  if (args.focal || args.presence) {
+  let subjectCover = null;
+  if (args.focal || args.presence || args.subject) {
     const {getGameRuntime} = await import('/game-runtime.js');
     const w = getGameRuntime().world;
     const r = document.querySelector('canvas').getBoundingClientRect();
@@ -134,8 +137,48 @@ MEASURE = """async (args) => {
       const top = w.projectEntity(args.presence.entity, [0, args.presence.height, 0]);
       if (base && top) presence = {share: Math.abs(top.y - base.y) / r.height, visible: base.visible && top.visible};
     }
+    // B7 subject occlusion: projected body box of the scene's subject entity;
+    // anchored labels must not cover it (review 210a663: markers buried the
+    // receiver, the emotional subject of the payoff beat).
+    if (args.subject && w?.projectEntity) {
+      const s = args.subject;
+      const proj = o => w.projectEntity(s.entity, o);
+      const pts = [proj(s.top || [0, 1, 0]), proj(s.bottom || [0, -1, 0]), proj(s.left || [-0.9, 0, 0]), proj(s.right || [0.9, 0, 0])];
+      if (pts.every(p => p && p.inFront)) {
+        const [t, b, l, rt] = pts;
+        const box = {left: Math.min(l.x, rt.x) + r.left, top: Math.min(t.y, b.y) + r.top,
+                     right: Math.max(l.x, rt.x) + r.left, bottom: Math.max(t.y, b.y) + r.top};
+        const boxArea = (box.right - box.left) * (box.bottom - box.top);
+        const covers = [];
+        for (const el of document.querySelectorAll(s.markers || '#markers [data-anchor]')) {
+          if (el.closest('[aria-hidden="true"]') || !visible(el)) continue;
+          const q = el.getBoundingClientRect();
+          const area = Math.max(0, Math.min(q.right, box.right) - Math.max(q.left, box.left))
+            * Math.max(0, Math.min(q.bottom, box.bottom) - Math.max(q.top, box.top));
+          if (boxArea > 0 && area / boxArea > budgets.subject_cover_max) {
+            covers.push((el.id ? '#' + el.id : el.textContent.trim().slice(0, 24)) + ' ' + Math.round(area / boxArea * 100) + '%');
+          }
+        }
+        subjectCover = {box, covers};
+      }
+    }
   }
-  return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal, presence, offenders: offenders.slice(0, 12)};
+  // B7 marker pile-up: visible anchored labels must not overlap each other;
+  // decorative aria-hidden world glyphs are excluded.
+  const markerClash = [];
+  if (args.markers) {
+    const rects = [...document.querySelectorAll(args.markers)]
+      .filter(el => !el.closest('[aria-hidden="true"]') && visible(el))
+      .map(el => ({name: (el.id ? '#' + el.id : el.tagName.toLowerCase()) + ' “' + el.textContent.trim().slice(0, 18) + '”', r: el.getBoundingClientRect()}));
+    for (let i = 0; i < rects.length; i++) for (let j = i + 1; j < rects.length; j++) {
+      const a = rects[i].r, b = rects[j].r;
+      if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > budgets.marker_overlap_px
+        && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > budgets.marker_overlap_px) {
+        markerClash.push(rects[i].name + ' ∩ ' + rects[j].name);
+      }
+    }
+  }
+  return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, markerClash, offenders: offenders.slice(0, 12)};
 }"""
 
 
@@ -143,6 +186,8 @@ def evaluate_state(page, scenario_state, budgets):
     return page.evaluate(MEASURE, {
         "focal": scenario_state.get("focal"),
         "presence": scenario_state.get("presence"),
+        "subject": scenario_state.get("subject"),
+        "markers": scenario_state.get("markers"),
         "budgets": budgets,
     })
 
@@ -167,6 +212,11 @@ def violations(state_name, metrics, budgets, panel_allowed):
     presence = metrics.get("presence")
     if presence and presence["share"] < budgets["presence_min_share"]:
         found.append(f"{state_name}: B6 subject presence {presence['share']:.1%} < {budgets['presence_min_share']:.0%}")
+    if metrics.get("markerClash"):
+        found.append(f"{state_name}: B7 world markers overlap: {metrics['markerClash'][:4]}")
+    cover = metrics.get("subjectCover")
+    if cover and cover["covers"]:
+        found.append(f"{state_name}: B7 markers cover the scene subject: {cover['covers'][:4]}")
     return found
 
 
@@ -239,6 +289,11 @@ def main():
                     wait_for_text(page, state["wait_text"], 20000)
                 page.wait_for_timeout(350)
                 metrics = evaluate_state(page, state, budgets)
+                if state.get("screenshot"):
+                    # Reusable evidence: the exact measured play state as a capture.
+                    shot = ROOT / state["screenshot"]
+                    shot.parent.mkdir(parents=True, exist_ok=True)
+                    page.screenshot(path=str(shot))
                 state_budgets = dict(budgets)
                 if state.get("coverage_max"):
                     # Touch viewports may raise B1 for direct-input affordances only
@@ -249,7 +304,9 @@ def main():
                 print(f"{state['name']}: coverage={metrics['coverage']:.1%} clipped={len(metrics['clipped'])} "
                       f"long={len(metrics['longBlocks'])} disabled={len(metrics['disabledVisible'])} "
                       f"focal={'n/a' if not metrics['focal'] else len(metrics['focal']['covered'] or [])} "
-                      f"presence={'n/a' if not metrics['presence'] else format(metrics['presence']['share'], '.1%')}")
+                      f"presence={'n/a' if not metrics['presence'] else format(metrics['presence']['share'], '.1%')} "
+                      f"markerClash={len(metrics['markerClash'])} "
+                      f"subjectCover={'n/a' if not metrics['subjectCover'] else len(metrics['subjectCover']['covers'])}")
             browser.close()
         finally:
             if proc:
