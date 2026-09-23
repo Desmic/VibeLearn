@@ -101,6 +101,35 @@ The supervised execution bridge now enforces a session/build/assignment/model-bo
 preflight. See `NATIVE-PLAY-EXECUTION-CONTRACT.md`; media capture and inspection are
 separate requirements. This does not authenticate supervisor-supplied observations.
 
+## Verification costs, measured on this machine
+
+Software-WebGL Chromium renders a few frames per second, so every gate here is a real
+play walk, not a unit run. The numbers below are what the commands actually took on
+24 September 2026; size a wait for the run, and never guess a duration from the size of
+the scenario.
+
+| Gate | Command | Wall clock |
+| --- | --- | --- |
+| Presentation budget, one beat chain | `python -m tools.check_presentation_budget --only <contiguous prefix>` | **41s** for 5 states |
+| Presentation budget, whole scenario | `python -m tools.check_presentation_budget` | **277s** for 21 states |
+| Unit suite | `python manage.py test` | ~70s for 411 tests |
+| Active browser matrix | `python manage.py browser` | ~26min for 10 modules |
+
+What follows from those numbers, without relaxing anything:
+
+- **Iterate on the prefix, certify on the whole.** A `--only` chain that starts at a
+  `goto` state answers a layout question in under a minute; the full scenario is the
+  record, not the workbench. Re-running 21 states to read one number costs 236 seconds
+  of nothing.
+- **Never re-drive the browser to see what the last run already knew.** The checker
+  attaches the bounded surface's ranked/unranked children to any B3 overflow violation
+  (`attach_shed_diagnostic`), because rebuilding that view by hand cost four full walks
+  when this rule was not yet enforced.
+- **Commit the body as soon as its gates are green.** A long session's real risk is not
+  elapsed time, it is hours of verified work sitting in an uncommitted tree.
+- **Report a duration or a count only after measuring it.** A figure carried forward from
+  a summary is a guess with the authority of evidence behind it.
+
 ## Quota and future orchestrator
 
 Use current Codex account usage for this supervised work. Do not introduce API-key

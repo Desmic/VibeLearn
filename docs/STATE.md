@@ -162,7 +162,15 @@ Gate status at this snapshot: **all measured gates are green.**
 - `check_presentation_budget.py` now says *which* kind of overflow it found: when every
   ranked rung on a surface is already hidden and the surface still overflows, the B3 line
   reports the exhausted ladder and points at unranked content or authored length instead
-  of leaving a worker to conclude that the ceiling is what is wrong.
+  of leaving a worker to conclude that the ceiling is what is wrong. A B3 violation now
+  also carries the surface's own child tree, each node labelled with its rank or
+  `UNRANKED` plus its height — verified by deliberately un-ranking the input rung, which
+  made the report name `div UNRANKED … INPUTOpen the route to the` in one line, the answer
+  that had cost four hand-written probe walks to obtain earlier.
+- Process cost, measured rather than assumed (see `docs/ASTRA-REVIEW-WORKFLOW.md`): a
+  5-state `--only` chain is **41s**, the full 21-state scenario **277s**, the unit suite
+  ~70s. Both budget runs were re-run after the verification break and passed; the
+  candidate is unchanged by it.
 
 **Still to do before presenting:** the cold-observer full-game critic pass is running
 against a disposable learner at a local URL (`artifacts/play-20260923/cold-report.md`),

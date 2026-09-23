@@ -3,7 +3,8 @@ import json
 import unittest
 from pathlib import Path
 
-from tools.check_presentation_budget import (BUDGETS, MEASURE, TEXT_SCALE, resolve_state_budgets,
+from tools.check_presentation_budget import (BUDGETS, MEASURE, SHED_DIAGNOSTIC, TEXT_SCALE,
+                                             attach_shed_diagnostic, resolve_state_budgets,
                                              violations)
 
 _LITERALS = {'"', "'", '`'}
@@ -79,6 +80,26 @@ class PresentationBudgetContract(unittest.TestCase):
 
     def test_injected_text_scale_script_is_balanced(self):
         self.assertIsNone(_unclosed(TEXT_SCALE))
+
+    def test_injected_shed_diagnostic_script_is_balanced(self):
+        self.assertIsNone(_unclosed(SHED_DIAGNOSTIC))
+
+    def test_a_b3_overflow_carries_its_own_cause(self):
+        # The two fixes for an overflowing surface (rank what is unranked, or shorten the
+        # sentence) are opposite, and telling them apart used to mean re-driving minutes
+        # of real play. The diagnostic rides the violation, not a flag.
+        overflow = ['x: B3 unreachable action — a painted choice needs scrolling']
+        seen = []
+        wired = attach_shed_diagnostic('x', overflow, lambda: seen.append(1) or 'client 286 / content 346')
+        self.assertEqual(len(wired), 2)
+        self.assertIn('client 286 / content 346', wired[1])
+        self.assertEqual(seen, [1])
+        # A clean state must not pay for the page read, and a different complaint must
+        # not get an answer to a question nobody asked.
+        quiet = attach_shed_diagnostic('y', [], lambda: self.fail('read on a clean state'))
+        self.assertEqual(quiet, [])
+        other = attach_shed_diagnostic('z', ['z: B2 focal entity covered'], lambda: 'unused')
+        self.assertEqual(other, ['z: B2 focal entity covered'])
 
     def test_every_state_needs_a_named_capture(self):
         # The scenario contract is what makes the critic's eyes mandatory: a measured

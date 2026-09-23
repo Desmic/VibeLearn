@@ -423,6 +423,50 @@ def violations(state_name, metrics, budgets, panel_allowed, scenario_state=None,
     return found
 
 
+SHED_DIAGNOSTIC = """(sheet)=>{
+          const s=document.querySelector(sheet); if(!s) return 'no sheet node to inspect';
+          const rows=[];
+          const walk=(el,depth)=>{for(const n of el.children){
+            if(depth>2)continue;
+            const r=n.getBoundingClientRect(),c=getComputedStyle(n);
+            const rank=n.dataset.shedItem;
+            rows.push(`${'  '.repeat(depth)}${n.tagName.toLowerCase()}${n.id?'#'+n.id:''}`
+              +` ${rank?'rank '+rank:'UNRANKED'}`
+              +(n.classList.contains('shed')&&rank?' (shed)':'')
+              +` h=${Math.round(r.height)} fs=${c.fontSize}`
+              +` ${c.display==='none'?'display:none':''}`
+              +` ${(n.textContent||'').trim().slice(0,26)}`);
+            walk(n,depth+1);}};
+          walk(s,0);
+          return `client ${s.clientHeight} / content ${s.scrollHeight}:\\n  `+rows.join('\\n  ');
+        }"""
+
+
+def attach_shed_diagnostic(state_name, state_violations, read_surface):
+    """Put the cause next to the complaint, on the run that found it.
+
+    Rebuilding this by hand cost four full re-walks of the scenario, so it is wired to
+    the violation itself rather than to a flag someone has to remember to pass.
+    """
+    if not any("B3 unreachable" in line for line in state_violations):
+        return state_violations
+    return state_violations + [f"{state_name}: bounded surface at this text size — " + read_surface()]
+
+
+def shed_diagnostic(page, scenario_state):
+    """Why a bounded surface could not fit, from the run that just measured it.
+
+    A B3 overflow has two very different causes — a rung nobody ranked, or authored text
+    that is simply too long for the fixed ceiling — and telling them apart used to mean
+    re-driving minutes of real play with a hand-written probe. This rides the same page,
+    so the answer is in the report the violation already produced.
+    """
+    try:
+        return page.evaluate(SHED_DIAGNOSTIC, scenario_state.get("sheet") or "#engine")
+    except Exception as error:  # noqa: BLE001 - a diagnostic must never mask the real failure
+        return f"diagnostic unavailable: {error}"
+
+
 def diagnose(page, scenario_state):
     """What the page actually looked like, for a failed wait.
 
@@ -615,8 +659,13 @@ def main():
                 all_violations.extend(raised)
                 states.append({"name": state["name"], "text_scale": state.get("text_scale", 1),
                     "budget_coverage_max": state_budgets["coverage_max"], **metrics})
-                all_violations.extend(violations(state["name"], metrics, state_budgets, bool(state.get("panel_open")),
-                    state, bool(state.get("opened_by")) and state["opened_by"] in clicked_names))
+                state_violations = violations(state["name"], metrics, state_budgets, bool(state.get("panel_open")),
+                    state, bool(state.get("opened_by")) and state["opened_by"] in clicked_names)
+                # Attach the cause to the violation instead of leaving the next worker to
+                # rebuild it: an unranked child and an over-long sentence look the same
+                # from the outside and need opposite fixes.
+                all_violations.extend(attach_shed_diagnostic(
+                    state["name"], state_violations, lambda: shed_diagnostic(page, state)))
                 carrier_summary = ",".join(f"{group['visible']}/{group['min']}" for group in metrics.get("carriers") or []) or "n/a"
                 print(f"{state['name']}: coverage={metrics['coverage']:.1%} "
                       f"text={state.get('text_scale', 1)}x clipped={len(metrics['clipped'])} "

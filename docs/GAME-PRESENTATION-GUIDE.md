@@ -296,7 +296,10 @@ not been given that decision, so the surface adapts instead of the budget moving
   `!important` on the one rule, with the reason beside it.
 - If everything declared has shed and the decision still does not fit, the beat has too
   much text on it at that size — fix the authored labels or split the beat. Report the
-  overflow; do not raise the number.
+  overflow; do not raise the number. The checker says which of the two causes it is: a
+  B3 overflow violation carries the surface's own tree, every child labelled with its
+  rank or `UNRANKED` and its height, so the answer is in the report rather than in a
+  re-run.
 
 **Why this matters** (the evidence behind I1/I6): diegetic, lowest-rung delivery is
 what keeps the player *inside* the fiction. Persistent non-diegetic chrome is the
