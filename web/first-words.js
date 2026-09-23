@@ -78,7 +78,9 @@ const tray=(label,action)=>button(label,action,false);
 // gives them up before it lets a button fall past the sheet's edge. The rank is above
 // the word readout, the INPUT restatement and an option's quoted text, which the world
 // boards already carry, and below nothing else: the recap is the beat's causal lesson.
-function statusLine(message,dataset){const p=document.createElement('p');p.setAttribute('role','status');p.dataset.shedItem='25';p.textContent=message;if(dataset)Object.assign(p.dataset,dataset);$('#actions').append(p);return p;}
+// A learning hint is instruction, so the shed ladder may not hide it for lack of room
+// (guide I10): the beat shortens instead. Ordinary status prose keeps rank 25 and sheds.
+function statusLine(message,dataset){const p=document.createElement('p');p.setAttribute('role','status');p.dataset.shedItem='25';p.textContent=message;if(dataset){Object.assign(p.dataset,dataset);if(dataset.learningHint)p.dataset.critical='true';}$('#actions').append(p);return p;}
 async function command(path,body={}){
   const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-Learning-Command':'1'},body:JSON.stringify(body)});
   let result={};try{result=await response.json();}catch(_){}
@@ -186,9 +188,12 @@ function render(){
   }
   else if(s.round===1&&s.clue==='none')for(const [label,action] of SCAN_TRAYS)tray(label,action);
   else if(s.round===1&&s.prediction==='none'){
-    tray('Predict: the machine will say Moon','predict-moon');tray('Predict: the machine will say Star','predict-star');tray('Predict: the machine will say Sun','predict-sun');
+    // The option name is the decision. "Predict:" is the question above it, repeated three
+    // times, and at the accessibility viewport that repetition is what pushed the third
+    // choice below the fold (guide I10: shorten what the options say).
+    tray('The machine will say Moon','predict-moon');tray('The machine will say Star','predict-star');tray('The machine will say Sun','predict-sun');
     if(s.hinted){
-      statusLine('Hint: Read the INPUT line above. The machine only uses the sign you supplied, even if another sign is newer. Which gate does that supplied sign point toward?',{learningHint:'route'});
+      statusLine('Hint: it uses the sign you supplied, not the newer one.',{learningHint:'route'});
     }else button('Ask for a hint','hint',false);
   }
   else if(s.round===1&&s.pieces===0&&s.loop_prediction==='none'&&s.available_actions?.some(x=>x.startsWith('loop-'))){

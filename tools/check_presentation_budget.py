@@ -127,7 +127,10 @@ MEASURE = """async (args) => {
     for (let n = el.parentElement; n; n = n.parentElement) {
       const cs = getComputedStyle(n);
       if (cs.overflowY !== 'visible') {
-        const rungs = [...n.querySelectorAll('[data-shed-item]')];
+        // A critical rung is instruction the fitter must not hide, so it cannot count as
+        // "shedding ran out of things to shed" - it is the reason shedding ran out.
+        const rungs = [...n.querySelectorAll('[data-shed-item]')]
+          .filter(r => r.dataset.critical !== 'true');
         return rungs.length > 0 && rungs.every(r => r.classList.contains('shed'))
           && n.scrollHeight > n.clientHeight + 1;
       }
@@ -144,9 +147,9 @@ MEASURE = """async (args) => {
     const hiddenByContainer = scrollClipped(el);
     if (outside || hiddenByContainer) {
       const ladder = hiddenByContainer && ladderExhausted(el)
-        ? ' [I10 shed ladder exhausted: every ranked rung on this surface is already hidden and it'
-          + ' still overflows, so unranked content is eating the space or the authored text is too'
-          + ' long at this size - rank it or shorten it, the ceiling does not move]' : '';
+        ? ' [I10 shed ladder exhausted: every sheddable rung on this surface is already hidden'
+          + ' and it still overflows, so unranked content, an unshedable [data-critical] line or'
+          + ' the authored text is eating the space - shorten it, the ceiling does not move]' : '';
       unreachableActions.push(((el.id ? '#' + el.id : el.tagName.toLowerCase()) + ' “' + el.textContent.trim().slice(0, 32) + '” '
         + Math.round(r.top) + '..' + Math.round(r.bottom) + '/' + vh) + (hiddenByContainer ? ' (scrolled out of its own panel)' : '') + ladder);
     }
@@ -433,6 +436,7 @@ SHED_DIAGNOSTIC = """(sheet)=>{
             rows.push(`${'  '.repeat(depth)}${n.tagName.toLowerCase()}${n.id?'#'+n.id:''}`
               +` ${rank?'rank '+rank:'UNRANKED'}`
               +(n.classList.contains('shed')&&rank?' (shed)':'')
+              +(n.dataset.critical==='true'?' (CRITICAL - instruction, never shed)':'')
               +` h=${Math.round(r.height)} fs=${c.fontSize}`
               +` ${c.display==='none'?'display:none':''}`
               +` ${(n.textContent||'').trim().slice(0,26)}`);

@@ -54,7 +54,7 @@ def main():
             complete_tutorial(page)
             action(page,'Begin Level 1 →')
             choose(page,"Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”")
-            choose(page,'Predict: the machine will say Star')
+            choose(page,'The machine will say Star')
             summary=page.locator('[data-route-commitment]')
             expect(summary).to_contain_text('Star')
             expect(page.locator('#output .empty')).to_have_count(4)

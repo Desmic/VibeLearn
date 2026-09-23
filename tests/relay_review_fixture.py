@@ -24,7 +24,7 @@ def prepare(path):
                 complete_tutorial(page)
                 action(page,'Begin Level 1 →')
                 choose(page,"Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”")
-                choose(page,'Predict: the machine will say Star')
+                choose(page,'The machine will say Star')
                 generate(page)
                 commit_relay_for_review(page)
                 cookie=next(c for c in page.context.cookies() if c['name']=='learning_session')

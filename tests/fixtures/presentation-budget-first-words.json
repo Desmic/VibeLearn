@@ -161,7 +161,7 @@
      "click": "Supply the old sign · “Take the Moon gate.”"
     },
     {
-     "click": "Predict: the machine will say Moon"
+     "click": "The machine will say Moon"
     },
     {
      "click": "Predict: each step also receives every generated word"
@@ -705,7 +705,7 @@
      "timeout": 60000
     },
     {
-     "click": "Predict: the machine will say Moon",
+     "click": "The machine will say Moon",
      "timeout": 60000
     },
     {
@@ -776,6 +776,154 @@
    "twin_of": "mission-recover-phone-sheet",
    "text_scale": 2,
    "text_scale_reason": "WCAG 1.4.4 accessibility viewport: the recovery beat measured at 200% text (guide I10)."
+  },
+  {
+   "name": "mission-hint-phone-sheet",
+   "markers": "#markers > [data-anchor]",
+   "focal": "zip",
+   "screenshot": "artifacts/play-20260923/mission-hint-phone-sheet.png",
+   "viewport": [
+    390,
+    844
+   ],
+   "goto": true,
+   "panel_open": true,
+   "narrow_sheet": true,
+   "sheet": "#engine",
+   "yields": [
+    ".game-move-stick",
+    ".game-view-tools",
+    ".game-controls-help"
+   ],
+   "opened_by": "Open the message machine",
+   "steps": [
+    {
+     "click": "Skip opening",
+     "timeout": 60000
+    },
+    {
+     "wait_text": "Skip control practice",
+     "timeout": 60000
+    },
+    {
+     "click": "Skip control practice",
+     "timeout": 60000
+    },
+    {
+     "wait_eval": "()=>{const t=document.querySelector('#machine-toggle');return t&&!t.hidden&&document.querySelector('#engine').hidden&&!FirstWordsReview.runtime.world.animating;}",
+     "timeout": 60000
+    },
+    {
+     "click": "Connect the loose power lead",
+     "timeout": 60000
+    },
+    {
+     "click": "Scan the Moon lock in the world",
+     "timeout": 60000
+    },
+    {
+     "click": "Use the speech engine in the world",
+     "timeout": 60000
+    },
+    {
+     "click": "Use the speech engine in the world",
+     "timeout": 60000
+    },
+    {
+     "click": "Use the speech engine in the world",
+     "timeout": 60000
+    },
+    {
+     "click": "Use the speech engine in the world",
+     "timeout": 60000
+    },
+    {
+     "click": "Speak the completed command to the Moon gate",
+     "timeout": 60000
+    },
+    {
+     "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
+     "timeout": 90000
+    },
+    {
+     "click": "Begin Level 1 through the opened Moon door",
+     "timeout": 60000
+    },
+    {
+     "wait_text": "Find the current route",
+     "timeout": 60000
+    },
+    {
+     "wait_eval": "()=>{const t=document.querySelector('#machine-toggle');return t&&!t.hidden&&document.querySelector('#engine').hidden&&!FirstWordsReview.runtime.world.animating;}",
+     "timeout": 60000
+    },
+    {
+     "click": "Open the message machine",
+     "timeout": 60000
+    },
+    {
+     "wait_eval": "()=>{const b=document.querySelectorAll('#actions button');return !document.querySelector('#engine').hidden&&b.length>=3&&!FirstWordsReview.runtime.world.animating;}",
+     "timeout": 60000
+    },
+    {
+     "click": "Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”",
+     "timeout": 60000
+    },
+    {
+     "wait_eval": "()=>[...document.querySelectorAll('#actions button')].some(b=>b.textContent.trim()==='Ask for a hint')",
+     "timeout": 60000
+    },
+    {
+     "click": "Ask for a hint",
+     "timeout": 60000
+    },
+    {
+     "wait_eval": "()=>Boolean(document.querySelector('#actions [data-learning-hint]'))",
+     "timeout": 60000
+    }
+   ],
+   "wait_eval": "()=>document.querySelector('#engine').classList.contains('sheet')",
+   "carriers": [
+    {
+     "selector": "#actions button",
+     "min": 3
+    },
+    {
+     "selector": "#actions [data-learning-hint]",
+     "min": 1
+    }
+   ],
+   "coverage_max_reason": "Guide B1 narrow-sheet clause: the player opened the machine and then asked for the hint, so the sheet carries the beat's instruction. That instruction is a declared carrier floor, not sheddable prose (guide I10)."
+  },
+  {
+   "name": "mission-hint-phone-sheet-200text",
+   "markers": "#markers > [data-anchor]",
+   "focal": "zip",
+   "screenshot": "artifacts/play-20260923/mission-hint-phone-sheet-200text.png",
+   "panel_open": true,
+   "narrow_sheet": true,
+   "sheet": "#engine",
+   "yields": [
+    ".game-move-stick",
+    ".game-view-tools",
+    ".game-controls-help"
+   ],
+   "opened_by": "Open the message machine",
+   "steps": [],
+   "wait_eval": "()=>document.querySelector('#engine').classList.contains('sheet')",
+   "carriers": [
+    {
+     "selector": "#actions button",
+     "min": 3
+    },
+    {
+     "selector": "#actions [data-learning-hint]",
+     "min": 1
+    }
+   ],
+   "text_scale": 2,
+   "twin_of": "mission-hint-phone-sheet",
+   "text_scale_reason": "WCAG 1.4.4 accessibility viewport: the beat that teaches with a hint, measured at 200% text, where the hint is instruction and may not be shed to buy room (guide I10)."
   }
  ]
 }

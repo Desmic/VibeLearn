@@ -277,8 +277,14 @@ not been given that decision, so the surface adapts instead of the budget moving
 - What may shed: framing the world already carries (chapter eyebrow, prose detail,
   captions, the readout duplicated by a world object, an option's quoted text when its
   name identifies the choice). What may never shed: the question, an option's own name,
-  and any control that is the only way to perform the beat. Shed text stays in the
-  element's accessible label, so assistive tech and the tests keep the full sentence.
+  any control that is the only way to perform the beat, and **anything the game teaches**
+  — a learning hint opts out of the ladder with `data-critical`, the same marker the
+  world layer uses for a carrier that must not fold. A hint the player has to ask for and
+  that then vanishes for lack of room is not a smaller hint, it is a hint that never
+  happened, so the beat that cannot fit it is the beat with too much text on it. Shed
+  text stays in the element's accessible label, so assistive tech and the tests keep the
+  full sentence — an unshedable line does not get that escape, so its authored length is
+  the thing that changes.
 - Rank by what else carries the meaning, not by what is longest. A beat's causal line —
   the sentence that says *why* this happened — outranks an option's quoted world text,
   because the sign board in the scene already shows that text while nothing else repeats
@@ -294,12 +300,19 @@ not been given that decision, so the surface adapts instead of the budget moving
   over a per-viewport rule that happens to set `display` on the same node, or a rung
   keeps its height while claiming to be gone; the shared stylesheet carries that as
   `!important` on the one rule, with the reason beside it.
-- If everything declared has shed and the decision still does not fit, the beat has too
+- If everything sheddable has shed and the decision still does not fit, the beat has too
   much text on it at that size — fix the authored labels or split the beat. Report the
   overflow; do not raise the number. The checker says which of the two causes it is: a
   B3 overflow violation carries the surface's own tree, every child labelled with its
-  rank or `UNRANKED` and its height, so the answer is in the report rather than in a
-  re-run.
+  rank, its `CRITICAL` opt-out or `UNRANKED`, and its height, so the answer is in the
+  report rather than in a re-run.
+- The never-shed claim needs a number behind it, so declare the instruction line as an
+  `I9` carrier floor in the same state (`{"selector": "#actions [data-learning-hint]",
+  "min": 1}`). Then the two failures the ladder can produce are both measured: the beat
+  that hides its own teaching, and the beat that keeps it by pushing a choice off the
+  bottom. The 24 September beat failed the second one until its three option labels lost
+  a "Predict:" prefix the question above them already said, and its hint lost a sentence
+  the INPUT line already showed.
 
 **Rule I11 (a control is its effect, not its flag).** A preference the player can set
 (mute, reduced motion, and each future one) has **one reading rendered everywhere it

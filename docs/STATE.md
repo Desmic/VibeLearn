@@ -172,10 +172,85 @@ Gate status at this snapshot: **all measured gates are green.**
   ~70s. Both budget runs were re-run after the verification break and passed; the
   candidate is unchanged by it.
 
-**Still to do before presenting:** the cold-observer full-game critic pass is running
-against a disposable learner at a local URL (`artifacts/play-20260923/cold-report.md`),
-followed by the design-intent comparison pass; every lane must reach ≥9. No commit made
-for the second-veto work yet; no Level 2, no deployment. Build passes.
+**Still to do before presenting:** the cold-observer full-game critic pass runs against a
+disposable learner at a local URL (`artifacts/play-cold-2409/cold-packet.md`), followed by
+the design-intent comparison pass; every lane must reach ≥9. No Level 2, no deployment.
+
+**Rule I11 — a control is its effect, not its flag (system repair) — 24 September 2026:**
+the user asked for the game to be checked in mute. Playing it that way found a blind spot
+in the gates rather than in the game: the prologue gate clicked the mute button and then
+asserted `FirstWordsReview.audio.preferences.muted` — a boolean. A button that wrote the
+preference and redrew its own icon while the score kept playing at 0.62 bus gain would have
+passed every gate in this repository. Two further defects were visible on screen in the same
+minute: the opening's corner button spelled "muted" with a different combining stroke
+(`♪̶`, U+0336) than the masthead's (`♪̸`, U+0338) and drew a different "sound on" glyph,
+and it carried a static `Toggle opening sound` label for a preference that is global and
+persists across a reload.
+- **Measurement first, from the running game.** A probe captured the game's own master bus
+  through its existing recorder tap and decoded it in the page: unmuted 4s = 62 KB,
+  peak **0.055**, rms 0.0082, 53% of samples above the floor; muted through the corner
+  button = 1.1 KB, **peak 0.00000, rms 0.00000**, with 17 voices still scheduled — the score
+  keeps running and the bus closes, which is the intended semantics. Reloading kept it
+  silent (`localStorage {"music":true,"effects":true,"muted":true}`) and unmuting returned
+  peak 0.057, so the zero is the mute and not a dead meter.
+- **Machinery:** `web/game-audio.js` exports `muteState(muted)` — glyph, label, pressed —
+  and the audio object exposes it as `muteUI`, so a surface cannot invent its own wording of
+  a shared preference. Both mute buttons now call one `paintMute`. The opening button gained
+  `id="opening-mute"` so a test can reach it by identity instead of by a label that changes.
+- **Enforcement:** `tests/first_words_opening_browser.py` now decodes the captured prologue
+  audio and asserts it was audible (`peak > 0.01`, `audibleFraction > 0.05`), asserts the
+  same measurement collapses by more than 50× after the mute **while `audio.state` is
+  `running`** (a suspended context is silent whatever the preference says), asserts both
+  mute surfaces render identically, and asserts the preference is still applied after the
+  reload the module already performs. Guide rule I11, worker checklist step 10, critic probe
+  CP12 and an enforcement-map row record it.
+
+Gate status at this snapshot: **green on candidate `f7a5b73`.**
+- Presentation budget, 21 measured states: `"result": "passed"`, zero violations
+  (`artifacts/presentation-budget-v12.json`, log `budget-v12.log`). Phone recovery sheet
+  30.1% at 100% text and 33.6% at 200% text, `carriers=2/2`, `unreachable=0`, `dup=0`,
+  `stray=0`.
+- `python manage.py build` passes; `python manage.py test` → **413 OK** (skipped=7).
+- `tests.first_words_opening_browser` passes end to end with the new loudness assertions
+  (`artifacts/opening-mute2.log`, "Prologue gate passed").
+- Measured, not inferred: the unit suite took **208s** while the 21-state budget scenario ran
+  beside it, against ~70s alone. Concurrent gates do not save the time they appear to.
+
+**The shed ladder hid a lesson (I10 regression, found by the browser matrix) —
+24 September 2026:** the first full `python manage.py browser` run on `f7a5b73` failed in
+`tests.level1_chapter_browser`: at 390×844 with the machine open, the Level 1 hint line was
+`<p class="shed" data-shed-item="25" data-learning-hint="route">` — **hidden**. That is my
+own I10 machinery doing exactly what the veto was about, in a new costume: the ladder shed
+the cheapest thing it could see, and what it saw was the sentence the beat exists to teach.
+The chapter test caught it because that test asks whether the hint is on screen; no budget
+number could have, because coverage, clipping and reachability all improve when a block
+disappears — the same shape of blind spot I9 was written for, on the other side of the
+surface.
+- **Machinery:** `fitBoundedSurface` now refuses to hide `[data-critical]`, the marker the
+  world layer already uses for a carrier that must not fold. A hint the player has to ask
+  for and that then vanishes for lack of room is not a smaller hint.
+- **Game:** `statusLine` marks a learning hint critical, so every hint the beat appends is
+  covered rather than only this one.
+- **Enforcement:** the checker's exhausted-ladder test ignores critical rungs (they are the
+  reason shedding ran out, not evidence that it did) and its surface tree now labels such a
+  node `CRITICAL - instruction, never shed`. A new scenario pair
+  `mission-hint-phone-sheet` / `-200text` declares the hint as an **I9 carrier floor**
+  (`#actions [data-learning-hint] min 1`) next to the option floor, so the beat that hides
+  its own teaching fails the presentation gate itself and not only a chapter test.
+- **Authored text, which is what the rule then demanded:** at 200% text the protected hint
+  pushed the third prediction to `788..867` against an 844px viewport — `unreachable=1`,
+  with the new report naming the unshedable 168px line as the cause. Shortened instead of
+  relaxed:
+  the three options lost a `Predict:` prefix the question above them already said twice, and
+  the hint lost a sentence the INPUT line already shows. Re-measured: `unreachable=0`,
+  `carriers=3/3,1/1`, `long=0`, coverage 38.0% against the untouched 40% ceiling, and the
+  capture now paints the question, all three choices and the hint in one glance.
+
+**How this one was found, and how to find the next one faster:** it surfaced only at the end
+of a 20-minute full `python manage.py browser` run. The narrowest gate that detects a shed
+regression is the single chapter module, ~2 minutes, and it should be run **first** after
+touching `fitBoundedSurface` or anything that marks a rung — not last. See the workflow
+section for the ordering rule.
 
 **Ambient + diegetic interaction model (system repair) — 22/23 September 2026:**
 The user vetoed the `4556f84`/`071591a`-era candidate over the shared opening
