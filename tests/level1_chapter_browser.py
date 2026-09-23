@@ -25,13 +25,17 @@ def skip_opening_to_tutorial(page, *, skip_controls=False):
     if skip_controls:
         page.get_by_role('button',name='Skip control practice',exact=True).click()
         expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 1/4',timeout=15000)
-        expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
+        # The speech-repair tutorial is diegetic: the panel stays folded behind the
+        # world toggle and world markers carry the verbs (no auto-summoned card).
+        expect(page.locator('#engine')).to_be_hidden()
+        expect(page.locator('#machine-toggle')).to_be_visible(timeout=15000)
+        expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible(timeout=15000)
 
 
 def open_card(page):
-    # The Level 1 stage card is opt-in behind a world-anchored machine toggle
-    # (diegetic presentation contract). Flow helpers open it the way a player
-    # would; idempotent so tutorial beats (always-open) are unaffected.
+    # The stage card is opt-in behind a world-anchored machine toggle in both the
+    # speech-repair tutorial and the mission (diegetic presentation contract).
+    # Flow helpers open it the way a player would; idempotent when already open.
     if page.locator('#engine').is_visible():return
     toggle=page.locator('#markers [data-machine-toggle]')
     expect(toggle).to_be_visible(timeout=15000)
@@ -110,6 +114,9 @@ def complete_relay(page, *, recover=False, reload_predictions=False, on_committe
     expect(page.get_by_role('button',name='Run the relay →',exact=True)).to_be_visible()
     if reload_predictions:
         page.reload()
+        # I8: a phone resume leaves the machine folded, so the restored relay card is
+        # something the player opens again rather than one that reappears on its own.
+        open_card(page)
         expect(page.get_by_role('button',name='Run the relay →',exact=True)).to_be_visible(timeout=20000)
         restored=page.evaluate('FirstWordsReview.state')
         for key in ('relay_context','relay_prediction','relay_input_prediction','relay_stage','relay_output'):
@@ -202,6 +209,11 @@ def main():
             expect(page.locator('#engine')).to_be_hidden()
             expect(page.locator('#machine-toggle')).to_be_visible(timeout=15000)
             expect(page.locator('#machine-toggle')).to_contain_text('Find the current route')
+            # I9 carrier floor at the game's central decision: with the panel folded on a
+            # 390px phone, all three route boards must still be on screen (parked with an
+            # edge cue if they no longer fit). They vanished there on 23 September while
+            # every coverage budget reported a smaller number.
+            expect(page.locator('#markers > [data-carrier]:visible')).to_have_count(3,timeout=15000)
             trace.append({'phase':'tutorial-to-level1','mode':page.locator('#adventure').get_attribute('data-experience-mode'),'passed':True})
             open_card(page)
             expect(page.get_by_role('button',name='Inspect the speech engine')).to_be_visible()
@@ -214,6 +226,25 @@ def main():
             generate(page,generation);expect(page.locator('#stage-name')).to_have_text('LEVEL 1 · RECOVER');expect(page.locator('#goal')).to_have_text('Wrong route.')
             replay.append({'phase':'stale-context-failure','state':page.evaluate('FirstWordsReview.state')})
             page.screenshot(path=str(out/'level1-transfer-wrong-390.png'))
+            # I7: the sign that already produced this exact output is not an open
+            # question, so the recovery panel must not offer it again.
+            expect(page.get_by_role('button',name='Supply the old sign · “Take the Moon gate.”',exact=True)).to_have_count(0)
+            # B3 reachability: every offered option is on screen without scrolling.
+            viewport=page.viewport_size
+            for label in ['Supply the parade notice · “The lantern parade starts at sunset.”',
+                          "Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”"]:
+                option=page.get_by_role('button',name=label,exact=True);expect(option).to_be_visible()
+                box=option.bounding_box()
+                assert box and box['y']>=0 and box['y']+box['height']<=viewport['height'], f'{label} needs scrolling: {box}'
+            # B1 narrow-sheet clause: on a phone the opened machine is a flush bottom
+            # sheet that yields its height budget to the world, never a card floating
+            # over the character (the 23 September second rejection).
+            sheet=page.locator('#engine');classes=sheet.get_attribute('class') or ''
+            assert 'sheet' in classes, f'machine card is not a sheet at 390px: {classes}'
+            panel=sheet.bounding_box()
+            assert abs(panel['y']+panel['height']-viewport['height'])<=8, f'sheet floats above the bottom edge: {panel}'
+            assert panel['height']<=0.40*viewport['height'], f'sheet takes too much screen height: {panel}'
+            assert panel['x']<=8 and panel['x']+panel['width']>=viewport['width']-8, f'sheet is not full-bleed: {panel}'
             choose(page,"Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”")
             expect(page.locator('#context')).to_contain_text('five-point lantern mark')
             replay.append({'phase':'current-context-selected','state':page.evaluate('FirstWordsReview.state')})

@@ -131,6 +131,7 @@ def create_app(config=None, auth_provider=None):
             'first-words.js', 'first-words-boot.js', 'first-words.css', 'first-words-world.js',
             'rescue-world-props.js', 'game-audio.js', 'learning-session.js', 'workshop-props.js', 'spec-game-world.js',
             'game-runtime.js', 'game-opening.js', 'tutorial-flow.js', 'experience-mode.js', 'world-marker-layout.js',
+            'surface-fit.js',
             'world-spec.js', 'playcanvas-backend.js', 'player-controls.js',
             'game-character-spec.js', 'game-screen.css', 'rescue-intro.css', 'play-canvas.css',
             'auth-game.js', 'auth-game.css'

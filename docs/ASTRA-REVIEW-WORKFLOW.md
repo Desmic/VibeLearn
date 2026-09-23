@@ -39,6 +39,17 @@ source, story treatment, prior findings or scores before cold observations.
 The reviewer may read generic tool instructions; record accidental context leaks.
 
 1. Preflight actual browser input, screenshots and recording/inspection capabilities.
+   Use `tools/play_session.py` (`start` / `step` / `stop`) as the play harness: it keeps
+   one browser alive between commands, takes real hold/drag/resize input, and appends
+   every action to `action-trace.jsonl` as the review's action evidence. A reviewer that
+   writes its own driver is a system defect report, not a workaround — two have already
+   had to (22 and 23 September), which is why the harness is shared now.
+   Invocation: `python -m tools.play_session start --serve --root artifacts/play-<lane>
+   --path first-words --viewport 390 844`, then repeated `step --file <steps>.json`, then
+   `stop`. Pass `--path` without its leading slash (Git Bash rewrites `/x` into a Windows
+   path), and prefer the step kinds `settle`/`dump`/`buttons`/`eval` over fixed waits —
+   headless software WebGL renders a few frames per second, so a millisecond-timed input
+   window starves movement.
 2. Play from entry through the full assigned ending. Record observations, choices,
    uncertainty and evidence references. Exercise mistakes, recovery and save/resume.
 3. Save the cold report before receiving intent or prior evidence. Do not rewrite it.

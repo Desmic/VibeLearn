@@ -4,12 +4,13 @@ import {createGameAudio} from './game-audio.js';
 import {createLearningSession} from './learning-session.js';
 import {createTutorialFlow,selectStateTutorialStep} from './tutorial-flow.js';
 import {createExperienceModeController} from './experience-mode.js';
-import {placeWorldMarker,chromeClearance,projectedEntityBox} from './world-marker-layout.js';
+import {placeWorldMarker,chromeClearance,projectedEntityBox,focalClearanceBox} from './world-marker-layout.js';
+import {fitBoundedSurface} from './surface-fit.js';
 import * as chapter from './first-words-world.js';
 
 const $=s=>document.querySelector(s),runtime=getGameRuntime(),audio=createGameAudio(),host=$('#world');
 const initial={round:0,pieces:0,status:'building',powered:false,output:[],context:[],moves:0};
-let reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,paused=false,inOpening=false,ready=false,presented=null,lastCue=null;
+let reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,paused=false,inOpening=false,ready=false,presented=null,lastCue=null,lastFit=0;
 // The mission/complete stage card is opt-in: a world-anchored machine toggle carries
 // the short goal while closed, and the card opens for the player or on feedback beats.
 let cardOpen=false,cardStateKey='',lastExperienceMode=null;
@@ -43,10 +44,16 @@ const blocked=()=>!ready||paused||inOpening||session.busy||session.pending||runt
 function syncCardVisibility(){
   const mode=root.dataset.experienceMode;
   if(!['tutorial','mission','complete'].includes(mode)){$('#machine-toggle').hidden=true;return;}
-  const open=(mode==='tutorial'||cardOpen)&&!document.querySelector('dialog[open]');
+  // Control practice is a transparent floating prompt at the character (rung 4),
+  // so it stays open. Once bearings are learned the message machine is opt-in in
+  // BOTH tutorial and mission: a world toggle carries the goal, world markers
+  // carry the verbs. Auto-summoning the panel over the play space is a P3/B1 defect.
+  const inPractice=mode==='tutorial'&&practice.step!=='done';
+  const inDialog=Boolean(document.querySelector('dialog[open]'));
+  const open=(inPractice||cardOpen)&&!inDialog;
   $('#engine').hidden=!open;
-  $('#card-close').hidden=!(open&&mode!=='tutorial');
-  $('#machine-toggle').hidden=open||Boolean(document.querySelector('dialog[open]'));
+  $('#card-close').hidden=!(open&&!inPractice);
+  $('#machine-toggle').hidden=open||inDialog;
 }
 function pauseSystems(){const value=paused||Boolean(document.querySelector('dialog[open]'));runtime.setPaused(value);audio.setPaused(value);}
 function dialog(selector){$(selector).showModal();pauseSystems();syncCardVisibility();}
@@ -54,9 +61,24 @@ document.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',()=>{p
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 document.addEventListener('pointerdown',()=>audio.unlock().catch(()=>{}),{capture:true});
 document.addEventListener('keydown',()=>audio.unlock().catch(()=>{}),{capture:true});
-function button(label,action,primary=true){const b=document.createElement('button');b.textContent=label;b.className=primary?'primary':'';b.dataset.action=action;b.disabled=Boolean(blocked());b.onclick=()=>act(action);$('#actions').append(b);}
+function button(label,action,primary=true){const b=document.createElement('button');b.className=primary?'primary':'';b.dataset.action=action;b.disabled=Boolean(blocked());b.onclick=()=>act(action);
+  // I10: an option may carry the world text it offers after its own name. The name is
+  // the decision and never sheds; the quote is a rung below it, so a tight surface gives
+  // the quote up before it gives up the choice, and the full text stays in the label.
+  // The quote sits below a beat's causal recap line: the notice boards carry that text in
+  // the world already, while the recap is the lesson and nothing else repeats it.
+  const name=label.split(' · ')[0],quote=label.slice(name.length+3);
+  b.setAttribute('aria-label',label);
+  if(quote){const shown=document.createElement('span');shown.textContent=name;const extra=document.createElement('span');extra.className='option-quote';extra.dataset.shedItem='22';extra.textContent=' · '+quote;b.append(shown,extra);}
+  else b.textContent=name;
+  $('#actions').append(b);}
 const tray=(label,action)=>button(label,action,false);
-function statusLine(message,dataset){const p=document.createElement('p');p.setAttribute('role','status');p.textContent=message;if(dataset)Object.assign(p.dataset,dataset);$('#actions').append(p);return p;}
+// Anything a beat drops into the decision container that is not a decision is a rung
+// (guide I10): the recap prose and the hint sit below the choice, so a tight surface
+// gives them up before it lets a button fall past the sheet's edge. The rank is above
+// the word readout, the INPUT restatement and an option's quoted text, which the world
+// boards already carry, and below nothing else: the recap is the beat's causal lesson.
+function statusLine(message,dataset){const p=document.createElement('p');p.setAttribute('role','status');p.dataset.shedItem='25';p.textContent=message;if(dataset)Object.assign(p.dataset,dataset);$('#actions').append(p);return p;}
 async function command(path,body={}){
   const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-Learning-Command':'1'},body:JSON.stringify(body)});
   let result={};try{result=await response.json();}catch(_){}
@@ -104,7 +126,11 @@ function render(){
   if(!ours()){syncCardVisibility();return;}
   const key=a.id+':'+a.revision;
   const feedbackBeat=!complete&&(s.status==='wrong'||s.relay_stage==='revealed'||(s.round===1&&s.status==='success'));
-  if(feedbackBeat&&cardStateKey!==key)cardOpen=true;
+  // I8: a narrow viewport cannot hold a readable decision sheet inside the coverage
+  // budget, so a beat may never summon one unasked there — the anchored toggle keeps
+  // carrying the result line and the sheet stays opt-in.
+  const narrow=host.getBoundingClientRect().width<700;
+  if(feedbackBeat&&cardStateKey!==key&&!narrow)cardOpen=true;
   cardStateKey=key;
   if(!inOpening&&presented!==key){
     world=runtime.showMission(chapter,host,s,{reducedMotion:reduced});presented=key;pauseSystems();
@@ -149,8 +175,14 @@ function render(){
   else if(repair)button(repair.actionLabel,repair.primaryAction);
   else if(s.status==='success')button('Finish Level 1 →','finish');
   else if(s.round===1&&s.status==='wrong'){
-    statusLine(`The machine produced “${s.output.join(' ')}.” because the sign you supplied pointed there. Compare the boards, then offer a different sign.`);
-    for(const [label,action] of SCAN_TRAYS)tray(label,action);
+    // I10: the recovery recap owes only the cause, because the two option labels already
+    // say what to do next (I5/I7) and a longer sentence costs the sheet its decision at
+    // the accessibility viewport.
+    statusLine(`Your sign pointed at “${s.output.join(' ')}.”`);
+    // I7: a recovery beat must not re-offer the choice that already produced this
+    // exact output — the words promise a different sign, so the tray must agree.
+    // Same rule the relay recovery already follows below.
+    for(const [label,action] of SCAN_TRAYS.filter(([,a])=>a!=='scan-'+s.clue))tray(label,action);
   }
   else if(s.round===1&&s.clue==='none')for(const [label,action] of SCAN_TRAYS)tray(label,action);
   else if(s.round===1&&s.prediction==='none'){
@@ -165,13 +197,13 @@ function render(){
   }
   else{button(s.pieces===0?'Make first word':s.pieces<4?'Next word':'Speak to gate →',s.pieces<4?'step':'send');}
   if(relay&&s.relay_stage==='choosing'&&s.relay_prediction!=='none'){
-    const committed=document.createElement('p');committed.dataset.relayCommitment='true';
+    const committed=document.createElement('p');committed.dataset.relayCommitment='true';committed.dataset.shedItem='45';
     committed.textContent=`Your prediction: ${s.relay_prediction==='yard'?'Bell Yard':'Lantern Loft'}.`;
     if(s.relay_input_prediction!=='none')committed.textContent+=` Your next-input choice: ${s.relay_input_prediction==='growing'?'request, note, and Meet':'request and note, unchanged'}.`;
     $('#actions').append(committed);
   }
   if(!relay&&s.round===1&&s.prediction!=='none'&&s.status==='building'){
-    const committed=document.createElement('p');committed.dataset.routeCommitment='true';
+    const committed=document.createElement('p');committed.dataset.routeCommitment='true';committed.dataset.shedItem='45';
     committed.textContent=`Your first route prediction: ${{moon:'Moon',star:'Star',sun:'Sun'}[s.prediction]}.`;
     if(s.loop_prediction!=='none')committed.textContent+=` Your input rule: ${s.loop_prediction==='grows'?'every generated word joins the next input':'the input stays the same each step'}.`;
     $('#actions').append(committed);
@@ -205,6 +237,9 @@ function render(){
     $('#actions').replaceChildren();button('Skip control practice','skip-controls',false);
   }
   syncCardVisibility();
+  // I10: fit the beat's decision inside its box now that its content is final. frame()
+  // re-checks afterwards because a player's text size changes without any event.
+  if(!$('#engine').hidden)fitBoundedSurface($('#engine'));
 }
 async function act(action){
   if(blocked())return;
@@ -288,15 +323,24 @@ function frame(){
   const mode=root.dataset.experienceMode;
   if(!['tutorial','mission','complete'].includes(mode)){requestAnimationFrame(frame);return;}
   const s=view(),rect=host.getBoundingClientRect(),card=$('#engine'),mobile=rect.width<700;
+  // A player-opened card on a narrow viewport is a bottom sheet: it owns the lower
+  // band, yields the direct-input chrome it replaces, and never floats over the
+  // focal subject (guide B1 narrow-sheet clause).
+  const sheet=mobile&&!card.hidden&&!card.classList.contains('prompt');
+  root.classList.toggle('sheet-mode',sheet);
+  card.classList.toggle('sheet',sheet);
   const bottomReserve=mobile?190:104;
+  // I10: a player's own text size fires no event, so the bounded surface is re-fitted
+  // on a slow timer. The steady state costs one overflow comparison per tick.
+  if(performance.now()-lastFit>250){lastFit=performance.now();fitBoundedSurface(card);}
   $('#actions').querySelectorAll('button').forEach(b=>b.disabled=Boolean(blocked()));$('#rewind').disabled=Boolean(blocked());
   const playRects=[localRect(host.querySelector('.game-view-tools'),rect),localRect(host.querySelector('.game-move-stick'),rect),localRect(host.querySelector('.game-controls-help'),rect)].filter(Boolean);
   const chromeTop=chromeClearance([document.querySelector('.masthead')],{fallback:76});
   const point=card.hidden?null:world.projectEntity(card.dataset.anchor||'socket');
   const anchored=point&&point.inFront;
   card.classList.toggle('parked',Boolean(point)&&!anchored);
-  const banded=card.classList.contains('compact')||card.classList.contains('world-focus');
-  card.classList.toggle('parked-reading',Boolean(anchored&&card.classList.contains('compact')&&mobile));
+  const banded=sheet||card.classList.contains('compact')||card.classList.contains('world-focus');
+  card.classList.toggle('parked-reading',Boolean(anchored&&card.classList.contains('compact')&&mobile&&!sheet));
   if(!anchored){card.style.left='';card.style.top='';}
   else if(banded){card.style.left='';card.style.top='';}
   else{const placed=placeWorldMarker(card,point,{viewportWidth:rect.width,safeTop:mobile?64:88,safeBottom:Math.max(rect.height-bottomReserve,mobile?430:500),critical:true,xPadding:Math.min((card.offsetWidth||360)/2+10,rect.width/2-10),yOffset:card.dataset.anchor==='zip'?200:18,avoidRects:playRects});
@@ -319,6 +363,11 @@ function frame(){
     const subject=projectedEntityBox(world,'friend-signal',{top:[0,1.35,.25],bottom:[0,-1.45,.25],left:[-.95,0,.25],right:[.95,0,.25],margin:8});
     if(subject)avoidRects.push(subject);
   }
+  // B2 protagonist clearance: Zip is the focal subject of every play stage, so
+  // anchored labels keep out of his body box *and* its focal ring instead of
+  // reading across the character (the narrow-phone POWER LEAD marker buried him).
+  const hero=focalClearanceBox(world,'zip',{top:[0,1.15,0],bottom:[0,-.15,0],left:[-.55,0,0],right:[.55,0,0],margin:8});
+  if(hero)avoidRects.push(hero);
   for(const marker of $('#markers').children){
     const anchor=world.projectEntity(marker.dataset.anchor),wrongRound=marker.dataset.round!==undefined&&Number(marker.dataset.round)!==s.round;
     const available=marker.dataset.action?s.available_actions?.includes(marker.dataset.action):true;
@@ -329,7 +378,10 @@ function frame(){
     const tutorialTarget=marker.classList.contains('tutorial-target-marker');
     const targetMismatch=tutorialTarget&&(marker.dataset.anchor!==host.dataset.tutorialWorldTarget||marker.dataset.action!==host.dataset.tutorialWorldAction||!available);
     const critical=tutorialTarget||marker.dataset.critical==='true';
-    const guidable=critical?Boolean(anchor?.inFront):Boolean(anchor?.visible);
+    // I9: a declared carrier of the beat's decision may slide and edge-cue, but may
+    // not vanish because the screen got small.
+    const carrier=marker.dataset.carrier!==undefined;
+    const guidable=critical||carrier?Boolean(anchor?.inFront):Boolean(anchor?.visible);
     const toggleMarker=marker.dataset.machineToggle!==undefined;
     if(toggleMarker){
       // The machine toggle is the opt-in door while the card is away; it never
@@ -338,10 +390,10 @@ function frame(){
       marker.classList.toggle('parked',!(anchor&&anchor.inFront));
     // I3: while the machine panel is open it owns the decision; its world
     // choice markers fold away (they return when the panel is put away).
-    }else marker.hidden=(!card.hidden&&marker.classList.contains('notice-marker'))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
+    }else marker.hidden=(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
     if(anchor&&!marker.hidden&&!(toggleMarker&&marker.classList.contains('parked'))){
-      const placement=placeWorldMarker(marker,anchor,{viewportWidth:rect.width,safeTop,safeBottom,critical,avoidRects});
-      if(!placement.placed||(!critical&&!placement.insideSafeArea))marker.hidden=true;
+      const placement=placeWorldMarker(marker,anchor,{viewportWidth:rect.width,safeTop,safeBottom,critical,parkWhenFull:carrier,avoidRects});
+      if(!placement.placed||(!critical&&!carrier&&!placement.insideSafeArea))marker.hidden=true;
       else{const footprint=marker.getBoundingClientRect();avoidRects.push({left:footprint.left-rect.left,right:footprint.right-rect.left,top:footprint.top-rect.top,bottom:footprint.bottom-rect.top});}
     }else if(toggleMarker&&marker.classList.contains('parked')){marker.style.left='';marker.style.top='';}
   }
@@ -351,7 +403,8 @@ host.addEventListener('click',async e=>{
   if(blocked()||e.target.closest('button,.game-player-controls'))return;
   const target=await world.pickSemanticAt(e.clientX,e.clientY),s=view();
   if(target==='loose-plug'||target?.startsWith('socket')){
-    if($('#engine').hidden){cardOpen=true;syncCardVisibility();return;}
+    // I1/CP4: acting on the machine performs the machine's verb in the world;
+    // it never summons a panel about the machine. The diegetic toggle opens the panel.
     if(!s.powered)act('connect');else if(s.available_actions?.includes('step'))act('step');
   }
   if(target?.startsWith('moon')&&s.available_actions?.includes('scan-moon'))act('scan-moon');

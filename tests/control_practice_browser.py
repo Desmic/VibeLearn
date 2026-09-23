@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 from tests.browser_check import start_server, stop_server
-from tests.level1_chapter_browser import action
+from tests.level1_chapter_browser import action,world_action
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -101,6 +101,7 @@ def main():
                 trace.append({'width':width,'step':'repair-handoff','target':'loose-plug','passed':True})
                 assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
                 expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible()
+                expect(page.locator('#engine')).to_be_hidden()   # diegetic: panel stays folded, the world marker carries the verb
                 page.screenshot(path=str(ROOT/f'artifacts/control-practice-handoff-{width}.png'))
                 if width<500:
                     check_marker_control_clearance(page,ctx,width,trace)
@@ -113,9 +114,9 @@ def main():
                 # Scan and speak share the same physical anchor. Only the current
                 # tutorial action may occupy it, including after a saved reload.
                 expect(page.locator('.tutorial-target-marker:not([hidden])')).to_have_count(1)
-                action(page,'Scan the Moon lock')
-                for label in ['Make first word']+['Next word']*3:
-                    action(page,label)
+                world_action(page,'Scan the Moon lock in the world')
+                for _ in range(4):
+                    world_action(page,'Use the speech engine in the world')
                 expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 4/4')
                 expect(page.get_by_role('button',name='Scan the Moon lock in the world',exact=True)).to_be_hidden()
                 expect(page.get_by_role('button',name='Speak the completed command to the Moon gate',exact=True)).to_be_visible()

@@ -1,5 +1,174 @@
 # Current state — LLM learning-game proof track
 
+**SECOND VETO — obstructing tutorial card: system repair IN FLIGHT (uncommitted) —
+23 September 2026:** The user re-rejected the candidate with a screenshot of the
+TUTORIAL "MESSAGE MACHINE" card parked top-left over the 3D view during REPAIR 1/4,
+carrying a DOM "Connect the power lead" button *while the POWER LEAD world marker was
+also on screen*. Verdict: fix the SYSTEM (enforcement + docs + game) so an auto-summoned
+panel / duplicated world verb cannot pass in ANY state, and RUN the full critic (play the
+whole game, screenshot every state, judge every lane ≥9) BEFORE presenting. Root causes
+pinned in `web/first-words.js`: `syncCardVisibility` force-opened the panel for all of
+`tutorial`; the `world-focus` toggle read `practice.current?.focus` (null after practice)
+so the compact band never applied; the DOM action button at the `repair` branch rendered
+alongside the world marker; and the world-click handler summoned the panel instead of
+performing the verb (Rule I1 / CP4). Fix applied this session:
+- **Game (diegetic opt-in tutorial, mirroring the blessed mission shape):** `syncCardVisibility`
+  now force-opens only during control practice (transparent floating prompt); the speech-repair
+  panel folds behind the world toggle and is opened by the player. World markers carry verbs;
+  when the panel is opened its world-verb marker folds away (single carrier, I3) via the new
+  `world-action-marker` term in the `frame()` fold rule; `world-focus` now keys off `repair?.focus`;
+  the socket/plug world click performs `connect`/`step` directly instead of opening the panel.
+- **Enforcement (`tools/check_presentation_budget.py`):** added a game-agnostic `dupCarriers`
+  measurement — the same `data-action` painted both inside the declared marker layer and on a
+  visible DOM control outside it is a B8/I1 violation, measured in EVERY state with a marker
+  layer, not only cinematics. Closed the self-authored coverage-waiver loophole: a state may
+  only raise `coverage_max` above the 15% base if it declares `panel_open` / a reason / cinematic,
+  otherwise it is held to base and flagged.
+- **Fixture (`tests/fixtures/presentation-budget-first-words.json`):** added
+  `tutorial-repair-closed-desktop` and `-phone` (the exact veto state, folded, dup must be 0,
+  coverage ≤15%) and `tutorial-repair-opened-desktop` (opt-in panel at the ≤22% budget);
+  `mission-intro-closed` now navigates the tutorial through world markers.
+- **Docs (`docs/GAME-PRESENTATION-GUIDE.md`):** B8 extended with the live-play double-carrier
+  clause + no-auto-summon rule; Tutorial stage shape now states the opt-in toggle; added critic
+  probe CP7 for a gameplay double-carrier / self-summoning panel.
+- **Tests:** `skip_opening_to_tutorial`, `control_practice_browser`, `first_words_opening_browser`,
+  `level1_lifecycle_browser` and `level1_controls_browser` updated to drive/assert the folded
+  diegetic tutorial (world markers + toggle visible, `#engine` hidden) instead of the old
+  always-open DOM button.
+
+Gate status at this snapshot: **all measured gates are green on the folded model.**
+- Active browser suite (9 modules, `python manage.py browser`): foundation entry,
+  renderer lifecycle, animation rest, opening, control-practice, controls, physicality,
+  chapter, readability, lifecycle — all **passed**.
+- One gap the browser groups did **not** cover: `tests/test_hosted.py` still asserted the
+  old always-open tutorial card (`#engine` visible + DOM "Connect the power lead") on the
+  hosted login/resume route and failed under the folded model. Fixed to assert the folded
+  diegetic state (card hidden, toggle visible, world marker "Connect the loose power lead"
+  present, and that state surviving a reload). The hosted module now passes (14/14).
+- Presentation budget tool on the exact candidate: **`"result": "passed"`, zero
+  violations across all 15 measured states** (`artifacts/presentation-budget-final.json`,
+  log `artifacts/veto2-budget6.log`). The veto state itself measures coverage 4.7%
+  desktop / 13.4% phone, `dup=0`, `focal=0`, `stray=0`.
+- One regression surfaced and was fixed during this run: re-pointing the `world-focus`
+  toggle at `repair?.focus` pushed the opt-in repair card into the bottom band and made
+  it overlap the phone move-stick (failed the readability B5/containment probe). The veto
+  is resolved by *folding* the card, not by repositioning it, so that edit was reverted;
+  `world-focus` keeps its prior (inert during repair) condition.
+- Second measured defect found by the checker in the same veto state: on the 390px phone
+  the POWER LEAD marker still sat inside Zip's focal ring (`B2 focal entity covered`).
+  Root cause was **systemic, not this game**: the reusable subject keep-out
+  (`projectedEntityBox`) returns the silhouette only, while the B2 probe measures the
+  silhouette *plus* the focal ring, so any game clearing the body can still bury the
+  subject's own space. Fixed as a shared primitive: `focalClearanceBox()` in
+  `web/world-marker-layout.js` unions the body box with the ring the checker probes
+  (2×margin), and `web/first-words.js` seeds the marker layout with it for the focal
+  protagonist in **every** play stage, not just the tutorial. Guide B2 now states that a
+  game must use the ring-inclusive keep-out. The checker now also treats a measured state
+  with no `screenshot` capture as an **evidence gap** violation, and the scenario names a
+  capture for **every** state, so a budget run leaves visual evidence for the critic pass
+  rather than only numbers.
+
+**Phone presentation rebuild (system repair) — 23 September 2026:** the second veto was a
+phone defect, and closing it exposed two more of the same family. Three rules now carry it,
+each enforced mechanically rather than by taste:
+- **Rule I8 (a narrow viewport never receives an unasked sheet)** — `web/first-words.js`
+  `render()` gates the feedback auto-open on `host.getBoundingClientRect().width<700`, so a
+  beat can no longer summon the mission card over the character on a phone; the anchored
+  toggle keeps carrying the result line. A player-opened card at that width renders as a
+  flush, full-bleed bottom sheet (`#engine.sheet`) that yields the move stick and camera
+  cluster and stops below Zip's focal ring. `check_presentation_budget.py` verifies the
+  claim before granting the raised budget: sheet geometry (flush, full-bleed, ≤40% height,
+  chrome actually gone) **and** a scenario step proving the player clicked the toggle.
+- **Rule I9 (a beat keeps its carriers when the screen shrinks)** — the mirror-image defect
+  that every existing budget was blind to: at 390×844 all three world route boards were
+  *hidden* because their labels no longer fitted the safe band, so the mission's central
+  decision had no readable surface anywhere while coverage, clipping and overlap all
+  reported clean numbers. `placeWorldMarker` gained `parkWhenFull` (slide to the nearest
+  free spot and edge-cue back to the world object instead of vanishing), the route signs are
+  declared `data-carrier`, and the checker measures a scenario-declared `carriers` floor
+  (`{selector, min}`). Pinned in `tests/level1_chapter_browser.py` (`#markers >
+  [data-carrier]:visible` count 3 at 390px) and in `tests/test_world_marker_layout.py`.
+- **B3 reachability on a wide viewport** — the same scrolled-out-of-its-own-panel defect the
+  phone sheet had: at 1280×720 the third recovery option sat below the fold of the reading
+  card. Fixed in CSS (the prose detail that duplicated what the boards already say yields
+  its height to the option list); both desktop decision states now measure `unreachable=0`.
+
+Gate status at this snapshot: **all measured gates are green on the folded model.**
+- Presentation budget, exact candidate, **19 measured states** including three phone
+  decision states and a new desktop folded-decision state: `"result": "passed"`, zero
+  violations (`artifacts/presentation-budget-v8b.json`, log `artifacts/veto2-budget8b.log`).
+  Phone decision: folded 20.3% with `carriers=3/3`, sheet 32.4%, recovery sheet 34.6%, all
+  `focal=0`, `unreachable=0`, `dup=0`.
+- `tests.test_presentation_budget_contract` (14 tests) and `tests.test_world_marker_layout`
+  (3 tests) pass; the full unit suite passed (403 tests) before the last two test edits.
+- Shared critic harness `tools/play_session.py` is now exercised end to end (`start`/`step`
+  with `goto`/`resize`/`clickrole`/`settle`/`eval`/`shot`, then `stop`); two defects found
+  and fixed while doing it — `--serve` could not import `tests.browser_check` when invoked
+  as a script, and Git Bash rewrote `--path /first-words` into a Windows path.
+- `check_presentation_budget.py` now prints the page's actual shape (marker classes and
+  visibility grouped, live buttons, headings) when a `wait_eval`/`wait_text` times out, so a
+  beat that never reaches its expected state is diagnosed from the log instead of costing a
+  full scenario re-run to discover.
+
+**Rule I10 — the accessibility viewport (system repair) — 23/24 September 2026:** every
+budget above was measured at the build's own text size. Re-measuring the phone decision
+sheet at the WCAG 1.4.4 viewport (200% text) put its third route notice 51px below the
+bottom of the screen: the same obstruction the veto was about, in a state no gate looked
+at. Fixed as a system, in four parts:
+- **Measurement:** a scenario state may declare `"text_scale": 2`. The tool stamps the
+  enlarged text on the live page *before* the beat's steps run (so the walk is lived at
+  that size), re-applies it before measuring, and relaxes nothing — asking for a taller
+  sheet at any text size is now a rejection in `resolve_state_budgets`, not a knob.
+  `tests/test_presentation_budget_contract.py` requires a scaled twin for every phone
+  sheet beat, so a new sheet state cannot be added at 100% only.
+- **Machinery:** `web/surface-fit.js` exports `fitBoundedSurface(surface)` — a bounded
+  surface ranks its optional sections with `data-shed-item` and hides ranks, lowest first,
+  until its decision fits. It converges in **one** pass in both directions; restoring one
+  rung per tick left a sheet wearing the previous text size's layout for over a second,
+  which is what the first measurement of the recovery sheet saw.
+- **Two holes the ladder exposed in itself.** (1) Ranking was decorative unless it is
+  exhaustive: the recovery beat appended a five-line "why it failed" paragraph straight
+  into the button container with no rank, so the fitter could not see the 168px that was
+  pushing the choice off screen and reported "everything shed" while still overflowing.
+  Run-time prose in a decision container is now ranked (`statusLine` 25, commitment lines
+  45). (2) `[data-shed-item].shed{display:none}` lost a specificity fight with
+  `#engine.sheet .engine-top{display:flex}`, so a rung kept its height while claiming to
+  be gone — and in the 200% capture the "Look inside" control was painted *over* the
+  heading. The shed rule now carries `!important` with the reason beside it.
+- **Authored text, per the rule's own remedy:** the recovery recap went from a 130-char
+  two-clause explanation to `Your sign pointed at "…".`, because the option labels already
+  say what to do next (I5/I7). Where two rungs still cannot both fit, the ranking now
+  keeps the beat's causal lesson and sheds an option's quoted world text, which the route
+  boards already carry in the scene — a learning-quality decision, written down as such in
+  the guide.
+
+Gate status at this snapshot: **all measured gates are green.**
+- Presentation budget, exact candidate, **21 measured states**, two of them new
+  200%-text phone sheet twins: `"result": "passed"`, zero violations, no budget raised
+  (`artifacts/presentation-budget-v11.json`, log `artifacts/budget-v11.log`). Recovery
+  sheet at 200% text: coverage 33.6% against the fixed 40% ceiling, `carriers=2/2`,
+  `unreachable=0`, `focal=0`; decision sheet at 200%: 35.8%, `carriers=3/3`.
+- Stated plainly for the reviewer: the scenario's step **waits** were raised from the
+  tool's 30s default to 45–90s while the walk grew from 12 states to 21 on a ~4fps
+  software renderer. That is a patience change, not a criteria change — no measured
+  ceiling, carrier floor or assertion was relaxed, and the two 200%-text twins declare
+  no `coverage_max` of their own.
+- `python manage.py build` passes; `python manage.py test` → 411 OK (skipped=7);
+  `tests.test_surface_fit` (4 node tests) + `tests.test_presentation_budget_contract` +
+  `tests.test_world_marker_layout` pass.
+- Active browser modules: readability, opening, control-practice, chapter, lifecycle and
+  controls **passed** (`artifacts/browser-groups.log`); entry, renderer-lifecycle,
+  animation-rest and physicality in `artifacts/browser-groups2.log`.
+- `check_presentation_budget.py` now says *which* kind of overflow it found: when every
+  ranked rung on a surface is already hidden and the surface still overflows, the B3 line
+  reports the exhausted ladder and points at unranked content or authored length instead
+  of leaving a worker to conclude that the ceiling is what is wrong.
+
+**Still to do before presenting:** the cold-observer full-game critic pass is running
+against a disposable learner at a local URL (`artifacts/play-20260923/cold-report.md`),
+followed by the design-intent comparison pass; every lane must reach ≥9. No commit made
+for the second-veto work yet; no Level 2, no deployment. Build passes.
+
 **Ambient + diegetic interaction model (system repair) — 22/23 September 2026:**
 The user vetoed the `4556f84`/`071591a`-era candidate over the shared opening
 controller painting a persistent bottom-centre "Take control / ← Back" bar —

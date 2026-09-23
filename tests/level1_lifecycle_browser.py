@@ -28,8 +28,8 @@ def main():
                     page.wait_for_url('**/first-words',timeout=15000);expect(page.locator('#rgi-intro')).to_be_visible(timeout=20000)
                     page.get_by_role('button',name='Skip opening',exact=True).click()
                     page.get_by_role('button',name='Skip control practice',exact=True).click()
-                    expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
-                    page.get_by_role('button',name='Connect the power lead',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+                    expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible(timeout=15000)
+                    page.get_by_role('button',name='Connect the loose power lead',exact=True).click();expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
 
                     page.get_by_role('button',name='Open game menu').click();expect(page.get_by_role('button',name='Reset game progress',exact=True)).to_be_visible();expect(page.get_by_role('button',name='Sign out',exact=True)).to_be_visible()
                     page.get_by_role('button',name='Reset game progress',exact=True).click();expect(page.locator('#reset-confirm')).to_be_visible();expect(page.locator('#reset-confirm')).to_contain_text('clears your saved game attempts')
@@ -39,7 +39,7 @@ def main():
 
                     page.get_by_role('button',name='Skip opening',exact=True).click()
                     page.get_by_role('button',name='Skip control practice',exact=True).click()
-                    expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
+                    expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible(timeout=15000)
                     page.get_by_role('button',name='Open game menu').click();page.get_by_role('button',name='Sign out',exact=True).click();page.wait_for_url(origin+'/',timeout=15000);expect(page.locator('#sign-in')).to_be_visible();expect(page.locator('#login-submit')).to_be_visible()
                     state=page.request.get(origin+'/api/state');assert state.status==401,state.status
                     page.screenshot(path=str(out/'level1-logout-back-to-auth-390.png'))

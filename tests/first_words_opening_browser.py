@@ -201,7 +201,10 @@ def main():
             expect(page.locator('#controls')).to_be_hidden()
             expect(page.locator('#stage-name')).to_have_text('TUTORIAL · MOVE')
             page.get_by_role('button',name='Skip control practice',exact=True).click()
-            expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000)
+            # Speech repair is diegetic: the panel folds behind the world toggle and
+            # the POWER LEAD world marker carries the verb (no obstructing card).
+            expect(page.locator('#engine')).to_be_hidden()
+            expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible(timeout=15000)
             expect(page.locator('#stage-name')).to_have_text('TUTORIAL · REPAIR 1/4')
             expect(page.locator('#saved')).to_have_text('Saved')
             until(page,"()=>FirstWordsReview.audio.phase==='repair'")
@@ -215,7 +218,7 @@ def main():
             log('Prologue: replay preserves draft');page.get_by_role('button',name='Open game menu').click();page.get_by_role('button',name='Replay the prologue',exact=True).click()
             page.get_by_role('button',name='Return to game',exact=True).click()
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
-            page.reload();expect(page.get_by_role('button',name='Connect the power lead',exact=True)).to_be_visible(timeout=15000);expect(page.locator('#rgi-intro')).to_have_count(0)
+            page.reload();expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible(timeout=15000);expect(page.locator('#rgi-intro')).to_have_count(0)
             checks.append('Explicit prologue replay is presentation-only; returning tutorial state resumes without replaying the prologue.')
 
             for width,height in [(360,800),(430,932),(1280,800)]:

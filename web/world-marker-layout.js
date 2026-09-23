@@ -18,6 +18,24 @@ export function projectedEntityBox(world,id,{
   };
 }
 
+// B2 keep-out box for the entity the camera is *about*: the silhouette unioned
+// with the focal clearance ring around its projected origin. Clearing only the
+// silhouette still buries the subject's immediate space, which is what the B2
+// probe measures, so a label that must clear a focal subject uses this.
+export const FOCAL_CLEARANCE_PX = 48;
+export function focalClearanceBox(world, id, box = {}, ring = FOCAL_CLEARANCE_PX) {
+  if (!world?.projectEntity) return null;
+  const subject = projectedEntityBox(world, id, box);
+  const origin = world.projectEntity(id);
+  if (!origin?.inFront) return subject;
+  const ringBox = { left: origin.x - ring, right: origin.x + ring, top: origin.y - ring, bottom: origin.y + ring };
+  if (!subject) return ringBox;
+  return {
+    left: Math.min(subject.left, ringBox.left), right: Math.max(subject.right, ringBox.right),
+    top: Math.min(subject.top, ringBox.top), bottom: Math.max(subject.bottom, ringBox.bottom),
+  };
+}
+
 // Viewport-space top limit below persistent page chrome (mastheads, toolbars).
 // Callers pass the live chrome nodes so marker safe areas follow real rendered
 // heights instead of guessed constants.
@@ -36,6 +54,7 @@ export function placeWorldMarker(marker,point,{
   safeTop,
   safeBottom,
   critical=false,
+  parkWhenFull=false,
   xPadding=40,
   yOffset=12,
   avoidRects=[],
@@ -50,6 +69,12 @@ export function placeWorldMarker(marker,point,{
   const desiredX=point.x,desiredY=point.y-yOffset;
   const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
   const occupied=avoidRects.filter(r=>r&&[r.left,r.right,r.top,r.bottom].every(Number.isFinite)&&r.right>r.left&&r.bottom>r.top);
+  // A critical marker is guided by an arrow, so moving it off its anchor is legible.
+  // `parkWhenFull` extends the same displacement to a declared *carrier* of a beat's
+  // decision (guide I9): when the screen is too small for the anchor point, the label
+  // slides to the nearest free spot and edge-cues back to its world object instead of
+  // being hidden — which is how three route boards vanished from a 390px phone.
+  const displace=critical||parkWhenFull;
   const setEdge=edge=>{
     marker.classList.toggle('edge-cued',Boolean(edge));
     if(edge)marker.dataset.edge=edge;else delete marker.dataset.edge;
@@ -64,7 +89,7 @@ export function placeWorldMarker(marker,point,{
     const exclusions=occupied.map(r=>({left:r.left-half-clearance,right:r.right+half+clearance,top:r.top-clearance,bottom:r.bottom+height+clearance}));
     const free=(x,y)=>!exclusions.some(r=>x>r.left&&x<r.right&&y>r.top&&y<r.bottom);
     const inside=desiredX>=left&&desiredX<=right&&desiredY>=top&&desiredY<=bottom&&free(desiredX,desiredY);
-    if(!critical)return inside?{x:desiredX,y:desiredY,inside}:null;
+    if(!displace)return inside?{x:desiredX,y:desiredY,inside}:null;
     const baseX=clamp(desiredX,left,right),baseY=clamp(desiredY,top,bottom);
     const xs=[baseX,...exclusions.flatMap(r=>[clamp(r.left,left,right),clamp(r.right,left,right)])];
     const ys=[baseY,...exclusions.flatMap(r=>[clamp(r.top,top,bottom),clamp(r.bottom,top,bottom)])];
@@ -83,13 +108,13 @@ export function placeWorldMarker(marker,point,{
     if(Math.max(Math.abs(dx),Math.abs(dy))<.5)return'';
     return Math.abs(dx)>Math.abs(dy)?(dx<0?'left':'right'):(dy<0?'top':'bottom');
   };
-  let edge=critical?direction(position):'';
+  let edge=displace?direction(position):'';
   // An edge arrow can widen the button. Measure its final footprint before
   // choosing the safe position, rather than allowing a one-frame overlap.
   setEdge(edge);
   if(edge){position=locate();if(!position)return{placed:false,edge,insideSafeArea:false};}
   const {x,y}=position;
-  edge=critical?direction(position):'';
+  edge=displace?direction(position):'';
   setEdge(edge);
   marker.style.left=x+'px';
   marker.style.top=y+'px';

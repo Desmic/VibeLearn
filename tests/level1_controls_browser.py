@@ -127,7 +127,8 @@ def main():
 
             # A non-text game button may retain focus after interaction/reload. That
             # must not suppress direct protagonist movement; only typing targets do.
-            page.get_by_role('button',name='Scan the Moon lock',exact=True).focus()
+            # In the diegetic folded tutorial the live button is the world marker.
+            page.get_by_role('button',name='Scan the Moon lock in the world',exact=True).focus()
             start=position(page)
             page.keyboard.down('KeyW');wait_frames(page,5);page.keyboard.up('KeyW');page.wait_for_timeout(120)
             after_key=position(page);assert distance(start,after_key)>.08,(start,after_key)
