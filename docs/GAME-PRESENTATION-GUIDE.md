@@ -301,6 +301,19 @@ not been given that decision, so the surface adapts instead of the budget moving
   rank or `UNRANKED` and its height, so the answer is in the report rather than in a
   re-run.
 
+**Rule I11 (a control is its effect, not its flag).** A preference the player can set
+(mute, reduced motion, and each future one) has **one reading rendered everywhere it
+appears**: the module that owns the preference exports the glyph, label and pressed
+state, and every surface paints from that. Hand-written copies drift — the 24 September
+mute check found the opening's corner button spelling "muted" with a different combining
+stroke than the masthead's, wearing a static `Toggle opening sound` label for a
+preference that is in fact global and survives a reload. And the gate measures what the
+control **does**: reading `preferences.muted` after a click only proves a boolean moved.
+Play the real output — decode the game's own master-bus capture and assert its sample
+peak collapses while the score is still running, then confirm the same preference is
+still in force after a reload. A button that changes only its own icon passes a
+flag-check and is broken.
+
 **Why this matters** (the evidence behind I1/I6): diegetic, lowest-rung delivery is
 what keeps the player *inside* the fiction. Persistent non-diegetic chrome is the
 strongest immersion breaker there is — it forces a "cognitive separation between
@@ -383,6 +396,11 @@ The first best-guess implementation of these shapes is recorded in
    text yourself: the question and every option name must be painted, and nothing may
    need scrolling inside the sheet (I10). If the sheet cannot fit them, shorten what the
    options *say* — do not touch a budget number.
+10. Set every preference the game offers, then reload, and judge each one by what the
+    experience does with it (I11) — sound is measured from the captured output, motion
+    from what the world renders — not from the flag the button wrote. Check that all
+    surfaces offering that preference read identically in glyph, label and pressed state,
+    and that the label does not claim a narrower scope than the setting has.
 
 ## Critic probes (fresh context, actual play — not source reading)
 
@@ -422,6 +440,12 @@ The first best-guess implementation of these shapes is recorded in
   to choose between three or more options. Is every option painted without scrolling, and
   is the surface the same size it was at normal text? An option below the fold fails I10;
   so does a sheet that got taller to fit them — that trades the decision for the world.
+- CP12: Operate every preference control in the running game, then reload. Did the thing
+  it claims to change actually change — is the sound really absent, does the reduced-motion
+  world really stop moving — and is the setting still applied after the reload? Then find
+  a second control for the same preference and compare glyph, label and pressed state. A
+  control verified only by the flag it writes, or two surfaces that spell the same state
+  differently, fails I11.
 
 A critic that cannot demonstrate a probe on the running candidate records it as
 unassessed; screenshots of a static frame do not certify B2 (movement/orbit required).
@@ -431,6 +455,7 @@ unassessed; screenshots of a static frame do not certify B2 (movement/orbit requ
 | Rule | Mechanism |
 | --- | --- |
 | P1–P3, I1–I10, B1–B8 | `tools/check_presentation_budget.py` (mechanical, exact candidate) + live critic observation |
+| I11 | The owning audio/motion module exports one reading; the game's own browser gate decodes captured output across the control instead of asserting the flag |
 | Design-time surface declaration | `tools/check_learning_design.py` (existing attention/focus contract) |
 | Review-time certification | `presentation_integration` criterion in `check_critic_review.py` V2 gates — requires budget report + interactive trace + cold-observer + live capture |
 | Worker behavior | this section referenced from `AGENTS.md` build order and `GAME-UX-SYSTEM.md` |

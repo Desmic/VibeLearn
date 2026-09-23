@@ -292,7 +292,8 @@ $('#inspect').onclick=()=>{
   for(const c of s.candidates){const row=document.createElement('div');row.className='score';const label=document.createElement('span');label.textContent=c.piece;const meter=document.createElement('meter');meter.min=0;meter.max=100;meter.value=c.chance;meter.setAttribute('aria-label',c.piece+' illustrative score');const score=document.createElement('span');score.textContent=c.chance+'%';row.append(label,meter,score);$('#scores').append(row);}
   dialog('#inspection');
 };
-function syncAudio(){for(const name of ['music','effects'])$('#'+name).checked=audio.preferences[name];$('#mute').setAttribute('aria-pressed',String(audio.preferences.muted));$('#mute').setAttribute('aria-label',audio.preferences.muted?'Unmute sound':'Mute all sound');text('#mute',audio.preferences.muted?'♪̸':'♫');}
+const paintMute=el=>{const ui=audio.muteUI;el.textContent=ui.glyph;el.setAttribute('aria-label',ui.label);el.setAttribute('aria-pressed',ui.pressed);};
+function syncAudio(){for(const name of ['music','effects'])$('#'+name).checked=audio.preferences[name];paintMute($('#mute'));}
 for(const name of ['music','effects'])$('#'+name).onchange=e=>{audio.setPreference(name,e.target.checked);syncAudio();};
 $('#mute').onclick=()=>{audio.setPreference('muted',!audio.preferences.muted);syncAudio();};syncAudio();
 $('#reduced').checked=reduced;
@@ -307,9 +308,8 @@ function opening(replay=false){
     inOpening=false;presented=null;world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced});pauseSystems();render();
   }});
   instance.element.classList.add('first-opening');
-  const mute=document.createElement('button');mute.textContent=audio.preferences.muted?'♪̶':'♪';mute.setAttribute('aria-label','Toggle opening sound');
-  mute.setAttribute('aria-pressed',String(audio.preferences.muted));
-  mute.onclick=()=>{audio.setPreference('muted',!audio.preferences.muted);mute.textContent=audio.preferences.muted?'♪̶':'♪';mute.setAttribute('aria-pressed',String(audio.preferences.muted));syncAudio();};instance.element.querySelector('.rgi-corner').prepend(mute);
+  const mute=document.createElement('button');mute.id='opening-mute';paintMute(mute);
+  mute.onclick=()=>{audio.setPreference('muted',!audio.preferences.muted);paintMute(mute);syncAudio();};instance.element.querySelector('.rgi-corner').prepend(mute);
   const observer=new MutationObserver(()=>{
     const step=Number(instance.element.dataset.step),scene=chapter.openingSpec.scenes[step]||{};
     audio.setPhase(scene.audioPhase||'home');

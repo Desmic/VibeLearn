@@ -31,6 +31,32 @@ def advance_beat(page,title):
     tap_world(page)
     expect(page.locator('#rgi-title')).to_have_text(title,timeout=20000)
 
+# Loudness of the game's own master-bus capture, decoded in the page. A preference flag
+# is not evidence that a control does anything; the sample count above a floor is.
+LOUDNESS="""async (spec) => {
+  const decode=async dataUrl=>{
+    const bin=atob(dataUrl.split(',')[1]);
+    const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    const buf=await new OfflineAudioContext(1,1,48000).decodeAudioData(bytes.buffer);
+    const d=buf.getChannelData(0);
+    let peak=0,sum=0,audible=0;
+    for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>peak)peak=v;sum+=v*v;if(v>0.002)audible++;}
+    return {seconds:+buf.duration.toFixed(2),peak:+peak.toFixed(5),
+            rms:+Math.sqrt(sum/d.length).toFixed(5),audibleFraction:+(audible/d.length).toFixed(4)};
+  };
+  if(spec.dataUrl)return await decode(spec.dataUrl);
+  await FirstWordsReview.audioCapture.start();
+  await new Promise(r=>setTimeout(r,spec.seconds*1000));
+  const cap=await FirstWordsReview.audioCapture.stop();
+  return {...await decode(cap.dataUrl),bytes:cap.bytes};
+}"""
+
+def loudness(page,**spec):
+    value=page.evaluate(LOUDNESS,spec)
+    assert 'peak' in value,value
+    return value
+
 def main():
     out=ROOT/'artifacts';out.mkdir(exist_ok=True);checks=[];errors=[]
     def observe_graphics(message):
@@ -180,9 +206,23 @@ def main():
             payload=captured['dataUrl'].split(',',1)[1]
             (out/'prologue-event-audio.webm').write_bytes(base64.b64decode(payload))
             assert (out/'prologue-event-audio.webm').stat().st_size==captured['bytes']
-            page.get_by_role('button',name='Toggle opening sound').click()
+            # The score was audible before the mute, so a silent reading afterwards is the
+            # preference working rather than a capture that never carried sound.
+            heard=loudness(page,dataUrl=captured['dataUrl'])
+            assert heard['peak']>0.01 and heard['audibleFraction']>0.05,heard
+            page.locator('#opening-mute').click()
             assert page.evaluate('FirstWordsReview.audio.preferences.muted')
+            expect(page.locator('#opening-mute')).to_have_attribute('aria-label','Unmute all sound')
+            # Both mute surfaces render one reading of the same global preference. The
+            # masthead copy is hidden during the opening, so compare it through the DOM.
+            assert page.evaluate("""()=>{const a=document.querySelector('#mute'),b=document.querySelector('#opening-mute');
+                return a.textContent===b.textContent&&a.getAttribute('aria-label')===b.getAttribute('aria-label')
+                  &&a.getAttribute('aria-pressed')===b.getAttribute('aria-pressed');}""")
             release(page);tap_world(page)
+            # A suspended context is silent whatever the preference says: prove it was running.
+            until(page,"()=>FirstWordsReview.audio.state==='running'&&FirstWordsReview.audio.scheduledBars>0")
+            muted=loudness(page,seconds=3)
+            assert muted['peak']<heard['peak']/50 and muted['rms']<heard['rms']/50,(heard,muted)
 
             log('Prologue: repair handoff');expect(page.locator('#rgi-title')).to_have_text('Get the words back.',timeout=45000)
             expect(page.get_by_role('button',name='REPAIR SOCKET',exact=True)).to_be_visible()
@@ -219,6 +259,11 @@ def main():
             page.get_by_role('button',name='Return to game',exact=True).click()
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
             page.reload();expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible(timeout=15000);expect(page.locator('#rgi-intro')).to_have_count(0)
+            # Muting is a device preference, not page state: it survives the reload and the
+            # control that resumes must say so.
+            until(page,'()=>!!window.FirstWordsReview')
+            assert page.evaluate('FirstWordsReview.audio.preferences.muted') is True
+            expect(page.locator('#mute')).to_have_attribute('aria-label','Unmute all sound')
             checks.append('Explicit prologue replay is presentation-only; returning tutorial state resumes without replaying the prologue.')
 
             for width,height in [(360,800),(430,932),(1280,800)]:

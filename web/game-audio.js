@@ -1,5 +1,15 @@
 /* Bellweather score v2. Original procedural audio synthesized locally; no downloads
    or model API. Semantic presentation cues only. Audio never establishes success. */
+
+// One reading of the mute preference for every surface that offers it. The preference
+// is global, so a surface must not name a scope ("opening sound") or draw a glyph the
+// others do not: hand-written copies of both drift apart within one file.
+export const muteState=(muted)=>({
+  glyph: muted ? '\u266A\u0338' : '\u266A',
+  label: muted ? 'Unmute all sound' : 'Mute all sound',
+  pressed: muted ? 'true' : 'false',
+});
+
 export function createGameAudio(){
   let context=null,musicBus=null,effectsBus=null,masterBus=null,noiseBuffer=null,timer=0,bar=0,next=0,phase='home',paused=false,disposed=false;
   let captureDestination=null,captureRecorder=null,captureChunks=[];
@@ -147,7 +157,7 @@ export function createGameAudio(){
       else effectPattern([74],{length:.4,volume:.05});
     },
     setPreference(name,value){if(!(name in preferences))return;preferences[name]=Boolean(value);try{localStorage.setItem('vibelearn-audio',JSON.stringify(preferences));}catch{}levels();},
-    get preferences(){return {...preferences};},setPaused,startCapture,stopCapture,
+    get preferences(){return {...preferences};},get muteUI(){return muteState(preferences.muted);},setPaused,startCapture,stopCapture,
     stats:()=>({version:'bellweather-score-v2',ready:Boolean(context),state:context?.state||'locked',phase,scheduledBars:bar,activeVoices:active.size,heard:heard.size,captureState:captureRecorder?.state||'inactive',preferences:{...preferences}}),
     dispose(){disposed=true;clearInterval(timer);document.removeEventListener('visibilitychange',visibility);if(captureRecorder&&captureRecorder.state!=='inactive')try{captureRecorder.stop();}catch{}try{masterBus?.disconnect(captureDestination);}catch{}stopNotes();context?.close();}
   };
