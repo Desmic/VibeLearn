@@ -249,8 +249,22 @@ surface.
 **How this one was found, and how to find the next one faster:** it surfaced only at the end
 of a 20-minute full `python manage.py browser` run. The narrowest gate that detects a shed
 regression is the single chapter module, ~2 minutes, and it should be run **first** after
-touching `fitBoundedSurface` or anything that marks a rung — not last. See the workflow
-section for the ordering rule.
+touching `fitBoundedSurface` or anything that marks a rung — not last. Recorded as the
+gate-ordering rule in `CODEX.md`.
+
+Gate status at this snapshot: **green on candidate `dd69fb4`** (this fix plus `f7a5b73`).
+- `python manage.py build` passes; the unit suite is **414 OK**, skipped=7.
+- Presentation budget, **23** measured states: `"result": "passed"`, zero violations
+  (`artifacts/presentation-budget-v13.json`, log `budget-v13.log`). The two new hint states
+  report `unreachable=0` and `carriers=3/3,1/1` at both 100% and 200% text against the
+  untouched 40% ceiling.
+- Full `python manage.py browser`: **10 of 10 modules passed**, zero failures, including
+  `tests.level1_chapter_browser` — the module that failed on `f7a5b73` — and
+  `tests.first_words_opening_browser` with the I11 loudness assertions
+  (`artifacts/browser-v13.log`, 20 min wall).
+- **Not assessed, recorded as such:** sound *quality* (only one signal at a time this
+  session) and the cold-observer full-game screenshot lane. Neither is converted into a
+  score.
 
 **Ambient + diegetic interaction model (system repair) — 22/23 September 2026:**
 The user vetoed the `4556f84`/`071591a`-era candidate over the shared opening

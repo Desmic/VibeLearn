@@ -131,6 +131,20 @@ suites, then play the whole experience from `/` through the ending. Internal rea
 requires no blocker across story, art/world, gameplay and learning gates. Only then
 present the candidate to the user for their final judgment.
 
+### Gate ordering: cheapest detector first
+
+Run gates in order of how fast they can see the change you just made, not in order of how
+authoritative they feel. Measured cost on this project, so the trade-off is real:
+a single browser module ~2 min, the 5-state budget subset 41s, the full budget scenario
+**277s**, the full browser matrix **~20 min**, the unit suite ~61s alone and **208s when a
+budget or browser run is beside it** — concurrent gates do not save the time they appear to.
+So after touching shared presentation machinery (`web/surface-fit.js`, the budget checker, a
+scenario fixture), run the one browser module that exercises it, then the budget subset for
+the affected states, and only then the full matrix once, immediately before certification.
+The I10 hint-shedding regression on `f7a5b73` cost a full 20-minute matrix to surface; the
+narrow module finds it in ~2 minutes. Do not use the ordering to skip the wide gate at
+certification time — the wide run is what makes a candidate presentable.
+
 
 ## Evidence gate for new game candidates
 
