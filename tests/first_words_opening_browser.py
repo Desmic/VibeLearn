@@ -31,6 +31,48 @@ def advance_beat(page,title):
     tap_world(page)
     expect(page.locator('#rgi-title')).to_have_text(title,timeout=20000)
 
+def band_groups(page):
+    # Which of the three story line groups this beat actually has words for.
+    return page.evaluate("""()=>{const b=document.querySelector('.rgi-band');
+      const g={title:b.querySelector('.rgi-scene-caption'),body:b.querySelector('.rgi-subtitle'),
+               speech:b.querySelector('.rgi-speech')};
+      return Object.fromEntries(Object.entries(g).map(([k,el])=>[k,el.textContent.trim().length>0]));}""")
+
+BAND_PAINTED="""()=>{const b=document.querySelector('.rgi-band');
+  const g={title:'.rgi-scene-caption',body:'.rgi-subtitle',speech:'.rgi-speech'};
+  const on=[],clash=[];
+  for(const [k,sel] of Object.entries(g)){const el=b.querySelector(sel);
+    const r=el.getBoundingClientRect();const o=+getComputedStyle(el).opacity;
+    if(o>=0.05&&r.width>0&&r.height>0
+       &&r.left>=-1&&r.right<=innerWidth+1&&r.top>=-1&&r.bottom<=innerHeight+1)on.push(k);
+    if(o>=0.5)clash.push(k);}
+  return {on,clash};}"""
+
+def band_all_painted(page):
+    # WCAG 2.2.2 / rule I12 together: with motion suppressed the band must show every
+    # line group at once, each painted, sized and inside the viewport - text can never
+    # be gated behind a sequence a player opted out of.
+    groups=band_groups(page)
+    painted=set(page.evaluate(BAND_PAINTED)['on'])
+    missing={k for k,v in groups.items() if v}-painted
+    assert not missing,f'I12: reduced-motion play never paints {sorted(missing)}'
+    return painted
+
+def band_seen(page,expected,limit_ms=17000):
+    # Rule I12: words the player is told must reach the eye, not only the assistive
+    # channel. The band sequences its groups, so sample the *painted* band over one
+    # full pass and require every non-empty group to be opaque, sized and on screen.
+    # Two groups both strongly opaque at once is the dip going missing (the phone B1
+    # failure of 24 September); a faint crossfade frame is not a defect, hence 0.5.
+    painted=set()
+    for _ in range(max(1,limit_ms//200)):
+        sample=page.evaluate(BAND_PAINTED)
+        assert len(sample['clash'])<=1,f'two story line groups share the frame at once: {sample["clash"]}'
+        painted|=set(sample['on'])
+        if expected<=painted:return painted
+        page.wait_for_timeout(200)
+    return painted
+
 # Loudness of the game's own master-bus capture, decoded in the page. A preference flag
 # is not evidence that a control does anything; the sample count above a floor is.
 LOUDNESS="""async (spec) => {
@@ -92,6 +134,13 @@ def main():
             expect(page.locator('#rgi-dialogue')).to_contain_text('All three of us')
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before_lantern
+            # Rule I12: every story line this beat announces must reach the eye. The band
+            # sequences its line groups, so sample the painted band across the whole pass
+            # and require each non-empty group (title/body/dialogue) to appear on screen.
+            expected={k for k,v in band_groups(page).items() if v}
+            assert expected=={'title','body','speech'},expected
+            seen=band_seen(page,expected,limit_ms=15000)
+            assert expected<=seen,f'I12: band lines never painted for the eye: {sorted(expected-seen)}'
             until(page,"()=>FirstWordsReview.audio.ready")
             capture_started=page.evaluate("()=>FirstWordsReview.audioCapture.start()")
             assert capture_started['state']=='recording',capture_started
@@ -255,7 +304,7 @@ def main():
             assert page.evaluate("FirstWordsReview.runtime.mode")=='mission'
             checks.append('Eight causal prologue beats separate normal Bellweather, visible Warden cause, rupture effect, isolation, prison reveal, speech targeting, capability removal and repair handoff before the separate tutorial; the same runtime becomes direct-control mission play.')
             checks.append('The Bellweather score is not required before a gesture; the first story advance unlocks bellweather-score-v2 and schedules bars before danger-phase assertions.')
-            checks.append('Plain story beats carry no persistent advance control: they advance ambiently once motion settles, a paused beat holds indefinitely, a world tap moves a beat on immediately, story actions are performed on their diegetic world marker (never a bottom button), the final handoff is ambient (a world tap hands control over, no painted button in motion play), and reduced-motion play never auto-advances but paints exactly one explicit control (WCAG 2.2.4).')
+            checks.append('Plain story beats carry no persistent advance control: they advance ambiently once motion settles, a paused beat holds indefinitely, a world tap moves a beat on immediately, story actions are performed on their diegetic world marker (never a bottom button), the final handoff is ambient (a world tap hands control over, no painted button in motion play), and reduced-motion play never auto-advances but paints exactly one explicit control (WCAG 2.2.2).')
 
             before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
             log('Prologue: replay preserves draft');page.get_by_role('button',name='Open game menu').click();page.get_by_role('button',name='Replay the prologue',exact=True).click()
@@ -290,12 +339,15 @@ def main():
                 vertical_clear=clearance['lanternY']<clearance['captionTop']-16
                 assert clearance['visible'] and (horizontal_clear or vertical_clear),clearance
                 q.screenshot(path=str(out/f'prologue-lantern-release-{width}.png'),timeout=15000)
-                # WCAG 2.2.4: reduced motion never auto-advances (the beat waits for
+                # WCAG 2.2.2: reduced motion never auto-advances (the beat waits for
                 # input indefinitely), so rule I6 paints exactly one explicit control.
                 expect(q.locator('#rgi-next')).to_be_visible()
                 expect(q.get_by_role('button',name='Continue →',exact=True)).to_be_enabled()
                 q.wait_for_timeout(12000)
                 expect(q.locator('#rgi-title')).to_have_text('One lantern. Three friends.')
+                # Reduced motion shows the whole beat at once: every line group with
+                # words must be painted and inside this viewport (rule I12, WCAG 2.2.2).
+                assert band_all_painted(q)=={k for k,v in band_groups(q).items() if v}
                 advance_beat(q,'A shadow over Bellweather.')
                 q.screenshot(path=str(out/f'prologue-threat-reduced-{width}.png'),timeout=15000)
                 advance_beat(q,'The sky cracks open.')
@@ -350,6 +402,7 @@ def main():
 
             assert not errors,errors
             checks.append('Fresh 360/430/desktop reduced-motion preserves the same eight story states and can skip safely into the separate tutorial without a 2D fallback.')
+            checks.append('Rule I12 delivery: the story band paints every line group it announces for this beat (title/body/dialogue) inside the viewport, one group in frame at a time in motion play, and all of them at once under reduced motion - no story sentence reaches the player only through the screen-reader channel.')
             checks.append('A separate 390px motion capture suppresses explanatory scene captions for cold-observer visual-comprehension review.')
             cold_packet={
                 'schema':'vibelearn.cold-observer-evidence.v1',

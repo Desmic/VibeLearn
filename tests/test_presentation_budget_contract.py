@@ -60,7 +60,7 @@ def _unclosed(code):
 def _metrics(**overrides):
     base = {'coverage': 0.05, 'panelOpen': False, 'clipped': [], 'longBlocks': [], 'disabledVisible': [],
             'focal': None, 'presence': None, 'subjectCover': None, 'markerClash': [], 'strayControls': [],
-            'dupCarriers': [], 'unreachableActions': [], 'sheet': None, 'carriers': []}
+            'dupCarriers': [], 'unreachableActions': [], 'sheet': None, 'carriers': [], 'announcedOnly': []}
     return {**base, **overrides}
 
 
@@ -227,6 +227,26 @@ class PresentationBudgetContract(unittest.TestCase):
                                      {'selector': '#machine-toggle', 'min': 1, 'visible': 1,
                                       'names': ['Find the current route']}])
         self.assertEqual(violations('x', metrics, BUDGETS, False, {}), [])
+
+    # --- I12 the sole announced-only carrier -----------------------------------------
+    def test_i12_flags_a_story_line_the_eye_never_receives(self):
+        # The 24 September cold play: the shared opening routed beat title and spoken
+        # dialogue into a 1x1 clip-path node. Zero area means no coverage to raise, no
+        # surface to overflow, no scroll trap and no duplicate — every other metric in
+        # this file improved as the text disappeared. Only a carrier test can see it.
+        metrics = _metrics(announcedOnly=[{'el': 'DIV.rgi-scene-caption.sr-only',
+                                           'text': 'Three friends.', 'words': 2,
+                                           'missing': ['friends']}])
+        found = violations('prologue-opening-desktop', metrics, BUDGETS, False, {})
+        self.assertEqual(len(found), 1)
+        self.assertIn('I12 sole announced-only carrier', found[0])
+        self.assertIn('Three friends.', found[0])
+        # The fix is never to delete the live region: the message has to say so.
+        self.assertIn('do not delete the live region', found[0])
+
+    def test_i12_is_silent_when_the_announced_line_is_also_painted(self):
+        metrics = _metrics(announcedOnly=[])
+        self.assertEqual(violations('prologue-opening-desktop', metrics, BUDGETS, False, {}), [])
 
     def test_the_decision_states_of_this_game_declare_their_carrier_floor(self):
         # A rule nobody asserts is a rule nobody follows: the beats where the world

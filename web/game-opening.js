@@ -47,15 +47,22 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   overlay.dataset.openingReplay=String(replay);
   overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-labelledby','rgi-title');
   // Presentation contract (docs/GAME-PRESENTATION-GUIDE.md): the world carries the
-  // scene; text is one fading subtitle line; controls are contextual and sparse.
+  // scene; text is one fading band; controls are contextual and sparse.
   // Rule I6: no persistent bottom-centre control bar. Advancement is ambient/tap/
   // keyboard; story actions are performed on their diegetic world marker. Only the
   // corner cluster (system verbs) and world markers are painted chrome; a single
-  // explicit control appears solely for prefers-reduced-motion (WCAG 2.2.4).
+  // explicit control appears solely for prefers-reduced-motion (WCAG 2.2.2 Pause, Stop, Hide).
+  // Rule I12: every line the player is meant to know must reach the eye. The band
+  // holds the beat card, the narration and the spoken line in ONE grid cell and
+  // reveals them in sequence, so a beat states its title and its dialogue without
+  // stacking three text layers over the world (which B1 would not afford on a phone).
   overlay.innerHTML=`<div class="rgi-shell">
     <div class="rgi-visual" id="rgi-world"><div class="rgi-markers"></div>
-      <div class="rgi-scene-caption sr-only"><span class="rgi-kicker"></span><h2 id="rgi-title"></h2><blockquote id="rgi-dialogue"></blockquote></div>
-      <div class="rgi-subtitle" role="status"><p id="rgi-body"></p><div class="rgi-fact" id="rgi-fact"></div></div>
+      <div class="rgi-band">
+        <div class="rgi-scene-caption" data-line="title"><span class="rgi-kicker"></span><h2 id="rgi-title"></h2></div>
+        <div class="rgi-subtitle" data-line="body" role="status"><p id="rgi-body"></p><div class="rgi-fact" id="rgi-fact"></div></div>
+        <blockquote class="rgi-speech" data-line="speech" id="rgi-dialogue"></blockquote>
+      </div>
       <span class="rgi-paused-badge" aria-hidden="true">PAUSED</span>
       <div class="rgi-corner"><button id="rgi-back" type="button" aria-label="Previous scene">‹</button><button id="rgi-replay-beat" type="button" aria-label="Replay scene">↻</button><button id="rgi-pause" type="button" aria-label="Pause story motion">⏸</button><button id="rgi-skip" type="button"></button></div>
       <small id="rgi-step" class="sr-only"></small></div>
@@ -64,13 +71,41 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   const progress=overlay.querySelector('.rgi-progress');
   spec.scenes.forEach(()=>progress.append(document.createElement('i')));
   const host=overlay.querySelector('#rgi-world'),next=overlay.querySelector('#rgi-next'),pause=overlay.querySelector('#rgi-pause');
-  const subtitle=overlay.querySelector('.rgi-subtitle');
-  let subtitleTimer=0;
-  const showSubtitle=()=>{
-    clearTimeout(subtitleTimer);
-    if(reduced){subtitle.classList.add('show');return;}
-    subtitle.classList.add('show');
-    subtitleTimer=setTimeout(()=>subtitle.classList.remove('show'),5500);
+  const band=overlay.querySelector('.rgi-band');
+  // One line group at a time, held for its own reading time, with a short dip between
+  // groups; the last group stays painted until the beat advances so the world is only
+  // partly covered and the closing line is still on screen when the player acts on it.
+  // Paused or reduced-motion play shows every line at once: text must never be gated
+  // behind motion a user opted out of (WCAG 2.2.2).
+  let bandTimers=[],bandMs=0;
+  const clearBand=()=>{for(const t of bandTimers)clearTimeout(t);bandTimers=[];};
+  const holdMs=(text)=>Math.min(7000,Math.max(2400,1500+450*(text.trim().split(/\s+/).filter(Boolean).length)));
+  const showBand=()=>{
+    clearBand();
+    const textOf=(sel)=>overlay.querySelector(sel).textContent.trim();
+    // Sequenced from the text actually painted for this beat, so the band can never
+    // drift out of step with what the screen-reader channel receives.
+    const lines={title:`${textOf('.rgi-kicker')} ${textOf('#rgi-title')}`.trim(),
+      body:`${textOf('#rgi-body')} ${textOf('#rgi-fact')}`.trim(),
+      speech:textOf('#rgi-dialogue')};
+    const seq=Object.keys(lines).filter(phase=>lines[phase]);
+    bandMs=0;
+    // Mirrored onto the overlay so a measurement or test can pin one phase
+    // (data-band-phase) instead of racing the fade.
+    const setPhase=(phase)=>{band.dataset.phase=phase;overlay.dataset.bandPhase=phase||'clear';};
+    if(!seq.length){setPhase('');return;}
+    if(reduced||paused){setPhase('all');return;}
+    setPhase(seq[0]);
+    // Dip between lines instead of crossfading: two story lines never occupy the
+    // frame at once, which is what titling practice and the B1 budget both ask for.
+    // The band then holds its last line until the beat changes - clearing text on a
+    // timer is how a player loses a sentence they were still reading (24 Sep play).
+    const dip=380;
+    for(const phase of seq){
+      if(bandMs)bandTimers.push(setTimeout(()=>setPhase(''),bandMs-dip));
+      bandTimers.push(setTimeout(()=>setPhase(phase),bandMs));
+      bandMs+=holdMs(lines[phase]);
+    }
   };
   const reduced=typeof reducedMotion==='boolean'?reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches;
   let step=0,closed=false,paused=false,world=null,actionDone=false,picking=false,frame=0;
@@ -88,7 +123,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   const ambientBeat=()=>{const s=scene();return !(s.action&&!actionDone);};
   const advance=()=>{if(closed||paused||!ready()||!ambientBeat())return;armedMs=0;if(step<spec.scenes.length-1){step++;refresh();}else close('complete');};
   const close=(reason='cancel')=>{
-    if(closed)return;closed=true;cancelAnimationFrame(frame);
+    if(closed)return;closed=true;cancelAnimationFrame(frame);clearBand();
     if(replay)runtime.dispose();else runtime.detach();
     overlay.remove();document.documentElement.classList.remove('game-opening-active');siblings.forEach(({node,inert})=>node.inert=inert);
     if(previousFocus?.isConnected)previousFocus.focus({preventScroll:true});
@@ -108,9 +143,12 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
     // world, never from this button).
     next.textContent=step===spec.scenes.length-1?(replay?'Return to game':spec.finishLabel||'Begin'):'Continue →';
     next.hidden=!reduced||!ambientBeat();
+    showBand();
     if(ambientBeat()){
       const s2=scene();
-      dwellMs=Math.min(20000,12000+40*((s2.body||'').length+(s2.dialogue||'').length+(s2.fact||'').length));
+      // Never advance mid-sentence: the reading dwell is the larger of the authored
+      // pacing and the time the painted band actually needs.
+      dwellMs=Math.max(bandMs+2500,Math.min(20000,12000+40*((s2.body||'').length+(s2.dialogue||'').length+(s2.fact||'').length)));
       armedMs=0;
     }
     if(s.action&&!actionDone)next.dataset.storyAction=s.action.target;else delete next.dataset.storyAction;
@@ -119,7 +157,6 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
     if(actionDone&&s.action?.patch)world.applyPresentation?.(s.action.patch);
     gate?.set(host,available()?'ready':'failed');
     next.disabled=!ready();
-    showSubtitle();
     const markers=overlay.querySelector('.rgi-markers');markers.replaceChildren();
     let actionableRendered=false;
     const addMarker=(cfg,{actionable}={})=>{
@@ -193,7 +230,7 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
   overlay.querySelector('#rgi-replay-beat').onclick=()=>{completed.delete(step);refresh();};
   pause.hidden=reduced;
   pause.onclick=()=>{
-    paused=!paused;runtime.setPaused(paused);pause.textContent=paused?'▶':'⏸';pause.setAttribute('aria-label',paused?'Resume story motion':'Pause story motion');overlay.classList.toggle('rgi-paused',paused);
+    paused=!paused;runtime.setPaused(paused);pause.textContent=paused?'▶':'⏸';pause.setAttribute('aria-label',paused?'Resume story motion':'Pause story motion');overlay.classList.toggle('rgi-paused',paused);showBand();
     next.disabled=!ready();
     for(const marker of overlay.querySelectorAll('.rgi-target'))marker.disabled=!ready();
   };

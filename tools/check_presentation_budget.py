@@ -293,7 +293,89 @@ MEASURE = """async (args) => {
     carriers.push({selector: group.selector, min: group.min, visible: nodes.length,
       names: nodes.slice(0, 6).map(el => ((el.getAttribute('aria-label') || el.textContent) || '').trim().slice(0, 30))});
   }
-  return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, markerClash, strayControls, dupCarriers, unreachableActions, sheet, carriers, offenders: offenders.slice(0, 12)};
+  // I12 sole-carrier (guide: narrative and instruction must reach the eye). A node
+  // that is still in the accessibility tree but painted at zero area, clipped or
+  // parked off-viewport is the announced-only channel. Information delivered ONLY
+  // there is invisible to every other measurement in this file: it adds no coverage,
+  // overflows no bounded surface, is not a scroll trap and is not a duplicate, so the
+  // 24 September cold play found story text that no number had reported as missing.
+  // A sentence counts as delivered when a painted element already carries its words.
+  const announcedOnly = [];
+  {
+    const stop = new Set(['the','and','you','your','are','for','with','that','this','from','have','has','had','were','was','them','they','their','its','not','but','all','one','two','who','how','why','when','there','here','into','about','just','then','over']);
+    const words = (text) => (text.toLowerCase().match(/[a-z]{3,}/g) || []).filter(w => !stop.has(w));
+    const paintedWords = new Set();
+    for (const el of document.querySelectorAll('body *')) {
+      if (!visible(el) || isWorld(el)) continue;
+      // Painted text only. An aria-label is the announced channel too, so counting it
+      // as sighted would let a world container mask the very defect this rule hunts
+      // (#world's aria-label restates the whole scene sentence by sentence).
+      for (const n of el.childNodes) if (n.nodeType === 3) for (const w of words(n.textContent)) paintedWords.add(w);
+    }
+    // In the accessibility tree means visible to an announced-only reader: hidden
+    // subtrees are excluded, because a collapsed panel is opt-in furniture rather
+    // than an invisible carrier (I9/I10 police what a surface sheds).
+    const inTreeAt = (n) => {
+      const s = getComputedStyle(n);
+      if (s.display === 'none' || s.visibility === 'hidden' || s.visibility === 'collapse') return false;
+      return !(n.getAttribute && n.getAttribute('aria-hidden') === 'true');
+    };
+    const announcedText = (el) => {
+      let out = '';
+      const walk = (n) => {
+        for (const c of n.childNodes) {
+          if (c.nodeType === 3) { out += c.textContent + ' '; continue; }
+          if (c.nodeType !== 1 || !inTreeAt(c)) continue;
+          if (['BUTTON','INPUT','SELECT','TEXTAREA','DIALOG','CANVAS'].includes(c.tagName)) continue;
+          walk(c);
+          if (['P','H1','H2','H3','H4','LI','DIV','BLOCKQUOTE','SPAN','EM','STRONG','BR'].includes(c.tagName)) out += ' · ';
+        }
+      };
+      walk(el);
+      return out.replace(/\\s+/g, ' ').replace(/(\\s·\\s)+/g, ' · ').trim();
+    };
+    const offscreen = [];
+    for (const el of document.querySelectorAll('body *')) {
+      if (isWorld(el) || el.closest('dialog:not([open])') || !inTreeAt(el)) continue;
+      // A skip link is a WCAG 2.4.1 keyboard bypass, not information, and B8 already
+      // allow-lists it; the announced-only rule must not push one on-screen.
+      if (el.tagName === 'A' && el.classList.contains('skip')) continue;
+      // An aria-live region is the game's world-narration channel: describing a 3D
+      // scene a blind player cannot see is correct practice (audio description), not
+      // a sole carrier. What this rule cannot see is an *instruction* that only ever
+      // lives there - that is what a declared carrier floor (I9) and live play catch.
+      if (el.getAttribute && el.getAttribute('aria-live')) continue;
+      let inTree = true;
+      for (let n = el; n && n !== document.body; n = n.parentElement) {
+        if (n !== el && !inTreeAt(n)) { inTree = false; break; }
+      }
+      if (!inTree) continue;
+      const text = announcedText(el);
+      if (text.length < 4) continue;
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      const path = cs.clipPath || cs.webkitClipPath;
+      const clipped = path && path !== 'none' && !/^inset\\(0(px)?\\)/.test(path);
+      const zeroArea = r.width <= 2 || r.height <= 2;
+      const parked = r.bottom < -2 || r.top > vh + 2 || r.right < -2 || r.left > vw + 2;
+      if (!(zeroArea || parked || clipped)) continue;
+      offscreen.push({el, text});
+    }
+    // Report the outermost announced-only surface only: its descendants carry the
+    // same text and would otherwise each file a separate violation.
+    const maximal = offscreen.filter(({el}) => !offscreen.some(o => o.el !== el && o.el.contains(el)));
+    for (const {el, text} of maximal) {
+      for (const segment of text.split(/(?<=[.!?…])\\s+|\\s*·\\s*/)) {
+        const found = words(segment);
+        if (found.length < 2) continue;
+        const missing = [...new Set(found.filter(w => !paintedWords.has(w)))];
+        if (missing.length / found.length > 0.25) {
+          announcedOnly.push({el: label(el), text: segment.trim().slice(0, 70), words: found.length, missing: missing.slice(0, 6)});
+        }
+      }
+    }
+  }
+  return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, markerClash, strayControls, dupCarriers, unreachableActions, sheet, carriers, announcedOnly, offenders: offenders.slice(0, 12)};
 }"""
 
 # Accessibility viewport (WCAG 1.4.4): a state may declare text_scale so the same beat
@@ -479,6 +561,12 @@ def violations(state_name, metrics, budgets, panel_allowed, scenario_state=None,
             found.append(f"{state_name}: I9 carrier floor — '{group['selector']}' paints {group['visible']} of "
                          f"{group['min']} required carriers, so part of the beat's decision has no readable "
                          f"surface at this viewport (seen: {group['names'][:4]})")
+    for item in metrics.get("announcedOnly") or []:
+        found.append(f"{state_name}: I12 sole announced-only carrier — “{item['text']}” reaches the player only "
+                     f"through the screen-reader channel ({item['el']}, zero area/off-viewport): "
+                     f"{len(item['missing'])} of {item['words']} of its words appear in no painted text "
+                     f"(missing: {item['missing'][:6]}). Paint it, or make the announced text a duplicate of "
+                     f"what is already on screen; do not delete the live region")
     return found
 
 
@@ -746,6 +834,8 @@ def main():
                       f"{' -> '+str(metrics['unreachableActions'][:2]) if metrics['unreachableActions'] else ''} "
                       f"carriers={carrier_summary} "
                       f"stray={len(metrics['strayControls'])} dup={len(metrics['dupCarriers'])} "
+                      f"announcedOnly={len(metrics['announcedOnly'])} "
+                      f"{' -> '+str([i['text'] for i in metrics['announcedOnly'][:2]]) if metrics['announcedOnly'] else ''} "
                       f"subjectCover={'n/a' if not metrics['subjectCover'] else len(metrics['subjectCover']['covers'])}")
             browser.close()
         finally:

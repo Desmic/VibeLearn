@@ -221,7 +221,7 @@ cinematic/story state:
 - The final **handoff is ambient**: the world simply becomes live and direct-control
   begins; at most a brief fading cue (rung 5), never a painted "Take control" button.
 - **Accessibility carve-out (not a loophole):** when the player has
-  `prefers-reduced-motion`, ambient auto-advance is suppressed (WCAG 2.2.4), so a
+  `prefers-reduced-motion`, ambient auto-advance is suppressed (WCAG 2.2.2 Pause, Stop, Hide), so a
   *single* clearly-labelled visible control is **required** and is correct, not a
   defect. Reduced-motion play may show exactly one explicit action control per beat;
   motion-allowed play must show zero painted action/advance chrome.
@@ -333,6 +333,30 @@ peak collapses while the score is still running, then confirm the same preferenc
 still in force after a reload. A button that changes only its own icon passes a
 flag-check and is broken.
 
+**Rule I12 (a sentence the player must know reaches the eye).** Rungs 1–6 are a
+ladder of *where* information lives; none of them says information may live **only**
+in the screen-reader channel. Text parked at zero area, off-viewport or clipped out
+of sight is invisible to every count that measures painted surface — coverage, word
+budget, carrier floors — so a game can satisfy all of them while its story and its
+instructions exist for exactly one sense. That is the 24 September defect: the
+opening's scene caption was moved *into* `aria-live` "for accessibility", which left
+`#rgi-title` and `#rgi-body` painted nowhere while the world played on, and no
+metric moved. Narrative, goal and consequence must be painted for a sighted player
+hearing nothing, and the announcement is the duplicate, not the original.
+
+The checker measures this structurally: for each in-tree, visible, non-zero-area
+text node it compares that node's content words against the corpus of **painted text
+nodes only**, and a line whose words appear nowhere on screen is a violation. Two
+exemptions are deliberate. `aria-label` is excluded from the painted corpus, because
+the world object's own label otherwise restates the scene and masks the defect. And
+an element carrying `aria-live` is **not** a candidate: an always-present narration
+region is audio description of the world, which is correct practice, and flagging it
+would push a build toward removing the access instead of adding the picture.
+
+**Residual hole, stated:** the exemption means an instruction that exists *only*
+inside a live narration region is not caught here. It is caught by I9's declared
+carrier floors and by a critic who plays the beat — see CP13.
+
 **Why this matters** (the evidence behind I1/I6): diegetic, lowest-rung delivery is
 what keeps the player *inside* the fiction. Persistent non-diegetic chrome is the
 strongest immersion breaker there is — it forces a "cognitive separation between
@@ -346,7 +370,11 @@ bottom bar that talks to the player is the pattern those games deliberately remo
 - **Goal** → world signal + (phone only) one-line transient status; never a card
   header that persists for a whole stage.
 - **Narrative/dialogue** → anchored to the speaker (speech bubble or in-world
-  display), ≤ one sentence visible, full transcript in the opt-in log.
+  display), ≤ one sentence visible, full transcript in the opt-in log. A cinematic
+  line that has no speaker to anchor to rides one **ephemeral painted band** above
+  the world: one line group at a time, held for its own reading time, briefly cleared
+  between groups, last line held until the beat advances. Stacking the groups is a
+  card (B1); absolutely positioning them independently lets two land on each other.
 - **Learning content (the machine, the evidence)** → inspection view opened *from
   the object*, visibly belonging to it (title names the object), closable, returns
   to the same camera state. It may be rich — it is opt-in.
@@ -358,7 +386,7 @@ bottom bar that talks to the player is the pattern those games deliberately remo
 ## Stage-specific shapes
 
 - **Entry plaque:** ≤ 1 sentence + 1 action. Fades into the world; not a landing page.
-- **Prologue/cinematic:** letterboxed world, rungs 1–3 only; controls reduced to Back/Skip per UI-UX rules; zero gameplay chrome visible. Plain beats carry **no persistent advance control**: the beat advances ambiently once its motion settles and a content-paced dwell elapses (tap-anywhere and keyboard advance it sooner); pause holds a beat indefinitely; reduced-motion play never auto-advances (WCAG 2.2.4); story-action and final handoff beats keep an explicit affordance. A pinned "Continue" button on plain beats is a defect.
+- **Prologue/cinematic:** letterboxed world, rungs 1–3 only; controls reduced to Back/Skip per UI-UX rules; zero gameplay chrome visible. Story text rides the ephemeral painted band above (I12) — never an announcement-only channel, and pacing that sequence so the band cannot drift out of step with what is painted. Plain beats carry **no persistent advance control**: the beat advances ambiently once its motion settles and a content-paced dwell elapses (tap-anywhere and keyboard advance it sooner); pause holds a beat indefinitely; reduced-motion play never auto-advances (WCAG 2.2.2); story-action and final handoff beats keep an explicit affordance. A pinned "Continue" button on plain beats is a defect.
 - **Tutorial:** demonstrate in-world, prompt contextually (≤ 6 words), success is
   the teaching; text explains nothing the player didn't just do. The tutorial uses the
   **same opt-in machine toggle as the mission** — its decision panel stays folded behind
@@ -465,6 +493,13 @@ The first best-guess implementation of these shapes is recorded in
   a second control for the same preference and compare glyph, label and pressed state. A
   control verified only by the flag it writes, or two surfaces that spell the same state
   differently, fails I11.
+- CP13: Mute the sound, or play with the assistive channel off, and watch a story beat
+  and an instruction beat from start to end. Write down the sentences you actually saw
+  painted, then compare them to the sentences the game means you to have — open the
+  announcement channel or read the beat's text if you need the source. Any required
+  sentence that arrived only as an announcement fails I12. Then do the inverse: is a
+  *required* instruction present only inside a narration region that I12 exempts? That
+  one is your finding, not the tool's, and it fails I9.
 
 A critic that cannot demonstrate a probe on the running candidate records it as
 unassessed; screenshots of a static frame do not certify B2 (movement/orbit required).
@@ -473,7 +508,7 @@ unassessed; screenshots of a static frame do not certify B2 (movement/orbit requ
 
 | Rule | Mechanism |
 | --- | --- |
-| P1–P3, I1–I10, B1–B8 | `tools/check_presentation_budget.py` (mechanical, exact candidate) + live critic observation |
+| P1–P3, I1–I10, I12, B1–B8 | `tools/check_presentation_budget.py` (mechanical, exact candidate) + live critic observation |
 | I11 | The owning audio/motion module exports one reading; the game's own browser gate decodes captured output across the control instead of asserting the flag |
 | Design-time surface declaration | `tools/check_learning_design.py` (existing attention/focus contract) |
 | Review-time certification | `presentation_integration` criterion in `check_critic_review.py` V2 gates — requires budget report + interactive trace + cold-observer + live capture |

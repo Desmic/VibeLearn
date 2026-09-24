@@ -1,5 +1,32 @@
 # Current state — LLM learning-game proof track
 
+**Branch target:** this work is deliberately on `docs-readthrough-20260921`. It is not
+merged to `main` and not pushed; that happens only on the user's word.
+
+**Information-channel repair — 24 September 2026:** The opening's scene caption had been
+moved into the screen-reader channel "for accessibility", so `#rgi-title` and `#rgi-body`
+were painted nowhere while the world played on — and no metric moved, because every
+budget counts painted surface. Added guide **rule I12** (a sentence the player must know
+reaches the eye) with CP13, and a game-agnostic I12 measurement in
+`tools/check_presentation_budget.py`: each visible in-tree text node's content words are
+compared against the corpus of painted text nodes only, so a line that exists solely as an
+announcement is a violation. Two exemptions are deliberate and recorded with the rule:
+`aria-label` is excluded from the painted corpus (the world object's own label otherwise
+restates the scene and masks the defect), and an `aria-live` region is not a candidate
+(always-present narration is audio description, which is correct practice). The residual
+hole is stated in the rule: an instruction living *only* inside a live narration region is
+caught by I9 carrier floors and by CP13 at play, not here. Game fix: the shared opening
+controller now paints one ephemeral band that sequences title → narration → speech (one
+group in frame, short dip between, last line held), shows all groups at once when paused or
+when motion is reduced (WCAG 2.2.2), and paces the ambient dwell from its own reading time.
+Dead legacy caption typography in `first-words.css`/`word-machine.css` was deleted — it
+resurrected as a 29px two-line block the moment the caption became painted and pushed phone
+coverage to 18.6% against the 15% budget; the full 23-state scenario now measures
+`prologue-opening-phone 12.9%` with zero violations and `announcedOnly=0` in every state.
+`tests/first_words_opening_browser.py` gained the delivery half the checker cannot do: it
+samples the painted band across a beat and requires every non-empty line group to reach the
+screen, at 390 in motion play and at 360/430/1280 under reduced motion.
+
 **Review-gate repair — 24 September 2026:** The presentation review contract now
 reads the measured report rather than accepting any file labelled `ci_report`. The
 report must cover the complete scenario, pass with zero violations and name the exact
@@ -287,7 +314,7 @@ only a brief fading cue, pending story actions are performed on their **diegetic
 world marker** (the controller synthesises one whenever a package omits it, so no
 title can fall back to a DOM button), and the corner cluster (back/replay/pause/skip)
 is the only persistent chrome. A single painted advance control now appears **solely**
-under `prefers-reduced-motion` (WCAG 2.2.4, which cannot auto-advance). Frame height
+under `prefers-reduced-motion` (WCAG 2.2.2, which cannot auto-advance). Frame height
 no longer reserves a bar: prologue screen-space UI drops ~11% → ~4%. Generalised
 upstream so geometry-only budgets can never re-certify a button bar: new guide rule
 **I6** (ambient world-first control surface, with the diegetic-UI rationale) and
