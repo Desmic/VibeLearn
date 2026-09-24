@@ -49,6 +49,16 @@ source, story treatment, prior findings or scores before cold observations.
 The reviewer may read generic tool instructions; record accidental context leaks.
 
 1. Preflight actual browser input, screenshots and recording/inspection capabilities.
+   **The preflight is harness-based, not MCP-based.** It passes only when a `shot` step
+   through the harness writes a non-trivial PNG to disk (verify the file exists and is more
+   than a few tens of KB, then look at it). Do not preflight with the host's embedded
+   browser tooling: on this machine the in-app browser surface reports
+   `visible=false, visibilityState=hidden`, and screenshot-to-file fails there with
+   `NATIVE_BROWSER_VIEWPORT_UNAVAILABLE` even though navigation, accessibility snapshots
+   and script evaluation all succeed. A reviewer that is pointed at that surface concludes
+   the cold lane is impossible, which is how this lane was recorded unassessed on
+   `071591a` and again on 24 September. The harness runs its own Chromium over CDP and
+   renders the WebGL canvas with software rasterisation, so it does not have that problem.
    Use `tools/play_session.py` (`start` / `step` / `stop`) as the play harness: it keeps
    one browser alive between commands, takes real hold/drag/resize input, and appends
    every action to `action-trace.jsonl` as the review's action evidence. A reviewer that
