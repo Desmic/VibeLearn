@@ -221,6 +221,9 @@ def main():
             release(page);tap_world(page)
             # A suspended context is silent whatever the preference says: prove it was running.
             until(page,"()=>FirstWordsReview.audio.state==='running'&&FirstWordsReview.audio.scheduledBars>0")
+            # The bus intentionally fades with a 0.12s time constant. Measure the
+            # steady muted state after that ramp, not the audible transition into it.
+            page.wait_for_timeout(1000)
             muted=loudness(page,seconds=3)
             assert muted['peak']<heard['peak']/50 and muted['rms']<heard['rms']/50,(heard,muted)
 
