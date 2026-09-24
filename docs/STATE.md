@@ -3,6 +3,37 @@
 **Branch target:** this work is deliberately on `docs-readthrough-20260921`. It is not
 merged to `main` and not pushed; that happens only on the user's word.
 
+**Preference-registry and served-asset repair — 24 September 2026:** Rule I11 was
+enforceable only against a hand-listed set of buttons, because each surface owned its own
+copy of a preference: `game-audio.js` stored `{music,effects,muted}` under
+`vibelearn-audio`, `first-words.js`/`word-machine.js` each read `matchMedia` directly, and
+the mute label was spelled in two places. Added `web/preferences.js` as the single owner of
+id, default, effective reading (OS signal is the default, an in-game choice overrides it),
+glyph, label, storage key and **document effect** (`html[data-motion]`, `body.xp-hidden`),
+and rebound audio, opening, mission and world code to it. Stylesheets now key motion off
+that one hook instead of restating `@media (prefers-reduced-motion)` — the two
+`scroll-behavior`-only copies in `first-words.css`/`auth-game.css` were deleted, and the
+reduced-motion band layout in `rescue-intro.css` moved onto the hook so the player's own
+toggle gets the same stilling as the OS signal. `tools/check_presentation_budget.py` now
+enumerates `data-preference` carriers and diffs each painted control against the registry
+(`prefs=… prefDrift=n`), which turns I11 from a review opinion into a per-state count.
+
+Wiring the registry surfaced a second, worse system defect: `preferences.js` 404ed, because
+both servers listed every servable file by hand (`app/server.py`, `app/hosted.py`) and a new
+shared module is only discovered when a browser run stalls with an uninitialised
+`window.FirstWordsReview`. The lists are now derived from the import graph of the pages the
+servers route (`app/assets.py`): a module is servable exactly when a served page reaches it,
+`manage.py build` fails on any routed import with no file behind it, and
+`tests/test_asset_graph.py` pins both properties plus "every page is routed or explicitly
+retired". The derived set was checked to equal the old hand list plus `preferences.js`, so
+nothing that used to serve stops serving.
+
+Residuals, deliberately not hidden: the retired Expedition page still owns an
+`expedition-sound` key and an unpersisted XP toggle, and `auth-game.js`,
+`play-canvas-migrate.js`, `rescue.js`, `rescue-chapter1.js` and `valley3d.js` still read
+`matchMedia` directly. Those surfaces are not reachable from a routed page, so the registry
+does not yet govern them; they are legacy, not the active gate.
+
 **Information-channel repair — 24 September 2026:** The opening's scene caption had been
 moved into the screen-reader channel "for accessibility", so `#rgi-title` and `#rgi-body`
 were painted nowhere while the world played on — and no metric moved, because every

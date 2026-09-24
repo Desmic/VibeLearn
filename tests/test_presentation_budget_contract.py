@@ -60,7 +60,8 @@ def _unclosed(code):
 def _metrics(**overrides):
     base = {'coverage': 0.05, 'panelOpen': False, 'clipped': [], 'longBlocks': [], 'disabledVisible': [],
             'focal': None, 'presence': None, 'subjectCover': None, 'markerClash': [], 'strayControls': [],
-            'dupCarriers': [], 'unreachableActions': [], 'sheet': None, 'carriers': [], 'announcedOnly': []}
+            'dupCarriers': [], 'unreachableActions': [], 'sheet': None, 'carriers': [], 'announcedOnly': [],
+            'prefDrift': [], 'declaredPreferences': []}
     return {**base, **overrides}
 
 
@@ -229,6 +230,24 @@ class PresentationBudgetContract(unittest.TestCase):
         self.assertEqual(violations('x', metrics, BUDGETS, False, {}), [])
 
     # --- I12 the sole announced-only carrier -----------------------------------------
+    def test_i11_flags_a_preference_control_that_disagrees_with_the_registry(self):
+        # The 24 September mute defect was two surfaces spelling one preference
+        # differently. Enumerating the page's carriers catches that without a
+        # hand-written list of button ids, which is the list nobody updates.
+        metrics = _metrics(declaredPreferences=['sound', 'music'],
+                           prefDrift=[{'id': 'sound',
+                                       'painted': 'button#opening-mute is named '
+                                                  '"Toggle opening sound", registry says "Mute all sound"'}])
+        found = violations('mission-decision-desktop-folded', metrics, BUDGETS, False, {})
+        self.assertEqual(len(found), 1)
+        self.assertIn('I11 preference drift', found[0])
+        self.assertIn('opening-mute', found[0])
+        self.assertIn('guide I11', found[0])
+
+    def test_i11_is_silent_when_every_carrier_reads_from_the_registry(self):
+        metrics = _metrics(declaredPreferences=['sound', 'music', 'motion'], prefDrift=[])
+        self.assertEqual(violations('mission-decision-desktop-folded', metrics, BUDGETS, False, {}), [])
+
     def test_i12_flags_a_story_line_the_eye_never_receives(self):
         # The 24 September cold play: the shared opening routed beat title and spoken
         # dialogue into a 1x1 clip-path node. Zero area means no coverage to raise, no

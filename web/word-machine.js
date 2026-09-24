@@ -1,11 +1,14 @@
 import {getGameRuntime,createGameRuntime} from './game-runtime.js';
+import {getPreferences} from './preferences.js';
 import {openGameOpening} from './game-opening.js';
 import * as workshop from './word-machine-world.js';
 
 const $=selector=>document.querySelector(selector),runtime=getGameRuntime(),host=$('#world');
-let attempt=null,busy=false,pending=null,paused=false,openingReplay=false,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let world=runtime.showMission(workshop,host,null,{reducedMotion:reduced});
-$('#reduce-motion').checked=reduced;
+const preferences=getPreferences();
+let attempt=null,busy=false,pending=null,paused=false,openingReplay=false;
+// Rule I11: the registry is the only copy of this setting; the checkbox reads from it too.
+const reduced=()=>preferences.get('motion');
+let world=runtime.showMission(workshop,host,null,{reducedMotion:reduced()});
 const initial={pieces:0,status:'building',round:0,destination:'Library',output:[]};
 const view=()=>attempt?.word_machine_state||initial;
 function text(selector,value){$(selector).textContent=value;}
@@ -24,7 +27,7 @@ function render(){
   const s=view();$('#welcome').hidden=Boolean(attempt);$('#machine-console').hidden=!attempt;
   $('.mission').classList.toggle('playing',Boolean(attempt));
   if(!attempt)return;
-  if(!openingReplay)runtime.showMission(workshop,host,s,{reducedMotion:reduced});
+  if(!openingReplay)runtime.showMission(workshop,host,s,{reducedMotion:reduced()});
   text('#chapter-label',openingReplay?'OPENING REPLAY':attempt.status==='submitted'?'EPISODE 1 · COMPLETE':s.round===0?'DELIVERY 1 / 2':'DELIVERY 2 / 2');
   const complete=attempt.status==='submitted';
   text('#goal',openingReplay?'A tiny machine. A missing clue.':complete?'Two deliveries. One useful idea.':s.status==='wrong'?'That sounded right. Wrong door.':s.status==='success'?`${s.case.person} got the ${s.case.parcel}!`:s.round===1?`Find ${s.case.person}. Deliver the ${s.case.parcel}.`:`Get ${s.case.person}’s ${s.case.parcel} to the ${s.case.target}.`);
@@ -83,17 +86,18 @@ $('#inspect').onclick=()=>{
 };
 function showOpening(replay=false){
   const openingRuntime=replay?createGameRuntime():runtime;
-  const opening=openGameOpening({root:$('#workshop'),spec:workshop.openingSpec,runtime:openingRuntime,worldModule:workshop,replay,reducedMotion:reduced,onExit:()=>{
-    world=runtime.showMission(workshop,host,view(),{reducedMotion:reduced});runtime.setPaused(paused);render();
+  const opening=openGameOpening({root:$('#workshop'),spec:workshop.openingSpec,runtime:openingRuntime,worldModule:workshop,replay,reducedMotion:reduced(),onExit:()=>{
+    world=runtime.showMission(workshop,host,view(),{reducedMotion:reduced()});runtime.setPaused(paused);render();
     if(!replay&&!attempt)act('start');
   }});
   opening.element.classList.add('word-opening');
 }
 $('#replay-opening').onclick=()=>{$('#menu').close();showOpening(true);};
-$('#reduce-motion').onchange=()=>{
-  reduced=$('#reduce-motion').checked;const player=world.getPlayerView?.();runtime.disposeWorld({keepStage:true});
-  world=runtime.showMission(workshop,host,openingReplay?initial:view(),{reducedMotion:reduced});world.restorePlayerView?.(player);runtime.setPaused(paused||Boolean(document.querySelector('dialog[open]')));
+$('#reduce-motion').onchange=e=>{
+  preferences.set('motion',e.target.checked);const player=world.getPlayerView?.();runtime.disposeWorld({keepStage:true});
+  world=runtime.showMission(workshop,host,openingReplay?initial:view(),{reducedMotion:reduced()});world.restorePlayerView?.(player);runtime.setPaused(paused||Boolean(document.querySelector('dialog[open]')));
 };
+preferences.hydrate();
 function positionLabels(){
   const rect=host.getBoundingClientRect(),tray=$('#experiment').getBoundingClientRect();
   const tools=host.querySelector('.game-view-tools'),stick=host.querySelector('.game-move-stick');

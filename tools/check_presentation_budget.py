@@ -375,7 +375,37 @@ MEASURE = """async (args) => {
       }
     }
   }
-  return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, markerClash, strayControls, dupCarriers, unreachableActions, sheet, carriers, announcedOnly, offenders: offenders.slice(0, 12)};
+  // I11 (guide: a control is its effect, not its flag, and one preference has one reading).
+  // Every control that declares which preference it carries must agree with the registry in
+  // this state, on this viewport. The gate enumerates the registry's carriers instead of a
+  // hand-written list of buttons, so a surface added later is covered by the same rule.
+  const prefDrift = [];
+  const registry = window.GamePreferences;
+  const prefCarriers = [...document.querySelectorAll('[data-preference]')];
+  if (prefCarriers.length) {
+    if (!registry) {
+      prefDrift.push({id: '(registry)', painted: 'the page paints preference controls with no GamePreferences to read'});
+    } else for (const el of prefCarriers) {
+      const id = el.dataset.preference, reading = registry.state(id);
+      const where = `${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''}`;
+      if (!reading) { prefDrift.push({id, painted: `${where} carries an id the registry does not define`}); continue; }
+      if (el.type === 'checkbox') {
+        if (el.checked !== reading.value) prefDrift.push({id, painted: `${where} shows ${el.checked}, registry says ${reading.value}`});
+        continue;
+      }
+      const pressed = el.getAttribute('aria-pressed') === 'true';
+      if (pressed !== reading.value) prefDrift.push({id, painted: `${where} is pressed=${pressed}, registry says ${reading.value}`});
+      else if (reading.glyph && el.textContent.trim() !== reading.glyph) {
+        prefDrift.push({id, painted: `${where} draws “${el.textContent.trim()}”, registry says “${reading.glyph}”`});
+      } else if (reading.label && el.getAttribute('aria-label') !== reading.label) {
+        prefDrift.push({id, painted: `${where} is named “${el.getAttribute('aria-label')}”, registry says “${reading.label}”`});
+      }
+    }
+  }
+  return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, markerClash,
+          strayControls, dupCarriers, unreachableActions, sheet, carriers, announcedOnly,
+          prefDrift, declaredPreferences: prefCarriers.map(el => el.dataset.preference),
+          offenders: offenders.slice(0, 12)};
 }"""
 
 # Accessibility viewport (WCAG 1.4.4): a state may declare text_scale so the same beat
@@ -561,6 +591,10 @@ def violations(state_name, metrics, budgets, panel_allowed, scenario_state=None,
             found.append(f"{state_name}: I9 carrier floor — '{group['selector']}' paints {group['visible']} of "
                          f"{group['min']} required carriers, so part of the beat's decision has no readable "
                          f"surface at this viewport (seen: {group['names'][:4]})")
+    for item in metrics.get("prefDrift") or []:
+        found.append(f"{state_name}: I11 preference drift — the carrier for “{item['id']}” disagrees with the "
+                     f"registry: {item['painted']}. A preference has one reading rendered everywhere it appears, "
+                     f"so paint it from the registry instead of writing a second copy (guide I11)")
     for item in metrics.get("announcedOnly") or []:
         found.append(f"{state_name}: I12 sole announced-only carrier — “{item['text']}” reaches the player only "
                      f"through the screen-reader channel ({item['el']}, zero area/off-viewport): "
@@ -834,6 +868,9 @@ def main():
                       f"{' -> '+str(metrics['unreachableActions'][:2]) if metrics['unreachableActions'] else ''} "
                       f"carriers={carrier_summary} "
                       f"stray={len(metrics['strayControls'])} dup={len(metrics['dupCarriers'])} "
+                      f"prefs={','.join(metrics.get('declaredPreferences') or []) or 'none'} "
+                      f"prefDrift={len(metrics.get('prefDrift') or [])} "
+                      f"{' -> '+str([i['id'] for i in metrics['prefDrift'][:3]]) if metrics.get('prefDrift') else ''} "
                       f"announcedOnly={len(metrics['announcedOnly'])} "
                       f"{' -> '+str([i['text'] for i in metrics['announcedOnly'][:2]]) if metrics['announcedOnly'] else ''} "
                       f"subjectCover={'n/a' if not metrics['subjectCover'] else len(metrics['subjectCover']['covers'])}")

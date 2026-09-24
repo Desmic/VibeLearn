@@ -58,6 +58,13 @@ def main():
         # to implement the design or a product-readiness judgment.
         from tools.check_learning_design import load, validate_design
         print(json.dumps(validate_design(load(ROOT / 'design' / 'learning-design.json'))))
+        from app.assets import missing_references
+        # A page that imports a module no route serves boots as a blank world minutes
+        # into a browser run; name the broken import here instead.
+        unresolved = missing_references()
+        if unresolved:
+            print("Build failed: served pages import files that do not exist: " + ", ".join(unresolved))
+            return 1
         from tools.package_repair import build as package_repair
         package_repair()
         if not compileall.compile_dir(ROOT / "app", quiet=1):

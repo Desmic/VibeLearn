@@ -1,5 +1,7 @@
 /* Reusable opening controller. Content, semantic targets and world patches are
    supplied by a validated package; no campaign rules or evidence writes live here. */
+import {getPreferences} from './preferences.js';
+
 export function shouldOpenGame({missions=[],attempt=null}={}){
   return !missions.some(m=>m.status==='cleared') && !attempt;
 }
@@ -107,7 +109,9 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
       bandMs+=holdMs(lines[phase]);
     }
   };
-  const reduced=typeof reducedMotion==='boolean'?reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // A caller that owns a preference registry passes the reading; one that does not still
+  // gets the same answer, because the registry is the only thing that consults the system.
+  const reduced=typeof reducedMotion==='boolean'?reducedMotion:getPreferences().get('motion');
   let step=0,closed=false,paused=false,world=null,actionDone=false,picking=false,frame=0;
   // Ambient advancement: a plain story beat advances itself once its motion has
   // settled and the reading dwell elapses; any input (tap, key, action) can

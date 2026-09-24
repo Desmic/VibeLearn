@@ -14,6 +14,7 @@ import psycopg
 from flask import Flask, jsonify, request, send_from_directory, g, redirect
 from werkzeug.exceptions import HTTPException
 from app import service
+from app.assets import served_names
 from app.auth import SupabaseAuth
 from app.pilot_auth import PilotAuth
 from app.manifest import manifest
@@ -127,15 +128,9 @@ def create_app(config=None, auth_provider=None):
 
     @app.get("/<asset>")
     def asset(asset):
-        if asset not in (
-            'first-words.js', 'first-words-boot.js', 'first-words.css', 'first-words-world.js',
-            'rescue-world-props.js', 'game-audio.js', 'learning-session.js', 'workshop-props.js', 'spec-game-world.js',
-            'game-runtime.js', 'game-opening.js', 'tutorial-flow.js', 'experience-mode.js', 'world-marker-layout.js',
-            'surface-fit.js',
-            'world-spec.js', 'playcanvas-backend.js', 'player-controls.js',
-            'game-character-spec.js', 'game-screen.css', 'rescue-intro.css', 'play-canvas.css',
-            'auth-game.js', 'auth-game.css'
-        ):
+        # Derived from the pages this server routes, so a module becomes servable the
+        # moment a served page imports it instead of when someone remembers a list.
+        if asset not in served_names():
             raise service.DomainError("NOT_FOUND", "Not found.", 404)
         return send_from_directory(ROOT / "web", asset)
 

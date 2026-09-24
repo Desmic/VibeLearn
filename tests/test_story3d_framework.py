@@ -1,3 +1,4 @@
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -56,34 +57,63 @@ class RuntimeMigrationTests(unittest.TestCase):
         self.assertIn("surface.dataset.playCanvasBackend='playcanvas'", migrate)
         self.assertIn("function programPanel(transfer)", rescue)
 
-    def test_active_level1_assets_are_explicitly_served_and_legacy_worlds_are_not(self):
+    def test_active_level1_assets_are_served_and_legacy_worlds_are_not(self):
+        # Ask the running server instead of grepping a list: the servable set is derived
+        # from the import graph of the pages it routes (app/assets.py), so there is no
+        # hand-written list left to pin — and a module a page imports is served the moment
+        # the page reaches it, which is exactly what a grepped list could not guarantee.
+        active = (
+            'first-words', 'first-words.js', 'first-words-boot.js', 'first-words.css',
+            'first-words-world.js', 'preferences.js', 'game-runtime.js', 'game-opening.js',
+            'tutorial-flow.js', 'experience-mode.js', 'world-marker-layout.js',
+            'world-spec.js', 'playcanvas-backend.js', 'player-controls.js', 'auth-game.js',
+            'game-screen.css', 'play-canvas.css', 'rescue-intro.css', 'auth-game.css',
+            'vendor/playcanvas.mjs', 'assets/quaternius-animated-robot.glb',
+        )
+        retired = (
+            'echo-forge-world-spec.js', 'rescue-playcanvas-world.js', 'play-canvas-migrate.js',
+            'rescue-game.js', 'expedition.js', 'word-machine.html',
+            'vendor/three.module.min.js', 'vendor/THREE-LICENSE.txt',
+        )
+        statuses = self._local_statuses((*active, *retired))
+        for asset in active:
+            self.assertEqual(200, statuses[asset], f'{asset} is not served')
+        for asset in retired:
+            self.assertEqual(404, statuses[asset], f'retired {asset} is still served')
+        # Both servers read the one derived set; only the vendored names stay explicit.
         server = (ROOT / 'app' / 'server.py').read_text(encoding='utf-8')
         hosted = (ROOT / 'app' / 'hosted.py').read_text(encoding='utf-8')
-        active = (
-            'first-words.js', 'first-words-boot.js', 'first-words-world.js',
-            'game-runtime.js', 'game-opening.js', 'tutorial-flow.js', 'experience-mode.js',
-            'world-marker-layout.js', 'world-spec.js', 'playcanvas-backend.js', 'player-controls.js', 'auth-game.js',
-            'playcanvas.mjs', 'quaternius-animated-robot.glb'
-        )
-        for asset in active:
-            self.assertIn(asset, server)
-            self.assertIn(asset, hosted)
-        retired = (
-            'echo-forge-world-spec.js', 'rescue-playcanvas-world.js',
-            'play-canvas-migrate.js', 'rescue-game.js', 'expedition.js',
-            'three.module.min.js', 'THREE-LICENSE.txt'
-        )
-        for asset in retired:
-            self.assertNotIn(f"'{asset}'", server)
-            self.assertNotIn(f'"{asset}"', server)
-            self.assertNotIn(f"'{asset}'", hosted)
-            self.assertNotIn(f'"{asset}"', hosted)
+        self.assertIn('**served_assets()', server)
+        self.assertIn('served_names()', hosted)
         self.assertIn('redirect("/first-words"', hosted)
         self.assertIn('return self.redirect("/first-words")', server)
         manage=(ROOT/'manage.py').read_text(encoding='utf-8')
         vendor_block=manage.split('if command == "vendor":',1)[1].split('if command == "vendor-legacy-three":',1)[0]
         self.assertNotIn('vendor_three.py',vendor_block)
         self.assertIn('vendor_playcanvas.py',vendor_block)
+
+    def _local_statuses(self, paths):
+        import threading
+        import urllib.error
+        import urllib.request
+        from app.server import make_server
+        with tempfile.TemporaryDirectory() as tmp:
+            server = make_server(Path(tmp) / 'assets.sqlite3', 0)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                base = f'http://127.0.0.1:{server.server_address[1]}'
+                def status(path):
+                    try:
+                        with urllib.request.urlopen(base + '/' + path, timeout=10) as response:
+                            return response.status
+                    except urllib.error.HTTPError as error:
+                        return error.code
+                return {path: status(path) for path in paths}
+            finally:
+                server.shutdown()
+                server.server_close()
+
 
     def test_active_prison_wall_leaves_a_real_gate_passage(self):
         world = (ROOT / 'web' / 'first-words-world.js').read_text(encoding='utf-8')

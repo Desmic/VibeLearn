@@ -1,21 +1,20 @@
 /* Bellweather score v2. Original procedural audio synthesized locally; no downloads
    or model API. Semantic presentation cues only. Audio never establishes success. */
 
-// One reading of the mute preference for every surface that offers it. The preference
-// is global, so a surface must not name a scope ("opening sound") or draw a glyph the
-// others do not: hand-written copies of both drift apart within one file.
-export const muteState=(muted)=>({
-  glyph: muted ? '\u266A\u0338' : '\u266A',
-  label: muted ? 'Unmute all sound' : 'Mute all sound',
-  pressed: muted ? 'true' : 'false',
-});
+import { getPreferences } from './preferences.js';
 
-export function createGameAudio(){
+// Sound is a global preference owned by the registry: this module plays the reading and
+// reports it, it never keeps a second copy of what "muted" means.
+export function createGameAudio(preferences = getPreferences()){
   let context=null,musicBus=null,effectsBus=null,masterBus=null,noiseBuffer=null,timer=0,bar=0,next=0,phase='home',paused=false,disposed=false;
   let captureDestination=null,captureRecorder=null,captureChunks=[];
   const active=new Set(),heard=new Set();
-  let preferences={music:true,effects:true,muted:false};
-  try{preferences={...preferences,...JSON.parse(localStorage.getItem('vibelearn-audio')||'{}')};}catch{}
+  // The buses read the registry directly: a stored flag that never reaches gain is a
+  // preference that does not exist.
+  const audible=()=>preferences.get('sound');
+  const view=()=>({music:preferences.get('music'),effects:preferences.get('effects'),muted:!audible()});
+  // Any surface that writes the preference moves the buses, whoever wrote it.
+  preferences.subscribe(id=>{if(id==='sound'||id==='music'||id==='effects')levels();});
   const frequency=n=>440*2**((n-69)/12);
   function track(node,...connections){
     active.add(node);node.onended=()=>{active.delete(node);try{node.disconnect();}catch{}for(const item of connections)try{item.disconnect();}catch{}};
@@ -79,8 +78,8 @@ export function createGameAudio(){
   function levels(){
     if(!context)return;
     const now=context.currentTime;
-    musicBus.gain.setTargetAtTime(preferences.music&&!preferences.muted?.62:0,now,.12);
-    effectsBus.gain.setTargetAtTime(preferences.effects&&!preferences.muted?.72:0,now,.035);
+    musicBus.gain.setTargetAtTime(preferences.get('music')&&audible()?.62:0,now,.12);
+    effectsBus.gain.setTargetAtTime(preferences.get('effects')&&audible()?.72:0,now,.035);
   }
   async function unlock(){
     if(disposed)return;
@@ -156,9 +155,10 @@ export function createGameAudio(){
       }
       else effectPattern([74],{length:.4,volume:.05});
     },
-    setPreference(name,value){if(!(name in preferences))return;preferences[name]=Boolean(value);try{localStorage.setItem('vibelearn-audio',JSON.stringify(preferences));}catch{}levels();},
-    get preferences(){return {...preferences};},get muteUI(){return muteState(preferences.muted);},setPaused,startCapture,stopCapture,
-    stats:()=>({version:'bellweather-score-v2',ready:Boolean(context),state:context?.state||'locked',phase,scheduledBars:bar,activeVoices:active.size,heard:heard.size,captureState:captureRecorder?.state||'inactive',preferences:{...preferences}}),
+    // Reading only: writing goes through the preference registry, which notifies this module
+    // so the buses follow whoever changed the setting.
+    get preferences(){return view();},setPaused,startCapture,stopCapture,
+    stats:()=>({version:'bellweather-score-v2',ready:Boolean(context),state:context?.state||'locked',phase,scheduledBars:bar,activeVoices:active.size,heard:heard.size,captureState:captureRecorder?.state||'inactive',preferences:view()}),
     dispose(){disposed=true;clearInterval(timer);document.removeEventListener('visibilitychange',visibility);if(captureRecorder&&captureRecorder.state!=='inactive')try{captureRecorder.stop();}catch{}try{masterBus?.disconnect(captureDestination);}catch{}stopNotes();context?.close();}
   };
 }

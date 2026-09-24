@@ -6,6 +6,7 @@ from pathlib import Path
 from http.cookies import SimpleCookie
 import sqlite3
 from app import service
+from app.assets import served_assets
 from app.manifest import manifest
 from urllib.parse import urlsplit
 
@@ -114,31 +115,12 @@ def make_server(database, port=8000):
                 return self.redirect("/first-words")
             assets = {
                 '/first-words': ('first-words.html', 'text/html'),
-                '/first-words.js': ('first-words.js', 'text/javascript'),
-                '/first-words-boot.js': ('first-words-boot.js', 'text/javascript'),
-                '/first-words.css': ('first-words.css', 'text/css'),
-                '/first-words-world.js': ('first-words-world.js', 'text/javascript'),
-                '/rescue-world-props.js': ('rescue-world-props.js', 'text/javascript'),
-                '/game-audio.js': ('game-audio.js', 'text/javascript'),
-                '/learning-session.js': ('learning-session.js', 'text/javascript'),
-                '/workshop-props.js': ('workshop-props.js', 'text/javascript'),
-                '/spec-game-world.js': ('spec-game-world.js', 'text/javascript'),
-                '/game-runtime.js': ('game-runtime.js', 'text/javascript'),
-                '/game-opening.js': ('game-opening.js', 'text/javascript'),
-                '/tutorial-flow.js': ('tutorial-flow.js', 'text/javascript'),
-                '/experience-mode.js': ('experience-mode.js', 'text/javascript'),
-                '/world-marker-layout.js': ('world-marker-layout.js', 'text/javascript'),
-                '/surface-fit.js': ('surface-fit.js', 'text/javascript'),
-                '/world-spec.js': ('world-spec.js', 'text/javascript'),
-                '/playcanvas-backend.js': ('playcanvas-backend.js', 'text/javascript'),
-                '/player-controls.js': ('player-controls.js', 'text/javascript'),
-                '/game-character-spec.js': ('game-character-spec.js', 'text/javascript'),
-                '/game-screen.css': ('game-screen.css', 'text/css'),
-                '/rescue-intro.css': ('rescue-intro.css', 'text/css'),
-                '/play-canvas.css': ('play-canvas.css', 'text/css'),
-                '/auth-game.js': ('auth-game.js', 'text/javascript'),
-                '/auth-game.css': ('auth-game.css', 'text/css'),
                 '/': ('index.html', 'text/html'),
+                # Every module a routed page can reach, derived from the import graph,
+                # so a newly shared module is served the moment something imports it.
+                **served_assets(),
+                # Vendored runtime and shipped models are not source modules, so the
+                # graph stops at them and each name stays listed here and in hosted.py.
                 '/vendor/playcanvas.mjs': ('vendor/playcanvas.mjs', 'text/javascript'),
                 '/vendor/PLAYCANVAS-LICENSE.txt': ('vendor/PLAYCANVAS-LICENSE.txt', 'text/plain'),
                 '/assets/quaternius-animated-robot.glb': ('assets/quaternius-animated-robot.glb', 'model/gltf-binary'),

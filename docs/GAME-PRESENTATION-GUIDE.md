@@ -333,6 +333,20 @@ peak collapses while the score is still running, then confirm the same preferenc
 still in force after a reload. A button that changes only its own icon passes a
 flag-check and is broken.
 
+One control is not enough either: a preference must be **declared** in one registry and
+**applied** by it. `web/preferences.js` owns the id, default, effective reading (the
+operating-system signal is the default, an in-game choice overrides it), glyph, label and
+storage key for every preference a game offers, and it writes the consequence into the
+document — `html[data-motion]` for motion, `body.xp-hidden` for XP. Stylesheets key off
+that one hook, not off a private `@media (prefers-reduced-motion)` restatement: a copy
+that watches the OS signal alone gives the player's own toggle no force, which is the
+same defect as an icon that flips nothing. A surface carries a preference by marking its
+control `data-preference="<id>"` and letting the registry paint it; nothing else chooses
+a glyph, a word or a `checked` state. Because the registry enumerates its own ids, the
+gate compares every painted carrier against the registry reading (`prefDrift` in
+`tools/check_presentation_budget.py`) instead of a hand-listed set of buttons, and a
+control that disagrees is reported per state.
+
 **Rule I12 (a sentence the player must know reaches the eye).** Rungs 1–6 are a
 ladder of *where* information lives; none of them says information may live **only**
 in the screen-reader channel. Text parked at zero area, off-viewport or clipped out
@@ -509,7 +523,7 @@ unassessed; screenshots of a static frame do not certify B2 (movement/orbit requ
 | Rule | Mechanism |
 | --- | --- |
 | P1–P3, I1–I10, I12, B1–B8 | `tools/check_presentation_budget.py` (mechanical, exact candidate) + live critic observation |
-| I11 | The owning audio/motion module exports one reading; the game's own browser gate decodes captured output across the control instead of asserting the flag |
+| I11 | `web/preferences.js` is the only owner of a preference's reading, wording and document effect; `tools/check_presentation_budget.py` enumerates its `data-preference` carriers and reports `prefDrift` against the registry, while the game's own browser gate decodes captured output across the control instead of asserting the flag |
 | Design-time surface declaration | `tools/check_learning_design.py` (existing attention/focus contract) |
 | Review-time certification | `presentation_integration` criterion in `check_critic_review.py` V2 gates — requires budget report + interactive trace + cold-observer + live capture |
 | Worker behavior | this section referenced from `AGENTS.md` build order and `GAME-UX-SYSTEM.md` |

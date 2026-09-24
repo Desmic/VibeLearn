@@ -46,5 +46,9 @@
  .rgi-subtitle p{font-size:1rem;line-height:1.4}.rgi-fact{font-size:.85rem}.rgi-kicker{font-size:.7rem}
  #rgi-next{bottom:calc(16px + env(safe-area-inset-bottom));min-height:46px;padding:8px 14px;font-size:.78rem}
 }
-@media(prefers-reduced-motion:reduce){.rgi-overlay *{transition:none!important;animation:none!important}.rgi-band{gap:8px}.rgi-band>*{opacity:1;grid-area:auto}}
+/* Stacking the band so every line is painted at once is a layout change, not an animation,
+   and it has to follow the same motion reading the story controller uses (guide I11/I12):
+   the registry hook, which carries the OS signal and the player's own choice. */
+html[data-motion="reduce"] .rgi-band{gap:8px}
+html[data-motion="reduce"] .rgi-band>*{opacity:1;grid-area:auto}
 .game-opening-active,.game-opening-active body{overflow:hidden!important;height:100svh!important;max-height:100svh!important}

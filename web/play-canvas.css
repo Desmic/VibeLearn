@@ -18,7 +18,12 @@
   .play-canvas-builder-world{min-height:80svh}.play-canvas-builder-hud{left:6px;right:6px;bottom:6px;max-height:58%;padding:6px;border-radius:13px}.play-canvas-builder-hud .rg-bench-title{padding:7px 8px}.play-canvas-builder-hud .rg-bench-title>span{display:none}.play-canvas-builder-hud .rg-slots{padding:7px 5px}.play-canvas-builder-hud #rescue-game .rg-slot{padding:5px 3px}.play-canvas-builder-hud .rg-palette{grid-template-columns:repeat(3,minmax(0,1fr));padding:0 5px 5px}.play-canvas-builder-hud .rg-palette button{font-size:.62rem!important;padding:6px!important;min-height:45px}.play-canvas-builder-hud .rg-build-actions{grid-template-columns:1fr}.play-canvas-builder-hud #rg-run{width:100%;min-width:0}.play-canvas-builder-hud .rg-run-note{display:none}.play-canvas-transfer-surface{min-height:76svh;padding:10px;border-radius:15px}
 }
 @media(max-width:430px){.play-canvas-mission-hud{max-height:47%}.play-canvas-builder-hud{max-height:61%}.play-canvas-builder-hud .rg-slot span{font-size:.6rem}.play-canvas-builder-hud .rg-palette button{font-size:.58rem!important;gap:3px!important}.play-canvas-transfer-surface .rg-incident{padding:14px}}
-@media(prefers-reduced-motion:reduce){.play-canvas-stage *{animation:none!important;transition:none!important}}
+/* One motion hook, written by the preference registry: the system signal is its default and
+   the player's own choice overrides it, so an in-game toggle weighs the same as the OS
+   setting (guide I11). The media clause is the same rule for a page that boots no registry,
+   or for the first frames before it runs. */
+@media(prefers-reduced-motion:reduce){html:not([data-motion]),html:not([data-motion]) *,html:not([data-motion]) *::before,html:not([data-motion]) *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+html[data-motion="reduce"],html[data-motion="reduce"] *,html[data-motion="reduce"] *::before,html[data-motion="reduce"] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 
 /* The first-touch story is the one place where the renderer itself is an input
    surface. Mission correctness still goes through semantic/server controls. */

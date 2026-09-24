@@ -1,4 +1,5 @@
 import {getGameRuntime,createGameRuntime} from './game-runtime.js';
+import {getPreferences} from './preferences.js';
 import {openGameOpening} from './game-opening.js';
 import {createGameAudio} from './game-audio.js';
 import {createLearningSession} from './learning-session.js';
@@ -8,15 +9,19 @@ import {placeWorldMarker,chromeClearance,projectedEntityBox,focalClearanceBox} f
 import {fitBoundedSurface} from './surface-fit.js';
 import * as chapter from './first-words-world.js';
 
-const $=s=>document.querySelector(s),runtime=getGameRuntime(),audio=createGameAudio(),host=$('#world');
+// Every preference the player can set is read from the shared registry, so this page never
+// holds a second copy of a setting another surface also paints (rule I11).
+const preferences=getPreferences();
+const $=s=>document.querySelector(s),runtime=getGameRuntime(),audio=createGameAudio(preferences),host=$('#world');
 const initial={round:0,pieces:0,status:'building',powered:false,output:[],context:[],moves:0};
-let reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,paused=false,inOpening=false,ready=false,presented=null,lastCue=null,lastFit=0;
+let paused=false,inOpening=false,ready=false,presented=null,lastCue=null,lastFit=0;
+const reduced=()=>preferences.get('motion');
 // The mission/complete stage card is opt-in: a world-anchored machine toggle carries
 // the short goal while closed, and the card opens for the player or on feedback beats.
 let cardOpen=false,cardStateKey='',lastExperienceMode=null;
 // Fresh entry mounts the first prologue composition behind the loading layer. Do not
 // instantiate the prison mission first and then flash it while learner state resolves.
-let world=runtime.showStory(chapter,host,0,{reducedMotion:reduced});
+let world=runtime.showStory(chapter,host,0,{reducedMotion:reduced()});
 const session=createLearningSession(render);
 const practice=createTutorialFlow(chapter.controlTutorialSpec);
 const ours=()=>['first-words-1','first-words-2'].includes(session.attempt?.snapshot?.word_machine?.version);
@@ -135,7 +140,7 @@ function render(){
   if(feedbackBeat&&cardStateKey!==key&&!narrow)cardOpen=true;
   cardStateKey=key;
   if(!inOpening&&presented!==key){
-    world=runtime.showMission(chapter,host,s,{reducedMotion:reduced});presented=key;pauseSystems();
+    world=runtime.showMission(chapter,host,s,{reducedMotion:reduced()});presented=key;pauseSystems();
     audio.setPhase(complete?'complete':s.status==='success'?'reunion':'repair');
     const moves=a.response.word_machine.moves,move=moves.at(-1);
     if(lastCue&&lastCue!==key){
@@ -297,24 +302,27 @@ $('#inspect').onclick=()=>{
   for(const c of s.candidates){const row=document.createElement('div');row.className='score';const label=document.createElement('span');label.textContent=c.piece;const meter=document.createElement('meter');meter.min=0;meter.max=100;meter.value=c.chance;meter.setAttribute('aria-label',c.piece+' illustrative score');const score=document.createElement('span');score.textContent=c.chance+'%';row.append(label,meter,score);$('#scores').append(row);}
   dialog('#inspection');
 };
-const paintMute=el=>{const ui=audio.muteUI;el.textContent=ui.glyph;el.setAttribute('aria-label',ui.label);el.setAttribute('aria-pressed',ui.pressed);};
-function syncAudio(){for(const name of ['music','effects'])$('#'+name).checked=audio.preferences[name];paintMute($('#mute'));}
-for(const name of ['music','effects'])$('#'+name).onchange=e=>{audio.setPreference(name,e.target.checked);syncAudio();};
-$('#mute').onclick=()=>{audio.setPreference('muted',!audio.preferences.muted);syncAudio();};syncAudio();
-$('#reduced').checked=reduced;
-$('#reduced').onchange=e=>{reduced=e.target.checked;const camera=world.getPlayerView();runtime.disposeWorld({keepStage:true});world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced});world.restorePlayerView(camera);presented=null;render();};
+// Rule I11: a control writes the registry and the registry repaints every carrier of that
+// preference, so no surface can be left showing a stale reading. The 3D world is the one
+// thing a motion change has to be rebuilt into.
+const remountMotion=()=>{const camera=world.getPlayerView();runtime.disposeWorld({keepStage:true});world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced()});world.restorePlayerView(camera);presented=null;render();};
+for(const name of ['music','effects'])$('#'+name).onchange=e=>preferences.set(name,e.target.checked);
+$('#mute').onclick=()=>preferences.set('sound',!preferences.get('sound'));
+$('#reduced').onchange=e=>{preferences.set('motion',e.target.checked);remountMotion();};
+preferences.hydrate();
 let openingSequence=0;
 function opening(replay=false){
   const storyRuntime=replay?createGameRuntime():runtime;inOpening=true;setExperienceMode('opening');audio.setPhase('home');
   const sequence=++openingSequence;
-  const instance=openGameOpening({root:$('#adventure'),spec:chapter.openingSpec,runtime:storyRuntime,worldModule:chapter,replay,reducedMotion:reduced,onExit:async()=>{
+  const instance=openGameOpening({root:$('#adventure'),spec:chapter.openingSpec,runtime:storyRuntime,worldModule:chapter,replay,reducedMotion:reduced(),onExit:async()=>{
     observer.disconnect();
     if(!replay&&!ours())await session.start('ai-01-first-words');
-    inOpening=false;presented=null;world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced});pauseSystems();render();
+    inOpening=false;presented=null;world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced()});pauseSystems();render();
   }});
   instance.element.classList.add('first-opening');
-  const mute=document.createElement('button');mute.id='opening-mute';paintMute(mute);
-  mute.onclick=()=>{audio.setPreference('muted',!audio.preferences.muted);paintMute(mute);syncAudio();};instance.element.querySelector('.rgi-corner').prepend(mute);
+  // The opening carries the same global sound preference, not an "opening sound" of its own.
+  const mute=document.createElement('button');mute.id='opening-mute';mute.dataset.preference='sound';preferences.render(mute);
+  mute.onclick=()=>preferences.set('sound',!preferences.get('sound'));instance.element.querySelector('.rgi-corner').prepend(mute);
   const observer=new MutationObserver(()=>{
     const step=Number(instance.element.dataset.step),scene=chapter.openingSpec.scenes[step]||{};
     audio.setPhase(scene.audioPhase||'home');
