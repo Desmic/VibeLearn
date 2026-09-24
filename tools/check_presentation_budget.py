@@ -9,6 +9,8 @@ Usage:
 """
 import argparse
 import json
+import re
+import subprocess
 import sys
 import tempfile
 import time
@@ -313,6 +315,54 @@ TEXT_SCALE = """(factor) => {
   return nodes.length;
 }"""
 
+# An allowance for a sheet belongs to a visible opening caused by this page's
+# player click. A remembered button name from another navigation (or a sheet that
+# closed and later opened itself) is not evidence of consent.
+SHEET_VISIBLE = """(selector) => {
+  const el = document.querySelector(selector);
+  if (!el || !el.isConnected || el.hidden) return false;
+  const style = getComputedStyle(el), rect = el.getBoundingClientRect();
+  return style.display !== 'none' && style.visibility !== 'hidden'
+    && Number(style.opacity) > .05 && rect.width > 1 && rect.height > 1;
+}"""
+SHEET_WITNESS = """({selector, name}) => {
+  const el = document.querySelector(selector);
+  if (!el) return false;
+  const entries = window.__presentationOptIn ||= {};
+  entries[selector]?.observer?.disconnect();
+  const entry = {name, el, valid: true};
+  entry.observer = new MutationObserver(() => {
+    if (!el.isConnected || el.hidden || getComputedStyle(el).display === 'none'
+      || getComputedStyle(el).visibility === 'hidden') entry.valid = false;
+  });
+  entry.observer.observe(el, {attributes: true, attributeFilter: ['hidden', 'class', 'style', 'aria-hidden']});
+  entries[selector] = entry;
+  return true;
+}"""
+SHEET_WITNESS_VALID = """({selector, name}) => {
+  const entry = window.__presentationOptIn?.[selector];
+  const el = document.querySelector(selector);
+  return Boolean(entry?.valid && entry.name === name && entry.el === el && el?.isConnected
+    && !el.hidden && getComputedStyle(el).display !== 'none'
+    && getComputedStyle(el).visibility !== 'hidden');
+}"""
+
+
+def click_scenario_button(page, name, opt_in_targets, timeout=30000):
+    """Click through the UI, recording only a newly opened declared sheet."""
+    targets = opt_in_targets.get(name, ())
+    before = {selector: page.evaluate(SHEET_VISIBLE, selector) for selector in targets}
+    page.get_by_role("button", name=name, exact=True).first.click(timeout=timeout)
+    for selector in targets:
+        if not before[selector] and page.evaluate(SHEET_VISIBLE, selector):
+            page.evaluate(SHEET_WITNESS, {"selector": selector, "name": name})
+
+
+def witnessed_sheet_open(page, state):
+    if not state.get("opened_by") or not state.get("sheet"):
+        return False
+    return page.evaluate(SHEET_WITNESS_VALID, {"selector": state["sheet"], "name": state["opened_by"]})
+
 
 def apply_text_scale(page, scenario_state, previous_scale=1):
     """Apply a state's declared text_scale; return the scale now on the page."""
@@ -399,17 +449,23 @@ def violations(state_name, metrics, budgets, panel_allowed, scenario_state=None,
     if metrics["disabledVisible"]:
         found.append(f"{state_name}: P3 visible non-actionable controls: {metrics['disabledVisible'][:4]}")
     focal = metrics.get("focal")
-    if focal and focal.get("covered"):
+    if scenario_state.get("focal") and (not focal or not focal.get("point", {}).get("visible")):
+        found.append(f"{state_name}: B2 focal entity could not be measured visibly")
+    elif focal and focal.get("covered"):
         found.append(f"{state_name}: B2 focal entity covered by {focal['covered'][:4]}")
     presence = metrics.get("presence")
-    if presence and presence["share"] < budgets["presence_min_share"]:
+    if scenario_state.get("presence") and (not presence or not presence.get("visible")):
+        found.append(f"{state_name}: B6 story subject could not be measured visibly")
+    elif presence and presence["share"] < budgets["presence_min_share"]:
         found.append(f"{state_name}: B6 subject presence {presence['share']:.1%} < {budgets['presence_min_share']:.0%}")
     if metrics.get("markerClash"):
         found.append(f"{state_name}: B7 world markers overlap: {metrics['markerClash'][:4]}")
     if metrics.get("dupCarriers"):
         found.append(f"{state_name}: B8/I1 world verb on two live surfaces (marker + DOM control): {metrics['dupCarriers'][:4]}")
     cover = metrics.get("subjectCover")
-    if cover and cover["covers"]:
+    if scenario_state.get("subject") and not cover:
+        found.append(f"{state_name}: B7 subject clearance could not be measured")
+    elif cover and cover["covers"]:
         found.append(f"{state_name}: B7 markers cover the scene subject: {cover['covers'][:4]}")
     if scenario_state.get("cinematic"):
         stray = metrics.get("strayControls") or []
@@ -561,9 +617,20 @@ def main():
     parser.add_argument("--out", type=Path, default=ROOT / "artifacts/presentation-budget.json")
     parser.add_argument("--url", help="Base URL of a running server; starts a disposable one when omitted")
     parser.add_argument("--report-only", action="store_true", help="Always exit 0; still write the report")
+    parser.add_argument("--candidate", help="Exact committed candidate SHA for review evidence; omit during draft checks")
     parser.add_argument("--only", help="Comma-separated state names to measure. States share one page, "
                                        "so pass a contiguous prefix whose first state has 'goto'.")
     args = parser.parse_args()
+    if args.candidate and not re.fullmatch(r"[0-9a-f]{40}", args.candidate):
+        parser.error("--candidate needs an exact 40-character lowercase SHA")
+    if args.candidate:
+        git = ["git", "-c", f"safe.directory={ROOT.as_posix()}"]
+        head = subprocess.run([*git, "rev-parse", "HEAD"], cwd=ROOT,
+                              capture_output=True, text=True, check=True).stdout.strip()
+        if args.candidate != head:
+            parser.error("--candidate must equal the checked-out commit")
+        if subprocess.run([*git, "diff", "--quiet", "HEAD"], cwd=ROOT).returncode:
+            parser.error("--candidate needs a clean tracked working tree")
     scenario = json.loads(args.scenario.read_text(encoding="utf-8"))
     if args.only:
         # Selecting states must actually select them: replaying the whole scenario to
@@ -577,7 +644,10 @@ def main():
             raise SystemExit("the first selected state needs 'goto': a fresh page would be "
                              "measured at about:blank instead of where the walk left it")
     budgets = {**BUDGETS, **scenario.get("budgets", {})}
+    opt_in_targets = {}
     for state in scenario["states"]:
+        if state.get("opened_by") and state.get("sheet"):
+            opt_in_targets.setdefault(state["opened_by"], set()).add(state["sheet"])
         if state.get("text_scale", 1) != 1:
             scale = state.get("text_scale")
             if not isinstance(scale, (int, float)) or scale < 1.5:
@@ -602,13 +672,8 @@ def main():
             context = browser.new_context(viewport={"width": 1280, "height": 720})
             page = context.new_page()
             page.set_default_timeout(20000)
-            clicked_names = set()
             scale_applied = 1
             for state in scenario["states"]:
-                # The walk is cumulative on one page, so opt-in proof may come from an
-                # earlier state (the player opened the machine and left it open).
-                clicked_names |= {step["click"] for step in state.get("steps", []) if "click" in step}
-                clicked_names |= set(state.get("clicks", []))
                 if state.get("viewport"):
                     context.close()
                     context = browser.new_context(viewport={"width": state["viewport"][0], "height": state["viewport"][1]})
@@ -631,13 +696,13 @@ def main():
                 # reach deep play states, not just the first screen of a chunk.
                 for step in state.get("steps", []):
                     if "click" in step:
-                        page.get_by_role("button", name=step["click"], exact=True).first.click(timeout=step.get("timeout", 30000))
+                        click_scenario_button(page, step["click"], opt_in_targets, step.get("timeout", 30000))
                     elif "wait_text" in step:
                         wait_for_text(page, step["wait_text"], step.get("timeout", 30000), state)
                     elif "wait_eval" in step:
                         wait_for_eval(page, step["wait_eval"], step.get("timeout", 45000), state)
                 for click in state.get("clicks", []):
-                    page.get_by_role("button", name=click, exact=True).first.click()
+                    click_scenario_button(page, click, opt_in_targets)
                 if state.get("wait_eval"):
                     # A measured beat on a software-rendered phone viewport can settle slower
                     # than a desktop one; the scenario may raise the allowance, never the tool.
@@ -664,7 +729,7 @@ def main():
                 states.append({"name": state["name"], "text_scale": state.get("text_scale", 1),
                     "budget_coverage_max": state_budgets["coverage_max"], **metrics})
                 state_violations = violations(state["name"], metrics, state_budgets, bool(state.get("panel_open")),
-                    state, bool(state.get("opened_by")) and state["opened_by"] in clicked_names)
+                    state, witnessed_sheet_open(page, state))
                 # Attach the cause to the violation instead of leaving the next worker to
                 # rebuild it: an unranked child and an over-long sentence look the same
                 # from the outside and need opposite fixes.
@@ -688,7 +753,10 @@ def main():
                 stop_server(proc)
     report = {
         "tool": "check_presentation_budget",
+        "candidate_sha": args.candidate,
+        "scenario_complete": args.only is None,
         "scenario": str(args.scenario.relative_to(ROOT)) if args.scenario.is_relative_to(ROOT) else str(args.scenario),
+        "expected_state_names": [state["name"] for state in scenario["states"]],
         "budgets": budgets,
         "states": states,
         "violations": all_violations,

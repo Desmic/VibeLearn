@@ -169,7 +169,13 @@ critic's eyes:
 
 Budget violations are defects, not preferences. A critic may rate `hud_readability`
 or `presentation_integration` ≥ 9 only with a passing budget report on the exact
-candidate plus live observation.
+candidate plus live observation. Run the complete scenario with `--candidate` set to
+the committed 40-character SHA when preparing review evidence. A draft run without
+that flag or a partial `--only` run can guide repairs but cannot qualify a review.
+The review gate reads the report itself: its candidate, measured state list, pass
+result and zero violations must agree. Declared focal, presence and subject checks
+that cannot be measured fail as evidence gaps. A narrow sheet's allowance is tied to
+the current page's observed player opening and expires when the sheet closes.
 
 ## Interaction design in the world
 

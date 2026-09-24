@@ -1,5 +1,14 @@
 # Current state — LLM learning-game proof track
 
+**Review-gate repair — 24 September 2026:** The presentation review contract now
+reads the measured report rather than accepting any file labelled `ci_report`. The
+report must cover the complete scenario, pass with zero violations and name the exact
+committed candidate SHA. Missing declared focal/presence/subject measurements fail;
+the phone-sheet allowance requires an observed player opening on the current page
+and expires when the sheet closes. This is a system gate repair, not a fresh game
+critique or a claim that the candidate is ready. The cold full-game pass and final
+user review recorded below remain outstanding.
+
 **SECOND VETO — obstructing tutorial card: system repair IN FLIGHT (uncommitted) —
 23 September 2026:** The user re-rejected the candidate with a screenshot of the
 TUTORIAL "MESSAGE MACHINE" card parked top-left over the 3D view during REPAIR 1/4,

@@ -1,5 +1,6 @@
 """Adversarial checks of review consistency, not evidence of game quality."""
 import copy
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -98,6 +99,12 @@ class CriticReviewTests(unittest.TestCase):
         }
         for modality, name in files.items():
             (self.root / name).write_text(f"{modality} fixture", encoding="utf-8")
+        (self.root / "ci.json").write_text(json.dumps({
+            "tool": "check_presentation_budget", "candidate_sha": self.sha,
+            "scenario": "synthetic-scenario.json", "scenario_complete": True,
+            "expected_state_names": ["opening"], "result": "passed", "violations": [],
+            "states": [{"name": "opening"}],
+        }), encoding="utf-8")
 
         def ev(modality):
             return {"ref": files[modality], "modality": modality, "candidate_sha": self.sha}
@@ -217,6 +224,23 @@ class CriticReviewTests(unittest.TestCase):
         ]
         with self.assertRaisesRegex(ValueError, "presentation_integration: evidence needs"):
             self.check(record)
+
+    def test_v2_presentation_report_must_pass_for_candidate(self):
+        record = self.v2_record()
+        path = self.root / "ci.json"
+        valid = json.loads(path.read_text(encoding="utf-8"))
+        for change, error in [
+            ({"candidate_sha": "b" * 40}, "different candidate"),
+            ({"result": "violated", "violations": ["obstructed"]}, "zero violations"),
+            ({"states": []}, "distinct measured states"),
+            ({"scenario_complete": False}, "full scenario"),
+            ({"expected_state_names": ["opening", "ending"]}, "omits scenario states"),
+            ({"tool": "unrelated_ci"}, "passing check_presentation_budget"),
+        ]:
+            with self.subTest(change=change):
+                path.write_text(json.dumps({**valid, **change}), encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, error):
+                    self.check(record)
 
     def test_v2_requires_cold_observer_before_intent(self):
         record = self.v2_record()

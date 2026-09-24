@@ -26,6 +26,12 @@ class ReleaseGateTests(unittest.TestCase):
             "source_inspection":"source.txt",
         }
         for name in files.values():(self.root/name).write_text("fixture",encoding="utf-8")
+        (self.root/"ci.json").write_text(json.dumps({
+            "tool":"check_presentation_budget","candidate_sha":self.sha,
+            "scenario":"synthetic-scenario.json","scenario_complete":True,
+            "expected_state_names":["opening"],"states":[{"name":"opening"}],
+            "result":"passed","violations":[],
+        }),encoding="utf-8")
         def ev(modality):
             return {"ref":files[modality],"modality":modality,"candidate_sha":self.sha}
         criteria={}

@@ -118,6 +118,7 @@ def evaluate(record, candidate, root=ROOT):
     def evidence(refs, criterion=None):
         require(isinstance(refs, list) and bool(refs), "Evidence references are required")
         modalities = set()
+        presentation_report_found = False
         for item in refs:
             if schema == 1:
                 require(isinstance(item, str) and bool(item.strip()), "Invalid evidence reference")
@@ -138,10 +139,36 @@ def evaluate(record, candidate, root=ROOT):
                 allowed = MODALITY_EXTENSIONS.get(modality, set())
                 require(not allowed or path.suffix.lower() in allowed,
                         f"{modality}: unsupported evidence file type {path.suffix.lower()}")
+                if criterion == "presentation_integration" and modality == "ci_report" and path.suffix.lower() == ".json":
+                    try:
+                        report = json.loads(path.read_text(encoding="utf-8"))
+                    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+                        raise ValueError(f"presentation_integration: invalid budget report: {ref}") from exc
+                    if isinstance(report, dict) and report.get("tool") == "check_presentation_budget":
+                        require(report.get("candidate_sha") == candidate,
+                                "presentation_integration: budget report belongs to a different candidate")
+                        require(report.get("result") == "passed" and report.get("violations") == [],
+                                "presentation_integration: budget report must pass with zero violations")
+                        require(report.get("scenario_complete") is True,
+                                "presentation_integration: budget report must cover the full scenario")
+                        states = report.get("states")
+                        require(isinstance(states, list) and bool(states)
+                                and all(isinstance(state, dict) and isinstance(state.get("name"), str)
+                                        and state["name"] for state in states)
+                                and len({state["name"] for state in states}) == len(states),
+                                "presentation_integration: budget report needs distinct measured states")
+                        require([state["name"] for state in states] == report.get("expected_state_names"),
+                                "presentation_integration: budget report omits scenario states")
+                        require(isinstance(report.get("scenario"), str) and bool(report["scenario"]),
+                                "presentation_integration: budget report needs its scenario")
+                        presentation_report_found = True
         if schema == 2 and criterion:
             for acceptable in CRITERION_MODALITIES.get(criterion, ()):
                 require(modalities.intersection(acceptable),
                         f"{criterion}: evidence needs one of {', '.join(acceptable)}")
+            if criterion == "presentation_integration":
+                require(presentation_report_found,
+                        "presentation_integration: evidence needs a passing check_presentation_budget JSON report")
         return modalities
 
     require(record.get("method") in ("internal_tool_assisted", "independent_agent"),

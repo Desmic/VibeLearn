@@ -4,8 +4,9 @@ import unittest
 from pathlib import Path
 
 from tools.check_presentation_budget import (BUDGETS, MEASURE, SHED_DIAGNOSTIC, TEXT_SCALE,
-                                             attach_shed_diagnostic, resolve_state_budgets,
-                                             violations)
+                                             attach_shed_diagnostic, click_scenario_button,
+                                             resolve_state_budgets, violations,
+                                             witnessed_sheet_open)
 
 _LITERALS = {'"', "'", '`'}
 _OPEN = {'(': ')', '{': '}', '[': ']'}
@@ -75,6 +76,43 @@ _SHEET_STATE = {'narrow_sheet': True, 'sheet': '#engine', 'opened_by': 'Open the
 
 
 class PresentationBudgetContract(unittest.TestCase):
+    def test_requested_world_measurements_cannot_disappear(self):
+        requested = {"focal": "zip", "presence": {"entity": "zip", "height": 2},
+                     "subject": {"entity": "zip"}}
+        problems = violations("play", _metrics(), BUDGETS, False, requested)
+        self.assertTrue(any("B2 focal entity could not" in problem for problem in problems))
+        self.assertTrue(any("B6 story subject could not" in problem for problem in problems))
+        self.assertTrue(any("B7 subject clearance could not" in problem for problem in problems))
+        hidden = _metrics(focal={"point": {"visible": False}, "covered": None},
+                          presence={"share": .3, "visible": False})
+        problems = violations("play", hidden, BUDGETS, False, requested)
+        self.assertTrue(any("B2 focal entity could not" in problem for problem in problems))
+        self.assertTrue(any("B6 story subject could not" in problem for problem in problems))
+
+    def test_sheet_allowance_requires_current_visible_player_opening(self):
+        from playwright.sync_api import sync_playwright
+        html = """<button onclick="document.querySelector('#engine').hidden=false">Open machine</button>
+        <button onclick="document.querySelector('#engine').hidden=false">Auto show</button>
+        <div id="engine" hidden><button onclick="this.parentElement.hidden=true">Close</button></div>"""
+        state = {"opened_by": "Open machine", "sheet": "#engine"}
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            page = browser.new_page()
+            page.set_content(html)
+            self.assertFalse(witnessed_sheet_open(page, state))
+            click_scenario_button(page, "Open machine", {"Open machine": {"#engine"}})
+            self.assertTrue(witnessed_sheet_open(page, state))
+            page.get_by_role("button", name="Close").click()
+            page.get_by_role("button", name="Auto show").click()
+            self.assertFalse(witnessed_sheet_open(page, state))
+            page.goto("about:blank")
+            page.set_content(html)
+            page.get_by_role("button", name="Auto show").click()
+            self.assertFalse(witnessed_sheet_open(page, state))
+            click_scenario_button(page, "Open machine", {"Open machine": {"#engine"}})
+            self.assertFalse(witnessed_sheet_open(page, state))
+            browser.close()
+
     def test_injected_measurement_script_is_balanced(self):
         self.assertIsNone(_unclosed(MEASURE))
 
