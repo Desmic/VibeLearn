@@ -15,6 +15,16 @@ art pass; Level 2 and deployment promotion remain gated.
 
 Active user decision, 20 September 2026. Supersedes Luna-first routing.
 
+**A lane is a column of the report, not a run.** One agent plays the whole game once,
+capturing recording, screenshots and the action trace as it goes, and scores every
+required lane inside that single pass. There is no per-lane scheduling decision to make
+and nothing to parallelise: the run is one, the findings are many. Independence lives in
+the findings (and in observations preceding rationale), never in separate critic sessions.
+Read "separate critic lanes", "independent disciplines" and "independent gates" in every
+document as describing report structure. Cost and time savings are the reason for this
+shape: one real GUI walk is the expensive object, and repeating it per lane multiplies it
+for no additional evidence.
+
 Use one fresh GPT-6 Astra reviewer for the main generated-game review. Keep every
 critic profile and separate findings/ratings; art/world direction is mandatory.
 Do not fan out one agent per lane or require a second opinion merely because
@@ -67,6 +77,9 @@ reviewer per critic lane. Technical scripts and deterministic evidence checks ar
 supporting tools, not extra creative critics.
 
 ## Required lanes
+
+Scored in the same single play pass, as separate findings (see "a lane is a column of
+the report, not a run" above):
 
 Cold observation; rendered story/cinematic causality; art/world direction;
 motion/animation; physicality; tutorial/transitions; audio/atmosphere;

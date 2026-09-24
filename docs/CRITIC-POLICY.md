@@ -33,6 +33,11 @@ The user is the sole final human product critic. Their explicit verdict override
 
 ## Critic disciplines are independent
 
+Independence here is independence of **judgment and evidence**, not of execution: these
+disciplines are separate findings a single reviewer produces in one play pass, not separate
+critic sessions. Do not average them. "Run them as independent gates" means each must pass
+on its own evidence, and a blocker in any one of them blocks the candidate.
+
 Every serious candidate is reviewed through separate disciplines:
 
 1. **Story/rendered narrative critic** — does the actual scene communicate world, role, cause, stakes and forward pull?
