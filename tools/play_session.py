@@ -214,6 +214,10 @@ def step(args):
         page = context.pages[0] if context.pages else context.new_page()
         for item in steps:
             unknown = set(item) - {"action"} - STEP_KEYS
+            # A critic that guesses a key must learn the vocabulary in the same call: during
+            # one cold pass six of twenty-one steps were spent rediscovering these names.
+            hint = f" expected one of {sorted(ACTIONS)}" if item.get("action") not in ACTIONS else \
+                   f" allowed keys for {item.get('action')}: {sorted(STEP_KEYS)}"
             if item.get("action") not in ACTIONS:
                 result = {"ok": False, "error": f"unknown action {item.get('action')!r}"}
             elif unknown:
@@ -223,6 +227,8 @@ def step(args):
                     result = run_step(page, item)
                 except Exception as error:  # a critic must see the failure, not a stack trace
                     result = {"ok": False, "error": f"{type(error).__name__}: {str(error)[:300]}"}
+            if not result.get("ok"):
+                result["error"] += hint
             trace(args.root, {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "step": item, "result": {
                 k: v for k, v in result.items() if k in {"ok", "error", "shot"}}})
             results.append(result)
