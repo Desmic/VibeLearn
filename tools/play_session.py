@@ -16,8 +16,9 @@ Game-agnostic: it takes a URL, never a level, and reads no project source.
   python -m tools.play_session list
   python -m tools.play_session sweep
 
-Headless WebGL is rasterised on the CPU here, and a page that repaints continuously costs
-several cores for as long as it does — including while a critic thinks between steps, because
+Headless WebGL is CPU-rasterised only with `--software`, and a page that repaints
+continuously then costs several cores for as long as it does — including while a critic
+thinks between steps, because
 the game's own animation loop and this harness's frame probe both keep requesting frames. Two
 sessions at once is what makes the machine crawl, so 'start' refuses a second one unless
 --reclaim; batch 8-15 steps into one 'step' call instead of driving one action per call. Every
@@ -29,10 +30,19 @@ reused. Never wrap a browser run in `timeout`: killing the driver leaves its chr
 repainting forever.
 
 Step actions: goto reload resize wait settle key hold type click clicktext clickrole
-drag shot dump buttons eval lsget. `settle` waits for actually-rendered frames,
-because headless software WebGL can run several times slower than real time and a
-millisecond-timed input window starves movement. A `shot` path is relative to the
-session `--root`, so every screenshot a review names lands in that review's own pack.
+drag shot dump buttons eval lsget expect. `settle` waits for actually-rendered frames,
+because rasterisation can run several times slower than real time and a millisecond-timed
+input window starves movement. A `shot` path is relative to the session `--root`, so every
+screenshot a review names lands in that review's own pack. `expect` is the only step that
+can certify a beat: every other action reports ok when its call did not throw, so a whole
+replay can be green while the world never advanced.
+
+Rasterisation defaults to the host's GPU path (`--use-angle=d3d11`, measured 60-144fps
+here); `--software` forces the CPU path, which runs at about 9fps. `start` sets the page box
+over CDP and refuses to run if the page reports a different viewport than was asked for,
+because `--window-size` is not the viewport and a review shot taken at the wrong box is not
+phone or desktop evidence — and a trace recorded through that wrong box cannot be replayed
+to re-certify the claim it made.
 """
 import argparse
 import json
@@ -48,7 +58,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 ACTIONS = {"goto", "reload", "resize", "wait", "settle", "key", "hold", "type",
            "click", "clicktext", "clickrole", "drag", "shot", "dump", "buttons",
-           "eval", "lsget"}
+           "eval", "lsget", "expect"}
 STEP_KEYS = {"action", "wait", "timeout", "exact", "frames", "seconds", "segment_ms",
              "path", "via", "url", "key", "text", "target", "name", "x", "y",
              "width", "height", "from", "to", "expression"}
@@ -84,6 +94,23 @@ BUTTONS = """() => {  const out = [];
       onscreen: r.x >= 0 && r.y >= 0 && r.right <= innerWidth + 2 && r.bottom <= innerHeight + 2});
   }
   return out;
+}"""
+
+# A step that returns ok only means the call did not throw. One replay reported 110 clean
+# steps while the world never advanced, which is how a review certifies a beat it never
+# reached. This probe asks the page whether words a player can actually see contain a
+# string; a 1x1 screen-reader node is deliberately too small to answer, so an `expect`
+# cannot be satisfied by the channel guide rule I12 already forbids.
+EXPECT = """(needle) => {
+  const vis = el => { const s = getComputedStyle(el); const r = el.getBoundingClientRect();
+    return s.display !== 'none' && s.visibility !== 'hidden' && parseFloat(s.opacity) > 0.05
+      && r.width > 1 && r.height > 1; };
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    if ((node.nodeValue || '').includes(needle) && vis(node.parentElement)) return true;
+  }
+  return false;
 }"""
 
 FRAMES = """() => {
@@ -270,6 +297,12 @@ def trace(root, entry):
 
 def start(args):
     root = Path(args.root)
+    # Reject a mangled entry path before anything is created or spent: Git Bash rewrites a
+    # leading-slash argument into a Windows path, so `--path /x` can arrive as
+    # "C:/Program Files/Git/x". Pass `--path x`, or set MSYS_NO_PATHCONV=1.
+    if ":" in args.path or "\\" in args.path:
+        raise SystemExit(f"--path looks like a shell-mangled Windows path: {args.path!r} — "
+                         "pass it without the leading slash, or set MSYS_NO_PATHCONV=1")
     refuse_or_reclaim(args, root)
     root.mkdir(parents=True, exist_ok=True)
     if session_file(root).exists():
@@ -291,8 +324,7 @@ def start(args):
     from playwright.sync_api import sync_playwright
     with sync_playwright() as playwright:
         executable = playwright.chromium.executable_path
-    # Git Bash rewrites a leading-slash argument into a Windows path, so `--path /x` can
-    # arrive as "C:/Program Files/Git/x". Pass `--path x`, or set MSYS_NO_PATHCONV=1.
+    # Git Bash rewrites are already rejected above; here a bare path just gains its slash.
     path = args.path.strip()
     if _port_open(args.port):
         # Two critics both defaulting to 9333 does not produce two browsers: the second one
@@ -303,9 +335,6 @@ def start(args):
             args.port = probe.getsockname()[1]
     if path and not path.startswith("/"):
         path = "/" + path
-    if path and (":" in path or "\\" in path):
-        raise SystemExit(f"--path looks like a shell-mangled Windows path: {args.path!r} — "
-                         "pass it without the leading slash, or set MSYS_NO_PATHCONV=1")
     entry = (base + path) if path else base
     flags = [executable, f"--remote-debugging-port={args.port}",
              f"--user-data-dir={root / 'profile'}", "--no-first-run", "--no-default-browser-check",
@@ -426,6 +455,11 @@ def run_step(page, step, root):
         return {"ok": True, "buttons": page.evaluate(BUTTONS)}
     elif kind == "eval":
         return {"ok": True, "value": page.evaluate(step["expression"])}
+    elif kind == "expect":
+        if not page.evaluate(EXPECT, step["text"]):
+            return {"ok": False,
+                    "error": f"nothing a player can see contains {str(step['text'])[:80]!r}"}
+        return {"ok": True}
     elif kind == "lsget":
         return {"ok": True, "localStorage": page.evaluate(
             "() => JSON.stringify(Object.fromEntries(Object.keys(localStorage).map(k => [k, (localStorage.getItem(k) || '').slice(0, 300)])))")}
@@ -447,11 +481,14 @@ def step(args):
             unknown = set(item) - {"action"} - STEP_KEYS
             # A critic that guesses a key must learn the vocabulary in the same call: during
             # one cold pass six of twenty-one steps were spent rediscovering these names.
-            hint = f" expected one of {sorted(ACTIONS)}" if item.get("action") not in ACTIONS else \
-                   f" allowed keys for {item.get('action')}: {sorted(STEP_KEYS)}"
+            # The hint belongs to a vocabulary failure only — appending it to a substantive
+            # one buries the finding under a list of key names.
+            hint = ""
             if item.get("action") not in ACTIONS:
+                hint = f" expected one of {sorted(ACTIONS)}"
                 result = {"ok": False, "error": f"unknown action {item.get('action')!r}"}
             elif unknown:
+                hint = f" allowed keys for {item.get('action')}: {sorted(STEP_KEYS)}"
                 result = {"ok": False, "error": f"{item['action']}: unknown key(s) {sorted(unknown)}"}
             else:
                 try:

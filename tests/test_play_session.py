@@ -105,5 +105,40 @@ class ClaimDiscoveryTests(unittest.TestCase):
         self.assertFalse((self.tmp / "artifacts" / "orphan" / "session.json").exists())
 
 
+class ExpectStepTests(unittest.TestCase):
+    """`ok` must mean the page shows it, not that the call returned."""
+
+    class Page:
+        def __init__(self, visible):
+            self.visible = visible
+            self.calls = []
+
+        def evaluate(self, script, arg=None):
+            self.calls.append(arg)
+            return self.visible
+
+        def wait_for_timeout(self, milliseconds):
+            pass
+
+    def run_expect(self, visible):
+        page = self.Page(visible)
+        return play_session.run_step(page, {"action": "expect", "text": "a beat"},
+                                     Path("session")), page
+
+    def test_visible_words_pass(self):
+        result, page = self.run_expect(True)
+        self.assertEqual(result, {"ok": True})
+        self.assertEqual(page.calls, ["a beat"])
+
+    def test_a_step_that_changed_nothing_fails_with_the_words_it_missed(self):
+        result, _ = self.run_expect(False)
+        self.assertFalse(result["ok"])
+        self.assertIn("a beat", result["error"])
+
+    def test_expect_is_in_the_vocabulary_a_critic_is_told(self):
+        self.assertIn("expect", play_session.ACTIONS)
+        self.assertIn("text", play_session.STEP_KEYS)
+
+
 if __name__ == "__main__":
     unittest.main()
