@@ -72,6 +72,7 @@ class ClaimDiscoveryTests(unittest.TestCase):
             mock.patch.object(play_session, "LEDGER", self.tmp / "owned.jsonl"),
             mock.patch.object(play_session, "_devtools_alive", lambda port: port == 9342),
             mock.patch.object(play_session, "_port_open", lambda port, timeout=0.35: False),
+            mock.patch.object(play_session, "_pid_alive", lambda pid: pid == 1234),
         ]
         for patcher in self.patch:
             patcher.start()
@@ -82,6 +83,14 @@ class ClaimDiscoveryTests(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertTrue(rows[0]["live"])
         self.assertEqual(rows[0]["owner"], "unrecorded")
+
+    def test_a_port_answered_by_the_next_browser_is_not_a_live_claim(self):
+        """A stopped session's port gets reused: identity is the browser process, not the port."""
+        with mock.patch.object(play_session, "_pid_alive", lambda pid: False):
+            rows = play_session.claims()
+            self.assertFalse(rows[0]["live"])
+            play_session.refuse_or_reclaim(mock.Mock(reclaim=False),
+                                           self.tmp / "artifacts" / "mine")
 
     def test_start_refuses_to_double_book_the_machine_for_it(self):
         args = mock.Mock(reclaim=False)

@@ -16,14 +16,17 @@ Game-agnostic: it takes a URL, never a level, and reads no project source.
   python -m tools.play_session list
   python -m tools.play_session sweep
 
-Headless WebGL is rasterised on the CPU here, so one session costs about a core for as long as
-it is open — including while a critic thinks between steps. Two sessions at once is what makes
-the machine crawl, so 'start' refuses a second one unless --reclaim; batch 8-15 steps into one
-'step' call instead of driving one action per call. Every browser opened is recorded in
-artifacts/owned.jsonl and crossed out on stop, so a leak has an owner and 'list' answers
-"what is still running" without enumerating processes — and any live session.json under
-artifacts counts as a claim even when the ledger predates it. Never wrap a browser run in
-`timeout`: killing the driver leaves its chromium repainting forever.
+Headless WebGL is rasterised on the CPU here, and a page that repaints continuously costs
+several cores for as long as it does — including while a critic thinks between steps, because
+the game's own animation loop and this harness's frame probe both keep requesting frames. Two
+sessions at once is what makes the machine crawl, so 'start' refuses a second one unless
+--reclaim; batch 8-15 steps into one 'step' call instead of driving one action per call. Every
+browser opened is recorded in artifacts/owned.jsonl and crossed out on stop, so a leak has an
+owner and 'list' answers "what is still running" without enumerating processes — any live
+session.json under artifacts counts as a claim even when the ledger predates it, and liveness
+is the browser's own process, never its port, because stopped sessions leave ports to be
+reused. Never wrap a browser run in `timeout`: killing the driver leaves its chromium
+repainting forever.
 
 Step actions: goto reload resize wait settle key hold type click clicktext clickrole
 drag shot dump buttons eval lsget. `settle` waits for actually-rendered frames,
@@ -79,9 +82,18 @@ BUTTONS = """() => {
   return out;
 }"""
 
-FRAMES = """() => { if (window.__psf) return window.__psf.n;
-  window.__psf = {n: 0}; const tick = () => { window.__psf.n++; requestAnimationFrame(tick); };
-  requestAnimationFrame(tick); return 0; }"""
+FRAMES = """() => {
+  // Software WebGL burns about a core per repaint, so the probe that counts frames must not
+  // keep requesting them after its caller has gone: it runs for a short window and re-arms
+  // only when a settle polls it again.
+  const s = window.__psf || (window.__psf = {n: 0, until: 0});
+  const now = Date.now();
+  if (now >= s.until) {
+    s.until = now + 5000;
+    const tick = () => { s.n++; if (Date.now() < s.until) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  }
+  return s.n; }"""
 
 
 def session_file(root):
@@ -102,6 +114,33 @@ def _port_open(port, timeout=0.35):
             return True
     except (OSError, TypeError, ValueError):
         return False
+
+
+def _pid_alive(pid):
+    """Is this process still running? `os.kill(pid, 0)` is NOT a probe on Windows — it calls
+    TerminateProcess there, so it would kill the very browser it was asked about."""
+    if not pid:
+        return False
+    pid = int(pid)
+    if sys.platform != "win32":
+        import os
+        try:
+            os.kill(pid, 0)
+            return True
+        except OSError:
+            return False
+    import ctypes
+    kernel32 = ctypes.windll.kernel32
+    handle = kernel32.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+    if not handle:
+        return False
+    try:
+        code = ctypes.c_ulong()
+        if not kernel32.GetExitCodeProcess(handle, ctypes.byref(code)):
+            return False
+        return code.value == 259  # STILL_ACTIVE; an unreaped exit code is not a running process
+    finally:
+        kernel32.CloseHandle(handle)
 
 
 def _devtools_alive(port):
@@ -135,6 +174,11 @@ def record(op, session, owner="unknown"):
         fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
+def live(pid=None, cdp=None, url=None):
+    """A session holds the machine only while its own browser process is running."""
+    return _pid_alive(pid) and (_devtools_alive(cdp) or _port_open(port_of(url)))
+
+
 def claims():
     """Every browser this machine can still be blamed for, one entry per root, probed for life."""
     latest = {}
@@ -162,7 +206,9 @@ def claims():
                        "cdp": held.get("port"), "pid": held.get("pid"),
                        "server_pid": held.get("server_pid"), "url": held.get("url")}
     for entry in latest.values():
-        entry["live"] = _devtools_alive(entry.get("cdp")) or _port_open(port_of(entry.get("url")))
+        # A port alone is not identity: the next session reuses 9333 after the last one stops,
+        # and then a dead owner reads as a live one while `--reclaim` kills whoever is playing.
+        entry["live"] = live(entry.get("pid"), entry.get("cdp"), entry.get("url"))
     return sorted(latest.values(), key=lambda entry: str(entry.get("ts")))
 
 
@@ -224,7 +270,7 @@ def start(args):
     root.mkdir(parents=True, exist_ok=True)
     if session_file(root).exists():
         held = {"root": str(root), **json.loads(session_file(root).read_text(encoding="utf-8"))}
-        if _port_open(held.get("port")) or _port_open(port_of(held.get("url"))):
+        if live(held.get("pid"), held.get("port"), held.get("url")):
             raise SystemExit(f"{root} already holds a live session — run 'stop' first")
         # Dead but still recorded: the owner died before 'stop'. Reap it rather than stacking
         # a second chromium on top of the orphan.
@@ -271,13 +317,16 @@ def start(args):
     deadline = time.monotonic() + args.timeout
     ready = False
     while time.monotonic() < deadline:
+        if browser.poll() is not None:  # chrome exits at once when it cannot bind the port
+            break
         try:
             import urllib.request
             with urllib.request.urlopen(f"http://127.0.0.1:{args.port}/json/version", timeout=2):
                 ready = True
                 break
         except Exception:
-            time.sleep(0.5)
+            pass
+        time.sleep(0.5)
     if not ready:
         # A browser that never answered is abandoned here, so the disposable server started
         # for it must not be left listening — that is exactly how a failed run becomes a leak.
