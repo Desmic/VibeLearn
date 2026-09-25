@@ -33,6 +33,7 @@ are never merged into one.
 | Experience review — caveats | That pass started its phone beats at the broken 484x644 box, so shots `01`-`04` are not phone evidence; its desktop pass was truncated at the mission decision |
 | Reproduction of the review's load-bearing claims (25 Sep, live GPU phone session at a true 390x844) | **One confirmed, one confirmed at source, one not reproducible.** (a) The invisible information node is confirmed in live play: `p#scene-description` measures `[0,16 1x1]` while its text is the only copy of the instruction. (b) The decision-sheet chrome removal is confirmed by the reviewer's own frame `25-power-lead-click.png` (stick and `◎ + − ? ◉` column absent) and by its mechanism in source, `web/first-words.css:107`, which sets `display:none` on `.game-view-tools`, `.game-move-stick` and `.game-controls-help` under `.sheet-mode`. (c) Replaying the recorded trace to reach that beat failed as an instrument: 110 steps reported `ok` and the world never left control practice, so `ok` means "the call did not throw", not "the game responded". A trace recorded through the pre-repair viewport is not replayable evidence, and the harness has no state-change assertion to catch that. |
 | In-flight repairs already in the dirty tree | Another agent's uncommitted work adds a visible `#learning-readout` world carrier (the cold pass found the causal explanation and beat counter living only in 1x1px nodes) and a `launch_browser` opt-in for headed checks. Neither is mine to edit, and neither has been measured or played. `tests/browser_check.py` and `tools/check_presentation_budget.py` still default to SwiftShader, i.e. the 9fps raster path the play harness just left |
+| Harness can now certify a beat (26 Sep) | Added an `expect` step: a step passes only if words a **player can see** contain a string, where a 1x1 node is deliberately too small to answer. Exercised live on a fresh disposable session at phone 390x844: `One lantern. Three friends.` passes, `1 / 8` fails, `Replay the prologue` (closed menu) fails. That run also reproduced the review's invisible-node finding in current play: `small#rgi-step` measures `[0,0 1x1]`. A failing step no longer gets the key-name hint appended. 437 unit tests OK (7 skipped) in 55 s |
 | User acceptance | Not requested. The user's latest verdict on the game is a rejection and stands until they say otherwise |
 
 ## Not verified
@@ -42,9 +43,9 @@ Stated as measured, not inferred:
 - No player-facing content in this tree has been observed in play by the user.
 - The five deferred Level 1 browser groups, and every gate, on any SHA that contains the in-flight edits.
 - The viewport-mismatch refusal path and the harness `--software` fallback: written, never exercised.
-- Whether the cold pass's remaining findings (unlabelled `◎ ◉` column, 21x21px phone stick arrows,
-  `clickrole "☰"` having no accessible name) are defects or the reviewer's framing: each is quoted
-  from its own dump, none has been re-measured.
+- The two 1x1 nodes are reproduced live; the rest of the cold pass's remaining findings
+  (unlabelled `◎ ◉` column, 21x21px phone stick arrows, `clickrole "☰"` having no accessible
+  name) are quoted from the reviewer's own dumps and have not been re-measured.
 - An earlier "idle chromium costs 10.5 cores" figure was retracted as unattributed; the attributed
   cost was one renderer at 871% of a core, caused by the frame probe that is now fixed.
 
@@ -63,9 +64,14 @@ Stated as measured, not inferred:
 ## Next actions, in order
 
 1. Land or hand off the in-flight working-tree edits so one SHA equals what gets played.
+   When that edit lands, correct its preflight paragraph: `docs/ASTRA-REVIEW-WORKFLOW.md`
+   still tells a reviewer that the harness's default headless mode forces SwiftShader
+   software WebGL. It does not since `7666075` — the GPU path is the default and
+   `--software` is the opt-in — and sending critics onto the 9fps path is how a lane gets
+   recorded unassessed.
 2. Cold playthrough completes in one pass, driven by batched step files rather than one action
-   per turn → collect scores, confusion log and blockers. Nothing reaches the player until it
-   has been seen in this step.
+   per turn, with an `expect` step at every beat the review later cites → collect scores,
+   confusion log and blockers. Nothing reaches the player until it has been seen in this step.
 3. Design-intent comparison against those observations, not against the docs.
 4. Repair only demonstrated blockers, each as its own bounded change, re-running only the
    checks that repair touches.
