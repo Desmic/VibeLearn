@@ -68,8 +68,12 @@ DUMP = """() => {
   return {title: document.title, url: location.href, texts: texts.slice(0, 80)};
 }"""
 
-BUTTONS = """() => {
-  const out = [];
+RENDERER = """() => { const c = document.querySelector('canvas');
+  const gl = c && (c.getContext('webgl2') || c.getContext('webgl'));
+  if (!gl) return null; const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  return dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : String(gl.getParameter(gl.RENDERER)); }"""
+
+BUTTONS = """() => {  const out = [];
   for (const el of document.querySelectorAll('button,a,[role=button]')) {
     const s = getComputedStyle(el); const r = el.getBoundingClientRect();
     if (s.display === 'none' || s.visibility === 'hidden' || parseFloat(s.opacity) < 0.05) continue;
@@ -307,10 +311,12 @@ def start(args):
              f"--user-data-dir={root / 'profile'}", "--no-first-run", "--no-default-browser-check",
              f"--window-size={args.viewport[0]},{args.viewport[1]}"]
     if args.headless:
-        # A generated game is WebGL: without software rasterisation a headless
-        # critic sees a blank canvas, and the GPU sandbox is denied on this host.
-        flags += ["--headless=new", "--disable-gpu-sandbox", "--use-angle=swiftshader",
-                  "--enable-unsafe-swiftshader"]
+        flags += ["--headless=new", "--disable-gpu-sandbox"]
+        # Measured on this host: --use-angle=d3d11 renders the game on the integrated GPU at
+        # 60fps, SwiftShader manages 9fps. Software rasterisation is the fallback only because
+        # it is the one path that needs no display attached.
+        flags += (["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] if args.software
+                  else ["--use-angle=d3d11"])
     log = (root / "browser.log").open("w", encoding="utf-8")
     browser = subprocess.Popen(flags + [entry], stdout=log, stderr=subprocess.STDOUT,
                                creationflags=0x00000008 if sys.platform == "win32" else 0)
@@ -337,9 +343,29 @@ def start(args):
     session = {"port": args.port, "pid": browser.pid, "root": str(root), "url": entry,
                "server_pid": server.pid if server else None,
                "db": str(root / "session.sqlite3") if server else None}
+    # Record what the page actually is before any critic trusts a screenshot of it. `--window-size`
+    # is not the viewport: a 390x844 phone request rendered at 484x644 until this call set it.
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as playwright:
+        connected = playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{args.port}")
+        context = connected.contexts[0]
+        page = context.pages[0] if context.pages else context.new_page()
+        page.set_viewport_size({"width": args.viewport[0], "height": args.viewport[1]})
+        session["viewport"] = page.evaluate("() => [innerWidth, innerHeight]")
+        # The page needs a frame or two before WebGL reports anything at all.
+        for _ in range(4):
+            time.sleep(1.5)
+            session["renderer"] = page.evaluate(RENDERER)
+            if session["renderer"]:
+                break
+        connected.close()
+    if session["viewport"] != [args.viewport[0], args.viewport[1]]:
+        raise SystemExit(f"page reports {session['viewport']}, asked for {args.viewport} — "
+                         "evidence taken at this size would not be the size under review")
     session_file(root).write_text(json.dumps(session, indent=1), encoding="utf-8")
     record("started", session, owner=args.owner)
-    print(json.dumps({"started": str(root), "cdp": args.port, "url": entry}))
+    print(json.dumps({"started": str(root), "cdp": args.port, "url": entry,
+                      "viewport": session["viewport"], "renderer": session["renderer"]}))
 
 
 def run_step(page, step, root):
@@ -484,6 +510,8 @@ def main(argv=None):
     parser.add_argument("--viewport", type=int, nargs=2, default=[1280, 720])
     parser.add_argument("--windowed", dest="headless", action="store_false",
                         help="show a real window instead of headless (native computer-use critics)")
+    parser.add_argument("--software", action="store_true",
+                        help="force SwiftShader rasterisation instead of the GPU path (60fps here)")
     parser.set_defaults(headless=True)
     parser.add_argument("--timeout", type=int, default=120, help="seconds to wait for the browser")
     parser.add_argument("--file", help="JSON list of steps")
