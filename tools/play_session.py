@@ -13,11 +13,23 @@ Game-agnostic: it takes a URL, never a level, and reads no project source.
   python -m tools.play_session step --root artifacts/play-session --file steps.json
   python -m tools.play_session step --root artifacts/play-session --steps '[{"action":"dump"}]'
   python -m tools.play_session stop --root artifacts/play-session
+  python -m tools.play_session list
+  python -m tools.play_session sweep
+
+Headless WebGL is rasterised on the CPU here, so one session costs about a core for as long as
+it is open — including while a critic thinks between steps. Two sessions at once is what makes
+the machine crawl, so 'start' refuses a second one unless --reclaim; batch 8-15 steps into one
+'step' call instead of driving one action per call. Every browser opened is recorded in
+artifacts/owned.jsonl and crossed out on stop, so a leak has an owner and 'list' answers
+"what is still running" without enumerating processes — and any live session.json under
+artifacts counts as a claim even when the ledger predates it. Never wrap a browser run in
+`timeout`: killing the driver leaves its chromium repainting forever.
 
 Step actions: goto reload resize wait settle key hold type click clicktext clickrole
 drag shot dump buttons eval lsget. `settle` waits for actually-rendered frames,
 because headless software WebGL can run several times slower than real time and a
-millisecond-timed input window starves movement.
+millisecond-timed input window starves movement. A `shot` path is relative to the
+session `--root`, so every screenshot a review names lands in that review's own pack.
 """
 import argparse
 import json
@@ -76,6 +88,124 @@ def session_file(root):
     return Path(root) / "session.json"
 
 
+# Every browser this harness opens is written down when it opens and crossed out when it is
+# reclaimed. Software-rasterised WebGL costs a core per session and an abandoned critic leaves
+# its chromium repainting forever, so ownership has to be a file an operator can read — not
+# something reconstructed by enumerating processes, which on this host takes minutes.
+LEDGER = ROOT / "artifacts" / "owned.jsonl"
+
+
+def _port_open(port, timeout=0.35):
+    import socket
+    try:
+        with socket.create_connection(("127.0.0.1", int(port)), timeout=timeout):
+            return True
+    except (OSError, TypeError, ValueError):
+        return False
+
+
+def _devtools_alive(port):
+    """Ask the DevTools endpoint rather than the port: a bare listener could be a recycled
+    port, and a false 'live' here refuses a legitimate run."""
+    if not port:
+        return False
+    import urllib.request
+    try:
+        with urllib.request.urlopen(f"http://127.0.0.1:{int(port)}/json/version", timeout=0.5) as ok:
+            return b"Browser" in ok.read(512)
+    except (OSError, ValueError):
+        return False
+
+
+def _root_key(root):
+    """Ledger roots are recorded as written and must still match a discovered path."""
+    try:
+        return str(Path(root).resolve())
+    except OSError:
+        return str(root)
+
+
+def record(op, session, owner="unknown"):
+    LEDGER.parent.mkdir(parents=True, exist_ok=True)
+    entry = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "op": op, "owner": owner,
+             "root": session.get("root"), "cdp": session.get("port"),
+             "pid": session.get("pid"), "server_pid": session.get("server_pid"),
+             "url": session.get("url")}
+    with LEDGER.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
+def claims():
+    """Every browser this machine can still be blamed for, one entry per root, probed for life."""
+    latest = {}
+    if LEDGER.exists():
+        for line in LEDGER.read_text(encoding="utf-8").splitlines():
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if entry.get("root"):
+                latest[_root_key(entry["root"])] = entry
+    # The ledger only knows what it was around to write down, and a session.json left by a
+    # killed driver is a live chromium on a port regardless. Discovering the file keeps a
+    # pre-ledger orphan from silently double-booking the machine behind 'start'.
+    artifacts = ROOT / "artifacts"
+    for path in artifacts.rglob("session.json") if artifacts.is_dir() else ():
+        key = _root_key(path.parent)
+        if key in latest:
+            continue
+        try:
+            held = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        latest[key] = {"root": str(path.parent), "ts": "", "op": "started", "owner": "unrecorded",
+                       "cdp": held.get("port"), "pid": held.get("pid"),
+                       "server_pid": held.get("server_pid"), "url": held.get("url")}
+    for entry in latest.values():
+        entry["live"] = _devtools_alive(entry.get("cdp")) or _port_open(port_of(entry.get("url")))
+    return sorted(latest.values(), key=lambda entry: str(entry.get("ts")))
+
+
+def port_of(url):
+    from urllib.parse import urlsplit
+    parts = urlsplit(url or "")
+    return parts.port
+
+
+def kill_tree(pid):
+    if not pid:
+        return
+    if sys.platform == "win32":
+        subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"], capture_output=True)
+    else:
+        subprocess.run(["kill", str(pid)], capture_output=True)
+
+
+def reclaim(entry):
+    for pid in (entry.get("pid"), entry.get("server_pid")):
+        kill_tree(pid)
+    # Drop the ownership token with the process it named, otherwise 'list' fills up with
+    # corpses that look like sessions someone might still be driving.
+    session_file(entry.get("root")).unlink(missing_ok=True)
+    record("reclaimed", entry, owner="sweeper")
+
+
+def refuse_or_reclaim(args, own_root):
+    """One browser work unit at a time: a second one doubles the CPU rasterisation."""
+    held = [entry for entry in claims()
+            if entry.get("live") and Path(entry["root"]) != Path(own_root)]
+    if not held:
+        return
+    if not args.reclaim:
+        owners = ", ".join(f"{entry['root']} (owner {entry.get('owner')}, cdp {entry.get('cdp')})"
+                           for entry in held)
+        raise SystemExit(f"another play session already holds the machine: {owners} — "
+                         "stop it, or pass --reclaim to take over a session you know is orphaned")
+    for entry in held:
+        reclaim(entry)
+    print(json.dumps({"reclaimed": [entry["root"] for entry in held]}))
+
+
 def load(root):
     path = session_file(root)
     if not path.exists():
@@ -90,9 +220,16 @@ def trace(root, entry):
 
 def start(args):
     root = Path(args.root)
+    refuse_or_reclaim(args, root)
     root.mkdir(parents=True, exist_ok=True)
     if session_file(root).exists():
-        raise SystemExit(f"{root} already holds a session — run 'stop' first")
+        held = {"root": str(root), **json.loads(session_file(root).read_text(encoding="utf-8"))}
+        if _port_open(held.get("port")) or _port_open(port_of(held.get("url"))):
+            raise SystemExit(f"{root} already holds a live session — run 'stop' first")
+        # Dead but still recorded: the owner died before 'stop'. Reap it rather than stacking
+        # a second chromium on top of the orphan.
+        reclaim(held)
+        session_file(root).unlink(missing_ok=True)
     server = None
     base = args.url
     if args.serve:
@@ -107,6 +244,13 @@ def start(args):
     # Git Bash rewrites a leading-slash argument into a Windows path, so `--path /x` can
     # arrive as "C:/Program Files/Git/x". Pass `--path x`, or set MSYS_NO_PATHCONV=1.
     path = args.path.strip()
+    if _port_open(args.port):
+        # Two critics both defaulting to 9333 does not produce two browsers: the second one
+        # waits on a port someone else owns and then reports a browser that never answered.
+        import socket
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            args.port = probe.getsockname()[1]
     if path and not path.startswith("/"):
         path = "/" + path
     if path and (":" in path or "\\" in path):
@@ -135,18 +279,21 @@ def start(args):
         except Exception:
             time.sleep(0.5)
     if not ready:
+        # A browser that never answered is abandoned here, so the disposable server started
+        # for it must not be left listening — that is exactly how a failed run becomes a leak.
         browser.terminate()
+        kill_tree(server.pid if server else None)
         raise SystemExit(f"DevTools port {args.port} never answered within {args.timeout}s — "
                          f"see {root / 'browser.log'}")
-    session_file(root).write_text(json.dumps({
-        "port": args.port, "pid": browser.pid, "root": str(root), "url": entry,
-        "server_pid": server.pid if server else None,
-        "db": str(root / "session.sqlite3") if server else None,
-    }, indent=1), encoding="utf-8")
+    session = {"port": args.port, "pid": browser.pid, "root": str(root), "url": entry,
+               "server_pid": server.pid if server else None,
+               "db": str(root / "session.sqlite3") if server else None}
+    session_file(root).write_text(json.dumps(session, indent=1), encoding="utf-8")
+    record("started", session, owner=args.owner)
     print(json.dumps({"started": str(root), "cdp": args.port, "url": entry}))
 
 
-def run_step(page, step):
+def run_step(page, step, root):
     kind = step["action"]
     pause = step.get("wait", 0.6)
     if kind == "goto":
@@ -187,6 +334,14 @@ def run_step(page, step):
         page.mouse.up()
     elif kind == "shot":
         path = Path(step["path"])
+        # A bare name belongs to the session, not to whoever happened to run the command: the
+        # evidence pack is read back from the session root, and a shot written to the cwd is
+        # missing from it while the trace still claims success. Paths already written out to
+        # the root stay as they are, because reviewers spell them both ways.
+        if not path.is_absolute():
+            anchored = (Path.cwd() / path).resolve()
+            if Path(root).resolve() not in anchored.parents:
+                path = root / path
         path.parent.mkdir(parents=True, exist_ok=True)
         page.screenshot(path=str(path))
         return {"ok": True, "shot": str(path)}
@@ -205,6 +360,7 @@ def run_step(page, step):
 
 def step(args):
     session = load(args.root)
+    root = Path(session.get("root") or args.root)
     steps = json.loads(Path(args.file).read_text(encoding="utf-8")) if args.file else json.loads(args.steps)
     from playwright.sync_api import sync_playwright
     results = []
@@ -224,12 +380,13 @@ def step(args):
                 result = {"ok": False, "error": f"{item['action']}: unknown key(s) {sorted(unknown)}"}
             else:
                 try:
-                    result = run_step(page, item)
+                    result = run_step(page, item, root)
                 except Exception as error:  # a critic must see the failure, not a stack trace
                     result = {"ok": False, "error": f"{type(error).__name__}: {str(error)[:300]}"}
             if not result.get("ok"):
                 result["error"] += hint
-            trace(args.root, {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "step": item, "result": {
+            # One root for the whole pack: the trace and the shots it names must sit together.
+            trace(root, {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "step": item, "result": {
                 k: v for k, v in result.items() if k in {"ok", "error", "shot"}}})
             results.append(result)
     print(json.dumps(results, ensure_ascii=False, indent=1))
@@ -238,18 +395,38 @@ def step(args):
 
 def stop(args):
     session = load(args.root)
-    for pid in (session.get("pid"), session.get("server_pid")):
-        if not pid:
-            continue
-        subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"], capture_output=True) \
-            if sys.platform == "win32" else subprocess.run(["kill", str(pid)], capture_output=True)
+    reclaim(session)
     session_file(args.root).unlink(missing_ok=True)
     print(json.dumps({"stopped": str(args.root), "trace": str(Path(args.root) / "action-trace.jsonl")}))
 
 
+def listing(args):
+    """Who owns a browser on this machine right now — read from ledger and session files,
+    never by enumerating processes, which costs minutes on this host."""
+    rows = [{"root": entry.get("root"), "live": entry.get("live"), "owner": entry.get("owner"),
+             "since": entry.get("ts"), "cdp": entry.get("cdp"), "pid": entry.get("pid"),
+             "server_pid": entry.get("server_pid")} for entry in claims()]
+    print(json.dumps(rows, indent=1))
+    return 0
+
+
+def sweep(args):
+    """Reap every session the ledger still marks live but nobody is driving."""
+    taken = []
+    for entry in claims():
+        if entry.get("live") and Path(entry["root"]) != Path(args.root):
+            reclaim(entry)
+            taken.append(entry["root"])
+        elif entry.get("live"):
+            stop(args)
+            taken.append(entry["root"])
+    print(json.dumps({"reclaimed": taken, "remaining_live": [e["root"] for e in claims() if e.get("live")]}))
+    return 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("command", choices=["start", "step", "stop"])
+    parser.add_argument("command", choices=["start", "step", "stop", "list", "sweep"])
     parser.add_argument("--root", default="artifacts/play-session")
     parser.add_argument("--serve", action="store_true", help="start the app on a fresh disposable DB")
     parser.add_argument("--url", default="http://127.0.0.1:8000", help="origin to play (with --serve, the port is reported)")
@@ -262,6 +439,10 @@ def main(argv=None):
     parser.add_argument("--timeout", type=int, default=120, help="seconds to wait for the browser")
     parser.add_argument("--file", help="JSON list of steps")
     parser.add_argument("--steps", help="inline JSON list of steps")
+    parser.add_argument("--owner", default="unknown",
+                        help="who is driving, recorded in the ledger so a leak has a name")
+    parser.add_argument("--reclaim", action="store_true",
+                        help="start anyway, after killing sessions another owner left behind")
     args = parser.parse_args(argv)
     if args.command == "start":
         return start(args)
@@ -269,6 +450,10 @@ def main(argv=None):
         if not (args.file or args.steps):
             raise SystemExit("step needs --file or --steps")
         return step(args)
+    if args.command == "list":
+        return listing(args)
+    if args.command == "sweep":
+        return sweep(args)
     stop(args)
     return 0
 
