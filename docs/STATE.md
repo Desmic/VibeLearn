@@ -18,23 +18,47 @@ are never merged into one.
   in the world band instead of living only in the screen-reader channel (`ec8789a`), and preferences
   (sound, music, effects, motion, XP) have one owner that also applies them, so an in-game toggle has
   force instead of only flipping its own icon (`05f3988`).
-- Nothing in this candidate has been observed in play by a critic or by the user yet.
+- One cold critic pass has since observed this content and scored it below the bar (see Evidence
+  status). The user has not seen any of it.
 
 ## Evidence status
 
 | Claim | State |
 | --- | --- |
 | Automated checks on `05f3988` | Passed: 426 unit tests (7 skipped), full 23-state presentation scenario 0 violations with `prefDrift=0` and `announcedOnly=0` in every state, `first-words-opening` browser group passed |
-| Automated checks on the dirty tree (25 Sep) | Passed: `manage.py build`, 433 unit tests (7 skipped) in 94 s. Not a candidate measurement — it includes uncommitted work |
+| Automated checks on the dirty tree (25 Sep, re-measured) | Passed: `manage.py build`, 434 unit tests OK (7 skipped) in 71 s. Not a candidate measurement — it includes uncommitted work |
 | Automated checks not yet re-run | The five other active Level 1 browser groups (tutorial, controls, chapter, readability, lifecycle) were last run on `ec8789a`; they need the frozen SHA, not a rescheduled slot |
-| Machine-level harness repair (25 Sep) | Passed, verified by measurement: `tools/play_session.py` now accounts for every chromium it opens even when the ledger predates it, refuses a second browser, and writes a review's screenshots inside its own evidence pack. One pre-repair orphan (1.76 GB, DevTools port 9342, driver dead) was reaped; afterwards no chrome process owns a loopback port |
-| Experience review | **Not run.** Two attempts this cycle produced no report, both for process reasons (a slow agent-driven pass, an aborted relaunch). One cold playthrough, phone first then desktop, every lane scored in the same pass, motion and audio parked as unassessed |
+| Machine-level harness repair (25 Sep) | Passed, measured: ownership is the browser process not its port (`list`/`--reclaim` can no longer mistake a reused 9333 for a live owner); the frame probe stops repainting when nobody polls; `start` now sets the page box over CDP and refuses to run if the reported `innerWidth/innerHeight` disagree with the requested viewport (it previously produced 484x644 for a 390x844 request); rasterisation moved from SwiftShader to the host's GPU path, measured 9fps to 144fps. Unit-tested and exercised live. A pre-repair orphan (1.76 GB, driver dead) was reaped |
+| Experience review | **Ran 25 Sep, and the candidate is not ready.** One fresh-context cold observer, one pass, phone 390x844 then desktop, all five lanes scored in that pass, motion and audio recorded unassessed. Scores: story 7/7, art-world 6/7, gameplay 6/7, learning 7/7, **presentation 4 phone / 6 desktop** — every lane below the 9 bar. Report: `artifacts/cold-pass-report.md`, evidence under `artifacts/cold-pass-phone/` |
+| Experience review — caveats | That pass started its phone beats at the broken 484x644 box, so shots `01`-`04` are not phone evidence; its desktop pass was truncated at the mission decision |
+| Reproduction of the review's load-bearing claims (25 Sep, live GPU phone session at a true 390x844) | **One confirmed, one confirmed at source, one not reproducible.** (a) The invisible information node is confirmed in live play: `p#scene-description` measures `[0,16 1x1]` while its text is the only copy of the instruction. (b) The decision-sheet chrome removal is confirmed by the reviewer's own frame `25-power-lead-click.png` (stick and `◎ + − ? ◉` column absent) and by its mechanism in source, `web/first-words.css:107`, which sets `display:none` on `.game-view-tools`, `.game-move-stick` and `.game-controls-help` under `.sheet-mode`. (c) Replaying the recorded trace to reach that beat failed as an instrument: 110 steps reported `ok` and the world never left control practice, so `ok` means "the call did not throw", not "the game responded". A trace recorded through the pre-repair viewport is not replayable evidence, and the harness has no state-change assertion to catch that. |
+| In-flight repairs already in the dirty tree | Another agent's uncommitted work adds a visible `#learning-readout` world carrier (the cold pass found the causal explanation and beat counter living only in 1x1px nodes) and a `launch_browser` opt-in for headed checks. Neither is mine to edit, and neither has been measured or played. `tests/browser_check.py` and `tools/check_presentation_budget.py` still default to SwiftShader, i.e. the 9fps raster path the play harness just left |
 | User acceptance | Not requested. The user's latest verdict on the game is a rejection and stands until they say otherwise |
+
+## Not verified
+
+Stated as measured, not inferred:
+
+- No player-facing content in this tree has been observed in play by the user.
+- The five deferred Level 1 browser groups, and every gate, on any SHA that contains the in-flight edits.
+- The viewport-mismatch refusal path and the harness `--software` fallback: written, never exercised.
+- Whether the cold pass's remaining findings (unlabelled `◎ ◉` column, 21x21px phone stick arrows,
+  `clickrole "☰"` having no accessible name) are defects or the reviewer's framing: each is quoted
+  from its own dump, none has been re-measured.
+- An earlier "idle chromium costs 10.5 cores" figure was retracted as unattributed; the attributed
+  cost was one renderer at 871% of a core, caused by the frame probe that is now fixed.
 
 ## Confirmed blockers
 
-None mechanical. The open question is not measurement but whether the whole journey works for
-a new player, which no checker can answer.
+- Mechanical: none outstanding on the last measured candidate; the four gate failures found earlier
+  are fixed and unit-pinned.
+- Demonstrated in play, not yet repaired on a frozen SHA: a bottom sheet removes the view chrome
+  (`web/first-words.css:107`) in states whose prompt asks the player to look at the world, and
+  primary instruction text still reaches a sighted player only when a world marker happens to be
+  placed. Both need a bounded repair plus a measurement that would have caught them — the budget
+  tool has no rule for "an opened carrier took away an affordance the beat depends on".
+- The open question is not measurement but whether the whole journey works for a new player, which
+  no checker can answer. Every lane scored below the 9 bar in the one cold pass that ran.
 
 ## Next actions, in order
 
