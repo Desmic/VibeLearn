@@ -115,6 +115,36 @@ class PresentationBudgetContract(unittest.TestCase):
             self.assertFalse(witnessed_sheet_open(page, state))
             browser.close()
 
+    def test_sheet_allowance_records_player_opening_after_render_frame(self):
+        from playwright.sync_api import sync_playwright
+        state = {"opened_by": "Open machine", "sheet": "#engine"}
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            page = browser.new_page()
+            page.set_content("""<button onclick="requestAnimationFrame(() =>
+                document.querySelector('#engine').hidden=false)">Open machine</button>
+                <div id="engine" hidden>Message</div>""")
+            click_scenario_button(page, "Open machine", {"Open machine": {"#engine"}})
+            self.assertTrue(witnessed_sheet_open(page, state))
+            browser.close()
+
+    def test_sheet_allowance_waits_for_opener_before_visibility_sample(self):
+        from playwright.sync_api import sync_playwright
+        state = {"opened_by": "Open machine", "sheet": "#engine"}
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            page = browser.new_page()
+            page.set_content("""<button id="open" hidden onclick="
+                document.querySelector('#engine').hidden=false; this.hidden=true">Open machine</button>
+                <div id="engine">Previous sheet</div>""")
+            page.evaluate("""() => setTimeout(() => {
+                document.querySelector('#engine').hidden=true;
+                document.querySelector('#open').hidden=false;
+              }, 50)""")
+            click_scenario_button(page, "Open machine", {"Open machine": {"#engine"}})
+            self.assertTrue(witnessed_sheet_open(page, state))
+            browser.close()
+
     def test_injected_measurement_script_is_balanced(self):
         self.assertIsNone(_unclosed(MEASURE))
 

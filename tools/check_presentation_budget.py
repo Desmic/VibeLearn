@@ -16,7 +16,7 @@ import tempfile
 import time
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -474,10 +474,22 @@ SHEET_WITNESS_VALID = """({selector, name}) => {
 def click_scenario_button(page, name, opt_in_targets, timeout=30000):
     """Click through the UI, recording only a newly opened declared sheet."""
     targets = opt_in_targets.get(name, ())
+    button = page.get_by_role("button", name=name, exact=True).first
+    # The preceding game command may still be closing the sheet. Let Playwright
+    # settle on the actionable opener before taking the pre-click visibility
+    # sample, or the old sheet can be mistaken for this click's starting state.
+    button.wait_for(state="visible", timeout=timeout)
     before = {selector: page.evaluate(SHEET_VISIBLE, selector) for selector in targets}
-    page.get_by_role("button", name=name, exact=True).first.click(timeout=timeout)
+    button.click(timeout=timeout)
     for selector in targets:
-        if not before[selector] and page.evaluate(SHEET_VISIBLE, selector):
+        if not before[selector]:
+            # The click can schedule the card's render for the next frame. Wait
+            # for that opening before recording consent; an already visible or
+            # never opened sheet still earns no witness.
+            try:
+                page.wait_for_function(SHEET_VISIBLE, arg=selector, timeout=3000)
+            except PlaywrightTimeoutError:
+                continue
             page.evaluate(SHEET_WITNESS, {"selector": selector, "name": name})
 
 
