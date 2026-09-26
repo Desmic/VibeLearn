@@ -5,9 +5,47 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 from tools import play_session
+
+
+class ViewportPersistenceTests(unittest.TestCase):
+    def test_each_step_connection_reapplies_viewport_and_resize_persists(self):
+        class Page:
+            def __init__(self):
+                self.size = [484, 644]  # Chromium's native box after CDP disconnects.
+
+            def set_viewport_size(self, size):
+                self.size = [size['width'], size['height']]
+
+            def evaluate(self, expression):
+                return self.size
+
+            def wait_for_timeout(self, milliseconds):
+                pass
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / 'session.json').write_text(json.dumps(
+                {'root': str(root), 'port': 9500, 'viewport': [390, 844]}), encoding='utf-8')
+            pages = [Page(), Page()]
+            browsers = [SimpleNamespace(contexts=[SimpleNamespace(pages=[page])]) for page in pages]
+            chromium = SimpleNamespace(connect_over_cdp=mock.Mock(side_effect=browsers))
+            manager = mock.MagicMock()
+            manager.__enter__.return_value = SimpleNamespace(chromium=chromium)
+            with mock.patch('playwright.sync_api.sync_playwright', return_value=manager), \
+                 mock.patch('builtins.print'):
+                first = SimpleNamespace(root=str(root), file=None,
+                                        steps=json.dumps([{'action': 'resize', 'width': 360, 'height': 800}]))
+                self.assertEqual(play_session.step(first), 0)
+                self.assertEqual(pages[0].size, [360, 800])
+                self.assertEqual(json.loads((root / 'session.json').read_text())['viewport'], [360, 800])
+                second = SimpleNamespace(root=str(root), file=None,
+                                         steps=json.dumps([{'action': 'eval', 'expression': '()=>[innerWidth,innerHeight]'}]))
+                self.assertEqual(play_session.step(second), 0)
+                self.assertEqual(pages[1].size, [360, 800])
 
 
 class FakePage:
@@ -100,9 +138,18 @@ class ClaimDiscoveryTests(unittest.TestCase):
 
     def test_reclaiming_clears_the_ownership_token(self):
         entry = play_session.claims()[0]
-        with mock.patch.object(play_session, "kill_tree", lambda pid: None):
+        alive = {1234: True, 5678: True}
+        with mock.patch.object(play_session, "kill_tree", lambda pid: alive.__setitem__(pid, False)), \
+             mock.patch.object(play_session, "_pid_alive", lambda pid: alive.get(pid, False)):
             play_session.reclaim(entry)
         self.assertFalse((self.tmp / "artifacts" / "orphan" / "session.json").exists())
+
+    def test_failed_kill_keeps_the_ownership_token(self):
+        entry = play_session.claims()[0]
+        with mock.patch.object(play_session, "kill_tree", lambda pid: None):
+            with self.assertRaisesRegex(RuntimeError, "still live"):
+                play_session.reclaim(entry)
+        self.assertTrue((self.tmp / "artifacts" / "orphan" / "session.json").exists())
 
 
 class ExpectStepTests(unittest.TestCase):

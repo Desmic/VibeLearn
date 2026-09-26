@@ -152,14 +152,20 @@ function render(){
   const repair=repairStep(s),controlStep=practice.step;
   const relay=Boolean(s.relay_stage&&s.relay_stage!=='none');
   const [stage,goal,detail]=tutorialStage(s,complete);text('#stage-name',stage);text('#goal',goal);text('#detail',detail);
-  $('#engine').dataset.anchor=controlStep!=='done'?'zip':(relay||(complete&&s.relay_stage==='done'))?'friend-signal':'socket';
+  $('#engine').dataset.anchor=controlStep!=='done'?'zip':(relay||(complete&&s.relay_stage==='done'))?'friend-signal':s.round===1?'route-machine':'socket';
   $('#engine').setAttribute('aria-label',controlStep!=='done'?'Control practice':'Message machine');
   $('#machine-toggle').dataset.anchor=$('#engine').dataset.anchor;
-  text('#machine-toggle',goal);
+  text('#machine-toggle',s.round===0?'Inspect engine':'OPEN ENGINE');
+  $('#machine-toggle').setAttribute('aria-label','Open the message machine');
+  $('#machine-toggle').setAttribute('aria-description',goal);
   host.dataset.tutorialWorldTarget=controlStep==='done'&&repair?.focus==='world'?(repair.target||''):'';
   host.dataset.tutorialWorldAction=controlStep==='done'&&repair?.focus==='world'?(repair.primaryAction||''):'';
   host.dataset.tutorialInteractionStep=controlStep==='done'?(repair?.id||''):'';
   const shownOutput=relay?s.relay_output:s.output;
+  const readoutInput=relay?[s.relay_case?.base,s.relay_case?.notes?.[s.relay_context]]:s.input||[];
+  text('#readout-request',readoutInput[0]||'Awaiting a request');
+  text('#readout-supplied',readoutInput[1]||'No clue supplied yet');
+  text('#readout-words',shownOutput?.length?shownOutput.join(' '):'No words yet');
   $('#output').replaceChildren();for(let i=0;i<4;i++){const span=document.createElement('span');span.textContent=shownOutput[i]||'·';if(!shownOutput[i])span.className='empty';$('#output').append(span);}
   text('#context',relay?[s.relay_case.base,s.relay_case.notes[s.relay_context]||'Choose a note.',['revealed','done'].includes(s.relay_stage)?s.relay_case.prefix:''].filter(Boolean).join(' '):s.context.join(' ')||'Waiting for power.');
   text('#engine-label',relay?'MESSAGE RECEIVER · PRISON RELAY':complete?(s.relay_stage==='done'?'MESSAGE RECEIVER · REPLY':'MESSAGE MACHINE · ROUTE OPEN'):s.round===1?'MESSAGE MACHINE · LEVEL 1':'MESSAGE MACHINE · TUTORIAL');
@@ -379,10 +385,13 @@ function frame(){
   // B2 protagonist clearance: Zip is the focal subject of every play stage, so
   // anchored labels keep out of his body box *and* its focal ring instead of
   // reading across the character (the narrow-phone POWER LEAD marker buried him).
-  const hero=focalClearanceBox(world,'zip',{top:[0,1.15,0],bottom:[0,-.15,0],left:[-.55,0,0],right:[.55,0,0],margin:8});
+  const hero=focalClearanceBox(world,'zip',{top:[0,2.55,0],bottom:[0,-.15,0],left:[-.8,0,0],right:[.8,0,0],margin:12});
   if(hero)avoidRects.push(hero);
   for(const marker of $('#markers').children){
-    const anchor=world.projectEntity(marker.dataset.anchor),wrongRound=marker.dataset.round!==undefined&&Number(marker.dataset.round)!==s.round;
+    const projected=world.projectEntity(marker.dataset.anchor);
+    const readout=marker.id==='learning-readout';
+    const anchor=readout&&!projected?.inFront?world.projectEntity('zip'):projected;
+    const wrongRound=marker.dataset.round!==undefined&&Number(marker.dataset.round)!==s.round;
     const available=marker.dataset.action?s.available_actions?.includes(marker.dataset.action):true;
     // P3: a visible world sign must never read as a dead control. Signs whose
     // action is currently spent stay readable and click-inert (the act() guards
@@ -403,9 +412,9 @@ function frame(){
       marker.classList.toggle('parked',!(anchor&&anchor.inFront));
     // I3: while the machine panel is open it owns the decision; its world
     // choice markers fold away (they return when the panel is put away).
-    }else marker.hidden=(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
+    }else marker.hidden=(readout&&(!s.powered||practice.step!=='done'||(s.clue==='none'&&!relay)||!card.hidden))||(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
     if(anchor&&!marker.hidden&&!(toggleMarker&&marker.classList.contains('parked'))){
-      const placement=placeWorldMarker(marker,anchor,{viewportWidth:rect.width,safeTop,safeBottom,critical,parkWhenFull:carrier,avoidRects});
+      const placement=placeWorldMarker(marker,anchor,{viewportWidth:rect.width,safeTop,safeBottom,critical,parkWhenFull:carrier,yOffset:readout?48:12,avoidRects});
       if(!placement.placed||(!critical&&!carrier&&!placement.insideSafeArea))marker.hidden=true;
       else{const footprint=marker.getBoundingClientRect();avoidRects.push({left:footprint.left-rect.left,right:footprint.right-rect.left,top:footprint.top-rect.top,bottom:footprint.bottom-rect.top});}
     }else if(toggleMarker&&marker.classList.contains('parked')){marker.style.left='';marker.style.top='';}
@@ -415,10 +424,15 @@ function frame(){
 host.addEventListener('click',async e=>{
   if(blocked()||e.target.closest('button,.game-player-controls'))return;
   const target=await world.pickSemanticAt(e.clientX,e.clientY),s=view();
-  if(target==='loose-plug'||target?.startsWith('socket')){
+  if(target==='loose-plug'||(s.round===0&&target?.startsWith('socket'))){
     // I1/CP4: acting on the machine performs the machine's verb in the world;
     // it never summons a panel about the machine. The diegetic toggle opens the panel.
     if(!s.powered)act('connect');else if(s.available_actions?.includes('step'))act('step');
+  }
+  if(s.round===1&&target?.startsWith('route-machine')){
+    if(s.available_actions?.includes('step'))act('step');
+    else if(s.available_actions?.includes('send'))act('send');
+    else{cardOpen=true;syncCardVisibility();}
   }
   if(target?.startsWith('moon')&&s.available_actions?.includes('scan-moon'))act('scan-moon');
   const noticeAction=target?.startsWith('notice-old')?'scan-moon':target?.startsWith('notice-parade')?'scan-parade':target?.startsWith('notice-today')?'scan-star':null;

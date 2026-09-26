@@ -2,14 +2,14 @@
 import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright,expect
-from tests.browser_check import start_server,stop_server
+from tests.browser_check import start_server,stop_server,launch_browser
 from tests.level1_chapter_browser import action,generate,skip_opening_to_tutorial
 ROOT=Path(__file__).resolve().parents[1]
 def overlaps(a,b):
     return a['x']<b['x']+b['width'] and a['x']+a['width']>b['x'] and a['y']<b['y']+b['height'] and a['y']+a['height']>b['y']
 def main():
     with tempfile.TemporaryDirectory() as temp,sync_playwright() as p:
-        proc,url=start_server(Path(temp)/'readability.db');browser=p.chromium.launch()
+        proc,url=start_server(Path(temp)/'readability.db');browser=launch_browser(p)
         try:
             page=browser.new_page(viewport={'width':390,'height':844},reduced_motion='reduce')
             page.goto(url+'/first-words');skip_opening_to_tutorial(page,skip_controls=True)

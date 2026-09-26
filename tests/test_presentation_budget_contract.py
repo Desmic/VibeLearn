@@ -58,7 +58,8 @@ def _unclosed(code):
 
 
 def _metrics(**overrides):
-    base = {'coverage': 0.05, 'panelOpen': False, 'clipped': [], 'longBlocks': [], 'disabledVisible': [],
+    base = {'coverage': 0.05, 'nonTouchCoverage': 0.05, 'touchControlCount': 0,
+            'viewportWidth': 1280, 'panelOpen': False, 'clipped': [], 'longBlocks': [], 'disabledVisible': [],
             'focal': None, 'presence': None, 'subjectCover': None, 'markerClash': [], 'strayControls': [],
             'dupCarriers': [], 'unreachableActions': [], 'sheet': None, 'carriers': [], 'announcedOnly': [],
             'prefDrift': [], 'declaredPreferences': []}
@@ -210,6 +211,18 @@ class PresentationBudgetContract(unittest.TestCase):
                        if state.get('coverage_max', BUDGETS['coverage_max']) > BUDGETS['coverage_max']
                        and not (state.get('coverage_max_reason') or state.get('panel_open') or state.get('cinematic'))]
         self.assertEqual(unjustified, [])
+        self.assertEqual([state['name'] for state in scenario['states']
+                          if resolve_state_budgets(state, BUDGETS)[1]], [])
+
+    def test_touch_allowance_does_not_excuse_informational_ui(self):
+        state = {'touch_controls': ['.game-move-stick'], 'coverage_max': 0.20}
+        budgets = {**BUDGETS, 'coverage_max': 0.20}
+        metrics = _metrics(coverage=0.19, nonTouchCoverage=0.16,
+                           touchControlCount=2, viewportWidth=390)
+        found = violations('phone', metrics, budgets, False, state)
+        self.assertTrue(any('non-touch UI covers' in item for item in found))
+        metrics['nonTouchCoverage'] = 0.14
+        self.assertEqual(violations('phone', metrics, budgets, False, state), [])
 
 
     def test_i9_flags_a_beat_whose_world_carriers_vanished(self):

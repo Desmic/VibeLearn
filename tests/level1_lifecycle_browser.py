@@ -7,6 +7,7 @@ from werkzeug.serving import make_server
 from app.hosted import create_app
 from app.storage import migrate, transaction
 from tests.test_hosted import AuthFixture
+from tests.browser_check import launch_browser
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -21,7 +22,7 @@ def main():
         thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
         try:
             with sync_playwright() as p:
-                browser=p.chromium.launch()
+                browser=launch_browser(p)
                 try:
                     page=browser.new_page(ignore_https_errors=True,viewport={'width':390,'height':844});page.goto(origin)
                     page.locator('#login-email').fill('owner@example.test');page.locator('#login-password').fill('test-password');page.locator('#login-submit').click()

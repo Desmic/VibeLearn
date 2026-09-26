@@ -95,6 +95,9 @@ routeBoard('notice-parade',[6.2,0,-11.2],-20,'rose','pinkGlow');
 routeBoard('notice-today',[3.2,0,-16],-12,'teal','mint');
 addTo('prison-zone',messageMachine('socket',[-3.5,0,2]));
 addTo('prison-zone',tokenTrack('words',[-3.5,1.3,4.5],4));
+// The first mission has its own reachable speech station. The tutorial socket is
+// behind the Moon door; anchoring mission controls to it strands them off-camera.
+addTo('prison-zone',messageMachine('route-machine',[-3,0,-15]));
 part('cable','box','gold',[-2,.15,2.6],[2.4,.1,.12],{parent:'prison-zone',rotation:[0,-18,0]});
 part('loose-plug','sphere','mint',[-1,.3,3],[.4,.4,.4],{parent:'prison-zone'});
 part('wrong-ring','torus','rose',[0,.12,-10.8],[2.1,.1,2.1],{parent:'prison-zone',enabled:false});
@@ -186,14 +189,14 @@ export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'
 
 const missionBase=()=>({
   show:['zip','prison-zone','sun','star',...revealParts],
-  hide:[...speechMarks,'bellweather-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','relay-note-a','relay-note-b','zip-voice','socket-core','socket-ring',...limboProps,...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
+  hide:[...speechMarks,'bellweather-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','relay-note-a','relay-note-b','route-machine','zip-voice','socket-core','socket-ring',...limboProps,...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
   transforms:{'moon-door':{position:[0,0,0]},'sun-door':{position:[0,0,0]},'star-door':{position:[0,0,0]},zip:{position:[0,0,-28]}},
   animations:{zip:'idle'}
 });
 
 function opening(beat){
   const p={show:['zip',...revealParts],hide:['bellweather-zone','prison-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','warden-rift-link','voice-extract-link','stolen-voice','zip-voice'],transforms:{zip:{position:[0,0,10]},singer:{position:[2.2,0,.5]},'friend-a':{position:[-2.2,0,.5]},'friendship-lantern':{position:[1.9,1.2,10.7]},'moon-door':{position:[0,0,0]}},animations:{zip:'idle'}};
-  p.hide.push(...speechMarks,'sun','star','notice-old','notice-parade','notice-today','tutorial-route-open','wrong-ring','reunion-ring','route-glow',...limboProps);
+  p.hide.push(...speechMarks,'sun','star','route-machine','notice-old','notice-parade','notice-today','tutorial-route-open','wrong-ring','reunion-ring','route-glow',...limboProps);
   // Explicitly restore the cast after a prior rupture/replay hid individuals.
   p.show.push('singer','friend-a','bellworker-a','bellworker-b','bellworker-b-parcel');
   p.hide.push('bellworker-a-parcel');
@@ -289,7 +292,7 @@ function present(s,prev){
   for(let i=0;i<(s.pieces||0);i++)p.show.push(`words-piece-${i}`);
   const tutorialComplete=s.round===1||s.status==='success';
   if(tutorialComplete){p.transforms['moon-door']={position:[0,7.8,0]};p.show.push('tutorial-route-open','zip-voice','route-floor','route-wall--1','route-wall-1');}
-  if(s.round===1&&s.status!=='success')p.show.push('notice-old','notice-parade','notice-today');
+  if(s.round===1){p.show.push('route-machine');if(s.status!=='success')p.show.push('notice-old','notice-parade','notice-today');}
   // The relay is played at the receiver: its two physical notes appear with it.
   if(s.relay_stage&&s.relay_stage!=='none')p.show.push('relay-note-a','relay-note-b');
   if(s.status==='wrong'){

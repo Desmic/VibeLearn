@@ -76,6 +76,11 @@ is our design decision; the cited Portal study does not prove all HUDs must be 3
    the design digest; observations cite unique checkpoints surrounding the same action.
    The promotion workflow reads the design from the candidate commit, not just main.
    Normal preview override does not waive this gate. Deployment is not acceptance.
+   For a sequence step, the before/after checkpoints must show the actual input and
+   generated history legibly at the active focus **before the next learner action**.
+   Include an ordinary camera change and a narrow viewport in the active-play probe;
+   source state, screen-reader-only text and an optional inspection panel cannot
+   prove the player saw the worked example at the moment it was taught.
 
 `manage.py build` checks structure while keeping draft repairs technically buildable.
 `check_release_gate` enforces design review/alignment under the active quality policy.

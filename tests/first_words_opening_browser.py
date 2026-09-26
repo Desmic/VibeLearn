@@ -4,7 +4,7 @@ import json
 import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
-from tests.browser_check import start_server, stop_server
+from tests.browser_check import start_server, stop_server, launch_browser
 from tests.first_words_browser import until
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -105,7 +105,7 @@ def main():
         if 'GL_INVALID_FRAMEBUFFER_OPERATION' in message.text or 'Framebuffer is incomplete' in message.text:
             errors.append(message.text)
     with tempfile.TemporaryDirectory() as temp,sync_playwright() as p:
-        proc,url=start_server(Path(temp)/'opening.db');browser=p.chromium.launch()
+        proc,url=start_server(Path(temp)/'opening.db');browser=launch_browser(p)
         try:
             context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,record_video_dir=str(Path(temp)/'video'),record_video_size={'width':390,'height':844})
             page=context.new_page();page.set_default_timeout(15000);page.on('pageerror',lambda e:errors.append(str(e)))

@@ -10,6 +10,7 @@ from uuid import uuid4
 from app import service
 from app.hosted import create_app, COOKIE, ACCESS_COOKIE
 from app.storage import migrate, transaction
+from tests.browser_check import launch_browser
 
 
 class AuthFixture:
@@ -68,7 +69,7 @@ class HostedTests(unittest.TestCase):
         thread = threading.Thread(target=server.serve_forever, daemon=True);thread.start()
         try:
             with sync_playwright() as playwright:
-                browser = playwright.chromium.launch()
+                browser = launch_browser(playwright)
                 try:
                     page = browser.new_page(ignore_https_errors=True, viewport={"width": 390, "height": 844});page.goto(origin)
                     expect(page.locator('#auth-world')).to_have_attribute('data-engine','playcanvas',timeout=20000);expect(page.locator('#auth-world .vl-playcanvas-engine')).to_be_visible();self.assertEqual(page.locator('#rescue-game').count(),0);self.assertEqual(page.locator('svg').count(),0)

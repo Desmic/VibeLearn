@@ -80,7 +80,7 @@
    "screenshot": "artifacts/play-20260922/b8-tutorial-prompt-desktop.png"
   },
   {
-   "name": "mission-intro-closed",
+   "name": "tutorial-word-desktop-folded",
    "steps": [
     {
      "click": "Skip control practice",
@@ -101,7 +101,28 @@
     {
      "click": "Use the speech engine in the world",
      "timeout": 60000
-    },
+    }
+   ],
+   "wait_eval": "()=>{const r=document.querySelector('#learning-readout');return r&&!r.hidden&&r.textContent.includes('Open')&&!FirstWordsReview.runtime.world.animating;}",
+   "carriers": [{"selector":"#learning-readout","min":1}],
+   "focal": "zip",
+   "screenshot": "artifacts/play-20260925/tutorial-word-desktop-folded.png"
+  },
+  {
+   "name": "tutorial-word-phone-folded",
+   "resize": [390,844],
+   "wait_eval": "()=>{const r=document.querySelector('#learning-readout');return r&&!r.hidden&&r.textContent.includes('Open')&&!FirstWordsReview.runtime.world.animating;}",
+   "carriers": [{"selector":"#learning-readout","min":1}],
+   "touch_controls": [".game-move-stick", ".game-view-tools"],
+   "coverage_max": 0.20,
+   "coverage_max_reason": "The narrow viewport needs the on-screen move stick and camera controls; the learning readout and all other information still meet the 15% base budget.",
+   "focal": "zip",
+   "screenshot": "artifacts/play-20260925/tutorial-word-phone-folded.png"
+  },
+  {
+  "name": "mission-intro-closed",
+  "resize": [1280,720],
+  "steps": [
     {
      "click": "Use the speech engine in the world",
      "timeout": 60000
@@ -127,7 +148,7 @@
      "timeout": 60000
     },
     {
-     "wait_text": "Find the current route",
+     "wait_text": "OPEN ENGINE",
      "timeout": 60000
     },
     {
@@ -361,6 +382,7 @@
    "wait_text": "Skip control practice",
    "focal": "zip",
    "coverage_max": 0.2,
+   "touch_controls": [".game-move-stick", ".game-view-tools"],
    "coverage_max_reason": "Touch viewport: on-screen move stick and camera tool cluster are direct-input affordances (guide B1 touch allowance); informational surfaces alone measure under 15%.",
    "screenshot": "artifacts/play-20260922/b8-tutorial-prompt-phone.png"
   },
@@ -392,6 +414,7 @@
     }
    ],
    "coverage_max": 0.2,
+   "touch_controls": [".game-move-stick", ".game-view-tools"],
    "coverage_max_reason": "Touch viewport: the move stick and camera cluster are direct-input affordances (guide B1). The repair tutorial is diegetic: the panel stays folded behind the world toggle and the world markers carry the verbs."
   },
   {
@@ -525,7 +548,7 @@
      "timeout": 90000
     },
     {
-     "wait_text": "Find the current route",
+     "wait_text": "OPEN ENGINE",
      "timeout": 90000
     },
     {
@@ -606,7 +629,7 @@
      "timeout": 60000
     },
     {
-     "wait_text": "Find the current route",
+     "wait_text": "OPEN ENGINE",
      "timeout": 60000
     },
     {
@@ -614,7 +637,8 @@
      "timeout": 60000
     }
    ],
-   "coverage_max": 0.23,
+   "coverage_max": 0.20,
+   "touch_controls": [".game-move-stick", ".game-view-tools"],
    "wait_eval": "()=>document.querySelector('#engine').hidden&&!FirstWordsReview.runtime.world.animating",
    "carriers": [
     {
@@ -623,7 +647,7 @@
     }
    ],
    "wait_timeout": 60000,
-   "coverage_max_reason": "Touch viewport, measured in two parts: 13.4% is the direct-input allowance the same build reports with no carriers on screen (move stick + camera cluster, guide B1), and the remaining ~7% is the three world route boards this beat owes under rule I9 - rung-2 world carriers, not a panel. Declared with the split so a build that paints a fourth surface on top of them still fails."
+   "coverage_max_reason": "The narrow viewport needs its move stick and camera controls; the three route clues and action prompt must remain visible while informational surfaces alone stay within 15%."
   },
   {
    "name": "mission-decision-phone-sheet",
@@ -850,7 +874,7 @@
      "timeout": 60000
     },
     {
-     "wait_text": "Find the current route",
+     "wait_text": "OPEN ENGINE",
      "timeout": 60000
     },
     {

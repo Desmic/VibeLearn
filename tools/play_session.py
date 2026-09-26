@@ -38,14 +38,16 @@ can certify a beat: every other action reports ok when its call did not throw, s
 replay can be green while the world never advanced.
 
 Rasterisation defaults to the host's GPU path (`--use-angle=d3d11`, measured 60-144fps
-here); `--software` forces the CPU path, which runs at about 9fps. `start` sets the page box
-over CDP and refuses to run if the page reports a different viewport than was asked for,
+here); `--software` forces the CPU path, which ran at about 9fps in an earlier sample.
+`start` and every `step` connection set the page box over CDP and refuse evidence if
+the page reports a different viewport than was asked for,
 because `--window-size` is not the viewport and a review shot taken at the wrong box is not
 phone or desktop evidence — and a trace recorded through that wrong box cannot be replayed
 to re-certify the claim it made.
 """
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 import time
@@ -253,14 +255,38 @@ def kill_tree(pid):
     if not pid:
         return
     if sys.platform == "win32":
-        subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"], capture_output=True)
+        # taskkill can return "Access denied" for a browser this account started.
+        # Stop-Process works on this host; traverse children first so a detached
+        # Chromium GPU/renderer cannot survive its browser root.
+        target = int(pid)
+        script = (f"$target={target};$all=Get-CimInstance Win32_Process;"
+                  "$ids=New-Object 'System.Collections.Generic.List[int]';$ids.Add($target);"
+                  "for($i=0;$i -lt $ids.Count;$i++){"
+                  "$all|Where-Object ParentProcessId -eq $ids[$i]|ForEach-Object {$ids.Add([int]$_.ProcessId)}};"
+                  "for($i=$ids.Count-1;$i -ge 0;$i--){"
+                  "Stop-Process -Id $ids[$i] -Force -ErrorAction SilentlyContinue};"
+                  "if(Get-Process -Id $target -ErrorAction SilentlyContinue){exit 1}")
+        shell = shutil.which("pwsh") or shutil.which("powershell")
+        if not shell:
+            raise RuntimeError("PowerShell is required to stop a Windows browser process tree")
+        result = subprocess.run([shell, "-NoProfile", "-Command", script],
+                                capture_output=True, text=True, timeout=20)
+        if result.returncode:
+            raise RuntimeError(f"could not stop process tree {target}: {result.stderr.strip()}")
     else:
-        subprocess.run(["kill", str(pid)], capture_output=True)
+        import os
+        import signal
+        try:
+            os.kill(int(pid), signal.SIGTERM)
+        except ProcessLookupError:
+            pass
 
 
 def reclaim(entry):
     for pid in (entry.get("pid"), entry.get("server_pid")):
         kill_tree(pid)
+    if any(_pid_alive(pid) for pid in (entry.get("pid"), entry.get("server_pid"))):
+        raise RuntimeError(f"session processes still live; refusing to mark {entry.get('root')} stopped")
     # Drop the ownership token with the process it named, otherwise 'list' fills up with
     # corpses that look like sessions someone might still be driving.
     session_file(entry.get("root")).unlink(missing_ok=True)
@@ -270,7 +296,7 @@ def reclaim(entry):
 def refuse_or_reclaim(args, own_root):
     """One browser work unit at a time: a second one doubles the CPU rasterisation."""
     held = [entry for entry in claims()
-            if entry.get("live") and Path(entry["root"]) != Path(own_root)]
+            if entry.get("live") and _root_key(entry["root"]) != _root_key(own_root)]
     if not held:
         return
     if not args.reclaim:
@@ -296,7 +322,7 @@ def trace(root, entry):
 
 
 def start(args):
-    root = Path(args.root)
+    root = Path(args.root).resolve()
     # Reject a mangled entry path before anything is created or spent: Git Bash rewrites a
     # leading-slash argument into a Windows path, so `--path /x` can arrive as
     # "C:/Program Files/Git/x". Pass `--path x`, or set MSYS_NO_PATHCONV=1.
@@ -313,88 +339,100 @@ def start(args):
         # a second chromium on top of the orphan.
         reclaim(held)
         session_file(root).unlink(missing_ok=True)
-    server = None
-    base = args.url
-    if args.serve:
-        from tests.browser_check import start_server
-        database = root / "session.sqlite3"
-        if database.exists():
-            raise SystemExit(f"refusing to reuse an existing learner DB: {database}")
-        server, base = start_server(database)
-    from playwright.sync_api import sync_playwright
-    with sync_playwright() as playwright:
+    server = browser = connected = log = None
+    playwright = None
+    try:
+        base = args.url
+        if args.serve:
+            from tests.browser_check import start_server
+            database = root / "session.sqlite3"
+            if database.exists():
+                raise SystemExit(f"refusing to reuse an existing learner DB: {database}")
+            server, base = start_server(database)
+        from playwright.sync_api import sync_playwright
+        playwright = sync_playwright().start()
         executable = playwright.chromium.executable_path
-    # Git Bash rewrites are already rejected above; here a bare path just gains its slash.
-    path = args.path.strip()
-    if _port_open(args.port):
-        # Two critics both defaulting to 9333 does not produce two browsers: the second one
-        # waits on a port someone else owns and then reports a browser that never answered.
-        import socket
-        with socket.socket() as probe:
-            probe.bind(("127.0.0.1", 0))
-            args.port = probe.getsockname()[1]
-    if path and not path.startswith("/"):
-        path = "/" + path
-    entry = (base + path) if path else base
-    flags = [executable, f"--remote-debugging-port={args.port}",
-             f"--user-data-dir={root / 'profile'}", "--no-first-run", "--no-default-browser-check",
-             f"--window-size={args.viewport[0]},{args.viewport[1]}"]
-    if args.headless:
-        flags += ["--headless=new", "--disable-gpu-sandbox"]
-        # Measured on this host: --use-angle=d3d11 renders the game on the integrated GPU at
-        # 60fps, SwiftShader manages 9fps. Software rasterisation is the fallback only because
-        # it is the one path that needs no display attached.
-        flags += (["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] if args.software
-                  else ["--use-angle=d3d11"])
-    log = (root / "browser.log").open("w", encoding="utf-8")
-    browser = subprocess.Popen(flags + [entry], stdout=log, stderr=subprocess.STDOUT,
-                               creationflags=0x00000008 if sys.platform == "win32" else 0)
-    deadline = time.monotonic() + args.timeout
-    ready = False
-    while time.monotonic() < deadline:
-        if browser.poll() is not None:  # chrome exits at once when it cannot bind the port
-            break
-        try:
-            import urllib.request
-            with urllib.request.urlopen(f"http://127.0.0.1:{args.port}/json/version", timeout=2):
-                ready = True
+        # Git Bash rewrites are already rejected above; here a bare path just gains its slash.
+        path = args.path.strip()
+        if _port_open(args.port):
+            import socket
+            with socket.socket() as probe:
+                probe.bind(("127.0.0.1", 0))
+                args.port = probe.getsockname()[1]
+        if path and not path.startswith("/"):
+            path = "/" + path
+        entry = (base + path) if path else base
+        flags = [executable, f"--remote-debugging-port={args.port}",
+                 f"--user-data-dir={root / 'profile'}", "--no-first-run", "--no-default-browser-check",
+                 f"--window-size={args.viewport[0]},{args.viewport[1]}"]
+        if args.headless:
+            flags += ["--headless=new", "--disable-gpu-sandbox"]
+            if args.software:
+                flags += ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+            elif sys.platform == "win32":
+                flags += ["--use-angle=d3d11"]
+        log = (root / "browser.log").open("w", encoding="utf-8")
+        browser = subprocess.Popen(flags + [entry], stdin=subprocess.DEVNULL,
+                                   stdout=log, stderr=subprocess.STDOUT,
+                                   creationflags=0x00000008 if sys.platform == "win32" else 0)
+        deadline = time.monotonic() + args.timeout
+        ready = False
+        while time.monotonic() < deadline:
+            if browser.poll() is not None:
                 break
-        except Exception:
-            pass
-        time.sleep(0.5)
-    if not ready:
-        # A browser that never answered is abandoned here, so the disposable server started
-        # for it must not be left listening — that is exactly how a failed run becomes a leak.
-        browser.terminate()
-        kill_tree(server.pid if server else None)
-        raise SystemExit(f"DevTools port {args.port} never answered within {args.timeout}s — "
-                         f"see {root / 'browser.log'}")
-    session = {"port": args.port, "pid": browser.pid, "root": str(root), "url": entry,
-               "server_pid": server.pid if server else None,
-               "db": str(root / "session.sqlite3") if server else None}
-    # Record what the page actually is before any critic trusts a screenshot of it. `--window-size`
-    # is not the viewport: a 390x844 phone request rendered at 484x644 until this call set it.
-    from playwright.sync_api import sync_playwright
-    with sync_playwright() as playwright:
-        connected = playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{args.port}")
+            try:
+                import urllib.request
+                with urllib.request.urlopen(f"http://127.0.0.1:{args.port}/json/version", timeout=2):
+                    ready = True
+                    break
+            except Exception:
+                time.sleep(0.5)
+        if not ready:
+            raise SystemExit(f"DevTools port {args.port} never answered within {args.timeout}s — "
+                             f"see {root / 'browser.log'}")
+        session = {"port": args.port, "pid": browser.pid, "root": str(root), "url": entry,
+                   "server_pid": server.pid if server else None,
+                   "db": str(root / "session.sqlite3") if server else None}
+        # `--window-size` is not the viewport; verify the page box before accepting evidence.
+        connected = playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{args.port}",
+                                                          timeout=10000)
         context = connected.contexts[0]
         page = context.pages[0] if context.pages else context.new_page()
+        page.set_default_timeout(10000)
         page.set_viewport_size({"width": args.viewport[0], "height": args.viewport[1]})
         session["viewport"] = page.evaluate("() => [innerWidth, innerHeight]")
-        # The page needs a frame or two before WebGL reports anything at all.
         for _ in range(4):
             time.sleep(1.5)
             session["renderer"] = page.evaluate(RENDERER)
             if session["renderer"]:
                 break
-        connected.close()
-    if session["viewport"] != [args.viewport[0], args.viewport[1]]:
-        raise SystemExit(f"page reports {session['viewport']}, asked for {args.viewport} — "
-                         "evidence taken at this size would not be the size under review")
-    session_file(root).write_text(json.dumps(session, indent=1), encoding="utf-8")
-    record("started", session, owner=args.owner)
-    print(json.dumps({"started": str(root), "cdp": args.port, "url": entry,
-                      "viewport": session["viewport"], "renderer": session["renderer"]}))
+        if session["viewport"] != [args.viewport[0], args.viewport[1]]:
+            raise SystemExit(f"page reports {session['viewport']}, asked for {args.viewport} — "
+                             "evidence taken at this size would not be the size under review")
+        session_file(root).write_text(json.dumps(session, indent=1), encoding="utf-8")
+        record("started", session, owner=args.owner)
+        print(json.dumps({"started": str(root), "cdp": args.port, "url": entry,
+                          "viewport": session["viewport"], "renderer": session["renderer"]}))
+    except BaseException:
+        # A failed preflight must not leave a browser or disposable server burning resources.
+        if browser is not None and browser.poll() is None:
+            kill_tree(browser.pid)
+            if browser.poll() is None:
+                browser.terminate()
+        if server is not None and server.poll() is None:
+            server.terminate()
+            server.wait(timeout=10)
+        if server is not None:
+            server.stdout.close()
+        session_file(root).unlink(missing_ok=True)
+        raise
+    finally:
+        if connected is not None:
+            connected.close()
+        if log is not None:
+            log.close()
+        if playwright is not None:
+            playwright.stop()
 
 
 def run_step(page, step, root):
@@ -477,6 +515,16 @@ def step(args):
         browser = playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{session['port']}")
         context = browser.contexts[0]
         page = context.pages[0] if context.pages else context.new_page()
+        # CDP emulation belongs to the connection. Closing the start connection
+        # restores Chromium's larger native page box, so every new step connection
+        # must reapply and verify the requested viewport before an action or shot.
+        if session.get("viewport"):
+            width, height = session["viewport"]
+            page.set_viewport_size({"width": width, "height": height})
+            actual = page.evaluate("() => [innerWidth, innerHeight]")
+            if actual != [width, height]:
+                raise SystemExit(f"step page reports {actual}, session requires {[width, height]} — "
+                                 "refusing evidence at the wrong viewport")
         for item in steps:
             unknown = set(item) - {"action"} - STEP_KEYS
             # A critic that guesses a key must learn the vocabulary in the same call: during
@@ -493,6 +541,14 @@ def step(args):
             else:
                 try:
                     result = run_step(page, item, root)
+                    if result.get("ok") and item["action"] == "resize":
+                        wanted = [item["width"], item["height"]]
+                        actual = page.evaluate("() => [innerWidth, innerHeight]")
+                        if actual != wanted:
+                            result = {"ok": False, "error": f"resize reports {actual}, asked for {wanted}"}
+                        else:
+                            session["viewport"] = wanted
+                            session_file(root).write_text(json.dumps(session, indent=1), encoding="utf-8")
                 except Exception as error:  # a critic must see the failure, not a stack trace
                     result = {"ok": False, "error": f"{type(error).__name__}: {str(error)[:300]}"}
             if not result.get("ok"):

@@ -261,6 +261,14 @@ sliding. `check_presentation_budget.py` enforces the consequence with a scenario
 `carriers` floor (`{selector, min}`): a measured state that paints fewer carriers than the
 beat owes fails. Off-camera is not off the hook — a carrier whose object is out of frame
 still owes the player an arrow, so declare it as placeable from `inFront`, not `visible`.
+For a learning beat, the changing state is part of that obligation: before the next
+learner action, the player must be able to read the supplied input, the generated
+history, and what changed at the active world device or at an explicitly carried
+part of it. A completed action button and a screen-reader-only transcript do not
+substitute for that visible state. A camera move, save/resume, or narrow viewport
+must not silently move the only teaching evidence into an optional panel. The
+scenario's carrier floor checks presence; an active-play critic must also read
+the actual words at normal and enlarged text sizes and identify the next input.
 
 **Rule I10 (a bounded surface sheds before it scrolls).** Every budget above is
 measured at the build's own text size, and that is where the 23 September blind spot

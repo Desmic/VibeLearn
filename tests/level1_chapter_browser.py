@@ -5,7 +5,7 @@ import re
 import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
-from tests.browser_check import start_server, stop_server
+from tests.browser_check import start_server, stop_server, launch_browser
 from tests.first_words_browser import until
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -189,7 +189,7 @@ def main():
     out=ROOT/'artifacts';out.mkdir(exist_ok=True);errors=[];checks=[];trace=[];replay=[]
     commands=[];contracts={};comparisons=[];generation=[]
     with tempfile.TemporaryDirectory() as temp,sync_playwright() as p:
-        proc,url=start_server(Path(temp)/'level1-chapter.db');browser=p.chromium.launch()
+        proc,url=start_server(Path(temp)/'level1-chapter.db');browser=launch_browser(p)
         try:
             page=browser.new_page(viewport={'width':390,'height':844},has_touch=True)
             record_commands(page,commands,contracts)
@@ -208,17 +208,24 @@ def main():
             # it; the panel must not auto-summon over the corridor.
             expect(page.locator('#engine')).to_be_hidden()
             expect(page.locator('#machine-toggle')).to_be_visible(timeout=15000)
-            expect(page.locator('#machine-toggle')).to_contain_text('Find the current route')
+            expect(page.locator('#machine-toggle')).to_contain_text('OPEN ENGINE')
             # I9 carrier floor at the game's central decision: with the panel folded on a
             # 390px phone, all three route boards must still be on screen (parked with an
             # edge cue if they no longer fit). They vanished there on 23 September while
             # every coverage budget reported a smaller number.
             expect(page.locator('#markers > [data-carrier]:visible')).to_have_count(3,timeout=15000)
+            expect(page.locator('#machine-toggle')).to_contain_text('OPEN ENGINE')
+            expect(page.locator('#engine')).to_have_attribute('data-anchor','route-machine')
+            expect(page.locator('#learning-readout')).to_be_hidden()
             trace.append({'phase':'tutorial-to-level1','mode':page.locator('#adventure').get_attribute('data-experience-mode'),'passed':True})
             open_card(page)
             expect(page.get_by_role('button',name='Inspect the speech engine')).to_be_visible()
             choose(page,'Supply the old sign · “Take the Moon gate.”')
             expect(page.locator('#context')).to_contain_text('Old route')
+            page.get_by_role('button',name='Put the machine away').click()
+            expect(page.locator('#learning-readout')).to_be_visible(timeout=15000)
+            expect(page.locator('#readout-request')).to_contain_text('Open the route')
+            expect(page.locator('#readout-supplied')).to_contain_text('Old route')
             replay.append({'phase':'stale-context-selected','state':page.evaluate('FirstWordsReview.state')})
             choose(page,'The machine will say Moon')
             expect(page.locator('#actions button[data-action^="relay-"]')).to_have_count(0)

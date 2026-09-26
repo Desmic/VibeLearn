@@ -4,7 +4,7 @@ import tempfile
 import time
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
-from tests.browser_check import start_server, stop_server, wait_frames
+from tests.browser_check import start_server, stop_server, wait_frames, launch_browser
 from tests.level1_chapter_browser import action,skip_opening_to_tutorial
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -39,7 +39,7 @@ def touch(session,kind,x=None,y=None):
 def main():
     out=ROOT/'artifacts';out.mkdir(exist_ok=True);trace=[]
     with tempfile.TemporaryDirectory() as temp,sync_playwright() as p:
-        proc,url=start_server(Path(temp)/'controls.db');browser=p.chromium.launch()
+        proc,url=start_server(Path(temp)/'controls.db');browser=launch_browser(p)
         try:
             ctx=browser.new_context(viewport={'width':390,'height':844},has_touch=True)
             page=ctx.new_page();page.goto(url+'/first-words')

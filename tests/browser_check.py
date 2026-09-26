@@ -12,13 +12,25 @@ from playwright.sync_api import sync_playwright, expect
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def launch_browser(playwright):
+    """Allow local 3D checks to use a visible hardware-accelerated browser.
+
+    CI keeps Playwright's default headless mode. On a desktop with a working GPU,
+    VIBELEARN_BROWSER_HEADED=1 avoids the sustained CPU cost of software WebGL.
+    """
+    return playwright.chromium.launch(headless=os.environ.get('VIBELEARN_BROWSER_HEADED') != '1')
+
+
 def install_frame_counter(page):
-    page.evaluate("""()=>{if(window.__qaf)return;window.__qaf={n:0};
-      const tick=()=>{window.__qaf.n++;requestAnimationFrame(tick)};requestAnimationFrame(tick);}""")
+    page.evaluate("""()=>{const s=window.__qaf||(window.__qaf={n:0,active:false,until:0});
+      s.until=Date.now()+5000;if(s.active)return;s.active=true;
+      const tick=()=>{s.n++;if(Date.now()<s.until)requestAnimationFrame(tick);else s.active=false;};
+      requestAnimationFrame(tick);}""")
 
 
 def rendered_frames(page):
-    return page.evaluate('window.__qaf?.n||0')
+    install_frame_counter(page)
+    return page.evaluate('window.__qaf.n')
 
 
 def wait_frames(page, count, timeout_ms=15000):

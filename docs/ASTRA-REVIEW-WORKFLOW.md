@@ -48,28 +48,47 @@ audience, scope, checkpoints, tools and action/time ceilings. No winning actions
 source, story treatment, prior findings or scores before cold observations.
 The reviewer may read generic tool instructions; record accidental context leaks.
 
-1. Preflight actual browser input, screenshots and recording/inspection capabilities.
-   **The preflight is harness-based, not MCP-based.** It passes only when a `shot` step
-   through the harness writes a non-trivial PNG to disk (verify the file exists and is more
-   than a few tens of KB, then look at it). Do not preflight with the host's embedded
-   browser tooling: on this machine the in-app browser surface reports
-   `visible=false, visibilityState=hidden`, and screenshot-to-file fails there with
-   `NATIVE_BROWSER_VIEWPORT_UNAVAILABLE` even though navigation, accessibility snapshots
-   and script evaluation all succeed. A reviewer that is pointed at that surface concludes
-   the cold lane is impossible, which is how this lane was recorded unassessed on
-   `071591a` and again on 24 September. The harness runs its own Chromium over CDP and
-   renders the WebGL canvas with software rasterisation, so it does not have that problem.
+1. Preflight actual browser input, screenshots and recording/inspection capabilities
+   **in the reviewer's own session**. The parent's in-app browser could capture and
+   drive this game responsively on 25 September; earlier child sessions reported
+   `NATIVE_BROWSER_VIEWPORT_UNAVAILABLE`, so neither result proves what a new child
+   can do. Prefer that native browser when the reviewer verifies a live screenshot
+   and one harmless input. Otherwise use the shared harness and verify that a `shot`
+   step writes a non-trivial PNG which the reviewer actually inspects.
+   For a long GUI pass, preflight responsiveness on the actual game. On Windows the
+   harness defaults to Direct3D 11; `--software` explicitly selects SwiftShader.
+   A 26 September phone-scene sample measured roughly 2.2 CPU cores plus 36% of
+   the Intel GPU on Direct3D 11. SwiftShader used about 8.3 CPU cores in the
+   bounded comparison, though its WebGL renderer query did not complete, so the
+   two samples are not a certified same-frame benchmark. Hardware acceleration
+   improves responsiveness but does not make an active 3D game cheap. Keep one
+   browser workload, stop a stalled step after a short diagnostic, and run `stop`
+   immediately on completion, interruption or usage-limit failure. Do not leave
+   any browser running while no reviewer is observing it.
    Use `tools/play_session.py` (`start` / `step` / `stop`) as the play harness: it keeps
    one browser alive between commands, takes real hold/drag/resize input, and appends
    every action to `action-trace.jsonl` as the review's action evidence. A reviewer that
    writes its own driver is a system defect report, not a workaround — two have already
    had to (22 and 23 September), which is why the harness is shared now.
-   Invocation: `python -m tools.play_session start --serve --root artifacts/play-<lane>
+   The harness re-applies and verifies the requested viewport on **every** `step`
+   connection, and saves a successful resize for the next connection. A `start`
+   report alone is not phone evidence: CDP can return Chromium to its larger
+   native page box after that connection closes. Inspect the step screenshot and
+   its actual dimensions before cold phone judgments.
+   Preferred invocation: `python -m tools.play_session start --windowed --serve --root artifacts/play-<lane>
    --path first-words --viewport 390 844`, then repeated `step --file <steps>.json`, then
-   `stop`. Pass `--path` without its leading slash (Git Bash rewrites `/x` into a Windows
+   `stop`. On this Windows host a direct `start` can stall after the DevTools
+   WebSocket connects; an empty PowerShell pipeline (`'' | python -m tools.play_session
+   start ...`) has launched successfully. Stop and clean up a failed attempt before
+   retrying. Pass `--path` without its leading slash (Git Bash rewrites `/x` into a Windows
    path), and prefer the step kinds `settle`/`dump`/`buttons`/`eval` over fixed waits —
-   headless software WebGL renders a few frames per second, so a millisecond-timed input
-   window starves movement.
+   software WebGL can render a few frames per second, so a millisecond-timed input
+   window starves movement. The control-practice browser check holds a key until the
+   game observes the input for this reason; a fixed 180 ms press is not evidence of
+   a broken control on a slow renderer. On a desktop with a working visible browser,
+   set `VIBELEARN_BROWSER_HEADED=1` for the automated browser groups and presentation
+   budget; CI can keep the default headless mode. This changes the browser backend,
+   not the assertions or evidence thresholds.
 2. Play from entry through the full assigned ending. Record observations, choices,
    uncertainty and evidence references. Exercise mistakes, recovery and save/resume.
 3. Save the cold report before receiving intent or prior evidence. Do not rewrite it.

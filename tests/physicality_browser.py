@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright, expect
-from tests.browser_check import start_server, stop_server, wait_frames
+from tests.browser_check import start_server, stop_server, wait_frames, launch_browser
 from tests.level1_chapter_browser import skip_opening_to_tutorial, complete_tutorial
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -94,7 +94,7 @@ def main():
     out = ROOT/'artifacts'; out.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory() as temp, sync_playwright() as p:
         proc, url = start_server(Path(temp)/'physicality.db')
-        browser = p.chromium.launch()
+        browser = launch_browser(p)
         ctx = browser.new_context(viewport={'width':1280,'height':800},
             record_video_dir=str(Path(temp)/'video'), record_video_size={'width':1280,'height':800})
         page = ctx.new_page(); video = page.video

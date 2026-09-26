@@ -68,15 +68,25 @@ MEASURE = """async (args) => {
   // independent of pointer-events). A finer grid reduces per-rect round-up bias.
   const cols = 160, rows = 90;
   const grid = new Uint8Array(cols * rows);
+  const nonTouchGrid = new Uint8Array(cols * rows);
+  const touchSelectors = args.touch_controls || [];
+  let touchControlCount = 0;
   for (const el of uiElements) {
+    const touchControl = touchSelectors.some(selector => el.matches(selector) || el.closest(selector));
+    if (touchControl) touchControlCount++;
     const r = el.getBoundingClientRect();
     const c0 = Math.max(0, Math.floor(r.left / vw * cols)), c1 = Math.min(cols - 1, Math.ceil(r.right / vw * cols) - 1);
     const r0 = Math.max(0, Math.floor(r.top / vh * rows)), r1 = Math.min(rows - 1, Math.ceil(r.bottom / vh * rows) - 1);
-    for (let c = c0; c <= c1; c++) for (let r2 = r0; r2 <= r1; r2++) grid[c * rows + r2] = 1;
+    for (let c = c0; c <= c1; c++) for (let r2 = r0; r2 <= r1; r2++) {
+      grid[c * rows + r2] = 1;
+      if (!touchControl) nonTouchGrid[c * rows + r2] = 1;
+    }
   }
-  let ui = 0;
+  let ui = 0, nonTouchUi = 0;
   for (const v of grid) ui += v;
+  for (const v of nonTouchGrid) nonTouchUi += v;
   const coverage = ui / (cols * rows);
+  const nonTouchCoverage = nonTouchUi / (cols * rows);
   let panelOpen = false;
   document.querySelectorAll('dialog[open]').forEach(d => { if (visible(d)) panelOpen = true; });
   // B3 containment + B4 text blocks + P3 disabled controls + top offenders.
@@ -402,7 +412,8 @@ MEASURE = """async (args) => {
       }
     }
   }
-  return {coverage, panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, markerClash,
+  return {coverage, nonTouchCoverage, touchControlCount, viewportWidth: vw,
+          panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, markerClash,
           strayControls, dupCarriers, unreachableActions, sheet, carriers, announcedOnly,
           prefDrift, declaredPreferences: prefCarriers.map(el => el.dataset.preference),
           offenders: offenders.slice(0, 12)};
@@ -499,6 +510,7 @@ def evaluate_state(page, scenario_state, budgets):
         "sheet": scenario_state.get("sheet"),
         "yields": scenario_state.get("yields"),
         "carriers": scenario_state.get("carriers", []),
+        "touch_controls": scenario_state.get("touch_controls", []),
         "b8": b8,
         "budgets": budgets,
     })
@@ -551,6 +563,14 @@ def violations(state_name, metrics, budgets, panel_allowed, scenario_state=None,
             " — on a narrow viewport an opened surface must be a flush bottom sheet that yielded its touch "
             "chrome (guide B1 narrow-sheet clause, I8)")
         found.append(f"{state_name}: B1 coverage {metrics['coverage']:.1%} > {limit:.0%}{hint}")
+    if scenario_state.get("touch_controls") and scenario_state.get("coverage_max", 0) > BUDGETS["coverage_max"]:
+        if metrics["viewportWidth"] >= 700 or scenario_state["coverage_max"] > 0.20:
+            found.append(f"{state_name}: B1 touch allowance is only for narrow viewports and at most 20%")
+        if not metrics["touchControlCount"]:
+            found.append(f"{state_name}: B1 touch allowance names no visible direct-input controls")
+        if metrics["nonTouchCoverage"] > BUDGETS["coverage_max"]:
+            found.append(f"{state_name}: B1 non-touch UI covers {metrics['nonTouchCoverage']:.1%} "
+                         f"> {BUDGETS['coverage_max']:.0%}; touch controls cannot excuse information")
     if metrics["clipped"]:
         found.append(f"{state_name}: B3 clipped elements: {metrics['clipped'][:4]}")
     if metrics.get("unreachableActions"):
@@ -724,6 +744,11 @@ def resolve_state_budgets(state, budgets):
             found.append(f"{name}: B1 raises coverage_max to "
                 f"{state['coverage_max']:.0%} with no reason — only a player-opened panel, "
                 "a cinematic or a touch direct-input allowance may exceed the base budget")
+        elif raised and not (state.get("panel_open") or state.get("cinematic")) and not state.get("touch_controls"):
+            found.append(f"{name}: B1 gameplay coverage above 15% needs declared touch controls; "
+                         "a prose reason alone cannot raise the budget")
+        elif raised and state.get("touch_controls") and state["coverage_max"] > 0.20:
+            found.append(f"{name}: B1 touch controls cannot raise gameplay coverage above 20%")
         else:
             resolved["coverage_max"] = state["coverage_max"]
     if state.get("narrow_sheet_height_max") or state.get("narrow_sheet_max"):
@@ -781,7 +806,7 @@ def main():
             if not group.get("selector") or not isinstance(group.get("min"), int) or group["min"] < 1:
                 raise SystemExit(f"{state['name']}: a carriers entry needs 'selector' and an integer 'min' >= 1")
     states, all_violations = [], []
-    from tests.browser_check import start_server, stop_server
+    from tests.browser_check import start_server, stop_server, launch_browser
 
     proc = None
     with tempfile.TemporaryDirectory() as temp, sync_playwright() as playwright:
@@ -790,7 +815,7 @@ def main():
                 base = args.url
             else:
                 proc, base = start_server(Path(temp) / "budget.sqlite3")
-            browser = playwright.chromium.launch()
+            browser = launch_browser(playwright)
             context = browser.new_context(viewport={"width": 1280, "height": 720})
             page = context.new_page()
             page.set_default_timeout(20000)
