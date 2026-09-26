@@ -4,6 +4,13 @@ import {messageMachine,tokenTrack,smallTree,pavilion,deliveryParcel} from './wor
 import {lantern,gate,tower,planter,companionRobot,capabilityModule,capabilitySocket,eventLink,speechBubble} from './rescue-world-props.js';
 import {makeWorldPackage} from './spec-game-world.js';
 
+// Story-specific labels for the shared inspect -> stage -> commit interaction.
+export const routeSources=Object.freeze({
+  moon:{name:'Old sign',anchor:'notice-old-label',action:'scan-moon'},
+  parade:{name:'Parade notice',anchor:'notice-parade-label',action:'scan-parade'},
+  star:{name:"Today's notice",anchor:'notice-today-label',action:'scan-star'}
+});
+
 const e=[];
 const part=(id,primitive,material,position,scale,extra={})=>e.push({id,primitive,material,position,scale,...extra});
 const addTo=(parent,items)=>items.forEach((item,index)=>e.push(index===0?{...item,parent}:item));

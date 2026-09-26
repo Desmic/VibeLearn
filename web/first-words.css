@@ -68,6 +68,13 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
    carries the short goal while the panel stays away (ladder rung 3). */
 #markers>.machine-toggle{z-index:8;min-height:44px;white-space:normal;width:max-content;max-width:220px;text-align:center;line-height:1.3;padding:7px 10px;border-radius:999px;border:1px solid #f0c873;background:#183b43ee;color:#fff0c4;box-shadow:0 0 0 5px #f0c8731c,0 8px 24px #0007;font-size:11.5px;font-weight:700;letter-spacing:.01em}
 #markers>.machine-toggle:hover{background:#22505a}
+#markers>.notice-marker.staged{box-shadow:0 0 0 3px #f0c873,0 8px 24px #17243c55}
+#markers>.source-inspection{z-index:9;width:min(280px,calc(100vw - 28px));max-height:min(35dvh,290px);overflow:auto;white-space:normal;padding:12px;border:1px solid #f0c873;border-radius:12px;background:#183b43f5;color:#fff2d9;box-shadow:0 12px 30px #071824ae}
+#markers>.source-inspection strong{display:block;color:#ffe1a1;font-size:14px}
+#markers>.source-inspection p{font-size:13px;line-height:1.35;margin:6px 0 10px}
+#markers>.source-inspection div{display:flex;gap:6px;flex-wrap:wrap}
+#markers>.source-inspection button{min-height:44px;padding:7px 10px;border-radius:8px;border:1px solid #f0c873;background:#f0c873;color:#152d30;font-weight:700}
+#markers>.source-inspection #source-close{background:transparent;color:#fff2d9}
 #markers>.machine-toggle.parked{left:50%;top:auto;bottom:96px;transform:translateX(-50%)}
 /* The repaired speech module travels with Zip. Its live learning state remains a
    readable world carrier after camera movement while the optional controls close. */

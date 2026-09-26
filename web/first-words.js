@@ -19,6 +19,30 @@ const reduced=()=>preferences.get('motion');
 // The mission/complete stage card is opt-in: a world-anchored machine toggle carries
 // the short goal while closed, and the card opens for the player or on feedback beats.
 let cardOpen=false,cardStateKey='',lastExperienceMode=null;
+let stagedSource=null,inspectedSource=null,sourceAttempt=null;
+const sourceName=key=>chapter.routeSources[key]?.name||'sign';
+function inspectSource(key){
+  const s=view(),source=chapter.routeSources[key];
+  if(!source||s.round!==1||!['none',undefined].includes(s.relay_stage)||
+     (s.clue!=='none'&&s.status!=='wrong'))return;
+  inspectedSource=key;
+  $('#source-inspection').dataset.anchor=source.anchor;
+  text('#source-name',source.name);
+  text('#source-text',s.case.notes[key]);
+  text('#source-stage',`Carry ${source.name.toLowerCase()}`);
+  $('#source-inspection').hidden=false;
+  cardOpen=false;syncCardVisibility();
+  $('#source-stage').focus();
+}
+function stageSource(){
+  if(!inspectedSource)return;
+  stagedSource=inspectedSource;
+  inspectedSource=null;
+  $('#source-inspection').hidden=true;
+  render();
+  $('#machine-toggle').focus();
+}
+function closeSource(){inspectedSource=null;$('#source-inspection').hidden=true;}
 // Fresh entry mounts the first prologue composition behind the loading layer. Do not
 // instantiate the prison mission first and then flash it while learner state resolves.
 let world=runtime.showStory(chapter,host,0,{reducedMotion:reduced()});
@@ -93,11 +117,6 @@ async function command(path,body={}){
   return result;
 }
 const repairStep=s=>s.round===0?selectStateTutorialStep(chapter.speechRepairTutorialSpec,s):null;
-const SCAN_TRAYS=[
-  ['Supply the old sign · “Take the Moon gate.”','scan-moon'],
-  ['Supply the parade notice · “The lantern parade starts at sunset.”','scan-parade'],
-  ['Supply today\'s notice · “Moon route closed. The tower bell answers the five-point lantern mark.”','scan-star']
-];
 const NOTE_TRAYS=[
   ['Offer the 18:00 note · “They are holding me in the Lantern Loft.”','relay-context-loft'],
   ['Offer the 18:20 note · “They moved me from the Lantern Loft to the Bell Yard.”','relay-context-yard']
@@ -121,6 +140,10 @@ function tutorialStage(s,complete){
 }
 function render(){
   const s=view(),a=session.attempt,complete=ours()&&a.status==='submitted';
+  if(a?.id!==sourceAttempt){sourceAttempt=a?.id;stagedSource=null;closeSource();}
+  if(s.round!==1||s.status==='success'||(stagedSource&&s.clue===stagedSource)){
+    stagedSource=null;closeSource();
+  }
   practice.bind(a?.id,ours()&&!s.powered&&s.round===0&&!complete);
   if(inOpening){setExperienceMode('opening');syncCardVisibility();return;}
   const mode=!ours()?'entry':complete?'complete':s.round===0?'tutorial':'mission';
@@ -155,8 +178,8 @@ function render(){
   $('#engine').dataset.anchor=controlStep!=='done'?'zip':(relay||(complete&&s.relay_stage==='done'))?'friend-signal':s.round===1?'route-machine':'socket';
   $('#engine').setAttribute('aria-label',controlStep!=='done'?'Control practice':'Message machine');
   $('#machine-toggle').dataset.anchor=$('#engine').dataset.anchor;
-  text('#machine-toggle',s.round===0?'Inspect engine':'OPEN ENGINE');
-  $('#machine-toggle').setAttribute('aria-label','Open the message machine');
+  text('#machine-toggle',s.round===0?'Inspect engine':stagedSource?`CARRY ${sourceName(stagedSource).toUpperCase()} → ENGINE`:'OPEN ENGINE');
+  $('#machine-toggle').setAttribute('aria-label',stagedSource?`Carry ${sourceName(stagedSource)} to the message machine`:'Open the message machine');
   $('#machine-toggle').setAttribute('aria-description',goal);
   host.dataset.tutorialWorldTarget=controlStep==='done'&&repair?.focus==='world'?(repair.target||''):'';
   host.dataset.tutorialWorldAction=controlStep==='done'&&repair?.focus==='world'?(repair.primaryAction||''):'';
@@ -195,9 +218,13 @@ function render(){
     // I7: a recovery beat must not re-offer the choice that already produced this
     // exact output — the words promise a different sign, so the tray must agree.
     // Same rule the relay recovery already follows below.
-    for(const [label,action] of SCAN_TRAYS.filter(([,a])=>a!=='scan-'+s.clue))tray(label,action);
+    if(stagedSource&&stagedSource!==s.clue)button(`Insert ${sourceName(stagedSource).toLowerCase()} into machine`,chapter.routeSources[stagedSource].action);
+    else statusLine('Inspect a different corridor sign, carry it here, then insert it in the machine.',{learningHint:'source'});
   }
-  else if(s.round===1&&s.clue==='none')for(const [label,action] of SCAN_TRAYS)tray(label,action);
+  else if(s.round===1&&s.clue==='none'){
+    if(stagedSource)button(`Insert ${sourceName(stagedSource).toLowerCase()} into machine`,chapter.routeSources[stagedSource].action);
+    else statusLine('Inspect a corridor sign, carry it here, then insert it in the machine.',{learningHint:'source'});
+  }
   else if(s.round===1&&s.prediction==='none'){
     // The option name is the decision. "Predict:" is the question above it, repeated three
     // times, and at the accessibility viewport that repetition is what pushed the third
@@ -265,7 +292,14 @@ async function act(action){
   if(action==='ending')return showEnding();
   if(action==='start'||action==='again'){await session.start('ai-01-first-words');return;}
   if(action!=='finish'&&!view().available_actions?.includes(action))return;
+  if(view().round===1&&action.startsWith('scan-')&&
+     (!stagedSource||chapter.routeSources[stagedSource]?.action!==action))return;
+  const suppliedSource=view().round===1&&action.startsWith('scan-');
   await session.action(action);
+  // On a narrow screen the open decision sheet can shed the long INPUT line.
+  // Return to the world carrier before asking for a prediction so the actual
+  // committed source is legible at the machine.
+  if(suppliedSource&&host.clientWidth<700){cardOpen=false;syncCardVisibility();}
 }
 function showEnding(){
   const result=session.attempt?.assessment?.transfer_observations;
@@ -283,12 +317,19 @@ function flavor(title,detail){
 }
 $('#start').onclick=()=>act('start');$('#rewind').onclick=()=>act('rewind');$('#retry').onclick=()=>session.retry();
 $('#card-close').onclick=()=>{cardOpen=false;syncCardVisibility();};
-$('#machine-toggle').onclick=()=>{cardOpen=true;syncCardVisibility();};
+$('#machine-toggle').onclick=()=>{closeSource();cardOpen=true;syncCardVisibility();};
+$('#source-stage').onclick=stageSource;
+function returnFromSource(){const key=inspectedSource;closeSource();document.querySelector(`[data-clue="${key}"]`)?.focus();}
+$('#source-close').onclick=returnFromSource;
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&inspectedSource){returnFromSource();event.preventDefault();}});
 $('#menu-open').onclick=()=>{if(practice.observe('menu'))render();dialog('#menu');};
 host.addEventListener('game-control-used',event=>{
   if(ours()&&!inOpening&&!blocked()&&practice.observe(event.detail?.kind))render();
 });
-for(const marker of document.querySelectorAll('#markers [data-action]'))marker.addEventListener('click',()=>{const action=marker.dataset.action;if(view().available_actions?.includes(action))act(action);});
+for(const marker of document.querySelectorAll('#markers [data-action],#markers [data-clue]'))marker.addEventListener('click',()=>{
+  if(marker.dataset.clue){inspectSource(marker.dataset.clue);return;}
+  const action=marker.dataset.action;if(view().available_actions?.includes(action))act(action);
+});
 function togglePause(){paused=!paused;$('#paused').hidden=!paused;text('#pause',paused?'Resume the world':'Pause the world');pauseSystems();}
 $('#pause').onclick=()=>{$('#menu').close();togglePause();}
 $('#paused').onclick=togglePause;
@@ -388,6 +429,7 @@ function frame(){
   const hero=focalClearanceBox(world,'zip',{top:[0,2.55,0],bottom:[0,-.15,0],left:[-.8,0,0],right:[.8,0,0],margin:12});
   if(hero)avoidRects.push(hero);
   for(const marker of $('#markers').children){
+    if(marker.id==='source-inspection'&&!inspectedSource){marker.hidden=true;continue;}
     const projected=world.projectEntity(marker.dataset.anchor);
     const readout=marker.id==='learning-readout';
     const anchor=readout&&!projected?.inFront?world.projectEntity('zip'):projected;
@@ -396,7 +438,7 @@ function frame(){
     // P3: a visible world sign must never read as a dead control. Signs whose
     // action is currently spent stay readable and click-inert (the act() guards
     // no-op), they do not appear disabled.
-    if(marker.dataset.action){marker.disabled=Boolean(blocked());marker.classList.toggle('chosen',marker.dataset.clue===s.clue);}
+    if(marker.dataset.action||marker.dataset.clue){marker.disabled=Boolean(blocked());marker.classList.toggle('chosen',Boolean(marker.dataset.clue&&marker.dataset.clue===s.clue));marker.classList.toggle('staged',Boolean(marker.dataset.clue&&marker.dataset.clue===stagedSource));}
     const tutorialTarget=marker.classList.contains('tutorial-target-marker');
     const targetMismatch=tutorialTarget&&(marker.dataset.anchor!==host.dataset.tutorialWorldTarget||marker.dataset.action!==host.dataset.tutorialWorldAction||!available);
     const critical=tutorialTarget||marker.dataset.critical==='true';
@@ -412,7 +454,7 @@ function frame(){
       marker.classList.toggle('parked',!(anchor&&anchor.inFront));
     // I3: while the machine panel is open it owns the decision; its world
     // choice markers fold away (they return when the panel is put away).
-    }else marker.hidden=(readout&&(!s.powered||practice.step!=='done'||(s.clue==='none'&&!relay)||!card.hidden))||(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
+    }else marker.hidden=(readout&&(!s.powered||practice.step!=='done'||(s.clue==='none'&&!relay)||!card.hidden))||(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')||marker.id==='source-inspection'))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
     if(anchor&&!marker.hidden&&!(toggleMarker&&marker.classList.contains('parked'))){
       const placement=placeWorldMarker(marker,anchor,{viewportWidth:rect.width,safeTop,safeBottom,critical,parkWhenFull:carrier,yOffset:readout?48:12,avoidRects});
       if(!placement.placed||(!critical&&!carrier&&!placement.insideSafeArea))marker.hidden=true;
@@ -435,8 +477,8 @@ host.addEventListener('click',async e=>{
     else{cardOpen=true;syncCardVisibility();}
   }
   if(target?.startsWith('moon')&&s.available_actions?.includes('scan-moon'))act('scan-moon');
-  const noticeAction=target?.startsWith('notice-old')?'scan-moon':target?.startsWith('notice-parade')?'scan-parade':target?.startsWith('notice-today')?'scan-star':null;
-  if(noticeAction&&s.available_actions?.includes(noticeAction))act(noticeAction);
+  const noticeSource=target?.startsWith('notice-old')?'moon':target?.startsWith('notice-parade')?'parade':target?.startsWith('notice-today')?'star':null;
+  if(noticeSource)inspectSource(noticeSource);
   const noteAction=target==='relay-note-a'?'relay-context-loft':target==='relay-note-b'?'relay-context-yard':null;
   if(noteAction&&s.available_actions?.includes(noteAction))act(noteAction);
   if(target==='friend-signal'&&s.available_actions?.includes('relay-start'))act('relay-start');

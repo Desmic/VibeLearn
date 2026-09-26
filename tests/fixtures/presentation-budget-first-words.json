@@ -167,7 +167,7 @@
      "click": "Open the message machine"
     },
     {
-     "wait_text": "Supply the old sign"
+     "wait_text": "Find the current route."
     }
    ],
    "panel_open": true,
@@ -179,7 +179,19 @@
    "name": "mission-recover-opened",
    "steps": [
     {
-     "click": "Supply the old sign · “Take the Moon gate.”"
+     "click": "Put the machine away"
+    },
+    {
+     "click": "Inspect the old route sign"
+    },
+    {
+     "click": "Carry old sign"
+    },
+    {
+     "click": "Carry Old sign to the message machine"
+    },
+    {
+     "click": "Insert old sign into machine"
     },
     {
      "click": "The machine will say Moon"
@@ -219,7 +231,19 @@
    "name": "mission-signal-opened",
    "steps": [
     {
-     "click": "Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”"
+     "click": "Put the machine away"
+    },
+    {
+     "click": "Inspect today's route notice"
+    },
+    {
+     "click": "Carry today's notice"
+    },
+    {
+     "click": "Carry Today's notice to the message machine"
+    },
+    {
+     "click": "Insert today's notice into machine"
     },
     {
      "click": "Make first word"
@@ -669,7 +693,7 @@
      "timeout": 60000
     },
     {
-     "wait_eval": "()=>{const b=document.querySelectorAll('#actions button');return !document.querySelector('#engine').hidden&&b.length>=3&&!FirstWordsReview.runtime.world.animating;}",
+     "wait_eval": "()=>!document.querySelector('#engine').hidden&&Boolean(document.querySelector('#actions [data-learning-hint]'))&&!FirstWordsReview.runtime.world.animating;",
      "timeout": 60000
     }
    ],
@@ -677,8 +701,8 @@
    "wait_eval": "()=>document.querySelector('#engine').classList.contains('sheet')",
    "carriers": [
     {
-     "selector": "#actions button",
-     "min": 3
+     "selector": "#actions [data-learning-hint]",
+     "min": 1
     }
    ]
   },
@@ -700,8 +724,8 @@
    "wait_eval": "()=>document.querySelector('#engine').classList.contains('sheet')",
    "carriers": [
     {
-     "selector": "#actions button",
-     "min": 3
+     "selector": "#actions [data-learning-hint]",
+     "min": 1
     }
    ],
    "text_scale": 2,
@@ -725,8 +749,14 @@
    "opened_by": "Open the message machine",
    "steps": [
     {
-     "click": "Supply the old sign · “Take the Moon gate.”",
+     "click": "Put the machine away",
      "timeout": 60000
+    },
+    {"click": "Inspect the old route sign", "timeout": 60000},
+    {"click": "Carry old sign", "timeout": 60000},
+    {"click": "Carry Old sign to the message machine", "timeout": 60000},
+    {"click": "Insert old sign into machine", "timeout": 60000},
+    {"click": "Open the message machine", "timeout": 60000
     },
     {
      "click": "The machine will say Moon",
@@ -761,7 +791,7 @@
      "timeout": 90000
     },
     {
-     "wait_eval": "()=>document.querySelectorAll('#actions button').length>=2",
+     "wait_eval": "()=>Boolean(document.querySelector('#actions [data-learning-hint]'))",
      "timeout": 60000
     }
    ],
@@ -769,8 +799,8 @@
    "wait_eval": "()=>document.querySelector('#engine').classList.contains('sheet')",
    "carriers": [
     {
-     "selector": "#actions button",
-     "min": 2
+     "selector": "#actions [data-learning-hint]",
+     "min": 1
     }
    ]
   },
@@ -793,8 +823,8 @@
    "wait_eval": "()=>document.querySelector('#engine').classList.contains('sheet')",
    "carriers": [
     {
-     "selector": "#actions button",
-     "min": 2
+     "selector": "#actions [data-learning-hint]",
+     "min": 1
     }
    ],
    "twin_of": "mission-recover-phone-sheet",
@@ -886,12 +916,18 @@
      "timeout": 60000
     },
     {
-     "wait_eval": "()=>{const b=document.querySelectorAll('#actions button');return !document.querySelector('#engine').hidden&&b.length>=3&&!FirstWordsReview.runtime.world.animating;}",
+     "wait_eval": "()=>!document.querySelector('#engine').hidden&&Boolean(document.querySelector('#actions [data-learning-hint]'))&&!FirstWordsReview.runtime.world.animating;",
      "timeout": 60000
     },
     {
-     "click": "Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”",
+     "click": "Put the machine away",
      "timeout": 60000
+    },
+    {"click": "Inspect today's route notice", "timeout": 60000},
+    {"click": "Carry today's notice", "timeout": 60000},
+    {"click": "Carry Today's notice to the message machine", "timeout": 60000},
+    {"click": "Insert today's notice into machine", "timeout": 60000},
+    {"click": "Open the message machine", "timeout": 60000
     },
     {
      "wait_eval": "()=>[...document.querySelectorAll('#actions button')].some(b=>b.textContent.trim()==='Ask for a hint')",

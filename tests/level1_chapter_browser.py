@@ -65,6 +65,14 @@ def choose(page,choice):
     expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
 
 
+def supply_sign(page,name,carry,insert):
+    if page.locator('#engine').is_visible():page.get_by_role('button',name='Put the machine away').click()
+    page.get_by_role('button',name=f'Inspect {name}').click()
+    expect(page.locator('#source-text')).to_be_visible()
+    page.get_by_role('button',name=f'Carry {carry}').click()
+    choose(page,f'Insert {insert} into machine')
+
+
 def world_action(page,name):
     with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
         page.get_by_role('button',name=name,exact=True).click()
@@ -218,11 +226,17 @@ def main():
             expect(page.locator('#engine')).to_have_attribute('data-anchor','route-machine')
             expect(page.locator('#learning-readout')).to_be_hidden()
             trace.append({'phase':'tutorial-to-level1','mode':page.locator('#adventure').get_attribute('data-experience-mode'),'passed':True})
+            page.get_by_role('button',name='Inspect the old route sign').click()
+            expect(page.locator('#source-text')).to_contain_text('Old route')
+            assert page.evaluate('FirstWordsReview.state.clue')=='none'
+            page.get_by_role('button',name='Carry old sign').click()
+            assert page.evaluate('FirstWordsReview.state.clue')=='none'
+            expect(page.locator('#machine-toggle')).to_contain_text('CARRY OLD SIGN')
             open_card(page)
             expect(page.get_by_role('button',name='Inspect the speech engine')).to_be_visible()
-            choose(page,'Supply the old sign · “Take the Moon gate.”')
+            choose(page,'Insert old sign into machine')
             expect(page.locator('#context')).to_contain_text('Old route')
-            page.get_by_role('button',name='Put the machine away').click()
+            expect(page.locator('#engine')).to_be_hidden()
             expect(page.locator('#learning-readout')).to_be_visible(timeout=15000)
             expect(page.locator('#readout-request')).to_contain_text('Open the route')
             expect(page.locator('#readout-supplied')).to_contain_text('Old route')
@@ -233,16 +247,20 @@ def main():
             generate(page,generation);expect(page.locator('#stage-name')).to_have_text('LEVEL 1 · RECOVER');expect(page.locator('#goal')).to_have_text('Wrong route.')
             replay.append({'phase':'stale-context-failure','state':page.evaluate('FirstWordsReview.state')})
             page.screenshot(path=str(out/'level1-transfer-wrong-390.png'))
-            # I7: the sign that already produced this exact output is not an open
-            # question, so the recovery panel must not offer it again.
-            expect(page.get_by_role('button',name='Supply the old sign · “Take the Moon gate.”',exact=True)).to_have_count(0)
-            # B3 reachability: every offered option is on screen without scrolling.
+            # Recovery requires a physical source change, not another machine
+            # panel choice. The existing sign remains readable in the corridor.
+            expect(page.get_by_role('button',name='Insert old sign into machine')).to_have_count(0)
+            if page.locator('#engine').is_visible():page.get_by_role('button',name='Put the machine away').click()
+            page.get_by_role('button',name="Inspect today's route notice").click()
+            expect(page.locator('#source-text')).to_contain_text('five-point lantern mark')
+            page.get_by_role('button',name="Carry today's notice").click()
+            expect(page.locator('#machine-toggle')).to_contain_text("CARRY TODAY'S NOTICE")
+            open_card(page)
+            # B3 reachability: the insertion action is on screen without scrolling.
             viewport=page.viewport_size
-            for label in ['Supply the parade notice · “The lantern parade starts at sunset.”',
-                          "Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”"]:
-                option=page.get_by_role('button',name=label,exact=True);expect(option).to_be_visible()
-                box=option.bounding_box()
-                assert box and box['y']>=0 and box['y']+box['height']<=viewport['height'], f'{label} needs scrolling: {box}'
+            option=page.get_by_role('button',name="Insert today's notice into machine",exact=True);expect(option).to_be_visible()
+            box=option.bounding_box()
+            assert box and box['y']>=0 and box['y']+box['height']<=viewport['height'], f'insertion needs scrolling: {box}'
             # B1 narrow-sheet clause: on a phone the opened machine is a flush bottom
             # sheet that yields its height budget to the world, never a card floating
             # over the character (the 23 September second rejection).
@@ -252,7 +270,7 @@ def main():
             assert abs(panel['y']+panel['height']-viewport['height'])<=8, f'sheet floats above the bottom edge: {panel}'
             assert panel['height']<=0.40*viewport['height'], f'sheet takes too much screen height: {panel}'
             assert panel['x']<=8 and panel['x']+panel['width']>=viewport['width']-8, f'sheet is not full-bleed: {panel}'
-            choose(page,"Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”")
+            choose(page,"Insert today's notice into machine")
             expect(page.locator('#context')).to_contain_text('five-point lantern mark')
             replay.append({'phase':'current-context-selected','state':page.evaluate('FirstWordsReview.state')})
             generate(page,generation);until(page,'()=>!FirstWordsReview.runtime.world.animating')
@@ -287,7 +305,7 @@ def main():
                 ctx=browser.new_context(viewport={'width':390,'height':844},has_touch=True,reduced_motion='reduce')
                 q=ctx.new_page();record_commands(q,commands,contracts);q.goto(url+'/first-words')
                 skip_opening_to_tutorial(q);complete_tutorial(q);action(q,'Begin Level 1 →')
-                choose(q,"Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”")
+                supply_sign(q,"today's route notice","today's notice","today's notice")
                 before_hint=q.evaluate('FirstWordsReview.state')
                 if hint:
                     action(q,'Ask for a hint')
@@ -322,7 +340,7 @@ def main():
                 ctx=browser.new_context(viewport={'width':width,'height':height},has_touch=width<500,reduced_motion='reduce');q=ctx.new_page();q.goto(url+'/first-words')
                 skip_opening_to_tutorial(q)
                 complete_tutorial(q);action(q,'Begin Level 1 →')
-                choose(q,"Supply today's notice · “Moon route closed. The tower bell answers the five-point lantern mark.”")
+                supply_sign(q,"today's route notice","today's notice","today's notice")
                 choose(q,'The machine will say Star');generate(q);complete_relay(q);action(q,'Finish Level 1 →','Level saved · practice recorded');expect(q.locator('#goal')).to_have_text('Mira heard you.',timeout=15000)
                 assert q.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 q.screenshot(path=str(out/f'level1-complete-{width}-reduced.png'));ctx.close()

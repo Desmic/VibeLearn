@@ -6,6 +6,25 @@ Automated checks, critic judgment and user acceptance are separate claims.
 
 ## Candidate
 
+- **26 September implementation progress (unreviewed):** Level 1 route boards now
+  open an object-local inspection with their full sign text. The player can stage
+  one sign and change it before carrying it to the message machine; only the
+  explicit insertion records the existing authoritative `scan-*` action. On a
+  phone, insertion returns to the world readout so the complete supplied sign
+  appears before the destination prediction. Existing saved game snapshots and
+  learning IDs were not changed. This is one bounded interaction repair under
+  the approved design, not full nine-step runtime alignment or readiness.
+  Build and 15 episode tests passed. Live 390x844 diagnostic play inspected,
+  restaged, inserted, changed camera and reloaded the committed source. Focused
+  presentation checks passed with zero violations across 10 desktop-prefix and
+  five phone states (including 200% text). The earlier full Level 1 module
+  passed before the phone handoff repair; its post-repair rerun passed the new
+  source/recovery path but timed out waiting for a later relay response in an
+  extra transfer trial, so that later path is not reverified by the rerun.
+  Full critic review, complete presentation report and user acceptance remain
+  open. The user has explicitly requested an unreviewed GitHub/Render progress
+  preview of this repair; deployment is a separate action and is not readiness.
+
 - Development branch `docs-readthrough-20260921`; frozen repair commit `38e88f1`.
   `main` remains the canonical development destination. The development branch
   is pushed but has not been merged; the experience candidate
