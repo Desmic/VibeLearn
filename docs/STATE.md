@@ -7,8 +7,9 @@ Automated checks, critic judgment and user acceptance are separate claims.
 ## Candidate
 
 - Development branch `docs-readthrough-20260921`; frozen repair commit `38e88f1`.
-  `main` remains the canonical development destination. This checkpoint has not
-  yet been merged or pushed. `deploy/render-supabase` remains pinned separately.
+  `main` remains the canonical development destination. The development branch
+  is pushed but has not been merged; the experience candidate
+  remains in `needs_revision`. `deploy/render-supabase` remains pinned separately.
 - The candidate repairs the cold critic's missing tutorial input/history with a
   carried, world-anchored readout; adds a reachable Level 1 speech station;
   makes its action visibly say OPEN ENGINE; and compacts phone markers without
