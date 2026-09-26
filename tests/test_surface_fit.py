@@ -43,9 +43,14 @@ const stuck=fitBoundedSurface(hopeless);
 const shed_tight=fitBoundedSurface(tight);
 const idle=fitBoundedSurface(surface([section(10,20)],{client:280}));
 const empty=fitBoundedSurface(none);
+const promoted=surface([section(10,60),section(30,60)],{client:100});
+fitBoundedSurface(promoted);
+promoted.sections[0].dataset.critical='true';
+const promoted_result=fitBoundedSurface(promoted);
 console.log(JSON.stringify({first,r:r_first,partial,r_partial:r_partial,room,r_room:r_room,
   stuck,r_stuck:ranks(hopeless),empty,idle,
-  tight:ranks(tight),tight_fits:shed_tight.fits}));
+  tight:ranks(tight),tight_fits:shed_tight.fits,
+  promoted:ranks(promoted),promoted_fits:promoted_result.fits}));
 '''.replace('MODULE', json.dumps((ROOT / 'web/surface-fit.js').as_uri()))
 
 
@@ -84,6 +89,10 @@ class SurfaceFitTests(unittest.TestCase):
         # fix for that report is shorter authored text, not a shed teaching line.
         self.assertEqual(self.data['tight'], [10, 40])
         self.assertFalse(self.data['tight_fits'])
+
+    def test_promoted_required_feedback_is_restored_from_previous_shed(self):
+        self.assertNotIn(10, self.data['promoted'])
+        self.assertFalse(self.data['promoted_fits'])
 
 
 if __name__ == '__main__':

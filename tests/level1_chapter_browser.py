@@ -44,6 +44,12 @@ def open_card(page):
 
 
 def action(page,name,saved_text='Saved'):
+    if name=='Answer the signal' and page.locator('#machine-toggle').is_visible():
+        with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
+            page.locator('#machine-toggle').click()
+        assert saved.value.ok,saved.value.status
+        expect(page.locator('#saved')).to_have_text(saved_text,timeout=15000)
+        return saved.value.json()
     open_card(page)
     if name=='Connect the power lead' and page.get_by_role('button',name='Skip control practice',exact=True).is_visible():
         page.get_by_role('button',name='Skip control practice',exact=True).click()
@@ -55,12 +61,19 @@ def action(page,name,saved_text='Saved'):
 
 
 def choose(page,choice):
+    correction=page.get_by_role('button',name='Use the full input →',exact=True)
+    if correction.count():correction.click()
     # World-anchored trays put every required decision in the stage card; a
     # choice is one button click with one saved command, no modal. Scoped to
     # #actions because matching world signs are separate clickable surfaces.
     open_card(page)
+    needs_commit=page.locator('#actions button[data-action^="check-"]').count()>0
     with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
         page.locator('#actions').get_by_role('button',name=choice,exact=isinstance(choice,str)).click()
+        if needs_commit:
+            check=page.locator('#actions button[data-action^="check-"]')
+            expect(check).to_be_enabled()
+            check.click()
     assert saved.value.ok,saved.value.status
     expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
 
@@ -70,7 +83,9 @@ def supply_sign(page,name,carry,insert):
     page.get_by_role('button',name=f'Inspect {name}').click()
     expect(page.locator('#source-text')).to_be_visible()
     page.get_by_role('button',name=f'Carry {carry}').click()
-    choose(page,f'Insert {insert} into machine')
+    open_card(page)
+    page.get_by_role('button',name=f'Place {insert} in machine slot').click()
+    action(page,'Commit source')
 
 
 def world_action(page,name):
@@ -87,7 +102,7 @@ def generate(page, observations=None, gate_prediction=None):
         previous=page.evaluate('FirstWordsReview.state')
         assert previous['output']==['Open']
     if previous['loop_prediction']=='none' and previous['pieces']==1:
-        choose(page,'Next input: request, sign, and Open')
+        choose(page,'Request, sign, and Open')
         assert page.evaluate('FirstWordsReview.state.loop_prediction')=='grows'
         previous=page.evaluate('FirstWordsReview.state')
     if previous.get('source_inference')=='none' and gate_prediction:
@@ -117,7 +132,9 @@ def complete_relay(page, *, recover=False, reload_predictions=False, on_committe
         marker.click()
         expect(page.locator('#source-text')).to_be_visible()
         page.locator('#source-stage').click()
-        choose(page,f'Insert {"18:00 mira note" if key=="loft" else "18:20 mira note"}')
+        open_card(page)
+        page.get_by_role('button',name=f'Place {"18:00 mira note" if key=="loft" else "18:20 mira note"} in receiver slot').click()
+        action(page,'Commit source')
     def build(inference,history):
         choose(page,inference)
         action(page,'Make first relay word')
@@ -245,7 +262,8 @@ def main():
             expect(page.locator('#machine-toggle')).to_contain_text('CARRY OLD SIGN')
             open_card(page)
             expect(page.get_by_role('button',name='Inspect the speech engine')).to_be_visible()
-            choose(page,'Insert old sign into machine')
+            page.get_by_role('button',name='Place old sign in machine slot').click()
+            action(page,'Commit source')
             expect(page.locator('#context')).to_contain_text('Old route')
             expect(page.locator('#engine')).to_be_hidden()
             expect(page.locator('#learning-readout')).to_be_visible(timeout=15000)
@@ -259,7 +277,7 @@ def main():
             page.screenshot(path=str(out/'level1-transfer-wrong-390.png'))
             # Recovery requires a physical source change, not another machine
             # panel choice. The existing sign remains readable in the corridor.
-            expect(page.get_by_role('button',name='Insert old sign into machine')).to_have_count(0)
+            expect(page.get_by_role('button',name='Place old sign in machine slot')).to_have_count(0)
             if page.locator('#engine').is_visible():page.get_by_role('button',name='Put the machine away').click()
             page.get_by_role('button',name="Inspect today's route notice").click()
             expect(page.locator('#source-text')).to_contain_text('five-point lantern mark')
@@ -268,7 +286,7 @@ def main():
             open_card(page)
             # B3 reachability: the insertion action is on screen without scrolling.
             viewport=page.viewport_size
-            option=page.get_by_role('button',name="Insert today's notice into machine",exact=True);expect(option).to_be_visible()
+            option=page.get_by_role('button',name="Place today's notice in machine slot",exact=True);expect(option).to_be_visible()
             box=option.bounding_box()
             assert box and box['y']>=0 and box['y']+box['height']<=viewport['height'], f'insertion needs scrolling: {box}'
             # B1 narrow-sheet clause: on a phone the opened machine is a flush bottom
@@ -280,7 +298,8 @@ def main():
             assert abs(panel['y']+panel['height']-viewport['height'])<=8, f'sheet floats above the bottom edge: {panel}'
             assert panel['height']<=0.40*viewport['height'], f'sheet takes too much screen height: {panel}'
             assert panel['x']<=8 and panel['x']+panel['width']>=viewport['width']-8, f'sheet is not full-bleed: {panel}'
-            choose(page,"Insert today's notice into machine")
+            option.click()
+            action(page,'Commit source')
             expect(page.locator('#context')).to_contain_text('five-point lantern mark')
             replay.append({'phase':'current-context-selected','state':page.evaluate('FirstWordsReview.state')})
             generate(page,generation);until(page,'()=>!FirstWordsReview.runtime.world.animating')
@@ -317,18 +336,18 @@ def main():
                 skip_opening_to_tutorial(q);complete_tutorial(q);action(q,'Begin Level 1 →')
                 supply_sign(q,"today's route notice","today's notice","today's notice")
                 action(q,'Make first word')
-                choose(q,'Next input: request, sign, and Open')
+                choose(q,'Request, sign, and Open')
                 before_hint=q.evaluate('FirstWordsReview.state')
                 if hint:
                     action(q,'Ask for a hint')
-                    expect(q.locator('[data-learning-hint="route"]')).to_contain_text('supplied sign')
+                    expect(q.locator('[data-learning-hint="current-source"]')).to_contain_text('supplied sign')
                     q.reload()
                     open_card(q)
-                    expect(q.locator('[data-learning-hint="route"]')).to_be_visible(timeout=15000)
+                    expect(q.locator('[data-learning-hint="current-source"]')).to_be_visible(timeout=15000)
                 after_hint=q.evaluate('FirstWordsReview.state')
-                visible_hint=q.locator('[data-learning-hint="route"]').inner_text() if hint else None
+                visible_hint=q.locator('[data-learning-hint="current-source"]').inner_text() if hint else None
                 choose(q,prediction)
-                expect(q.locator('[data-learning-hint="route"]')).to_have_count(0)
+                expect(q.locator('[data-learning-hint="current-source"]')).to_have_count(0)
                 steps=[];generated=generate(q,steps)
                 complete_relay(q)
                 submitted=action(q,'Finish Level 1 →','Level saved · practice recorded')

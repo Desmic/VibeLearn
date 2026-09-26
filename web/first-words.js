@@ -5,9 +5,12 @@ import {createGameAudio} from './game-audio.js';
 import {createLearningSession} from './learning-session.js';
 import {createTutorialFlow,selectStateTutorialStep} from './tutorial-flow.js';
 import {createExperienceModeController} from './experience-mode.js';
-import {placeWorldMarker,chromeClearance,projectedEntityBox,focalClearanceBox} from './world-marker-layout.js';
+import {placeWorldMarker,parkWorldCarrier,chromeClearance,projectedEntityBox,focalClearanceBox} from './world-marker-layout.js';
 import {fitBoundedSurface} from './surface-fit.js';
+import {createReversibleChoice} from './reversible-choice.js';
+import {createEntityMatcher,carrierAtFocus} from './world-interaction-focus.js';
 import * as chapter from './first-words-world.js';
+const hitsEntity=createEntityMatcher(chapter.worldSpec.entities);
 
 // Every preference the player can set is read from the shared registry, so this page never
 // holds a second copy of a setting another surface also paints (rule I11).
@@ -19,7 +22,8 @@ const reduced=()=>preferences.get('motion');
 // The mission/complete stage card is opt-in: a world-anchored machine toggle carries
 // the short goal while closed, and the card opens for the player or on feedback beats.
 let cardOpen=false,cardStateKey='',lastExperienceMode=null;
-let stagedSource=null,stagedRelaySource=null,inspectedSource=null,inspectedKind=null,sourceAttempt=null;
+let stagedSource=null,stagedRelaySource=null,slottedSource=null,slottedRelaySource=null,inspectedSource=null,inspectedKind=null,sourceAttempt=null;
+let routeCorrectionSeen=false;
 const sourceName=key=>chapter.routeSources[key]?.name||chapter.relaySources[key]?.name||'sign';
 function inspectSource(key){
   const s=view(),source=chapter.routeSources[key];
@@ -61,6 +65,7 @@ function closeSource(){inspectedSource=null;inspectedKind=null;$('#source-inspec
 // instantiate the prison mission first and then flash it while learner state resolves.
 let world=runtime.showStory(chapter,host,0,{reducedMotion:reduced()});
 const session=createLearningSession(render);
+const tentative=createReversibleChoice(render);
 const practice=createTutorialFlow(chapter.controlTutorialSpec);
 const ours=()=>['first-words-1','first-words-2','first-words-3','first-words-4'].includes(session.attempt?.snapshot?.word_machine?.version);
 const growingBeat=s=>['first-words-3','first-words-4'].includes(session.attempt?.snapshot?.word_machine?.version)&&s.round===1&&s.pieces===1;
@@ -107,7 +112,7 @@ document.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',()=>{p
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 document.addEventListener('pointerdown',()=>audio.unlock().catch(()=>{}),{capture:true});
 document.addEventListener('keydown',()=>audio.unlock().catch(()=>{}),{capture:true});
-function button(label,action,primary=true){const b=document.createElement('button');b.className=primary?'primary':'';b.dataset.action=action;b.disabled=Boolean(blocked());b.onclick=()=>act(action);
+function button(label,action,primary=true,onClick=null){const b=document.createElement('button');b.className=primary?'primary':'';b.dataset.action=action;b.disabled=Boolean(blocked());b.onclick=onClick||(()=>act(action));
   // I10: an option may carry the world text it offers after its own name. The name is
   // the decision and never sheds; the quote is a rung below it, so a tight surface gives
   // the quote up before it gives up the choice, and the full text stays in the label.
@@ -117,8 +122,27 @@ function button(label,action,primary=true){const b=document.createElement('butto
   b.setAttribute('aria-label',label);
   if(quote){const shown=document.createElement('span');shown.textContent=name;const extra=document.createElement('span');extra.className='option-quote';extra.dataset.shedItem='22';extra.textContent=' · '+quote;b.append(shown,extra);}
   else b.textContent=name;
-  $('#actions').append(b);}
+  $('#actions').append(b);return b;}
 const tray=(label,action)=>button(label,action,false);
+const choiceScope=(kind)=>`${session.attempt?.id}:${session.attempt?.revision}:${kind}`;
+function choiceTray(label,action,kind){
+  const scope=choiceScope(kind),selected=tentative.selected(scope)===action;
+  const b=button(label,action,false,()=>{
+    tentative.select(scope,action);
+    requestAnimationFrame(()=>$('#actions [data-choice-selected="true"]')?.focus());
+  });
+  b.dataset.choiceSelected=String(selected);b.setAttribute('aria-pressed',String(selected));
+}
+function commitChoice(kind){
+  const scope=choiceScope(kind),selected=tentative.selected(scope);
+  if(selected&&view().available_actions?.includes(selected))tentative.commit(scope,act);
+}
+function checkChoice(kind){
+  const b=button('Check my prediction','check-'+kind,true,()=>commitChoice(kind));
+  b.dataset.requiresChoice=kind;
+  b.hidden=!tentative.selected(choiceScope(kind));
+  b.disabled=Boolean(blocked());
+}
 // Anything a beat drops into the decision container that is not a decision is a rung
 // (guide I10): the recap prose and the hint sit below the choice, so a tight surface
 // gives them up before it lets a button fall past the sheet's edge. The rank is above
@@ -138,6 +162,25 @@ const NOTE_TRAYS=[
   ['Offer the 18:00 note · “They are holding me in the Lantern Loft.”','relay-context-loft'],
   ['Offer the 18:20 note · “They moved me from the Lantern Loft to the Bell Yard.”','relay-context-yard']
 ];
+function sourceHandoff(kind){
+  const relay=kind==='relay',carried=relay?stagedRelaySource:stagedSource;
+  const placed=relay?slottedRelaySource:slottedSource;
+  const target=relay?'receiver':'machine';
+  if(placed){
+    statusLine(`${sourceName(placed)} is in the ${target} slot. Only Commit source supplies it.`,{learningHint:'source-slot'});
+    button('Commit source',relay?chapter.relaySources[placed].action:chapter.routeSources[placed].action);
+    button('Remove from slot',`remove-${kind}-slot`,false,()=>{
+      if(relay)slottedRelaySource=null;else slottedSource=null;
+      render();
+    });
+  }
+  if(carried&&carried!==placed){
+    button(`Place ${sourceName(carried).toLowerCase()} in ${target} slot`,`place-${kind}-slot`,!placed,()=>{
+      if(relay)slottedRelaySource=carried;else slottedSource=carried;
+      render();
+    });
+  }else if(!placed)statusLine(`Inspect a ${relay?'dated note':'corridor sign'}, carry it to the ${target}, then place it in the slot.`,{learningHint:'source'});
+}
 function tutorialStage(s,complete){
   if(complete)return['LEVEL 1 · COMPLETE',s.relay_stage==='done'?'Mira heard you.':'The deeper gate is open.',s.relay_stage==='done'?'Your friend is alive. The receiver holds her reply while you plan the way deeper inside.':'You restored enough speech to read the changing route and found the way forward.'];
   if(s.round===1&&s.status==='success'&&s.relay_stage!==undefined){
@@ -152,7 +195,9 @@ function tutorialStage(s,complete){
   if(s.status==='wrong')return['LEVEL 1 · RECOVER','Wrong route.','Nothing is lost. Compare the route boards, supply a better sign and try again.'];
   if(s.clue==='none')return['LEVEL 1 · FIRST MISSION','Find the current route.','Three route boards stand here and they disagree. Read them, then supply one sign to the machine.'];
   if(growingBeat(s)&&s.loop_prediction==='none')return['LEVEL 1 · INPUT','What reaches the machine next?','Open has appeared. Predict whether the next input also receives that word.'];
-  if(growingBeat(s)&&s.source_inference==='none')return['LEVEL 1 · SOURCE','Gate or none?','Name the gate the inserted sign supports, or say that it names none.'];
+  if(growingBeat(s)&&s.source_inference==='none'&&s.loop_prediction==='same'&&!routeCorrectionSeen)
+    return['LEVEL 1 · INPUT','Open joins the next input.','Your choice left out Open. Actual next input: request, sign, and Open.'];
+  if(growingBeat(s)&&s.source_inference==='none')return['LEVEL 1 · SOURCE','Which gate does this sign support?','Use only the inserted sign, not the route you hope is open.'];
   if(s.round===1&&s.pieces===0&&s.prediction==='none'&&s.available_actions?.includes('step'))return['LEVEL 1 · FIRST WORD','Run the machine once.','Only the inserted sign is supplied. The other corridor signs remain outside the machine.'];
   if(!sourceInferenceMode(s)&&s.prediction==='none')return['LEVEL 1 · FIRST MISSION','Predict the gate.','Before running the machine, predict the output from only the sign you supplied.'];
   if(s.pieces===0&&s.loop_prediction==='none'&&s.available_actions?.some(a=>a.startsWith('loop-')))return['LEVEL 1 · FIRST MISSION','Predict how the input grows.','Decide what each new prediction will receive, before the first word exists.'];
@@ -160,11 +205,13 @@ function tutorialStage(s,complete){
 }
 function render(){
   const s=view(),a=session.attempt,complete=ours()&&a.status==='submitted';
-  if(a?.id!==sourceAttempt){sourceAttempt=a?.id;stagedSource=null;stagedRelaySource=null;closeSource();}
+  if(a?.id!==sourceAttempt){sourceAttempt=a?.id;stagedSource=null;stagedRelaySource=null;slottedSource=null;slottedRelaySource=null;routeCorrectionSeen=false;tentative.reset();closeSource();}
   if(s.round!==1||s.status==='success'||(stagedSource&&s.clue===stagedSource)){
-    stagedSource=null;closeSource();
+    stagedSource=null;slottedSource=null;closeSource();
   }
-  if(s.relay_context!=='none'&&s.relay_context===stagedRelaySource)stagedRelaySource=null;
+  if(slottedSource&&s.clue===slottedSource)slottedSource=null;
+  if(s.relay_context!=='none'&&s.relay_context===stagedRelaySource){stagedRelaySource=null;slottedRelaySource=null;}
+  if(slottedRelaySource&&s.relay_context===slottedRelaySource)slottedRelaySource=null;
   practice.bind(a?.id,ours()&&!s.powered&&s.round===0&&!complete);
   if(inOpening){setExperienceMode('opening');syncCardVisibility();return;}
   const mode=!ours()?'entry':complete?'complete':s.round===0?'tutorial':'mission';
@@ -196,13 +243,27 @@ function render(){
   const repair=repairStep(s),controlStep=practice.step;
   const relay=Boolean(s.relay_stage&&s.relay_stage!=='none');
   const [stage,goal,detail]=tutorialStage(s,complete);text('#stage-name',stage);text('#goal',goal);text('#detail',detail);
-  $('#engine').dataset.anchor=controlStep!=='done'?'zip':(relay||(complete&&s.relay_stage==='done'))?'friend-signal':s.round===1?'route-machine':'socket';
-  $('#engine').setAttribute('aria-label',controlStep!=='done'?'Control practice':'Message machine');
+  const routeCorrection=growingBeat(s)&&s.source_inference==='none'&&s.loop_prediction==='same'&&!routeCorrectionSeen;
+  $('#detail').dataset.critical=routeCorrection?'true':'false';
+  $('#engine').dataset.anchor=controlStep!=='done'?'zip':(relay||(s.round===1&&s.status==='success'&&s.relay_stage!==undefined))?'friend-signal':s.round===1?'route-machine':'socket';
+  $('#engine').setAttribute('aria-label',controlStep!=='done'?'Control practice':relay?'Message receiver':'Message machine');
   $('#machine-toggle').dataset.anchor=$('#engine').dataset.anchor;
-  const carried=relay?stagedRelaySource:stagedSource;
-  text('#machine-toggle',s.round===0?'Inspect engine':carried?`CARRY ${sourceName(carried).toUpperCase()} → ${relay?'RECEIVER':'ENGINE'}`:'OPEN ENGINE');
-  $('#machine-toggle').setAttribute('aria-label',carried?`Carry ${sourceName(carried)} to the message machine`:'Open the message machine');
+  const carried=relay?stagedRelaySource:stagedSource,slotted=relay?slottedRelaySource:slottedSource;
+  const device=relay?'receiver':'message machine';
+  const arriving=s.available_actions?.includes('relay-start');
+  text('#machine-toggle',s.round===0?'Inspect engine':arriving?'ANSWER MIRA’S SIGNAL':slotted?`${sourceName(slotted).toUpperCase()} IN ${relay?'RECEIVER':'ENGINE'}`:carried?`CARRY ${sourceName(carried).toUpperCase()} → ${relay?'RECEIVER':'ENGINE'}`:relay?'OPEN RECEIVER':'OPEN ENGINE');
+  $('#machine-toggle').setAttribute('aria-label',arriving?'Answer Mira’s signal at the receiver':carried?`Carry ${sourceName(carried)} to the ${device}`:`Open the ${device}`);
   $('#machine-toggle').setAttribute('aria-description',goal);
+  const carryToken=$('#carried-source'),slotToken=$('#slotted-source');
+  carryToken.dataset.anchor='zip';
+  text('#carried-source',carried&&!slotted?`ZIP CARRIES · ${sourceName(carried).toUpperCase()}`:'');
+  const sourceQuestion=!relay&&growingBeat(s)&&s.loop_prediction!=='none'&&s.source_inference==='none'&&!routeCorrection;
+  slotToken.dataset.anchor=sourceQuestion?chapter.routeSources[s.clue].anchor:relay?'friend-signal-label':'route-machine';
+  const routeSource=chapter.routeSources[s.clue];
+  text('#slotted-source',slotted?`${sourceName(slotted).toUpperCase()} · IN ${relay?'RECEIVER':'MACHINE'} SLOT`:
+    sourceQuestion?`SUPPLIED · ${s.hinted&&routeSource.cueText?routeSource.cueText:routeSource.decisionText}`:'');
+  slotToken.classList.toggle('source-evidence',sourceQuestion);
+  slotToken.dataset.critical=sourceQuestion?'true':'false';
   host.dataset.tutorialWorldTarget=controlStep==='done'&&repair?.focus==='world'?(repair.target||''):'';
   host.dataset.tutorialWorldAction=controlStep==='done'&&repair?.focus==='world'?(repair.primaryAction||''):'';
   host.dataset.tutorialInteractionStep=controlStep==='done'?(repair?.id||''):'';
@@ -212,6 +273,19 @@ function render(){
   text('#readout-request',readoutInput[0]||'Awaiting a request');
   text('#readout-supplied',readoutInput[1]||'No clue supplied yet');
   text('#readout-words',shownOutput?.length?shownOutput.join(' '):'No words yet');
+  const wrongHistory=changedRelay(s)&&s.relay_stage==='choosing'&&s.relay_input_prediction!=='none'&&s.relay_input_prediction!=='full';
+  const wrongRouteHistory=growingBeat(s)&&s.loop_prediction==='same';
+  const omitted=s.relay_input_prediction==='latest'?'Meet':'Meet and at';
+  const tutorialReadout=s.round===0&&s.pieces===1;
+  $('#readout-request-row').hidden=tutorialReadout;
+  text('#readout-feedback',wrongHistory?`Your choice left out ${omitted}. The next input includes every generated word.`:
+    wrongRouteHistory?'Your choice left out Open. The next input includes the request, sign, and Open.':
+    tutorialReadout?'Prepared toy words; real tokens may be smaller.':'');
+  $('#readout-feedback').hidden=!$('#readout-feedback').textContent;
+  $('#learning-readout').dataset.anchor=relay?'friend-signal-label':'zip-voice';
+  $('#learning-readout').dataset.critical=wrongHistory||wrongRouteHistory?'true':'false';
+  $('#learning-readout strong').textContent=relay?'NEXT INPUT TO RECEIVER':"NEXT INPUT TO ZIP'S ENGINE";
+  $('#learning-readout strong').hidden=tutorialReadout;
   $('#output').replaceChildren();for(let i=0;i<4;i++){const span=document.createElement('span');span.textContent=shownOutput[i]||'·';if(!shownOutput[i])span.className='empty';$('#output').append(span);}
   const visibleInput=growingBeat(s)&&s.loop_prediction==='none'?s.input:s.context;
   text('#context',relay?(changedRelay(s)?s.relay_input:[s.relay_case.base,s.relay_case.notes[s.relay_context]||'Choose a note.',['revealed','done'].includes(s.relay_stage)?s.relay_case.prefix:'']).filter(Boolean).join(' '):visibleInput.join(' ')||'Waiting for power.');
@@ -224,19 +298,13 @@ function render(){
     if(s.relay_context==='yard')button('Send the message to Mira','relay-finish');
     const support=s.relay_case.source_support[s.relay_context];
     statusLine(`${sourceName(s.relay_context)} ${support==='no-mira'?'did not locate Mira':`located Mira at ${s.relay_case.destinations[s.relay_context]}`}. The toy wrote “${s.relay_output.join(' ')}”; ${s.relay_context==='yard'?'Mira can receive this.':'Mira did not reply here.'} Your first choices remain saved.`);
-    if(s.relay_context!=='yard'){
-      if(stagedRelaySource&&stagedRelaySource!==s.relay_context)button(`Insert ${sourceName(stagedRelaySource).toLowerCase()}`,chapter.relaySources[stagedRelaySource].action);
-      else statusLine('Inspect another dated note, carry it to the receiver, then insert it.',{learningHint:'relay-source'});
-    }
+    if(s.relay_context!=='yard')sourceHandoff('relay');
   }
   else if(relay&&changedRelay(s)){
-    if(s.relay_context==='none'){
-      if(stagedRelaySource)button(`Insert ${sourceName(stagedRelaySource).toLowerCase()}`,chapter.relaySources[stagedRelaySource].action);
-      else statusLine('Inspect a dated note, carry it here, then insert it.',{learningHint:'relay-source'});
-    }
+    if(s.relay_context==='none')sourceHandoff('relay');
     else if(s.relay_inference==='none'){
       statusLine('What does the supplied note say about Mira’s location?',{learningHint:'relay-inference'});
-      tray('Lantern Loft','relay-infer-loft');tray('Bell Yard','relay-infer-yard');tray('No Mira location','relay-infer-no-mira');
+      choiceTray('Lantern Loft','relay-infer-loft','relay-inference');choiceTray('Bell Yard','relay-infer-yard','relay-inference');choiceTray('No Mira location','relay-infer-no-mira','relay-inference');checkChoice('relay-inference');
     }
     else if(s.relay_pieces<2){
       statusLine(s.relay_pieces===0?'The source inference is saved. Generate the first word.':'Meet has appeared. Generate one more word, then decide what enters the next prediction.');
@@ -244,11 +312,15 @@ function render(){
     }
     else if(s.relay_input_prediction==='none'){
       statusLine('What enters the next prediction after Meet at?',{learningHint:'relay-history'});
-      tray('Request and note only','relay-input-original');
-      tray('Request, note, and at only','relay-input-latest');
-      tray('Request, note, Meet, and at','relay-input-full');
+      choiceTray('Request and note only','relay-input-original','relay-history');
+      choiceTray('Request, note, and at only','relay-input-latest','relay-history');
+      choiceTray('Request, note, Meet, and at','relay-input-full','relay-history');checkChoice('relay-history');
     }
-    else button('Run the relay →','relay-run');
+    else{
+      if(wrongHistory)statusLine(`Your choice omitted ${omitted}. The actual next input includes the request, note, Meet and at.`,{learningHint:'history-correction'});
+      else statusLine('Yes. The actual next input includes the request, note, Meet and at.',{learningHint:'history-correction'});
+      button('Run the relay →','relay-run');
+    }
   }
   else if(relay&&s.relay_stage==='revealed'){
     if(s.relay_context==='yard')button('Send the message to Mira','relay-finish');
@@ -274,24 +346,24 @@ function render(){
     // I7: a recovery beat must not re-offer the choice that already produced this
     // exact output — the words promise a different sign, so the tray must agree.
     // Same rule the relay recovery already follows below.
-    if(stagedSource&&stagedSource!==s.clue)button(`Insert ${sourceName(stagedSource).toLowerCase()} into machine`,chapter.routeSources[stagedSource].action);
-    else statusLine('Inspect a different corridor sign, carry it here, then insert it in the machine.',{learningHint:'source'});
+    sourceHandoff('route');
   }
   else if(s.round===1&&s.clue==='none'){
-    if(stagedSource)button(`Insert ${sourceName(stagedSource).toLowerCase()} into machine`,chapter.routeSources[stagedSource].action);
-    else statusLine('Inspect a corridor sign, carry it here, then insert it in the machine.',{learningHint:'source'});
+    sourceHandoff('route');
   }
   else if(growingBeat(s)&&s.loop_prediction==='none'){
-    tray('Next input: request and sign only','loop-same');
-    tray('Next input: request, sign, and Open','loop-grows');
+    choiceTray('Request and sign only','loop-same','route-history');
+    choiceTray('Request, sign, and Open','loop-grows','route-history');checkChoice('route-history');
+  }
+  else if(routeCorrection){
+    button('Use the full input →','ack-route-correction',false,()=>{routeCorrectionSeen=true;render();});
   }
   else if(growingBeat(s)&&s.source_inference==='none'){
     $('#actions').dataset.layout='two-column';
-    if(s.hinted)statusLine('Hint: use only the supplied sign.',{learningHint:'route'});
-    else statusLine(s.loop_prediction==='grows'?'Yes. Open joins the next input.':'Open also joins the next input.',{learningHint:'history'});
-    tray('Moon','infer-moon');tray('Star','infer-star');
-    tray('Sun','infer-sun');tray('No gate','infer-no-gate');
-    if(!s.hinted)button('Ask for a hint','hint',false);
+    if(s.hinted)statusLine('Hint: trust this sign.',{learningHint:'current-source'});
+    choiceTray('Moon','infer-moon','route-inference');choiceTray('Star','infer-star','route-inference');
+    choiceTray('Sun','infer-sun','route-inference');choiceTray('No gate','infer-no-gate','route-inference');checkChoice('route-inference');
+    if(!s.hinted&&!wrongRouteHistory)button('Ask for a hint','hint',false);
   }
   else if(s.round===1&&s.pieces===0&&s.prediction==='none'&&s.available_actions?.includes('step')){
     statusLine(`Only ${sourceName(s.clue).toLowerCase()} was supplied. The other signs remain outside the machine.`);
@@ -410,7 +482,11 @@ function flavor(title,detail){
 }
 $('#start').onclick=()=>act('start');$('#rewind').onclick=()=>act('rewind');$('#retry').onclick=()=>session.retry();
 $('#card-close').onclick=()=>{cardOpen=false;syncCardVisibility();};
-$('#machine-toggle').onclick=()=>{closeSource();cardOpen=true;syncCardVisibility();};
+$('#machine-toggle').onclick=()=>{
+  closeSource();
+  if(view().available_actions?.includes('relay-start')){act('relay-start');return;}
+  cardOpen=true;syncCardVisibility();
+};
 $('#source-stage').onclick=stageSource;
 function returnFromSource(){const key=inspectedSource,kind=inspectedKind;closeSource();document.querySelector(kind==='relay'?`[data-relay-source="${key}"]`:`[data-clue="${key}"]`)?.focus();}
 $('#source-close').onclick=returnFromSource;
@@ -491,14 +567,14 @@ function frame(){
   // I10: a player's own text size fires no event, so the bounded surface is re-fitted
   // on a slow timer. The steady state costs one overflow comparison per tick.
   if(performance.now()-lastFit>250){lastFit=performance.now();fitBoundedSurface(card);}
-  $('#actions').querySelectorAll('button').forEach(b=>b.disabled=Boolean(blocked()));$('#rewind').disabled=Boolean(blocked());
+  $('#actions').querySelectorAll('button').forEach(b=>b.disabled=Boolean(blocked()||(b.dataset.requiresChoice&&!tentative.selected(choiceScope(b.dataset.requiresChoice)))));$('#rewind').disabled=Boolean(blocked());
   const playRects=[localRect(host.querySelector('.game-view-tools'),rect),localRect(host.querySelector('.game-move-stick'),rect),localRect(host.querySelector('.game-controls-help'),rect)].filter(Boolean);
   const hero=focalClearanceBox(world,'zip',{top:[0,2.55,0],bottom:[0,-.15,0],left:[-.8,0,0],right:[.8,0,0],margin:12});
   const chromeTop=chromeClearance([document.querySelector('.masthead')],{fallback:76});
   const point=card.hidden?null:world.projectEntity(card.dataset.anchor||'socket');
   const anchored=point&&point.inFront;
   card.classList.toggle('parked',Boolean(point)&&!anchored);
-  card.classList.toggle('side-focus',!mobile&&sourceInferenceMode(s)&&s.round===1&&s.pieces===1&&s.source_inference==='none');
+  card.classList.remove('side-focus');
   const banded=sheet||card.classList.contains('compact')||card.classList.contains('world-focus')||card.classList.contains('side-focus');
   card.classList.toggle('parked-reading',Boolean(anchored&&card.classList.contains('compact')&&mobile&&!sheet));
   if(!anchored){card.style.left='';card.style.top='';}
@@ -517,11 +593,22 @@ function frame(){
     avoidRects.push({left:cardRect.left-rect.left,right:cardRect.right-rect.left,top:cardRect.top-rect.top,bottom:cardRect.bottom-rect.top});
   }
   const relay=Boolean(s.relay_stage&&s.relay_stage!=='none');
+  const sourceQuestion=!relay&&growingBeat(s)&&s.loop_prediction!=='none'&&s.source_inference==='none'&&
+    !(s.loop_prediction==='same'&&!routeCorrectionSeen);
+  const activeFocus=s.round===0?'tutorial':s.status==='success'&&s.relay_stage==='none'?'receiver-approach':relay?'receiver':'route';
+  const readoutFocus=s.round===0?'tutorial':relay?'receiver':'route';
+  const readoutActive=carrierAtFocus(readoutFocus,activeFocus,relay?s.relay_context!=='none'&&s.relay_stage!=='done':s.round===0?s.input?.length>=2:s.clue!=='none');
   // Subject clearance: during the relay the receiver owns the scene; labels
   // yield to its screen box instead of burying it (guide B2, review 210a663).
   if(relay){
     const subject=projectedEntityBox(world,'friend-signal',{top:[0,1.35,.25],bottom:[0,-1.45,.25],left:[-.95,0,.25],right:[.95,0,.25],margin:8});
     if(subject)avoidRects.push(subject);
+  }
+  if(sourceQuestion){
+    // Preserve the route symbol as the readable landmark; the outer bars may
+    // sit behind a contextual sign when a narrow view leaves no other space.
+    const gate=projectedEntityBox(world,'star',{top:[0,3.1,.2],bottom:[0,1.2,.2],left:[-.8,2.1,.2],right:[.8,2.1,.2],margin:8});
+    if(gate)avoidRects.push(gate);
   }
   // B2 protagonist clearance: Zip is the focal subject of every play stage, so
   // anchored labels keep out of his body box *and* its focal ring instead of
@@ -532,6 +619,7 @@ function frame(){
     if(marker.id==='source-inspection'&&inspectedSource)marker.hidden=false;
     const projected=world.projectEntity(marker.dataset.anchor);
     const readout=marker.id==='learning-readout';
+    const carryToken=marker.id==='carried-source',slotToken=marker.id==='slotted-source';
     const anchor=readout&&!projected?.inFront?world.projectEntity('zip'):projected;
     const wrongRound=marker.dataset.round!==undefined&&Number(marker.dataset.round)!==s.round;
     const available=marker.dataset.action?s.available_actions?.includes(marker.dataset.action):true;
@@ -545,7 +633,7 @@ function frame(){
     // I9: a declared carrier of the beat's decision may slide and edge-cue, but may
     // not vanish because the screen got small.
     const carrier=marker.dataset.carrier!==undefined;
-    const guidable=critical||carrier?Boolean(anchor?.inFront):Boolean(anchor?.visible);
+    const guidable=(critical||carrier?Boolean(anchor?.inFront):Boolean(anchor?.visible))||(slotToken&&sourceQuestion);
     const toggleMarker=marker.dataset.machineToggle!==undefined;
     if(toggleMarker){
       // The machine toggle is the opt-in door while the card is away; it never
@@ -554,9 +642,12 @@ function frame(){
       marker.classList.toggle('parked',!(anchor&&anchor.inFront));
     // I3: while the machine panel is open it owns the decision; its world
     // choice markers fold away (they return when the panel is put away).
-    }else marker.hidden=(readout&&(!s.powered||practice.step!=='done'||(s.clue==='none'&&!relay)||!card.hidden))||(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')||marker.id==='source-inspection'))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay||(!changedRelay(s)&&marker.dataset.relaySource==='tavi')))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
-    if(anchor&&!marker.hidden&&!(toggleMarker&&marker.classList.contains('parked'))){
+    }else marker.hidden=(readout&&(!readoutActive||!s.powered||practice.step!=='done'||!card.hidden))||(carryToken&&!(relay?stagedRelaySource&&!slottedRelaySource:stagedSource&&!slottedSource))||(slotToken&&!marker.textContent)||(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')||marker.id==='source-inspection'))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay||(!changedRelay(s)&&marker.dataset.relaySource==='tavi')))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
+    if((anchor||slotToken&&sourceQuestion)&&!marker.hidden&&!(toggleMarker&&marker.classList.contains('parked'))){
       const placement=placeWorldMarker(marker,anchor,{viewportWidth:rect.width,safeTop,safeBottom,critical,parkWhenFull:carrier,yOffset:readout?48:12,avoidRects});
+      if(slotToken&&sourceQuestion&&!placement.placed){
+        marker.hidden=!parkWorldCarrier(marker,{viewportWidth:rect.width,safeTop,safeBottom});
+      }
       if(marker.id==='source-inspection'&&!placement.placed){
         // Inspection is a player-opened carrier. Crowded phone scenes may have
         // no free world-anchored slot; park the whole note below the masthead
@@ -565,7 +656,7 @@ function frame(){
         marker.style.top=Math.min(rect.height-8,chromeTop+marker.offsetHeight+8)+'px';
         marker.classList.add('edge-cued');marker.dataset.edge='top';
       }
-      else if(!placement.placed||(!critical&&!carrier&&!placement.insideSafeArea))marker.hidden=true;
+      else if((!placement.placed&&!(slotToken&&sourceQuestion))||(!critical&&!carrier&&!placement.insideSafeArea))marker.hidden=true;
       else{const footprint=marker.getBoundingClientRect();avoidRects.push({left:footprint.left-rect.left,right:footprint.right-rect.left,top:footprint.top-rect.top,bottom:footprint.bottom-rect.top});}
     }else if(toggleMarker&&marker.classList.contains('parked')){marker.style.left='';marker.style.top='';}
   }
@@ -574,26 +665,30 @@ function frame(){
 host.addEventListener('click',async e=>{
   if(blocked()||e.target.closest('button,.game-player-controls'))return;
   const target=await world.pickSemanticAt(e.clientX,e.clientY),s=view();
-  if(target==='loose-plug'||(s.round===0&&target?.startsWith('socket'))){
+  if(hitsEntity(target,'loose-plug')||(s.round===0&&hitsEntity(target,'socket'))){
     // I1/CP4: acting on the machine performs the machine's verb in the world;
     // it never summons a panel about the machine. The diegetic toggle opens the panel.
     if(!s.powered)act('connect');else if(s.available_actions?.includes('step'))act('step');
   }
-  if(s.round===1&&target?.startsWith('route-machine')){
+  if(s.round===1&&hitsEntity(target,'route-machine')){
     if(s.available_actions?.includes('step'))act('step');
     else if(s.available_actions?.includes('send'))act('send');
     else{cardOpen=true;syncCardVisibility();}
   }
-  if(target?.startsWith('moon')&&s.available_actions?.includes('scan-moon'))act('scan-moon');
-  const noticeSource=target?.startsWith('notice-old')?'moon':target?.startsWith('notice-parade')?'parade':target?.startsWith('notice-today')?'star':null;
-  if(noticeSource)inspectSource(noticeSource);
-  const noteSource=target?.startsWith('relay-note-a')?'loft':target?.startsWith('relay-note-b')?'yard':target?.startsWith('relay-note-c')?'tavi':null;
+  if(hitsEntity(target,'moon')&&s.available_actions?.includes('scan-moon'))act('scan-moon');
+  const noticeSource=hitsEntity(target,'notice-old')?'moon':hitsEntity(target,'notice-parade')?'parade':hitsEntity(target,'notice-today')?'star':null;
+  if(noticeSource){inspectSource(noticeSource);return;}
+  const noteSource=hitsEntity(target,'relay-note-a')?'loft':hitsEntity(target,'relay-note-b')?'yard':hitsEntity(target,'relay-note-c')?'tavi':null;
   if(noteSource){
     if(changedRelay(s))inspectRelaySource(noteSource);
     else if(s.available_actions?.includes(`relay-context-${noteSource}`))act(`relay-context-${noteSource}`);
+    return;
   }
-  if(target==='friend-signal'&&s.available_actions?.includes('relay-start'))act('relay-start');
-  if(target==='friend-cube')flavor('A very companionable cube.','Someone painted a heart on a spare power cube. It may belong to one of the missing robots.');
+  if(hitsEntity(target,'friend-signal')){
+    if(s.available_actions?.includes('relay-start'))act('relay-start');
+    else if(s.relay_stage&&s.relay_stage!=='none'){cardOpen=true;syncCardVisibility();}
+  }
+  if(hitsEntity(target,'friend-cube'))flavor('A very companionable cube.','Someone painted a heart on a spare power cube. It may belong to one of the missing robots.');
 });
 async function boot(){
   try{

@@ -15,13 +15,17 @@ class PlatformGeneralizationTests(unittest.TestCase):
             "tutorial":(ROOT/"web"/"tutorial-flow.js").as_uri(),
             "modes":(ROOT/"web"/"experience-mode.js").as_uri(),
             "markers":(ROOT/"web"/"world-marker-layout.js").as_uri(),
+            "choices":(ROOT/"web"/"reversible-choice.js").as_uri(),
+            "focus":(ROOT/"web"/"world-interaction-focus.js").as_uri(),
         }
         script=textwrap.dedent(f"""
             const {{validateWorldSpec}}=await import({json.dumps(modules["world"])});
             const {{validateOpeningSpec}}=await import({json.dumps(modules["opening"])});
             const {{validateTutorialFlowSpec,createTutorialFlow,validateStateTutorialSpec,selectStateTutorialStep,tutorialStepSucceeded}}=await import({json.dumps(modules["tutorial"])});
             const {{createExperienceModeController}}=await import({json.dumps(modules["modes"])});
-            const {{placeWorldMarker}}=await import({json.dumps(modules["markers"])});
+            const {{placeWorldMarker,parkWorldCarrier}}=await import({json.dumps(modules["markers"])});
+            const {{createReversibleChoice}}=await import({json.dumps(modules["choices"])});
+            const {{createEntityMatcher,carrierAtFocus}}=await import({json.dumps(modules["focus"])});
 
             const ensure=(value,message)=>{{if(!value)throw new Error(message);}};
 
@@ -38,6 +42,8 @@ class PlatformGeneralizationTests(unittest.TestCase):
                 {{id:'pressure-core',primitive:'sphere',material:'signal',position:[2,1,-2],
                   storyObject:{{role:'pressure-core',importance:'major',readability:['light','motion']}},
                   motion:{{type:'pulse',amplitude:.12,speed:2.4}}}},
+                {{id:'gauge-lens',parent:'pressure-core',primitive:'sphere',material:'signal',position:[0,.2,.2]}},
+                {{id:'pressure-core-spare',primitive:'sphere',material:'metal',position:[3,1,-2]}},
                 {{id:'dock-worker',primitive:'capsule',material:'worker',position:[-3,0,1],
                   motion:{{type:'patrol',offset:[2.5,0,-1],speed:.45,phase:.7}}}},
                 {{id:'bridge',primitive:'box',material:'stone',position:[0,.3,-6],scale:[4,.5,2],
@@ -136,6 +142,34 @@ class PlatformGeneralizationTests(unittest.TestCase):
             }};
             const placed=placeWorldMarker(marker,{{x:900,y:350}},{{viewportWidth:400,safeTop:120,safeBottom:650,critical:true}});
             ensure(placed.edge==='right'&&placed.x===360,'critical world target did not clamp generically');
+            const parked={{offsetWidth:120,offsetHeight:48,style:{{}},dataset:{{}},
+              classList:{{add(){{}}}}}};
+            ensure(parkWorldCarrier(parked,{{viewportWidth:400,safeTop:100,safeBottom:250}})
+              &&parked.style.left==='332px'&&parked.style.top==='156px'
+              &&parked.dataset.edge==='bottom','required harbor carrier did not park within safe area');
+
+            // Same interaction guarantees in a harbor lesson, with no Bellweather
+            // names or learning IDs: child mesh hits route to the parent object,
+            // a spent relay hint yields to the active bridge, and tentative
+            // answers cannot dispatch an assessed command until commitment.
+            const hitsEntity=createEntityMatcher(world.entities);
+            ensure(hitsEntity('gauge-lens','pressure-core')
+              &&hitsEntity('pressure-core','pressure-core')
+              &&!hitsEntity('pressure-core-spare','pressure-core'),
+              'semantic child hit routing must follow authored parentage, not IDs');
+            const cyclic=createEntityMatcher([{{id:'cycle-a',parent:'cycle-b'}},{{id:'cycle-b',parent:'cycle-a'}}]);
+            ensure(!cyclic('cycle-a','missing-root'),'cyclic generated ancestry did not terminate');
+            ensure(!carrierAtFocus('pressure-core','bridge')
+              &&carrierAtFocus('bridge','bridge'),'spent guidance did not yield');
+            let dispatched=[];
+            const pending=createReversibleChoice();
+            pending.select('harbor-attempt:3:prediction','core-a');
+            pending.select('harbor-attempt:3:prediction','core-b');
+            ensure(dispatched.length===0,'tentative selection dispatched evidence');
+            const commit=()=>pending.commit('harbor-attempt:3:prediction',action=>dispatched.push(action));
+            await commit();await commit();
+            ensure(dispatched.length===1&&dispatched[0]==='core-b','explicit commitment did not dispatch once');
+            ensure(pending.selected('harbor-attempt:4:prediction')===null,'selection leaked across revision');
 
             console.log(JSON.stringify({{
               world:world.id,

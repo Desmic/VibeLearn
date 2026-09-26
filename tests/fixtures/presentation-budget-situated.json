@@ -1,0 +1,104 @@
+{
+  "path": "/first-words",
+  "states": [
+    {
+      "name": "route-wrong-history-correction-phone",
+      "screenshot": "artifacts/presentation-situated/route-correction-phone.png",
+      "viewport": [390, 844],
+      "goto": true,
+      "steps": [
+        {"click": "Skip opening", "timeout": 60000},
+        {"wait_text": "Skip control practice", "timeout": 60000},
+        {"click": "Skip control practice", "timeout": 60000},
+        {"wait_eval": "()=>{const t=document.querySelector('#machine-toggle');return t&&!t.hidden&&document.querySelector('#engine').hidden&&!FirstWordsReview.runtime.world.animating;}", "timeout": 60000},
+        {"click": "Connect the loose power lead", "timeout": 60000},
+        {"click": "Scan the Moon lock in the world", "timeout": 60000},
+        {"click": "Use the speech engine in the world", "timeout": 60000},
+        {"click": "Use the speech engine in the world", "timeout": 60000},
+        {"click": "Use the speech engine in the world", "timeout": 60000},
+        {"click": "Use the speech engine in the world", "timeout": 60000},
+        {"click": "Speak the completed command to the Moon gate", "timeout": 60000},
+        {"wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating", "timeout": 90000},
+        {"click": "Begin Level 1 through the opened Moon door", "timeout": 60000},
+        {"wait_text": "OPEN ENGINE", "timeout": 60000},
+        {"click": "Inspect the parade notice", "timeout": 60000},
+        {"click": "Carry parade notice", "timeout": 60000},
+        {"click": "Carry Parade notice to the message machine", "timeout": 60000},
+        {"click": "Place parade notice in machine slot", "timeout": 60000},
+        {"click": "Commit source", "timeout": 60000},
+        {"click": "Open the message machine", "timeout": 60000},
+        {"click": "Make first word", "timeout": 60000},
+        {"click": "Request and sign only", "timeout": 60000},
+        {"click": "Check my prediction", "timeout": 60000}
+      ],
+      "wait_eval": "()=>window.FirstWordsReview?.state?.loop_prediction==='same'&&document.querySelector('#goal')?.textContent==='Open joins the next input.'",
+      "wait_timeout": 60000,
+      "panel_open": true,
+      "narrow_sheet": true,
+      "sheet": "#engine",
+      "yields": [".game-move-stick", ".game-view-tools", ".game-controls-help"],
+      "opened_by": "Open the message machine",
+      "required_content": [
+        {"selector": "#goal", "includes": ["Open joins the next input."]},
+        {"selector": "#detail", "includes": ["left out Open", "request, sign, and Open"]}
+      ]
+    },
+    {
+      "name": "route-source-question-phone",
+      "screenshot": "artifacts/presentation-situated/source-question-phone.png",
+      "steps": [{"click": "Use the full input →", "timeout": 60000}],
+      "wait_eval": "()=>document.querySelector('#goal')?.textContent==='Which gate does this sign support?'",
+      "panel_open": true,
+      "narrow_sheet": true,
+      "sheet": "#engine",
+      "yields": [".game-move-stick", ".game-view-tools", ".game-controls-help"],
+      "opened_by": "Open the message machine",
+      "required_content": [
+        {"selector": "#goal", "includes": ["Which gate does this sign support?"]},
+        {"selector": "#slotted-source", "includes": ["The lantern parade starts at sunset."]}
+      ]
+    },
+    {
+      "name": "route-source-question-phone-200text",
+      "screenshot": "artifacts/presentation-situated/source-question-phone-200text.png",
+      "text_scale": 2,
+      "panel_open": true,
+      "narrow_sheet": true,
+      "sheet": "#engine",
+      "yields": [".game-move-stick", ".game-view-tools", ".game-controls-help"],
+      "opened_by": "Open the message machine",
+      "required_content": [
+        {"selector": "#goal", "includes": ["Which gate does this sign support?"]},
+        {"selector": "#slotted-source", "includes": ["The lantern parade starts at sunset."]}
+      ]
+    },
+    {
+      "name": "route-source-question-desktop",
+      "screenshot": "artifacts/presentation-situated/source-question-desktop.png",
+      "resize": [1280, 720],
+      "text_scale": 1,
+      "panel_open": true,
+      "required_content": [
+        {"selector": "#goal", "includes": ["Which gate does this sign support?"]},
+        {"selector": "#slotted-source", "includes": ["The lantern parade starts at sunset."]}
+      ]
+    },
+    {
+      "name": "route-source-selected-phone-200text",
+      "screenshot": "artifacts/presentation-situated/source-selected-phone-200text.png",
+      "resize": [390, 844],
+      "text_scale": 2,
+      "steps": [{"click": "No gate", "timeout": 60000}],
+      "wait_eval": "()=>document.querySelector('#actions [data-choice-selected=true]')?.textContent==='No gate'&&!!document.querySelector('#actions button[data-action=check-route-inference]:not([hidden])')",
+      "panel_open": true,
+      "narrow_sheet": true,
+      "sheet": "#engine",
+      "yields": [".game-move-stick", ".game-view-tools", ".game-controls-help"],
+      "opened_by": "Open the message machine",
+      "required_content": [
+        {"selector": "#goal", "includes": ["Which gate does this sign support?"]},
+        {"selector": "#slotted-source", "includes": ["The lantern parade starts at sunset."]}
+      ]
+    }
+  ]
+}

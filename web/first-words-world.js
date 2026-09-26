@@ -6,9 +6,9 @@ import {makeWorldPackage} from './spec-game-world.js';
 
 // Story-specific labels for the shared inspect -> stage -> commit interaction.
 export const routeSources=Object.freeze({
-  moon:{name:'Old sign',anchor:'notice-old-label',action:'scan-moon'},
-  parade:{name:'Parade notice',anchor:'notice-parade-label',action:'scan-parade'},
-  star:{name:"Today's notice",anchor:'notice-today-label',action:'scan-star'}
+  moon:{name:'Old sign',anchor:'notice-old-label',action:'scan-moon',decisionText:'Take the Moon gate.'},
+  parade:{name:'Parade notice',anchor:'notice-parade-label',action:'scan-parade',decisionText:'The lantern parade starts at sunset.'},
+  star:{name:"Today's notice",anchor:'notice-today-label',action:'scan-star',decisionText:'Moon route closed. The tower bell answers the five-point lantern mark.',cueText:'Moon closed · five-point mark.'}
 });
 export const relaySources=Object.freeze({
   loft:{name:'18:00 Mira note',anchor:'relay-note-a-label',action:'relay-context-loft'},
@@ -83,7 +83,7 @@ part('friend-signal-shell','box','teal',[0,0,0],[1.5,1.1,.3],{parent:'friend-sig
 part('friend-signal-post','cylinder','ink',[0,-.95,0],[.16,1.1,.16],{parent:'friend-signal'});
 part('friend-signal-foot','box','teal',[0,-1.34,0],[.9,.12,.6],{parent:'friend-signal'});
 part('friend-signal-screen','box','blueGlow',[0,.05,.18],[1.15,.65,.06],{parent:'friend-signal',motion:{type:'pulse',amplitude:.08,speed:1.2}});
-part('friend-signal-reply-light','sphere','mint',[0,.75,.12],[.23,.23,.23],{parent:'friend-signal',enabled:false,motion:{type:'pulse',amplitude:.12,speed:1.1}});
+part('friend-signal-reply-light','sphere','coral',[0,.75,.12],[.23,.23,.23],{parent:'friend-signal',enabled:false,motion:{type:'pulse',amplitude:.12,speed:1.1}});
 for(const side of [-1,1])part('friend-signal-eye-'+side,'sphere','ink',[side*.23,.08,.23],[.13,.13,.06],{parent:'friend-signal'});
 e.push({id:'friend-signal-label',parent:'friend-signal',position:[0,1.05,.2]});
 /* Three separate dated notices are inspectable around the receiver. */
@@ -400,7 +400,7 @@ export const speechRepairTutorialSpec={
     },
     {
       id:'build-2',stage:'TUTORIAL · REPAIR 3/4',title:'Watch the input grow.',
-      detail:'Run it again. The first generated word is now included in the next prediction input.',
+      detail:'This prepared toy adds whole words. Real models can use smaller tokens and may continue differently. Run it again with Open in the input.',
       feedback:'A second word appears and the input grows again.',
       when:{round:0,powered:true,status:'building',clue:{neq:'none'},pieces:1},success:{pieces:{gte:2}},
       target:'socket',focus:'world',actions:['step'],primaryAction:'step',actionLabel:'Next word'
@@ -439,9 +439,9 @@ export const speechRepairTutorialSpec={
 export const openingSpec={
   id:'bellweather.opening.v8',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
   scenes:[
-    {beat:0,audioPhase:'home',kicker:'BELLWEATHER · LANTERN NIGHT',title:'One lantern. Three friends.',body:'You are Zip. Mira made this lantern for the three of you. Send it into the sky.',
+    {beat:0,audioPhase:'home',kicker:'BELLWEATHER · LANTERN NIGHT',title:'One lantern. Three friends.',body:'You are Zip. Mira made this lantern for all three of you. Send it skyward.',
       direction:{kind:'establishing',channels:['world','character','camera','interaction','narration'],worldAfter:'The shared lantern is launched and the three friends have visibly acted together.'},
-      markers:[{entity:'friendship-lantern',label:'Send up our lantern',target:'release-lantern',offset:[0,-8]}],
+      markers:[{entity:'singer',label:'MIRA',offset:[0,-8]},{entity:'friendship-lantern',label:'Send up our lantern',target:'release-lantern',offset:[0,-8]}],
       action:{target:'release-lantern',label:'Send up our lantern',patch:{show:['friendship-lantern','bellworker-b-parcel'],hide:['bellworker-a-parcel'],transforms:{'bellworker-a':{position:[-3.8,0,-4]},'bellworker-b-parcel':{position:[0,.8,.55]}},animations:{zip:'wave'},timeline:{duration:2800,moves:[{entity:'friendship-lantern',from:[1.25,1.2,10.7],to:[0,3.7,8],duration:2600},{entity:'singer',from:[2.2,0,.5],to:[1.8,0,.5],duration:1000},{entity:'friend-a',from:[-2.2,0,.5],to:[-1.8,0,.5],duration:1000}],finish:{animations:{zip:'yes'}}}}},
       success:{body:'Three lights rise above your home.',dialogue:'“Same time next year. All three of us.”'}},
     {beat:1,audioPhase:'danger',audioCue:'capture',kicker:'ABOVE THE SQUARE',title:'A shadow over Bellweather.',body:'A black machine rises above the tower. Red light reaches into the sky.',

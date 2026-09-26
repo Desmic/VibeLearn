@@ -5,7 +5,7 @@ from pathlib import Path
 
 from tools.check_presentation_budget import (BUDGETS, MEASURE, SHED_DIAGNOSTIC, TEXT_SCALE,
                                              attach_shed_diagnostic, click_scenario_button,
-                                             resolve_state_budgets, violations,
+                                             evaluate_state, load_scenario, resolve_state_budgets, violations,
                                              witnessed_sheet_open)
 
 _LITERALS = {'"', "'", '`'}
@@ -78,6 +78,16 @@ _SHEET_STATE = {'narrow_sheet': True, 'sheet': '#engine', 'opened_by': 'Open the
 
 
 class PresentationBudgetContract(unittest.TestCase):
+    def test_default_full_scenario_includes_situated_required_content(self):
+        root = Path(__file__).resolve().parents[1]
+        scenario = load_scenario(root / "tests/fixtures/presentation-budget-first-words.json")
+        states = {state["name"]: state for state in scenario["states"]}
+        for name in ("route-wrong-history-correction-phone", "route-source-question-phone",
+                     "route-source-question-phone-200text", "route-source-question-desktop",
+                     "route-source-selected-phone-200text"):
+            self.assertIn(name, states)
+            self.assertTrue(states[name]["required_content"])
+
     def test_requested_world_measurements_cannot_disappear(self):
         requested = {"focal": "zip", "presence": {"entity": "zip", "height": 2},
                      "subject": {"entity": "zip"}}
@@ -143,6 +153,35 @@ class PresentationBudgetContract(unittest.TestCase):
               }, 50)""")
             click_scenario_button(page, "Open machine", {"Open machine": {"#engine"}})
             self.assertTrue(witnessed_sheet_open(page, state))
+            browser.close()
+
+    def test_required_question_cannot_pass_when_only_short_or_hidden_text_is_painted(self):
+        from playwright.sync_api import sync_playwright
+        state = {"required_content": [{"selector": "#question", "includes": ["Which harbor pressure core is safe?"]}]}
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            page = browser.new_page()
+            page.set_content('<main><h1 id="question">Core or none?</h1><p class="sr-only">Which harbor pressure core is safe?</p></main>')
+            missing = violations("question", evaluate_state(page, state, BUDGETS), BUDGETS, False, state)
+            self.assertTrue(any("I12 required meaning" in item for item in missing))
+            page.locator('#question').evaluate("el => el.textContent = 'Which harbor pressure core is safe?'")
+            complete = violations("question", evaluate_state(page, state, BUDGETS), BUDGETS, False, state)
+            self.assertFalse(any("I12 required meaning" in item for item in complete))
+            page.locator('#question').evaluate("el => el.classList.add('shed')")
+            page.add_style_tag(content='.shed { display:none }')
+            hidden = violations("question", evaluate_state(page, state, BUDGETS), BUDGETS, False, state)
+            self.assertTrue(any("I12 required meaning" in item for item in hidden))
+            # A visible carrier cannot borrow required words from a hidden child.
+            page.set_content('<main><h1 id="question">Core or none? <span hidden>Which harbor pressure core is safe?</span></h1></main>')
+            hidden_child = violations("question", evaluate_state(page, state, BUDGETS), BUDGETS, False, state)
+            self.assertTrue(any("I12 required meaning" in item for item in hidden_child))
+            page.set_content('<main><h1 id="question">Core or none? <span class="shed">Which harbor pressure core is safe?</span></h1></main>')
+            page.add_style_tag(content='.shed { display:none }')
+            shed_child = violations("question", evaluate_state(page, state, BUDGETS), BUDGETS, False, state)
+            self.assertTrue(any("I12 required meaning" in item for item in shed_child))
+            page.set_content('<main><h1 id="question"><span aria-hidden="true">Which harbor pressure core is safe?</span></h1></main>')
+            painted_duplicate = violations("question", evaluate_state(page, state, BUDGETS), BUDGETS, False, state)
+            self.assertFalse(any("I12 required meaning" in item for item in painted_duplicate))
             browser.close()
 
     def test_injected_measurement_script_is_balanced(self):

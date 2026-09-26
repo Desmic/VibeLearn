@@ -127,7 +127,7 @@ def main():
                 page.set_viewport_size({'width':width,'height':height})
                 until(page,"""async()=>{await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);const {getGameRuntime}=await import('/game-runtime.js');return Boolean(getGameRuntime().world.projectEntity('zip')?.visible);}""")
 
-            expect(page.locator('#rgi-body')).to_contain_text('for the three of you')
+            expect(page.locator('#rgi-body')).to_contain_text('for all three of you')
             page.screenshot(path=str(out/'prologue-home-390.png'),timeout=15000)
             before_lantern=page.evaluate('JSON.stringify(FirstWordsReview.state)')
             page.get_by_role('button',name='Send up our lantern',exact=True).click()
@@ -212,7 +212,8 @@ def main():
             page.screenshot(path=str(out/'prologue-reveal-early-paused-390.png'),timeout=15000)
             release(page)
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
-            expect(page.get_by_role('button',name='SEALED EXIT',exact=True)).to_be_visible()
+            expect(page.locator('.rgi-marker[data-entity="moon-label"]')).to_be_visible()
+            assert page.locator('.rgi-marker[data-entity="moon-label"]').evaluate('el => el.tagName')=='SPAN'
             page.screenshot(path=str(out/'prologue-prison-reveal-390.png'),timeout=15000)
             tap_world(page)
 
@@ -277,7 +278,7 @@ def main():
             assert muted['peak']<heard['peak']/50 and muted['rms']<heard['rms']/50,(heard,muted)
 
             log('Prologue: repair handoff');expect(page.locator('#rgi-title')).to_have_text('Get the words back.',timeout=45000)
-            expect(page.get_by_role('button',name='REPAIR SOCKET',exact=True)).to_be_visible()
+            expect(page.locator('.rgi-marker[data-entity="socket"]')).to_be_visible()
             instance=page.evaluate('FirstWordsReview.runtime.instanceId')
             page.screenshot(path=str(out/'prologue-repair-handoff-390.png'),timeout=15000)
             # Rule I6: the handoff is ambient. Motion play paints NO "Take control"
@@ -354,11 +355,11 @@ def main():
                 q.screenshot(path=str(out/f'prologue-rupture-reduced-{width}.png'),timeout=15000)
                 advance_beat(q,'Silence.')
                 advance_beat(q,'This is not home.')
-                expect(q.get_by_role('button',name='SEALED EXIT',exact=True)).to_be_visible()
+                expect(q.locator('.rgi-marker[data-entity="moon-label"]')).to_be_visible()
                 advance_beat(q,'It finds your voice.')
                 advance_beat(q,'It tears the module free.')
                 advance_beat(q,'Get the words back.')
-                expect(q.get_by_role('button',name='REPAIR SOCKET',exact=True)).to_be_visible()
+                expect(q.locator('.rgi-marker[data-entity="socket"]')).to_be_visible()
                 expect(q.get_by_role('button',name='Take control →',exact=True)).to_be_enabled()
                 assert q.evaluate('document.documentElement.scrollWidth<=innerWidth && document.documentElement.scrollHeight<=innerHeight')
                 for selector in ['#rgi-title','#rgi-body','#rgi-next','#rgi-skip']:

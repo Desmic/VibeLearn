@@ -303,6 +303,49 @@ MEASURE = """async (args) => {
     carriers.push({selector: group.selector, min: group.min, visible: nodes.length,
       names: nodes.slice(0, 6).map(el => ((el.getAttribute('aria-label') || el.textContent) || '').trim().slice(0, 30))});
   }
+  // I12: a declared current question or corrective line must retain its whole
+  // meaning on a painted, unclipped carrier. Counting a visible panel or an
+  // announced-only duplicate cannot prove that the question itself survived.
+  const requiredContent = [];
+  for (const claim of (args.required_content || [])) {
+    const el = document.querySelector(claim.selector);
+    // Read painted text leaves, not container.textContent: a visible wrapper can
+    // retain an invisible/shed child with the missing question words inside it.
+    const paintedText=[];
+    if (el) {
+      const walk=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
+      for(let node=walk.nextNode();node;node=walk.nextNode()){
+        if(!node.textContent.trim())continue;
+        let ok=true;
+        for(let n=node.parentElement;n&&ok;n=n.parentElement){
+          const cs=getComputedStyle(n);
+          if(n.hidden||n.classList.contains('shed')
+              ||cs.display==='none'||cs.visibility!=='visible'||Number(cs.opacity)<.05
+              ||cs.clipPath!=='none'||(cs.clip!=='auto'&&cs.clip!=='rect(auto, auto, auto, auto)'))ok=false;
+        }
+        if(!ok)continue;
+        const range=document.createRange();range.selectNodeContents(node);
+        const rects=[...range.getClientRects()];
+        if(!rects.length)continue;
+        for(const r of rects){
+          if(r.width<2||r.height<2||r.left < -budgets.clip_tolerance_px
+              ||r.top < -budgets.clip_tolerance_px||r.right > vw+budgets.clip_tolerance_px
+              ||r.bottom > vh+budgets.clip_tolerance_px){ok=false;break;}
+          for(let n=node.parentElement;n&&ok;n=n.parentElement){
+            const cs=getComputedStyle(n),box=n.getBoundingClientRect();
+            if(!['hidden','clip','scroll','auto'].includes(cs.overflowX)
+                &&!['hidden','clip','scroll','auto'].includes(cs.overflowY))continue;
+            if(r.left<box.left-1||r.right>box.right+1||r.top<box.top-1||r.bottom>box.bottom+1)ok=false;
+          }
+        }
+        if(ok)paintedText.push(node.textContent);
+      }
+    }
+    const actual=paintedText.join(' ').replace(/\\s+/g,' ').trim();
+    const painted=Boolean(actual);
+    const missing = claim.includes.filter(phrase => !actual.includes(phrase));
+    requiredContent.push({selector:claim.selector, painted, missing, actual:actual.slice(0, 120)});
+  }
   // I12 sole-carrier (guide: narrative and instruction must reach the eye). A node
   // that is still in the accessibility tree but painted at zero area, clipped or
   // parked off-viewport is the announced-only channel. Information delivered ONLY
@@ -414,7 +457,7 @@ MEASURE = """async (args) => {
   }
   return {coverage, nonTouchCoverage, touchControlCount, viewportWidth: vw,
           panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, markerClash,
-          strayControls, dupCarriers, unreachableActions, sheet, carriers, announcedOnly,
+          strayControls, dupCarriers, unreachableActions, sheet, carriers, requiredContent, announcedOnly,
           prefDrift, declaredPreferences: prefCarriers.map(el => el.dataset.preference),
           offenders: offenders.slice(0, 12)};
 }"""
@@ -522,6 +565,7 @@ def evaluate_state(page, scenario_state, budgets):
         "sheet": scenario_state.get("sheet"),
         "yields": scenario_state.get("yields"),
         "carriers": scenario_state.get("carriers", []),
+        "required_content": scenario_state.get("required_content", []),
         "touch_controls": scenario_state.get("touch_controls", []),
         "b8": b8,
         "budgets": budgets,
@@ -623,6 +667,11 @@ def violations(state_name, metrics, budgets, panel_allowed, scenario_state=None,
             found.append(f"{state_name}: I9 carrier floor — '{group['selector']}' paints {group['visible']} of "
                          f"{group['min']} required carriers, so part of the beat's decision has no readable "
                          f"surface at this viewport (seen: {group['names'][:4]})")
+    for item in metrics.get("requiredContent") or []:
+        if not item["painted"] or item["missing"]:
+            found.append(f"{state_name}: I12 required meaning — '{item['selector']}' must paint its full "
+                         f"declared question/feedback without clipping; missing {item['missing']}, "
+                         f"painted={item['painted']} (seen: {item['actual']!r})")
     for item in metrics.get("prefDrift") or []:
         found.append(f"{state_name}: I11 preference drift — the carrier for “{item['id']}” disagrees with the "
                      f"registry: {item['painted']}. A preference has one reading rendered everywhere it appears, "
@@ -770,9 +819,29 @@ def resolve_state_budgets(state, budgets):
     return resolved, found
 
 
+def load_scenario(path):
+    """Compose required play states without making a deep-state check optional."""
+    scenario = json.loads(path.read_text(encoding="utf-8"))
+    for relative in scenario.get("include_states", []):
+        included_path = (path.parent / relative).resolve()
+        included = json.loads(included_path.read_text(encoding="utf-8"))
+        if included.get("include_states"):
+            raise ValueError(f"nested include_states is unsupported: {included_path}")
+        if included.get("path", scenario.get("path")) != scenario.get("path"):
+            raise ValueError(f"included scenario must use the same path: {included_path}")
+        if included.get("budgets"):
+            raise ValueError(f"included scenario cannot override budgets: {included_path}")
+        scenario["states"].extend(included["states"])
+    names = [state["name"] for state in scenario["states"]]
+    if len(names) != len(set(names)):
+        raise ValueError("presentation scenario state names must be unique across includes")
+    return scenario
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--scenario", type=Path, required=True)
+    parser.add_argument("--scenario", type=Path,
+                        default=ROOT / "tests/fixtures/presentation-budget-first-words.json")
     parser.add_argument("--out", type=Path, default=ROOT / "artifacts/presentation-budget.json")
     parser.add_argument("--url", help="Base URL of a running server; starts a disposable one when omitted")
     parser.add_argument("--report-only", action="store_true", help="Always exit 0; still write the report")
@@ -790,7 +859,7 @@ def main():
             parser.error("--candidate must equal the checked-out commit")
         if subprocess.run([*git, "diff", "--quiet", "HEAD"], cwd=ROOT).returncode:
             parser.error("--candidate needs a clean tracked working tree")
-    scenario = json.loads(args.scenario.read_text(encoding="utf-8"))
+    scenario = load_scenario(args.scenario)
     if args.only:
         # Selecting states must actually select them: replaying the whole scenario to
         # re-check one beat costs minutes and hides which state was asked for.
@@ -817,6 +886,10 @@ def main():
             # browser for minutes, not silently measure nothing.
             if not group.get("selector") or not isinstance(group.get("min"), int) or group["min"] < 1:
                 raise SystemExit(f"{state['name']}: a carriers entry needs 'selector' and an integer 'min' >= 1")
+        for claim in state.get("required_content", []):
+            if not claim.get("selector") or not isinstance(claim.get("includes"), list) or not claim["includes"] \
+               or any(not isinstance(phrase, str) or not phrase for phrase in claim["includes"]):
+                raise SystemExit(f"{state['name']}: required_content needs a selector and nonempty includes strings")
     states, all_violations = [], []
     from tests.browser_check import start_server, stop_server, launch_browser
 

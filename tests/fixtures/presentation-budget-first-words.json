@@ -1,11 +1,12 @@
 {
  "path": "/first-words",
+ "include_states": ["presentation-budget-situated.json"],
  "states": [
   {
    "name": "prologue-opening-desktop",
    "goto": true,
    "cinematic": true,
-   "wait_text": "for the three of you",
+   "wait_text": "for all three of you",
    "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
    "focal": "zip",
    "presence": {
@@ -56,7 +57,7 @@
     844
    ],
    "goto": true,
-   "wait_text": "for the three of you",
+   "wait_text": "for all three of you",
    "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
    "focal": "zip",
    "presence": {
@@ -105,6 +106,7 @@
    ],
    "wait_eval": "()=>{const r=document.querySelector('#learning-readout');return r&&!r.hidden&&r.textContent.includes('Open')&&!FirstWordsReview.runtime.world.animating;}",
    "carriers": [{"selector":"#learning-readout","min":1}],
+   "required_content": [{"selector":"#readout-feedback","includes":["Prepared toy words","real tokens may be smaller"]}],
    "focal": "zip",
    "screenshot": "artifacts/play-20260925/tutorial-word-desktop-folded.png"
   },
@@ -113,6 +115,7 @@
    "resize": [390,844],
    "wait_eval": "()=>{const r=document.querySelector('#learning-readout');return r&&!r.hidden&&r.textContent.includes('Open')&&!FirstWordsReview.runtime.world.animating;}",
    "carriers": [{"selector":"#learning-readout","min":1}],
+   "required_content": [{"selector":"#readout-feedback","includes":["Prepared toy words","real tokens may be smaller"]}],
    "touch_controls": [".game-move-stick", ".game-view-tools"],
    "coverage_max": 0.20,
    "coverage_max_reason": "The narrow viewport needs the on-screen move stick and camera controls; the learning readout and all other information still meet the 15% base budget.",
@@ -191,16 +194,25 @@
      "click": "Carry Old sign to the message machine"
     },
     {
-     "click": "Insert old sign into machine"
+     "click": "Place old sign in machine slot"
+    },
+    {
+     "click": "Commit source"
     },
     {
      "click": "Make first word"
     },
     {
-     "click": "Next input: request, sign, and Open"
+     "click": "Request, sign, and Open"
+    },
+    {
+     "click": "Check my prediction"
     },
     {
      "click": "Moon"
+    },
+    {
+     "click": "Check my prediction"
     },
     {
      "click": "Next word"
@@ -243,7 +255,10 @@
      "click": "Carry Today's notice to the message machine"
     },
     {
-     "click": "Insert today's notice into machine"
+     "click": "Place today's notice in machine slot"
+    },
+    {
+     "click": "Commit source"
     },
     {
      "click": "Make first word"
@@ -330,11 +345,15 @@
      "timeout": 45000
     },
     {
-     "click": "Carry 18:20 Mira note to the message machine",
+     "click": "Carry 18:20 Mira note to the receiver",
      "timeout": 45000
     },
     {
-     "click": "Insert 18:20 mira note",
+     "click": "Place 18:20 mira note in receiver slot",
+     "timeout": 45000
+    },
+    {
+     "click": "Commit source",
      "timeout": 45000
     },
     {
@@ -343,6 +362,10 @@
     },
     {
      "click": "Bell Yard",
+     "timeout": 45000
+    },
+    {
+     "click": "Check my prediction",
      "timeout": 45000
     },
     {
@@ -355,6 +378,10 @@
     },
     {
      "click": "Request, note, Meet, and at",
+     "timeout": 45000
+    },
+    {
+     "click": "Check my prediction",
      "timeout": 45000
     },
     {
@@ -775,7 +802,8 @@
     {"click": "Inspect the old route sign", "timeout": 60000},
     {"click": "Carry old sign", "timeout": 60000},
     {"click": "Carry Old sign to the message machine", "timeout": 60000},
-    {"click": "Insert old sign into machine", "timeout": 60000},
+    {"click": "Place old sign in machine slot", "timeout": 60000},
+    {"click": "Commit source", "timeout": 60000},
     {"click": "Open the message machine", "timeout": 60000
     },
     {
@@ -783,13 +811,15 @@
      "timeout": 60000
     },
     {
-     "click": "Next input: request, sign, and Open",
+     "click": "Request, sign, and Open",
      "timeout": 60000
     },
+    {"click": "Check my prediction", "timeout": 60000},
     {
      "click": "Moon",
      "timeout": 60000
     },
+    {"click": "Check my prediction", "timeout": 60000},
     {
      "click": "Next word",
      "timeout": 60000
@@ -946,11 +976,13 @@
     {"click": "Inspect today's route notice", "timeout": 60000},
     {"click": "Carry today's notice", "timeout": 60000},
     {"click": "Carry Today's notice to the message machine", "timeout": 60000},
-    {"click": "Insert today's notice into machine", "timeout": 60000},
+    {"click": "Place today's notice in machine slot", "timeout": 60000},
+    {"click": "Commit source", "timeout": 60000},
     {"click": "Open the message machine", "timeout": 60000
     },
     {"click": "Make first word", "timeout": 60000},
-    {"click": "Next input: request, sign, and Open", "timeout": 60000},
+    {"click": "Request, sign, and Open", "timeout": 60000},
+    {"click": "Check my prediction", "timeout": 60000},
     {
      "wait_eval": "()=>[...document.querySelectorAll('#actions button')].some(b=>b.textContent.trim()==='Ask for a hint')",
      "timeout": 60000
@@ -974,6 +1006,11 @@
      "selector": "#actions [data-learning-hint]",
      "min": 1
     }
+   ],
+   "required_content": [
+    {"selector":"#goal","includes":["Which gate does this sign support?"]},
+    {"selector":"#slotted-source","includes":["Moon closed · five-point mark."]},
+    {"selector":"[data-learning-hint=\"current-source\"]","includes":["Hint: trust this sign."]}
    ],
    "coverage_max_reason": "Guide B1 narrow-sheet clause: the player opened the machine and then asked for the hint, so the sheet carries the beat's instruction. That instruction is a declared carrier floor, not sheddable prose (guide I10)."
   },
@@ -1002,6 +1039,11 @@
      "selector": "#actions [data-learning-hint]",
      "min": 1
     }
+   ],
+   "required_content": [
+    {"selector":"#goal","includes":["Which gate does this sign support?"]},
+    {"selector":"#slotted-source","includes":["Moon closed · five-point mark."]},
+    {"selector":"[data-learning-hint=\"current-source\"]","includes":["Hint: trust this sign."]}
    ],
    "text_scale": 2,
    "twin_of": "mission-hint-phone-sheet",

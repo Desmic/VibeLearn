@@ -16,6 +16,10 @@
    player kept seeing the previous size's shed and any measurement taken in that window
    described a layout nobody was looking at. */
 export function fitBoundedSurface(surface) {
+  // A beat may promote an old optional line into required feedback. Its old
+  // .shed class must not survive that promotion just because it left the ladder.
+  for (const el of surface.querySelectorAll('[data-shed-item][data-critical="true"].shed'))
+    el.classList.remove('shed');
   const items = [...surface.querySelectorAll('[data-shed-item]')]
     .filter((el) => el.dataset.critical !== 'true');
   if (!items.length) return null;

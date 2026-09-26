@@ -29,7 +29,7 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
    world-focus tutorial steps pin it too but keep the machine's output visible. */
 @media (min-width:701px){#engine.compact,#engine.world-focus{left:50%;top:auto;bottom:16px;transform:translateX(-50%)}}
 /* Opening owns one full viewport; gameplay chrome underneath stays hidden (inert and occluded). */
-.first-opening .rgi-visual{min-height:0}.first-opening .rgi-progress{position:absolute;left:18px;right:18px;top:auto;bottom:84px;height:3px;padding:0}
+.first-opening .rgi-visual{min-height:0}.first-opening .rgi-progress{position:absolute;left:18px;right:18px;top:72px;bottom:auto;height:3px;padding:0}
 .game-opening-active .masthead,.game-opening-active #markers{display:none}
 /* Control practice reads as a floating prompt at the character, not a panel (guide rung 4). */
 .stage-card.prompt{background:transparent;border:0;box-shadow:none;backdrop-filter:none;padding:0 8px;max-height:none;overflow:visible;text-align:center;width:min(340px,calc(100% - 48px))}
@@ -80,10 +80,12 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
    readable world carrier after camera movement while the optional controls close. */
 #markers>.learning-readout{z-index:7;width:min(282px,calc(100vw - 32px));white-space:normal;text-align:left;padding:6px 9px;border:1px solid #86c9b5;background:#153840ed;color:#fff2d9;border-radius:12px;box-shadow:0 0 0 3px #7be3bc22,0 10px 26px #071824a8;pointer-events:none}
 #markers>.learning-readout>strong{display:block;font-size:10px;letter-spacing:.11em;color:#b9efd9;margin-bottom:2px}
+#markers>.learning-readout>strong[hidden]{display:none}
 #markers>.learning-readout p{display:grid;grid-template-columns:70px 1fr;gap:7px;margin:0;font-size:11px;line-height:1.25}
 #markers>.learning-readout p span{font-size:8px;letter-spacing:.06em;color:#afd0c5;font-weight:800}
 #markers>.learning-readout p b{font-weight:600;overflow-wrap:anywhere}
-@media(max-width:700px){#markers>.learning-readout{width:min(264px,calc(100vw - 24px));padding:6px 9px}#markers>.learning-readout p{font-size:10.5px;grid-template-columns:62px 1fr}}
+#markers>.learning-readout p[hidden]{display:none}
+@media(max-width:700px){#markers>.learning-readout{width:min(264px,calc(100vw - 24px));padding:4px 9px}#markers>.learning-readout p{font-size:10.5px;grid-template-columns:62px 1fr}}
 .stage-card .card-head{padding-right:34px}
 #engine #card-close{position:absolute;top:6px;right:6px;width:44px;min-height:44px;padding:0;background:#ffffff14;border:0;color:#ffe2ab;font-size:18px;line-height:1}
 #engine #card-close:hover{background:#ffffff26}
@@ -116,7 +118,8 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
    caption give the sheet its height back: the sheet must stop below the
    character's focal ring, not push past him (guide B2 + I8). */
 #engine.sheet .card-head p{display:none}
-#engine.sheet .card-head{padding-right:88px}
+#engine.sheet .card-head p[data-critical="true"]{display:block}
+#engine.sheet .card-head{padding-right:48px}
 #engine.sheet .card-head h1{margin:2px 0 3px}
 #engine.sheet .engine-top{position:absolute;top:11px;left:14px;right:56px;display:flex;justify-content:flex-end;padding:0;min-height:0}
 #engine.sheet #engine-label{display:none}
@@ -132,3 +135,12 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
    the world boards and the option labels already say) and the card takes more width. */
 @media (min-width:701px){#engine.compact{width:min(460px,calc(100% - 48px))}}
 #engine.compact .card-head p{display:none}
+#engine.compact .card-head p[data-critical="true"]{display:block}
+
+/* The active question and its answer remain a single device-owned decision. */
+.actions>button[data-choice-selected="true"]{outline:3px solid #ffe2a0;outline-offset:1px;background:#2d625f;color:#fff7dc}
+.actions>button[data-action^="check-"]{grid-column:1/-1}
+#markers>.learning-readout .readout-feedback{display:block;margin-top:5px;padding-top:5px;border-top:1px solid #b9efd977;color:#ffe0a4;font-weight:700;font-size:11px}
+#markers>.source-token{z-index:8;max-width:min(240px,calc(100vw - 28px));white-space:normal;text-align:center;padding:7px 10px;border:1px solid #f0c873;border-radius:9px;background:#332d2aef;color:#ffebc3;font-size:10px;font-weight:800;box-shadow:0 6px 16px #0007;pointer-events:none}
+#markers>#slotted-source{background:#18444aed;border-color:#8dd9be;color:#dbffef}
+#markers>#slotted-source.source-evidence{max-width:150px}

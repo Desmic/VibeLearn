@@ -6,6 +6,7 @@ from playwright.sync_api import expect, sync_playwright
 
 from tests.browser_check import launch_browser, start_server, stop_server
 from tests.level1_chapter_browser import action, choose, complete_tutorial, generate, open_card, skip_opening_to_tutorial
+from tools.check_presentation_budget import BUDGETS, evaluate_state
 
 
 def carry_note(page, key, label):
@@ -19,7 +20,9 @@ def carry_note(page, key, label):
     assert carry_box and carry_box['y']>=64 and carry_box['y']+carry_box['height']<=page.viewport_size['height'],carry_box
     assert label.lower() in page.locator('#source-stage').inner_text().lower()
     page.locator('#source-stage').click()
-    choose(page, f'Insert {label.lower()}')
+    open_card(page)
+    page.get_by_role('button',name=f'Place {label.lower()} in receiver slot').click()
+    action(page,'Commit source')
 
 
 def run_note(page, key, label, inference, history):
@@ -51,7 +54,31 @@ def main():
             from tests.level1_chapter_browser import supply_sign
             supply_sign(page,"today's route notice","today's notice","today's notice")
             generate(page,gate_prediction='Star')
-            action(page,'Answer the signal')
+            for _ in range(120):
+                ready=page.evaluate("()=>FirstWordsReview.state.available_actions.includes('relay-start')&&!FirstWordsReview.runtime.world.animating")
+                if ready:break
+                page.wait_for_timeout(500)
+            assert ready,page.evaluate('FirstWordsReview.state')
+            # Act on the receiver face itself, with no generic card/marker click.
+            point=page.evaluate("""async()=>{
+              const world=(await import('/game-runtime.js')).getGameRuntime().world;
+              const host=document.querySelector('#world').getBoundingClientRect();
+              const p=world.projectEntity('friend-signal-screen');
+              for(const [dx,dy] of [[0,0],[-22,0],[22,0],[0,-15],[0,15]]){
+                const x=host.left+p.x+dx,y=host.top+p.y+dy;
+                const hit=await world.pickSemanticAt(x,y);
+                if(hit?.startsWith('friend-signal')&&document.elementFromPoint(x,y)?.closest('canvas'))
+                  return {x,y,hit};
+              }
+              return {projected:p,element:document.elementFromPoint(host.left+p.x,host.top+p.y)?.tagName};
+            }""")
+            assert 'x' in point,point
+            page.mouse.click(point['x'],point['y'])
+            for _ in range(30):
+                choosing=page.evaluate("()=>FirstWordsReview.state.relay_stage==='choosing'")
+                if choosing:break
+                page.wait_for_timeout(500)
+            assert choosing,{'point':point,'state':page.evaluate('FirstWordsReview.state')}
             if page.locator('#engine').is_visible():page.get_by_role('button',name='Put the machine away').click()
             before_staging=page.evaluate('FirstWordsReview.state.moves')
             page.locator('[data-relay-source="loft"]').click()
@@ -70,6 +97,12 @@ def main():
             assert state['relay_output']==['Meet','at']
             expect(page.locator('#output')).to_be_visible()
             choose(page,'Request, note, and at only')
+            correction=evaluate_state(page,{'required_content':[
+                {'selector':'[data-learning-hint="history-correction"]',
+                 'includes':['omitted Meet','request, note, Meet and at']} ]},BUDGETS)['requiredContent'][0]
+            assert correction['painted'] and not correction['missing'],correction
+            Path('artifacts/situated-repair-play').mkdir(parents=True,exist_ok=True)
+            page.screenshot(path='artifacts/situated-repair-play/relay-wrong-history-phone.png')
             committed=page.evaluate('FirstWordsReview.state')
             page.reload();open_card(page)
             restored=page.evaluate('FirstWordsReview.state')
@@ -106,6 +139,11 @@ def main():
             action(desktop,'Make next relay word')
             expect(desktop.locator('#output')).to_be_visible()
             assert desktop.evaluate('FirstWordsReview.state.relay_input')[-2:]!=['Meet','at']
+            choose(desktop,'Request and note only')
+            original=evaluate_state(desktop,{'required_content':[
+                {'selector':'[data-learning-hint="history-correction"]',
+                 'includes':['omitted Meet and at','request, note, Meet and at']} ]},BUDGETS)['requiredContent'][0]
+            assert original['painted'] and not original['missing'],original
             print('Relay history browser check passed: phone source inspection/no-Mira/history/reload/recovery and desktop note visibility/generated-history pause')
         finally:
             browser.close();stop_server(server)

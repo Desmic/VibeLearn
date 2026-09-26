@@ -126,3 +126,17 @@ export function placeWorldMarker(marker,point,{
     insideSafeArea:position.inside
   };
 }
+
+// Last-resort position for a required contextual carrier when the projected
+// anchor and all collision-free slots are unavailable. It stays under the HUD
+// and above the opened sheet, with an edge cue back toward the world object.
+export function parkWorldCarrier(marker,{viewportWidth,safeTop,safeBottom,side='right',margin=8}={}){
+  if(!marker)return false;
+  const half=marker.offsetWidth/2,height=marker.offsetHeight;
+  const x=side==='left'?half+margin:viewportWidth-half-margin;
+  const y=safeTop+height+margin;
+  if(x-half<0||x+half>viewportWidth||y>safeBottom)return false;
+  marker.style.left=x+'px';marker.style.top=y+'px';
+  marker.classList.add('edge-cued');marker.dataset.edge='bottom';
+  return true;
+}

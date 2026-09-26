@@ -164,9 +164,11 @@ export function openGameOpening({root,spec,runtime,worldModule,replay=false,redu
     const markers=overlay.querySelector('.rgi-markers');markers.replaceChildren();
     let actionableRendered=false;
     const addMarker=(cfg,{actionable}={})=>{
-      const n=document.createElement('button');n.type='button';n.className=`rgi-marker ${cfg.tone||''}`;n.textContent=cfg.label;n.dataset.entity=cfg.entity;
+      const n=document.createElement(actionable?'button':'span');
+      if(actionable)n.type='button';
+      n.className=`rgi-marker ${cfg.tone||''}`;n.textContent=cfg.label;n.dataset.entity=cfg.entity;
       n.dataset.offsetX=String(cfg.offset?.[0]||0);n.dataset.offsetY=String(cfg.offset?.[1]||0);
-      n.disabled=!actionable;n.tabIndex=actionable?0:-1;
+      if(actionable)n.tabIndex=0;
       if(actionable){n.classList.add('rgi-target');n.onclick=()=>performAction();actionableRendered=true;}
       markers.append(n);
     };

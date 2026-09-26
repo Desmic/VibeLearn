@@ -1,8 +1,57 @@
 # Current state — LLM learning-game proof track
 
-**26 September 2026.** This file is the current status. Older narratives live in
+**27 September 2026.** This file is the current status. Older narratives live in
 `docs/history/STATE-20260921-24.md` and `docs/history/STATE-20260918-20.md`.
 Automated checks, critic judgment and user acceptance are separate claims.
+
+## Current repair and gate
+
+- The independent Astra cold/warm review of `552280eb4cdfd4fc7fe2c2f09931fe3980e0ccb9`
+  returned **needs_revision**. Its preserved source reports are
+  `artifacts/cold-review-552280e/COLD-REPORT.md`, `WARM-COMPARISON.md` and
+  `PRIORITIZED-FINDINGS.md` (SHA-256 prefixes `750458c594e0`,
+  `0de4c549450a`, `73f9da070b52` respectively). The present development branch is repairing the
+  situated-learning findings R1–R5 and observed R7 layout issues; Mira's name
+  and coral cue were staged within the existing opening beat for R6. This is
+  implementation verification, not a new independent review or user verdict.
+- Shared repairs use authored world ancestry for object/child hits, reversible
+  choice selection with explicit once-only command dispatch, focus-owned
+  carriers, a bounded fallback for a required contextual source, and a
+  presentation check that requires the actual painted question/feedback text.
+  Passive opening labels render as labels rather than disabled controls. The
+  bounded-surface fitter restores a line when it becomes required. These
+  mechanics also pass a materially different harbor fixture; Bellweather
+  wording, source details and learning IDs remain in its content/rules.
+- In the proof game, Zip visibly carries and slots a source before commitment;
+  the active receiver answers directly from its object/marker while spent route
+  guidance yields. Wrong next-input history receives an immediate local
+  correction before the complete source question; the prepared whole-word toy
+  and smaller real tokens are explained during the normal tutorial. Its phone
+  readout stays within the unchanged budget; a source-specific cue keeps the
+  later 200% phone hint legible while the full sign remains inspectable. The first
+  wrong choice and generated output remain separate in immutable evidence.
+  The approved question and supplied sign survive 390/360 phone, desktop and
+  200% text in focused live replay without expanding the sheet budget.
+- `python manage.py build` passed; `python manage.py test` passed 452 tests
+  (7 configured PostgreSQL skips). The focused situated phone/desktop replay,
+  changed-case relay browser check, chapter, opening, tutorial, controls,
+  physicality, 200% readability and hosted lifecycle browser groups passed.
+  The draft five-state contextual question/correction/selection presentation
+  check passed with zero violations. These five states are included in the
+  normal full presentation scenario, which now contains 30 states; a separate
+  contract test prevents their accidental omission. The full exact-commit
+  presentation result belongs in `artifacts/presentation-budget-situated-full.json`;
+  it must pass before this repair is handed to the independent reviewer.
+- The accepted operational architecture direction is now documented in
+  `docs/GAME-GENERATION-OPERATIONS.md`, with current candidate authority kept
+  here and the user's supplied proposal unchanged. No provider, Level 2,
+  deployment promotion or `main` merge is authorized by this repair.
+- Required next gate: finish exact-candidate technical checks, then a new
+  fresh-context Astra cold pass and warm comparison across story, art/world,
+  gameplay and learning under `docs/ASTRA-REVIEW-WORKFLOW.md`. Hosted entry/auth
+  is not established by the disposable local root redirect. Motion and audio
+  remain unassessed under the current scope, not passed. The user retains the
+  final experience verdict.
 
 ## Candidate
 
