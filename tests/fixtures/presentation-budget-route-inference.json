@@ -1,0 +1,265 @@
+{
+  "path": "/first-words",
+  "states": [
+    {
+      "name": "route-inference-phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "goto": true,
+      "steps": [
+        {
+          "click": "Skip opening",
+          "timeout": 60000
+        },
+        {
+          "wait_text": "Skip control practice",
+          "timeout": 60000
+        },
+        {
+          "click": "Skip control practice",
+          "timeout": 60000
+        },
+        {
+          "wait_eval": "()=>{const t=document.querySelector('#machine-toggle');return t&&!t.hidden&&document.querySelector('#engine').hidden&&!FirstWordsReview.runtime.world.animating;}",
+          "timeout": 60000
+        },
+        {
+          "click": "Connect the loose power lead",
+          "timeout": 60000
+        },
+        {
+          "click": "Scan the Moon lock in the world",
+          "timeout": 60000
+        },
+        {
+          "click": "Use the speech engine in the world",
+          "timeout": 60000
+        },
+        {
+          "click": "Use the speech engine in the world",
+          "timeout": 60000
+        },
+        {
+          "click": "Use the speech engine in the world",
+          "timeout": 60000
+        },
+        {
+          "click": "Use the speech engine in the world",
+          "timeout": 60000
+        },
+        {
+          "click": "Speak the completed command to the Moon gate",
+          "timeout": 60000
+        },
+        {
+          "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
+          "timeout": 90000
+        },
+        {
+          "click": "Begin Level 1 through the opened Moon door",
+          "timeout": 60000
+        },
+        {
+          "wait_text": "OPEN ENGINE",
+          "timeout": 60000
+        },
+        {
+          "wait_eval": "()=>{const t=document.querySelector('#machine-toggle');return t&&!t.hidden&&document.querySelector('#engine').hidden&&!FirstWordsReview.runtime.world.animating;}",
+          "timeout": 60000
+        },
+        {
+          "click": "Inspect the parade notice",
+          "timeout": 60000
+        },
+        {
+          "click": "Carry parade notice",
+          "timeout": 60000
+        },
+        {
+          "click": "Carry Parade notice to the message machine",
+          "timeout": 60000
+        },
+        {
+          "click": "Insert parade notice into machine",
+          "timeout": 60000
+        },
+        {
+          "click": "Open the message machine",
+          "timeout": 60000
+        },
+        {
+          "click": "Make first word",
+          "timeout": 60000
+        },
+        {
+          "click": "Next input: request and sign only",
+          "timeout": 60000
+        },
+        {
+          "wait_eval": "()=>FirstWordsReview.state.pieces===1&&FirstWordsReview.state.loop_prediction==='same'&&document.querySelector('#actions').dataset.layout==='two-column'",
+          "timeout": 60000
+        }
+      ],
+      "focal": "zip",
+      "panel_open": true,
+      "narrow_sheet": true,
+      "sheet": "#engine",
+      "yields": [
+        ".game-move-stick",
+        ".game-view-tools",
+        ".game-controls-help"
+      ],
+      "opened_by": "Open the message machine",
+      "carriers": [
+        {
+          "selector": "#actions button[data-action=\"infer-no-gate\"]",
+          "min": 1
+        },
+        {
+          "selector": "#actions [data-learning-hint=\"history\"]",
+          "min": 1
+        }
+      ],
+      "coverage_max_reason": "Player-opened phone machine sheet at the route inference; controls yield to the readable decision.",
+      "screenshot": "artifacts/repair-route-budget-phone.png"
+    },
+    {
+      "name": "route-inference-phone-200text",
+      "focal": "zip",
+      "panel_open": true,
+      "narrow_sheet": true,
+      "sheet": "#engine",
+      "yields": [
+        ".game-move-stick",
+        ".game-view-tools",
+        ".game-controls-help"
+      ],
+      "opened_by": "Open the message machine",
+      "carriers": [
+        {
+          "selector": "#actions button[data-action=\"infer-no-gate\"]",
+          "min": 1
+        },
+        {
+          "selector": "#actions [data-learning-hint=\"history\"]",
+          "min": 1
+        }
+      ],
+      "coverage_max_reason": "Player-opened phone machine sheet at the route inference; controls yield to the readable decision.",
+      "screenshot": "artifacts/repair-route-budget-phone-200text.png",
+      "text_scale": 2,
+      "twin_of": "route-inference-phone",
+      "text_scale_reason": "The same source-inference decision at 200% text."
+    },
+    {
+      "name": "route-inference-desktop",
+      "viewport": [
+        1280,
+        720
+      ],
+      "goto": true,
+      "steps": [
+        {
+          "click": "Skip opening",
+          "timeout": 60000
+        },
+        {
+          "wait_text": "Skip control practice",
+          "timeout": 60000
+        },
+        {
+          "click": "Skip control practice",
+          "timeout": 60000
+        },
+        {
+          "wait_eval": "()=>{const t=document.querySelector('#machine-toggle');return t&&!t.hidden&&document.querySelector('#engine').hidden&&!FirstWordsReview.runtime.world.animating;}",
+          "timeout": 60000
+        },
+        {
+          "click": "Connect the loose power lead",
+          "timeout": 60000
+        },
+        {
+          "click": "Scan the Moon lock in the world",
+          "timeout": 60000
+        },
+        {
+          "click": "Use the speech engine in the world",
+          "timeout": 60000
+        },
+        {
+          "click": "Use the speech engine in the world",
+          "timeout": 60000
+        },
+        {
+          "click": "Use the speech engine in the world",
+          "timeout": 60000
+        },
+        {
+          "click": "Use the speech engine in the world",
+          "timeout": 60000
+        },
+        {
+          "click": "Speak the completed command to the Moon gate",
+          "timeout": 60000
+        },
+        {
+          "wait_eval": "()=>window.FirstWordsReview&&!FirstWordsReview.runtime.world.animating",
+          "timeout": 90000
+        },
+        {
+          "click": "Begin Level 1 through the opened Moon door",
+          "timeout": 60000
+        },
+        {
+          "wait_text": "OPEN ENGINE",
+          "timeout": 60000
+        },
+        {
+          "wait_eval": "()=>{const t=document.querySelector('#machine-toggle');return t&&!t.hidden&&document.querySelector('#engine').hidden&&!FirstWordsReview.runtime.world.animating;}",
+          "timeout": 60000
+        },
+        {
+          "click": "Inspect the parade notice",
+          "timeout": 60000
+        },
+        {
+          "click": "Carry parade notice",
+          "timeout": 60000
+        },
+        {
+          "click": "Carry Parade notice to the message machine",
+          "timeout": 60000
+        },
+        {
+          "click": "Insert parade notice into machine",
+          "timeout": 60000
+        },
+        {
+          "click": "Make first word",
+          "timeout": 60000
+        },
+        {
+          "click": "Next input: request and sign only",
+          "timeout": 60000
+        },
+        {
+          "wait_eval": "()=>FirstWordsReview.state.pieces===1&&FirstWordsReview.state.loop_prediction==='same'&&document.querySelector('#actions').dataset.layout==='two-column'",
+          "timeout": 60000
+        }
+      ],
+      "focal": "zip",
+      "panel_open": true,
+      "carriers": [
+        {
+          "selector": "#actions button[data-action=\"infer-no-gate\"]",
+          "min": 1
+        }
+      ],
+      "screenshot": "artifacts/repair-route-budget-desktop.png",
+      "wait_eval": "()=>{const e=document.querySelector('#engine'),r=e.getBoundingClientRect();return e.classList.contains('side-focus')&&r.left>750&&r.top>=0;}"
+    }
+  ]
+}

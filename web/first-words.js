@@ -48,7 +48,9 @@ function closeSource(){inspectedSource=null;$('#source-inspection').hidden=true;
 let world=runtime.showStory(chapter,host,0,{reducedMotion:reduced()});
 const session=createLearningSession(render);
 const practice=createTutorialFlow(chapter.controlTutorialSpec);
-const ours=()=>['first-words-1','first-words-2'].includes(session.attempt?.snapshot?.word_machine?.version);
+const ours=()=>['first-words-1','first-words-2','first-words-3'].includes(session.attempt?.snapshot?.word_machine?.version);
+const growingBeat=s=>session.attempt?.snapshot?.word_machine?.version==='first-words-3'&&s.round===1&&s.pieces===1;
+const sourceInferenceMode=s=>s.source_inference!==undefined;
 const view=()=>ours()?session.attempt.word_machine_state:initial;
 const text=(s,v)=>{$(s).textContent=v;};
 const root=$('#adventure');
@@ -134,7 +136,10 @@ function tutorialStage(s,complete){
   if(s.status==='success')return['LEVEL 1 · COMPLETE','Route found.','The changed context opened the deeper gate. Finish when you are ready.'];
   if(s.status==='wrong')return['LEVEL 1 · RECOVER','Wrong route.','Nothing is lost. Compare the route boards, supply a better sign and try again.'];
   if(s.clue==='none')return['LEVEL 1 · FIRST MISSION','Find the current route.','Three route boards stand here and they disagree. Read them, then supply one sign to the machine.'];
-  if(s.prediction==='none')return['LEVEL 1 · FIRST MISSION','Predict the gate.','Before running the machine, predict the output from only the sign you supplied.'];
+  if(growingBeat(s)&&s.loop_prediction==='none')return['LEVEL 1 · INPUT','What reaches the machine next?','Open has appeared. Predict whether the next input also receives that word.'];
+  if(growingBeat(s)&&s.source_inference==='none')return['LEVEL 1 · SOURCE','Gate or none?','Name the gate the inserted sign supports, or say that it names none.'];
+  if(s.round===1&&s.pieces===0&&s.prediction==='none'&&s.available_actions?.includes('step'))return['LEVEL 1 · FIRST WORD','Run the machine once.','Only the inserted sign is supplied. The other corridor signs remain outside the machine.'];
+  if(!sourceInferenceMode(s)&&s.prediction==='none')return['LEVEL 1 · FIRST MISSION','Predict the gate.','Before running the machine, predict the output from only the sign you supplied.'];
   if(s.pieces===0&&s.loop_prediction==='none'&&s.available_actions?.some(a=>a.startsWith('loop-')))return['LEVEL 1 · FIRST MISSION','Predict how the input grows.','Decide what each new prediction will receive, before the first word exists.'];
   return['LEVEL 1 · FIRST MISSION','Build the route sentence.','Use the same word-by-word loop, now with less help.'];
 }
@@ -190,10 +195,11 @@ function render(){
   text('#readout-supplied',readoutInput[1]||'No clue supplied yet');
   text('#readout-words',shownOutput?.length?shownOutput.join(' '):'No words yet');
   $('#output').replaceChildren();for(let i=0;i<4;i++){const span=document.createElement('span');span.textContent=shownOutput[i]||'·';if(!shownOutput[i])span.className='empty';$('#output').append(span);}
-  text('#context',relay?[s.relay_case.base,s.relay_case.notes[s.relay_context]||'Choose a note.',['revealed','done'].includes(s.relay_stage)?s.relay_case.prefix:''].filter(Boolean).join(' '):s.context.join(' ')||'Waiting for power.');
+  const visibleInput=growingBeat(s)&&s.loop_prediction==='none'?s.input:s.context;
+  text('#context',relay?[s.relay_case.base,s.relay_case.notes[s.relay_context]||'Choose a note.',['revealed','done'].includes(s.relay_stage)?s.relay_case.prefix:''].filter(Boolean).join(' '):visibleInput.join(' ')||'Waiting for power.');
   text('#engine-label',relay?'MESSAGE RECEIVER · PRISON RELAY':complete?(s.relay_stage==='done'?'MESSAGE RECEIVER · REPLY':'MESSAGE MACHINE · ROUTE OPEN'):s.round===1?'MESSAGE MACHINE · LEVEL 1':'MESSAGE MACHINE · TUTORIAL');
   $('#inspect').hidden=s.round===0||relay;
-  $('#actions').replaceChildren();
+  $('#actions').replaceChildren();$('#actions').removeAttribute('data-layout');
   if(complete){button('Look deeper into the prison','ending');button('Play Level 1 again','again',false);}
   else if(s.relay_stage==='done')button('Finish Level 1 →','finish');
   else if(relay&&s.relay_stage==='revealed'){
@@ -214,7 +220,9 @@ function render(){
     // I10: the recovery recap owes only the cause, because the two option labels already
     // say what to do next (I5/I7) and a longer sentence costs the sheet its decision at
     // the accessibility viewport.
-    statusLine(`Your sign pointed at “${s.output.join(' ')}.”`);
+    statusLine(sourceInferenceMode(s)&&s.case.source_support?.[s.clue]==='no-gate'
+      ?`The supplied sign named no gate. The toy still said “${s.output.join(' ')},” and the gate stayed shut.`
+      :`The toy said “${s.output.join(' ')},” but that route stayed shut.`);
     // I7: a recovery beat must not re-offer the choice that already produced this
     // exact output — the words promise a different sign, so the tray must agree.
     // Same rule the relay recovery already follows below.
@@ -225,7 +233,23 @@ function render(){
     if(stagedSource)button(`Insert ${sourceName(stagedSource).toLowerCase()} into machine`,chapter.routeSources[stagedSource].action);
     else statusLine('Inspect a corridor sign, carry it here, then insert it in the machine.',{learningHint:'source'});
   }
-  else if(s.round===1&&s.prediction==='none'){
+  else if(growingBeat(s)&&s.loop_prediction==='none'){
+    tray('Next input: request and sign only','loop-same');
+    tray('Next input: request, sign, and Open','loop-grows');
+  }
+  else if(growingBeat(s)&&s.source_inference==='none'){
+    $('#actions').dataset.layout='two-column';
+    if(s.hinted)statusLine('Hint: use only the supplied sign.',{learningHint:'route'});
+    else statusLine(s.loop_prediction==='grows'?'Yes. Open joins the next input.':'Open also joins the next input.',{learningHint:'history'});
+    tray('Moon','infer-moon');tray('Star','infer-star');
+    tray('Sun','infer-sun');tray('No gate','infer-no-gate');
+    if(!s.hinted)button('Ask for a hint','hint',false);
+  }
+  else if(s.round===1&&s.pieces===0&&s.prediction==='none'&&s.available_actions?.includes('step')){
+    statusLine(`Only ${sourceName(s.clue).toLowerCase()} was supplied. The other signs remain outside the machine.`);
+    button('Make first word','step');
+  }
+  else if(s.round===1&&!sourceInferenceMode(s)&&s.prediction==='none'){
     // The option name is the decision. "Predict:" is the question above it, repeated three
     // times, and at the accessibility viewport that repetition is what pushed the third
     // choice below the fold (guide I10: shorten what the options say).
@@ -238,7 +262,15 @@ function render(){
     tray('Predict: each step receives the same input again','loop-same');
     tray('Predict: each step also receives every generated word','loop-grows');
   }
-  else{button(s.pieces===0?'Make first word':s.pieces<4?'Next word':'Speak to gate →',s.pieces<4?'step':'send');}
+  else{
+    if(growingBeat(s)&&s.source_inference!=='none'){
+      const supported=s.case.source_support[s.clue],named=supported==='no-gate'?'no gate':`${supported[0].toUpperCase()}${supported.slice(1)} gate`;
+      statusLine(supported==='no-gate'
+        ?'This sign names no gate. Your first inference is kept. The toy may still write a fluent but unsupported route.'
+        :`This sign supports ${named}. Your first inference is kept; the toy continues from this source.`,{learningHint:'source-feedback'});
+    }
+    button(s.pieces===0?'Make first word':s.pieces<4?'Next word':'Speak to gate →',s.pieces<4?'step':'send');
+  }
   if(relay&&s.relay_stage==='choosing'&&s.relay_prediction!=='none'){
     const committed=document.createElement('p');committed.dataset.relayCommitment='true';committed.dataset.shedItem='45';
     committed.textContent=`Your prediction: ${s.relay_prediction==='yard'?'Bell Yard':'Lantern Loft'}.`;
@@ -249,6 +281,11 @@ function render(){
     const committed=document.createElement('p');committed.dataset.routeCommitment='true';committed.dataset.shedItem='45';
     committed.textContent=`Your first route prediction: ${{moon:'Moon',star:'Star',sun:'Sun'}[s.prediction]}.`;
     if(s.loop_prediction!=='none')committed.textContent+=` Your input rule: ${s.loop_prediction==='grows'?'every generated word joins the next input':'the input stays the same each step'}.`;
+    $('#actions').append(committed);
+  }
+  if(!relay&&s.round===1&&sourceInferenceMode(s)&&s.source_inference!=='none'&&s.status==='building'){
+    const committed=document.createElement('p');committed.dataset.sourceCommitment='true';committed.dataset.shedItem='45';
+    committed.textContent=`First source inference: ${s.source_inference==='no-gate'?'no gate':s.source_inference}. Input choice: ${s.loop_prediction==='grows'?'include Open':'original input only'}.`;
     $('#actions').append(committed);
   }
   $('#rewind').hidden=complete||!s.powered||s.status==='success'||s.pieces===0;
@@ -399,7 +436,8 @@ function frame(){
   const point=card.hidden?null:world.projectEntity(card.dataset.anchor||'socket');
   const anchored=point&&point.inFront;
   card.classList.toggle('parked',Boolean(point)&&!anchored);
-  const banded=sheet||card.classList.contains('compact')||card.classList.contains('world-focus');
+  card.classList.toggle('side-focus',!mobile&&sourceInferenceMode(s)&&s.round===1&&s.pieces===1&&s.source_inference==='none');
+  const banded=sheet||card.classList.contains('compact')||card.classList.contains('world-focus')||card.classList.contains('side-focus');
   card.classList.toggle('parked-reading',Boolean(anchored&&card.classList.contains('compact')&&mobile&&!sheet));
   if(!anchored){card.style.left='';card.style.top='';}
   else if(banded){card.style.left='';card.style.top='';}

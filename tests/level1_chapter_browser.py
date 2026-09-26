@@ -80,15 +80,21 @@ def world_action(page,name):
     expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
 
 
-def generate(page, observations=None):
+def generate(page, observations=None, gate_prediction=None):
     previous=page.evaluate('FirstWordsReview.state')
-    if previous['loop_prediction']=='none' and previous['prediction']!='none':
-        # One growth-hypothesis beat per run; a recovery re-supply keeps the
-        # committed prediction, exactly like the anchored tray UI.
-        choose(page,'Predict: each step also receives every generated word')
+    if previous['pieces']==0 and previous['round']==1 and 'source_inference' in previous and 'step' in previous['available_actions']:
+        action(page,'Make first word')
+        previous=page.evaluate('FirstWordsReview.state')
+        assert previous['output']==['Open']
+    if previous['loop_prediction']=='none' and previous['pieces']==1:
+        choose(page,'Next input: request, sign, and Open')
         assert page.evaluate('FirstWordsReview.state.loop_prediction')=='grows'
         previous=page.evaluate('FirstWordsReview.state')
-    for index,label in enumerate(['Make first word']+['Next word']*3):
+    if previous.get('source_inference')=='none' and gate_prediction:
+        choose(page,'No gate' if gate_prediction=='no-gate' else gate_prediction)
+        previous=page.evaluate('FirstWordsReview.state')
+    for index in range(previous['pieces'],4):
+        label='Make first word' if index==0 else 'Next word'
         attempt=action(page,label)
         state=attempt['word_machine_state']
         assert state['output'][:-1]==previous['output']
@@ -241,10 +247,9 @@ def main():
             expect(page.locator('#readout-request')).to_contain_text('Open the route')
             expect(page.locator('#readout-supplied')).to_contain_text('Old route')
             replay.append({'phase':'stale-context-selected','state':page.evaluate('FirstWordsReview.state')})
-            choose(page,'The machine will say Moon')
             expect(page.locator('#actions button[data-action^="relay-"]')).to_have_count(0)
+            generate(page,generation,gate_prediction='Moon');expect(page.locator('#stage-name')).to_have_text('LEVEL 1 · RECOVER');expect(page.locator('#goal')).to_have_text('Wrong route.')
             replay.append({'phase':'moon-prediction','state':page.evaluate('FirstWordsReview.state')})
-            generate(page,generation);expect(page.locator('#stage-name')).to_have_text('LEVEL 1 · RECOVER');expect(page.locator('#goal')).to_have_text('Wrong route.')
             replay.append({'phase':'stale-context-failure','state':page.evaluate('FirstWordsReview.state')})
             page.screenshot(path=str(out/'level1-transfer-wrong-390.png'))
             # Recovery requires a physical source change, not another machine
@@ -306,17 +311,19 @@ def main():
                 q=ctx.new_page();record_commands(q,commands,contracts);q.goto(url+'/first-words')
                 skip_opening_to_tutorial(q);complete_tutorial(q);action(q,'Begin Level 1 →')
                 supply_sign(q,"today's route notice","today's notice","today's notice")
+                action(q,'Make first word')
+                choose(q,'Next input: request, sign, and Open')
                 before_hint=q.evaluate('FirstWordsReview.state')
                 if hint:
                     action(q,'Ask for a hint')
-                    expect(q.locator('[data-learning-hint]')).to_contain_text('uses the sign you supplied')
+                    expect(q.locator('[data-learning-hint="route"]')).to_contain_text('supplied sign')
                     q.reload()
                     open_card(q)
-                    expect(q.locator('[data-learning-hint]')).to_be_visible(timeout=15000)
+                    expect(q.locator('[data-learning-hint="route"]')).to_be_visible(timeout=15000)
                 after_hint=q.evaluate('FirstWordsReview.state')
-                visible_hint=q.locator('[data-learning-hint]').inner_text() if hint else None
-                choose(q,f'The machine will say {prediction}')
-                expect(q.locator('[data-learning-hint]')).to_have_count(0)
+                visible_hint=q.locator('[data-learning-hint="route"]').inner_text() if hint else None
+                choose(q,prediction)
+                expect(q.locator('[data-learning-hint="route"]')).to_have_count(0)
                 steps=[];generated=generate(q,steps)
                 complete_relay(q)
                 submitted=action(q,'Finish Level 1 →','Level saved · practice recorded')
@@ -324,7 +331,7 @@ def main():
                 assert assessment['mastery']=='unknown'
                 assert assessment['reasoning']['outcome']=='not_observed'
                 assert assessment['transfer_observations']['hint_before_prediction']==hint
-                assert assessment['transfer_observations']['prediction_matches_supplied_context']==(prediction=='Star')
+                assert assessment['transfer_observations']['inference_matches_source']==(prediction=='Star')
                 comparisons.append({'prediction':prediction,'hint_requested':hint,'before_hint':before_hint,
                     'after_hint':after_hint,'visible_hint':visible_hint,'generation':steps,'final_state':generated['word_machine_state'],
                     'assessment':assessment,'attempt_id':submitted['id'],'revision':submitted['revision']})
@@ -341,7 +348,7 @@ def main():
                 skip_opening_to_tutorial(q)
                 complete_tutorial(q);action(q,'Begin Level 1 →')
                 supply_sign(q,"today's route notice","today's notice","today's notice")
-                choose(q,'The machine will say Star');generate(q);complete_relay(q);action(q,'Finish Level 1 →','Level saved · practice recorded');expect(q.locator('#goal')).to_have_text('Mira heard you.',timeout=15000)
+                generate(q,gate_prediction='Star');complete_relay(q);action(q,'Finish Level 1 →','Level saved · practice recorded');expect(q.locator('#goal')).to_have_text('Mira heard you.',timeout=15000)
                 assert q.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 q.screenshot(path=str(out/f'level1-complete-{width}-reduced.png'));ctx.close()
             checks.append('360/430 phone and 1280 desktop reduced-motion players follow the same separate tutorial and solve Level 1 without requiring camera skill.')

@@ -6,6 +6,31 @@ Automated checks, critic judgment and user acceptance are separate claims.
 
 ## Candidate
 
+- **26 September route-machine checkpoint (unreviewed):** A new pinned
+  `first-words-3` snapshot keeps existing v1/v2 attempts replayable while new
+  Level 1 runs generate **Open** from the committed sign, pause before showing
+  the assembled next input, record a first input-history choice, then reveal
+  that Open joined the request and sign. The next separate choice asks which
+  gate the supplied sign supports, including **no gate** for the parade note;
+  this inference cannot change the toy's authored continuation. In diagnostic
+  390x844 GUI play, the wrong unchanged-input choice survived reload, the
+  parade/no-gate inference was correct even while the toy wrote a fluent Moon
+  command, the gate stayed shut, and replacing the source with today's notice
+  produced and opened the Star route without erasing first choices. The four
+  choices now fit as an opt-in phone sheet at ordinary and 200% text, and the
+  desktop card sits clear of Zip. `python manage.py build` passed; `python
+  manage.py test` passed 444 tests (7 PostgreSQL skips); the focused route
+  browser check passed; and the three-state phone/200%-text/desktop
+  presentation report passed with zero violations. Trace/screenshots:
+  `artifacts/repair-inference-play-2`; budget report:
+  `artifacts/repair-route-presentation-result.json`. The broad Level 1 chapter
+  script reached the route/recovery/relay/ending path but stopped in an
+  auxiliary hint assertion that still used a broad selector; that assertion
+  was narrowed and rechecked by the focused browser run, not by a new full
+  chapter rerun. Changed-case relevance/recency and full generated-history
+  alignment, independent cold review, full presentation report and user
+  acceptance remain open. This checkpoint is not critic or release approval.
+
 - **26 September implementation progress (unreviewed):** Level 1 route boards now
   open an object-local inspection with their full sign text. The player can stage
   one sign and change it before carrying it to the message machine; only the
@@ -25,10 +50,14 @@ Automated checks, critic judgment and user acceptance are separate claims.
   open. The user has explicitly requested an unreviewed GitHub/Render progress
   preview of this repair; deployment is a separate action and is not readiness.
 
-- Development branch `docs-readthrough-20260921`; frozen repair commit `38e88f1`.
-  `main` remains the canonical development destination. The development branch
-  is pushed but has not been merged; the experience candidate
-  remains in `needs_revision`. `deploy/render-supabase` remains pinned separately.
+- Development branch `docs-readthrough-20260921`; prior cold-reviewed repair
+  commit `38e88f1`. `main` remains the canonical development destination.
+  This newer implementation is not cold-reviewed or merged; the experience
+  remains in `needs_revision`. GitHub `deploy/render-supabase` was separately
+  advanced to the earlier `bcf6c4f` progress snapshot after explicit user
+  authorization, but automatic approval review rejected the Render trigger.
+  The live site remains on `74455fd7`; see
+  `docs/experiments/20260926-user-requested-progress-preview.md`.
 - The candidate repairs the cold critic's missing tutorial input/history with a
   carried, world-anchored readout; adds a reachable Level 1 speech station;
   makes its action visibly say OPEN ENGINE; and compacts phone markers without
@@ -68,10 +97,11 @@ Automated checks, critic judgment and user acceptance are separate claims.
 
 ## Next gate
 
-1. Implement one coherent world-centered interaction repair under the approved
-   design, retaining existing saves/learning evidence identities and keeping the
-   first success before Level 1. The design approval is permission to prototype,
-   not a verdict that the current runtime meets it.
+1. Complete the approved changed-case receiver: physical note inspection,
+   reversible staging and insertion; first relevance/recency and
+   source-supported inference; and prediction from the complete generated
+   history. Preserve the tutorial success, existing saves and learning IDs.
+   The design approval is permission to prototype, not runtime alignment.
 2. Re-freeze, then replay the demonstrated panel/agency/transfer/ending blockers on a new exact
    candidate. Cover the still-unobserved opening, physicality, recovery and devices.
 3. Repeat affected technical/presentation gates, obtain a full critic record and

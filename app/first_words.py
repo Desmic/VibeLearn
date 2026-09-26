@@ -144,7 +144,7 @@ def _gate_view(config, value, engine, result):
             first_input = 'none'
         elif first_input is not None and action.startswith('scan-'):
             first_input = action.removeprefix('scan-')
-        elif first_input is not None and action.startswith('predict-'):
+        elif first_input is not None and action.startswith('infer-' if config['version'] == 'first-words-3' else 'predict-'):
             break
     return {**s, 'case': case, 'context': context + output, 'input': context, 'output': output,
             'candidates': candidates, 'destination': destination, 'available_actions': legal,
@@ -156,7 +156,8 @@ def evaluate_v1(snapshot, response, independence):
     s = replay(snapshot, response['word_machine'])
     prediction_destination = {'star': 'Star', 'moon': 'Moon', 'parade': 'Moon'}.get(s['prediction_input'])
     moves = response['word_machine']['moves']
-    prediction_index = next((i for i, move in enumerate(moves) if move.startswith('predict-')), len(moves))
+    decision_prefix = 'infer-' if snapshot['word_machine']['version'] == 'first-words-3' else 'predict-'
+    prediction_index = next((i for i, move in enumerate(moves) if move.startswith(decision_prefix)), len(moves))
     helped = 'hint' in moves[:prediction_index]
     loop_prediction = s.get('loop_prediction', 'none')
     transfer = {
@@ -179,9 +180,9 @@ def evaluate_v1(snapshot, response, independence):
 
 # Version 1 remains a replayable, immutable two-gate activity. New starts use the
 # changed relay case; existing saves never acquire new required actions.
-CURRENT_VERSION = 'first-words-2'
+V2_VERSION = 'first-words-2'
 RULES_V2 = deepcopy(RULES)
-RULES_V2['version'] = CURRENT_VERSION
+RULES_V2['version'] = V2_VERSION
 RULES_V2['state'].update({
     'relay_stage': enum(['none', 'choosing', 'revealed', 'done'], 'none'),
     'relay_context': enum(['none', 'loft', 'yard'], 'none'),
@@ -235,15 +236,57 @@ RELAY_CASE = {
 }
 
 
-def build_content(template):
+def build_content_v2(template):
     item = build_content_v1(template)
     for name in ('activity', 'frame', 'binding', 'rubric'):
         item[name]['revision'] = 2
     item['frame']['coverage'] = 'Guided gates followed by first decisions in a changed relay case before its feedback; prior practice disclosed.'
-    item['policies']['assessment'] = CURRENT_VERSION
-    item['word_machine'] = {'version': CURRENT_VERSION, 'rules': deepcopy(RULES_V2),
+    item['policies']['assessment'] = V2_VERSION
+    item['word_machine'] = {'version': V2_VERSION, 'rules': deepcopy(RULES_V2),
                             'cases': deepcopy(CASES), 'relay_case': deepcopy(RELAY_CASE)}
     item['validation']['scope'] = 'Guided gates and a changed message-relay application within Level 1'
+    return item
+
+
+# The new sequence beat is pinned separately. V1 and V2 action logs retain
+# their original order and evaluation; new runs pause after Open, before the
+# gate hypothesis or another generated word can reveal the grown input.
+CURRENT_VERSION = 'first-words-3'
+RULES_V3 = deepcopy(RULES_V2)
+RULES_V3['version'] = CURRENT_VERSION
+RULES_V3['state']['source_inference'] = enum(['none', 'moon', 'star', 'sun', 'no-gate'], 'none')
+RULES_V3['actions']['step']['when'] = both(
+    READY, eq('relay_stage', 'none'),
+    {'op': 'lt', 'left': field('pieces'), 'right': 4},
+    either(
+        both(eq('round', 0), eq('clue', 'moon')),
+        both(eq('round', 1), {'op': 'ne', 'left': field('clue'), 'right': 'none'},
+             either(eq('pieces', 0), both({'op': 'ne', 'left': field('loop_prediction'), 'right': 'none'},
+                                      {'op': 'ne', 'left': field('source_inference'), 'right': 'none'}))),
+    ),
+)
+for prediction in ('moon', 'star', 'sun'):
+    RULES_V3['actions']['predict-' + prediction]['when'] = False
+for inference in ('moon', 'star', 'sun', 'no-gate'):
+    RULES_V3['actions']['infer-' + inference] = {
+        'when': both(eq('relay_stage', 'none'), eq('round', 1), eq('source_inference', 'none'),
+                     eq('pieces', 1), {'op': 'ne', 'left': field('loop_prediction'), 'right': 'none'}),
+        'effects': [set_to('source_inference', inference)], 'emits': ['source-inference-recorded'],
+    }
+for prediction in ('grows', 'same'):
+    RULES_V3['actions']['loop-' + prediction]['when'] = both(
+        eq('relay_stage', 'none'), eq('round', 1), eq('loop_prediction', 'none'), eq('pieces', 1),
+        {'op': 'ne', 'left': field('clue'), 'right': 'none'},
+    )
+
+
+def build_content(template):
+    item = build_content_v2(template)
+    item['policies']['assessment'] = CURRENT_VERSION
+    item['word_machine']['version'] = CURRENT_VERSION
+    item['word_machine']['rules'] = deepcopy(RULES_V3)
+    item['word_machine']['cases'][1]['source_support'] = {'moon': 'moon', 'star': 'star', 'parade': 'no-gate'}
+    item['validation']['scope'] = 'Gate source and next-input practice, then changed message-relay application within Level 1'
     return item
 
 
@@ -251,7 +294,7 @@ def replay(snapshot, value):
     version = snapshot['word_machine']['version']
     if version == VERSION:
         return replay_v1(snapshot, value)
-    if version != CURRENT_VERSION:
+    if version not in (V2_VERSION, CURRENT_VERSION):
         raise ValueError('Unsupported rescue episode version')
     config = snapshot['word_machine']
     engine = GameRulesEngine(config['rules'])
@@ -269,6 +312,16 @@ def evaluate(snapshot, response, independence):
     state = replay(snapshot, response['word_machine'])
     result = evaluate_v1(snapshot, response, independence)
     moves = response['word_machine']['moves']
+    if snapshot['word_machine']['version'] == CURRENT_VERSION:
+        first_inference = next((move.removeprefix('infer-') for move in moves if move.startswith('infer-')), None)
+        first_source = result['transfer_observations']['context_choice']
+        support = snapshot['word_machine']['cases'][1]['source_support'].get(first_source)
+        result['transfer_observations'].update(
+            source_inference=first_inference, source_support=support,
+            inference_matches_source=None if first_inference is None else first_inference == support,
+            predicted_destination=None, prediction_matches_supplied_context=None,
+            scope='First source and source-supported gate inference after a generated input-history choice; toy continuation is separate. No independent mastery.',
+        )
     first_context = first_prediction = first_input = None
     feedback_seen = False
     for move in moves:

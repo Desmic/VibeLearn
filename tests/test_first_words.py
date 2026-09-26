@@ -141,6 +141,8 @@ class FirstWordsV2Tests(unittest.TestCase):
     action = FirstWordsTests.action
 
     def setUp(self):
+        self.content_patch=patch.dict(MISSION_INDEX,{first_words.MISSION_ID:first_words.build_content_v2(CONTENT)})
+        self.content_patch.start();self.addCleanup(self.content_patch.stop)
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
         self.path=Path(self.tmp.name)/'test.db';migrate(self.path)
         _,self.learner=service.create_session(self.path)
@@ -192,6 +194,7 @@ class FirstWordsV2Tests(unittest.TestCase):
         self.assertFalse(observation['prediction_matches_supplied_context'])
         self.assertFalse(observation['input_prediction_correct'])
         self.assertTrue(observation['first_decisions_before_case_feedback'])
+        self.assertNotIn('source_inference',result['transfer_observations'])
         self.assertEqual(result['mastery'],'unknown');self.assertEqual(result['independence'],'assisted')
         self.assertEqual(observation['assistance'],'unknown')
 
@@ -247,5 +250,84 @@ class FirstWordsV2Tests(unittest.TestCase):
         capsule=json.loads(row['capsule'])
         recomputed=evaluate(capsule['snapshot'],capsule['response'],capsule['assistance'])
         self.assertEqual(recomputed,json.loads(row['result']))
+
+
+class FirstWordsV3Tests(unittest.TestCase):
+    action = FirstWordsTests.action
+
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
+        self.path=Path(self.tmp.name)/'test.db';migrate(self.path)
+        _,self.learner=service.create_session(self.path)
+        self.attempt=service.command(self.path,self.learner,'start',{
+            'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':first_words.MISSION_ID})
+
+    def test_first_word_precedes_growing_input_choice_and_gate_choice(self):
+        self.assertEqual(self.attempt['snapshot']['word_machine']['version'],'first-words-3')
+        for move in FIRST+['next','scan-parade']:self.action(move)
+        state=self.attempt['word_machine_state']
+        self.assertIn('step',state['available_actions'])
+        self.assertNotIn('infer-moon',state['available_actions'])
+        with self.assertRaises(service.DomainError):self.action('loop-grows')
+        self.action('step')
+        state=self.attempt['word_machine_state']
+        self.assertEqual(state['output'],['Open'])
+        self.assertIn('loop-grows',state['available_actions'])
+        self.assertNotIn('step',state['available_actions'])
+        self.assertNotIn('infer-moon',state['available_actions'])
+        self.action('loop-same')
+        self.attempt=service.state(self.path,self.learner)['attempt']
+        state=self.attempt['word_machine_state']
+        self.assertEqual(state['loop_prediction'],'same')
+        self.assertEqual(state['context'],state['input']+['Open'])
+        self.assertIn('infer-no-gate',state['available_actions'])
+        with self.assertRaises(service.DomainError):self.action('loop-grows')
+        self.action('infer-no-gate')
+        with self.assertRaises(service.DomainError):self.action('infer-moon')
+        for move in ['step']*3+['send']:self.action(move)
+        state=self.attempt['word_machine_state']
+        self.assertEqual(state['output'],['Open','the','Moon','gate'])
+        self.assertEqual(state['status'],'wrong')
+        self.action('scan-star')
+        self.assertEqual(self.attempt['word_machine_state']['loop_prediction'],'same')
+        for move in ['step']*4+['send']:self.action(move)
+        self.action('relay-start')
+        for move in ['relay-context-yard','relay-predict-yard','relay-input-growing','relay-run','relay-finish']:
+            self.action(move)
+        self.action('finish')
+        result=self.attempt['assessment']['transfer_observations']
+        self.assertEqual(result['loop_prediction'],'same')
+        self.assertFalse(result['loop_correct'])
+        self.assertIsNone(result['predicted_destination'])
+        self.assertEqual(result['source_inference'],'no-gate')
+        self.assertEqual(result['source_support'],'no-gate')
+        self.assertTrue(result['inference_matches_source'])
+        self.assertEqual(result['context_choice'],'parade')
+        self.assertEqual(self.attempt['assessment']['mastery'],'unknown')
+
+    def test_wrong_source_inference_stays_first_after_recovery(self):
+        for move in FIRST+['next','scan-parade','step','loop-grows','infer-moon']+['step']*3+['send']:
+            self.action(move)
+        self.assertEqual(self.attempt['word_machine_state']['output'],['Open','the','Moon','gate'])
+        self.assertEqual(self.attempt['word_machine_state']['status'],'wrong')
+        for move in ['scan-star']+['step']*4+['send','relay-start','relay-context-yard',
+                     'relay-predict-yard','relay-input-growing','relay-run','relay-finish']:
+            self.action(move)
+        self.action('finish')
+        result=self.attempt['assessment']['transfer_observations']
+        self.assertEqual(result['context_choice'],'parade')
+        self.assertEqual(result['source_support'],'no-gate')
+        self.assertEqual(result['source_inference'],'moon')
+        self.assertFalse(result['inference_matches_source'])
+        self.assertIsNone(result['prediction_matches_supplied_context'])
+        self.assertEqual(self.attempt['word_machine_state']['output'],['Open','the','Star','gate'])
+        self.assertEqual(self.attempt['assessment']['mastery'],'unknown')
+
+    def test_existing_v2_replay_still_uses_old_action_order(self):
+        old=first_words.build_content_v2(CONTENT)
+        old_view=word_machine.replay(old,{'moves':FIRST+['next','scan-star','predict-star','step']})
+        self.assertEqual(old_view['output'],['Open'])
+        self.assertEqual(old_view['loop_prediction'],'none')
+        self.assertIn('step',old_view['available_actions'])
 
 if __name__=='__main__':unittest.main()

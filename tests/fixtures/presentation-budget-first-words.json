@@ -194,13 +194,13 @@
      "click": "Insert old sign into machine"
     },
     {
-     "click": "The machine will say Moon"
-    },
-    {
-     "click": "Predict: each step also receives every generated word"
-    },
-    {
      "click": "Make first word"
+    },
+    {
+     "click": "Next input: request, sign, and Open"
+    },
+    {
+     "click": "Moon"
     },
     {
      "click": "Next word"
@@ -759,15 +759,15 @@
     {"click": "Open the message machine", "timeout": 60000
     },
     {
-     "click": "The machine will say Moon",
-     "timeout": 60000
-    },
-    {
-     "click": "Predict: each step also receives every generated word",
-     "timeout": 60000
-    },
-    {
      "click": "Make first word",
+     "timeout": 60000
+    },
+    {
+     "click": "Next input: request, sign, and Open",
+     "timeout": 60000
+    },
+    {
+     "click": "Moon",
      "timeout": 60000
     },
     {
@@ -929,6 +929,8 @@
     {"click": "Insert today's notice into machine", "timeout": 60000},
     {"click": "Open the message machine", "timeout": 60000
     },
+    {"click": "Make first word", "timeout": 60000},
+    {"click": "Next input: request, sign, and Open", "timeout": 60000},
     {
      "wait_eval": "()=>[...document.querySelectorAll('#actions button')].some(b=>b.textContent.trim()==='Ask for a hint')",
      "timeout": 60000
