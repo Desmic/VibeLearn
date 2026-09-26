@@ -322,7 +322,19 @@
    "name": "complete-closed",
    "steps": [
     {
-     "click": "Offer Mira's 18:20 note about the Bell Yard to the receiver",
+     "click": "Inspect Mira's 18:20 note about the Bell Yard",
+     "timeout": 45000
+    },
+    {
+     "click": "Carry 18:20 mira note",
+     "timeout": 45000
+    },
+    {
+     "click": "Carry 18:20 Mira note to the message machine",
+     "timeout": 45000
+    },
+    {
+     "click": "Insert 18:20 mira note",
      "timeout": 45000
     },
     {
@@ -330,11 +342,19 @@
      "timeout": 30000
     },
     {
-     "click": "Predict: message goes to the Bell Yard",
+     "click": "Bell Yard",
      "timeout": 45000
     },
     {
-     "click": "Predict: each step also receives Meet",
+     "click": "Make first relay word",
+     "timeout": 45000
+    },
+    {
+     "click": "Make next relay word",
+     "timeout": 45000
+    },
+    {
+     "click": "Request, note, Meet, and at",
      "timeout": 45000
     },
     {

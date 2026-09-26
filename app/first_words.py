@@ -144,7 +144,7 @@ def _gate_view(config, value, engine, result):
             first_input = 'none'
         elif first_input is not None and action.startswith('scan-'):
             first_input = action.removeprefix('scan-')
-        elif first_input is not None and action.startswith('infer-' if config['version'] == 'first-words-3' else 'predict-'):
+        elif first_input is not None and action.startswith('infer-' if config['version'] in (V3_VERSION, CURRENT_VERSION) else 'predict-'):
             break
     return {**s, 'case': case, 'context': context + output, 'input': context, 'output': output,
             'candidates': candidates, 'destination': destination, 'available_actions': legal,
@@ -156,7 +156,7 @@ def evaluate_v1(snapshot, response, independence):
     s = replay(snapshot, response['word_machine'])
     prediction_destination = {'star': 'Star', 'moon': 'Moon', 'parade': 'Moon'}.get(s['prediction_input'])
     moves = response['word_machine']['moves']
-    decision_prefix = 'infer-' if snapshot['word_machine']['version'] == 'first-words-3' else 'predict-'
+    decision_prefix = 'infer-' if snapshot['word_machine']['version'] in (V3_VERSION, CURRENT_VERSION) else 'predict-'
     prediction_index = next((i for i, move in enumerate(moves) if move.startswith(decision_prefix)), len(moves))
     helped = 'hint' in moves[:prediction_index]
     loop_prediction = s.get('loop_prediction', 'none')
@@ -251,9 +251,9 @@ def build_content_v2(template):
 # The new sequence beat is pinned separately. V1 and V2 action logs retain
 # their original order and evaluation; new runs pause after Open, before the
 # gate hypothesis or another generated word can reveal the grown input.
-CURRENT_VERSION = 'first-words-3'
+V3_VERSION = 'first-words-3'
 RULES_V3 = deepcopy(RULES_V2)
-RULES_V3['version'] = CURRENT_VERSION
+RULES_V3['version'] = V3_VERSION
 RULES_V3['state']['source_inference'] = enum(['none', 'moon', 'star', 'sun', 'no-gate'], 'none')
 RULES_V3['actions']['step']['when'] = both(
     READY, eq('relay_stage', 'none'),
@@ -280,13 +280,81 @@ for prediction in ('grows', 'same'):
     )
 
 
-def build_content(template):
+def build_content_v3(template):
     item = build_content_v2(template)
-    item['policies']['assessment'] = CURRENT_VERSION
-    item['word_machine']['version'] = CURRENT_VERSION
+    item['policies']['assessment'] = V3_VERSION
+    item['word_machine']['version'] = V3_VERSION
     item['word_machine']['rules'] = deepcopy(RULES_V3)
     item['word_machine']['cases'][1]['source_support'] = {'moon': 'moon', 'star': 'star', 'parade': 'no-gate'}
     item['validation']['scope'] = 'Gate source and next-input practice, then changed message-relay application within Level 1'
+    return item
+
+
+# The changed relay is a separately pinned lesson. Inference is about the
+# supplied note; generated words and delivery are independent observations.
+CURRENT_VERSION = 'first-words-4'
+RULES_V4 = deepcopy(RULES_V3)
+RULES_V4['version'] = CURRENT_VERSION
+RULES_V4['state']['relay_context'] = enum(['none', 'loft', 'yard', 'tavi'], 'none')
+RULES_V4['state']['relay_inference'] = enum(['none', 'loft', 'yard', 'no-mira'], 'none')
+RULES_V4['state']['relay_pieces'] = integer(2)
+RULES_V4['state']['relay_input_prediction'] = enum(['none', 'original', 'latest', 'full'], 'none')
+for place in ('loft', 'yard', 'tavi'):
+    RULES_V4['actions']['relay-context-' + place] = {
+        'when': either(both(eq('relay_stage', 'choosing'), eq('relay_context', 'none')),
+                       eq('relay_stage', 'revealed')),
+        'effects': [set_to('relay_context', place), set_to('relay_stage', 'choosing'),
+                    set_to('relay_inference', 'none'), set_to('relay_pieces', 0),
+                    set_to('relay_input_prediction', 'none')],
+        'emits': ['relay-source-inserted'],
+    }
+for place in ('loft', 'yard'):
+    RULES_V4['actions']['relay-predict-' + place]['when'] = False
+for inference in ('loft', 'yard', 'no-mira'):
+    RULES_V4['actions']['relay-infer-' + inference] = {
+        'when': both(eq('relay_stage', 'choosing'), eq('relay_inference', 'none'),
+                     {'op': 'ne', 'left': field('relay_context'), 'right': 'none'}),
+        'effects': [set_to('relay_inference', inference)], 'emits': ['relay-source-inference-recorded'],
+    }
+RULES_V4['actions']['relay-piece'] = {
+    'when': both(eq('relay_stage', 'choosing'), {'op': 'ne', 'left': field('relay_inference'), 'right': 'none'},
+                 {'op': 'lt', 'left': field('relay_pieces'), 'right': 2}),
+    'effects': [{'op': 'add', 'field': 'relay_pieces', 'value': 1}], 'emits': ['relay-piece-appended'],
+}
+for prediction in ('original', 'growing'):
+    RULES_V4['actions']['relay-input-' + prediction]['when'] = False
+for prediction in ('original', 'latest', 'full'):
+    RULES_V4['actions']['relay-input-' + prediction] = {
+        'when': both(eq('relay_stage', 'choosing'), eq('relay_pieces', 2),
+                     eq('relay_input_prediction', 'none')),
+        'effects': [set_to('relay_input_prediction', prediction)],
+        'emits': ['relay-input-prediction-recorded'],
+    }
+RULES_V4['actions']['relay-run']['when'] = both(
+    eq('relay_stage', 'choosing'), eq('relay_pieces', 2),
+    {'op': 'ne', 'left': field('relay_input_prediction'), 'right': 'none'},
+)
+RELAY_CASE_V4 = {
+    'base': 'Send Mira a meeting place.',
+    'goal': 'Find where Mira is now. A newer note may concern someone else.',
+    'notes': {
+        'loft': '18:00 · Mira: They are holding me in the Lantern Loft.',
+        'yard': '18:20 · Mira: They moved me from the Lantern Loft to the Bell Yard.',
+        'tavi': '18:30 · Tavi: Meet me at the Sun Court.',
+    },
+    'source_support': {'loft': 'loft', 'yard': 'yard', 'tavi': 'no-mira'},
+    'destinations': {'loft': 'Lantern Loft', 'yard': 'Bell Yard', 'tavi': 'Sun Court'},
+    'prefix': 'Meet',
+}
+
+
+def build_content(template):
+    item = build_content_v3(template)
+    item['policies']['assessment'] = CURRENT_VERSION
+    item['word_machine']['version'] = CURRENT_VERSION
+    item['word_machine']['rules'] = deepcopy(RULES_V4)
+    item['word_machine']['relay_case'] = deepcopy(RELAY_CASE_V4)
+    item['validation']['scope'] = 'Gate source and generated-history practice, then a dated changed-source relay within Level 1'
     return item
 
 
@@ -294,7 +362,7 @@ def replay(snapshot, value):
     version = snapshot['word_machine']['version']
     if version == VERSION:
         return replay_v1(snapshot, value)
-    if version not in (V2_VERSION, CURRENT_VERSION):
+    if version not in (V2_VERSION, V3_VERSION, CURRENT_VERSION):
         raise ValueError('Unsupported rescue episode version')
     config = snapshot['word_machine']
     engine = GameRulesEngine(config['rules'])
@@ -302,8 +370,19 @@ def replay(snapshot, value):
     view = _gate_view(config, value, engine, result)
     state = result.state
     revealed = state['relay_stage'] in ('revealed', 'done')
-    relay_output = (['Meet', 'at'] + ('Lantern Loft' if state['relay_context'] == 'loft' else 'Bell Yard').split()) if revealed else []
-    return {**view, 'relay_case': deepcopy(config['relay_case']), 'relay_output': relay_output}
+    if version == CURRENT_VERSION:
+        relay_output = ['Meet', 'at'][:state['relay_pieces']]
+        if revealed:
+            relay_output += config['relay_case']['destinations'][state['relay_context']].split()
+    else:
+        relay_output = (['Meet', 'at'] + ('Lantern Loft' if state['relay_context'] == 'loft' else 'Bell Yard').split()) if revealed else []
+    relay_input = [config['relay_case']['base']]
+    if state['relay_context'] != 'none':
+        relay_input.append(config['relay_case']['notes'][state['relay_context']])
+    if version == CURRENT_VERSION and state['relay_input_prediction'] != 'none':
+        relay_input.extend(relay_output[:min(2, state['relay_pieces'])])
+    return {**view, 'relay_case': deepcopy(config['relay_case']), 'relay_output': relay_output,
+            'relay_input': relay_input}
 
 
 def evaluate(snapshot, response, independence):
@@ -312,7 +391,7 @@ def evaluate(snapshot, response, independence):
     state = replay(snapshot, response['word_machine'])
     result = evaluate_v1(snapshot, response, independence)
     moves = response['word_machine']['moves']
-    if snapshot['word_machine']['version'] == CURRENT_VERSION:
+    if snapshot['word_machine']['version'] in (V3_VERSION, CURRENT_VERSION):
         first_inference = next((move.removeprefix('infer-') for move in moves if move.startswith('infer-')), None)
         first_source = result['transfer_observations']['context_choice']
         support = snapshot['word_machine']['cases'][1]['source_support'].get(first_source)
@@ -323,6 +402,29 @@ def evaluate(snapshot, response, independence):
             scope='First source and source-supported gate inference after a generated input-history choice; toy continuation is separate. No independent mastery.',
         )
     first_context = first_prediction = first_input = None
+    if snapshot['word_machine']['version'] == CURRENT_VERSION:
+        first_inference = next((m.removeprefix('relay-infer-') for m in moves if m.startswith('relay-infer-')), None)
+        first_context = next((m.removeprefix('relay-context-') for m in moves if m.startswith('relay-context-')), None)
+        first_input = next((m.removeprefix('relay-input-') for m in moves if m.startswith('relay-input-')), None)
+        feedback_seen = 'relay-run' in moves
+        support = snapshot['word_machine']['relay_case']['source_support'].get(first_context)
+        result['relay_transfer_observations'] = {
+            'context_choice': first_context,
+            'relevant_context': None if first_context is None else first_context == 'yard',
+            'source_support': support,
+            'source_inference': first_inference,
+            'inference_matches_source': None if first_inference is None else first_inference == support,
+            'input_prediction': first_input,
+            'input_prediction_correct': None if first_input is None else first_input == 'full',
+            'first_decisions_before_case_feedback': bool(first_context and first_inference and first_input),
+            'case_feedback_observed': feedback_seen,
+            'final_context': state['relay_context'],
+            'prior_guided_practice': True, 'assistance': 'unknown',
+            'scope': 'First dated source, Mira-location inference and complete generated-history choice before feedback. No independent mastery claim.',
+        }
+        result['rows'][0]['reason'] = 'Authoritative action replay opens both gates and delivers the changed relay message.'
+        result['scope'] = 'Guided gates and changed-case first decisions. Completion is not mastery; global assistance remains applicable.'
+        return result
     feedback_seen = False
     for move in moves:
         if move.startswith('relay-context-') and first_prediction is None:

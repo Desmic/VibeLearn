@@ -109,22 +109,30 @@ def generate(page, observations=None, gate_prediction=None):
 
 
 def complete_relay(page, *, recover=False, reload_predictions=False, on_committed=None):
-    """Commit changed-case decisions before feedback, optionally retry a stale note."""
+    """Inspect a dated source, build history, and optionally recover from a stale note."""
+    def offer(key):
+        if page.locator('#engine').is_visible():page.get_by_role('button',name='Put the machine away').click()
+        marker=page.locator(f'[data-relay-source="{key}"]')
+        expect(marker).to_be_visible(timeout=15000)
+        marker.click()
+        expect(page.locator('#source-text')).to_be_visible()
+        page.locator('#source-stage').click()
+        choose(page,f'Insert {"18:00 mira note" if key=="loft" else "18:20 mira note"}')
+    def build(inference,history):
+        choose(page,inference)
+        action(page,'Make first relay word')
+        assert page.evaluate('FirstWordsReview.state.relay_output')==['Meet']
+        action(page,'Make next relay word')
+        assert page.evaluate('FirstWordsReview.state.relay_output')==['Meet','at']
+        choose(page,history)
     action(page,'Answer the signal')
-    choose(page,re.compile('18:00' if recover else '18:20'))
-    choose(page,'Predict: message goes to the Bell Yard')
-    # The question supplies a hypothetical prefix; the live input must not
-    # answer the next-input question before the learner commits that choice.
-    before_input=page.evaluate('FirstWordsReview.state')
-    expect(page.locator('#context')).to_have_text(
-        before_input['relay_case']['base']+' '+before_input['relay_case']['notes'][before_input['relay_context']])
-    choose(page,'Predict: each step receives the request + note again' if recover
-           else 'Predict: each step also receives Meet')
+    offer('loft' if recover else 'yard')
+    build('Bell Yard' if recover else 'Bell Yard',
+          'Request and note only' if recover else 'Request, note, Meet, and at')
     committed=page.evaluate('FirstWordsReview.state')
-    assert committed['relay_output']==[]
+    assert committed['relay_output']==['Meet','at']
     assert committed['relay_stage']=='choosing'
-    expect(page.locator('#output .empty')).to_have_count(4)
-    expect(page.locator('#actions [role="status"]')).to_have_count(0)
+    expect(page.locator('#output .empty')).to_have_count(2)
     expect(page.get_by_role('button',name='Run the relay →',exact=True)).to_be_visible()
     if reload_predictions:
         page.reload()
@@ -133,25 +141,22 @@ def complete_relay(page, *, recover=False, reload_predictions=False, on_committe
         open_card(page)
         expect(page.get_by_role('button',name='Run the relay →',exact=True)).to_be_visible(timeout=20000)
         restored=page.evaluate('FirstWordsReview.state')
-        for key in ('relay_context','relay_prediction','relay_input_prediction','relay_stage','relay_output'):
+        for key in ('relay_context','relay_inference','relay_pieces','relay_input_prediction','relay_stage','relay_output'):
             assert restored[key]==committed[key],(key,restored,committed)
-        expect(page.locator('#output .empty')).to_have_count(4)
-        expect(page.locator('#actions [role="status"]')).to_have_count(0)
+        expect(page.locator('#output .empty')).to_have_count(2)
         expect(page.locator('#context')).to_have_text(
-            committed['relay_case']['base']+' '+committed['relay_case']['notes'][committed['relay_context']])
+            committed['relay_case']['base']+' '+committed['relay_case']['notes'][committed['relay_context']]+' Meet at')
     if on_committed:
         on_committed(page)
     result=action(page,'Run the relay →')
     assert result['word_machine_state']['relay_output']==(['Meet','at','Lantern','Loft'] if recover else ['Meet','at','Bell','Yard'])
-    expect(page.locator('#actions [role="status"]')).to_contain_text('The selected note produced')
+    expect(page.locator('#actions [role="status"]').first).to_contain_text('The toy wrote')
     if recover:
-        expect(page.locator('#goal')).to_have_text('No reply from that holding area.')
-        expect(page.locator('#actions [role="status"]')).to_contain_text('not your destination prediction')
+        expect(page.locator('#goal')).to_have_text('No reply from Mira.')
         expect(page.get_by_role('button',name='Send the message to Mira',exact=True)).to_have_count(0)
-        choose(page,re.compile('18:20'))
-        choose(page,'Predict: message goes to the Bell Yard')
-        choose(page,'Predict: each step also receives Meet')
-        expect(page.locator('#output .empty')).to_have_count(4)
+        offer('yard')
+        build('Bell Yard','Request, note, Meet, and at')
+        expect(page.locator('#output .empty')).to_have_count(2)
         action(page,'Run the relay →')
     delivered=action(page,'Send the message to Mira')
     assert delivered['word_machine_state']['relay_stage']=='done'
@@ -286,9 +291,9 @@ def main():
             replay.append({'phase':'changed-relay-first-decisions-and-recovery',**relay})
             submitted=action(page,'Finish Level 1 →','Level saved · practice recorded')
             transfer=submitted['assessment']['relay_transfer_observations']
-            assert transfer['context_choice']=='loft' and transfer['predicted_destination']=='yard'
+            assert transfer['context_choice']=='loft' and transfer['source_inference']=='yard'
             assert transfer['input_prediction']=='original' and transfer['input_prediction_correct'] is False
-            assert transfer['prediction_matches_supplied_context'] is False
+            assert transfer['inference_matches_source'] is False
             assert transfer['first_decisions_before_case_feedback'] is True
             assert transfer['final_context']=='yard' and transfer['case_feedback_observed'] is True
             assert submitted['assessment']['mastery']=='unknown'
@@ -303,7 +308,7 @@ def main():
             expect(page.locator('#reflection')).to_contain_text('predicted that each new word joins the next input')
             page.get_by_role('button',name='Stay here',exact=True).click();page.reload();expect(page.locator('#goal')).to_have_text('Mira heard you.',timeout=15000)
             checks.append('Level 1 begins only after tutorial completion, permits a normal wrong context choice, preserves it, then recovers through the current route clue and ends in the prison world.')
-            checks.append('Changed relay case withholds output and feedback until both predictions are committed; reload preserves those decisions, and later successful correction retains the first incorrect decisions in authoritative assessment.')
+            checks.append('Changed relay case reveals Meet and at separately, waits for complete-history choice before final output; reload preserves first decisions, and successful correction retains errors in authoritative assessment.')
 
             # Identical context and viewport; intervene on prediction or hint use.
             for prediction,hint in [('Moon',False),('Star',False),('Star',True)]:

@@ -13,6 +13,7 @@ BROWSER_GROUPS = {
     "first-words-tutorial": ["tests.control_practice_browser"],
     "first-words-controls": ["tests.level1_controls_browser", "tests.physicality_browser"],
     "first-words-chapter": ["tests.level1_chapter_browser"],
+    "first-words-relay": ["tests.relay_history_browser"],
     "first-words-readability": ["tests.first_words_readability_browser"],
     "first-words-lifecycle": ["tests.level1_lifecycle_browser"],
     # Keep the combined command as the final integrated Level 1 regression.
@@ -22,6 +23,7 @@ BROWSER_GROUPS = {
         "tests.level1_controls_browser",
         "tests.physicality_browser",
         "tests.level1_chapter_browser",
+        "tests.relay_history_browser",
         "tests.first_words_readability_browser",
         "tests.level1_lifecycle_browser",
     ],
@@ -33,7 +35,7 @@ BROWSER_GROUPS = {
     "legacy-word-machine": ["tests.word_machine_browser"],
     "legacy-first-words-complex": ["tests.first_words_browser"],
 }
-ACTIVE_LEVEL1_GROUPS = ["first-words-opening", "first-words-tutorial", "first-words-controls", "first-words-chapter", "first-words-readability", "first-words-lifecycle"]
+ACTIVE_LEVEL1_GROUPS = ["first-words-opening", "first-words-tutorial", "first-words-controls", "first-words-chapter", "first-words-relay", "first-words-readability", "first-words-lifecycle"]
 
 
 def main():

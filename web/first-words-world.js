@@ -10,6 +10,11 @@ export const routeSources=Object.freeze({
   parade:{name:'Parade notice',anchor:'notice-parade-label',action:'scan-parade'},
   star:{name:"Today's notice",anchor:'notice-today-label',action:'scan-star'}
 });
+export const relaySources=Object.freeze({
+  loft:{name:'18:00 Mira note',anchor:'relay-note-a-label',action:'relay-context-loft'},
+  yard:{name:'18:20 Mira note',anchor:'relay-note-b-label',action:'relay-context-yard'},
+  tavi:{name:'18:30 Tavi note',anchor:'relay-note-c-label',action:'relay-context-tavi'}
+});
 
 const e=[];
 const part=(id,primitive,material,position,scale,extra={})=>e.push({id,primitive,material,position,scale,...extra});
@@ -78,10 +83,11 @@ part('friend-signal-shell','box','teal',[0,0,0],[1.5,1.1,.3],{parent:'friend-sig
 part('friend-signal-post','cylinder','ink',[0,-.95,0],[.16,1.1,.16],{parent:'friend-signal'});
 part('friend-signal-foot','box','teal',[0,-1.34,0],[.9,.12,.6],{parent:'friend-signal'});
 part('friend-signal-screen','box','blueGlow',[0,.05,.18],[1.15,.65,.06],{parent:'friend-signal',motion:{type:'pulse',amplitude:.08,speed:1.2}});
+part('friend-signal-reply-light','sphere','mint',[0,.75,.12],[.23,.23,.23],{parent:'friend-signal',enabled:false,motion:{type:'pulse',amplitude:.12,speed:1.1}});
 for(const side of [-1,1])part('friend-signal-eye-'+side,'sphere','ink',[side*.23,.08,.23],[.13,.13,.06],{parent:'friend-signal'});
 e.push({id:'friend-signal-label',parent:'friend-signal',position:[0,1.05,.2]});
-/* Mira's two intercepted notes are physical cards clipped beside the receiver. */
-for(const [side,x,tilt] of [['a',-1.02,14],['b',1.02,-14]]){
+/* Three separate dated notices are inspectable around the receiver. */
+for(const [side,x,tilt] of [['a',-1.62,12],['b',0,-5],['c',1.62,-12]]){
   part('relay-note-'+side,'box','paper',[x,.62,.14],[.58,.7,.05],{parent:'friend-signal',rotation:[6,tilt,0],enabled:false});
   part('relay-note-'+side+'-pin','sphere','gold',[x,.97,.17],[.06,.06,.05],{parent:'friend-signal'});
   e.push({id:'relay-note-'+side+'-label',parent:'relay-note-'+side,position:[0,.5,0]});
@@ -196,7 +202,7 @@ export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'
 
 const missionBase=()=>({
   show:['zip','prison-zone','sun','star',...revealParts],
-  hide:[...speechMarks,'bellweather-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','relay-note-a','relay-note-b','route-machine','zip-voice','socket-core','socket-ring',...limboProps,...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
+  hide:[...speechMarks,'bellweather-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','relay-note-a','relay-note-b','relay-note-c','friend-signal-reply-light','route-machine','zip-voice','socket-core','socket-ring',...limboProps,...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
   transforms:{'moon-door':{position:[0,0,0]},'sun-door':{position:[0,0,0]},'star-door':{position:[0,0,0]},zip:{position:[0,0,-28]}},
   animations:{zip:'idle'}
 });
@@ -300,8 +306,9 @@ function present(s,prev){
   const tutorialComplete=s.round===1||s.status==='success';
   if(tutorialComplete){p.transforms['moon-door']={position:[0,7.8,0]};p.show.push('tutorial-route-open','zip-voice','route-floor','route-wall--1','route-wall-1');}
   if(s.round===1){p.show.push('route-machine');if(s.status!=='success')p.show.push('notice-old','notice-parade','notice-today');}
-  // The relay is played at the receiver: its two physical notes appear with it.
-  if(s.relay_stage&&s.relay_stage!=='none')p.show.push('relay-note-a','relay-note-b');
+  // The relay is played at the receiver: each dated source remains inspectable.
+  if(s.relay_stage&&s.relay_stage!=='none')p.show.push('relay-note-a','relay-note-b',...(s.relay_inference!==undefined?['relay-note-c']:[]));
+  if(s.relay_stage==='done')p.show.push('friend-signal-reply-light');
   if(s.status==='wrong'){
     p.show.push('wrong-ring');p.animations.zip='no';
     p.transforms['wrong-ring']={position:s.round===1?[0,.12,-10.8]:[6,.12,-11]};

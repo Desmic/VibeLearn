@@ -85,14 +85,17 @@ export function placeWorldMarker(marker,point,{
   const locate=()=>{
     const half=(marker.offsetWidth||0)/2,height=marker.offsetHeight||0;
     const left=Math.max(xPadding,half+clearance),right=width-left;
-    if(left>right)return null;
+    // Marker coordinates are bottom-centred. The top safe edge applies to the
+    // whole carrier, including its buttons, rather than only its anchor point.
+    const topAnchor=top+height;
+    if(left>right||topAnchor>bottom)return null;
     const exclusions=occupied.map(r=>({left:r.left-half-clearance,right:r.right+half+clearance,top:r.top-clearance,bottom:r.bottom+height+clearance}));
     const free=(x,y)=>!exclusions.some(r=>x>r.left&&x<r.right&&y>r.top&&y<r.bottom);
-    const inside=desiredX>=left&&desiredX<=right&&desiredY>=top&&desiredY<=bottom&&free(desiredX,desiredY);
+    const inside=desiredX>=left&&desiredX<=right&&desiredY>=topAnchor&&desiredY<=bottom&&free(desiredX,desiredY);
     if(!displace)return inside?{x:desiredX,y:desiredY,inside}:null;
-    const baseX=clamp(desiredX,left,right),baseY=clamp(desiredY,top,bottom);
+    const baseX=clamp(desiredX,left,right),baseY=clamp(desiredY,topAnchor,bottom);
     const xs=[baseX,...exclusions.flatMap(r=>[clamp(r.left,left,right),clamp(r.right,left,right)])];
-    const ys=[baseY,...exclusions.flatMap(r=>[clamp(r.top,top,bottom),clamp(r.bottom,top,bottom)])];
+    const ys=[baseY,...exclusions.flatMap(r=>[clamp(r.top,topAnchor,bottom),clamp(r.bottom,topAnchor,bottom)])];
     let best=null,bestDistance=Infinity;
     for(const x of xs)for(const y of ys){
       const distance=(x-baseX)**2+(y-baseY)**2;

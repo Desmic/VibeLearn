@@ -256,6 +256,8 @@ class FirstWordsV3Tests(unittest.TestCase):
     action = FirstWordsTests.action
 
     def setUp(self):
+        self.content_patch=patch.dict(MISSION_INDEX,{first_words.MISSION_ID:first_words.build_content_v3(CONTENT)})
+        self.content_patch.start();self.addCleanup(self.content_patch.stop)
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
         self.path=Path(self.tmp.name)/'test.db';migrate(self.path)
         _,self.learner=service.create_session(self.path)
@@ -329,5 +331,85 @@ class FirstWordsV3Tests(unittest.TestCase):
         self.assertEqual(old_view['output'],['Open'])
         self.assertEqual(old_view['loop_prediction'],'none')
         self.assertIn('step',old_view['available_actions'])
+
+
+class FirstWordsV4Tests(unittest.TestCase):
+    action = FirstWordsTests.action
+
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
+        self.path=Path(self.tmp.name)/'test.db';migrate(self.path)
+        _,self.learner=service.create_session(self.path)
+        self.attempt=service.command(self.path,self.learner,'start',{
+            'command_id':str(uuid4()),'expected_revision':0,'mode':'LEARN','mission_id':first_words.MISSION_ID})
+
+    def enter_relay(self):
+        for move in FIRST+['next','scan-star','step','loop-grows','infer-star']+['step']*3+['send','relay-start']:
+            self.action(move)
+
+    def test_three_sources_and_complete_history_are_separate_from_toy_output(self):
+        self.enter_relay()
+        self.assertEqual(self.attempt['snapshot']['word_machine']['version'],'first-words-4')
+        self.assertEqual(set(self.attempt['snapshot']['word_machine']['relay_case']['notes']),{'loft','yard','tavi'})
+        self.action('relay-context-tavi')
+        self.assertNotIn('relay-piece',self.attempt['word_machine_state']['available_actions'])
+        self.action('relay-infer-no-mira')
+        self.action('relay-piece')
+        self.assertEqual(self.attempt['word_machine_state']['relay_output'],['Meet'])
+        self.assertNotIn('relay-input-full',self.attempt['word_machine_state']['available_actions'])
+        self.action('relay-piece')
+        self.assertEqual(self.attempt['word_machine_state']['relay_output'],['Meet','at'])
+        self.assertEqual(len(self.attempt['word_machine_state']['relay_input']),2)
+        with self.assertRaises(service.DomainError):self.action('relay-piece')
+        self.action('relay-input-full')
+        self.attempt=service.state(self.path,self.learner)['attempt']
+        self.assertEqual(self.attempt['word_machine_state']['relay_input_prediction'],'full')
+        self.assertEqual(self.attempt['word_machine_state']['relay_output'],['Meet','at'])
+        self.assertEqual(self.attempt['word_machine_state']['relay_input'][-2:],['Meet','at'])
+        self.action('relay-run')
+        self.assertEqual(self.attempt['word_machine_state']['relay_output'],['Meet','at','Sun','Court'])
+        with self.assertRaises(service.DomainError):self.action('relay-finish')
+        for move in ['relay-context-yard','relay-infer-yard','relay-piece','relay-piece','relay-input-latest','relay-run','relay-finish']:
+            self.action(move)
+        self.action('finish')
+        observation=self.attempt['assessment']['relay_transfer_observations']
+        self.assertEqual(observation['context_choice'],'tavi')
+        self.assertEqual(observation['source_support'],'no-mira')
+        self.assertEqual(observation['source_inference'],'no-mira')
+        self.assertTrue(observation['inference_matches_source'])
+        self.assertTrue(observation['input_prediction_correct'])
+        self.assertEqual(observation['final_context'],'yard')
+        self.assertFalse(observation['relevant_context'])
+        self.assertEqual(self.attempt['assessment']['mastery'],'unknown')
+
+    def test_wrong_first_inference_and_history_survive_recovery(self):
+        self.enter_relay()
+        for move in ['relay-context-loft','relay-infer-yard','relay-piece','relay-piece','relay-input-original','relay-run']:
+            self.action(move)
+        for move in ['relay-context-yard','relay-infer-yard','relay-piece','relay-piece','relay-input-full','relay-run','relay-finish']:
+            self.action(move)
+        self.action('finish')
+        observed=self.attempt['assessment']['relay_transfer_observations']
+        self.assertEqual(observed['context_choice'],'loft')
+        self.assertFalse(observed['inference_matches_source'])
+        self.assertFalse(observed['input_prediction_correct'])
+        self.assertEqual(observed['final_context'],'yard')
+        self.assertEqual(self.attempt['word_machine_state']['relay_output'],['Meet','at','Bell','Yard'])
+
+    def test_v3_snapshot_replay_and_assessment_keep_old_semantics(self):
+        from app.assessment import evaluate
+        old=first_words.build_content_v3(CONTENT)
+        moves=FIRST+['next','scan-star','step','loop-grows','infer-star']+['step']*3+[
+            'send','relay-start','relay-context-yard','relay-predict-yard','relay-input-growing','relay-run','relay-finish']
+        view=word_machine.replay(old,{'moves':moves})
+        self.assertTrue(view['complete'])
+        self.assertEqual(view['relay_output'],['Meet','at','Bell','Yard'])
+        response=copy.deepcopy(self.attempt['response'])
+        response['word_machine']['moves']=moves
+        result=evaluate(old,response,[])
+        self.assertEqual(result['relay_transfer_observations']['input_prediction'],'growing')
+        self.assertNotIn('source_inference',result['relay_transfer_observations'])
+        for name in ('activity','frame','binding','rubric'):
+            self.assertEqual(self.attempt['snapshot'][name]['id'],old[name]['id'])
 
 if __name__=='__main__':unittest.main()

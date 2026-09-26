@@ -19,13 +19,14 @@ const reduced=()=>preferences.get('motion');
 // The mission/complete stage card is opt-in: a world-anchored machine toggle carries
 // the short goal while closed, and the card opens for the player or on feedback beats.
 let cardOpen=false,cardStateKey='',lastExperienceMode=null;
-let stagedSource=null,inspectedSource=null,sourceAttempt=null;
-const sourceName=key=>chapter.routeSources[key]?.name||'sign';
+let stagedSource=null,stagedRelaySource=null,inspectedSource=null,inspectedKind=null,sourceAttempt=null;
+const sourceName=key=>chapter.routeSources[key]?.name||chapter.relaySources[key]?.name||'sign';
 function inspectSource(key){
   const s=view(),source=chapter.routeSources[key];
   if(!source||s.round!==1||!['none',undefined].includes(s.relay_stage)||
      (s.clue!=='none'&&s.status!=='wrong'))return;
   inspectedSource=key;
+  inspectedKind='route';
   $('#source-inspection').dataset.anchor=source.anchor;
   text('#source-name',source.name);
   text('#source-text',s.case.notes[key]);
@@ -34,22 +35,36 @@ function inspectSource(key){
   cardOpen=false;syncCardVisibility();
   $('#source-stage').focus();
 }
+function inspectRelaySource(key){
+  const s=view(),source=chapter.relaySources[key];
+  if(!source||s.relay_stage!=='choosing'&&s.relay_stage!=='revealed')return;
+  if(s.relay_stage==='choosing'&&s.relay_context!=='none')return;
+  inspectedSource=key;inspectedKind='relay';
+  $('#source-inspection').dataset.anchor=source.anchor;
+  text('#source-name',source.name);
+  text('#source-text',s.relay_case.notes[key]);
+  text('#source-stage',`Carry ${source.name.toLowerCase()}`);
+  $('#source-inspection').hidden=false;
+  cardOpen=false;syncCardVisibility();$('#source-stage').focus();
+}
 function stageSource(){
   if(!inspectedSource)return;
-  stagedSource=inspectedSource;
-  inspectedSource=null;
+  if(inspectedKind==='relay')stagedRelaySource=inspectedSource;
+  else stagedSource=inspectedSource;
+  inspectedSource=null;inspectedKind=null;
   $('#source-inspection').hidden=true;
   render();
   $('#machine-toggle').focus();
 }
-function closeSource(){inspectedSource=null;$('#source-inspection').hidden=true;}
+function closeSource(){inspectedSource=null;inspectedKind=null;$('#source-inspection').hidden=true;}
 // Fresh entry mounts the first prologue composition behind the loading layer. Do not
 // instantiate the prison mission first and then flash it while learner state resolves.
 let world=runtime.showStory(chapter,host,0,{reducedMotion:reduced()});
 const session=createLearningSession(render);
 const practice=createTutorialFlow(chapter.controlTutorialSpec);
-const ours=()=>['first-words-1','first-words-2','first-words-3'].includes(session.attempt?.snapshot?.word_machine?.version);
-const growingBeat=s=>session.attempt?.snapshot?.word_machine?.version==='first-words-3'&&s.round===1&&s.pieces===1;
+const ours=()=>['first-words-1','first-words-2','first-words-3','first-words-4'].includes(session.attempt?.snapshot?.word_machine?.version);
+const growingBeat=s=>['first-words-3','first-words-4'].includes(session.attempt?.snapshot?.word_machine?.version)&&s.round===1&&s.pieces===1;
+const changedRelay=s=>s.relay_inference!==undefined;
 const sourceInferenceMode=s=>s.source_inference!==undefined;
 const view=()=>ours()?session.attempt.word_machine_state:initial;
 const text=(s,v)=>{$(s).textContent=v;};
@@ -128,8 +143,8 @@ function tutorialStage(s,complete){
   if(s.round===1&&s.status==='success'&&s.relay_stage!==undefined){
     if(s.relay_stage==='none')return['LEVEL 1 · A SIGNAL','Someone is still out there.','A receiver glows beyond the open gate. Walk over and try to reach your friend.'];
     if(s.relay_stage==='done')return['LEVEL 1 · MESSAGE DELIVERED','Mira answers.','Your message reached her holding area. The way to your friends is still sealed, but you are no longer alone.'];
-    if(s.relay_stage==='revealed')return['LEVEL 1 · RELAY',s.relay_context==='yard'?'The receiver finds Mira.':'No reply from that holding area.',s.relay_context==='yard'?'Your message reached the place in the later note. Send it to Mira.':'Compare the two notes on the receiver, offer the other one and try again. Your first decisions are kept.'];
-    return['LEVEL 1 · RELAY','Find where Mira is waiting.',s.relay_case?.goal||'Use the two notes to send a message.'];
+    if(s.relay_stage==='revealed')return['LEVEL 1 · RELAY',s.relay_context==='yard'?'The receiver finds Mira.':'No reply from Mira.',s.relay_context==='yard'?'Your message reached the place in her current note. Send it to Mira.':'Compare the dated notes, carry another to the receiver and try again. Your first decisions are kept.'];
+    return['LEVEL 1 · RELAY','Find where Mira is waiting.',s.relay_case?.goal||'Use the dated notes to send a message.'];
   }
   const repair=repairStep(s);
   if(repair)return[repair.stage,repair.title,repair.detail];
@@ -145,10 +160,11 @@ function tutorialStage(s,complete){
 }
 function render(){
   const s=view(),a=session.attempt,complete=ours()&&a.status==='submitted';
-  if(a?.id!==sourceAttempt){sourceAttempt=a?.id;stagedSource=null;closeSource();}
+  if(a?.id!==sourceAttempt){sourceAttempt=a?.id;stagedSource=null;stagedRelaySource=null;closeSource();}
   if(s.round!==1||s.status==='success'||(stagedSource&&s.clue===stagedSource)){
     stagedSource=null;closeSource();
   }
+  if(s.relay_context!=='none'&&s.relay_context===stagedRelaySource)stagedRelaySource=null;
   practice.bind(a?.id,ours()&&!s.powered&&s.round===0&&!complete);
   if(inOpening){setExperienceMode('opening');syncCardVisibility();return;}
   const mode=!ours()?'entry':complete?'complete':s.round===0?'tutorial':'mission';
@@ -172,7 +188,7 @@ function render(){
     audio.setPhase(complete?'complete':s.status==='success'?'reunion':'repair');
     const moves=a.response.word_machine.moves,move=moves.at(-1);
     if(lastCue&&lastCue!==key){
-      const cue=complete?'finish':move==='connect'?'connect':move==='step'?'piece':move==='send'?(s.status==='wrong'?'wrong':s.round===0?'rescue':'finish'):move?.startsWith('scan-')?'scan':move==='next'?'exit':null;
+      const cue=complete?'finish':move==='relay-finish'?'rescue':move==='connect'?'connect':move==='step'?'piece':move==='send'?(s.status==='wrong'?'wrong':s.round===0?'rescue':'finish'):move?.startsWith('scan-')?'scan':move==='next'?'exit':null;
       if(cue)audio.cue(cue,key);
     }
     lastCue=key;
@@ -183,25 +199,57 @@ function render(){
   $('#engine').dataset.anchor=controlStep!=='done'?'zip':(relay||(complete&&s.relay_stage==='done'))?'friend-signal':s.round===1?'route-machine':'socket';
   $('#engine').setAttribute('aria-label',controlStep!=='done'?'Control practice':'Message machine');
   $('#machine-toggle').dataset.anchor=$('#engine').dataset.anchor;
-  text('#machine-toggle',s.round===0?'Inspect engine':stagedSource?`CARRY ${sourceName(stagedSource).toUpperCase()} → ENGINE`:'OPEN ENGINE');
-  $('#machine-toggle').setAttribute('aria-label',stagedSource?`Carry ${sourceName(stagedSource)} to the message machine`:'Open the message machine');
+  const carried=relay?stagedRelaySource:stagedSource;
+  text('#machine-toggle',s.round===0?'Inspect engine':carried?`CARRY ${sourceName(carried).toUpperCase()} → ${relay?'RECEIVER':'ENGINE'}`:'OPEN ENGINE');
+  $('#machine-toggle').setAttribute('aria-label',carried?`Carry ${sourceName(carried)} to the message machine`:'Open the message machine');
   $('#machine-toggle').setAttribute('aria-description',goal);
   host.dataset.tutorialWorldTarget=controlStep==='done'&&repair?.focus==='world'?(repair.target||''):'';
   host.dataset.tutorialWorldAction=controlStep==='done'&&repair?.focus==='world'?(repair.primaryAction||''):'';
   host.dataset.tutorialInteractionStep=controlStep==='done'?(repair?.id||''):'';
   const shownOutput=relay?s.relay_output:s.output;
+  $('#output').dataset.critical=changedRelay(s)&&s.relay_pieces>0&&s.relay_stage==='choosing'?'true':'false';
   const readoutInput=relay?[s.relay_case?.base,s.relay_case?.notes?.[s.relay_context]]:s.input||[];
   text('#readout-request',readoutInput[0]||'Awaiting a request');
   text('#readout-supplied',readoutInput[1]||'No clue supplied yet');
   text('#readout-words',shownOutput?.length?shownOutput.join(' '):'No words yet');
   $('#output').replaceChildren();for(let i=0;i<4;i++){const span=document.createElement('span');span.textContent=shownOutput[i]||'·';if(!shownOutput[i])span.className='empty';$('#output').append(span);}
   const visibleInput=growingBeat(s)&&s.loop_prediction==='none'?s.input:s.context;
-  text('#context',relay?[s.relay_case.base,s.relay_case.notes[s.relay_context]||'Choose a note.',['revealed','done'].includes(s.relay_stage)?s.relay_case.prefix:''].filter(Boolean).join(' '):visibleInput.join(' ')||'Waiting for power.');
+  text('#context',relay?(changedRelay(s)?s.relay_input:[s.relay_case.base,s.relay_case.notes[s.relay_context]||'Choose a note.',['revealed','done'].includes(s.relay_stage)?s.relay_case.prefix:'']).filter(Boolean).join(' '):visibleInput.join(' ')||'Waiting for power.');
   text('#engine-label',relay?'MESSAGE RECEIVER · PRISON RELAY':complete?(s.relay_stage==='done'?'MESSAGE RECEIVER · REPLY':'MESSAGE MACHINE · ROUTE OPEN'):s.round===1?'MESSAGE MACHINE · LEVEL 1':'MESSAGE MACHINE · TUTORIAL');
   $('#inspect').hidden=s.round===0||relay;
   $('#actions').replaceChildren();$('#actions').removeAttribute('data-layout');
   if(complete){button('Look deeper into the prison','ending');button('Play Level 1 again','again',false);}
   else if(s.relay_stage==='done')button('Finish Level 1 →','finish');
+  else if(relay&&changedRelay(s)&&s.relay_stage==='revealed'){
+    if(s.relay_context==='yard')button('Send the message to Mira','relay-finish');
+    const support=s.relay_case.source_support[s.relay_context];
+    statusLine(`${sourceName(s.relay_context)} ${support==='no-mira'?'did not locate Mira':`located Mira at ${s.relay_case.destinations[s.relay_context]}`}. The toy wrote “${s.relay_output.join(' ')}”; ${s.relay_context==='yard'?'Mira can receive this.':'Mira did not reply here.'} Your first choices remain saved.`);
+    if(s.relay_context!=='yard'){
+      if(stagedRelaySource&&stagedRelaySource!==s.relay_context)button(`Insert ${sourceName(stagedRelaySource).toLowerCase()}`,chapter.relaySources[stagedRelaySource].action);
+      else statusLine('Inspect another dated note, carry it to the receiver, then insert it.',{learningHint:'relay-source'});
+    }
+  }
+  else if(relay&&changedRelay(s)){
+    if(s.relay_context==='none'){
+      if(stagedRelaySource)button(`Insert ${sourceName(stagedRelaySource).toLowerCase()}`,chapter.relaySources[stagedRelaySource].action);
+      else statusLine('Inspect a dated note, carry it here, then insert it.',{learningHint:'relay-source'});
+    }
+    else if(s.relay_inference==='none'){
+      statusLine('What does the supplied note say about Mira’s location?',{learningHint:'relay-inference'});
+      tray('Lantern Loft','relay-infer-loft');tray('Bell Yard','relay-infer-yard');tray('No Mira location','relay-infer-no-mira');
+    }
+    else if(s.relay_pieces<2){
+      statusLine(s.relay_pieces===0?'The source inference is saved. Generate the first word.':'Meet has appeared. Generate one more word, then decide what enters the next prediction.');
+      button(s.relay_pieces===0?'Make first relay word':'Make next relay word','relay-piece');
+    }
+    else if(s.relay_input_prediction==='none'){
+      statusLine('What enters the next prediction after Meet at?',{learningHint:'relay-history'});
+      tray('Request and note only','relay-input-original');
+      tray('Request, note, and at only','relay-input-latest');
+      tray('Request, note, Meet, and at','relay-input-full');
+    }
+    else button('Run the relay →','relay-run');
+  }
   else if(relay&&s.relay_stage==='revealed'){
     if(s.relay_context==='yard')button('Send the message to Mira','relay-finish');
     statusLine(`The selected note produced ${s.relay_output.join(' ')}. ${s.relay_prediction===s.relay_context?'Your destination prediction matched.':'The machine followed the selected note, not your destination prediction.'} ${s.relay_input_prediction==='growing'?'The next prediction used the input plus Meet.':'The next prediction also needs Meet, the word already generated.'}`);
@@ -271,7 +319,13 @@ function render(){
     }
     button(s.pieces===0?'Make first word':s.pieces<4?'Next word':'Speak to gate →',s.pieces<4?'step':'send');
   }
-  if(relay&&s.relay_stage==='choosing'&&s.relay_prediction!=='none'){
+  if(relay&&changedRelay(s)&&s.relay_stage==='choosing'&&s.relay_inference!=='none'){
+    const committed=document.createElement('p');committed.dataset.relayCommitment='true';committed.dataset.shedItem='45';
+    committed.textContent=`First Mira-location inference: ${s.relay_inference==='no-mira'?'none in this note':s.relay_case.destinations[s.relay_inference]}.`;
+    if(s.relay_input_prediction!=='none')committed.textContent+=` First history choice: ${s.relay_input_prediction}.`;
+    $('#actions').append(committed);
+  }
+  if(relay&&!changedRelay(s)&&s.relay_stage==='choosing'&&s.relay_prediction!=='none'){
     const committed=document.createElement('p');committed.dataset.relayCommitment='true';committed.dataset.shedItem='45';
     committed.textContent=`Your prediction: ${s.relay_prediction==='yard'?'Bell Yard':'Lantern Loft'}.`;
     if(s.relay_input_prediction!=='none')committed.textContent+=` Your next-input choice: ${s.relay_input_prediction==='growing'?'request, note, and Meet':'request and note, unchanged'}.`;
@@ -331,6 +385,8 @@ async function act(action){
   if(action!=='finish'&&!view().available_actions?.includes(action))return;
   if(view().round===1&&action.startsWith('scan-')&&
      (!stagedSource||chapter.routeSources[stagedSource]?.action!==action))return;
+  if(changedRelay(view())&&action.startsWith('relay-context-')&&
+     (!stagedRelaySource||chapter.relaySources[stagedRelaySource]?.action!==action))return;
   const suppliedSource=view().round===1&&action.startsWith('scan-');
   await session.action(action);
   // On a narrow screen the open decision sheet can shed the long INPUT line.
@@ -343,7 +399,7 @@ function showEnding(){
   const context=result?(result.relevant_context?'You found the current clue and mapped its five-point mark to the Star gate.':'Your first context choice was stale or unrelated; you recovered without erasing it.') : '';
   const loop=result?.loop_prediction&&result.loop_prediction!=='none'?(result.loop_correct?' You predicted that each new word joins the next input.':' The next prediction receives the growing input, not the original input alone.'):' You watched each new word become part of the next input.';
   const relay=session.attempt?.assessment?.relay_transfer_observations;
-  const relayReflection=relay?` In the relay, ${relay.relevant_context?'the note you offered located Mira':'you recovered from an earlier location without erasing that choice'}. ${relay.input_prediction_correct?'You predicted that Meet joins the next input.':'The relay showed that Meet joins the next input.'}`:'';
+  const relayReflection=relay?` In the relay, ${relay.relevant_context?'the note you offered located Mira':'you recovered from an earlier source without erasing that choice'}. ${relay.input_prediction_correct?'You kept the generated words in the next input.':'The relay showed that the full generated history joins the next input.'}`:'';
   text('#reflection',context+loop+relayReflection);
   text('#ending-signal',relay?'The receiver flickers. “Zip? You found me.” Mira is still trapped, but now she can hear you.':'A broken message flickers from the receiver beyond the gate: “Hel—p.”');
   dialog('#ending');
@@ -356,15 +412,20 @@ $('#start').onclick=()=>act('start');$('#rewind').onclick=()=>act('rewind');$('#
 $('#card-close').onclick=()=>{cardOpen=false;syncCardVisibility();};
 $('#machine-toggle').onclick=()=>{closeSource();cardOpen=true;syncCardVisibility();};
 $('#source-stage').onclick=stageSource;
-function returnFromSource(){const key=inspectedSource;closeSource();document.querySelector(`[data-clue="${key}"]`)?.focus();}
+function returnFromSource(){const key=inspectedSource,kind=inspectedKind;closeSource();document.querySelector(kind==='relay'?`[data-relay-source="${key}"]`:`[data-clue="${key}"]`)?.focus();}
 $('#source-close').onclick=returnFromSource;
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&inspectedSource){returnFromSource();event.preventDefault();}});
 $('#menu-open').onclick=()=>{if(practice.observe('menu'))render();dialog('#menu');};
 host.addEventListener('game-control-used',event=>{
   if(ours()&&!inOpening&&!blocked()&&practice.observe(event.detail?.kind))render();
 });
-for(const marker of document.querySelectorAll('#markers [data-action],#markers [data-clue]'))marker.addEventListener('click',()=>{
+for(const marker of document.querySelectorAll('#markers [data-action],#markers [data-clue],#markers [data-relay-source]'))marker.addEventListener('click',()=>{
   if(marker.dataset.clue){inspectSource(marker.dataset.clue);return;}
+  if(marker.dataset.relaySource){
+    if(changedRelay(view()))inspectRelaySource(marker.dataset.relaySource);
+    else if(view().available_actions?.includes(`relay-context-${marker.dataset.relaySource}`))act(`relay-context-${marker.dataset.relaySource}`);
+    return;
+  }
   const action=marker.dataset.action;if(view().available_actions?.includes(action))act(action);
 });
 function togglePause(){paused=!paused;$('#paused').hidden=!paused;text('#pause',paused?'Resume the world':'Pause the world');pauseSystems();}
@@ -432,6 +493,7 @@ function frame(){
   if(performance.now()-lastFit>250){lastFit=performance.now();fitBoundedSurface(card);}
   $('#actions').querySelectorAll('button').forEach(b=>b.disabled=Boolean(blocked()));$('#rewind').disabled=Boolean(blocked());
   const playRects=[localRect(host.querySelector('.game-view-tools'),rect),localRect(host.querySelector('.game-move-stick'),rect),localRect(host.querySelector('.game-controls-help'),rect)].filter(Boolean);
+  const hero=focalClearanceBox(world,'zip',{top:[0,2.55,0],bottom:[0,-.15,0],left:[-.8,0,0],right:[.8,0,0],margin:12});
   const chromeTop=chromeClearance([document.querySelector('.masthead')],{fallback:76});
   const point=card.hidden?null:world.projectEntity(card.dataset.anchor||'socket');
   const anchored=point&&point.inFront;
@@ -441,7 +503,7 @@ function frame(){
   card.classList.toggle('parked-reading',Boolean(anchored&&card.classList.contains('compact')&&mobile&&!sheet));
   if(!anchored){card.style.left='';card.style.top='';}
   else if(banded){card.style.left='';card.style.top='';}
-  else{const placed=placeWorldMarker(card,point,{viewportWidth:rect.width,safeTop:mobile?64:88,safeBottom:Math.max(rect.height-bottomReserve,mobile?430:500),critical:true,xPadding:Math.min((card.offsetWidth||360)/2+10,rect.width/2-10),yOffset:card.dataset.anchor==='zip'?200:18,avoidRects:playRects});
+  else{const placed=placeWorldMarker(card,point,{viewportWidth:rect.width,safeTop:mobile?64:88,safeBottom:Math.max(rect.height-bottomReserve,mobile?430:500),critical:true,xPadding:Math.min((card.offsetWidth||360)/2+10,rect.width/2-10),yOffset:card.dataset.anchor==='zip'?200:18,avoidRects:[...playRects,hero].filter(Boolean)});
     // B3 containment: a tall card must not clip at the viewport top; park it low.
     if(!placed||!placed.placed||placed.y-(card.offsetHeight||0)<8){card.classList.add('parked');card.style.left='';card.style.top='';}
     else if(mobile){card.style.left='';card.style.top=Math.max(64,Math.min(placed.y,rect.height*.4)-(card.offsetHeight||0))+'px';}}
@@ -464,10 +526,10 @@ function frame(){
   // B2 protagonist clearance: Zip is the focal subject of every play stage, so
   // anchored labels keep out of his body box *and* its focal ring instead of
   // reading across the character (the narrow-phone POWER LEAD marker buried him).
-  const hero=focalClearanceBox(world,'zip',{top:[0,2.55,0],bottom:[0,-.15,0],left:[-.8,0,0],right:[.8,0,0],margin:12});
   if(hero)avoidRects.push(hero);
   for(const marker of $('#markers').children){
     if(marker.id==='source-inspection'&&!inspectedSource){marker.hidden=true;continue;}
+    if(marker.id==='source-inspection'&&inspectedSource)marker.hidden=false;
     const projected=world.projectEntity(marker.dataset.anchor);
     const readout=marker.id==='learning-readout';
     const anchor=readout&&!projected?.inFront?world.projectEntity('zip'):projected;
@@ -476,7 +538,7 @@ function frame(){
     // P3: a visible world sign must never read as a dead control. Signs whose
     // action is currently spent stay readable and click-inert (the act() guards
     // no-op), they do not appear disabled.
-    if(marker.dataset.action||marker.dataset.clue){marker.disabled=Boolean(blocked());marker.classList.toggle('chosen',Boolean(marker.dataset.clue&&marker.dataset.clue===s.clue));marker.classList.toggle('staged',Boolean(marker.dataset.clue&&marker.dataset.clue===stagedSource));}
+    if(marker.dataset.action||marker.dataset.clue||marker.dataset.relaySource){marker.disabled=Boolean(blocked());marker.classList.toggle('chosen',Boolean(marker.dataset.clue&&marker.dataset.clue===s.clue)||Boolean(marker.dataset.relaySource&&marker.dataset.relaySource===s.relay_context));marker.classList.toggle('staged',Boolean(marker.dataset.clue&&marker.dataset.clue===stagedSource)||Boolean(marker.dataset.relaySource&&marker.dataset.relaySource===stagedRelaySource));}
     const tutorialTarget=marker.classList.contains('tutorial-target-marker');
     const targetMismatch=tutorialTarget&&(marker.dataset.anchor!==host.dataset.tutorialWorldTarget||marker.dataset.action!==host.dataset.tutorialWorldAction||!available);
     const critical=tutorialTarget||marker.dataset.critical==='true';
@@ -492,10 +554,18 @@ function frame(){
       marker.classList.toggle('parked',!(anchor&&anchor.inFront));
     // I3: while the machine panel is open it owns the decision; its world
     // choice markers fold away (they return when the panel is put away).
-    }else marker.hidden=(readout&&(!s.powered||practice.step!=='done'||(s.clue==='none'&&!relay)||!card.hidden))||(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')||marker.id==='source-inspection'))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
+    }else marker.hidden=(readout&&(!s.powered||practice.step!=='done'||(s.clue==='none'&&!relay)||!card.hidden))||(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')||marker.id==='source-inspection'))||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay||(!changedRelay(s)&&marker.dataset.relaySource==='tavi')))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
     if(anchor&&!marker.hidden&&!(toggleMarker&&marker.classList.contains('parked'))){
       const placement=placeWorldMarker(marker,anchor,{viewportWidth:rect.width,safeTop,safeBottom,critical,parkWhenFull:carrier,yOffset:readout?48:12,avoidRects});
-      if(!placement.placed||(!critical&&!carrier&&!placement.insideSafeArea))marker.hidden=true;
+      if(marker.id==='source-inspection'&&!placement.placed){
+        // Inspection is a player-opened carrier. Crowded phone scenes may have
+        // no free world-anchored slot; park the whole note below the masthead
+        // instead of hiding its carry/return controls or clipping them above it.
+        marker.hidden=false;marker.style.left=rect.width/2+'px';
+        marker.style.top=Math.min(rect.height-8,chromeTop+marker.offsetHeight+8)+'px';
+        marker.classList.add('edge-cued');marker.dataset.edge='top';
+      }
+      else if(!placement.placed||(!critical&&!carrier&&!placement.insideSafeArea))marker.hidden=true;
       else{const footprint=marker.getBoundingClientRect();avoidRects.push({left:footprint.left-rect.left,right:footprint.right-rect.left,top:footprint.top-rect.top,bottom:footprint.bottom-rect.top});}
     }else if(toggleMarker&&marker.classList.contains('parked')){marker.style.left='';marker.style.top='';}
   }
@@ -517,8 +587,11 @@ host.addEventListener('click',async e=>{
   if(target?.startsWith('moon')&&s.available_actions?.includes('scan-moon'))act('scan-moon');
   const noticeSource=target?.startsWith('notice-old')?'moon':target?.startsWith('notice-parade')?'parade':target?.startsWith('notice-today')?'star':null;
   if(noticeSource)inspectSource(noticeSource);
-  const noteAction=target==='relay-note-a'?'relay-context-loft':target==='relay-note-b'?'relay-context-yard':null;
-  if(noteAction&&s.available_actions?.includes(noteAction))act(noteAction);
+  const noteSource=target?.startsWith('relay-note-a')?'loft':target?.startsWith('relay-note-b')?'yard':target?.startsWith('relay-note-c')?'tavi':null;
+  if(noteSource){
+    if(changedRelay(s))inspectRelaySource(noteSource);
+    else if(s.available_actions?.includes(`relay-context-${noteSource}`))act(`relay-context-${noteSource}`);
+  }
   if(target==='friend-signal'&&s.available_actions?.includes('relay-start'))act('relay-start');
   if(target==='friend-cube')flavor('A very companionable cube.','Someone painted a heart on a spare power cube. It may belong to one of the missing robots.');
 });

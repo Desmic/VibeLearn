@@ -6,6 +6,34 @@ Automated checks, critic judgment and user acceptance are separate claims.
 
 ## Candidate
 
+- **26 September changed-case receiver checkpoint (unreviewed draft):** New
+  `first-words-4` starts have three physical, dated notes at the receiver:
+  Mira at 18:00 in the Loft, Mira moved at 18:20 to the Yard, and Tavi at
+  18:30 in the Sun Court. Each note can be inspected and carried without an
+  assessed action; explicit insertion commits only that source. The learner
+  separately infers whether it locates Mira, sees **Meet** and **at** generated
+  one at a time, then chooses among original input, latest piece only, and
+  complete generated history before the next input is revealed. An irrelevant
+  Tavi note can produce fluent **Meet at Sun Court** without a Mira reply;
+  her later note produces **Meet at Bell Yard** and a local reply/light at the
+  receiver. First decisions survive retries; predictions do not alter toy
+  output. Existing v1–v3 snapshots and learning IDs remain pinned. A live
+  390×844 adaptive implementation play inspected Tavi's note, found and
+  repaired a carry control clipped above the screen, committed a wrong
+  latest-piece history choice, reloaded, saw the no-reply result, recovered
+  with Mira's later note, and saved Level 1. Trace/screenshots:
+  `artifacts/repair-relay-play/`. The focused phone/desktop relay browser
+  check passed. `python manage.py build` and 447 application tests passed
+  (7 PostgreSQL skips) before the last presentation fixes; focused source,
+  world-marker and browser checks passed afterwards. The full 25-state
+  presentation run passed 24 states and identified one tutorial desktop
+  focal overlap; the exact affected state passed after repair. The broad
+  chapter script reached the relay but its first rerun failed an outdated
+  exact-case selector; the second run exceeded an eight-minute bound and
+  was stopped, so no full new chapter pass is claimed. Independent cold
+  review, exact-candidate full presentation, remaining physicality/audio
+  evidence and user acceptance are open. This is not critic approval.
+
 - **26 September route-machine checkpoint (unreviewed):** A new pinned
   `first-words-3` snapshot keeps existing v1/v2 attempts replayable while new
   Level 1 runs generate **Open** from the committed sign, pause before showing
@@ -27,9 +55,11 @@ Automated checks, critic judgment and user acceptance are separate claims.
   script reached the route/recovery/relay/ending path but stopped in an
   auxiliary hint assertion that still used a broad selector; that assertion
   was narrowed and rechecked by the focused browser run, not by a new full
-  chapter rerun. Changed-case relevance/recency and full generated-history
-  alignment, independent cold review, full presentation report and user
-  acceptance remain open. This checkpoint is not critic or release approval.
+  chapter rerun. At that checkpoint, changed-case relevance/recency and full
+  generated-history alignment remained open; the receiver repair above now
+  addresses them. Independent cold review, exact-candidate full presentation
+  and user acceptance remain open. This checkpoint is not critic or release
+  approval.
 
 - **26 September implementation progress (unreviewed):** Level 1 route boards now
   open an object-local inspection with their full sign text. The player can stage
@@ -97,13 +127,8 @@ Automated checks, critic judgment and user acceptance are separate claims.
 
 ## Next gate
 
-1. Complete the approved changed-case receiver: physical note inspection,
-   reversible staging and insertion; first relevance/recency and
-   source-supported inference; and prediction from the complete generated
-   history. Preserve the tutorial success, existing saves and learning IDs.
-   The design approval is permission to prototype, not runtime alignment.
-2. Re-freeze, then replay the demonstrated panel/agency/transfer/ending blockers on a new exact
+1. Re-freeze, then replay the demonstrated panel/agency/transfer/ending blockers on a new exact
    candidate. Cover the still-unobserved opening, physicality, recovery and devices.
-3. Repeat affected technical/presentation gates, obtain a full critic record and
+2. Repeat affected technical/presentation gates, obtain a full critic record and
    user review. Merge reviewed development work into `main` when ready. No Level 2
    or deployment promotion before the existing review and user gates.
