@@ -522,6 +522,13 @@ The first best-guess implementation of these shapes is recorded in
   sentence that arrived only as an announcement fails I12. Then do the inverse: is a
   *required* instruction present only inside a narration region that I12 exempts? That
   one is your finding, not the tool's, and it fails I9.
+- CP14: After control practice, try to complete the chapter without moving the
+  character or observing another world object. Count meaningful decisions versus
+  repeated advance clicks. If a game promises embodied exploration yet all needed
+  evidence and actions live in one panel, record a gameplay/world-direction blocker
+  even when that panel satisfies coverage and clipping budgets. The test concerns
+  the declared experience; an intentionally stationary puzzle can pass with a
+  coherent design rationale.
 
 A critic that cannot demonstrate a probe on the running candidate records it as
 unassessed; screenshots of a static frame do not certify B2 (movement/orbit required).

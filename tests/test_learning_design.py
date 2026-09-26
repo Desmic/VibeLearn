@@ -241,7 +241,19 @@ class LearningDesignTests(unittest.TestCase):
         review.update(approval_stage='prototype',approved_steps=['demonstrate','mix'])
         self.assertEqual(check_design_gate(self.design,review)['allowed_steps'],['demonstrate','mix'])
         with self.assertRaisesRegex(ValueError,'scope'):
+            check_design_gate(self.design,review,stage='implementation')
+        with self.assertRaisesRegex(ValueError,'scope'):
             check_design_gate(self.design,review,stage='release',candidate='a'*40)
+
+    def test_full_implementation_needs_current_full_design_approval(self):
+        self.design['prototype_scope'] = dict(steps=['demonstrate','mix'],purpose='Test one loop',not_authorized_by_design_pass='No release')
+        review = approved_design_review(self.design)
+        review.update(approval_stage='implementation',approved_steps=['demonstrate','mix','new-order'])
+        result = check_design_gate(self.design,review,stage='implementation')
+        self.assertEqual(result['allowed_steps'],['demonstrate','mix','new-order'])
+        self.design['sequence'][-1]['decision'] = 'Choose amounts for a different order.'
+        with self.assertRaisesRegex(ValueError,'stale design review'):
+            check_design_gate(self.design,review,stage='implementation')
 
     def test_failed_design_review_blocks_prototype(self):
         review = approved_design_review(self.design)

@@ -105,6 +105,30 @@ when using that separate evidence-repair protocol; it does not require a differe
 reviewer per critic lane. Technical scripts and deterministic evidence checks are
 supporting tools, not extra creative critics.
 
+### Cold account before calibrated criticism
+
+The reviewer receives only the exact build, how to reach and control it, the scope,
+and evidence/time limits. Before any design document, prior finding, or reference
+game is supplied, ask them to report in their own words: what world they think they
+visited; who they controlled and cared about; what happened; what they believe the
+rules, goals and learning were; which interactions they discovered or expected;
+what surprised, confused or bored them; and where they stopped. Require observed
+events and action/screenshot references for each inference. Freeze this account
+before sending the intent packet. A later explanation may diagnose a gap but cannot
+retroactively turn an unobserved idea into a cold observation.
+
+Only then ask the same reviewer for the intent comparison and separate critic-lane
+scores. For the current research calibration, *The Legend of Zelda: Breath of the
+Wild* is a reference for legible affordances, exploration, world coherence and
+player agency. It is not a required genre, content volume, production budget,
+visual style, or automatic 10/10. Anchor every 0–10 score to this candidate's
+observed experience and the diagnostic anchors in `CRITIC-POLICY.md`; state what
+the reference reveals about the direction and what would be unfair to compare.
+Report blockers before numbers, score each lane separately, and leave unsupported
+motion/audio criteria unassessed under the current scope. One strong lane does not
+average away a weak one. Include what the game taught as observed and what the
+design intended to teach, side by side.
+
 ## Required lanes
 
 Scored in the same single play pass, as separate findings (see "a lane is a column of

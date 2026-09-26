@@ -20,9 +20,7 @@
       "observable_capability": "Choose task-relevant context, identify what supplied information supports, and diagnose a task failure caused by unsuitable information.",
       "misconception": "The model automatically has all relevant world information, or completing a fluent message guarantees the task succeeds.",
       "success_evidence": "Commit context selection and a source-supported inference before feedback. Report relevance and source-consistency separately; do not score guessed real-model wording.",
-      "prerequisites": [
-        "sequence"
-      ]
+      "prerequisites": []
     }
   ],
   "sequence": [
@@ -170,7 +168,56 @@
       "assessment_boundary": {
         "claim": "guided_observation",
         "before_answer_feedback": "No prediction or commitment required. Demonstrate the assembled input and each new piece openly; this is teaching, not assessment.",
-        "preserve": "First selection per decision, case identity, supplied context, output, revision and help before selection remain immutable.",
+        "preserve": "First committed choice per decision, case identity, supplied context, output, revision and help before commitment remain immutable; inspection and staging remain non-assessment interaction history.",
+        "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
+      }
+    },
+    {
+      "id": "context-contrast",
+      "phase": "mission",
+      "role": "introduce",
+      "player_goal": "See what each physical route sign would give the machine.",
+      "decision": "Inspect the three route boards in the corridor, explicitly stage one sign, then commit it at the machine as the supplied source. Inspection alone never chooses or records a first source.",
+      "feedback": "The committed sign's full text appears in the machine's INPUT line; the card states which sign was supplied and which signs stay outside the machine. No correctness cue before the player's prediction.",
+      "outcomes": [
+        "context"
+      ],
+      "recovery": "Before commitment, staging a different sign replaces the pending source without changing recorded evidence. After commitment, a mistaken source can be replaced only through explicit retry; the first committed choice stays immutable.",
+      "assistance": "Explicit side-by-side comparison at the machine; no independent evidence claimed.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "message-machine",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "object_inspection",
+          "anchor": "message-machine",
+          "critical": true,
+          "purpose": "Compare what supplied signs contribute before choosing one.",
+          "reveal": "Each corridor board carries its complete readable sign text in the world (short, high-contrast, no tiny caps). Inspect opens its full text without selecting it; Stage marks one source as pending. At the machine the player explicitly commits that staged sign, then sees only its text in INPUT and the two unsupplied signs named.",
+          "dismiss": "Return to the corridor at any time. Inspection and staging are reversible; a committed first source is recorded before any destination prediction.",
+          "offscreen_recovery": "Board labels stay projected at their physical boards; the machine card clamps with an edge cue. No modal covers the corridor to display this comparison.",
+          "keyboard": "Each board is a focusable world marker with separate Inspect and Stage actions equivalent to touch. Focus navigation can reach every source without camera precision; the machine card has a separate Commit source action and no remote source-selection buttons.",
+          "touch": "Board markers are at least 44 CSS pixels and placed clear of the board geometry.",
+          "readability": "360-430px portrait and desktop; each sign is readable at standing distance as projected semantic text; 200% enlargement reflows the card comparison without clipping.",
+          "presentation": "contextual_inspection",
+          "focus_transition": "Physical board -> inspect its text -> stage one source -> return to machine and commit -> its text in INPUT while unsupplied signs remain outside. Keep the corridor framed; never hide boards behind an overlay."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus",
+      "worked_example": {
+        "situation": "Beyond the first door, three signs disagree about the route to the tower.",
+        "starting_state": "Old sign: 'Old route: take the Moon gate.' Current notice: 'TODAY: Moon route closed. The tower bell answers the five-point lantern mark.' Parade notice: 'The lantern parade starts at sunset.' The machine has received none of them yet.",
+        "player_action": "Move to or focus a board, inspect its text, stage it without commitment, then return to the machine and explicitly commit it. Returning reveals only the source actually committed.",
+        "visible_result": "The INPUT line now contains exactly the scanned sign's text. The card states the other two signs remain outside the machine. The world's Star gate mark is visible but the machine has not been told anything about judging signs.",
+        "why": "The machine can only use information actually supplied to it. Which sign is correct for the task is not yet revealed; that decision belongs to the next step.",
+        "misconception_response": "A local note says: seeing a sign in the room is not the same as giving it to the machine; a real model may also respond differently than any authored example."
+      },
+      "assessment_boundary": {
+        "claim": "guided_observation",
+        "before_answer_feedback": "No correctness highlight, destination reveal or completed route until the player commits the gate prediction; comparison is explicit teaching, not evidence.",
+        "preserve": "First committed choice per decision, case identity, supplied context, output, revision and help before commitment remain immutable; inspection and staging remain non-assessment interaction history.",
         "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
       }
     },
@@ -178,8 +225,8 @@
       "id": "sequence-practice",
       "phase": "mission",
       "role": "practice",
-      "player_goal": "Predict what the machine will receive next before it generates the first route word.",
-      "decision": "After choosing a sign and predicting its gate, commit one of two next-input choices at the machine: the input unchanged, or the input plus the word already generated.",
+      "player_goal": "Predict what the machine will receive next after it generates the first route word.",
+      "decision": "After a sign is committed, let the machine visibly generate 'Open'. Before it generates another word, commit one of two next-input choices: the original input unchanged, or the original input plus 'Open'. The gate prediction comes in the following step.",
       "feedback": "The machine reveals the grown input as it produces each word; the player's committed prediction is compared to the revealed input beside the output rail. The prediction never changes what the machine does.",
       "outcomes": [
         "sequence"
@@ -195,80 +242,31 @@
           "anchor": "message-machine",
           "critical": true,
           "purpose": "Commit a next-input rule prediction, then finish the route sentence.",
-          "reveal": "At the machine card: the request and selected sign text, then two prediction trays - 'each step receives the same input again' and 'each step also receives every word generated so far'. Selecting is reversible until Check my prediction is pressed; after commitment the trays collapse back to the INPUT line as words are generated.",
+          "reveal": "At the machine card: the request and committed sign text, then the first visible output word 'Open'. Two prediction trays compare the original input against original input plus 'Open'; no tray is preselected. Selecting is reversible until Check my prediction is pressed; only then is the next INPUT revealed.",
           "dismiss": "Return-to-machine view always preserves the committed choice; closing the page or dialog never answers the question or discards a choice.",
           "offscreen_recovery": "The card clamps to the safe area with an edge cue toward the machine; the committed prediction stays visible on the card.",
           "keyboard": "Both trays are focusable buttons; commit is a separate explicit button so selection and commitment stay distinct.",
           "touch": "Trays and commit control are at least 44 CSS pixels and stacked inside the machine card, never a detached toolbar.",
           "readability": "Portrait stacks the two tray previews vertically inside the card; the current INPUT line stays visible while choosing; 200% text reflows with the commit control reachable.",
           "presentation": "contextual_inspection",
-          "focus_transition": "Committed prediction -> revealed grown input -> generated word -> joined input. Reveal only after commit; remove the trays before the build loop continues."
+          "focus_transition": "First output 'Open' -> committed next-input prediction -> revealed grown input. Pause here before any route-revealing word; context-practice asks for the gate prediction next, then resumes generation."
         }
       ],
       "goal_surface": "focus",
       "action_surface": "focus",
       "feedback_surface": "focus",
       "worked_example": {
-        "situation": "The corridor machine has been given the current notice as its clue, and the first generated word will be 'Open'.",
-        "starting_state": "Card INPUT shows 'Open the route to the tower. TODAY: Moon route closed...' with zero generated words. The two trays read: the same input again; or that input plus the word already generated.",
-        "player_action": "Select a tray and press Check my prediction, then build the remaining words.",
-        "visible_result": "After 'Open' is produced, the card reveals the next INPUT as request + selected sign + 'Open'. Each later word again extends the full previous input.",
+        "situation": "The corridor machine has the committed old sign as its clue and has just visibly generated the first word, 'Open'.",
+        "starting_state": "Card shows the original INPUT 'Open the route to the tower. Old route: take the Moon gate.' and output 'Open'. Before the next word, trays offer original input alone or original input plus 'Open'; the assembled next input remains hidden.",
+        "player_action": "Select a tray and press Check my prediction before the machine continues generating.",
+        "visible_result": "The card reveals next INPUT as request + selected sign + 'Open' and pauses. Context-practice asks for the gate prediction before the remaining words are generated; each later word then extends the full previous input.",
         "why": "Generated history joins the original request. The comparison is authored for this toy; a real model's continuation could differ.",
         "misconception_response": "Unchanged input: That drops what the machine already said. Show the omitted part beside the tray after commitment, then continue; the first choice stays recorded and never blocks progress."
       },
       "assessment_boundary": {
         "claim": "assisted_practice",
         "before_answer_feedback": "No correctness cues, completed input assembly or destination reveal until the corresponding prediction is committed.",
-        "preserve": "First selection per decision, case identity, supplied context, output, revision and help before selection remain immutable.",
-        "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
-      }
-    },
-    {
-      "id": "context-contrast",
-      "phase": "mission",
-      "role": "introduce",
-      "player_goal": "See what each physical route sign would give the machine.",
-      "decision": "Read the three route boards in the corridor and compare what each one says about the route; scan any one sign into the machine.",
-      "feedback": "The scanned sign's full text appears in the machine's INPUT line; the card states which sign was supplied and which signs stay outside the machine. No correctness cue before the player's prediction.",
-      "outcomes": [
-        "context"
-      ],
-      "recovery": "Scanning a different sign replaces the supplied context non-destructively; earlier scans remain visible as room objects, and first choices are immutable.",
-      "assistance": "Explicit side-by-side comparison at the machine; no independent evidence claimed.",
-      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
-      "primary_focus": "message-machine",
-      "surfaces": [
-        {
-          "id": "focus",
-          "kind": "object_inspection",
-          "anchor": "message-machine",
-          "critical": true,
-          "purpose": "Compare what supplied signs contribute before choosing one.",
-          "reveal": "Each corridor board carries its complete readable sign text in the world (short, high-contrast, no tiny caps). Inspecting a board or tapping it scans it; the machine card then shows the supplied text in its INPUT and names the two signs the machine did not receive.",
-          "dismiss": "Return to the corridor view at any time; scanning is reversible until the destination prediction is committed.",
-          "offscreen_recovery": "Board labels stay projected at their physical boards; the machine card clamps with an edge cue. No modal covers the corridor to display this comparison.",
-          "keyboard": "Each board is a focusable world marker with the same scan action as touch; the card repeats the available scans as buttons.",
-          "touch": "Board markers are at least 44 CSS pixels and placed clear of the board geometry.",
-          "readability": "360-430px portrait and desktop; each sign is readable at standing distance as projected semantic text; 200% enlargement reflows the card comparison without clipping.",
-          "presentation": "contextual_inspection",
-          "focus_transition": "Physical board -> its text in the machine INPUT -> the not-supplied signs named beside it. Keep the corridor framed; never hide boards behind an overlay."
-        }
-      ],
-      "goal_surface": "focus",
-      "action_surface": "focus",
-      "feedback_surface": "focus",
-      "worked_example": {
-        "situation": "Beyond the first door, three signs disagree about the route to the tower.",
-        "starting_state": "Old sign: 'Old route: take the Moon gate.' Current notice: 'TODAY: Moon route closed. The tower bell answers the five-point lantern mark.' Parade notice: 'The lantern parade starts at sunset.' The machine has received none of them yet.",
-        "player_action": "Read the boards in the world, then scan one sign into the machine.",
-        "visible_result": "The INPUT line now contains exactly the scanned sign's text. The card states the other two signs remain outside the machine. The world's Star gate mark is visible but the machine has not been told anything about judging signs.",
-        "why": "The machine can only use information actually supplied to it. Which sign is correct for the task is not yet revealed; that decision belongs to the next step.",
-        "misconception_response": "A local note says: seeing a sign in the room is not the same as giving it to the machine; a real model may also respond differently than any authored example."
-      },
-      "assessment_boundary": {
-        "claim": "guided_observation",
-        "before_answer_feedback": "No correctness highlight, destination reveal or completed route until the player commits the gate prediction; comparison is explicit teaching, not evidence.",
-        "preserve": "First selection per decision, case identity, supplied context, output, revision and help before selection remain immutable.",
+        "preserve": "First committed choice per decision, case identity, supplied context, output, revision and help before commitment remain immutable; inspection and staging remain non-assessment interaction history.",
         "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
       }
     },
@@ -276,9 +274,9 @@
       "id": "context-practice",
       "phase": "mission",
       "role": "practice",
-      "player_goal": "Predict which gate the supplied sign leads to, then open the route with the machine.",
-      "decision": "After supplying one sign, commit a gate prediction (Moon/Star/Sun) from only that supplied context, then build and speak the command.",
-      "feedback": "The machine produces the sentence for the sign actually supplied. A wrong route shows the failed gate and a local comparison at the machine between the supplied sign and the sign that describes the current route; recovery keeps every first choice.",
+      "player_goal": "Judge which gate the supplied sign actually supports, if any, then test the machine's command against the world.",
+      "decision": "After the first route word and next-input practice, infer which gate the supplied sign supports: Moon, Star, Sun, or 'This sign does not identify a gate.' Commit that source inference before the toy continues, then finish and speak its command. Do not ask the player to guess unsupported prepared wording.",
+      "feedback": "The machine's authored continuation and the player's source inference are shown separately. Moon and Star signs support named gates, though the old Moon route fails in the world. The parade notice supports no gate; the toy may still generate a fluent Moon command from its prior, which fails and does not make a Moon inference correct. A local comparison shows supplied versus current route evidence; recovery keeps every first committed choice.",
       "outcomes": [
         "context",
         "sequence"
@@ -294,12 +292,12 @@
           "anchor": "message-machine",
           "critical": true,
           "purpose": "Commit a gate prediction from the supplied sign, then generate and speak the route.",
-          "reveal": "Prediction trays (Moon/Star/Sun) appear at the machine card only after a sign has been supplied; the committed prediction is pinned on the card. Then the word-by-word build loop and Speak action continue on the same card.",
+          "reveal": "Four source-inference trays (Moon/Star/Sun/This sign does not identify a gate) appear at the machine card only after a sign has been committed; the inference is pinned on the card. This does not force or predict the toy's prepared output. Then the word-by-word build loop and Speak action continue on the same card.",
           "dismiss": "Return-to-corridor preserves the committed prediction; closing dialogs never answers the question or discards a choice.",
           "offscreen_recovery": "The card clamps with an edge cue toward the machine; gate outcomes are shown on the real gates in the world.",
           "keyboard": "Trays and build/speak actions are focusable buttons; the committed prediction is announced in the live region.",
           "touch": "Tray and action buttons at least 44 CSS pixels inside the card.",
-          "readability": "Portrait keeps the supplied sign text visible while the three gate choices are being weighed; the wrong-route comparison shows both signs stacked; 200% text reflows.",
+          "readability": "Portrait keeps the supplied sign text visible while the four source-inference choices are weighed; the wrong-route comparison shows both signs stacked; 200% text reflows.",
           "presentation": "contextual_inspection",
           "focus_transition": "Supplied sign -> committed gate prediction -> generated words on the output rail -> the actual gate in the world reacting -> comparison at the machine on failure."
         }
@@ -309,16 +307,16 @@
       "feedback_surface": "focus",
       "worked_example": {
         "situation": "The machine holds the old sign's text and the corridor has one closed route and one open route.",
-        "starting_state": "Card INPUT: request + 'Old route: take the Moon gate.' No prediction committed yet; the Star gate mark is visible in the world but unnamed by the machine.",
-        "player_action": "Predict a gate from only the supplied sign, commit it, then build and speak the sentence.",
+        "starting_state": "Card INPUT: request + 'Old route: take the Moon gate.' The first output word 'Open' is visible from sequence-practice; no gate prediction is committed yet. The Star gate mark is visible in the world but unnamed by the machine.",
+        "player_action": "Infer which gate the supplied sign actually names (or that it names none), commit the inference, then build and speak the toy's sentence.",
         "visible_result": "The machine produces 'Open the Moon gate.' The Moon door stays sealed and shows a wrong ring; the card compares the supplied old sign with the current notice that says the Moon route is closed. Rescanning the current notice later produces the Star route and the Star gate lifts.",
         "why": "A fluent, correctly-formed sentence can still fail the task when the supplied context is unsuitable. Relevance and currentness are judged from the sources given to the machine, not from a hidden rule.",
-        "misconception_response": "If the parade notice was supplied, the comparison shows it names an event, not a route: the machine formed a fluent sentence from unsuitable information. The prediction never changes output; first choices are retained and the player recovers without penalty."
+        "misconception_response": "If the parade notice was supplied, 'This sign does not identify a gate' is the source-consistent inference. The toy's prior can still make a fluent Moon sentence; that is an unsuitable output, not evidence that the parade note supported Moon. Inference never changes output; first committed choices are retained and recovery is penalty-free."
       },
       "assessment_boundary": {
         "claim": "assisted_practice",
         "before_answer_feedback": "No correctness cues, completed input assembly or destination reveal until the corresponding prediction is committed.",
-        "preserve": "First selection per decision, case identity, supplied context, output, revision and help before selection remain immutable.",
+        "preserve": "First committed choice per decision, case identity, supplied context, output, revision and help before commitment remain immutable; inspection and staging remain non-assessment interaction history.",
         "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
       }
     },
@@ -327,14 +325,14 @@
       "phase": "mission",
       "role": "transfer",
       "player_goal": "Send Mira a message that reaches where she is now.",
-      "decision": "Supply one of Mira's two dated notes to the receiver, identify the place named by that note, then predict the full next input after the word 'Meet' is generated.",
-      "feedback": "The receiver generates 'Meet at <place of the supplied note>'. A stale note reaches the old holding area with no reply; the later note reaches the Bell Yard and Mira answers. The first choices are kept either way.",
+      "decision": "Inspect three dated world notes, pick one up and explicitly insert it into the receiver: Mira's old location, Mira's current location, or a later note about someone else. Decide whether it locates Mira and, if so, which place it supports; then predict the full next input after 'Meet' and 'at' have both been generated. Compare original input, original plus only 'at', and original plus 'Meet at'.",
+      "feedback": "The receiver generates 'Meet at <place of the supplied note>'. Mira's stale note reaches the old holding area with no reply; the newer relevant note reaches the Bell Yard and Mira answers; the later unrelated note cannot locate Mira. The first choices are kept either way.",
       "outcomes": [
         "sequence",
         "context"
       ],
-      "recovery": "A wrong delivery is returned without penalty. Re-read the actual supplied note at the receiver and retry; first choices and help remain separate from final success.",
-      "assistance": "No answer highlighting or next-input assembly before the corresponding choice. Both notes are from Mira, so recency alone never wins: the player must keep the request (find Mira) and read what the chosen note supports.",
+      "recovery": "Before insertion is committed, cancel carrying or replace the staged note freely. A wrong delivery is returned without penalty; re-read the supplied note at the receiver and retry. First committed source/inference/input choices and help remain separate from final success.",
+      "assistance": "No answer highlighting or next-input assembly before the corresponding choice. The latest note concerns someone else, so recency alone fails; the player must relate the request to the source and read what it supports. Provide a clear physical route and focus alternative to each note without requiring camera dexterity.",
       "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
       "primary_focus": "message-receiver",
       "surfaces": [
@@ -344,35 +342,35 @@
           "anchor": "message-receiver",
           "critical": true,
           "purpose": "Run the changed relay case at the receiver beyond the open gate.",
-          "reveal": "The receiver frames the cracked antenna and the two note cards clipped beside it, each with full readable text and its date-time. After a note is supplied, the place inference and then the next-input trays appear at the same receiver card; nothing is asked through a corridor-wide modal.",
+          "reveal": "The receiver frames the cracked antenna and accepts a note carried from its world location. Three note sources occupy readable positions beyond the opened gate, with visible identity, full text and date-time; none can be supplied remotely from the receiver card. Inspect opens a note without selecting it; Pick up shows the chosen physical note or a clear carrying token on Zip, with an edge cue back to the receiver. Insert stages it at the slot, where Cancel/Replace remains possible until Commit source. After commitment, Mira-location inference and next-input trays appear at that same receiver; nothing is asked through a corridor-wide modal.",
           "dismiss": "Return to world preserves staged choices; after feedback, retry is local to the receiver.",
-          "offscreen_recovery": "The receiver card clamps with an edge cue; the notes remain physical objects at the receiver.",
-          "keyboard": "Note selection, inference and next-input trays are focusable buttons with explicit commit controls; Escape restores the exploration camera.",
+          "offscreen_recovery": "World cues point to the three physical notes and back to the receiver. The receiver card clamps with an edge cue; leaving and returning preserves the carried or committed note and decision state. A player can cancel or replace a staged note without erasing committed first evidence.",
+          "keyboard": "Each world note has separate focusable Inspect and Pick up actions equivalent to touch. A focusable route cue reaches the receiver without precision movement; Insert, Cancel/Replace and Commit source are distinct buttons. Mira-location inference and next-input trays have explicit commits. Escape restores the exploration camera without silently choosing.",
           "touch": "All receiver card controls at least 44 CSS pixels, stacked within the receiver framing.",
-          "readability": "Portrait stages these states sequentially in the same receiver card; both notes, the generated 'Meet' and the three input trays stay legible; reflow/scroll within the object view keeps Return-to-world reachable.",
+          "readability": "Portrait stages these states sequentially at the note and receiver; the three source texts, generated 'Meet at' and next-input trays stay legible. Reflow/scroll within object inspection keeps Return-to-world reachable.",
           "presentation": "contextual_inspection",
-          "focus_transition": "Request + two notes -> supplied-note inference -> committed next-input -> generated message on the receiver -> the world's reply or silence."
+          "focus_transition": "Receiver request -> discover and inspect world notes -> visibly carry one note -> stage/commit it at receiver -> decide whether it locates Mira and infer place -> see 'Meet' then 'at' -> predict full next input -> message on receiver -> world reply or silence."
         }
       ],
       "goal_surface": "focus",
       "action_surface": "focus",
       "feedback_surface": "focus",
-      "changed_situation": "Change from opening a gate for Zip to addressing a message to a specific person across two conflicting first-person notes. The same growing-input and supplied-context rules apply at a new device. This is near transfer within the toy, not broad real-world LLM transfer.",
-      "shortcut_probe": "Try fixed-position guessing, request-only input, latest-piece-only input, treating the unseen note as automatically available, and answering for whoever the first note mentioned. Option order is fixed at the receiver but both notes are from Mira, so blind recency cannot decide the place without reading the chosen note; first wrong guesses remain wrong even if retry succeeds.",
+      "changed_situation": "Change from opening a gate for Zip to addressing a message to a specific person using three physically separate sources. The newest note is irrelevant; two generated pieces must join the original request and supplied note before the next prediction. This is near transfer within the toy, not broad real-world LLM transfer.",
+      "shortcut_probe": "Try fixed-position guessing, newest-note-only selection, longest-answer selection, request-only input, latest-piece-only input, treating an unseen note as automatically available, and answering for the wrong person. Explicit choices must distinguish request + note + Meet + at from request + note + at or request + note alone. Inspecting every note must not commit a first choice; first wrong committed guesses remain wrong even if retry succeeds.",
       "evidence_limit": "First note relevance, source-consistency and all-history input prediction are separate observations. Correct reading of a supplied note does not prove real-model output prediction; one changed toy case does not establish mastery or retention.",
       "commit_before_feedback": true,
       "worked_example": {
-        "situation": "Mira is still captive; the relay can address one meeting place, and two intercepted notes about her disagree.",
-        "starting_state": "Request at the receiver: 'Send Mira a meeting place.' Note A: '18:00 - Mira: They are holding me in the Lantern Loft.' Note B: '18:20 - Mira: They moved me from the Lantern Loft to the Bell Yard.' The receiver states it will use only the note placed into it.",
-        "player_action": "Supply one note. Answer which place that note names. Commit the destination prediction, then commit the next-input prediction (request + note only, or plus the generated 'Meet'), and run the relay.",
-        "visible_result": "The receiver generates 'Meet at Bell Yard' for the later note and Mira answers; 'Meet at Lantern Loft' for the earlier note reaches the empty holding area and stays silent. The revealed next input contains request + supplied note + 'Meet' regardless of the player's prediction.",
-        "why": "Both notes concern the task's person, so relevance alone does not decide; the player must read what the chosen note supports. The stale-note failure shows the machine faithfully continues from unsuitable-but-supplied context. All generated history joins the next input.",
-        "misconception_response": "Loft choice: the receiver replays which note was supplied and shows it names the old location; retry is offered and the first choice stays recorded. Omitting 'Meet' from the next input loses generated history; show the omitted piece after commitment. Predictions never change the authoritative relay output."
+        "situation": "Mira is still captive; the relay can address one meeting place, and three intercepted notes differ in person and date.",
+        "starting_state": "Request at the receiver: 'Send Mira a meeting place.' Note A: '18:00 - Mira: They are holding me in the Lantern Loft.' Note B: '18:20 - Mira: They moved me from the Lantern Loft to the Bell Yard.' Note C: '18:30 - Tavi: Meet me at the Sun Court.' The notes are separate world objects; the receiver uses only a note physically supplied to it.",
+        "player_action": "Inspect the world notes without choosing, pick up one with visible carrying feedback, insert and explicitly commit it at the receiver. Say whether that note locates Mira: A supports Lantern Loft but is stale, B supports Bell Yard, C gives no Mira location although it names Tavi's Sun Court. See 'Meet' and 'at' separately, then choose among original input, original plus 'at', and original plus 'Meet at' before the next input is revealed.",
+        "visible_result": "The receiver generates 'Meet at Bell Yard' for Note B and Mira answers; Note A reaches the empty holding area; Note C may produce 'Meet at Sun Court' from Tavi's source but cannot establish Mira's location, so no Mira reply. The revealed next input contains request + supplied note + 'Meet' + 'at' regardless of the player's prediction.",
+        "why": "The newest note is irrelevant to Mira, while the older Mira note is stale. The player must combine relevance and source-supported recency. The machine continues from supplied context even when unsuitable; all generated history joins the next input.",
+        "misconception_response": "Loft choice: show the old source and empty destination. Tavi choice: Sun Court is a source-consistent place for Tavi but irrelevant to locating Mira; do not mark those two judgments identically wrong. Omitting 'Meet' from the next input exposes a latest-piece-only error after commitment. First choices stay recorded, and predictions never change authoritative output."
       },
       "assessment_boundary": {
         "claim": "bounded_first_decisions",
         "before_answer_feedback": "No correctness cues, completed input assembly or destination reveal until the corresponding prediction is committed.",
-        "preserve": "First selection per decision, case identity, supplied context, output, revision and help before selection remain immutable.",
+        "preserve": "First committed choice per decision, case identity, supplied context, output, revision and help before commitment remain immutable; inspection and staging remain non-assessment interaction history.",
         "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
       }
     },

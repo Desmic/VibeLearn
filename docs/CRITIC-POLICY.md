@@ -7,14 +7,15 @@ judgments and cold observations before intent. Use the existing Codex session fo
 now; future Terminal PM owns orchestration. Luna-first wording below is historical.
 See `ASTRA-REVIEW-WORKFLOW.md`. Unsupported evidence remains unassessed.
 
-**Model roles — 20 September 2026 user direction:** Astra directly owns
+**Superseded model-role experiment — 20 September 2026:** Astra directly owns
 whole-experience creative-direction criticism (story, art/world, atmosphere,
 pacing and coherence). Luna performs bounded GUI play/checks and evidence
 collection, with Astra fallback when it signals an unresolved judgment. Missing
 tools require setup repair; missing observations block acceptance even when Luna
 reports confidence. See `LUNA-ROUTING-POLICY.md`. Self-reported uncertainty is
 useful but is not yet proven sufficient to catch silent misses. Preserve
-independent discipline gates and the user's final judgment.
+independent discipline gates and the user's final judgment. The active execution
+rule above replaces this split with one fresh-context Astra reviewer across lanes.
 
 **Required execution mode — 19 September 2026 user clarification:** Native
 computer/browser-use agents actively play the generated experience. Screenshots,
@@ -61,8 +62,8 @@ The current rejected build achieved some visual attraction but failed the second
 ## Review workflow
 
 1. Freeze the exact candidate SHA and environment.
-2. Read the active product/story/progression specs, but disclose reviewer prior knowledge.
-3. Review the fresh prologue cold where possible. Before interpreting intent, write what the rendered scene actually communicated.
+2. Give the fresh-context reviewer only the build and play instructions. Disclose any prior knowledge or accidental context leaks.
+3. Play the experience cold and freeze the reviewer's account of the world, controls, interactions, learning and uncertainty before supplying product/story/progression specs or reference games.
 4. Compare the written storyboard to rendered causality beat-by-beat: world-before -> event -> reaction -> text/sound/camera -> world-after -> newcomer takeaway.
 5. Run the art/world-direction pass: alternate camera angles, orbit/zoom/walk, density/negative space, clipping/intersections, protagonist identity, landmarks and phone/desktop compositions.
 6. Play the separate tutorial. Verify reusable controls/core interaction grammar and a clean first success **before Level 1**.

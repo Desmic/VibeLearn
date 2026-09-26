@@ -1,0 +1,44 @@
+{
+  "schema": "vibelearn.learning-design-review.v1",
+  "design_sha256": "f025cdd51c1fa108d25e0cae4f6ca6047ae73e31d386875125df13a07ca89724",
+  "reviewer": "astra-concrete-design-review",
+  "context_separation": "Fresh /root/concrete_design_review subagent; source/design review without parent conversation. No GUI/runtime assessment.",
+  "verdict": "pass",
+  "approval_stage": "prototype",
+  "approved_steps": [
+    "controls",
+    "sequence-demo",
+    "sequence-practice"
+  ],
+  "blockers": [],
+  "findings": {
+    "progression": {
+      "verdict": "pass",
+      "reason": "Control practice is separate from conceptual teaching. Growing-input demonstration precedes supported prediction; context follows, then a changed repair case combining both ideas. The transfer includes two generated pieces.",
+      "counterexample": "Latest-piece-only reasoning passes one-piece practice but fails the changed case. Final completion after an incorrect first choice must not become independent success."
+    },
+    "concept_fidelity": {
+      "verdict": "pass",
+      "reason": "Questions now ask what supplied information supports, not unjustified exact-word predictions. Prepared continuations are explicitly illustrative; real models can reject irrelevant notes.",
+      "counterexample": "For Mira plus a Tavi note, a real model may say Mira’s location is unknown. Source-consistency is assessed separately from relevance and no model wording is graded."
+    },
+    "decision_necessity": {
+      "verdict": "pass",
+      "reason": "First decisions precede answer feedback. Context, source-consistency and full-history input are separate observations; predictions cannot alter authoritative output.",
+      "counterexample": "Wick note plus Copper is source-consistent but irrelevant. Choosing the longest option remains a superficial strategy; one correct choice cannot establish mastery."
+    },
+    "attention_and_access": {
+      "verdict": "pass",
+      "reason": "Distinct interaction states now specify lead/socket, open demonstration, covered input socket with prediction trays and staged note comparisons. Portrait reflow, keyboard order and state preservation are concrete enough to prototype.",
+      "counterexample": "A decorative device behind a scrolling questionnaire fails. At 360px and enlarged text, request and generated pieces must remain usable while choosing and returning to the world."
+    },
+    "research_application": {
+      "verdict": "pass",
+      "reason": "Portal passive-success and spatial-explanation findings map to pre-feedback decisions and visible device cause/effect; scope stays bounded and adaptation limits are explicit.",
+      "counterexample": "Repeated advances opening a latch must not record conceptual success. World labels obscuring a device on phones fail even if they share an anchor."
+    }
+  },
+  "runtime_alignment": {
+    "verdict": "unassessed"
+  }
+}

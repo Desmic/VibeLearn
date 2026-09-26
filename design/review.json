@@ -1,44 +1,51 @@
 {
   "schema": "vibelearn.learning-design-review.v1",
-  "design_sha256": "f025cdd51c1fa108d25e0cae4f6ca6047ae73e31d386875125df13a07ca89724",
-  "reviewer": "astra-concrete-design-review",
-  "context_separation": "Fresh /root/concrete_design_review subagent; source/design review without parent conversation. No GUI/runtime assessment.",
+  "design_sha256": "9b1ba9a9d80c4be1c73a984b3a522181c366f6d21cbc0fa1a5d8171a8bd7d2b5",
+  "reviewer": "astra-cold-gui-world-design-review-20260926",
+  "context_separation": "Independent /root/cold_gui_world reviewer, separate from the implementation author. Initial GUI observations were frozen before receiving design intent. This record follows an explicit warm comparison and several adversarial design-only revision audits; it is not a new cold pass. The reviewer did not edit the design. Prior prototype approval was treated as stale, not evidence. Frozen COLD-REPORT.md and WARM-COMPARISON.md remain unchanged.",
   "verdict": "pass",
-  "approval_stage": "prototype",
+  "approval_stage": "implementation",
   "approved_steps": [
+    "arrival",
+    "opening",
     "controls",
     "sequence-demo",
-    "sequence-practice"
+    "context-contrast",
+    "sequence-practice",
+    "context-practice",
+    "changed-problem",
+    "consequence"
   ],
   "blockers": [],
   "findings": {
     "progression": {
       "verdict": "pass",
-      "reason": "Control practice is separate from conceptual teaching. Growing-input demonstration precedes supported prediction; context follows, then a changed repair case combining both ideas. The transfer includes two generated pieces.",
-      "counterexample": "Latest-piece-only reasoning passes one-piece practice but fails the changed case. Final completion after an incorrect first choice must not become independent success."
+      "reason": "The whole bounded journey is coherent: entry and shared lantern action establish the player and friend; direct controls precede a safe generation demonstration and opened Moon door. Physical source inspection introduces context before supported next-input practice. Open is visibly generated, its next input is predicted and revealed, then generation pauses for source inference before the destination appears. A changed recipient/source task combines relevance and two-piece history before a local reply payoff. No prerequisite cycle or forced tutorial failure remains.",
+      "counterexample": "Generating Moon or Star before context-practice would leak the inference answer, so sequence-practice explicitly pauses after Open and the grown input. The old-sign worked example flows through a source-consistent Moon inference to a world failure and recoverable rescan. A learner taking the successful route need not experience that failure; completion must not imply they demonstrated diagnosis. No Level 2 is approved."
     },
     "concept_fidelity": {
       "verdict": "pass",
-      "reason": "Questions now ask what supplied information supports, not unjustified exact-word predictions. Prepared continuations are explicitly illustrative; real models can reject irrelevant notes.",
-      "counterexample": "For Mira plus a Tavi note, a real model may say Mira’s location is unknown. Source-consistency is assessed separately from relevance and no model wording is graded."
+      "reason": "The prepared whole-word toy and real-token limitations are stated in normal teaching. Generated history joins the original request and supplied source; unseen sources are not silently available. Source relevance, source-supported inference, authored continuation and world success are distinct. The parade branch now allows no gate even if the toy produces an unsupported fluent Moon command. The Tavi branch distinguishes a source-consistent Sun Court reference from evidence about Mira.",
+      "counterexample": "For the parade notice, Moon is not a valid source inference merely because the prepared toy later emits Moon. For Tavi's note, Sun Court concerns Tavi and supplies no Mira location; scoring must preserve that distinction. A real model could reject unsuitable context instead of producing these prepared continuations. The design does not claim to predict general real-model wording, training or attention."
     },
     "decision_necessity": {
       "verdict": "pass",
-      "reason": "First decisions precede answer feedback. Context, source-consistency and full-history input are separate observations; predictions cannot alter authoritative output.",
-      "counterexample": "Wick note plus Copper is source-consistent but irrelevant. Choosing the longest option remains a superficial strategy; one correct choice cannot establish mastery."
+      "reason": "Demonstration is explicitly unassessed. Supported and changed-case decisions are committed before corresponding feedback. Inspecting and staging never create an assessed first choice; the first committed source, inference and input choices remain immutable, and predictions cannot alter generation. The newest note is irrelevant, while request-only and latest-piece-only input options differ from the full Meet at history. These are distinct bounded learning decisions rather than reward for clicking through.",
+      "counterexample": "Inspect A, stage A, inspect B and commit B must assess B, not the first inspected object. Newest-note-only selects Tavi and fails relevance; latest-piece-only omits Meet and fails the history check. Always choosing the longest input or a fixed position remains a possible superficial strategy: the design names those probes and explicitly limits evidence to bounded first decisions, not mastery or retention. Retry success cannot overwrite a wrong first commitment."
     },
     "attention_and_access": {
       "verdict": "pass",
-      "reason": "Distinct interaction states now specify lead/socket, open demonstration, covered input socket with prediction trays and staged note comparisons. Portrait reflow, keyboard order and state preservation are concrete enough to prototype.",
-      "counterexample": "A decorative device behind a scrolling questionnaire fails. At 360px and enlarged text, request and generated pieces must remain usable while choosing and returning to the world."
+      "reason": "Goals, actions and feedback are specified at an active character, sign, machine or receiver, with sequential phone framing instead of a persistent detached console. Sources must be inspected in the world; notes have visible carrying, staging, insertion, cancellation and commitment. Semantic focus routes provide equivalent access without precision camera or drag demands. Target sizing, portrait reflow, enlarged text, return controls and preservation of staged/committed state are sufficiently specified for implementation.",
+      "counterexample": "A keyboard user must inspect all notes without accidental commitment and return to the receiver without precision movement. At 360px and 200% text, source text, generated pieces, current choice and Return-to-world must remain usable. Merely assigning an anchor to a large bottom questionnaire fails the intended presentation. Extra carrying or commit steps must not become pointless travel or obscure the immediate action; actual GUI play and presentation-budget evidence must test this."
     },
     "research_application": {
       "verdict": "pass",
-      "reason": "Portal passive-success and spatial-explanation findings map to pre-feedback decisions and visible device cause/effect; scope stays bounded and adaptation limits are explicit.",
-      "counterexample": "Repeated advances opening a latch must not record conceptual success. World labels obscuring a device on phones fail even if they share an anchor."
+      "reason": "The design maps its stated research observations to concrete safeguards: passive demonstration is separated from pre-feedback decisions, and explanation is located at the device and its consequence. The adaptations remain bounded to this existing chapter, include falsification probes and do not require copied reference assets, high-end graphics or new orchestration. This judgment concerns application of the cited observations, not a fresh independent verification of the external research media.",
+      "counterexample": "Waiting or repeatedly advancing may complete the demonstration but cannot count as independent conceptual evidence. A visually attractive device behind a remote questionnaire would not satisfy situated attention. Physical source collection alone does not establish curiosity, agency or enjoyment; these require subsequent cold GUI review, not this design approval."
     }
   },
   "runtime_alignment": {
-    "verdict": "unassessed"
+    "verdict": "unassessed",
+    "reason": "The revised design has not been implemented and played in this audit. Earlier runtime cold/warm findings are unchanged and are not converted to passes by this design approval. Motion and audio remain deferred and unassessed. Implementation approval is not release, deployment, Level 2 or user acceptance."
   }
 }

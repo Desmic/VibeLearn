@@ -132,7 +132,7 @@ def validate_design(design):
 
 def check_design_gate(design, review=None, *, stage='prototype', candidate=None, evidence_root=None):
     result = validate_design(design)
-    require(stage in ('structure', 'prototype', 'release'), 'invalid design gate stage')
+    require(stage in ('structure', 'prototype', 'implementation', 'release'), 'invalid design gate stage')
     if stage == 'structure':
         return result
     require(isinstance(review, dict), 'design review required before prototype or release')
@@ -151,10 +151,16 @@ def check_design_gate(design, review=None, *, stage='prototype', candidate=None,
     if 'prototype_scope' in design:
         allowed_steps = design['prototype_scope']['steps'] if stage == 'prototype' else [s['id'] for s in design['sequence']]
         require(review.get('approved_steps') == allowed_steps, 'design approval does not cover requested scope')
-        require(review.get('approval_stage') == ('prototype' if stage == 'prototype' else 'release_design'),
-                'prototype approval cannot authorize release')
+        required_approval = {'prototype': 'prototype', 'implementation': 'implementation',
+                             'release': 'release_design'}[stage]
+        require(review.get('approval_stage') == required_approval,
+                f'design approval does not authorize {stage}')
     else:
         allowed_steps = [s['id'] for s in design['sequence']]
+        if stage == 'implementation':
+            require(review.get('approved_steps') == allowed_steps and
+                    review.get('approval_stage') == 'implementation',
+                    'design approval does not cover full implementation')
     if stage == 'release':
         alignment = review.get('runtime_alignment')
         require(isinstance(alignment, dict) and alignment.get('candidate_sha') == candidate
@@ -270,7 +276,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--design', type=Path, default=Path('design/learning-design.json'))
     parser.add_argument('--review', type=Path)
-    parser.add_argument('--stage', choices=('structure', 'prototype', 'release'), default='prototype')
+    parser.add_argument('--stage', choices=('structure', 'prototype', 'implementation', 'release'), default='prototype')
     parser.add_argument('--candidate')
     parser.add_argument('--evidence-root', type=Path)
     args = parser.parse_args(argv)

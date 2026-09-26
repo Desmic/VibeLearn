@@ -64,6 +64,13 @@ is our design decision; the cited Portal study does not prove all HUDs must be 3
    design review this fails. This is the authoring/prototype boundary; there is no
    autonomous generator to intercept yet. System/tool repairs and design iteration
    remain allowed while it fails. Do not bypass it by calling game work a repair.
+   Before merging implementation that covers the full designed journey, run
+   `python manage.py design-gate --stage implementation --review design/review.json`.
+   CI now checks this separately from technical tests: the review digest must match
+   the current design, and `approved_steps` must cover every step with
+   `approval_stage: implementation`. A prototype-only approval cannot authorize
+   the remaining mission/payoff; the release gate still needs exact-candidate
+   native alignment after implementation.
 4. Prototype one coherent teaching loop after the design passes, preserving the
    original learning/evidence identities and saves. Native GUI review starts without
    answer keys or the design, then compares the preserved cold observations to intent.
@@ -100,6 +107,11 @@ boundary; no new orchestrator, provider or generation pipeline is introduced.
 - Try a mistaken choice and a new example; do feedback and recovery explain cause?
 - Check phone and desktop, camera movement, keyboard and enlarged text. Merely
   placing a label in the world does not prove integration or readability.
+- For a game that declares direct control and an explorable world, can the player
+  finish every meaningful choice while standing still in a detached panel after
+  control practice? If so, the design review must explain why the world and
+  embodiment matter to those choices or send the mechanic back for revision.
+  A deliberate stationary puzzle may be sound; the declared experience decides.
 
 Expert AI play can find confusion and bypasses; it cannot certify novice learning or
 retention. Learner comprehension remains an empirical question, not a schema field.
