@@ -22,17 +22,23 @@ Automated checks, critic judgment and user acceptance are separate claims.
   repaired a carry control clipped above the screen, committed a wrong
   latest-piece history choice, reloaded, saw the no-reply result, recovered
   with Mira's later note, and saved Level 1. Trace/screenshots:
-  `artifacts/repair-relay-play/`. The focused phone/desktop relay browser
-  check passed. `python manage.py build` and 447 application tests passed
-  (7 PostgreSQL skips) before the last presentation fixes; focused source,
-  world-marker and browser checks passed afterwards. The full 25-state
-  presentation run passed 24 states and identified one tutorial desktop
-  focal overlap; the exact affected state passed after repair. The broad
-  chapter script reached the relay but its first rerun failed an outdated
-  exact-case selector; the second run exceeded an eight-minute bound and
-  was stopped, so no full new chapter pass is claimed. Independent cold
-  review, exact-candidate full presentation, remaining physicality/audio
-  evidence and user acceptance are open. This is not critic approval.
+  `artifacts/repair-relay-play/`. `python manage.py build` passed and 447
+  application tests passed (7 PostgreSQL skips). The focused phone/desktop
+  relay browser check passed, including reversible staging, no-Mira source
+  inference, generated-history visibility, reload and recovery. The full
+  Level 1 chapter browser module subsequently passed its tutorial, wrong
+  route/recovery, relay, fixed-context comparisons and 360/430/1280 variants
+  with no page errors; report: `artifacts/level1-chapter-report.json`. Opening,
+  tutorial, controls/physicality, 200% readability and hosted lifecycle
+  browser groups also passed. An exact-code-SHA 25-state presentation report
+  passed with zero violations at `3975442aea8d74a3205e6eadf973a98a8ce18143`;
+  report: `artifacts/presentation-budget-3975442-rerun.json`. An earlier
+  full run exposed one tutorial desktop focal overlap and a later intermittent
+  sheet opt-in witness failure; the focal defect was fixed, affected subsets
+  passed, and the subsequent full run passed. The implementation design gate
+  allows this nine-step design, while runtime alignment remains unassessed.
+  Independent fresh-context Astra review, its motion/audio evidence and user
+  acceptance are open. This is not critic approval.
 
 - **26 September route-machine checkpoint (unreviewed):** A new pinned
   `first-words-3` snapshot keeps existing v1/v2 attempts replayable while new
@@ -127,8 +133,12 @@ Automated checks, critic judgment and user acceptance are separate claims.
 
 ## Next gate
 
-1. Re-freeze, then replay the demonstrated panel/agency/transfer/ending blockers on a new exact
-   candidate. Cover the still-unobserved opening, physicality, recovery and devices.
-2. Repeat affected technical/presentation gates, obtain a full critic record and
+1. Have one fresh-context Astra reviewer play the exact new candidate cold
+   before seeing design intent, then judge story, art/world, gameplay and
+   learning separately against the observed opening, physicality, source
+   choices, recovery, relay and local reply. Listen to audio and inspect motion
+   where available; mark anything not observed unassessed.
+2. Repair any blocking findings, repeat affected technical/presentation gates,
+   then obtain a full critic record and
    user review. Merge reviewed development work into `main` when ready. No Level 2
    or deployment promotion before the existing review and user gates.
