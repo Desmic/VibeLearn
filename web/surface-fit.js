@@ -16,17 +16,24 @@
    player kept seeing the previous size's shed and any measurement taken in that window
    described a layout nobody was looking at. */
 export function fitBoundedSurface(surface) {
+  // A semantic unit can mark its necessary leaf rather than every enclosing layout
+  // wrapper. Never shed an ancestor containing that leaf while fitting the surface.
+  const protectedItem = el => el.dataset.critical === 'true'
+    || Boolean(el.querySelector?.('[data-critical="true"]'));
   // A beat may promote an old optional line into required feedback. Its old
   // .shed class must not survive that promotion just because it left the ladder.
-  for (const el of surface.querySelectorAll('[data-shed-item][data-critical="true"].shed'))
-    el.classList.remove('shed');
-  const items = [...surface.querySelectorAll('[data-shed-item]')]
-    .filter((el) => el.dataset.critical !== 'true');
-  if (!items.length) return null;
+  for (const el of surface.querySelectorAll('[data-shed-item]'))
+    if (protectedItem(el) && el.classList.contains('shed')) el.classList.remove('shed');
+  const ranked = [...surface.querySelectorAll('[data-shed-item]')];
+  if (!ranked.length) return null;
+  const items = ranked.filter((el) => !protectedItem(el));
   const rank = (el) => Number(el.dataset.shedItem);
   const ranks = [...new Set(items.map(rank))].sort((a, b) => a - b);
   const overflowing = () => surface.scrollHeight > surface.clientHeight + 1;
   const shed = () => items.filter((el) => el.classList.contains('shed'));
+  // All-required content can exceed an authored surface. Report that explicitly;
+  // returning null would hide the failure after restoring a formerly shed group.
+  if (!items.length) return {shed:0,fits:!overflowing()};
   // Steady state is the common call: nothing shed, nothing overflowing. It must cost one
   // overflow comparison, not a class rewrite and a reflow.
   if (!shed().length && !overflowing()) return { shed: 0, fits: true };

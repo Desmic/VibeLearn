@@ -1,7 +1,7 @@
 {
   "schema": "vibelearn.learning-design.v1",
   "id": "llm-first-principles",
-  "version": "4-draft",
+  "version": "5-draft",
   "author": "codex-implementation",
   "audience": "Beginners who can read short everyday instructions; prior LLM knowledge is not assumed.",
   "starting_knowledge": "Reading simple messages; movement and interaction are taught separately.",
@@ -177,13 +177,13 @@
       "phase": "mission",
       "role": "introduce",
       "player_goal": "See what each physical route sign would give the machine.",
-      "decision": "Inspect the three route boards in the corridor, explicitly stage one sign, then commit it at the machine as the supplied source. Inspection alone never chooses or records a first source.",
-      "feedback": "The committed sign's full text appears in the machine's INPUT line; the card states which sign was supplied and which signs stay outside the machine. No correctness cue before the player's prediction.",
+      "decision": "Inspect three readable world boards, stage one sign as a reversible pending source, then use one deliberate Insert and commit source action at the existing machine. Inspecting a board never stages it; staging never writes a first source choice. Movement and camera can reveal the route junction, with equivalent semantic focus access and no mandatory travel.",
+      "feedback": "The committed sign's exact text joins the request in machine INPUT; the other signs remain outside. Before the later source-inference commitment, any inspected board frames the same Moon, Star and Sun route features with equal emphasis, and no source-specific gate/no-gate answer is highlighted. Only after inference commitment may a trace relate the source words to the world consequence.",
       "outcomes": [
         "context"
       ],
-      "recovery": "Before commitment, staging a different sign replaces the pending source without changing recorded evidence. After commitment, a mistaken source can be replaced only through explicit retry; the first committed choice stays immutable.",
-      "assistance": "Explicit side-by-side comparison at the machine; no independent evidence claimed.",
+      "recovery": "The visible carried token names the pending source through camera turns and return to the machine. Cancel or stage another source before insertion without assessed evidence. Insert and commit records the first source once; retry after a failed gate may replace it without overwriting its first choice, assistance or output.",
+      "assistance": "Readable sign text and neutral, equal-emphasis route framing support comparison without selecting the correct sign. Inspect and stage are evidence-neutral; no correctness cue or interpreted source-to-gate line appears before inference commitment.",
       "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
       "primary_focus": "message-machine",
       "surfaces": [
@@ -192,15 +192,15 @@
           "kind": "object_inspection",
           "anchor": "message-machine",
           "critical": true,
-          "purpose": "Compare what supplied signs contribute before choosing one.",
-          "reveal": "Each corridor board carries its complete readable sign text in the world (short, high-contrast, no tiny caps). Inspect opens its full text without selecting it; Stage marks one source as pending. At the machine the player explicitly commits that staged sign, then sees only its text in INPUT and the two unsupplied signs named.",
-          "dismiss": "Return to the corridor at any time. Inspection and staging are reversible; a committed first source is recorded before any destination prediction.",
-          "offscreen_recovery": "Board labels stay projected at their physical boards; the machine card clamps with an edge cue. No modal covers the corridor to display this comparison.",
-          "keyboard": "Each board is a focusable world marker with separate Inspect and Stage actions equivalent to touch. Focus navigation can reach every source without camera precision; the machine card has a separate Commit source action and no remote source-selection buttons.",
-          "touch": "Board markers are at least 44 CSS pixels and placed clear of the board geometry.",
-          "readability": "360-430px portrait and desktop; each sign is readable at standing distance as projected semantic text; 200% enlargement reflows the card comparison without clipping.",
+          "purpose": "Read physical route evidence, keep one source pending, then supply exactly that source to the machine with one deliberate device action.",
+          "reveal": "Each board carries full readable sign text. Inspect displays that exact text and a neutral outline on that board while the same three gate features remain equally framed for every board; obscuring the words must leave no source-specific inference answer in the camera/highlight treatment. Stage shows one identifiable source token carried by Zip and a bounded cue back to the machine. Insert and commit at the machine is the only assessed source action; its INPUT shows the request plus committed sign and names the unsupplied signs as outside. A source-specific explanatory trace appears only after the later source-inference commitment.",
+          "dismiss": "Inspection returns to direct control without staging. Pending source identity survives camera turns and card closure; cancel or replace it before commitment. After a committed source, retry may change the current source but never the first recorded choice.",
+          "offscreen_recovery": "Boards and route marks remain findable through movement or semantic focus. Pending source stays identifiable on Zip and through text; a bounded machine cue works offscreen. The machine carrier stays anchored and readable without covering the junction.",
+          "keyboard": "Each board has separate focusable Inspect and Stage actions. Focus access reaches each board and machine with the same observable route facts but no interpreted answer; no camera precision or mandatory locomotion. The machine has one focusable Insert and commit source action, disabled without a staged source; Escape closes inspection without choosing.",
+          "touch": "World board markers and the single device insertion action have at least 44 CSS pixel targets; stage/commit remain distinct and no precision drag is required.",
+          "readability": "360-430px portrait, desktop and 200% text preserve board words, pending source identity and committed INPUT without clipping. The machine may shed optional explanation but never a necessary request/source/history member.",
           "presentation": "contextual_inspection",
-          "focus_transition": "Physical board -> inspect its text -> stage one source -> return to machine and commit -> its text in INPUT while unsupplied signs remain outside. Keep the corridor framed; never hide boards behind an overlay."
+          "focus_transition": "Board words + neutrally framed junction -> optional inspection -> explicit pending source on Zip -> one machine insertion/commit -> exact supplied text in INPUT; later inference commitment permits explanatory route trace. Movement can reveal spatial relation, but semantic focus offers equivalent evidence."
         }
       ],
       "goal_surface": "focus",
@@ -209,15 +209,15 @@
       "worked_example": {
         "situation": "Beyond the first door, three signs disagree about the route to the tower.",
         "starting_state": "Old sign: 'Old route: take the Moon gate.' Current notice: 'TODAY: Moon route closed. The tower bell answers the five-point lantern mark.' Parade notice: 'The lantern parade starts at sunset.' The machine has received none of them yet.",
-        "player_action": "Move to or focus a board, inspect its text, stage it without commitment, then return to the machine and explicitly commit it. Returning reveals only the source actually committed.",
-        "visible_result": "The INPUT line now contains exactly the scanned sign's text. The card states the other two signs remain outside the machine. The world's Star gate mark is visible but the machine has not been told anything about judging signs.",
-        "why": "The machine can only use information actually supplied to it. Which sign is correct for the task is not yet revealed; that decision belongs to the next step.",
-        "misconception_response": "A local note says: seeing a sign in the room is not the same as giving it to the machine; a real model may also respond differently than any authored example."
+        "player_action": "Move to or semantically focus any board; inspect without choosing, stage one source, optionally inspect another without changing the pending source, then use one Insert and commit source action at the machine.",
+        "visible_result": "Before inference, all route features remain equally framed whichever board is inspected. The pending token names the staged sign. After insertion, INPUT contains exactly the request and committed sign while the other two remain outside; no gate answer or destination is highlighted.",
+        "why": "The world contains many visible signs, but the toy receives only a deliberately committed source. The learner must read that source and relate its words to the neutral route evidence rather than follow a selective highlight.",
+        "misconception_response": "Inspecting B after staging A does not switch to B; stage B explicitly to replace the pending token. If no source is staged, insertion cannot guess one. A later bad committed source is recoverable but its first choice is preserved."
       },
       "assessment_boundary": {
         "claim": "guided_observation",
-        "before_answer_feedback": "No correctness highlight, destination reveal or completed route until the player commits the gate prediction; comparison is explicit teaching, not evidence.",
-        "preserve": "First committed choice per decision, case identity, supplied context, output, revision and help before commitment remain immutable; inspection and staging remain non-assessment interaction history.",
+        "before_answer_feedback": "Before the later source-inference commitment, no selective board-to-gate cue, correctness highlight, route trace, destination reveal or prepared continuation answers the source question. The committed sign may be shown as supplied text; this comparison is guided observation, not evidence.",
+        "preserve": "First committed source and inference choices, case identity, supplied context, actual output, command IDs/revisions and help remain immutable. Inspection, focus, staging and pending-token replacement remain non-assessment interaction history; a retry never rewrites old snapshots.",
         "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
       }
     },
@@ -275,14 +275,14 @@
       "phase": "mission",
       "role": "practice",
       "player_goal": "Judge which gate the supplied sign actually supports, if any, then test the machine's command against the world.",
-      "decision": "After the first route word and next-input practice, infer which gate the supplied sign supports: Moon, Star, Sun, or 'This sign does not identify a gate.' Commit that source inference before the toy continues, then finish and speak its command. Do not ask the player to guess unsupported prepared wording.",
-      "feedback": "The machine's authored continuation and the player's source inference are shown separately. Moon and Star signs support named gates, though the old Moon route fails in the world. The parade notice supports no gate; the toy may still generate a fluent Moon command from its prior, which fails and does not make a Moon inference correct. A local comparison shows supplied versus current route evidence; recovery keeps every first committed choice.",
+      "decision": "After the sequence-practice first-word/next-input commitment, select and explicitly commit which gate the supplied sign supports (Moon, Star, Sun, or no gate). The inference never changes the prepared toy output. Then one deliberate Run continuation begins the remaining words, an untimed review exposes every full-input prefix, and one deliberate Speak command applies the completed sentence to the world gate.",
+      "feedback": "After inference commitment, a source-specific trace may connect the committed words to the relevant route evidence. The authored continuation and source inference remain separate. Old Moon supports a Moon inference but fails the current route; the parade supports no gate even if the toy emits fluent Moon. A failed-gate comparison uses the supplied and current evidence, preserving first choices and output.",
       "outcomes": [
         "context",
         "sequence"
       ],
-      "recovery": "Keep the first prediction and first sign choice immutable. Give the explicit contrast after the wrong gate, allow rescanning a different sign and rebuilding; do not move the player or hide the objects.",
-      "assistance": "Before feedback, all signs are equally legible with no answer highlighting. Optional hint asks what the supplied sign points toward. Record first choices and assistance separately.",
+      "recovery": "Keep the first inference and source choice immutable. Pause and review every saved prefix without altering evidence or output. Focus/inspection/away transitions stop playback before another word command; reload restores the authoritative prefix in a paused, inspectable state until deliberate resume. Retry may replace a source after failed world consequence without moving the player or hiding the objects.",
+      "assistance": "Before inference commitment, all route features have equal emphasis and no source-specific cue or prepared destination. Optional hint asks what the sign itself says, and help is recorded separately. Playback and untimed history inspection are unassessed; reduced motion preserves the same states without animation and is not treated as a reading-speed preference.",
       "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
       "primary_focus": "message-machine",
       "surfaces": [
@@ -291,15 +291,15 @@
           "kind": "object_inspection",
           "anchor": "message-machine",
           "critical": true,
-          "purpose": "Commit a gate prediction from the supplied sign, then generate and speak the route.",
-          "reveal": "Four source-inference trays (Moon/Star/Sun/This sign does not identify a gate) appear at the machine card only after a sign has been committed; the inference is pinned on the card. This does not force or predict the toy's prepared output. Then the word-by-word build loop and Speak action continue on the same card.",
-          "dismiss": "Return-to-corridor preserves the committed prediction; closing dialogs never answers the question or discards a choice.",
-          "offscreen_recovery": "The card clamps with an edge cue toward the machine; gate outcomes are shown on the real gates in the world.",
-          "keyboard": "Trays and build/speak actions are focusable buttons; the committed prediction is announced in the live region.",
-          "touch": "Tray and action buttons at least 44 CSS pixels inside the card.",
-          "readability": "Portrait keeps the supplied sign text visible while the four source-inference choices are weighed; the wrong-route comparison shows both signs stacked; 200% text reflows.",
+          "purpose": "Commit a source-supported gate inference, then inspect the whole growing input during one short continuation and speak the finished command to the visible world gate.",
+          "reveal": "Four source-inference trays appear at the machine only after source commitment; a reversible selection has a separate Commit inference action. No route answer or future continuation is exposed beforehand. After commitment, the device can show an explanatory trace and a Run continuation control. Each generated prefix retains an untimed before/after record with request, supplied sign and all words so far. Pause and review is always reachable and evidence-neutral; the final Speak command remains deliberate and distinct.",
+          "dismiss": "Closing inspection keeps the pending/committed inference and saved prefix. Leaving the device or moving focus into its inspection/history content pauses before the next word; activating Run/Resume controls is allowed to start playback. Reload returns to the saved prefix paused and inspectable, requiring deliberate Resume.",
+          "offscreen_recovery": "The anchored device has a bounded edge cue and neutral route framing before inference. Untimed prefix history and the first committed inference remain available on return; after speaking, the affected world gate shows the actual consequence.",
+          "keyboard": "Inference trays and Commit inference are focusable and separate. Run/Resume, Pause and review, ordered prefix history and Speak are keyboard accessible. Entering history/inspection pauses playback, but keyboard activation of Run/Resume does not cancel itself. Semantic source/gate facts match the visual world without choosing an answer for the player.",
+          "touch": "Trays, inference commit, Run/Resume, Pause and review, history navigation and Speak use at least 44 CSS pixel targets. No precision drag or mandatory walking.",
+          "readability": "At 360-430px and 200% text, request, supplied sign and all generated words in the current prefix are painted together before a next action; optional caveat/instruction may move but no input member may be shed. Untimed history preserves each intermediate full-input state.",
           "presentation": "contextual_inspection",
-          "focus_transition": "Supplied sign -> committed gate prediction -> generated words on the output rail -> the actual gate in the world reacting -> comparison at the machine on failure."
+          "focus_transition": "Committed source and Open from sequence-practice -> reversible gate selection -> explicit inference commitment -> source-specific explanatory trace -> one Run continuation with stable full-input prefix history -> deliberate Speak -> actual gate reaction and local evidence comparison on failure."
         }
       ],
       "goal_surface": "focus",
@@ -308,15 +308,15 @@
       "worked_example": {
         "situation": "The machine holds the old sign's text and the corridor has one closed route and one open route.",
         "starting_state": "Card INPUT: request + 'Old route: take the Moon gate.' The first output word 'Open' is visible from sequence-practice; no gate prediction is committed yet. The Star gate mark is visible in the world but unnamed by the machine.",
-        "player_action": "Infer which gate the supplied sign actually names (or that it names none), commit the inference, then build and speak the toy's sentence.",
-        "visible_result": "The machine produces 'Open the Moon gate.' The Moon door stays sealed and shows a wrong ring; the card compares the supplied old sign with the current notice that says the Moon route is closed. Rescanning the current notice later produces the Star route and the Star gate lifts.",
-        "why": "A fluent, correctly-formed sentence can still fail the task when the supplied context is unsuitable. Relevance and currentness are judged from the sources given to the machine, not from a hidden rule.",
-        "misconception_response": "If the parade notice was supplied, 'This sign does not identify a gate' is the source-consistent inference. The toy's prior can still make a fluent Moon sentence; that is an unsuitable output, not evidence that the parade note supported Moon. Inference never changes output; first committed choices are retained and recovery is penalty-free."
+        "player_action": "Read the committed old sign and neutral route junction, select Moon and press Commit inference. Press Run continuation once; pause/review the intermediate full-input prefixes if needed, then press Speak command after the authored sentence completes.",
+        "visible_result": "Only after inference commitment does a trace relate the old sign to Moon. The device then reveals Open the Moon gate in order while each saved prefix includes the original request and old sign. Speaking leaves the Moon gate sealed; the comparison shows that a source-consistent command can fail the current route. Rescanning the current notice later opens the Star route.",
+        "why": "Source support, prepared continuation and task success are different judgments. Untimed history makes the growing input inspectable; running it does not count as a prediction or independent learning evidence.",
+        "misconception_response": "For a parade source, No gate is the source-consistent inference even if the toy later says Moon. The first wrong inference remains recorded; reviewing or replaying output cannot correct it. Pausing after Open the, focusing away and reloading must retain the prefix without duplicating a step command or revealing an uncommitted answer."
       },
       "assessment_boundary": {
         "claim": "assisted_practice",
-        "before_answer_feedback": "No correctness cues, completed input assembly or destination reveal until the corresponding prediction is committed.",
-        "preserve": "First committed choice per decision, case identity, supplied context, output, revision and help before commitment remain immutable; inspection and staging remain non-assessment interaction history.",
+        "before_answer_feedback": "Do not reveal an assembled next-input answer before sequence-practice input-rule commitment, or a source-specific route trace, prepared destination or correctness cue before source-inference commitment. Playback starts only after both decisions.",
+        "preserve": "First committed source, input-rule and inference choices, case identity, supplied context, actual generated output, command IDs/revisions and help remain separate and immutable. Untimed review, pause, focus and reload do not write assessment evidence or replay acknowledged word commands; saved prefixes resume paused until deliberate Run/Resume.",
         "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
       }
     },
@@ -435,14 +435,14 @@
       "source_locator": "docs/GAME-REFERENCE-STUDY.md §6, 1:41-2:34; user screenshot and instruction 2026-09-21",
       "observation": "The commentary describes replacing a hard-to-explain setup with a physical reveal. The user screenshot shows goal, world and action panel separated.",
       "adaptation": "Place goals, actions and feedback at the active device, character or explicit object-inspection view.",
-      "failure_probe": "Look only at the active object: can the next action and its response be discovered? Test phone framing and enlarged text.",
+      "failure_probe": "Obscure board words: neutral precommit framing must not identify a source-specific gate/no-gate answer. With words restored, can the player explain board, route and consequence? At 200% phone text, pause after an intermediate prefix, inspect, focus away and reload; every complete input remains readable without duplicate commands. Count meaningful decisions versus clerical actions.",
       "limit": "Our interface rule is a design decision supported by the user finding; the source does not establish that every HUD must be diegetic.",
       "steps": [
         "controls",
         "context-practice",
         "consequence"
       ],
-      "verification": "Look only at the active object: can the next action and its response be discovered? Test phone framing and enlarged text.",
+      "verification": "Obscure board words: neutral precommit framing must not identify a source-specific gate/no-gate answer. With words restored, can the player explain board, route and consequence? At 200% phone text, pause after an intermediate prefix, inspect, focus away and reload; every complete input remains readable without duplicate commands. Count meaningful decisions versus clerical actions.",
       "cost": "Author and test one small coherent loop before rebuilding the chapter.",
       "exclusions": "No new orchestration, copied reference assets or photorealism requirement.",
       "review_lanes": [

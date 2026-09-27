@@ -41,9 +41,11 @@ MEASURE = """async (args) => {
   const {budgets} = args;
   const vw = innerWidth, vh = innerHeight;
   const visible = (el) => {
-    const cs = getComputedStyle(el);
-    if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) < 0.05) return false;
-    for (let n = el; n; n = n.parentElement) if (n.className && String(n.className).includes('sr-only')) return false;
+    for (let n = el; n; n = n.parentElement) {
+      const cs = getComputedStyle(n);
+      if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) < 0.05) return false;
+      if (n.className && String(n.className).includes('sr-only')) return false;
+    }
     const r = el.getBoundingClientRect();
     return r.width > 1 && r.height > 1;
   };
@@ -943,6 +945,11 @@ def main():
                     wait_for_text(page, state["wait_text"], 20000, state)
                 page.wait_for_timeout(350)
                 scale_applied = apply_text_scale(page, state, scale_applied)
+                # Re-applying the accessibility text size can change line wraps even
+                # when the scale is unchanged. Let the game's bounded-surface fitter
+                # see that final geometry before sampling; otherwise the report can
+                # count a footer that the next paint correctly sheds.
+                page.wait_for_timeout(320)
                 metrics = evaluate_state(page, state, budgets)
                 if state.get("screenshot"):
                     # Reusable evidence: the exact measured play state as a capture.

@@ -127,6 +127,10 @@ def main():
                     state=page.evaluate('FirstWordsReview.state')
                     expect(page.locator('#engine')).to_be_hidden()
                     expect(page.locator('#learning-readout')).to_be_visible(timeout=15000)
+                    # A retained carrier is insufficient: every necessary part of
+                    # the complete next input must be painted together before action.
+                    for member in ('#readout-request-row','#readout-supplied','#readout-words'):
+                        expect(page.locator(member)).to_be_visible()
                     expect(page.locator('#readout-request')).to_have_text(state['input'][0])
                     expect(page.locator('#readout-supplied')).to_have_text(state['input'][1])
                     expect(page.locator('#readout-words')).to_have_text(

@@ -10,10 +10,11 @@ SCRIPT = r'''
 import {fitBoundedSurface} from MODULE;
 // Minimal DOM: sections with a rank and a height, a surface whose content height is the
 // sum of what is not shed, and a classList that behaves like the real one.
-function section(rank,height,critical){
+function section(rank,height,critical,requiredChild=false){
   const classes=new Set();
   return {dataset:{shedItem:String(rank),...(critical?{critical:'true'}:{})},height,
-    classList:{add:c=>classes.add(c),remove:c=>classes.delete(c),contains:c=>classes.has(c)}};
+    classList:{add:c=>classes.add(c),remove:c=>classes.delete(c),contains:c=>classes.has(c)},
+    querySelector:selector=>requiredChild&&selector==='[data-critical="true"]'?{textContent:'Harbor request + tide note + Stabilize'}:null};
 }
 function surface(sections,{base=60,client=280}={}){
   return {sections,clientHeight:client,
@@ -47,10 +48,20 @@ const promoted=surface([section(10,60),section(30,60)],{client:100});
 fitBoundedSurface(promoted);
 promoted.sections[0].dataset.critical='true';
 const promoted_result=fitBoundedSurface(promoted);
+const harbor=surface([section(10,30),section(20,95,false,true),section(40,40)],{client:120});
+fitBoundedSurface(harbor);
+const harbor_result={shed:ranks(harbor),fits:fitBoundedSurface(harbor).fits};
+harbor.sections[1].classList.add('shed'); // simulate a formerly optional ancestor
+fitBoundedSurface(harbor);
+harbor_result.restored=!harbor.sections[1].classList.contains('shed');
+const allRequired=surface([section(20,95,false,true),section(30,70,true)],{client:100});
+allRequired.sections[0].classList.add('shed');
+const allRequired_result=fitBoundedSurface(allRequired);
 console.log(JSON.stringify({first,r:r_first,partial,r_partial:r_partial,room,r_room:r_room,
   stuck,r_stuck:ranks(hopeless),empty,idle,
   tight:ranks(tight),tight_fits:shed_tight.fits,
-  promoted:ranks(promoted),promoted_fits:promoted_result.fits}));
+  promoted:ranks(promoted),promoted_fits:promoted_result.fits,harbor:harbor_result,
+  allRequired:{...allRequired_result,shedRanks:ranks(allRequired)}}));
 '''.replace('MODULE', json.dumps((ROOT / 'web/surface-fit.js').as_uri()))
 
 
@@ -93,6 +104,14 @@ class SurfaceFitTests(unittest.TestCase):
     def test_promoted_required_feedback_is_restored_from_previous_shed(self):
         self.assertNotIn(10, self.data['promoted'])
         self.assertFalse(self.data['promoted_fits'])
+
+    def test_required_child_protects_its_semantic_group_wrapper(self):
+        self.assertEqual(self.data['harbor']['shed'], [10, 40])
+        self.assertFalse(self.data['harbor']['fits'])
+        self.assertTrue(self.data['harbor']['restored'])
+
+    def test_all_required_overflow_restores_group_and_reports_cannot_fit(self):
+        self.assertEqual(self.data['allRequired'], {'shed': 0, 'fits': False, 'shedRanks': []})
 
 
 if __name__ == '__main__':

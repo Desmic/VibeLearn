@@ -1,6 +1,8 @@
 {
  "path": "/first-words",
- "include_states": ["presentation-budget-situated.json"],
+ "include_states": [
+  "presentation-budget-situated.json"
+ ],
  "states": [
   {
    "name": "prologue-opening-desktop",
@@ -105,27 +107,98 @@
     }
    ],
    "wait_eval": "()=>{const r=document.querySelector('#learning-readout');return r&&!r.hidden&&r.textContent.includes('Open')&&!FirstWordsReview.runtime.world.animating;}",
-   "carriers": [{"selector":"#learning-readout","min":1}],
-   "required_content": [{"selector":"#readout-feedback","includes":["Prepared toy words","real tokens may be smaller"]}],
+   "carriers": [
+    {
+     "selector": "#learning-readout",
+     "min": 1
+    }
+   ],
+   "required_content": [
+    {
+     "selector": "#readout-request-row",
+     "includes": [
+      "Open a gate."
+     ]
+    },
+    {
+     "selector": "#readout-supplied",
+     "includes": [
+      "Zip is behind the Moon gate."
+     ]
+    },
+    {
+     "selector": "#readout-words",
+     "includes": [
+      "Open"
+     ]
+    },
+    {
+     "selector": "#readout-feedback",
+     "includes": [
+      "Prepared toy words",
+      "real tokens may be smaller"
+     ]
+    }
+   ],
    "focal": "zip",
    "screenshot": "artifacts/play-20260925/tutorial-word-desktop-folded.png"
   },
   {
    "name": "tutorial-word-phone-folded",
-   "resize": [390,844],
+   "resize": [
+    390,
+    844
+   ],
    "wait_eval": "()=>{const r=document.querySelector('#learning-readout');return r&&!r.hidden&&r.textContent.includes('Open')&&!FirstWordsReview.runtime.world.animating;}",
-   "carriers": [{"selector":"#learning-readout","min":1}],
-   "required_content": [{"selector":"#readout-feedback","includes":["Prepared toy words","real tokens may be smaller"]}],
-   "touch_controls": [".game-move-stick", ".game-view-tools"],
-   "coverage_max": 0.20,
+   "carriers": [
+    {
+     "selector": "#learning-readout",
+     "min": 1
+    }
+   ],
+   "required_content": [
+    {
+     "selector": "#readout-request-row",
+     "includes": [
+      "Open a gate."
+     ]
+    },
+    {
+     "selector": "#readout-supplied",
+     "includes": [
+      "Zip is behind the Moon gate."
+     ]
+    },
+    {
+     "selector": "#readout-words",
+     "includes": [
+      "Open"
+     ]
+    },
+    {
+     "selector": "#readout-feedback",
+     "includes": [
+      "Prepared toy words",
+      "real tokens may be smaller"
+     ]
+    }
+   ],
+   "touch_controls": [
+    ".game-move-stick",
+    ".game-view-tools"
+   ],
+   "coverage_max": 0.2,
    "coverage_max_reason": "The narrow viewport needs the on-screen move stick and camera controls; the learning readout and all other information still meet the 15% base budget.",
    "focal": "zip",
    "screenshot": "artifacts/play-20260925/tutorial-word-phone-folded.png"
   },
   {
-  "name": "mission-intro-closed",
-  "resize": [1280,720],
-  "steps": [
+   "name": "mission-intro-closed",
+   "resize": [
+    1280,
+    720
+   ],
+   "steps": [
     {
      "click": "Use the speech engine in the world",
      "timeout": 60000
@@ -188,16 +261,13 @@
      "click": "Inspect the old route sign"
     },
     {
-     "click": "Carry old sign"
+     "click": "Stage old sign"
     },
     {
-     "click": "Carry Old sign to the message machine"
+     "click": "Insert and commit Old sign at the message machine"
     },
     {
-     "click": "Place old sign in machine slot"
-    },
-    {
-     "click": "Commit source"
+     "click": "Open the message machine"
     },
     {
      "click": "Make first word"
@@ -215,16 +285,14 @@
      "click": "Check my prediction"
     },
     {
-     "click": "Next word"
+     "click": "Run continuation"
     },
     {
-     "click": "Next word"
+     "wait_eval": "()=>FirstWordsReview.state.pieces===4",
+     "timeout": 60000
     },
     {
-     "click": "Next word"
-    },
-    {
-     "click": "Speak to gate →"
+     "click": "Speak command to gate"
     },
     {
      "wait_eval": "()=>FirstWordsReview.state.status==='wrong'&&!FirstWordsReview.runtime.world.animating",
@@ -249,31 +317,26 @@
      "click": "Inspect today's route notice"
     },
     {
-     "click": "Carry today's notice"
+     "click": "Stage today's notice"
     },
     {
-     "click": "Carry Today's notice to the message machine"
+     "click": "Insert and commit Today's notice at the message machine"
     },
     {
-     "click": "Place today's notice in machine slot"
-    },
-    {
-     "click": "Commit source"
+     "click": "Open the message machine"
     },
     {
      "click": "Make first word"
     },
     {
-     "click": "Next word"
+     "click": "Run continuation"
     },
     {
-     "click": "Next word"
+     "wait_eval": "()=>FirstWordsReview.state.pieces===4",
+     "timeout": 60000
     },
     {
-     "click": "Next word"
-    },
-    {
-     "click": "Speak to gate →"
+     "click": "Speak command to gate"
     },
     {
      "wait_eval": "()=>FirstWordsReview.state.status==='success'&&!FirstWordsReview.runtime.world.animating",
@@ -453,7 +516,10 @@
    "wait_text": "Skip control practice",
    "focal": "zip",
    "coverage_max": 0.2,
-   "touch_controls": [".game-move-stick", ".game-view-tools"],
+   "touch_controls": [
+    ".game-move-stick",
+    ".game-view-tools"
+   ],
    "coverage_max_reason": "Touch viewport: on-screen move stick and camera tool cluster are direct-input affordances (guide B1 touch allowance); informational surfaces alone measure under 15%.",
    "screenshot": "artifacts/play-20260922/b8-tutorial-prompt-phone.png"
   },
@@ -485,7 +551,10 @@
     }
    ],
    "coverage_max": 0.2,
-   "touch_controls": [".game-move-stick", ".game-view-tools"],
+   "touch_controls": [
+    ".game-move-stick",
+    ".game-view-tools"
+   ],
    "coverage_max_reason": "Touch viewport: the move stick and camera cluster are direct-input affordances (guide B1). The repair tutorial is diegetic: the panel stays folded behind the world toggle and the world markers carry the verbs."
   },
   {
@@ -708,8 +777,11 @@
      "timeout": 60000
     }
    ],
-   "coverage_max": 0.20,
-   "touch_controls": [".game-move-stick", ".game-view-tools"],
+   "coverage_max": 0.2,
+   "touch_controls": [
+    ".game-move-stick",
+    ".game-view-tools"
+   ],
    "wait_eval": "()=>document.querySelector('#engine').hidden&&!FirstWordsReview.runtime.world.animating",
    "carriers": [
     {
@@ -799,12 +871,21 @@
      "click": "Put the machine away",
      "timeout": 60000
     },
-    {"click": "Inspect the old route sign", "timeout": 60000},
-    {"click": "Carry old sign", "timeout": 60000},
-    {"click": "Carry Old sign to the message machine", "timeout": 60000},
-    {"click": "Place old sign in machine slot", "timeout": 60000},
-    {"click": "Commit source", "timeout": 60000},
-    {"click": "Open the message machine", "timeout": 60000
+    {
+     "click": "Inspect the old route sign",
+     "timeout": 60000
+    },
+    {
+     "click": "Stage old sign",
+     "timeout": 60000
+    },
+    {
+     "click": "Insert and commit Old sign at the message machine",
+     "timeout": 60000
+    },
+    {
+     "click": "Open the message machine",
+     "timeout": 60000
     },
     {
      "click": "Make first word",
@@ -814,26 +895,28 @@
      "click": "Request, sign, and Open",
      "timeout": 60000
     },
-    {"click": "Check my prediction", "timeout": 60000},
+    {
+     "click": "Check my prediction",
+     "timeout": 60000
+    },
     {
      "click": "Moon",
      "timeout": 60000
     },
-    {"click": "Check my prediction", "timeout": 60000},
     {
-     "click": "Next word",
+     "click": "Check my prediction",
      "timeout": 60000
     },
     {
-     "click": "Next word",
+     "click": "Run continuation",
      "timeout": 60000
     },
     {
-     "click": "Next word",
+     "wait_eval": "()=>FirstWordsReview.state.pieces===4",
      "timeout": 60000
     },
     {
-     "click": "Speak to gate →",
+     "click": "Speak command to gate",
      "timeout": 60000
     },
     {
@@ -973,16 +1056,34 @@
      "click": "Put the machine away",
      "timeout": 60000
     },
-    {"click": "Inspect today's route notice", "timeout": 60000},
-    {"click": "Carry today's notice", "timeout": 60000},
-    {"click": "Carry Today's notice to the message machine", "timeout": 60000},
-    {"click": "Place today's notice in machine slot", "timeout": 60000},
-    {"click": "Commit source", "timeout": 60000},
-    {"click": "Open the message machine", "timeout": 60000
+    {
+     "click": "Inspect today's route notice",
+     "timeout": 60000
     },
-    {"click": "Make first word", "timeout": 60000},
-    {"click": "Request, sign, and Open", "timeout": 60000},
-    {"click": "Check my prediction", "timeout": 60000},
+    {
+     "click": "Stage today's notice",
+     "timeout": 60000
+    },
+    {
+     "click": "Insert and commit Today's notice at the message machine",
+     "timeout": 60000
+    },
+    {
+     "click": "Open the message machine",
+     "timeout": 60000
+    },
+    {
+     "click": "Make first word",
+     "timeout": 60000
+    },
+    {
+     "click": "Request, sign, and Open",
+     "timeout": 60000
+    },
+    {
+     "click": "Check my prediction",
+     "timeout": 60000
+    },
     {
      "wait_eval": "()=>[...document.querySelectorAll('#actions button')].some(b=>b.textContent.trim()==='Ask for a hint')",
      "timeout": 60000
@@ -1008,9 +1109,33 @@
     }
    ],
    "required_content": [
-    {"selector":"#goal","includes":["Which gate does this sign support?"]},
-    {"selector":"#slotted-source","includes":["Moon closed · five-point mark."]},
-    {"selector":"[data-learning-hint=\"current-source\"]","includes":["Hint: trust this sign."]}
+    {
+     "selector": "#goal",
+     "includes": [
+      "Which gate does this sign support?"
+     ]
+    },
+    {
+     "selector": "#slotted-source",
+     "includes": [
+      "TODAY'S NOTICE",
+      "IN MACHINE"
+     ]
+    },
+    {
+     "selector": "[data-learning-hint=\"current-source\"]",
+     "includes": [
+      "Hint: trust this sign."
+     ]
+    },
+    {
+     "selector": "#context",
+     "includes": [
+      "Open the route",
+      "five-point lantern mark",
+      "Open"
+     ]
+    }
    ],
    "coverage_max_reason": "Guide B1 narrow-sheet clause: the player opened the machine and then asked for the hint, so the sheet carries the beat's instruction. That instruction is a declared carrier floor, not sheddable prose (guide I10)."
   },
@@ -1041,9 +1166,33 @@
     }
    ],
    "required_content": [
-    {"selector":"#goal","includes":["Which gate does this sign support?"]},
-    {"selector":"#slotted-source","includes":["Moon closed · five-point mark."]},
-    {"selector":"[data-learning-hint=\"current-source\"]","includes":["Hint: trust this sign."]}
+    {
+     "selector": "#goal",
+     "includes": [
+      "Which gate does this sign support?"
+     ]
+    },
+    {
+     "selector": "#slotted-source",
+     "includes": [
+      "TODAY'S NOTICE",
+      "IN MACHINE"
+     ]
+    },
+    {
+     "selector": "[data-learning-hint=\"current-source\"]",
+     "includes": [
+      "Hint: trust this sign."
+     ]
+    },
+    {
+     "selector": "#context",
+     "includes": [
+      "Open the route",
+      "five-point lantern mark",
+      "Open"
+     ]
+    }
    ],
    "text_scale": 2,
    "twin_of": "mission-hint-phone-sheet",

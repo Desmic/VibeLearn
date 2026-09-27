@@ -122,7 +122,7 @@ def replay(snapshot, value=None):
     value = empty() if value is None else value
     validate(value)
     config = snapshot["word_machine"]
-    if config['version'] in ('first-words-1', 'first-words-2', 'first-words-3', 'first-words-4'):
+    if config['version'] in ('first-words-1', 'first-words-2', 'first-words-3', 'first-words-4', 'first-words-5'):
         from app.first_words import replay as replay_rescue
         return replay_rescue(snapshot, value)
     if config["version"] != VERSION:

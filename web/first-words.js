@@ -24,8 +24,60 @@ const reduced=()=>preferences.get('motion');
 let cardOpen=false,cardStateKey='',lastExperienceMode=null;
 let stagedSource=null,stagedRelaySource=null,slottedSource=null,slottedRelaySource=null,inspectedSource=null,inspectedKind=null,sourceAttempt=null;
 let routeCorrectionSeen=false;
+let continuationRunning=false,continuationReview=false,continuationIndex=0,continuationTimer=null,continuationWaitAt=0;
+function pauseContinuation(){
+  continuationRunning=false;
+  if(continuationTimer){clearTimeout(continuationTimer);continuationTimer=null;}
+}
+function pauseContinuationAway(focusAction=null){
+  if(!continuationRunning)return;
+  pauseContinuation();
+  render();
+  if(focusAction)$('#actions button[data-action="'+focusAction+'"]')?.focus();
+}
+function pauseContinuationForHistory(){
+  if(!continuationRunning)return;
+  pauseContinuation();
+  // Focus can precede click/Enter. Preserve the focused history button until
+  // activation, instead of replacing #actions and swallowing that activation.
+  const resume=$('#actions button[data-action="continuation-pause"]');
+  if(resume){resume.dataset.action='continuation-run';resume.textContent='Resume continuation';resume.setAttribute('aria-label','Resume continuation');resume.onclick=runContinuation;}
+}
+async function advanceContinuation(){
+  continuationTimer=null;
+  if(!continuationRunning)return;
+  const s=view();
+  if(!situatedRoute()||s.round!==1||s.status!=='building'||s.source_inference==='none'||s.pieces>=4){pauseContinuation();render();return;}
+  if(session.busy||session.pending||session.error){pauseContinuation();render();return;}
+  if(blocked()){
+    if(performance.now()-continuationWaitAt>20000){pauseContinuation();render();return;}
+    continuationTimer=setTimeout(advanceContinuation,250);return;
+  }
+  if(!s.available_actions?.includes('step')){pauseContinuation();render();return;}
+  await session.action('step');
+  if(!continuationRunning)return;
+  if(session.pending||session.error){pauseContinuation();render();return;}
+  if(view().pieces>=4){pauseContinuation();render();return;}
+  continuationWaitAt=performance.now();
+  continuationTimer=setTimeout(advanceContinuation,2000);
+}
+function runContinuation(){
+  if(continuationRunning)return;
+  continuationReview=false;
+  continuationRunning=true;
+  continuationWaitAt=performance.now();
+  continuationTimer=setTimeout(advanceContinuation,900);
+  render();
+}
+function reviewContinuation(){
+  pauseContinuation();
+  continuationReview=true;
+  continuationIndex=view().pieces;
+  render();
+}
 const sourceName=key=>chapter.routeSources[key]?.name||chapter.relaySources[key]?.name||'sign';
 function inspectSource(key){
+  pauseContinuation();
   const s=view(),source=chapter.routeSources[key];
   if(!source||s.round!==1||!['none',undefined].includes(s.relay_stage)||
      (s.clue!=='none'&&s.status!=='wrong'))return;
@@ -34,12 +86,15 @@ function inspectSource(key){
   $('#source-inspection').dataset.anchor=source.anchor;
   text('#source-name',source.name);
   text('#source-text',s.case.notes[key]);
-  text('#source-stage',`Carry ${source.name.toLowerCase()}`);
+  text('#source-stage',situatedRoute()?`Stage ${source.name.toLowerCase()}`:`Carry ${source.name.toLowerCase()}`);
+  $('#source-route-frame').hidden=!situatedRoute();
   $('#source-inspection').hidden=false;
+  host.classList.toggle('route-inspecting',situatedRoute());
   cardOpen=false;syncCardVisibility();
   $('#source-stage').focus();
 }
 function inspectRelaySource(key){
+  pauseContinuation();
   const s=view(),source=chapter.relaySources[key];
   if(!source||s.relay_stage!=='choosing'&&s.relay_stage!=='revealed')return;
   if(s.relay_stage==='choosing'&&s.relay_context!=='none')return;
@@ -48,6 +103,7 @@ function inspectRelaySource(key){
   text('#source-name',source.name);
   text('#source-text',s.relay_case.notes[key]);
   text('#source-stage',`Carry ${source.name.toLowerCase()}`);
+  $('#source-route-frame').hidden=true;
   $('#source-inspection').hidden=false;
   cardOpen=false;syncCardVisibility();$('#source-stage').focus();
 }
@@ -57,18 +113,20 @@ function stageSource(){
   else stagedSource=inspectedSource;
   inspectedSource=null;inspectedKind=null;
   $('#source-inspection').hidden=true;
+  host.classList.remove('route-inspecting');
   render();
   $('#machine-toggle').focus();
 }
-function closeSource(){inspectedSource=null;inspectedKind=null;$('#source-inspection').hidden=true;}
+function closeSource(){inspectedSource=null;inspectedKind=null;$('#source-inspection').hidden=true;host.classList.remove('route-inspecting');}
 // Fresh entry mounts the first prologue composition behind the loading layer. Do not
 // instantiate the prison mission first and then flash it while learner state resolves.
 let world=runtime.showStory(chapter,host,0,{reducedMotion:reduced()});
 const session=createLearningSession(render);
 const tentative=createReversibleChoice(render);
 const practice=createTutorialFlow(chapter.controlTutorialSpec);
-const ours=()=>['first-words-1','first-words-2','first-words-3','first-words-4'].includes(session.attempt?.snapshot?.word_machine?.version);
-const growingBeat=s=>['first-words-3','first-words-4'].includes(session.attempt?.snapshot?.word_machine?.version)&&s.round===1&&s.pieces===1;
+const ours=()=>['first-words-1','first-words-2','first-words-3','first-words-4','first-words-5'].includes(session.attempt?.snapshot?.word_machine?.version);
+const situatedRoute=()=>session.attempt?.snapshot?.word_machine?.version==='first-words-5';
+const growingBeat=s=>['first-words-3','first-words-4','first-words-5'].includes(session.attempt?.snapshot?.word_machine?.version)&&s.round===1&&s.pieces===1;
 const changedRelay=s=>s.relay_inference!==undefined;
 const sourceInferenceMode=s=>s.source_inference!==undefined;
 const view=()=>ours()?session.attempt.word_machine_state:initial;
@@ -112,6 +170,18 @@ document.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',()=>{p
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 document.addEventListener('pointerdown',()=>audio.unlock().catch(()=>{}),{capture:true});
 document.addEventListener('keydown',()=>audio.unlock().catch(()=>{}),{capture:true});
+// Playback belongs to the active machine. Leaving it or entering an inspection
+// freezes the saved prefix; activating its Run control remains a deliberate resume.
+document.addEventListener('focusin',event=>{
+  if(!continuationRunning)return;
+  const history=event.target.closest?.('#actions button[data-action="continuation-review"]');
+  if(history){pauseContinuationForHistory();return;}
+  if(event.target=== $('#inspect')||!$('#engine').contains(event.target))pauseContinuationAway();
+});
+document.addEventListener('pointerdown',event=>{
+  if(continuationRunning&&!$('#engine').contains(event.target))pauseContinuationAway();
+},{capture:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseContinuationAway();});
 function button(label,action,primary=true,onClick=null){const b=document.createElement('button');b.className=primary?'primary':'';b.dataset.action=action;b.disabled=Boolean(blocked());b.onclick=onClick||(()=>act(action));
   // I10: an option may carry the world text it offers after its own name. The name is
   // the decision and never sheds; the quote is a rung below it, so a tight surface gives
@@ -132,6 +202,7 @@ function choiceTray(label,action,kind){
     requestAnimationFrame(()=>$('#actions [data-choice-selected="true"]')?.focus());
   });
   b.dataset.choiceSelected=String(selected);b.setAttribute('aria-pressed',String(selected));
+  return b;
 }
 function commitChoice(kind){
   const scope=choiceScope(kind),selected=tentative.selected(scope);
@@ -166,6 +237,11 @@ function sourceHandoff(kind){
   const relay=kind==='relay',carried=relay?stagedRelaySource:stagedSource;
   const placed=relay?slottedRelaySource:slottedSource;
   const target=relay?'receiver':'machine';
+  if(!relay&&situatedRoute()){
+    if(carried)button(`Insert and commit ${sourceName(carried).toLowerCase()}`,chapter.routeSources[carried].action);
+    else statusLine(view().status==='wrong'?'Read another sign, then stage and insert it here to retry.':'Read a corridor sign, stage it, then insert it here. Inspection alone supplies nothing.',{learningHint:'source'});
+    return;
+  }
   if(placed){
     statusLine(`${sourceName(placed)} is in the ${target} slot. Only Commit source supplies it.`,{learningHint:'source-slot'});
     button('Commit source',relay?chapter.relaySources[placed].action:chapter.routeSources[placed].action);
@@ -193,6 +269,9 @@ function tutorialStage(s,complete){
   if(repair)return[repair.stage,repair.title,repair.detail];
   if(s.status==='success')return['LEVEL 1 · COMPLETE','Route found.','The changed context opened the deeper gate. Finish when you are ready.'];
   if(s.status==='wrong')return['LEVEL 1 · RECOVER','Wrong route.','Nothing is lost. Compare the route boards, supply a better sign and try again.'];
+  if(situatedRoute()&&s.round===1&&s.pieces>0&&s.source_inference!=='none'&&s.status==='building')
+    return['LEVEL 1 · CONTINUATION',continuationReview?`Input ${continuationIndex} of ${s.pieces}.`:s.pieces<4?'See the input grow.':'Test the finished command.',
+      s.pieces<4?'Run the short toy continuation once. Pause and review every complete input at your own pace.':'The complete command is ready. Review its inputs or speak it to the world gate.'];
   if(s.clue==='none')return['LEVEL 1 · FIRST MISSION','Find the current route.','Three route boards stand here and they disagree. Read them, then supply one sign to the machine.'];
   if(growingBeat(s)&&s.loop_prediction==='none')return['LEVEL 1 · INPUT','What reaches the machine next?','Open has appeared. Predict whether the next input also receives that word.'];
   if(growingBeat(s)&&s.source_inference==='none'&&s.loop_prediction==='same'&&!routeCorrectionSeen)
@@ -205,7 +284,8 @@ function tutorialStage(s,complete){
 }
 function render(){
   const s=view(),a=session.attempt,complete=ours()&&a.status==='submitted';
-  if(a?.id!==sourceAttempt){sourceAttempt=a?.id;stagedSource=null;stagedRelaySource=null;slottedSource=null;slottedRelaySource=null;routeCorrectionSeen=false;tentative.reset();closeSource();}
+  if(a?.id!==sourceAttempt){pauseContinuation();continuationReview=false;sourceAttempt=a?.id;stagedSource=null;stagedRelaySource=null;slottedSource=null;slottedRelaySource=null;routeCorrectionSeen=false;tentative.reset();closeSource();}
+  if(situatedRoute()&&(s.round!==1||s.source_inference==='none'||s.status!=='building')){pauseContinuation();continuationReview=false;}
   if(s.round!==1||s.status==='success'||(stagedSource&&s.clue===stagedSource)){
     stagedSource=null;slottedSource=null;closeSource();
   }
@@ -251,24 +331,30 @@ function render(){
   const carried=relay?stagedRelaySource:stagedSource,slotted=relay?slottedRelaySource:slottedSource;
   const device=relay?'receiver':'message machine';
   const arriving=s.available_actions?.includes('relay-start');
-  text('#machine-toggle',s.round===0?'Inspect engine':arriving?'ANSWER MIRA’S SIGNAL':slotted?`${sourceName(slotted).toUpperCase()} IN ${relay?'RECEIVER':'ENGINE'}`:carried?`CARRY ${sourceName(carried).toUpperCase()} → ${relay?'RECEIVER':'ENGINE'}`:relay?'OPEN RECEIVER':'OPEN ENGINE');
-  $('#machine-toggle').setAttribute('aria-label',arriving?'Answer Mira’s signal at the receiver':carried?`Carry ${sourceName(carried)} to the ${device}`:`Open the ${device}`);
+  const directInsert=Boolean(situatedRoute()&&!relay&&carried&&s.available_actions?.includes(chapter.routeSources[carried].action));
+  text('#machine-toggle',s.round===0?'Inspect engine':arriving?'ANSWER MIRA’S SIGNAL':directInsert?`INSERT ${sourceName(carried).toUpperCase()}`:slotted?`${sourceName(slotted).toUpperCase()} IN ${relay?'RECEIVER':'ENGINE'}`:carried?`CARRY ${sourceName(carried).toUpperCase()} → ${relay?'RECEIVER':'ENGINE'}`:situatedRoute()&&!relay&&s.clue!=='none'?`${sourceName(s.clue).toUpperCase()} IN ENGINE`:relay?'OPEN RECEIVER':'OPEN ENGINE');
+  $('#machine-toggle').setAttribute('aria-label',arriving?'Answer Mira’s signal at the receiver':directInsert?`Insert and commit ${sourceName(carried)} at the message machine`:carried?`Carry ${sourceName(carried)} to the ${device}`:`Open the ${device}`);
   $('#machine-toggle').setAttribute('aria-description',goal);
   const carryToken=$('#carried-source'),slotToken=$('#slotted-source');
   carryToken.dataset.anchor='zip';
   text('#carried-source',carried&&!slotted?`ZIP CARRIES · ${sourceName(carried).toUpperCase()}`:'');
   const sourceQuestion=!relay&&growingBeat(s)&&s.loop_prediction!=='none'&&s.source_inference==='none'&&!routeCorrection;
-  slotToken.dataset.anchor=sourceQuestion?chapter.routeSources[s.clue].anchor:relay?'friend-signal-label':'route-machine';
+  slotToken.dataset.anchor=sourceQuestion&&!situatedRoute()?chapter.routeSources[s.clue].anchor:relay?'friend-signal-label':'route-machine';
   const routeSource=chapter.routeSources[s.clue];
-  text('#slotted-source',slotted?`${sourceName(slotted).toUpperCase()} · IN ${relay?'RECEIVER':'MACHINE'} SLOT`:
+  const committedRoute=situatedRoute()&&!relay&&s.round===1&&s.clue!=='none'&&s.status!=='success';
+  const support=committedRoute&&s.source_inference!=='none'?s.case.source_support[s.clue]:null;
+  text('#slotted-source',committedRoute?`${sourceName(s.clue).toUpperCase()} · IN MACHINE${support?` · ${support==='no-gate'?'NO GATE NAMED':`${support.toUpperCase()} NAMED`}`:''}`:slotted?`${sourceName(slotted).toUpperCase()} · IN ${relay?'RECEIVER':'MACHINE'} SLOT`:
     sourceQuestion?`SUPPLIED · ${s.hinted&&routeSource.cueText?routeSource.cueText:routeSource.decisionText}`:'');
-  slotToken.classList.toggle('source-evidence',sourceQuestion);
-  slotToken.dataset.critical=sourceQuestion?'true':'false';
+  slotToken.classList.toggle('source-evidence',sourceQuestion&&!situatedRoute());
+  slotToken.dataset.critical=sourceQuestion||committedRoute?'true':'false';
   host.dataset.tutorialWorldTarget=controlStep==='done'&&repair?.focus==='world'?(repair.target||''):'';
   host.dataset.tutorialWorldAction=controlStep==='done'&&repair?.focus==='world'?(repair.primaryAction||''):'';
   host.dataset.tutorialInteractionStep=controlStep==='done'?(repair?.id||''):'';
   const shownOutput=relay?s.relay_output:s.output;
   $('#output').dataset.critical=changedRelay(s)&&s.relay_pieces>0&&s.relay_stage==='choosing'?'true':'false';
+  const completeRouteInput=situatedRoute()&&s.round===1&&s.clue!=='none'&&s.status==='building';
+  $('#engine .input').dataset.critical=completeRouteInput?'true':'false';
+  if(completeRouteInput&&s.pieces>0)$('#output').dataset.critical='true';
   const readoutInput=relay?[s.relay_case?.base,s.relay_case?.notes?.[s.relay_context]]:s.input||[];
   text('#readout-request',readoutInput[0]||'Awaiting a request');
   text('#readout-supplied',readoutInput[1]||'No clue supplied yet');
@@ -277,7 +363,9 @@ function render(){
   const wrongRouteHistory=growingBeat(s)&&s.loop_prediction==='same';
   const omitted=s.relay_input_prediction==='latest'?'Meet':'Meet and at';
   const tutorialReadout=s.round===0&&s.pieces===1;
-  $('#readout-request-row').hidden=tutorialReadout;
+  // The request is part of every next input, including after the first toy word.
+  // Shedding it made the carried readout look complete while teaching an incomplete input.
+  $('#readout-request-row').hidden=false;
   text('#readout-feedback',wrongHistory?`Your choice left out ${omitted}. The next input includes every generated word.`:
     wrongRouteHistory?'Your choice left out Open. The next input includes the request, sign, and Open.':
     tutorialReadout?'Prepared toy words; real tokens may be smaller.':'');
@@ -285,9 +373,11 @@ function render(){
   $('#learning-readout').dataset.anchor=relay?'friend-signal-label':'zip-voice';
   $('#learning-readout').dataset.critical=wrongHistory||wrongRouteHistory?'true':'false';
   $('#learning-readout strong').textContent=relay?'NEXT INPUT TO RECEIVER':"NEXT INPUT TO ZIP'S ENGINE";
-  $('#learning-readout strong').hidden=tutorialReadout;
-  $('#output').replaceChildren();for(let i=0;i<4;i++){const span=document.createElement('span');span.textContent=shownOutput[i]||'·';if(!shownOutput[i])span.className='empty';$('#output').append(span);}
-  const visibleInput=growingBeat(s)&&s.loop_prediction==='none'?s.input:s.context;
+  $('#learning-readout strong').hidden=false;
+  const reviewCount=continuationReview?Math.max(0,Math.min(continuationIndex,s.pieces)):null;
+  const paintedOutput=reviewCount===null?shownOutput:shownOutput.slice(0,reviewCount);
+  $('#output').replaceChildren();for(let i=0;i<4;i++){const span=document.createElement('span');span.textContent=paintedOutput[i]||'·';if(!paintedOutput[i])span.className='empty';$('#output').append(span);}
+  const visibleInput=continuationReview?[...s.input,...s.output.slice(0,reviewCount)]:growingBeat(s)&&s.loop_prediction==='none'?s.input:s.context;
   text('#context',relay?(changedRelay(s)?s.relay_input:[s.relay_case.base,s.relay_case.notes[s.relay_context]||'Choose a note.',['revealed','done'].includes(s.relay_stage)?s.relay_case.prefix:'']).filter(Boolean).join(' '):visibleInput.join(' ')||'Waiting for power.');
   text('#engine-label',relay?'MESSAGE RECEIVER · PRISON RELAY':complete?(s.relay_stage==='done'?'MESSAGE RECEIVER · REPLY':'MESSAGE MACHINE · ROUTE OPEN'):s.round===1?'MESSAGE MACHINE · LEVEL 1':'MESSAGE MACHINE · TUTORIAL');
   $('#inspect').hidden=s.round===0||relay;
@@ -362,8 +452,28 @@ function render(){
     $('#actions').dataset.layout='two-column';
     if(s.hinted)statusLine('Hint: trust this sign.',{learningHint:'current-source'});
     choiceTray('Moon','infer-moon','route-inference');choiceTray('Star','infer-star','route-inference');
-    choiceTray('Sun','infer-sun','route-inference');choiceTray('No gate','infer-no-gate','route-inference');checkChoice('route-inference');
+    choiceTray('Sun','infer-sun','route-inference');
+    const none=choiceTray('No gate','infer-no-gate','route-inference');
+    if(situatedRoute())none.textContent='None';
+    checkChoice('route-inference');
     if(!s.hinted&&!wrongRouteHistory)button('Ask for a hint','hint',false);
+  }
+  else if(situatedRoute()&&!relay&&s.round===1&&s.pieces>0&&s.source_inference!=='none'&&s.status==='building'){
+    if(continuationReview){
+      $('#actions').dataset.layout='history';
+      if(reviewCount>0)button('Previous input','review-previous',false,()=>{continuationIndex--;render();}).textContent='Back';
+      if(reviewCount<s.pieces)button('Next input','review-next',false,()=>{continuationIndex++;render();}).textContent='Next';
+      button('Return to current input','review-close',false,()=>{continuationReview=false;render();}).textContent='Current';
+      if(s.pieces<4)button('Resume continuation','continuation-resume',true,runContinuation).textContent='Resume';
+      else button('Speak command to gate','send').textContent='Speak';
+    }else if(s.pieces<4){
+      if(continuationRunning)button('Pause and review','continuation-pause',true,reviewContinuation);
+      else button(s.pieces===1?'Run continuation':'Resume continuation','continuation-run',true,runContinuation);
+      button('Review generated inputs','continuation-review',false,reviewContinuation);
+    }else{
+      button('Speak command to gate','send');
+      button('Review generated inputs','continuation-review',false,reviewContinuation);
+    }
   }
   else if(s.round===1&&s.pieces===0&&s.prediction==='none'&&s.available_actions?.includes('step')){
     statusLine(`Only ${sourceName(s.clue).toLowerCase()} was supplied. The other signs remain outside the machine.`);
@@ -430,6 +540,7 @@ function render(){
   // Sign-reading beats must not let the card steal the boards' airtime.
   const readingBeat=step==='done'&&((s.round===1&&s.clue==='none')||(s.round===1&&s.status==='wrong')||(relay&&s.relay_stage==='choosing'&&s.relay_context==='none'));
   $('#engine').classList.toggle('compact',readingBeat);
+  $('#engine').classList.toggle('source-question',situatedRoute()&&growingBeat(s)&&s.source_inference==='none');
   // World-focus tutorial steps: the world marker carries the verb, so the card
   // rides in the bottom band instead of dominating the scene (ladder rungs 1-3).
   $('#engine').classList.toggle('world-focus',s.round===0&&step==='done'&&practice.current?.focus==='world');
@@ -481,10 +592,13 @@ function flavor(title,detail){
   dialog('#choice');
 }
 $('#start').onclick=()=>act('start');$('#rewind').onclick=()=>act('rewind');$('#retry').onclick=()=>session.retry();
-$('#card-close').onclick=()=>{cardOpen=false;syncCardVisibility();};
+$('#card-close').onclick=()=>{pauseContinuation();cardOpen=false;syncCardVisibility();};
 $('#machine-toggle').onclick=()=>{
   closeSource();
   if(view().available_actions?.includes('relay-start')){act('relay-start');return;}
+  if(situatedRoute()&&stagedSource&&view().round===1&&view().available_actions?.includes(chapter.routeSources[stagedSource].action)){
+    act(chapter.routeSources[stagedSource].action);return;
+  }
   cardOpen=true;syncCardVisibility();
 };
 $('#source-stage').onclick=stageSource;
@@ -526,7 +640,7 @@ $('#inspect').onclick=()=>{
 // Rule I11: a control writes the registry and the registry repaints every carrier of that
 // preference, so no surface can be left showing a stale reading. The 3D world is the one
 // thing a motion change has to be rebuilt into.
-const remountMotion=()=>{const camera=world.getPlayerView();runtime.disposeWorld({keepStage:true});world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced()});world.restorePlayerView(camera);presented=null;render();};
+const remountMotion=()=>{pauseContinuation();const camera=world.getPlayerView();runtime.disposeWorld({keepStage:true});world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced()});world.restorePlayerView(camera);presented=null;render();};
 for(const name of ['music','effects'])$('#'+name).onchange=e=>preferences.set(name,e.target.checked);
 $('#mute').onclick=()=>preferences.set('sound',!preferences.get('sound'));
 $('#reduced').onchange=e=>{preferences.set('motion',e.target.checked);remountMotion();};
@@ -707,6 +821,7 @@ async function boot(){
 }
 window.FirstWordsReview={
   get state(){return view();},
+  get continuation(){return {running:continuationRunning,review:continuationReview,index:continuationIndex};},
   get runtime(){return runtime.stats();},
   get colliders(){return runtime.colliderSnapshot();},
   get audio(){return audio.stats();},

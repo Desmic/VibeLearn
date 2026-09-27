@@ -55,6 +55,16 @@ The reviewer may read generic tool instructions; record accidental context leaks
    can do. Prefer that native browser when the reviewer verifies a live screenshot
    and one harmless input. Otherwise use the shared harness and verify that a `shot`
    step writes a non-trivial PNG which the reviewer actually inspects.
+   Before a costly cold run, map every assigned claim to its required input and
+   observation. If the journey requires continuous movement, verify a sustained
+   held direction on the actual playable scene and observe the character change
+   position; a successful tap or Tab key is not that capability. Check touch,
+   camera, reload, recording and listening separately when the assigned claim
+   needs them. If the native interface lacks one, use the existing shared
+   adaptive harness for that claim, or mark it unassessed. Keep captures and
+   action traces under the run's candidate-bound evidence root; record which
+   images/video segments were actually inspected, and use the existing hash and
+   receipt checks where applicable. A saved file alone does not certify review.
    For a long GUI pass, preflight responsiveness on the actual game. On Windows the
    harness defaults to Direct3D 11; `--software` explicitly selects SwiftShader.
    A 26 September phone-scene sample measured roughly 2.2 CPU cores plus 36% of

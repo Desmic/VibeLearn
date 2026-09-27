@@ -332,6 +332,19 @@ class FirstWordsV3Tests(unittest.TestCase):
         self.assertEqual(old_view['loop_prediction'],'none')
         self.assertIn('step',old_view['available_actions'])
 
+    def test_existing_v4_snapshot_keeps_replay_and_assessment_meaning(self):
+        old=first_words.build_content_v4(CONTENT)
+        self.assertEqual(old['word_machine']['version'],'first-words-4')
+        moves=FIRST+['next','scan-parade','step','loop-grows','infer-no-gate']+['step']*3+['send']
+        response={'word_machine':{'moves':moves}}
+        old_view=word_machine.replay(old,response['word_machine'])
+        self.assertEqual(old_view['source_inference'],'no-gate')
+        self.assertEqual(old_view['output'],['Open','the','Moon','gate'])
+        self.assertEqual(old_view['status'],'wrong')
+        assessment=first_words.evaluate(old,response,'assisted')
+        self.assertEqual(assessment['transfer_observations']['source_support'],'no-gate')
+        self.assertTrue(assessment['transfer_observations']['inference_matches_source'])
+
 
 class FirstWordsV4Tests(unittest.TestCase):
     action = FirstWordsTests.action
@@ -349,7 +362,7 @@ class FirstWordsV4Tests(unittest.TestCase):
 
     def test_three_sources_and_complete_history_are_separate_from_toy_output(self):
         self.enter_relay()
-        self.assertEqual(self.attempt['snapshot']['word_machine']['version'],'first-words-4')
+        self.assertEqual(self.attempt['snapshot']['word_machine']['version'],'first-words-5')
         self.assertEqual(set(self.attempt['snapshot']['word_machine']['relay_case']['notes']),{'loft','yard','tavi'})
         self.action('relay-context-tavi')
         self.assertNotIn('relay-piece',self.attempt['word_machine_state']['available_actions'])

@@ -8,11 +8,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 BROWSER_GROUPS = {
-    "foundation": ["tests.level1_entry_browser", "tests.renderer_lifecycle_browser", "tests.animation_rest_browser"],
+    "foundation": ["tests.level1_entry_browser", "tests.renderer_lifecycle_browser", "tests.opening_renderer_contract_browser", "tests.animation_rest_browser"],
     "first-words-opening": ["tests.first_words_opening_browser"],
     "first-words-tutorial": ["tests.control_practice_browser"],
     "first-words-controls": ["tests.level1_controls_browser", "tests.physicality_browser"],
-    "first-words-chapter": ["tests.level1_chapter_browser"],
+    "first-words-chapter": ["tests.level1_chapter_browser", "tests.situated_route_browser"],
     "first-words-relay": ["tests.relay_history_browser"],
     "first-words-readability": ["tests.first_words_readability_browser"],
     "first-words-lifecycle": ["tests.level1_lifecycle_browser"],
@@ -23,6 +23,7 @@ BROWSER_GROUPS = {
         "tests.level1_controls_browser",
         "tests.physicality_browser",
         "tests.level1_chapter_browser",
+        "tests.situated_route_browser",
         "tests.relay_history_browser",
         "tests.first_words_readability_browser",
         "tests.level1_lifecycle_browser",

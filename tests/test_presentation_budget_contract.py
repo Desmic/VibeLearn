@@ -87,6 +87,10 @@ class PresentationBudgetContract(unittest.TestCase):
                      "route-source-selected-phone-200text"):
             self.assertIn(name, states)
             self.assertTrue(states[name]["required_content"])
+        for name in ("tutorial-word-desktop-folded", "tutorial-word-phone-folded"):
+            claims = {entry["selector"] for entry in states[name]["required_content"]}
+            self.assertTrue({"#readout-request-row", "#readout-supplied", "#readout-words",
+                             "#readout-feedback"} <= claims)
 
     def test_requested_world_measurements_cannot_disappear(self):
         requested = {"focal": "zip", "presence": {"entity": "zip", "height": 2},
@@ -182,6 +186,48 @@ class PresentationBudgetContract(unittest.TestCase):
             page.set_content('<main><h1 id="question"><span aria-hidden="true">Which harbor pressure core is safe?</span></h1></main>')
             painted_duplicate = violations("question", evaluate_state(page, state, BUDGETS), BUDGETS, False, state)
             self.assertFalse(any("I12 required meaning" in item for item in painted_duplicate))
+            browser.close()
+
+    def test_shed_ancestor_does_not_count_child_as_painted_action(self):
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            page = browser.new_page(viewport={"width": 390, "height": 844})
+            page.set_content('<main><button>Continue</button><div style="display:none">'
+                             '<button style="position:absolute;top:820px">Try again</button>'
+                             '</div></main>')
+            metrics = evaluate_state(page, {}, BUDGETS)
+            self.assertEqual([], metrics["unreachableActions"])
+            browser.close()
+
+    def test_unfamiliar_complete_input_requires_every_painted_member_at_once(self):
+        from playwright.sync_api import sync_playwright
+        state = {"required_content": [
+            {"selector": "#harbor-request", "includes": ["Stabilize the harbor relay."]},
+            {"selector": "#harbor-source", "includes": ["Tide gauge reads high."]},
+            {"selector": "#harbor-prefix", "includes": ["Secure the"]},
+        ]}
+        html = '''<main><section id="harbor-input">
+            <p id="harbor-request">Stabilize the harbor relay.</p>
+            <p id="harbor-source">Tide gauge reads high.</p>
+            <p id="harbor-prefix">Secure the</p>
+            </section></main>'''
+        def missing(page):
+            findings = violations("harbor-next-input", evaluate_state(page, state, BUDGETS), BUDGETS, False, state)
+            return [item for item in findings if "I12 required meaning" in item]
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            page = browser.new_page()
+            page.set_content(html)
+            self.assertEqual(missing(page), [])
+            page.locator('#harbor-request').evaluate('el => el.hidden = true')
+            self.assertEqual(len(missing(page)), 1)
+            page.locator('#harbor-request').evaluate('el => el.hidden = false')
+            page.locator('#harbor-prefix').evaluate("el => el.classList.add('shed')")
+            page.add_style_tag(content='.shed { display:none }')
+            self.assertEqual(len(missing(page)), 1)
+            page.locator('#harbor-prefix').evaluate("el => el.classList.remove('shed')")
+            self.assertEqual(missing(page), [])
             browser.close()
 
     def test_injected_measurement_script_is_balanced(self):

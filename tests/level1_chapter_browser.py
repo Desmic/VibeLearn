@@ -82,6 +82,13 @@ def supply_sign(page,name,carry,insert):
     if page.locator('#engine').is_visible():page.get_by_role('button',name='Put the machine away').click()
     page.get_by_role('button',name=f'Inspect {name}').click()
     expect(page.locator('#source-text')).to_be_visible()
+    if page.locator('#source-route-frame').is_visible():
+        page.get_by_role('button',name=f'Stage {carry}').click()
+        with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
+            page.get_by_role('button',name=f'Insert and commit {insert} at the message machine').click()
+        assert saved.value.ok,saved.value.status
+        expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+        return
     page.get_by_role('button',name=f'Carry {carry}').click()
     open_card(page)
     page.get_by_role('button',name=f'Place {insert} in machine slot').click()
@@ -108,6 +115,14 @@ def generate(page, observations=None, gate_prediction=None):
     if previous.get('source_inference')=='none' and gate_prediction:
         choose(page,'No gate' if gate_prediction=='no-gate' else gate_prediction)
         previous=page.evaluate('FirstWordsReview.state')
+    if page.locator('#actions button[data-action="continuation-run"]').count():
+        open_card(page)
+        page.get_by_role('button',name='Run continuation',exact=True).click()
+        expect(page.locator('#saved')).to_have_text('Saved',timeout=15000)
+        until(page,'FirstWordsReview.state.pieces===4',seconds=35)
+        finished=page.evaluate('FirstWordsReview.state')
+        assert finished['context']==finished['input']+finished['output']
+        return action(page,'Speak command to gate')
     for index in range(previous['pieces'],4):
         label='Make first word' if index==0 else 'Next word'
         attempt=action(page,label)
@@ -256,17 +271,17 @@ def main():
             trace.append({'phase':'tutorial-to-level1','mode':page.locator('#adventure').get_attribute('data-experience-mode'),'passed':True})
             page.get_by_role('button',name='Inspect the old route sign').click()
             expect(page.locator('#source-text')).to_contain_text('Old route')
+            expect(page.locator('#source-route-frame')).to_be_visible()
             assert page.evaluate('FirstWordsReview.state.clue')=='none'
-            page.get_by_role('button',name='Carry old sign').click()
+            page.get_by_role('button',name='Stage old sign').click()
             assert page.evaluate('FirstWordsReview.state.clue')=='none'
-            expect(page.locator('#machine-toggle')).to_contain_text('CARRY OLD SIGN')
+            expect(page.locator('#machine-toggle')).to_contain_text('INSERT OLD SIGN')
+            with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
+                page.get_by_role('button',name='Insert and commit Old sign at the message machine').click()
+            assert saved.value.ok
             open_card(page)
-            expect(page.get_by_role('button',name='Inspect the speech engine')).to_be_visible()
-            page.get_by_role('button',name='Place old sign in machine slot').click()
-            action(page,'Commit source')
             expect(page.locator('#context')).to_contain_text('Old route')
-            expect(page.locator('#engine')).to_be_hidden()
-            expect(page.locator('#learning-readout')).to_be_visible(timeout=15000)
+            expect(page.locator('#engine')).to_be_visible()
             expect(page.locator('#readout-request')).to_contain_text('Open the route')
             expect(page.locator('#readout-supplied')).to_contain_text('Old route')
             replay.append({'phase':'stale-context-selected','state':page.evaluate('FirstWordsReview.state')})
@@ -277,29 +292,28 @@ def main():
             page.screenshot(path=str(out/'level1-transfer-wrong-390.png'))
             # Recovery requires a physical source change, not another machine
             # panel choice. The existing sign remains readable in the corridor.
-            expect(page.get_by_role('button',name='Place old sign in machine slot')).to_have_count(0)
+            expect(page.get_by_role('button',name='Insert and commit Old sign at the message machine')).to_have_count(0)
             if page.locator('#engine').is_visible():page.get_by_role('button',name='Put the machine away').click()
             page.get_by_role('button',name="Inspect today's route notice").click()
             expect(page.locator('#source-text')).to_contain_text('five-point lantern mark')
-            page.get_by_role('button',name="Carry today's notice").click()
-            expect(page.locator('#machine-toggle')).to_contain_text("CARRY TODAY'S NOTICE")
-            open_card(page)
+            page.get_by_role('button',name="Stage today's notice").click()
+            expect(page.locator('#machine-toggle')).to_contain_text("INSERT TODAY'S NOTICE")
             # B3 reachability: the insertion action is on screen without scrolling.
             viewport=page.viewport_size
-            option=page.get_by_role('button',name="Place today's notice in machine slot",exact=True);expect(option).to_be_visible()
+            option=page.get_by_role('button',name="Insert and commit Today's notice at the message machine",exact=True);expect(option).to_be_visible()
             box=option.bounding_box()
             assert box and box['y']>=0 and box['y']+box['height']<=viewport['height'], f'insertion needs scrolling: {box}'
             # B1 narrow-sheet clause: on a phone the opened machine is a flush bottom
             # sheet that yields its height budget to the world, never a card floating
             # over the character (the 23 September second rejection).
+            option.click()
+            open_card(page)
             sheet=page.locator('#engine');classes=sheet.get_attribute('class') or ''
             assert 'sheet' in classes, f'machine card is not a sheet at 390px: {classes}'
             panel=sheet.bounding_box()
             assert abs(panel['y']+panel['height']-viewport['height'])<=8, f'sheet floats above the bottom edge: {panel}'
             assert panel['height']<=0.40*viewport['height'], f'sheet takes too much screen height: {panel}'
             assert panel['x']<=8 and panel['x']+panel['width']>=viewport['width']-8, f'sheet is not full-bleed: {panel}'
-            option.click()
-            action(page,'Commit source')
             expect(page.locator('#context')).to_contain_text('five-point lantern mark')
             replay.append({'phase':'current-context-selected','state':page.evaluate('FirstWordsReview.state')})
             generate(page,generation);until(page,'()=>!FirstWordsReview.runtime.world.animating')
@@ -340,7 +354,7 @@ def main():
                 before_hint=q.evaluate('FirstWordsReview.state')
                 if hint:
                     action(q,'Ask for a hint')
-                    expect(q.locator('[data-learning-hint="current-source"]')).to_contain_text('supplied sign')
+                    expect(q.locator('[data-learning-hint="current-source"]')).to_contain_text('trust this sign')
                     q.reload()
                     open_card(q)
                     expect(q.locator('[data-learning-hint="current-source"]')).to_be_visible(timeout=15000)

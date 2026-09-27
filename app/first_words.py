@@ -144,7 +144,7 @@ def _gate_view(config, value, engine, result):
             first_input = 'none'
         elif first_input is not None and action.startswith('scan-'):
             first_input = action.removeprefix('scan-')
-        elif first_input is not None and action.startswith('infer-' if config['version'] in (V3_VERSION, CURRENT_VERSION) else 'predict-'):
+        elif first_input is not None and action.startswith('infer-' if config['version'] in (V3_VERSION, V4_VERSION, CURRENT_VERSION) else 'predict-'):
             break
     return {**s, 'case': case, 'context': context + output, 'input': context, 'output': output,
             'candidates': candidates, 'destination': destination, 'available_actions': legal,
@@ -156,7 +156,7 @@ def evaluate_v1(snapshot, response, independence):
     s = replay(snapshot, response['word_machine'])
     prediction_destination = {'star': 'Star', 'moon': 'Moon', 'parade': 'Moon'}.get(s['prediction_input'])
     moves = response['word_machine']['moves']
-    decision_prefix = 'infer-' if snapshot['word_machine']['version'] in (V3_VERSION, CURRENT_VERSION) else 'predict-'
+    decision_prefix = 'infer-' if snapshot['word_machine']['version'] in (V3_VERSION, V4_VERSION, CURRENT_VERSION) else 'predict-'
     prediction_index = next((i for i, move in enumerate(moves) if move.startswith(decision_prefix)), len(moves))
     helped = 'hint' in moves[:prediction_index]
     loop_prediction = s.get('loop_prediction', 'none')
@@ -292,9 +292,9 @@ def build_content_v3(template):
 
 # The changed relay is a separately pinned lesson. Inference is about the
 # supplied note; generated words and delivery are independent observations.
-CURRENT_VERSION = 'first-words-4'
+V4_VERSION = 'first-words-4'
 RULES_V4 = deepcopy(RULES_V3)
-RULES_V4['version'] = CURRENT_VERSION
+RULES_V4['version'] = V4_VERSION
 RULES_V4['state']['relay_context'] = enum(['none', 'loft', 'yard', 'tavi'], 'none')
 RULES_V4['state']['relay_inference'] = enum(['none', 'loft', 'yard', 'no-mira'], 'none')
 RULES_V4['state']['relay_pieces'] = integer(2)
@@ -348,13 +348,28 @@ RELAY_CASE_V4 = {
 }
 
 
-def build_content(template):
+def build_content_v4(template):
     item = build_content_v3(template)
-    item['policies']['assessment'] = CURRENT_VERSION
-    item['word_machine']['version'] = CURRENT_VERSION
+    item['policies']['assessment'] = V4_VERSION
+    item['word_machine']['version'] = V4_VERSION
     item['word_machine']['rules'] = deepcopy(RULES_V4)
     item['word_machine']['relay_case'] = deepcopy(RELAY_CASE_V4)
     item['validation']['scope'] = 'Gate source and generated-history practice, then a dated changed-source relay within Level 1'
+    return item
+
+
+CURRENT_VERSION = 'first-words-5'
+RULES_V5 = deepcopy(RULES_V4)
+RULES_V5['version'] = CURRENT_VERSION
+
+
+def build_content(template):
+    # V5 changes the route encounter's interaction treatment. Keep the V4 rules,
+    # learning IDs and evaluator semantics pinned for old saves and first choices.
+    item = build_content_v4(template)
+    item['policies']['assessment'] = CURRENT_VERSION
+    item['word_machine']['version'] = CURRENT_VERSION
+    item['word_machine']['rules'] = deepcopy(RULES_V5)
     return item
 
 
@@ -362,7 +377,7 @@ def replay(snapshot, value):
     version = snapshot['word_machine']['version']
     if version == VERSION:
         return replay_v1(snapshot, value)
-    if version not in (V2_VERSION, V3_VERSION, CURRENT_VERSION):
+    if version not in (V2_VERSION, V3_VERSION, V4_VERSION, CURRENT_VERSION):
         raise ValueError('Unsupported rescue episode version')
     config = snapshot['word_machine']
     engine = GameRulesEngine(config['rules'])
@@ -370,7 +385,7 @@ def replay(snapshot, value):
     view = _gate_view(config, value, engine, result)
     state = result.state
     revealed = state['relay_stage'] in ('revealed', 'done')
-    if version == CURRENT_VERSION:
+    if version in (V4_VERSION, CURRENT_VERSION):
         relay_output = ['Meet', 'at'][:state['relay_pieces']]
         if revealed:
             relay_output += config['relay_case']['destinations'][state['relay_context']].split()
@@ -379,7 +394,7 @@ def replay(snapshot, value):
     relay_input = [config['relay_case']['base']]
     if state['relay_context'] != 'none':
         relay_input.append(config['relay_case']['notes'][state['relay_context']])
-    if version == CURRENT_VERSION and state['relay_input_prediction'] != 'none':
+    if version in (V4_VERSION, CURRENT_VERSION) and state['relay_input_prediction'] != 'none':
         relay_input.extend(relay_output[:min(2, state['relay_pieces'])])
     return {**view, 'relay_case': deepcopy(config['relay_case']), 'relay_output': relay_output,
             'relay_input': relay_input}
@@ -391,7 +406,7 @@ def evaluate(snapshot, response, independence):
     state = replay(snapshot, response['word_machine'])
     result = evaluate_v1(snapshot, response, independence)
     moves = response['word_machine']['moves']
-    if snapshot['word_machine']['version'] in (V3_VERSION, CURRENT_VERSION):
+    if snapshot['word_machine']['version'] in (V3_VERSION, V4_VERSION, CURRENT_VERSION):
         first_inference = next((move.removeprefix('infer-') for move in moves if move.startswith('infer-')), None)
         first_source = result['transfer_observations']['context_choice']
         support = snapshot['word_machine']['cases'][1]['source_support'].get(first_source)
@@ -402,7 +417,7 @@ def evaluate(snapshot, response, independence):
             scope='First source and source-supported gate inference after a generated input-history choice; toy continuation is separate. No independent mastery.',
         )
     first_context = first_prediction = first_input = None
-    if snapshot['word_machine']['version'] == CURRENT_VERSION:
+    if snapshot['word_machine']['version'] in (V4_VERSION, CURRENT_VERSION):
         first_inference = next((m.removeprefix('relay-infer-') for m in moves if m.startswith('relay-infer-')), None)
         first_context = next((m.removeprefix('relay-context-') for m in moves if m.startswith('relay-context-')), None)
         first_input = next((m.removeprefix('relay-input-') for m in moves if m.startswith('relay-input-')), None)

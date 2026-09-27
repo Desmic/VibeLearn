@@ -6,52 +6,59 @@ Automated checks, critic judgment and user acceptance are separate claims.
 
 ## Current repair and gate
 
-- The independent Astra cold/warm review of `552280eb4cdfd4fc7fe2c2f09931fe3980e0ccb9`
-  returned **needs_revision**. Its preserved source reports are
-  `artifacts/cold-review-552280e/COLD-REPORT.md`, `WARM-COMPARISON.md` and
-  `PRIORITIZED-FINDINGS.md` (SHA-256 prefixes `750458c594e0`,
-  `0de4c549450a`, `73f9da070b52` respectively). The present development branch is repairing the
-  situated-learning findings R1–R5 and observed R7 layout issues; Mira's name
-  and coral cue were staged within the existing opening beat for R6. This is
-  implementation verification, not a new independent review or user verdict.
-- Shared repairs use authored world ancestry for object/child hits, reversible
-  choice selection with explicit once-only command dispatch, focus-owned
-  carriers, a bounded fallback for a required contextual source, and a
-  presentation check that requires the actual painted question/feedback text.
-  Passive opening labels render as labels rather than disabled controls. The
-  bounded-surface fitter restores a line when it becomes required. These
-  mechanics also pass a materially different harbor fixture; Bellweather
-  wording, source details and learning IDs remain in its content/rules.
-- In the proof game, Zip visibly carries and slots a source before commitment;
-  the active receiver answers directly from its object/marker while spent route
-  guidance yields. Wrong next-input history receives an immediate local
-  correction before the complete source question; the prepared whole-word toy
-  and smaller real tokens are explained during the normal tutorial. Its phone
-  readout stays within the unchanged budget; a source-specific cue keeps the
-  later 200% phone hint legible while the full sign remains inspectable. The first
-  wrong choice and generated output remain separate in immutable evidence.
-  The approved question and supplied sign survive 390/360 phone, desktop and
-  200% text in focused live replay without expanding the sheet budget.
-- `python manage.py build` passed; `python manage.py test` passed 452 tests
-  (7 configured PostgreSQL skips). The focused situated phone/desktop replay,
-  changed-case relay browser check, chapter, opening, tutorial, controls,
-  physicality, 200% readability and hosted lifecycle browser groups passed.
-  The draft five-state contextual question/correction/selection presentation
-  check passed with zero violations. These five states are included in the
-  normal full presentation scenario, which now contains 30 states; a separate
-  contract test prevents their accidental omission. The full exact-commit
-  presentation result belongs in `artifacts/presentation-budget-situated-full.json`;
-  it must pass before this repair is handed to the independent reviewer.
+- The latest independent Astra cold/warm review of
+  `7e82fcf581e0d0ea486f5dec283799c7a7bcea94` returned **needs_revision**.
+  Preserve `artifacts/cold-review-7e82fcf/{COLD-REPORT.md,WARM-COMPARISON.md,PRIORITIZED-FINDINGS.md}`
+  unchanged (SHA-256 prefixes `75d47a5da6fb`, `02f98fee0353`,
+  `d5ae7bc3e6be`). Its authoritative disposable learner export is in that
+  folder. The current development changes repair the missing complete tutorial
+  input and prototype a shorter, world-linked route encounter. This is worker
+  verification, not independent approval.
+- Shared boundaries now protect whole required content groups while fitting,
+  including a previously shed ancestor and explicit cannot-fit reporting;
+  an unfamiliar Harbor fixture proves a missing member fails. Live WebGL
+  loss/restoration preserves opening and attempt state and gives explicit
+  recovery; a materially different WorldSpec passes the same opening path.
+  The active foundation browser gate includes that probe. The reviewer
+  workflow now preflights every input required by its assigned claims,
+  including sustained movement when needed.
+- The approved `first-words-5` design changes only context-contrast and
+  context-practice. Inspecting/staging a sign is reversible; one machine
+  insertion commits it. Equal route framing avoids giving away the gate before
+  inference. After a separate input-history and source-inference commitment,
+  one deliberate Run advances the toy while every complete saved prefix can be
+  paused, reviewed and resumed; reload returns paused. Speak remains a separate
+  world action. The old v1–v4 snapshots, learning IDs, first choices and
+  assessment/output separation remain pinned. Canonical design SHA-256 is
+  `6efa8322088bcd0208fde8d723a3373f588c6a1f92f4809f25d514e1b8647f6d`;
+  the same independent reviewer approved its structure and implementation
+  gate in `artifacts/cold-review-7e82fcf/LEARNING-DESIGN-REVIEW-v5.json`.
+  Runtime alignment is still unassessed.
+- Current draft checks: build passed; 457 application tests passed with seven
+  configured PostgreSQL skips; the focused live 390px route replay passed
+  insertion, uncommitted inference, keyboard-focus pause, reload, wrong gate
+  and recovery source. The active combined browser group and the full
+  33-state presentation scenario passed with zero violations. A separate
+  adaptive 390px GUI play held movement, saw the entire tutorial next input,
+  chose a wrong history, reloaded with its first choice intact, judged the
+  parade notice as naming no gate, paused/reviewed the growing input, saw a
+  fluent but unsupported Moon output fail in the world, and inserted today's
+  notice for recovery (`artifacts/repair-v5-adaptive-3/`). The phone route
+  source card was made opaque and an optional overlapping inspect control
+  removed from the source question after that play. A subsequent situated
+  presentation rerun passed; the full exact-commit report is still required.
 - The accepted operational architecture direction is now documented in
   `docs/GAME-GENERATION-OPERATIONS.md`, with current candidate authority kept
   here and the user's supplied proposal unchanged. No provider, Level 2,
   deployment promotion or `main` merge is authorized by this repair.
-- Required next gate: finish exact-candidate technical checks, then a new
-  fresh-context Astra cold pass and warm comparison across story, art/world,
-  gameplay and learning under `docs/ASTRA-REVIEW-WORKFLOW.md`. Hosted entry/auth
-  is not established by the disposable local root redirect. Motion and audio
-  remain unassessed under the current scope, not passed. The user retains the
-  final experience verdict.
+- Required next gate: complete exact-candidate presentation evidence, then ask the
+  same independent Astra reviewer for an **informed repair recheck** of the
+  changed behavior. Do not relabel the frozen cold/warm findings as a new cold
+  pass. The earlier criticism of thin relationship staging and potential
+  questionnaire-like play remains open to reviewer judgment. Hosted entry/auth
+  is not established by the disposable local root
+  redirect. Motion and audio remain unassessed under the current scope, not
+  passed. The user retains the final experience verdict.
 
 ## Candidate
 

@@ -21,7 +21,7 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 .first-opening .rgi-visual{position:absolute;inset:0;height:auto}.first-opening .rgi-controls{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:min(550px,calc(100% - 24px));padding:10px;display:grid;gap:7px;background:transparent;border:0}.first-opening .rgi-nav{grid-template-columns:auto minmax(0,1fr)}.first-opening .game-move-stick{display:none!important}.first-opening #rgi-dialogue:empty,.first-opening #rgi-fact:empty{display:none}
 /* The subtitle line sits clear of the floating control row (guide B2 spirit: nothing stacks on the focal text). */
 
-@media(max-width:700px){.masthead{padding:10px 12px;gap:9px;max-height:62px;overflow:hidden}.masthead>div{display:none}.masthead>a{font-size:27px;margin-right:auto}.stage-card{left:10px;right:10px;top:auto;bottom:auto;width:auto;transform:none;max-height:min(32dvh,300px)}.stage-card.parked{top:64px;bottom:auto;left:10px;right:10px;transform:none}.stage-card.parked-reading{top:auto;bottom:calc(200px + env(safe-area-inset-bottom));left:10px;right:10px;transform:none}.stage-card h1{font-size:19px;margin:4px 0 3px}.stage-card .card-head p{font-size:11.5px;line-height:1.3}.stage-card{padding:9px 13px 3px}#output>span{font-size:18px;padding:6px 3px}.actions>button{font-size:13px;padding:10px}.input p{font-size:11px}.foot{font-size:9px}.first-opening .rgi-storybar{font-size:8px}.first-opening .rgi-controls button{font-size:12px}#world .game-move-stick{transform:scale(.65)}#markers>.notice-marker{font-size:11px;max-width:170px;padding:5px 8px;line-height:1.2}#markers>.machine-toggle.parked{bottom:176px}.dialog-actions{flex-direction:column}}
+@media(max-width:700px){.masthead{padding:10px 12px;gap:9px;max-height:62px;overflow:hidden}.masthead>div{display:none}.masthead>a{font-size:27px;margin-right:auto}.stage-card{left:10px;right:10px;top:auto;bottom:auto;width:auto;transform:none;max-height:min(32dvh,300px)}.stage-card.parked{top:64px;bottom:auto;left:10px;right:10px;transform:none}.stage-card.parked-reading{top:auto;bottom:calc(200px + env(safe-area-inset-bottom));left:10px;right:10px;transform:none}.stage-card h1{font-size:17px;margin:4px 0 3px}.stage-card .card-head p{font-size:11.5px;line-height:1.3}.stage-card{padding:9px 13px 3px}#output>span{font-size:18px;padding:6px 3px}.actions>button{font-size:13px;padding:10px}.input p{font-size:11px}.foot{font-size:9px}.first-opening .rgi-storybar{font-size:8px}.first-opening .rgi-controls button{font-size:12px}#world .game-move-stick{transform:scale(.65)}#markers>.notice-marker{font-size:11px;max-width:170px;padding:5px 8px;line-height:1.2}#markers>.machine-toggle.parked{bottom:176px}.dialog-actions{flex-direction:column}}
 #engine.practicing #output,#engine.practicing .input,#engine.practicing #inspect,#engine.practicing .foot{display:none}
 /* Reading beats keep the world band open: the card carries only the question while the signs are read. */
 #engine.compact #output,#engine.compact .foot{display:none}
@@ -69,12 +69,15 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 #markers>.machine-toggle{z-index:8;min-height:44px;white-space:normal;width:max-content;max-width:220px;text-align:center;line-height:1.3;padding:7px 10px;border-radius:999px;border:1px solid #f0c873;background:#183b43ee;color:#fff0c4;box-shadow:0 0 0 5px #f0c8731c,0 8px 24px #0007;font-size:11.5px;font-weight:700;letter-spacing:.01em}
 #markers>.machine-toggle:hover{background:#22505a}
 #markers>.notice-marker.staged{box-shadow:0 0 0 3px #f0c873,0 8px 24px #17243c55}
-#markers>.source-inspection{z-index:9;width:min(280px,calc(100vw - 28px));max-height:min(35dvh,290px);overflow:auto;white-space:normal;padding:12px;border:1px solid #f0c873;border-radius:12px;background:#183b43f5;color:#fff2d9;box-shadow:0 12px 30px #071824ae}
+#markers>.source-inspection{z-index:9;width:min(280px,calc(100vw - 28px));max-height:min(35dvh,290px);overflow:auto;white-space:normal;padding:12px;border:1px solid #f0c873;border-radius:12px;background:#183b43;color:#fff2d9;box-shadow:0 12px 30px #071824ae}
 #markers>.source-inspection strong{display:block;color:#ffe1a1;font-size:14px}
 #markers>.source-inspection p{font-size:13px;line-height:1.35;margin:6px 0 10px}
 #markers>.source-inspection div{display:flex;gap:6px;flex-wrap:wrap}
 #markers>.source-inspection button{min-height:44px;padding:7px 10px;border-radius:8px;border:1px solid #f0c873;background:#f0c873;color:#152d30;font-weight:700}
 #markers>.source-inspection #source-close{background:transparent;color:#fff2d9}
+#world.route-inspecting #markers>span[data-round="1"][data-anchor="moon-label"],
+#world.route-inspecting #markers>span[data-round="1"][data-anchor="sun-label"],
+#world.route-inspecting #markers>span[data-round="1"][data-anchor="star-label"]{outline:2px solid #d0efce;outline-offset:3px}
 #markers>.machine-toggle.parked{left:50%;top:auto;bottom:96px;transform:translateX(-50%)}
 /* The repaired speech module travels with Zip. Its live learning state remains a
    readable world carrier after camera movement while the optional controls close. */
@@ -86,6 +89,7 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 #markers>.learning-readout p b{font-weight:600;overflow-wrap:anywhere}
 #markers>.learning-readout p[hidden]{display:none}
 @media(max-width:700px){#markers>.learning-readout{width:min(264px,calc(100vw - 24px));padding:4px 9px}#markers>.learning-readout p{font-size:10.5px;grid-template-columns:62px 1fr}}
+@media(max-width:700px){#markers>.learning-readout{padding-top:2px;padding-bottom:1px}#markers>.learning-readout>strong{margin-bottom:1px}#markers>.learning-readout .readout-feedback{margin-top:1px;padding-top:1px}#markers>.learning-readout.edge-cued::after{position:absolute;right:6px;bottom:2px}}
 .stage-card .card-head{padding-right:34px}
 #engine #card-close{position:absolute;top:6px;right:6px;width:44px;min-height:44px;padding:0;background:#ffffff14;border:0;color:#ffe2ab;font-size:18px;line-height:1}
 #engine #card-close:hover{background:#ffffff26}
@@ -128,6 +132,17 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 #engine.sheet .actions>button{min-height:44px;padding:6px 10px;font-size:12.5px;line-height:1.3}
 #engine.sheet .actions[data-layout="two-column"]{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}
 #engine.sheet .actions[data-layout="two-column"]>p,#engine.sheet .actions[data-layout="two-column"]>button[data-action="hint"]{grid-column:1/-1}
+#engine.sheet.source-question #output{display:none}
+#engine.sheet.source-question{padding-top:4px;padding-bottom:4px}
+#engine.sheet.source-question .card-head h1{margin:0}
+#engine.sheet.source-question .card-head h1{font-size:17px;line-height:1.15}
+#engine.sheet.source-question #inspect{display:none}
+#engine.sheet.source-question .input p{line-height:1.2}
+#engine.sheet.source-question .actions{margin-top:2px;gap:4px}
+#engine.sheet.source-question .actions[data-layout="two-column"]{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+#engine.sheet.source-question .actions[data-layout="two-column"]>button[data-action="check-route-inference"]{grid-column:1/-1}
+#engine.sheet .actions[data-layout="history"]{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+#engine.sheet .actions[data-layout="history"]>button{min-width:0}
 }
 @media(min-width:1000px){#engine.side-focus{left:auto;right:80px;top:90px;transform:none}}
 /* B3 reachability on a wide viewport too: a reading beat's option list must fit the
