@@ -150,6 +150,12 @@ critic's eyes:
   and deliberately place an occluder in a negative fixture. One sample cannot
   certify an entire shape or composition; the live critic still judges whether
   the whole relationship reads.
+  When a required status must stay tied to a visible device action, declare
+  `associated_carriers` with `carrier`, `target` and a justified `max_gap_px`.
+  The shared budget check measures painted edge distance and fails missing or
+  distant members. Test the relevant closed-panel phase as well as the opened
+  decision surface; a long source/status line may be merged into the complete
+  input carrier instead of parked below an unrelated actor.
 - **B8 Control surface (interaction model):** in a motion-allowed cinematic/story
   state, **no painted DOM control may sit in the bottom-centre nav band**, and **no
   painted DOM button may carry a world/story verb** (its accessible name must not

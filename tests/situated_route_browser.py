@@ -5,6 +5,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
+from tools.check_presentation_budget import BUDGETS, TEXT_SCALE, evaluate_state
 from tests.browser_check import launch_browser, start_server, stop_server
 from tests.level1_chapter_browser import (
     action, choose, complete_tutorial, open_card, skip_opening_to_tutorial, supply_sign, world_action,
@@ -167,6 +168,55 @@ def main():
             retry=retry_saved.value.json()['word_machine_state']
             assert retry['pieces']==1 and retry['moves']==before+1,(before,retry)
             assert retry['source_inference']=='moon',retry
+            page.set_viewport_size({'width':390,'height':844})
+            page.reload()
+            expect(page.locator('#readout-source-row')).to_be_visible()
+            expect(page.locator('#readout-source-row')).to_contain_text("TODAY'S NOTICE")
+            expect(page.locator('#readout-source-row')).to_contain_text('STAR NAMED')
+            expect(page.locator('#slotted-source')).to_be_hidden()
+            group=evaluate_state(page,{
+                'required_content':[
+                    {'selector':'#readout-request-row','includes':['Open the route']},
+                    {'selector':'#readout-supplied','includes':['five-point lantern mark']},
+                    {'selector':'#readout-source-row','includes':["TODAY'S NOTICE",'IN MACHINE','STAR NAMED']},
+                    {'selector':'#readout-words','includes':['Open']},
+                ],
+                'associated_carriers':[{'carrier':'#learning-readout','target':'#machine-toggle','max_gap_px':140}],
+            },BUDGETS)
+            assert all(item['painted'] and not item['missing'] for item in group['requiredContent']),group['requiredContent']
+            assert group['associatedCarriers'][0]['associated'],group['associatedCarriers']
+            expect(page.get_by_role('button',name='Inspect the old route sign')).to_be_hidden()
+            page.screenshot(path=str(ROOT/'artifacts'/'route-retry-prefix-phone-draft.png'))
+            page.evaluate(TEXT_SCALE,2)
+            page.wait_for_timeout(1200)
+            enlarged=evaluate_state(page,{
+                'required_content':[{'selector':'#slotted-source','includes':["TODAY'S NOTICE",'STAR NAMED']}],
+                'associated_carriers':[{'carrier':'#slotted-source','target':'#machine-toggle','max_gap_px':140}],
+            },BUDGETS)
+            page.screenshot(path=str(ROOT/'artifacts'/'route-retry-prefix-phone-200text-draft.png'))
+            assert all(item['painted'] and not item['missing'] for item in enlarged['requiredContent']),enlarged['requiredContent']
+            assert enlarged['associatedCarriers'][0]['associated'],enlarged['associatedCarriers']
+            open_card(page)
+            expect(page.locator('#context')).to_contain_text('five-point lantern mark')
+            expect(page.locator('#output')).to_contain_text('Open')
+            page.get_by_role('button',name='Put the machine away').click()
+            page.evaluate(TEXT_SCALE,1)
+            page.wait_for_timeout(1200)
+            open_card(page)
+            resume=page.get_by_role('button',name='Resume continuation',exact=True)
+            (resume if resume.count() else page.get_by_role('button',name='Run continuation',exact=True)).click()
+            until(page,'FirstWordsReview.state.pieces===4',seconds=25)
+            page.get_by_role('button',name='Put the machine away').click()
+            expect(page.locator('#readout-source-row')).to_be_visible()
+            expect(page.locator('#slotted-source')).to_be_hidden()
+            completed=evaluate_state(page,{
+                'required_content':[{'selector':'#readout-source-row','includes':["TODAY'S NOTICE",'STAR NAMED']},
+                                    {'selector':'#readout-words','includes':['Open the Star gate']}],
+                'associated_carriers':[{'carrier':'#learning-readout','target':'#machine-toggle','max_gap_px':140}],
+            },BUDGETS)
+            assert all(item['painted'] and not item['missing'] for item in completed['requiredContent']),completed['requiredContent']
+            assert completed['associatedCarriers'][0]['associated'],completed['associatedCarriers']
+            page.screenshot(path=str(ROOT/'artifacts'/'route-retry-complete-phone-draft.png'))
             (ROOT/'artifacts'/'situated-route-browser.json').write_text(json.dumps(evidence,indent=2),encoding='utf-8')
             print(json.dumps({'status':'passed','phases':[x['phase'] for x in evidence]}))
         finally:

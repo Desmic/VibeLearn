@@ -1,6 +1,6 @@
 # Current state — LLM learning-game proof track
 
-**27 September 2026.** This file is the current status. Older narratives live in
+**28 September 2026.** This file is the current status. Older narratives live in
 `docs/history/STATE-20260921-24.md` and `docs/history/STATE-20260918-20.md`.
 Automated checks, critic judgment and user acceptance are separate claims.
 
@@ -29,6 +29,15 @@ Automated checks, critic judgment and user acceptance are separate claims.
   The disposable review learner export is in that folder; 23 stored commands
   preserve first choices through Star output, while assessment remains draft,
   evidence absent and mastery unknown. Original cold/warm reports were not rewritten.
+  The same reviewer's informed recheck of `c744f12dc38625a6b6daeee8db1beeae6c183c0a`
+  closed the ordinary phone/desktop Sun-mark occlusion and duplicate retry action,
+  but returned **needs_revision** for a source-status marker drifting below Zip
+  after phone prefix reload and closed completed output. See
+  `artifacts/cold-review-7e82fcf/informed-recheck-c744f12/RECHECK-REPORT.md`
+  (SHA-256 `f03ea9db2944fb0acb1fe0f26db934b3c7f22f28f894d5dfd821d68b9c78b6d5`).
+  Its separate read-only learner export preserves the first wrong history and
+  Moon inference through Star output; assessment remains draft/unknown with
+  zero evidence. The reviewer browser and disposable server were stopped.
 - Shared boundaries now protect whole required content groups while fitting,
   including a previously shed ancestor and explicit cannot-fit reporting;
   an unfamiliar Harbor fixture proves a missing member fails. Live WebGL
@@ -73,7 +82,7 @@ Automated checks, critic judgment and user acceptance are separate claims.
   not a critic verdict. The exact-commit 34-state presentation report passed
   with zero violations at `artifacts/presentation-budget-b48a8ac.json`, but
   the informed reviewer findings above keep the experience gate open.
-- The current uncommitted repair moves existing notice boards away from the
+- The `c744f12` repair moves existing notice boards away from the
   compared gate marks, fits the machine action back to the physical device,
   folds an empty generated-history readout, and makes the retry world action
   dispatch the first word once even during a visual transition. A shared
@@ -83,26 +92,43 @@ Automated checks, critic judgment and user acceptance are separate claims.
   prove failures. The required presentation scenario now checks three marks
   at the ordinary junction, on phone/desktop and during source inspection.
   The sign sheet keeps complete meaning and both actions visible at 200% text
-  within the unchanged budget. This is worker repair, not critic acceptance.
-- Current draft checks: build passed; 457 application tests passed (seven
+  within the unchanged budget. Exact `c744f12` full 35-state presentation
+  passed with zero violations at `artifacts/presentation-budget-c744f12.json`.
+  This is worker repair, not critic acceptance.
+- Current status-placement repair folds committed source/support into the
+  complete next-input world carrier when that carrier fits, so it remains
+  visible with the request and generated prefix instead of duplicating below
+  Zip. Once inference is committed and generation is underway, source prompts
+  that cannot stay at their physical sign yield; the signs remain inspectable
+  in-world and source prompts return for failed-route recovery. The shared
+  presentation checker now measures a declared status/action edge gap; an
+  unrelated Harbor fixture fails when status is painted far from its device.
+  Focused live phone replay passed the critic's prefix-reload and closed-final
+  counterexamples, including a 200% text fallback to source status and the
+  player-opened complete input. Screenshots are
+  `artifacts/route-retry-prefix-phone-draft.png`,
+  `artifacts/route-retry-prefix-phone-200text-draft.png`, and
+  `artifacts/route-retry-complete-phone-draft.png`. This is worker verification,
+  not a new reviewer verdict.
+- Current repair checks: build passed; 458 application tests passed (seven
   configured PostgreSQL skips); the focused route browser and full 35-state
-  presentation scenario passed with zero violations. The active browser
-  sequence passed foundation, opening, controls, physicality, chapter and
-  situated route, then stopped at a relay assertion tied to shortened button
-  text. Restoring the relay's original label made the relay group pass; the
-  remaining readability and lifecycle groups passed separately. Three attempts
+  `c744f12` presentation scenario passed with zero violations. The full active
+  browser sequence now passes foundation, opening, controls, physicality,
+  chapter, situated route, relay, readability and lifecycle sequentially.
+  Three earlier attempts
   to start an additional adaptive shared-harness session crashed at viewport
   setup before any game input; no session/browser/server survived. The earlier
   `b48a8ac` adaptive worker play and independent reviewer play are preserved,
-  but they do not verify this new candidate. Exact-commit evidence and an
-  informed reviewer recheck remain required.
+  but they do not verify this new status-placement repair. Exact-commit
+  presentation evidence and an informed reviewer recheck remain required.
 - The accepted operational architecture direction is now documented in
   `docs/GAME-GENERATION-OPERATIONS.md`, with current candidate authority kept
   here and the user's supplied proposal unchanged. No provider, Level 2,
   deployment promotion or `main` merge is authorized by this repair.
 - Required next gate: freeze and report the current candidate, then ask the same
-  independent Astra reviewer for another **informed repair recheck** of mark
-  visibility, source/device anchoring and one-click retry. The frozen cold/warm
+  independent Astra reviewer for an **informed repair recheck** of the remaining
+  status/action association at prefix reload and closed completed output,
+  including enlarged text and unchanged source access. The frozen cold/warm
   findings remain needs_revision and cannot become a new cold pass. Broader
   world/relationship treatment, hosted entry/auth, motion and audio remain
   unassessed; the user retains the final experience verdict. No Level 2,

@@ -358,6 +358,19 @@ MEASURE = """async (args) => {
     const missing = claim.includes.filter(phrase => !actual.includes(phrase));
     requiredContent.push({selector:claim.selector, painted, missing, actual:actual.slice(0, 120)});
   }
+  // Painted status can still be detached from the object/action it describes.
+  const associatedCarriers = [];
+  for (const claim of (args.associated_carriers || [])) {
+    const carrier=document.querySelector(claim.carrier),target=document.querySelector(claim.target);
+    const measurable=Boolean(carrier&&target&&visible(carrier)&&visible(target));
+    let gap=null;
+    if(measurable){
+      const a=carrier.getBoundingClientRect(),b=target.getBoundingClientRect();
+      gap=Math.hypot(Math.max(0,a.left-b.right,b.left-a.right),Math.max(0,a.top-b.bottom,b.top-a.bottom));
+    }
+    associatedCarriers.push({carrier:claim.carrier,target:claim.target,gap,
+      maxGap:claim.max_gap_px,associated:measurable&&gap<=claim.max_gap_px});
+  }
   // I12 sole-carrier (guide: narrative and instruction must reach the eye). A node
   // that is still in the accessibility tree but painted at zero area, clipped or
   // parked off-viewport is the announced-only channel. Information delivered ONLY
@@ -469,7 +482,7 @@ MEASURE = """async (args) => {
   }
   return {coverage, nonTouchCoverage, touchControlCount, viewportWidth: vw,
           panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, worldFeatures, markerClash,
-          strayControls, dupCarriers, unreachableActions, sheet, carriers, requiredContent, announcedOnly,
+          strayControls, dupCarriers, unreachableActions, sheet, carriers, requiredContent, associatedCarriers, announcedOnly,
           prefDrift, declaredPreferences: prefCarriers.map(el => el.dataset.preference),
           offenders: offenders.slice(0, 12)};
 }"""
@@ -578,6 +591,7 @@ def evaluate_state(page, scenario_state, budgets):
         "yields": scenario_state.get("yields"),
         "carriers": scenario_state.get("carriers", []),
         "required_content": scenario_state.get("required_content", []),
+        "associated_carriers": scenario_state.get("associated_carriers", []),
         "world_features": scenario_state.get("world_features", []),
         "touch_controls": scenario_state.get("touch_controls", []),
         "b8": b8,
@@ -689,6 +703,10 @@ def violations(state_name, metrics, budgets, panel_allowed, scenario_state=None,
             found.append(f"{state_name}: I12 required meaning — '{item['selector']}' must paint its full "
                          f"declared question/feedback without clipping; missing {item['missing']}, "
                          f"painted={item['painted']} (seen: {item['actual']!r})")
+    for item in metrics.get("associatedCarriers") or []:
+        if not item["associated"]:
+            found.append(f"{state_name}: B7 carrier '{item['carrier']}' is not within {item['maxGap']}px "
+                         f"of '{item['target']}' (painted gap {item['gap']})")
     for item in metrics.get("prefDrift") or []:
         found.append(f"{state_name}: I11 preference drift — the carrier for “{item['id']}” disagrees with the "
                      f"registry: {item['painted']}. A preference has one reading rendered everywhere it appears, "
@@ -907,6 +925,10 @@ def main():
             if not claim.get("selector") or not isinstance(claim.get("includes"), list) or not claim["includes"] \
                or any(not isinstance(phrase, str) or not phrase for phrase in claim["includes"]):
                 raise SystemExit(f"{state['name']}: required_content needs a selector and nonempty includes strings")
+        for claim in state.get("associated_carriers", []):
+            gap = claim.get("max_gap_px")
+            if not claim.get("carrier") or not claim.get("target") or not isinstance(gap, (int, float)) or gap < 0:
+                raise SystemExit(f"{state['name']}: associated_carriers needs carrier, target and nonnegative max_gap_px")
         for feature in state.get("world_features", []):
             if not feature.get("entity") or not isinstance(feature.get("acceptedHits"), list) or not feature["acceptedHits"]:
                 raise SystemExit(f"{state['name']}: world_features needs an entity and nonempty acceptedHits list")

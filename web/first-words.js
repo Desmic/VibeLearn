@@ -349,7 +349,8 @@ function render(){
   const routeSource=chapter.routeSources[s.clue];
   const committedRoute=situatedRoute()&&!relay&&s.round===1&&s.clue!=='none'&&s.status!=='success';
   const support=committedRoute&&s.source_inference!=='none'?s.case.source_support[s.clue]:null;
-  text('#slotted-source',committedRoute?`${sourceName(s.clue).toUpperCase()} · IN MACHINE${support?` · ${support==='no-gate'?'NO GATE NAMED':`${support.toUpperCase()} NAMED`}`:''}`:slotted?`${sourceName(slotted).toUpperCase()} · IN ${relay?'RECEIVER':'MACHINE'} SLOT`:
+  const committedSource=committedRoute?`${sourceName(s.clue).toUpperCase()} · IN MACHINE${support?` · ${support==='no-gate'?'NO GATE NAMED':`${support.toUpperCase()} NAMED`}`:''}`:'';
+  text('#slotted-source',committedRoute?committedSource:slotted?`${sourceName(slotted).toUpperCase()} · IN ${relay?'RECEIVER':'MACHINE'} SLOT`:
     sourceQuestion?`SUPPLIED · ${s.hinted&&routeSource.cueText?routeSource.cueText:routeSource.decisionText}`:'');
   slotToken.classList.toggle('source-evidence',sourceQuestion&&!situatedRoute());
   slotToken.dataset.critical=sourceQuestion||committedRoute?'true':'false';
@@ -364,6 +365,8 @@ function render(){
   const readoutInput=relay?[s.relay_case?.base,s.relay_case?.notes?.[s.relay_context]]:s.input||[];
   text('#readout-request',readoutInput[0]||'Awaiting a request');
   text('#readout-supplied',readoutInput[1]||'No clue supplied yet');
+  text('#readout-source',committedSource);
+  $('#readout-source-row').hidden=!committedSource;
   text('#readout-words',shownOutput?.length?shownOutput.join(' '):'No words yet');
   const wrongHistory=changedRelay(s)&&s.relay_stage==='choosing'&&s.relay_input_prediction!=='none'&&s.relay_input_prediction!=='full';
   const wrongRouteHistory=growingBeat(s)&&s.loop_prediction==='same';
@@ -778,7 +781,12 @@ function frame(){
     const critical=tutorialTarget||marker.dataset.critical==='true';
     // I9: a declared carrier of the beat's decision may slide and edge-cue, but may
     // not vanish because the screen got small.
-    const carrier=marker.dataset.carrier!==undefined;
+    // Source-choice carriers must remain discoverable while the player is deciding.
+    // Once inference is committed, an offscreen, unselected sign prompt may yield;
+    // its physical sign remains inspectable when brought back into view.
+    const pastSourceDecision=marker.classList.contains('notice-marker')&&!marker.dataset.relay&&
+      s.source_inference!=='none'&&s.status==='building'&&s.pieces>0;
+    const carrier=marker.dataset.carrier!==undefined&&!pastSourceDecision;
     const guidable=(critical||carrier?Boolean(anchor?.inFront):Boolean(anchor?.visible))||(slotToken&&sourceQuestion);
     const toggleMarker=marker.dataset.machineToggle!==undefined;
     if(toggleMarker){
@@ -788,7 +796,7 @@ function frame(){
       marker.classList.toggle('parked',!(anchor&&anchor.inFront));
     // I3: while the machine panel is open it owns the decision; its world
     // choice markers fold away (they return when the panel is put away).
-    }else marker.hidden=(readout&&(!readoutActive||!s.powered||practice.step!=='done'||!card.hidden))||(carryToken&&!(relay?stagedRelaySource&&!slottedRelaySource:stagedSource&&!slottedSource))||(slotToken&&!marker.textContent)||(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')||marker.id==='source-inspection'))||(inspectedSource&&marker.dataset.clue&&marker.dataset.clue!==inspectedSource)||routeLabelIdle||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay||(!changedRelay(s)&&marker.dataset.relaySource==='tavi')))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
+    }else marker.hidden=(readout&&(!readoutActive||!s.powered||practice.step!=='done'||!card.hidden))||(carryToken&&!(relay?stagedRelaySource&&!slottedRelaySource:stagedSource&&!slottedSource))||(slotToken&&(!marker.textContent||Boolean(situatedRoute()&&!relay&&s.round===1&&s.clue!=='none'&&!$('#learning-readout').hidden)))||(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')||marker.id==='source-inspection'))||(inspectedSource&&marker.dataset.clue&&marker.dataset.clue!==inspectedSource)||routeLabelIdle||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay||(!changedRelay(s)&&marker.dataset.relaySource==='tavi')))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
     if((anchor||slotToken&&sourceQuestion)&&!marker.hidden&&!(toggleMarker&&marker.classList.contains('parked'))){
       const placement=placeWorldMarker(marker,anchor,{viewportWidth:rect.width,safeTop,safeBottom,critical,parkWhenFull:carrier,yOffset:readout?48:12,avoidRects:marker.dataset.routeLabel?avoidRects:[...avoidRects,...markRects]});
       if(slotToken&&sourceQuestion&&!placement.placed){

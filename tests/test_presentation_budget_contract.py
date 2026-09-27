@@ -228,6 +228,31 @@ class PresentationBudgetContract(unittest.TestCase):
             self.assertEqual(len(missing(page)), 1)
             page.locator('#harbor-prefix').evaluate("el => el.classList.remove('shed')")
             self.assertEqual(missing(page), [])
+
+    def test_unfamiliar_device_status_must_stay_near_its_action_under_collision_pressure(self):
+        from playwright.sync_api import sync_playwright
+        state = {"associated_carriers": [
+            {"carrier": "#relay-status", "target": "#relay-action", "max_gap_px": 120}
+        ], "required_content": [
+            {"selector": "#relay-input", "includes": ["Secure the floodgate.", "Gauge reports rising water.", "Hold"]},
+            {"selector": "#relay-status", "includes": ["GAUGE REPORT", "IN DEVICE"]},
+        ]}
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            page = browser.new_page(viewport={"width": 390, "height": 844})
+            page.set_content('''<div id="relay-input" style="position:absolute;left:50px;top:90px;width:270px">
+                Secure the floodgate. Gauge reports rising water. Hold</div>
+                <button id="relay-action" style="position:absolute;left:15px;top:335px">Run relay</button>
+                <div id="relay-status" style="position:absolute;left:8px;top:570px">GAUGE REPORT · IN DEVICE</div>''')
+            detached = violations("harbor-prefix", evaluate_state(page, state, BUDGETS), BUDGETS, False, state)
+            self.assertTrue(any("B7 carrier" in item for item in detached))
+            page.locator('#relay-status').evaluate("el => { el.style.left='20px'; el.style.top='390px'; }")
+            associated = violations("harbor-prefix", evaluate_state(page, state, BUDGETS), BUDGETS, False, state)
+            self.assertFalse(any("B7 carrier" in item for item in associated))
+            page.locator('#relay-status').evaluate("el => el.hidden=true")
+            missing = violations("harbor-prefix", evaluate_state(page, state, BUDGETS), BUDGETS, False, state)
+            self.assertTrue(any("B7 carrier" in item for item in missing))
+            browser.close()
             browser.close()
 
     def test_injected_measurement_script_is_balanced(self):
