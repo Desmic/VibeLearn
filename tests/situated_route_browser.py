@@ -12,6 +12,18 @@ from tests.level1_chapter_browser import (
 from tests.first_words_browser import until
 
 ROOT=Path(__file__).resolve().parents[1]
+FEATURE_PROBE='''async()=>{
+  const {getGameRuntime}=await import('/game-runtime.js');
+  const {probeWorldFeature}=await import('/world-feature-visibility.js');
+  const w=getGameRuntime().world;
+  const features=[
+    {entity:'moon-mark-crescent-14',acceptedHits:['moon-mark-crescent-14','moon-mark-crescent-15']},
+    {entity:'star-mark-line-0',acceptedHits:['star-mark-line-0','star-mark-line-1']},
+    {entity:'sun-mark-disk',acceptedHits:['sun-mark-disk']}
+  ];
+  const overlayAt=(x,y)=>{const el=document.elementFromPoint(x,y);return el?.tagName==='CANVAS'?null:el?.id||el?.tagName||null};
+  return await Promise.all(features.map(feature=>probeWorldFeature(w,feature,overlayAt)));
+}'''
 
 
 def main():
@@ -25,7 +37,23 @@ def main():
             skip_opening_to_tutorial(page,skip_controls=True)
             complete_tutorial(page)
             action(page,'Begin Level 1 →')
+            assert all(item['visible'] for item in page.evaluate(FEATURE_PROBE))
+            page.screenshot(path=str(ROOT/'artifacts'/'route-junction-phone-draft.png'))
+            page.set_viewport_size({'width':1280,'height':720})
+            assert all(item['visible'] for item in page.evaluate(FEATURE_PROBE))
+            page.screenshot(path=str(ROOT/'artifacts'/'route-junction-desktop-draft.png'))
+            page.set_viewport_size({'width':390,'height':844})
             page.get_by_role('button',name='Inspect the old route sign').click()
+            assert all(item['visible'] for item in page.evaluate(FEATURE_PROBE))
+            hidden=page.evaluate('''async()=>{
+              const {getGameRuntime}=await import('/game-runtime.js');
+              const {probeWorldFeature}=await import('/world-feature-visibility.js');
+              const w=getGameRuntime().world;
+              w.applyPresentation({transforms:{'notice-today':{position:[3.2,0,-16]}}});
+              try{return await probeWorldFeature(w,{entity:'sun-mark-disk',acceptedHits:['sun-mark-disk']});}
+              finally{w.applyPresentation({transforms:{'notice-today':{position:[6,0,-16.2]}}});}
+            }''')
+            assert not hidden['visible'] and hidden['reason']=='occluded',hidden
             expect(page.locator('#source-route-frame')).to_be_visible()
             for gate in ('moon','sun','star'):
                 expect(page.locator(f'#markers > [data-round="1"][data-anchor="{gate}-label"]')).to_be_visible()
@@ -119,12 +147,26 @@ def main():
             page.get_by_role('button',name='Put the machine away').click()
             page.screenshot(path=str(ROOT/'artifacts'/'route-recovery-draft.png'))
             assert page.get_by_role('button',name="Inspect today's route notice").count(),page.locator('#markers').inner_text()
-            supply_sign(page,"today's route notice","today's notice","today's notice")
+            page.get_by_role('button',name="Inspect today's route notice").click()
+            page.get_by_role('button',name="Stage today's notice").click()
+            page.reload()
+            expect(page.locator('#carried-source')).to_contain_text("TODAY'S NOTICE")
+            with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST'):
+                page.get_by_role('button',name="Insert and commit today's notice at the message machine").click()
             recovered=page.evaluate('FirstWordsReview.state')
+            page.screenshot(path=str(ROOT/'artifacts'/'route-retry-inserted-draft.png'))
             evidence.append({'phase':'recovery-source','pieces':recovered['pieces'],
                              'status':recovered['status'],'available_actions':recovered['available_actions']})
             assert recovered['clue']=='star' and recovered['pieces']==0,recovered
             expect(page.get_by_role('button',name='Make first word at the message machine',exact=True)).to_be_visible()
+            page.evaluate('''async()=>{const {getGameRuntime}=await import('/game-runtime.js');getGameRuntime().world.applyPresentation({transition:{entity:'route-machine',from:[-3,0,-15],to:[-3,0,-15],duration:1500,finish:{}}});}''')
+            assert page.evaluate('FirstWordsReview.runtime.world.animating')
+            before=page.evaluate('FirstWordsReview.state.moves')
+            with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as retry_saved:
+                page.get_by_role('button',name='Make first word at the message machine',exact=True).click()
+            retry=retry_saved.value.json()['word_machine_state']
+            assert retry['pieces']==1 and retry['moves']==before+1,(before,retry)
+            assert retry['source_inference']=='moon',retry
             (ROOT/'artifacts'/'situated-route-browser.json').write_text(json.dumps(evidence,indent=2),encoding='utf-8')
             print(json.dumps({'status':'passed','phases':[x['phase'] for x in evidence]}))
         finally:

@@ -175,10 +175,20 @@ MEASURE = """async (args) => {
   let focal = null;
   let presence = null;
   let subjectCover = null;
-  if (args.focal || args.presence || args.subject) {
+  const worldFeatures = [];
+  if (args.focal || args.presence || args.subject || args.world_features?.length) {
     const {getGameRuntime} = await import('/game-runtime.js');
     const w = getGameRuntime().world;
     const r = document.querySelector('canvas').getBoundingClientRect();
+    if (args.world_features?.length) {
+      const {probeWorldFeature} = await import('/world-feature-visibility.js');
+      for (const feature of args.world_features) {
+        worldFeatures.push(await probeWorldFeature(w, feature, (x, y) => {
+          const el = document.elementFromPoint(x + r.left, y + r.top);
+          return el && el.tagName !== 'CANVAS' ? (el.id ? '#' + el.id : el.tagName.toLowerCase()) : null;
+        }));
+      }
+    }
     if (args.focal && w?.projectEntity) {
       const p = w.projectEntity(args.focal);
       if (p) {
@@ -458,7 +468,7 @@ MEASURE = """async (args) => {
     }
   }
   return {coverage, nonTouchCoverage, touchControlCount, viewportWidth: vw,
-          panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, markerClash,
+          panelOpen, clipped, longBlocks, disabledVisible, focal, presence, subjectCover, worldFeatures, markerClash,
           strayControls, dupCarriers, unreachableActions, sheet, carriers, requiredContent, announcedOnly,
           prefDrift, declaredPreferences: prefCarriers.map(el => el.dataset.preference),
           offenders: offenders.slice(0, 12)};
@@ -568,6 +578,7 @@ def evaluate_state(page, scenario_state, budgets):
         "yields": scenario_state.get("yields"),
         "carriers": scenario_state.get("carriers", []),
         "required_content": scenario_state.get("required_content", []),
+        "world_features": scenario_state.get("world_features", []),
         "touch_controls": scenario_state.get("touch_controls", []),
         "b8": b8,
         "budgets": budgets,
@@ -657,6 +668,10 @@ def violations(state_name, metrics, budgets, panel_allowed, scenario_state=None,
         found.append(f"{state_name}: B7 subject clearance could not be measured")
     elif cover and cover["covers"]:
         found.append(f"{state_name}: B7 markers cover the scene subject: {cover['covers'][:4]}")
+    for feature in metrics.get("worldFeatures") or []:
+        if not feature["visible"]:
+            found.append(f"{state_name}: B7 required world feature '{feature['entity']}' is {feature['reason']} "
+                         f"(hit={feature.get('hit')}, overlay={feature.get('overlay')})")
     if scenario_state.get("cinematic"):
         stray = metrics.get("strayControls") or []
         # I6 accessibility carve-out: reduced-motion play may paint exactly one
@@ -892,6 +907,9 @@ def main():
             if not claim.get("selector") or not isinstance(claim.get("includes"), list) or not claim["includes"] \
                or any(not isinstance(phrase, str) or not phrase for phrase in claim["includes"]):
                 raise SystemExit(f"{state['name']}: required_content needs a selector and nonempty includes strings")
+        for feature in state.get("world_features", []):
+            if not feature.get("entity") or not isinstance(feature.get("acceptedHits"), list) or not feature["acceptedHits"]:
+                raise SystemExit(f"{state['name']}: world_features needs an entity and nonempty acceptedHits list")
     states, all_violations = [], []
     from tests.browser_check import start_server, stop_server, launch_browser
 

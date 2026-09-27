@@ -194,6 +194,11 @@
   },
   {
    "name": "mission-intro-closed",
+   "world_features": [
+    {"entity":"moon-mark-crescent-14","acceptedHits":["moon-mark-crescent-14","moon-mark-crescent-15"]},
+    {"entity":"star-mark-line-0","acceptedHits":["star-mark-line-0","star-mark-line-1"]},
+    {"entity":"sun-mark-disk","acceptedHits":["sun-mark-disk"]}
+   ],
    "resize": [
     1280,
     720
@@ -622,6 +627,11 @@
   },
   {
    "name": "mission-decision-desktop-folded",
+   "world_features": [
+    {"entity":"moon-mark-crescent-14","acceptedHits":["moon-mark-crescent-14","moon-mark-crescent-15"]},
+    {"entity":"star-mark-line-0","acceptedHits":["star-mark-line-0","star-mark-line-1"]},
+    {"entity":"sun-mark-disk","acceptedHits":["sun-mark-disk"]}
+   ],
    "markers": "#markers > [data-anchor]",
    "focal": "zip",
    "screenshot": "artifacts/play-20260923/mission-decision-desktop-folded.png",
@@ -703,6 +713,11 @@
   },
   {
    "name": "mission-decision-phone-folded",
+   "world_features": [
+    {"entity":"moon-mark-crescent-14","acceptedHits":["moon-mark-crescent-14","moon-mark-crescent-15"]},
+    {"entity":"star-mark-line-0","acceptedHits":["star-mark-line-0","star-mark-line-1"]},
+    {"entity":"sun-mark-disk","acceptedHits":["sun-mark-disk"]}
+   ],
    "markers": "#markers > [data-anchor]",
    "focal": "zip",
    "screenshot": "artifacts/play-20260923/mission-decision-phone-folded.png",
@@ -790,6 +805,11 @@
   },
   {
    "name": "mission-source-inspection-phone",
+   "world_features": [
+    {"entity":"moon-mark-crescent-14","acceptedHits":["moon-mark-crescent-14","moon-mark-crescent-15"]},
+    {"entity":"star-mark-line-0","acceptedHits":["star-mark-line-0","star-mark-line-1"]},
+    {"entity":"sun-mark-disk","acceptedHits":["sun-mark-disk"]}
+   ],
    "markers": "#markers > [data-anchor]",
    "steps": [
     {
@@ -797,7 +817,7 @@
      "timeout": 60000
     },
     {
-     "wait_text": "Stage old sign",
+     "wait_text": "Carry sign",
      "timeout": 60000
     }
    ],
@@ -809,9 +829,9 @@
      "includes": [
       "Old sign",
       "Old route: take the Moon gate.",
-      "Moon, Sun and five-point gate marks",
-      "Stage old sign",
-      "Return to corridor"
+      "Compare Moon, Sun and five-point gate marks.",
+      "Carry sign",
+      "Return"
      ]
     }
    ],
@@ -825,6 +845,26 @@
     ".game-controls-help"
    ],
    "coverage_max_reason": "A deliberately opened source inspection yields movement chrome and sits below the visible three-gate junction."
+  },
+  {
+   "name": "mission-source-inspection-phone-200text",
+   "twin_of": "mission-source-inspection-phone",
+   "text_scale": 2,
+   "world_features": [
+    {"entity":"moon-mark-crescent-14","acceptedHits":["moon-mark-crescent-14","moon-mark-crescent-15"]},
+    {"entity":"star-mark-line-0","acceptedHits":["star-mark-line-0","star-mark-line-1"]},
+    {"entity":"sun-mark-disk","acceptedHits":["sun-mark-disk"]}
+   ],
+   "markers": "#markers > [data-anchor]",
+   "wait_eval": "()=>!document.querySelector('#source-inspection').hidden&&document.querySelector('#engine').hidden",
+   "screenshot": "artifacts/presentation-situated/route-source-inspection-phone-200text.png",
+   "required_content": [{"selector":"#source-inspection","includes":["Old sign","Old route: take the Moon gate.","Compare Moon, Sun and five-point gate marks.","Carry sign","Return"]}],
+   "panel_open": true,
+   "narrow_sheet": true,
+   "sheet": "#source-inspection",
+   "opened_by": "Inspect the old route sign",
+   "yields": [".game-move-stick",".game-view-tools",".game-controls-help"],
+   "coverage_max_reason": "The player-opened source inspection must keep its complete decision at 200% text while the gate marks remain readable."
   },
   {
    "name": "mission-decision-phone-sheet",

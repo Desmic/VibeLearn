@@ -68,6 +68,7 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
    carries the short goal while the panel stays away (ladder rung 3). */
 #markers>.machine-toggle{z-index:8;min-height:44px;white-space:normal;width:max-content;max-width:220px;text-align:center;line-height:1.3;padding:7px 10px;border-radius:999px;border:1px solid #f0c873;background:#183b43ee;color:#fff0c4;box-shadow:0 0 0 5px #f0c8731c,0 8px 24px #0007;font-size:11.5px;font-weight:700;letter-spacing:.01em}
 #markers>.machine-toggle:hover{background:#22505a}
+#markers>.machine-toggle[data-anchor='route-machine']{max-width:112px}
 #markers>.notice-marker.staged{box-shadow:0 0 0 3px #f0c873,0 8px 24px #17243c55}
 #markers>.source-inspection{z-index:9;width:min(280px,calc(100vw - 28px));max-height:min(35dvh,290px);overflow:auto;white-space:normal;padding:12px;border:1px solid #f0c873;border-radius:12px;background:#183b43;color:#fff2d9;box-shadow:0 12px 30px #071824ae}
 #markers>.source-inspection strong{display:block;color:#ffe1a1;font-size:14px}
@@ -78,8 +79,7 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 /* Inspecting a sign is a temporary world beat. On a narrow screen the note
    sits below the three gates, linked to the highlighted source above it. */
 @media(max-width:700px){
-  #world.route-inspecting ~ #markers>.source-inspection{left:0!important;top:auto!important;bottom:0;transform:none!important;width:100%;max-height:min(33dvh,280px);border-radius:14px 14px 0 0}
-  #world.route-inspecting ~ #markers>.source-inspection::before{content:'↑ SELECTED SIGN';display:block;color:#ffe1a1;font-size:10px;letter-spacing:.12em;font-weight:800;margin-bottom:4px}
+  #world.route-inspecting ~ #markers>.source-inspection{left:0!important;top:auto!important;bottom:0;transform:none!important;width:100%;max-height:44dvh;border-radius:14px 14px 0 0}
   #world.route-inspecting .game-move-stick,#world.route-inspecting .game-view-tools,#world.route-inspecting .game-controls-help{visibility:hidden!important}
   #world.route-inspecting ~ #markers>.notice-marker.inspected{outline:3px solid #f0c873;outline-offset:3px}
 }

@@ -18,6 +18,7 @@ class PlatformGeneralizationTests(unittest.TestCase):
             "choices":(ROOT/"web"/"reversible-choice.js").as_uri(),
             "focus":(ROOT/"web"/"world-interaction-focus.js").as_uri(),
             "pending":(ROOT/"web"/"pending-source.js").as_uri(),
+            "visibility":(ROOT/"web"/"world-feature-visibility.js").as_uri(),
         }
         script=textwrap.dedent(f"""
             const {{validateWorldSpec}}=await import({json.dumps(modules["world"])});
@@ -28,6 +29,7 @@ class PlatformGeneralizationTests(unittest.TestCase):
             const {{createReversibleChoice}}=await import({json.dumps(modules["choices"])});
             const {{createEntityMatcher,carrierAtFocus}}=await import({json.dumps(modules["focus"])});
             const {{createPendingSourceStore}}=await import({json.dumps(modules["pending"])});
+            const {{probeWorldFeature}}=await import({json.dumps(modules["visibility"])});
 
             const ensure=(value,message)=>{{if(!value)throw new Error(message);}};
 
@@ -182,6 +184,17 @@ class PlatformGeneralizationTests(unittest.TestCase):
             ensure(carried.read(scope,['storm-warning'])===null,'unknown source was accepted');
             carried.clear(scope);
             ensure(carried.read(scope,['gauge-report'])===null,'cancel did not clear pending source');
+
+            // A landmark's entity/DOM presence alone cannot certify that it is
+            // readable: a nearer board or a painted control can cover its mark.
+            let front='storm-beacon-glow';
+            const beacon={{projectEntity:()=>({{x:37,y:42,inFront:true,visible:true}}),pickSemanticAt:async()=>front}};
+            const feature={{entity:'storm-beacon-glow',acceptedHits:['storm-beacon-glow']}};
+            ensure((await probeWorldFeature(beacon,feature)).visible,'clear harbor beacon was rejected');
+            front='warning-board';
+            ensure((await probeWorldFeature(beacon,feature)).reason==='occluded','nearer harbor board hid no feature');
+            front='storm-beacon-glow';
+            ensure((await probeWorldFeature(beacon,feature,()=>'.dock-action')).reason==='overlay','painted dock control hid no feature');
 
             console.log(JSON.stringify({{
               world:world.id,

@@ -10,6 +10,7 @@ import {fitBoundedSurface} from './surface-fit.js';
 import {createReversibleChoice} from './reversible-choice.js';
 import {createEntityMatcher,carrierAtFocus} from './world-interaction-focus.js';
 import {createPendingSourceStore} from './pending-source.js';
+import {probeWorldFeature} from './world-feature-visibility.js';
 import * as chapter from './first-words-world.js';
 const hitsEntity=createEntityMatcher(chapter.worldSpec.entities);
 
@@ -89,7 +90,8 @@ function inspectSource(key){
   $('#source-inspection').dataset.anchor=source.anchor;
   text('#source-name',source.name);
   text('#source-text',s.case.notes[key]);
-  text('#source-stage',situatedRoute()?`Stage ${source.name.toLowerCase()}`:`Carry ${source.name.toLowerCase()}`);
+  text('#source-stage','Carry sign');
+  $('#source-stage').setAttribute('aria-label',`${situatedRoute()?'Stage':'Carry'} ${source.name.toLowerCase()}`);
   $('#source-route-frame').hidden=!situatedRoute();
   $('#source-inspection').hidden=false;
   host.classList.toggle('route-inspecting',situatedRoute());
@@ -106,6 +108,7 @@ function inspectRelaySource(key){
   text('#source-name',source.name);
   text('#source-text',s.relay_case.notes[key]);
   text('#source-stage',`Carry ${source.name.toLowerCase()}`);
+  $('#source-stage').setAttribute('aria-label',`Carry ${source.name.toLowerCase()}`);
   $('#source-route-frame').hidden=true;
   $('#source-inspection').hidden=false;
   cardOpen=false;syncCardVisibility();$('#source-stage').focus();
@@ -150,7 +153,7 @@ const experience=createExperienceModeController(root,{
 });
 const setExperienceMode=mode=>experience.set(mode);
 setExperienceMode('loading');
-const blocked=()=>!ready||paused||inOpening||session.busy||session.pending||runtime.stats().contextLost||world.stats().animating||document.querySelector('dialog[open]');
+const blocked=(duringWorldTransition=false)=>!ready||paused||inOpening||session.busy||session.pending||runtime.stats().contextLost||(!duringWorldTransition&&world.stats().animating)||document.querySelector('dialog[open]');
 function syncCardVisibility(){
   const mode=root.dataset.experienceMode;
   if(!['tutorial','mission','complete'].includes(mode)){$('#machine-toggle').hidden=true;return;}
@@ -561,24 +564,25 @@ function render(){
   // re-checks afterwards because a player's text size changes without any event.
   if(!$('#engine').hidden)fitBoundedSurface($('#engine'));
 }
-async function act(action){
-  if(blocked())return;
+async function act(action,{duringWorldTransition=false}={}){
+  if(blocked(duringWorldTransition))return false;
   if(action==='skip-controls'){practice.skip();render();return;}
-  if(practice.step!=='done')return;
+  if(practice.step!=='done')return false;
   await audio.unlock().catch(()=>{});
   if(action==='ending')return showEnding();
   if(action==='start'||action==='again'){await session.start('ai-01-first-words');return;}
-  if(action!=='finish'&&!view().available_actions?.includes(action))return;
+  if(action!=='finish'&&!view().available_actions?.includes(action))return false;
   if(view().round===1&&action.startsWith('scan-')&&
-     (!stagedSource||chapter.routeSources[stagedSource]?.action!==action))return;
+     (!stagedSource||chapter.routeSources[stagedSource]?.action!==action))return false;
   if(changedRelay(view())&&action.startsWith('relay-context-')&&
-     (!stagedRelaySource||chapter.relaySources[stagedRelaySource]?.action!==action))return;
+     (!stagedRelaySource||chapter.relaySources[stagedRelaySource]?.action!==action))return false;
   const suppliedSource=view().round===1&&action.startsWith('scan-');
   await session.action(action);
   // On a narrow screen the open decision sheet can shed the long INPUT line.
   // Return to the world carrier before asking for a prediction so the actual
   // committed source is legible at the machine.
   if(suppliedSource&&host.clientWidth<700){cardOpen=false;syncCardVisibility();}
+  return true;
 }
 function showEnding(){
   const result=session.attempt?.assessment?.transfer_observations;
@@ -596,14 +600,23 @@ function flavor(title,detail){
 }
 $('#start').onclick=()=>act('start');$('#rewind').onclick=()=>act('rewind');$('#retry').onclick=()=>session.retry();
 $('#card-close').onclick=()=>{pauseContinuation();cardOpen=false;syncCardVisibility();};
-$('#machine-toggle').onclick=()=>{
+let firstWordDispatching=false;
+$('#machine-toggle').onclick=async()=>{
   closeSource();
   if(view().available_actions?.includes('relay-start')){act('relay-start');return;}
   if(situatedRoute()&&stagedSource&&view().round===1&&view().available_actions?.includes(chapter.routeSources[stagedSource].action)){
     act(chapter.routeSources[stagedSource].action);return;
   }
   if(situatedRoute()&&view().round===1&&view().clue!=='none'&&view().pieces===0&&view().available_actions?.includes('step')){
-    cardOpen=true;syncCardVisibility();act('step');return;
+    if(firstWordDispatching)return;
+    firstWordDispatching=true;
+    try{
+      // A state transition can still be animating when the world already offers
+      // this action. Its learning command is safe to dispatch once; opening the
+      // sheet before checking guards produced a second identical button on retry.
+      if(await act('step',{duringWorldTransition:true})){cardOpen=true;syncCardVisibility();}
+    }finally{firstWordDispatching=false;}
+    return;
   }
   cardOpen=true;syncCardVisibility();
 };
@@ -725,18 +738,21 @@ function frame(){
   const readoutFocus=s.round===0?'tutorial':relay?'receiver':'route';
   // A finished wrong route already has feedback at the gate and on the device.
   // Folding the generated-word readout gives the next physical sources room.
-  const readoutActive=s.status!=='wrong'&&carrierAtFocus(readoutFocus,activeFocus,relay?s.relay_context!=='none'&&s.relay_stage!=='done':s.round===0?s.input?.length>=2:s.clue!=='none');
+  const readoutActive=s.status!=='wrong'&&carrierAtFocus(readoutFocus,activeFocus,relay?s.relay_context!=='none'&&s.relay_stage!=='done':s.round===0?s.input?.length>=2:s.clue!=='none'&&s.pieces>0);
   // Subject clearance: during the relay the receiver owns the scene; labels
   // yield to its screen box instead of burying it (guide B2, review 210a663).
   if(relay){
     const subject=projectedEntityBox(world,'friend-signal',{top:[0,1.35,.25],bottom:[0,-1.45,.25],left:[-.95,0,.25],right:[.95,0,.25],margin:8});
     if(subject)avoidRects.push(subject);
   }
-  if(sourceQuestion){
-    // Preserve the route symbol as the readable landmark; the outer bars may
-    // sit behind a contextual sign when a narrow view leaves no other space.
-    const gate=projectedEntityBox(world,'star',{top:[0,3.1,.2],bottom:[0,1.2,.2],left:[-.8,2.1,.2],right:[.8,2.1,.2],margin:8});
-    if(gate)avoidRects.push(gate);
+  const markRects=[];
+  if(s.round===1&&!relay&&s.status!=='success'&&card.hidden){
+    // The compared marks are required world information, including after a
+    // source is inserted. Protect their painted centers from contextual labels.
+    for(const mark of ['moon-mark','star-mark','sun-mark']){
+      const symbol=projectedEntityBox(world,mark,{top:[0,.8,0],bottom:[0,-.8,0],left:[-.8,0,0],right:[.8,0,0],margin:8});
+      if(symbol)markRects.push(symbol);
+    }
   }
   // B2 protagonist clearance: Zip is the focal subject of every play stage, so
   // anchored labels keep out of his body box *and* its focal ring instead of
@@ -768,13 +784,13 @@ function frame(){
     if(toggleMarker){
       // The machine toggle is the opt-in door while the card is away; it never
       // disappears with the camera, it parks, and a focused dialog owns the screen.
-      marker.hidden=card.hidden&&!document.querySelector('dialog[open]')?Boolean(inOpening||!ours()):true;
+      marker.hidden=card.hidden&&!document.querySelector('dialog[open]')?Boolean(inOpening||!ours()||inspectedSource):true;
       marker.classList.toggle('parked',!(anchor&&anchor.inFront));
     // I3: while the machine panel is open it owns the decision; its world
     // choice markers fold away (they return when the panel is put away).
-    }else marker.hidden=(readout&&(!readoutActive||!s.powered||practice.step!=='done'||!card.hidden))||(carryToken&&!(relay?stagedRelaySource&&!slottedRelaySource:stagedSource&&!slottedSource))||(slotToken&&!marker.textContent)||(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')||marker.id==='source-inspection'))||routeLabelIdle||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay||(!changedRelay(s)&&marker.dataset.relaySource==='tavi')))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
+    }else marker.hidden=(readout&&(!readoutActive||!s.powered||practice.step!=='done'||!card.hidden))||(carryToken&&!(relay?stagedRelaySource&&!slottedRelaySource:stagedSource&&!slottedSource))||(slotToken&&!marker.textContent)||(!card.hidden&&(marker.classList.contains('notice-marker')||marker.classList.contains('world-action-marker')||marker.id==='source-inspection'))||(inspectedSource&&marker.dataset.clue&&marker.dataset.clue!==inspectedSource)||routeLabelIdle||!guidable||wrongRound||inOpening||!ours()||targetMismatch||(marker.dataset.relay&&(s.relay_stage==='done'||!relay||(!changedRelay(s)&&marker.dataset.relaySource==='tavi')))||(marker.classList.contains('notice-marker')&&marker.dataset.relay===undefined&&s.status==='success')||(marker.dataset.signal&&s.status!=='success')||(marker.dataset.anchor==='star-label'&&s.status==='success');
     if((anchor||slotToken&&sourceQuestion)&&!marker.hidden&&!(toggleMarker&&marker.classList.contains('parked'))){
-      const placement=placeWorldMarker(marker,anchor,{viewportWidth:rect.width,safeTop,safeBottom,critical,parkWhenFull:carrier,yOffset:readout?48:12,avoidRects});
+      const placement=placeWorldMarker(marker,anchor,{viewportWidth:rect.width,safeTop,safeBottom,critical,parkWhenFull:carrier,yOffset:readout?48:12,avoidRects:marker.dataset.routeLabel?avoidRects:[...avoidRects,...markRects]});
       if(slotToken&&sourceQuestion&&!placement.placed){
         marker.hidden=!parkWorldCarrier(marker,{viewportWidth:rect.width,safeTop,safeBottom});
       }
@@ -841,6 +857,7 @@ window.FirstWordsReview={
   get runtime(){return runtime.stats();},
   get colliders(){return runtime.colliderSnapshot();},
   get audio(){return audio.stats();},
+  probeFeature:feature=>probeWorldFeature(world,feature),
   audioCapture:{
     start:()=>audio.startCapture(),
     stop:()=>audio.stopCapture()

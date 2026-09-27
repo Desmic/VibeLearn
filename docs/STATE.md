@@ -18,7 +18,17 @@ Automated checks, critic judgment and user acceptance are separate claims.
   Its separate report is
   `artifacts/cold-review-7e82fcf/informed-recheck-af49886/RECHECK-REPORT.md`
   (SHA-256 `75d97315a9f34b5186631dca2df47a2420e3905a3ccc390407f50cdc0a5458b9`).
-  The original cold/warm reports were not rewritten.
+  The subsequent informed recheck of
+  `b48a8ac32bf5cc0f78ade0aa7483a5d00b38277a` also returned
+  **needs_revision**: pending-source reload/cancel, first-path direct Make,
+  and Moon failure/recovery improved, but today's board hid the Sun mark,
+  retry Make opened a second identical action, and fitted controls drifted
+  from the device. Its separate report is
+  `artifacts/cold-review-7e82fcf/informed-recheck-b48a8ac/RECHECK-REPORT.md`
+  (SHA-256 `d6e7dd508d7ecf28bc532bef695f19fa2fc68a491e9d70a752608d4cf61d5de3`).
+  The disposable review learner export is in that folder; 23 stored commands
+  preserve first choices through Star output, while assessment remains draft,
+  evidence absent and mastery unknown. Original cold/warm reports were not rewritten.
 - Shared boundaries now protect whole required content groups while fitting,
   including a previously shed ancestor and explicit cannot-fit reporting;
   an unfamiliar Harbor fixture proves a missing member fails. Live WebGL
@@ -39,7 +49,7 @@ Automated checks, critic judgment and user acceptance are separate claims.
   the same independent reviewer approved its structure and implementation
   gate in `artifacts/cold-review-7e82fcf/LEARNING-DESIGN-REVIEW-v5.json`.
   Runtime alignment is still unassessed.
-- The next repair scopes reversible source staging to the attempt and pinned
+- The `b48a8ac` repair scopes reversible source staging to the attempt and pinned
   package in browser session storage, with no new command or assessed choice.
   Cancelling and reloading clear or restore only that pending source. The
   shared boundary passes an unrelated Harbor source fixture. The authored
@@ -49,7 +59,7 @@ Automated checks, critic judgment and user acceptance are separate claims.
   Wrong Moon output is labelled at the Moon gate, and its finished readout
   yields to the recovery signs. A committed source exposes **Make first word**
   directly at the machine, removing an extra reopen step.
-- Worker verification on this repair: build passed, 457 application tests passed
+- Worker verification on `b48a8ac`: build passed, 457 application tests passed
   (seven configured PostgreSQL skips), focused phone route replay passed
   staging/reload/cancel, insertion, inference, pause/reload, wrong route and
   recovery; the full 34-state presentation scenario passed with zero
@@ -60,15 +70,39 @@ Automated checks, critic judgment and user acceptance are separate claims.
   committed a wrong history and Moon inference, saw the failed Moon route in
   the world, then inserted today's notice for recovery
   (`artifacts/repair-route-worker-play-2/`). That is implementation evidence,
-  not a critic verdict. An exact-commit presentation report and informed
-  reviewer recheck are still needed before this repair can be accepted.
+  not a critic verdict. The exact-commit 34-state presentation report passed
+  with zero violations at `artifacts/presentation-budget-b48a8ac.json`, but
+  the informed reviewer findings above keep the experience gate open.
+- The current uncommitted repair moves existing notice boards away from the
+  compared gate marks, fits the machine action back to the physical device,
+  folds an empty generated-history readout, and makes the retry world action
+  dispatch the first word once even during a visual transition. A shared
+  `probeWorldFeature` checks whether a declared world mark is on screen and
+  actually hit at its rendered point, including DOM/nearer-world occlusion;
+  an unrelated Harbor fixture and a deliberate foreground-board regression
+  prove failures. The required presentation scenario now checks three marks
+  at the ordinary junction, on phone/desktop and during source inspection.
+  The sign sheet keeps complete meaning and both actions visible at 200% text
+  within the unchanged budget. This is worker repair, not critic acceptance.
+- Current draft checks: build passed; 457 application tests passed (seven
+  configured PostgreSQL skips); the focused route browser and full 35-state
+  presentation scenario passed with zero violations. The active browser
+  sequence passed foundation, opening, controls, physicality, chapter and
+  situated route, then stopped at a relay assertion tied to shortened button
+  text. Restoring the relay's original label made the relay group pass; the
+  remaining readability and lifecycle groups passed separately. Three attempts
+  to start an additional adaptive shared-harness session crashed at viewport
+  setup before any game input; no session/browser/server survived. The earlier
+  `b48a8ac` adaptive worker play and independent reviewer play are preserved,
+  but they do not verify this new candidate. Exact-commit evidence and an
+  informed reviewer recheck remain required.
 - The accepted operational architecture direction is now documented in
   `docs/GAME-GENERATION-OPERATIONS.md`, with current candidate authority kept
   here and the user's supplied proposal unchanged. No provider, Level 2,
   deployment promotion or `main` merge is authorized by this repair.
-- Required next gate: run exact-candidate presentation evidence and ask the same
-  independent Astra reviewer for another **informed repair recheck** of the
-  changed junction, consequence and pending-stage reload. The frozen cold/warm
+- Required next gate: freeze and report the current candidate, then ask the same
+  independent Astra reviewer for another **informed repair recheck** of mark
+  visibility, source/device anchoring and one-click retry. The frozen cold/warm
   findings remain needs_revision and cannot become a new cold pass. Broader
   world/relationship treatment, hosted entry/auth, motion and audio remain
   unassessed; the user retains the final experience verdict. No Level 2,

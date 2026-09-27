@@ -143,6 +143,13 @@ critic's eyes:
   stacked into one column over the receiver at the payoff beat — under B2/B3/B1 the
   state measured clean because those check single surfaces, not mutual marker
   collision or subject occlusion by labels.
+  When a decision needs a visible world mark, declare a rendered sample in the
+  presentation scenario's `world_features` (`entity` plus explicit
+  `acceptedHits`). The shared probe fails if that point is offscreen, covered by
+  DOM or picked as a nearer world object. Test the ordinary and inspection views,
+  and deliberately place an occluder in a negative fixture. One sample cannot
+  certify an entire shape or composition; the live critic still judges whether
+  the whole relationship reads.
 - **B8 Control surface (interaction model):** in a motion-allowed cinematic/story
   state, **no painted DOM control may sit in the bottom-centre nav band**, and **no
   painted DOM button may carry a world/story verb** (its accessible name must not

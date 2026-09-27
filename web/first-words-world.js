@@ -104,8 +104,10 @@ function routeBoard(id,position,rotation,material,accent){
   e.push({id:id+'-label',parent:id,position:[0,2.6,0]});
 }
 routeBoard('notice-old',[-6.2,0,-11.5],20,'wood','gold');
-routeBoard('notice-parade',[6.2,0,-11.2],-20,'rose','pinkGlow');
-routeBoard('notice-today',[3.2,0,-16],-12,'teal','mint');
+routeBoard('notice-parade',[7.3,0,-10.8],-20,'rose','pinkGlow');
+routeBoard('notice-today',[6.0,0,-16.2],-12,'teal','mint');
+e.find(entity=>entity.id==='notice-parade-label').position=[0,-.5,0];
+e.find(entity=>entity.id==='notice-today-label').position=[0,-1.1,0];
 addTo('prison-zone',messageMachine('socket',[-3.5,0,2]));
 addTo('prison-zone',tokenTrack('words',[-3.5,1.3,4.5],4));
 // The first mission has its own reachable speech station. The tutorial socket is
