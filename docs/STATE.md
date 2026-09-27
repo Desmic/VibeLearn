@@ -6,14 +6,19 @@ Automated checks, critic judgment and user acceptance are separate claims.
 
 ## Current repair and gate
 
-- The latest independent Astra cold/warm review of
+- The independent Astra cold/warm review of
   `7e82fcf581e0d0ea486f5dec283799c7a7bcea94` returned **needs_revision**.
   Preserve `artifacts/cold-review-7e82fcf/{COLD-REPORT.md,WARM-COMPARISON.md,PRIORITIZED-FINDINGS.md}`
   unchanged (SHA-256 prefixes `75d47a5da6fb`, `02f98fee0353`,
   `d5ae7bc3e6be`). Its authoritative disposable learner export is in that
-  folder. The current development changes repair the missing complete tutorial
-  input and prototype a shorter, world-linked route encounter. This is worker
-  verification, not independent approval.
+  folder. The later informed recheck of `af49886babc974ea3a33ae0b2be2dfc08a5da05f`
+  also returned **needs_revision**: the complete tutorial request, one device
+  insertion, and stable prefix/recovery play were observed, but the source/gate
+  relationship was thin and pending source staging disappeared on reload.
+  Its separate report is
+  `artifacts/cold-review-7e82fcf/informed-recheck-af49886/RECHECK-REPORT.md`
+  (SHA-256 `75d97315a9f34b5186631dca2df47a2420e3905a3ccc390407f50cdc0a5458b9`).
+  The original cold/warm reports were not rewritten.
 - Shared boundaries now protect whole required content groups while fitting,
   including a previously shed ancestor and explicit cannot-fit reporting;
   an unfamiliar Harbor fixture proves a missing member fails. Live WebGL
@@ -34,31 +39,40 @@ Automated checks, critic judgment and user acceptance are separate claims.
   the same independent reviewer approved its structure and implementation
   gate in `artifacts/cold-review-7e82fcf/LEARNING-DESIGN-REVIEW-v5.json`.
   Runtime alignment is still unassessed.
-- Current draft checks: build passed; 457 application tests passed with seven
-  configured PostgreSQL skips; the focused live 390px route replay passed
-  insertion, uncommitted inference, keyboard-focus pause, reload, wrong gate
-  and recovery source. The active combined browser group and the full
-  33-state presentation scenario passed with zero violations. A separate
-  adaptive 390px GUI play held movement, saw the entire tutorial next input,
-  chose a wrong history, reloaded with its first choice intact, judged the
-  parade notice as naming no gate, paused/reviewed the growing input, saw a
-  fluent but unsupported Moon output fail in the world, and inserted today's
-  notice for recovery (`artifacts/repair-v5-adaptive-3/`). The phone route
-  source card was made opaque and an optional overlapping inspect control
-  removed from the source question after that play. A subsequent situated
-  presentation rerun passed; the full exact-commit report is still required.
+- The next repair scopes reversible source staging to the attempt and pinned
+  package in browser session storage, with no new command or assessed choice.
+  Cancelling and reloading clear or restore only that pending source. The
+  shared boundary passes an unrelated Harbor source fixture. The authored
+  mission recomposes its existing Moon, Sun and Star gates so all three marks
+  can be compared from the junction; phone sign inspection is a temporary
+  player-opened sheet below the gates, with the selected world sign highlighted.
+  Wrong Moon output is labelled at the Moon gate, and its finished readout
+  yields to the recovery signs. A committed source exposes **Make first word**
+  directly at the machine, removing an extra reopen step.
+- Worker verification on this repair: build passed, 457 application tests passed
+  (seven configured PostgreSQL skips), focused phone route replay passed
+  staging/reload/cancel, insertion, inference, pause/reload, wrong route and
+  recovery; the full 34-state presentation scenario passed with zero
+  violations, including sign inspection and enlarged text. The full active
+  foundation, opening, control, chapter, relay, readability and lifecycle
+  browser command passed sequentially. A disposable adaptive phone play
+  inspected the rebuilt junction and signs, reloaded an uncommitted old sign,
+  committed a wrong history and Moon inference, saw the failed Moon route in
+  the world, then inserted today's notice for recovery
+  (`artifacts/repair-route-worker-play-2/`). That is implementation evidence,
+  not a critic verdict. An exact-commit presentation report and informed
+  reviewer recheck are still needed before this repair can be accepted.
 - The accepted operational architecture direction is now documented in
   `docs/GAME-GENERATION-OPERATIONS.md`, with current candidate authority kept
   here and the user's supplied proposal unchanged. No provider, Level 2,
   deployment promotion or `main` merge is authorized by this repair.
-- Required next gate: complete exact-candidate presentation evidence, then ask the
-  same independent Astra reviewer for an **informed repair recheck** of the
-  changed behavior. Do not relabel the frozen cold/warm findings as a new cold
-  pass. The earlier criticism of thin relationship staging and potential
-  questionnaire-like play remains open to reviewer judgment. Hosted entry/auth
-  is not established by the disposable local root
-  redirect. Motion and audio remain unassessed under the current scope, not
-  passed. The user retains the final experience verdict.
+- Required next gate: run exact-candidate presentation evidence and ask the same
+  independent Astra reviewer for another **informed repair recheck** of the
+  changed junction, consequence and pending-stage reload. The frozen cold/warm
+  findings remain needs_revision and cannot become a new cold pass. Broader
+  world/relationship treatment, hosted entry/auth, motion and audio remain
+  unassessed; the user retains the final experience verdict. No Level 2,
+  deployment promotion or main merge follows from worker checks.
 
 ## Candidate
 

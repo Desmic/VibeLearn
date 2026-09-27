@@ -79,11 +79,7 @@
      "timeout": 60000
     },
     {
-     "click": "Open the message machine",
-     "timeout": 60000
-    },
-    {
-     "click": "Make first word",
+     "click": "Make first word at the message machine",
      "timeout": 60000
     },
     {
@@ -105,7 +101,7 @@
     ".game-view-tools",
     ".game-controls-help"
    ],
-   "opened_by": "Open the message machine",
+   "opened_by": "Make first word at the message machine",
    "required_content": [
     {
      "selector": "#goal",
@@ -140,7 +136,7 @@
     ".game-view-tools",
     ".game-controls-help"
    ],
-   "opened_by": "Open the message machine",
+   "opened_by": "Make first word at the message machine",
    "required_content": [
     {
      "selector": "#goal",
@@ -177,7 +173,7 @@
     ".game-view-tools",
     ".game-controls-help"
    ],
-   "opened_by": "Open the message machine",
+   "opened_by": "Make first word at the message machine",
    "required_content": [
     {
      "selector": "#goal",
@@ -258,7 +254,7 @@
     ".game-view-tools",
     ".game-controls-help"
    ],
-   "opened_by": "Open the message machine",
+   "opened_by": "Make first word at the message machine",
    "required_content": [
     {
      "selector": "#goal",
@@ -288,21 +284,57 @@
    "screenshot": "artifacts/presentation-situated/route-prefix-phone-200text.png",
    "text_scale": 2,
    "steps": [
-    {"click": "Check my prediction", "timeout": 60000},
-    {"click": "Run continuation", "timeout": 60000},
-    {"wait_eval": "()=>FirstWordsReview.state.pieces>=2", "timeout": 60000},
-    {"click": "Review generated inputs", "timeout": 60000}
+    {
+     "click": "Check my prediction",
+     "timeout": 60000
+    },
+    {
+     "click": "Run continuation",
+     "timeout": 60000
+    },
+    {
+     "wait_eval": "()=>FirstWordsReview.state.pieces>=2",
+     "timeout": 60000
+    },
+    {
+     "click": "Review generated inputs",
+     "timeout": 60000
+    }
    ],
    "wait_eval": "()=>FirstWordsReview.continuation.review&&FirstWordsReview.state.pieces>=2",
    "panel_open": true,
    "narrow_sheet": true,
    "sheet": "#engine",
-   "yields": [".game-move-stick", ".game-view-tools", ".game-controls-help"],
-   "opened_by": "Open the message machine",
+   "yields": [
+    ".game-move-stick",
+    ".game-view-tools",
+    ".game-controls-help"
+   ],
+   "opened_by": "Make first word at the message machine",
    "required_content": [
-    {"selector": "#context", "includes": ["Open the route", "The lantern parade starts at sunset.", "Open", "the"]},
-    {"selector": "#output", "includes": ["Open", "the"]},
-    {"selector": "#slotted-source", "includes": ["PARADE NOTICE", "NO GATE NAMED"]}
+    {
+     "selector": "#context",
+     "includes": [
+      "Open the route",
+      "The lantern parade starts at sunset.",
+      "Open",
+      "the"
+     ]
+    },
+    {
+     "selector": "#output",
+     "includes": [
+      "Open",
+      "the"
+     ]
+    },
+    {
+     "selector": "#slotted-source",
+     "includes": [
+      "PARADE NOTICE",
+      "NO GATE NAMED"
+     ]
+    }
    ]
   },
   {
@@ -312,21 +344,56 @@
    "panel_open": true,
    "narrow_sheet": true,
    "sheet": "#engine",
-   "yields": [".game-move-stick", ".game-view-tools", ".game-controls-help"],
-   "opened_by": "Open the message machine",
+   "yields": [
+    ".game-move-stick",
+    ".game-view-tools",
+    ".game-controls-help"
+   ],
+   "opened_by": "Make first word at the message machine",
    "required_content": [
-    {"selector": "#context", "includes": ["Open the route", "The lantern parade starts at sunset.", "Open", "the"]},
-    {"selector": "#output", "includes": ["Open", "the"]}
+    {
+     "selector": "#context",
+     "includes": [
+      "Open the route",
+      "The lantern parade starts at sunset.",
+      "Open",
+      "the"
+     ]
+    },
+    {
+     "selector": "#output",
+     "includes": [
+      "Open",
+      "the"
+     ]
+    }
    ]
   },
   {
    "name": "route-prefix-desktop",
    "screenshot": "artifacts/presentation-situated/route-prefix-desktop.png",
-   "resize": [1280,720],
+   "resize": [
+    1280,
+    720
+   ],
    "panel_open": true,
    "required_content": [
-    {"selector": "#context", "includes": ["Open the route", "The lantern parade starts at sunset.", "Open", "the"]},
-    {"selector": "#output", "includes": ["Open", "the"]}
+    {
+     "selector": "#context",
+     "includes": [
+      "Open the route",
+      "The lantern parade starts at sunset.",
+      "Open",
+      "the"
+     ]
+    },
+    {
+     "selector": "#output",
+     "includes": [
+      "Open",
+      "the"
+     ]
+    }
    ]
   }
  ]

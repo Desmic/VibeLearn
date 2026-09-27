@@ -75,9 +75,17 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 #markers>.source-inspection div{display:flex;gap:6px;flex-wrap:wrap}
 #markers>.source-inspection button{min-height:44px;padding:7px 10px;border-radius:8px;border:1px solid #f0c873;background:#f0c873;color:#152d30;font-weight:700}
 #markers>.source-inspection #source-close{background:transparent;color:#fff2d9}
-#world.route-inspecting #markers>span[data-round="1"][data-anchor="moon-label"],
-#world.route-inspecting #markers>span[data-round="1"][data-anchor="sun-label"],
-#world.route-inspecting #markers>span[data-round="1"][data-anchor="star-label"]{outline:2px solid #d0efce;outline-offset:3px}
+/* Inspecting a sign is a temporary world beat. On a narrow screen the note
+   sits below the three gates, linked to the highlighted source above it. */
+@media(max-width:700px){
+  #world.route-inspecting ~ #markers>.source-inspection{left:0!important;top:auto!important;bottom:0;transform:none!important;width:100%;max-height:min(33dvh,280px);border-radius:14px 14px 0 0}
+  #world.route-inspecting ~ #markers>.source-inspection::before{content:'↑ SELECTED SIGN';display:block;color:#ffe1a1;font-size:10px;letter-spacing:.12em;font-weight:800;margin-bottom:4px}
+  #world.route-inspecting .game-move-stick,#world.route-inspecting .game-view-tools,#world.route-inspecting .game-controls-help{visibility:hidden!important}
+  #world.route-inspecting ~ #markers>.notice-marker.inspected{outline:3px solid #f0c873;outline-offset:3px}
+}
+#world.route-inspecting ~ #markers>span[data-round="1"][data-anchor="moon-label"],
+#world.route-inspecting ~ #markers>span[data-round="1"][data-anchor="sun-label"],
+#world.route-inspecting ~ #markers>span[data-round="1"][data-anchor="star-label"]{outline:2px solid #d0efce;outline-offset:3px}
 #markers>.machine-toggle.parked{left:50%;top:auto;bottom:96px;transform:translateX(-50%)}
 /* The repaired speech module travels with Zip. Its live learning state remains a
    readable world carrier after camera movement while the optional controls close. */
@@ -157,5 +165,6 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 .actions>button[data-action^="check-"]{grid-column:1/-1}
 #markers>.learning-readout .readout-feedback{display:block;margin-top:5px;padding-top:5px;border-top:1px solid #b9efd977;color:#ffe0a4;font-weight:700;font-size:11px}
 #markers>.source-token{z-index:8;max-width:min(240px,calc(100vw - 28px));white-space:normal;text-align:center;padding:7px 10px;border:1px solid #f0c873;border-radius:9px;background:#332d2aef;color:#ffebc3;font-size:10px;font-weight:800;box-shadow:0 6px 16px #0007;pointer-events:none}
+#markers>.source-token[data-cancel-pending]{pointer-events:auto;min-height:44px}
 #markers>#slotted-source{background:#18444aed;border-color:#8dd9be;color:#dbffef}
 #markers>#slotted-source.source-evidence{max-width:150px}

@@ -44,6 +44,8 @@ def open_card(page):
 
 
 def action(page,name,saved_text='Saved'):
+    if name=='Make first word' and page.get_by_role('button',name='Make first word at the message machine',exact=True).is_visible():
+        return world_action(page,'Make first word at the message machine')
     if name=='Answer the signal' and page.locator('#machine-toggle').is_visible():
         with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
             page.locator('#machine-toggle').click()
@@ -264,12 +266,15 @@ def main():
             # 390px phone, all three route boards must still be on screen (parked with an
             # edge cue if they no longer fit). They vanished there on 23 September while
             # every coverage budget reported a smaller number.
-            expect(page.locator('#markers > [data-carrier]:visible')).to_have_count(3,timeout=15000)
+            expect(page.locator('#markers > .notice-marker[data-carrier]:visible')).to_have_count(3,timeout=15000)
             expect(page.locator('#machine-toggle')).to_contain_text('OPEN ENGINE')
             expect(page.locator('#engine')).to_have_attribute('data-anchor','route-machine')
             expect(page.locator('#learning-readout')).to_be_hidden()
             trace.append({'phase':'tutorial-to-level1','mode':page.locator('#adventure').get_attribute('data-experience-mode'),'passed':True})
             page.get_by_role('button',name='Inspect the old route sign').click()
+            expect(page.locator('#markers > [data-round="1"][data-anchor="moon-label"]')).to_be_visible()
+            expect(page.locator('#markers > [data-round="1"][data-anchor="sun-label"]')).to_be_visible()
+            expect(page.locator('#markers > [data-round="1"][data-anchor="star-label"]')).to_be_visible()
             expect(page.locator('#source-text')).to_contain_text('Old route')
             expect(page.locator('#source-route-frame')).to_be_visible()
             assert page.evaluate('FirstWordsReview.state.clue')=='none'
@@ -279,12 +284,12 @@ def main():
             with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
                 page.get_by_role('button',name='Insert and commit Old sign at the message machine').click()
             assert saved.value.ok
-            open_card(page)
-            expect(page.locator('#context')).to_contain_text('Old route')
-            expect(page.locator('#engine')).to_be_visible()
             expect(page.locator('#readout-request')).to_contain_text('Open the route')
             expect(page.locator('#readout-supplied')).to_contain_text('Old route')
             replay.append({'phase':'stale-context-selected','state':page.evaluate('FirstWordsReview.state')})
+            action(page,'Make first word')
+            expect(page.locator('#context')).to_contain_text('Old route')
+            expect(page.locator('#engine')).to_be_visible()
             expect(page.locator('#actions button[data-action^="relay-"]')).to_have_count(0)
             generate(page,generation,gate_prediction='Moon');expect(page.locator('#stage-name')).to_have_text('LEVEL 1 · RECOVER');expect(page.locator('#goal')).to_have_text('Wrong route.')
             replay.append({'phase':'moon-prediction','state':page.evaluate('FirstWordsReview.state')})

@@ -7,7 +7,7 @@ from playwright.sync_api import expect, sync_playwright
 
 from tests.browser_check import launch_browser, start_server, stop_server
 from tests.level1_chapter_browser import (
-    action, choose, complete_tutorial, open_card, skip_opening_to_tutorial, supply_sign,
+    action, choose, complete_tutorial, open_card, skip_opening_to_tutorial, supply_sign, world_action,
 )
 from tests.first_words_browser import until
 
@@ -27,10 +27,29 @@ def main():
             action(page,'Begin Level 1 →')
             page.get_by_role('button',name='Inspect the old route sign').click()
             expect(page.locator('#source-route-frame')).to_be_visible()
+            for gate in ('moon','sun','star'):
+                expect(page.locator(f'#markers > [data-round="1"][data-anchor="{gate}-label"]')).to_be_visible()
+            page.screenshot(path=str(ROOT/'artifacts'/'route-source-inspection-draft.png'))
             assert page.evaluate('FirstWordsReview.state.clue')=='none'
             page.get_by_role('button',name='Stage old sign').click()
             expect(page.locator('#carried-source')).to_contain_text('OLD SIGN')
             assert page.evaluate('FirstWordsReview.state.clue')=='none'
+            page.get_by_role('button',name="Inspect today's route notice").click()
+            expect(page.locator('#source-inspection')).to_be_visible()
+            expect(page.locator('#carried-source')).to_contain_text('OLD SIGN')
+            page.get_by_role('button',name='Close sign inspection').click()
+            page.screenshot(path=str(ROOT/'artifacts'/'route-junction-draft.png'))
+            page.reload()
+            expect(page.locator('#carried-source')).to_contain_text('OLD SIGN')
+            page.get_by_role('button',name='Put down pending old sign').click()
+            page.reload()
+            expect(page.locator('#carried-source')).to_be_hidden()
+            page.get_by_role('button',name="Inspect today's route notice").click()
+            page.get_by_role('button',name="Stage today's notice").click()
+            page.reload()
+            expect(page.locator('#carried-source')).to_contain_text("TODAY'S NOTICE")
+            page.get_by_role('button',name='Inspect the old route sign').click()
+            page.get_by_role('button',name='Stage old sign').click()
             with page.expect_response(lambda r:'/api/commands/' in r.url and r.request.method=='POST') as saved:
                 page.get_by_role('button',name='Insert and commit old sign at the message machine').click()
             attempt=saved.value.json()
@@ -40,7 +59,7 @@ def main():
             assert 'NAMED' not in page.locator('#slotted-source').inner_text()
             evidence.append({'phase':'one-device-insertion','revision':attempt['revision'],
                              'input':attempt['word_machine_state']['input']})
-            action(page,'Make first word')
+            world_action(page,'Make first word at the message machine')
             choose(page,'Request and sign only')
             expect(page.locator('#context')).to_contain_text('Open')
             expect(page.get_by_role('button',name='Use the full input →')).to_be_visible()
@@ -93,15 +112,19 @@ def main():
             action(page,'Speak command to gate')
             wrong=page.evaluate('FirstWordsReview.state')
             assert wrong['status']=='wrong' and wrong['output']==['Open','the','Moon','gate']
+            expect(page.get_by_text('MOON SHUT',exact=False)).to_be_visible()
+            page.screenshot(path=str(ROOT/'artifacts'/'route-failure-draft.png'))
             evidence.append({'phase':'world-consequence','status':wrong['status'],
                              'output':wrong['output'],'source_inference':wrong['source_inference']})
+            page.get_by_role('button',name='Put the machine away').click()
+            page.screenshot(path=str(ROOT/'artifacts'/'route-recovery-draft.png'))
+            assert page.get_by_role('button',name="Inspect today's route notice").count(),page.locator('#markers').inner_text()
             supply_sign(page,"today's route notice","today's notice","today's notice")
             recovered=page.evaluate('FirstWordsReview.state')
             evidence.append({'phase':'recovery-source','pieces':recovered['pieces'],
                              'status':recovered['status'],'available_actions':recovered['available_actions']})
             assert recovered['clue']=='star' and recovered['pieces']==0,recovered
-            open_card(page)
-            assert page.get_by_role('button',name='Make first word',exact=True).count(),page.locator('#actions').inner_text()
+            expect(page.get_by_role('button',name='Make first word at the message machine',exact=True)).to_be_visible()
             (ROOT/'artifacts'/'situated-route-browser.json').write_text(json.dumps(evidence,indent=2),encoding='utf-8')
             print(json.dumps({'status':'passed','phases':[x['phase'] for x in evidence]}))
         finally:

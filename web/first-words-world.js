@@ -305,13 +305,21 @@ function present(s,prev){
   for(let i=0;i<(s.pieces||0);i++)p.show.push(`words-piece-${i}`);
   const tutorialComplete=s.round===1||s.status==='success';
   if(tutorialComplete){p.transforms['moon-door']={position:[0,7.8,0]};p.show.push('tutorial-route-open','zip-voice','route-floor','route-wall--1','route-wall-1');}
-  if(s.round===1){p.show.push('route-machine');if(s.status!=='success')p.show.push('notice-old','notice-parade','notice-today');}
+  if(s.round===1){
+    // Recompose the existing three gate roots at the mission junction. Their
+    // marks are equally visible before inference; the source words decide.
+    p.transforms.moon={position:[-3.4,0,-17.8],scale:[.62,.74,1]};
+    p.transforms.sun={position:[3.4,0,-17.8]};
+    p.transforms['moon-door']={position:[0,0,0]};
+    p.show.push('route-machine');
+    if(s.status!=='success')p.show.push('notice-old','notice-parade','notice-today');
+  }
   // The relay is played at the receiver: each dated source remains inspectable.
   if(s.relay_stage&&s.relay_stage!=='none')p.show.push('relay-note-a','relay-note-b',...(s.relay_inference!==undefined?['relay-note-c']:[]));
   if(s.relay_stage==='done')p.show.push('friend-signal-reply-light');
   if(s.status==='wrong'){
     p.show.push('wrong-ring');p.animations.zip='no';
-    p.transforms['wrong-ring']={position:s.round===1?[0,.12,-10.8]:[6,.12,-11]};
+    p.transforms['wrong-ring']={position:s.round===1?[-3.4,.12,-17]:[6,.12,-11]};
     if(!s.round)p.transforms['sun-door']={position:[0,3.8,0]};
   }
   if(s.status==='success'){

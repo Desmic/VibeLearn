@@ -17,6 +17,7 @@ class PlatformGeneralizationTests(unittest.TestCase):
             "markers":(ROOT/"web"/"world-marker-layout.js").as_uri(),
             "choices":(ROOT/"web"/"reversible-choice.js").as_uri(),
             "focus":(ROOT/"web"/"world-interaction-focus.js").as_uri(),
+            "pending":(ROOT/"web"/"pending-source.js").as_uri(),
         }
         script=textwrap.dedent(f"""
             const {{validateWorldSpec}}=await import({json.dumps(modules["world"])});
@@ -26,6 +27,7 @@ class PlatformGeneralizationTests(unittest.TestCase):
             const {{placeWorldMarker,parkWorldCarrier}}=await import({json.dumps(modules["markers"])});
             const {{createReversibleChoice}}=await import({json.dumps(modules["choices"])});
             const {{createEntityMatcher,carrierAtFocus}}=await import({json.dumps(modules["focus"])});
+            const {{createPendingSourceStore}}=await import({json.dumps(modules["pending"])});
 
             const ensure=(value,message)=>{{if(!value)throw new Error(message);}};
 
@@ -170,6 +172,16 @@ class PlatformGeneralizationTests(unittest.TestCase):
             await commit();await commit();
             ensure(dispatched.length===1&&dispatched[0]==='core-b','explicit commitment did not dispatch once');
             ensure(pending.selected('harbor-attempt:4:prediction')===null,'selection leaked across revision');
+            const values=new Map();
+            const pendingStorage={{getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key)}};
+            const carried=createPendingSourceStore(pendingStorage,'harbor-source');
+            const scope={{attemptId:'harbor-attempt:3',version:'harbor-lesson-2',kind:'dock-note'}};
+            carried.set(scope,'gauge-report');
+            ensure(carried.read(scope,['gauge-report','storm-warning'])==='gauge-report','reversible harbor source did not survive reload');
+            ensure(carried.read({{...scope,attemptId:'harbor-attempt:4'}},['gauge-report'])===null,'pending source leaked into another attempt');
+            ensure(carried.read(scope,['storm-warning'])===null,'unknown source was accepted');
+            carried.clear(scope);
+            ensure(carried.read(scope,['gauge-report'])===null,'cancel did not clear pending source');
 
             console.log(JSON.stringify({{
               world:world.id,

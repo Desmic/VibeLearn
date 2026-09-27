@@ -267,10 +267,8 @@
      "click": "Insert and commit Old sign at the message machine"
     },
     {
-     "click": "Open the message machine"
-    },
-    {
-     "click": "Make first word"
+     "click": "Make first word at the message machine",
+     "timeout": 30000
     },
     {
      "click": "Request, sign, and Open"
@@ -323,10 +321,8 @@
      "click": "Insert and commit Today's notice at the message machine"
     },
     {
-     "click": "Open the message machine"
-    },
-    {
-     "click": "Make first word"
+     "click": "Make first word at the message machine",
+     "timeout": 30000
     },
     {
      "click": "Run continuation"
@@ -793,6 +789,44 @@
    "coverage_max_reason": "The narrow viewport needs its move stick and camera controls; the three route clues and action prompt must remain visible while informational surfaces alone stay within 15%."
   },
   {
+   "name": "mission-source-inspection-phone",
+   "markers": "#markers > [data-anchor]",
+   "steps": [
+    {
+     "click": "Inspect the old route sign",
+     "timeout": 60000
+    },
+    {
+     "wait_text": "Stage old sign",
+     "timeout": 60000
+    }
+   ],
+   "wait_eval": "()=>!document.querySelector(\"#source-inspection\").hidden&&document.querySelector(\"#engine\").hidden",
+   "screenshot": "artifacts/presentation-situated/route-source-inspection-phone.png",
+   "required_content": [
+    {
+     "selector": "#source-inspection",
+     "includes": [
+      "Old sign",
+      "Old route: take the Moon gate.",
+      "Moon, Sun and five-point gate marks",
+      "Stage old sign",
+      "Return to corridor"
+     ]
+    }
+   ],
+   "panel_open": true,
+   "narrow_sheet": true,
+   "sheet": "#source-inspection",
+   "opened_by": "Inspect the old route sign",
+   "yields": [
+    ".game-move-stick",
+    ".game-view-tools",
+    ".game-controls-help"
+   ],
+   "coverage_max_reason": "A deliberately opened source inspection yields movement chrome and sits below the visible three-gate junction."
+  },
+  {
    "name": "mission-decision-phone-sheet",
    "markers": "#markers > [data-anchor]",
    "focal": "zip",
@@ -807,6 +841,10 @@
    ],
    "opened_by": "Open the message machine",
    "steps": [
+    {
+     "click": "Close sign inspection",
+     "timeout": 60000
+    },
     {
      "click": "Open the message machine",
      "timeout": 60000
@@ -865,7 +903,7 @@
     ".game-view-tools",
     ".game-controls-help"
    ],
-   "opened_by": "Open the message machine",
+   "opened_by": "Make first word at the message machine",
    "steps": [
     {
      "click": "Put the machine away",
@@ -884,11 +922,7 @@
      "timeout": 60000
     },
     {
-     "click": "Open the message machine",
-     "timeout": 60000
-    },
-    {
-     "click": "Make first word",
+     "click": "Make first word at the message machine",
      "timeout": 60000
     },
     {
@@ -950,7 +984,7 @@
     ".game-view-tools",
     ".game-controls-help"
    ],
-   "opened_by": "Open the message machine",
+   "opened_by": "Make first word at the message machine",
    "steps": [],
    "coverage_max_reason": "Guide B1 narrow-sheet clause (I8): this sheet stayed open from the player's own click; the wrong-route beat did not summon it, and rule I7 removed the spent sign from it.",
    "wait_eval": "()=>document.querySelector('#engine').classList.contains('sheet')",
@@ -982,7 +1016,7 @@
     ".game-view-tools",
     ".game-controls-help"
    ],
-   "opened_by": "Open the message machine",
+   "opened_by": "Make first word at the message machine",
    "steps": [
     {
      "click": "Skip opening",
@@ -1069,11 +1103,7 @@
      "timeout": 60000
     },
     {
-     "click": "Open the message machine",
-     "timeout": 60000
-    },
-    {
-     "click": "Make first word",
+     "click": "Make first word at the message machine",
      "timeout": 60000
     },
     {
@@ -1152,7 +1182,7 @@
     ".game-view-tools",
     ".game-controls-help"
    ],
-   "opened_by": "Open the message machine",
+   "opened_by": "Make first word at the message machine",
    "steps": [],
    "wait_eval": "()=>document.querySelector('#engine').classList.contains('sheet')",
    "carriers": [
