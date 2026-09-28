@@ -28,8 +28,11 @@ Automated checks, critic judgment and user acceptance are separate claims.
   and server are stopped. Build passed, 460 application tests passed (seven
   configured PostgreSQL skips), the full active browser sequence passed, and
   the 35-state draft presentation report passed with zero violations at
-  `artifacts/presentation-budget-source-access-draft.json`. Exact committed
-  presentation identity and independent informed repair recheck are still
+  `artifacts/presentation-budget-source-access-draft.json`. The exact committed
+  source/tree `3dc2309f05ecaa2e792e7b8b90b43d02c0bf35af` then passed the
+  full 35-state presentation gate with zero violations at
+  `artifacts/presentation-budget-3dc2309.json`; the later status-only record
+  does not change runtime source. Independent informed repair recheck is still
   pending. The original broader game appeal, relationship and art/world
   findings remain open; motion/audio and hosted entry remain unassessed.
 - The independent Astra cold/warm review of
@@ -151,8 +154,7 @@ Automated checks, critic judgment and user acceptance are separate claims.
   `docs/GAME-GENERATION-OPERATIONS.md`, with current candidate authority kept
   here and the user's supplied proposal unchanged. No provider, Level 2,
   deployment promotion or `main` merge is authorized by this repair.
-- Next: close the exact-commit presentation identity for `063e3c1`, then reopen
-  the integrated opening-to-Level-1 experience design before more runtime
+- Next: reopen the integrated opening-to-Level-1 experience design before more runtime
   expansion. An independent informed repair recheck of postcommit source
   access remains pending; the original cold/warm findings stay needs_revision.
   The broader game appeal, relationship, art/world and learning gates need
