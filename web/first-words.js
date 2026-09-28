@@ -80,23 +80,35 @@ function reviewContinuation(){
   render();
 }
 const sourceName=key=>chapter.routeSources[key]?.name||chapter.relaySources[key]?.name||'sign';
+const routeSourceCanStage=s=>s.clue==='none'||s.status==='wrong';
 function inspectSource(key){
   pauseContinuation();
   const s=view(),source=chapter.routeSources[key];
-  if(!source||s.round!==1||!['none',undefined].includes(s.relay_stage)||
-     (s.clue!=='none'&&s.status!=='wrong'))return;
+  if(!source||s.round!==1||!['none',undefined].includes(s.relay_stage))return;
   inspectedSource=key;
   inspectedKind='route';
   $('#source-inspection').dataset.anchor=source.anchor;
   text('#source-name',source.name);
   text('#source-text',s.case.notes[key]);
   text('#source-stage','Carry sign');
+  $('#source-stage').hidden=!routeSourceCanStage(s);
   $('#source-stage').setAttribute('aria-label',`${situatedRoute()?'Stage':'Carry'} ${source.name.toLowerCase()}`);
+  const others=$('#source-others');
+  others.replaceChildren();
+  others.hidden=routeSourceCanStage(s);
+  if(!others.hidden)for(const [otherKey,otherSource] of Object.entries(chapter.routeSources)){
+    if(otherKey===key)continue;
+    const control=document.createElement('button');
+    control.type='button';control.textContent=otherSource.name;
+    control.setAttribute('aria-label',`Review ${otherSource.name.toLowerCase()}`);
+    control.onclick=()=>inspectSource(otherKey);
+    others.append(control);
+  }
   $('#source-route-frame').hidden=!situatedRoute();
   $('#source-inspection').hidden=false;
   host.classList.toggle('route-inspecting',situatedRoute());
   cardOpen=false;syncCardVisibility();
-  $('#source-stage').focus();
+  (routeSourceCanStage(s)?$('#source-stage'):$('#source-close')).focus();
 }
 function inspectRelaySource(key){
   pauseContinuation();
@@ -108,13 +120,15 @@ function inspectRelaySource(key){
   text('#source-name',source.name);
   text('#source-text',s.relay_case.notes[key]);
   text('#source-stage',`Carry ${source.name.toLowerCase()}`);
+  $('#source-stage').hidden=false;
+  $('#source-others').hidden=true;
   $('#source-stage').setAttribute('aria-label',`Carry ${source.name.toLowerCase()}`);
   $('#source-route-frame').hidden=true;
   $('#source-inspection').hidden=false;
   cardOpen=false;syncCardVisibility();$('#source-stage').focus();
 }
 function stageSource(){
-  if(!inspectedSource)return;
+  if(!inspectedSource||inspectedKind==='route'&&!routeSourceCanStage(view()))return;
   if(inspectedKind==='relay')stagedRelaySource=inspectedSource;
   else {stagedSource=inspectedSource;if(situatedRoute())pendingSources.set(pendingScope('route'),stagedSource);}
   closeSource();
@@ -784,7 +798,7 @@ function frame(){
     // Source-choice carriers must remain discoverable while the player is deciding.
     // Once inference is committed, an offscreen, unselected sign prompt may yield;
     // its physical sign remains inspectable when brought back into view.
-    const pastSourceDecision=marker.classList.contains('notice-marker')&&!marker.dataset.relay&&
+    const pastSourceDecision=marker.classList.contains('notice-marker')&&!marker.dataset.relay&&marker.dataset.clue!==s.clue&&
       s.source_inference!=='none'&&s.status==='building'&&s.pieces>0;
     const carrier=marker.dataset.carrier!==undefined&&!pastSourceDecision;
     const guidable=(critical||carrier?Boolean(anchor?.inFront):Boolean(anchor?.visible))||(slotToken&&sourceQuestion);

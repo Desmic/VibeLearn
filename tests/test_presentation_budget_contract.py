@@ -261,6 +261,19 @@ class PresentationBudgetContract(unittest.TestCase):
     def test_injected_text_scale_script_is_balanced(self):
         self.assertIsNone(_unclosed(TEXT_SCALE))
 
+    def test_text_scale_includes_emphasized_value_text(self):
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            page = browser.new_page()
+            page.set_content('<p>REQUEST <b>Secure the harbor gate</b> <strong>Current source</strong></p>')
+            before = page.locator('b').evaluate('el => parseFloat(getComputedStyle(el).fontSize)')
+            page.evaluate(TEXT_SCALE, 2)
+            self.assertAlmostEqual(page.locator('b').evaluate('el => parseFloat(getComputedStyle(el).fontSize)'), before * 2)
+            page.evaluate(TEXT_SCALE, 1)
+            self.assertAlmostEqual(page.locator('b').evaluate('el => parseFloat(getComputedStyle(el).fontSize)'), before)
+            browser.close()
+
     def test_injected_shed_diagnostic_script_is_balanced(self):
         self.assertIsNone(_unclosed(SHED_DIAGNOSTIC))
 

@@ -493,13 +493,16 @@ MEASURE = """async (args) => {
 # instead of being measured around a style the player would never see. Text-bearing
 # nodes are stamped and restored, so scaled and unscaled states share one walk.
 TEXT_SCALE = """(factor) => {
-  const nodes = [...document.querySelectorAll('button,p,h1,h2,h3,span,small,a,label,li,blockquote')]
+  const nodes = [...document.querySelectorAll('button,p,h1,h2,h3,span,small,a,label,li,blockquote,b,strong,em')]
     .filter(e => [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim()));
   for (const el of nodes) {
     if (el.dataset.budgetBase === undefined) {
       el.dataset.budgetBase = getComputedStyle(el).fontSize;
       el.dataset.budgetInline = el.style.fontSize;
     }
+  }
+  // Snapshot every inherited size before changing an ancestor's size.
+  for (const el of nodes) {
     el.style.fontSize = factor === 1 ? el.dataset.budgetInline
       : (parseFloat(el.dataset.budgetBase) * factor) + 'px';
   }
@@ -554,9 +557,13 @@ def click_scenario_button(page, name, opt_in_targets, timeout=30000):
             # The click can schedule the card's render for the next frame. Wait
             # for that opening before recording consent; an already visible or
             # never opened sheet still earns no witness.
-            try:
-                page.wait_for_function(SHEET_VISIBLE, arg=selector, timeout=3000)
-            except PlaywrightTimeoutError:
+            # wait_for_function evaluates a string and is blocked by the
+            # product's script-src 'self' CSP. page.evaluate runs the same
+            # read-only predicate without granting unsafe-eval.
+            deadline = time.monotonic() + 3
+            while not page.evaluate(SHEET_VISIBLE, selector) and time.monotonic() < deadline:
+                page.wait_for_timeout(50)
+            if not page.evaluate(SHEET_VISIBLE, selector):
                 continue
             page.evaluate(SHEET_WITNESS, {"selector": selector, "name": name})
 

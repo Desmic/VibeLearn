@@ -130,6 +130,17 @@ class ClaimDiscoveryTests(unittest.TestCase):
             play_session.refuse_or_reclaim(mock.Mock(reclaim=False),
                                            self.tmp / "artifacts" / "mine")
 
+    def test_reclaimed_owner_cannot_resurrect_from_reused_pid_and_url_port(self):
+        owner = self.tmp / "artifacts" / "orphan"
+        play_session.record("reclaimed", {"root": str(owner), "port": 9342,
+                                          "pid": 1234, "server_pid": 5678,
+                                          "url": "http://127.0.0.1:50590/first-words"}, owner="sweeper")
+        with mock.patch.object(play_session, "_port_open", lambda port, timeout=0.35: True):
+            rows = play_session.claims()
+        self.assertFalse(rows[0]["live"])
+        play_session.refuse_or_reclaim(mock.Mock(reclaim=False),
+                                       self.tmp / "artifacts" / "mine")
+
     def test_start_refuses_to_double_book_the_machine_for_it(self):
         args = mock.Mock(reclaim=False)
         with self.assertRaises(SystemExit) as caught:

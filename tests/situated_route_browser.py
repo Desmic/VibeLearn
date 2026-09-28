@@ -186,6 +186,31 @@ def main():
             assert all(item['painted'] and not item['missing'] for item in group['requiredContent']),group['requiredContent']
             assert group['associatedCarriers'][0]['associated'],group['associatedCarriers']
             expect(page.get_by_role('button',name='Inspect the old route sign')).to_be_hidden()
+            before_inspect=page.evaluate('FirstWordsReview.state')
+            page.get_by_role('button',name="Inspect today's route notice").click()
+            expect(page.locator('#source-inspection')).to_be_visible()
+            expect(page.locator('#source-stage')).to_be_hidden()
+            expect(page.locator('#source-text')).to_contain_text('five-point lantern mark')
+            page.get_by_role('button',name='Review old sign').click()
+            expect(page.locator('#source-text')).to_contain_text('Moon gate')
+            page.get_by_role('button',name='Review parade notice').click()
+            expect(page.locator('#source-text')).to_contain_text('parade')
+            page.get_by_role('button',name='Close sign inspection').click()
+            assert page.evaluate('FirstWordsReview.state')==before_inspect
+            page.set_viewport_size({'width':1280,'height':720})
+            expect(page.get_by_role('button',name='Inspect the old route sign')).to_be_visible()
+            page.get_by_role('button',name='Inspect the old route sign').click()
+            expect(page.locator('#source-inspection')).to_be_visible()
+            expect(page.locator('#source-stage')).to_be_hidden()
+            page.get_by_role('button',name='Close sign inspection').click()
+            point=page.evaluate("async()=>{const {getGameRuntime}=await import('/game-runtime.js');return getGameRuntime().world.projectEntity('notice-today')}")
+            assert point and point['visible'],point
+            page.mouse.click(point['x'],point['y'])
+            expect(page.locator('#source-inspection')).to_be_visible()
+            expect(page.locator('#source-stage')).to_be_hidden()
+            page.get_by_role('button',name='Close sign inspection').click()
+            assert page.evaluate('FirstWordsReview.state')==before_inspect
+            page.set_viewport_size({'width':390,'height':844})
             page.screenshot(path=str(ROOT/'artifacts'/'route-retry-prefix-phone-draft.png'))
             page.evaluate(TEXT_SCALE,2)
             page.wait_for_timeout(1200)
@@ -196,6 +221,11 @@ def main():
             page.screenshot(path=str(ROOT/'artifacts'/'route-retry-prefix-phone-200text-draft.png'))
             assert all(item['painted'] and not item['missing'] for item in enlarged['requiredContent']),enlarged['requiredContent']
             assert enlarged['associatedCarriers'][0]['associated'],enlarged['associatedCarriers']
+            page.get_by_role('button',name="Inspect today's route notice").click()
+            expect(page.locator('#source-inspection')).to_be_visible()
+            expect(page.locator('#source-stage')).to_be_hidden()
+            expect(page.get_by_role('button',name='Review old sign')).to_be_visible()
+            page.get_by_role('button',name='Close sign inspection').click()
             open_card(page)
             expect(page.locator('#context')).to_contain_text('five-point lantern mark')
             expect(page.locator('#output')).to_contain_text('Open')
@@ -217,6 +247,22 @@ def main():
             assert all(item['painted'] and not item['missing'] for item in completed['requiredContent']),completed['requiredContent']
             assert completed['associatedCarriers'][0]['associated'],completed['associatedCarriers']
             page.screenshot(path=str(ROOT/'artifacts'/'route-retry-complete-phone-draft.png'))
+            page.get_by_role('button',name="Inspect today's route notice").click()
+            expect(page.locator('#source-inspection')).to_be_visible()
+            expect(page.locator('#source-stage')).to_be_hidden()
+            page.get_by_role('button',name='Close sign inspection').click()
+            assert page.evaluate('FirstWordsReview.state.pieces')==4
+            page.evaluate(TEXT_SCALE,2)
+            page.wait_for_timeout(1200)
+            page.screenshot(path=str(ROOT/'artifacts'/'route-retry-complete-phone-200text-draft.png'))
+            row_clashes=page.evaluate("""()=>[...document.querySelectorAll('#learning-readout p:not([hidden])')]
+              .filter(p=>!p.closest('#learning-readout[hidden]'))
+              .map(p=>{const label=p.querySelector('span'),value=p.querySelector('b');return{
+                labelRight:label?.getBoundingClientRect().right||0,valueLeft:value?.getBoundingClientRect().left||0,
+                labelOverflow:(label?.scrollWidth||0)>(label?.clientWidth||0)+2};})
+              .filter(r=>r.labelOverflow||r.labelRight>r.valueLeft+2)""")
+            assert not row_clashes,row_clashes
+            page.evaluate(TEXT_SCALE,1)
             (ROOT/'artifacts'/'situated-route-browser.json').write_text(json.dumps(evidence,indent=2),encoding='utf-8')
             print(json.dumps({'status':'passed','phases':[x['phase'] for x in evidence]}))
         finally:

@@ -241,7 +241,10 @@ def claims():
     for entry in latest.values():
         # A port alone is not identity: the next session reuses 9333 after the last one stops,
         # and then a dead owner reads as a live one while `--reclaim` kills whoever is playing.
-        entry["live"] = live(entry.get("pid"), entry.get("cdp"), entry.get("url"))
+        # A verified terminal ledger record must not resurrect when Windows later reuses
+        # the old PID and an unrelated server happens to answer on the old URL port.
+        entry["live"] = entry.get("op") not in {"reclaimed", "stopped"} and \
+            live(entry.get("pid"), entry.get("cdp"), entry.get("url"))
     return sorted(latest.values(), key=lambda entry: str(entry.get("ts")))
 
 

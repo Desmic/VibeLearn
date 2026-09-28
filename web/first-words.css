@@ -75,6 +75,8 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 #markers>.source-inspection p{font-size:13px;line-height:1.35;margin:6px 0 10px}
 #markers>.source-inspection div{display:flex;gap:6px;flex-wrap:wrap}
 #markers>.source-inspection button{min-height:44px;padding:7px 10px;border-radius:8px;border:1px solid #f0c873;background:#f0c873;color:#152d30;font-weight:700}
+#markers>.source-inspection #source-others{margin:0 0 8px}
+#markers>.source-inspection #source-others button{background:#244d50;color:#fff2d9}
 #markers>.source-inspection #source-close{background:transparent;color:#fff2d9}
 /* Inspecting a sign is a temporary world beat. On a narrow screen the note
    sits below the three gates, linked to the highlighted source above it. */
@@ -92,11 +94,11 @@ dialog{border:1px solid #ad8a5570;border-radius:18px;background:#f7e9cf;color:#2
 #markers>.learning-readout{z-index:7;width:min(282px,calc(100vw - 32px));white-space:normal;text-align:left;padding:6px 9px;border:1px solid #86c9b5;background:#153840ed;color:#fff2d9;border-radius:12px;box-shadow:0 0 0 3px #7be3bc22,0 10px 26px #071824a8;pointer-events:none}
 #markers>.learning-readout>strong{display:block;font-size:10px;letter-spacing:.11em;color:#b9efd9;margin-bottom:2px}
 #markers>.learning-readout>strong[hidden]{display:none}
-#markers>.learning-readout p{display:grid;grid-template-columns:70px 1fr;gap:7px;margin:0;font-size:11px;line-height:1.25}
+#markers>.learning-readout p{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:7px;margin:0;font-size:11px;line-height:1.25}
 #markers>.learning-readout p span{font-size:8px;letter-spacing:.06em;color:#afd0c5;font-weight:800}
 #markers>.learning-readout p b{font-weight:600;overflow-wrap:anywhere}
 #markers>.learning-readout p[hidden]{display:none}
-@media(max-width:700px){#markers>.learning-readout{width:min(264px,calc(100vw - 24px));padding:4px 9px}#markers>.learning-readout p{font-size:10.5px;grid-template-columns:62px 1fr}}
+@media(max-width:700px){#markers>.learning-readout{width:min(264px,calc(100vw - 24px));padding:4px 9px}#markers>.learning-readout p{font-size:10.5px}}
 @media(max-width:700px){#markers>.learning-readout{padding-top:2px;padding-bottom:1px}#markers>.learning-readout>strong{margin-bottom:1px}#markers>.learning-readout .readout-feedback{margin-top:1px;padding-top:1px}#markers>.learning-readout.edge-cued::after{position:absolute;right:6px;bottom:2px}}
 .stage-card .card-head{padding-right:34px}
 #engine #card-close{position:absolute;top:6px;right:6px;width:44px;min-height:44px;padding:0;background:#ffffff14;border:0;color:#ffe2ab;font-size:18px;line-height:1}
