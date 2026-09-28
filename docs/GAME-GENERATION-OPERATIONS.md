@@ -116,6 +116,16 @@ observed recurring run failure.
 
 ## 5. Asset and optional source boundaries
 
+The Sky Reach play study (`experiments/20260928-sky-reach-play-study.md`) also
+motivates a bounded procedural source option: validated modules/assets arranged
+by deterministic rules under the approved topology and style. Compare this with
+authored assembly before assuming an external world model is needed. Reuse engine
+features/libraries where suitable. Pin seed, generator version, parameters and
+output identity; preserve learning semantics and saves across regeneration.
+Validate reachability/readability and play contrasting layouts before treating
+variation as a reusable capability. This is a next-design option, not an implemented
+generator or authorization for an additional platform-building workstream.
+
 Resolve commodity assets from pinned, validated packages when possible; reserve
 bespoke work for learning-critical objects, distinctive characters and
 landmarks. A style family should constrain silhouette, materials, palette,

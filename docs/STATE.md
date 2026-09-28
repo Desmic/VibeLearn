@@ -6,6 +6,32 @@ Automated checks, critic judgment and user acceptance are separate claims.
 
 ## Current repair and gate
 
+- Current runtime repair is `063e3c1a000a1399dd5317f848f9b159d89b9346` on
+  the development branch. The same reviewer's informed `a6d609d` recheck
+  closed the ordinary status-placement case but returned **needs_revision**:
+  after commitment, visible route-sign controls and physical signs no longer
+  opened for inspection. Its separate report is
+  `artifacts/cold-review-7e82fcf/informed-recheck-a6d609d/RECHECK-REPORT.md`
+  (SHA-256 `58b737e752f4a88ee45c0ee61e029532ff00eea61e2dd52ab6aa92e62046626f`).
+  The `063e3c1` repair permits read-only inspection after commitment while
+  keeping staging and first choices locked. A selected sign remains reachable;
+  the existing inspection sheet offers the other signs on phone. Enlarged
+  readout values are included in the shared presentation simulation, and the
+  shared session ledger no longer revives a stopped browser claim when a PID
+  and loopback port are reused. These are worker repairs, not critic acceptance.
+- The `063e3c1` worker's focused route replay passed after one intermittent
+  command-response timeout on an unchanged first run. Adaptive phone play from
+  the actual opening through tutorial and route saw wrong history/Moon,
+  Moon-gate failure, today's-notice recovery, postcommit read-only Today/Old
+  inspection, paused-prefix reload and Star output; captures and action trace
+  are under `artifacts/worker-source-access-repair/`. That disposable browser
+  and server are stopped. Build passed, 460 application tests passed (seven
+  configured PostgreSQL skips), the full active browser sequence passed, and
+  the 35-state draft presentation report passed with zero violations at
+  `artifacts/presentation-budget-source-access-draft.json`. Exact committed
+  presentation identity and independent informed repair recheck are still
+  pending. The original broader game appeal, relationship and art/world
+  findings remain open; motion/audio and hosted entry remain unassessed.
 - The independent Astra cold/warm review of
   `7e82fcf581e0d0ea486f5dec283799c7a7bcea94` returned **needs_revision**.
   Preserve `artifacts/cold-review-7e82fcf/{COLD-REPORT.md,WARM-COMPARISON.md,PRIORITIZED-FINDINGS.md}`
@@ -110,7 +136,7 @@ Automated checks, critic judgment and user acceptance are separate claims.
   `artifacts/route-retry-prefix-phone-200text-draft.png`, and
   `artifacts/route-retry-complete-phone-draft.png`. This is worker verification,
   not a new reviewer verdict.
-- Current repair checks: build passed; 458 application tests passed (seven
+- Previous `a6d609d` repair checks: build passed; 458 application tests passed (seven
   configured PostgreSQL skips); the focused route browser and full 35-state
   `c744f12` presentation scenario passed with zero violations. The full active
   browser sequence now passes foundation, opening, controls, physicality,
@@ -125,16 +151,22 @@ Automated checks, critic judgment and user acceptance are separate claims.
   `docs/GAME-GENERATION-OPERATIONS.md`, with current candidate authority kept
   here and the user's supplied proposal unchanged. No provider, Level 2,
   deployment promotion or `main` merge is authorized by this repair.
-- Required next gate: freeze and report the current candidate, then ask the same
-  independent Astra reviewer for an **informed repair recheck** of the remaining
-  status/action association at prefix reload and closed completed output,
-  including enlarged text and unchanged source access. The frozen cold/warm
-  findings remain needs_revision and cannot become a new cold pass. Broader
-  world/relationship treatment, hosted entry/auth, motion and audio remain
-  unassessed; the user retains the final experience verdict. No Level 2,
-  deployment promotion or main merge follows from worker checks.
+- Next: close the exact-commit presentation identity for `063e3c1`, then reopen
+  the integrated opening-to-Level-1 experience design before more runtime
+  expansion. An independent informed repair recheck of postcommit source
+  access remains pending; the original cold/warm findings stay needs_revision.
+  The broader game appeal, relationship, art/world and learning gates need
+  actual play and criticism under the revised design, with hosted entry/auth
+  and motion/audio still unassessed. The user retains the final experience
+  verdict. No Level 2, deployment promotion or main merge follows from worker
+  checks.
 
 ## Candidate
+
+- **28 September route-source inspection repair (unreviewed):** Runtime source
+  `063e3c1a000a1399dd5317f848f9b159d89b9346`, pinned `first-words-5`.
+  The exact runtime candidate is separate from subsequent documentation-only
+  commits. Worker checks and unresolved criticism are recorded above.
 
 - **26 September changed-case receiver checkpoint (unreviewed draft):** New
   `first-words-4` starts have three physical, dated notes at the receiver:

@@ -1,5 +1,18 @@
 # Experience quality system — evidence before scores
 
+**Two product promises — 28 September 2026:** VibeLearn must deliver a compelling
+game and a strong learning experience in the same coherent activity. Before the
+next gameplay expansion, the existing encounter brief states why the player would
+want to act without XP/course obligation and how the target understanding improves
+a meaningful decision. The same reviewer evaluates game appeal and learning
+separately through their existing lanes; neither compensates for the other. A
+clean interface, aligned spec or solved bug list does not establish either promise.
+Use observed desire/discovery/agency/payoff and changed-case learning evidence,
+with honest limits on what expert AI play can establish about novice learners.
+See `experiments/20260928-sky-reach-play-study.md` for direct reference play,
+including the observed surface-to-space transition and evidence limits. Apply this
+through the current design gate, not a new framework or additional critic agents.
+
 **Design prevention — 21 September 2026:** Apply `LEARNING-DESIGN-GATE.md` before
 game implementation. Runtime tests and downstream critics cannot repair an
 unreviewed learning sequence by scoring it generously. Require situated primary

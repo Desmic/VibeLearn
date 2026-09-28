@@ -206,6 +206,28 @@ What follows from those numbers, without relaxing anything:
 - **Report a duration or a count only after measuring it.** A figure carried forward from
   a summary is a guess with the authority of evidence behind it.
 
+## Repair handoffs and cost control — 28 September 2026
+
+For an informed repair recheck, the worker first covers the affected transition
+sequence and nearby regressions, not only the last failing screenshot. Include
+initial versus retry, inspect versus commit, pending versus saved state, reload,
+closed/open presentation, physical/semantic access and relevant text sizes where
+the change puts them at risk. Keep one compact closure list with evidence and
+unresolved claims. Do not generate every possible combination or a new framework.
+
+Use focused checks and adaptive worker play during repair. Preserve the required
+exact-candidate presentation report before any review record. A narrow informed
+repair probe is not a new full readiness gate: run the full integrated build,
+application and active browser checks once the coherent slice is stable; repeat
+or broaden when later changes or concrete cross-cutting risks warrant it. Bind all
+claims to their actual candidate, and retain full release gates. The same reviewer
+rechecks affected behavior and adjacent risks; preserve the original cold account.
+
+Ask whether the original experience finding is closed as well as each local
+symptom. Geometry and fewer clicks cannot alone close a world/agency finding.
+Root reviews reusable-system value and build-versus-reuse choices at the checkpoint;
+Sol owns routine repair and testing. See `REVIEW-20260928-WORKFLOW-AND-REUSE.md`.
+
 ## Quota and future orchestrator
 
 Use current Codex account usage for this supervised work. Do not introduce API-key
