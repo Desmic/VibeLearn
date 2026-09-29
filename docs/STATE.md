@@ -6,6 +6,17 @@ Automated checks, critic judgment and user acceptance are separate claims.
 
 ## Current repair and gate
 
+- **29 September repository checkpoint:** All accumulated project source,
+  research, licensed/original assets and editable Blender work are preserved in
+  `c21f6dc`, pushed to canonical `main`. Selected final visual evidence is included;
+  caches, local databases, browser scratch and generated builds remain excluded.
+  The deployment branch is unchanged. Continuation adds a portable dependency
+  lock and exact-candidate guide for the isolated art study: a clean install/build
+  reproduces `index-DXmeqNSe.js` byte for byte. Root repeated native approach and
+  guided courtyard traversal, then paused the preview. No new visual acceptance
+  or engine-migration claim. [Checkpoint validation](experiments/20260929-checkpoint-validation.md)
+  records application/browser results and the contaminated first opening run.
+
 - **29 September district silhouettes:** Optional `districts=terraces` on the
   sunlit city replaces repeated houses with stepped garden buildings, low curved-
   roof galleries and slender towers. Existing orbital sky is smaller/off-axis;

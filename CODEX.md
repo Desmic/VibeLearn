@@ -1,5 +1,14 @@
 # vibeLearn — delivery workflow
 
+**Candidate stability — 29 September 2026:** Finish branch changes and source
+edits before starting a browser verification pass. Keep all files served by that
+pass fixed until it ends; a commit alone is harmless, but checkout/merge/build
+replacement can expose mixed versions. If served files change, mark the pass
+contaminated and rerun the affected group on the stable candidate before treating
+its failure as a product defect. For isolated art studies, preserve the exact
+entry URL, portable dependency lock and authoring provenance beside the source;
+local cache junctions are conveniences, never reproduction prerequisites.
+
 **Iteration efficiency — 29 September 2026:** User approves coherent visual
 passes with one overall composition target instead of repeated per-detail
 checkpoints. Root owns art/source, then freezes the candidate for one bounded Sol
