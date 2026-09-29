@@ -26,6 +26,13 @@ The September 17 user review exposed failures that the previous critic pass miss
 
 ## Purpose
 
+For the current Bellweather candidate, compare art intent against
+`ART-DIRECTION-REFERENCE-20260928.md` after cold observations are frozen. Test
+the promise of exploration through actual reachable discoveries and responsive
+world behavior. Inspect coherent lighting/contact from changed views; neither
+a beautiful still nor a noisy rendering filter proves this direction. The
+reference is not a pixel-match requirement or a style mandate for other games.
+
 Judge whether the rendered game world is intentionally composed, readable, inviting and spatially playable—not merely whether assets load and no object is technically offscreen.
 
 ## Required review dimensions

@@ -1,0 +1,54 @@
+{
+  "name": "Sunward swept portal conditioned",
+  "original": true,
+  "tool": "5.2.2 LTS",
+  "coordinateSystem": "glTF Y-up, metres",
+  "triangles": 31658,
+  "materials": 5,
+  "aoSize": [
+    512,
+    512
+  ],
+  "colliders": [
+    {
+      "minX": -3.4844746589660645,
+      "maxX": -2.4800000190734863,
+      "minZ": -0.75,
+      "maxZ": 0.7542049288749695
+    },
+    {
+      "minX": 2.5399999618530273,
+      "maxX": 3.5391573905944824,
+      "minZ": -0.75,
+      "maxZ": 0.75
+    }
+  ],
+  "placement": {
+    "x": 1.1,
+    "y": 0.12,
+    "z": -4.4
+  },
+  "source": "authoring/repair_portal_export.py",
+  "rights": "Original VibeLearn asset; no third-party geometry or images.",
+  "baseAsset": "sunward-portal-swept.glb",
+  "sha256": "c50e6edf945ec0fed99b3687bb59dd5f5315322d4229db25a024a4bb0439ea0e",
+  "bounds": {
+    "min": [
+      -4.164117336273193,
+      -1.7924498319625854,
+      0.0
+    ],
+    "max": [
+      3.547327995300293,
+      0.7805595397949219,
+      7.948355674743652
+    ]
+  },
+  "cleanup": {
+    "weldMetres": 1e-05,
+    "maxBidirectionalVertexDistanceMetres": 9.982310075429268e-06,
+    "sourceVertices": 17084,
+    "conditionedVertices": 15859,
+    "uvPolicy": "Preserve loop UVs and existing local AO; microscopic edge cleanup only."
+  }
+}

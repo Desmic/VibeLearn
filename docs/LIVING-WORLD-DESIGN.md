@@ -9,6 +9,12 @@ response, spatial readability and visible consequences remain in scope.
 
 ## Reference research
 
+For this proof game's latest selected visual direction, see
+[the 28 September reference](ART-DIRECTION-REFERENCE-20260928.md): graphic
+techno-fantasy utopia, credible lighting/physical behavior, and an alive,
+expansive world whose invitations lead to worthwhile exploration. These are
+game-specific choices; the reusable principles below apply across other styles.
+
 The expanded [ten-game study](GAME-REFERENCE-STUDY.md) is the current research
 dossier: score/platform selection, concrete gameplay and developer evidence,
 conflicting approaches, transfer limits and critic experiments. The

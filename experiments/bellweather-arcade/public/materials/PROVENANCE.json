@@ -1,0 +1,12 @@
+{
+  "scope": "Isolated art-focus checkpoint; copied from existing reviewed repository assets, no new download",
+  "license": "CC0-1.0",
+  "creator": "Rob Tuytel",
+  "asset": "sandstone_cracks",
+  "source": "https://polyhaven.com/a/sandstone_cracks",
+  "original_manifest": "web/lab/assets/PROVENANCE.json",
+  "files": [
+    {"path":"sandstone_cracks_nor_gl_1k.jpg","sha256":"cb983540cae33979e79862fe27b4ec23a5d41c627230d3730e9d5ff6671859f9","role":"subtle surface normal, OpenGL convention"},
+    {"path":"sandstone_cracks_rough_1k.jpg","sha256":"4995b3ce148ceef48ea3bc0b83a8799fd0bf38e00c75677ff2de857a7d4cbdbb","role":"surface roughness"}
+  ]
+}

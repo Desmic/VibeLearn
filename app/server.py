@@ -127,6 +127,12 @@ def make_server(database, port=8000):
                 '/assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt': ('assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt', 'text/plain'),
                 '/assets/quaternius-blacksmith.glb': ('assets/quaternius-blacksmith.glb', 'model/gltf-binary'),
                 '/assets/QUATERNIUS-BLACKSMITH-LICENSE.txt': ('assets/QUATERNIUS-BLACKSMITH-LICENSE.txt', 'text/plain'),
+                '/assets/kenney-tree-detailed.glb': ('assets/kenney-tree-detailed.glb', 'model/gltf-binary'),
+                '/assets/kenney-tree-oak.glb': ('assets/kenney-tree-oak.glb', 'model/gltf-binary'),
+                '/assets/kenney-tree-thin.glb': ('assets/kenney-tree-thin.glb', 'model/gltf-binary'),
+                '/assets/KENNEY-NATURE-KIT-LICENSE.txt': ('assets/KENNEY-NATURE-KIT-LICENSE.txt', 'text/plain'),
+                '/assets/quaternius-birch-tree-5.glb': ('assets/quaternius-birch-tree-5.glb', 'model/gltf-binary'),
+                '/assets/QUATERNIUS-STYLIZED-NATURE-BIRCH-TREE-5-LICENSE.txt': ('assets/QUATERNIUS-STYLIZED-NATURE-BIRCH-TREE-5-LICENSE.txt', 'text/plain'),
             }
             if path in assets:
                 name, mime = assets[path]

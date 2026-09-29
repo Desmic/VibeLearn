@@ -1,0 +1,42 @@
+{
+  "kind": "manual-art-trial-policy",
+  "status": "parked_no_anthropic_subscription",
+  "live_run_authorized": false,
+  "implementation_scope_authorized": true,
+  "requested_model": "claude-opus-5-5",
+  "actual_model_must_be_recorded": true,
+  "automatic_model_fallback": false,
+  "provider_authentication": "unverified",
+  "billing_route": null,
+  "approved_extra_spend_usd": null,
+  "proposed_limits": {
+    "initial_minutes": 60,
+    "initial_agent_turns": 40,
+    "repair_passes_max": 2,
+    "minutes_per_repair": 15,
+    "agent_turns_per_repair": 10,
+    "total_minutes_max": 90,
+    "concurrent_builders": 1
+  },
+  "allowed_input": "Only the reviewed artifacts/opus-art-trial-input packet",
+  "output_scope": "A separate disposable trial output directory chosen at dispatch",
+  "shell_scope": "Only reviewed local build/preview commands in the trial output",
+  "permissions_bypass": false,
+  "new_network_downloads": false,
+  "paid_asset_generation": false,
+  "subagents": false,
+  "deployment": false,
+  "production_mutation": false,
+  "terminal_pm_live_run": false,
+  "enforcement_required_before_dispatch": [
+    "Verify current client options and exact model availability",
+    "Verify chosen authentication/billing route without printing credentials",
+    "Enforce selected monetary or zero-extra-spend policy; stop if not enforceable",
+    "Enforce runtime and turn limits; stop owned children on expiry",
+    "Use a reviewed isolated input/output boundary, not the dirty main checkout",
+    "Disable inherited unrelated tools/hooks/connectors for this run",
+    "Preserve initial result, exact source hashes, run/model/usage metadata",
+    "No automated retries after quota, auth or budget failure"
+  ],
+  "note": "User reports no Anthropic subscription and cannot use Opus now. No Opus run or purchase is authorized. Preserve the prepared packet for possible later use. This is a local proposal, not a validated Terminal PM schema or an executable sandbox."
+}

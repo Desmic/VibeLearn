@@ -1,0 +1,15 @@
+{
+  "source": "E:\\Projects\\VibeLearn\\experiments\\bellweather-arcade\\public\\atelier\\sunward-atelier.glb",
+  "source_sha256": "fcfed0118bcc450c5ab0a825677f84b3a3f795a1deee413b16824e0775676910",
+  "output": "E:\\Projects\\VibeLearn\\experiments\\bellweather-arcade\\public\\atelier\\sunward-atelier-occlusion-v4.glb",
+  "output_sha256": "0827034df3a667f8d1f9555e291aa6eeb7b07609fefc878881fc17edbf9e80c1",
+  "blender": "5.2.2 LTS",
+  "resolution": 1024,
+  "distance_metres": 1.5,
+  "samples": 24,
+  "threads": 4,
+  "elapsed_seconds": 39.9,
+  "bytes": 2046188,
+  "uv_coverage": 0.653,
+  "limits": "Welded bake proxy only; UVs transferred to untouched original geometry with Blender Data Transfer. Position/normal parity requires independent verification. No sunlight or GI bake."
+}

@@ -1,5 +1,15 @@
 # Experience quality system — evidence before scores
 
+**Priority clarification — 28 September 2026:** The user wants world/art and
+engaging play completed before the deeper learning-design stage. Preserve the
+[core research](experiments/20260928-story-learning-core-review.md) for that stage;
+its proposed immediate priority switch is superseded. Players must want to enter,
+inhabit, explore and act in the world. Judge that through the existing independent
+lanes and actual play, not just stills, technical passes or asset counts. Preserve
+learning correctness and evidence now; do not use the sequence to waive either
+product promise at the complete chapter gate.
+
+
 **Two product promises — 28 September 2026:** VibeLearn must deliver a compelling
 game and a strong learning experience in the same coherent activity. Before the
 next gameplay expansion, the existing encounter brief states why the player would

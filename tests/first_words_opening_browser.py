@@ -1,6 +1,7 @@
 """Opening-first gate. Does not play or certify the rest of Level 1."""
 import base64
 import json
+import sys
 import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
@@ -100,6 +101,7 @@ def loudness(page,**spec):
     return value
 
 def main():
+    behavior_only='--behavior-only' in sys.argv
     out=ROOT/'artifacts';out.mkdir(exist_ok=True);checks=[];errors=[]
     def observe_graphics(message):
         if 'GL_INVALID_FRAMEBUFFER_OPERATION' in message.text or 'Framebuffer is incomplete' in message.text:
@@ -107,7 +109,8 @@ def main():
     with tempfile.TemporaryDirectory() as temp,sync_playwright() as p:
         proc,url=start_server(Path(temp)/'opening.db');browser=launch_browser(p)
         try:
-            context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,record_video_dir=str(Path(temp)/'video'),record_video_size={'width':390,'height':844})
+            context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,
+                **({} if behavior_only else {'record_video_dir':str(Path(temp)/'video'),'record_video_size':{'width':390,'height':844}}))
             page=context.new_page();page.set_default_timeout(15000);page.on('pageerror',lambda e:errors.append(str(e)))
             page.on('console',observe_graphics)
             log('Prologue: navigate');page.goto(url+'/first-words')
@@ -116,7 +119,8 @@ def main():
             expect(page.locator('#engine')).to_be_hidden()
             expect(page.locator('#controls')).to_be_hidden()
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
-            expect(page.locator('#rgi-title')).to_have_text('One lantern. Three friends.')
+            expect(page.locator('#rgi-title')).to_have_text('A city that answers.')
+            expect(page.locator('#rgi-intro')).to_have_attribute('data-explore','true')
             speech=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');return Object.fromEntries(['zip-speech','mira-speech','zip-speech-link','zip-silence'].map(id=>[id,getGameRuntime().world.projectEntity(id)?.visible||false]));}""")
             assert speech=={'zip-speech':True,'mira-speech':True,'zip-speech-link':True,'zip-silence':False},speech
             delivery=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');const w=getGameRuntime().world;return ['bellworker-a-parcel','bellworker-b-parcel'].map(id=>w.projectEntity(id)?.visible||false);}""")
@@ -127,13 +131,22 @@ def main():
                 page.set_viewport_size({'width':width,'height':height})
                 until(page,"""async()=>{await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);const {getGameRuntime}=await import('/game-runtime.js');return Boolean(getGameRuntime().world.projectEntity('zip')?.visible);}""")
 
-            expect(page.locator('#rgi-body')).to_contain_text('for all three of you')
+            expect(page.locator('#rgi-body')).to_contain_text('Explore or send a signal')
             page.screenshot(path=str(out/'prologue-home-390.png'),timeout=15000)
-            before_lantern=page.evaluate('JSON.stringify(FirstWordsReview.state)')
-            page.get_by_role('button',name='Send up our lantern',exact=True).click()
-            expect(page.locator('#rgi-dialogue')).to_contain_text('All three of us')
-            until(page,'()=>!FirstWordsReview.runtime.world.animating')
-            assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before_lantern
+            # Pausing suppresses unavailable world verbs while preserving the
+            # character label; resuming restores both actionable choices.
+            hold(page)
+            expect(page.locator('.rgi-marker[data-entity="singer-head"]')).to_be_visible()
+            for entity in ('garden-lightwell-core','skybridge-relay-eye'):
+                marker=page.locator(f'.rgi-target[data-entity="{entity}"]')
+                expect(marker).to_have_count(1)
+                expect(marker).to_be_hidden()
+            release(page)
+            expect(page.get_by_role('button',name='Wake garden lightwell',exact=True)).to_be_enabled()
+            expect(page.get_by_role('button',name='Light skybridge relay',exact=True)).to_be_enabled()
+            before_signal=page.evaluate('JSON.stringify(FirstWordsReview.state)')
+            page.get_by_role('button',name='Wake garden lightwell',exact=True).click()
+            expect(page.locator('#rgi-dialogue')).to_contain_text('It answered!')
             # Rule I12: every story line this beat announces must reach the eye. The band
             # sequences its line groups, so sample the painted band across the whole pass
             # and require each non-empty group (title/body/dialogue) to appear on screen.
@@ -141,10 +154,26 @@ def main():
             assert expected=={'title','body','speech'},expected
             seen=band_seen(page,expected,limit_ms=15000)
             assert expected<=seen,f'I12: band lines never painted for the eye: {sorted(expected-seen)}'
+            until(page,'()=>!FirstWordsReview.runtime.world.animating')
+            assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before_signal
+            expect(page.locator('#rgi-intro')).to_have_attribute('data-chosen-path','garden-lightwell')
+            expect(page.locator('#rgi-intro')).to_have_attribute('data-explore','false')
+            expect(page.locator('.rgi-marker[data-entity="singer-head"]')).to_have_count(0)
+            look=page.get_by_role('button',name='Look at the shaded terrace',exact=True)
+            expect(look).to_be_visible()
+            expect(look).to_be_enabled()
             until(page,"()=>FirstWordsReview.audio.ready")
             capture_started=page.evaluate("()=>FirstWordsReview.audioCapture.start()")
             assert capture_started['state']=='recording',capture_started
-            page.screenshot(path=str(out/'prologue-lantern-release-390.png'),timeout=15000)
+            page.screenshot(path=str(out/'prologue-garden-response-390.png'),timeout=15000)
+            # The destination is a separate object-linked inspection; ambient
+            # advance and generic world taps cannot skip the chosen reveal.
+            tap_world(page)
+            expect(page.locator('#rgi-title')).to_have_text('A city that answers.')
+            look.click()
+            expect(page.locator('#rgi-body')).to_contain_text('Two shaded seats.')
+            assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before_signal
+            page.screenshot(path=str(out/'prologue-garden-destination-390.png'),timeout=15000)
 
             log('Prologue: visible cause');expect(page.locator('#rgi-title')).to_have_text('A shadow over Bellweather.',timeout=45000)
             until(page,'()=>!FirstWordsReview.runtime.world.animating')
@@ -188,7 +217,7 @@ def main():
             hold(page)
             page.locator('#rgi-back').click()
             page.locator('#rgi-back').click()
-            restored=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');return ['zip','singer','friend-a','bellworker-a','bellworker-b','bellworker-b-parcel'].map(id=>getGameRuntime().world.projectEntity(id)!==null);}""")
+            restored=page.evaluate("""async()=>{const {getGameRuntime}=await import('/game-runtime.js');return ['zip','singer','friend-a','bellworker-a','bellworker-b','bellworker-a-parcel'].map(id=>getGameRuntime().world.projectEntity(id)!==null);}""")
             assert all(restored),restored
             # Released at the (already completed) home beat: the ambient timer
             # walks shadow -> rupture -> limbo with no further input at all,
@@ -303,14 +332,39 @@ def main():
             until(page,"()=>FirstWordsReview.audio.phase==='repair'")
             assert page.evaluate('FirstWordsReview.runtime.instanceId')==instance
             assert page.evaluate("FirstWordsReview.runtime.mode")=='mission'
-            checks.append('Eight causal prologue beats separate normal Bellweather, visible Warden cause, rupture effect, isolation, prison reveal, speech targeting, capability removal and repair handoff before the separate tutorial; the same runtime becomes direct-control mission play.')
+            checks.append('A directly controlled Bellweather terrace offers two signal objects; the garden choice changes local response, and an object-linked Look reveals its receiver without writing learner evidence. Eight causal prologue beats then separate visible Warden cause, rupture effect, isolation, prison reveal, speech targeting, capability removal and repair handoff before the separate tutorial.')
             checks.append('The Bellweather score is not required before a gesture; the first story advance unlocks bellweather-score-v2 and schedules bars before danger-phase assertions.')
             checks.append('Plain story beats carry no persistent advance control: they advance ambiently once motion settles, a paused beat holds indefinitely, a world tap moves a beat on immediately, story actions are performed on their diegetic world marker (never a bottom button), the final handoff is ambient (a world tap hands control over, no painted button in motion play), and reduced-motion play never auto-advances but paints exactly one explicit control (WCAG 2.2.2).')
 
             before=page.evaluate('JSON.stringify(FirstWordsReview.state)')
+            stored_before=context.request.get(url+'/api/state')
+            assert stored_before.ok
+            stored_before=stored_before.json()
             log('Prologue: replay preserves draft');page.get_by_role('button',name='Open game menu').click();page.get_by_role('button',name='Replay the prologue',exact=True).click()
             page.get_by_role('button',name='Return to game',exact=True).click()
             assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
+            assert context.request.get(url+'/api/state').json()==stored_before
+            # A replay can be left at the held inspection or after looking.
+            # Neither path may rewrite the saved tutorial/learning record.
+            for inspected,route,look_name in [
+                (False,'Wake garden lightwell','Look at the shaded terrace'),
+                (True,'Light skybridge relay','Look at the train balcony')]:
+                page.get_by_role('button',name='Open game menu').click()
+                page.get_by_role('button',name='Replay the prologue',exact=True).click()
+                choice=page.get_by_role('button',name=route,exact=True)
+                expect(choice).to_be_enabled(timeout=20000)
+                if inspected:choice.click()
+                else:
+                    choice.focus();page.keyboard.press('Space')
+                expect(page.get_by_role('button',name=look_name,exact=True)).to_be_visible()
+                if inspected:
+                    page.get_by_role('button',name=look_name,exact=True).click()
+                    page.keyboard.press('Escape')
+                else:page.keyboard.press('Escape')
+                expect(page.locator('#rgi-intro')).to_have_count(0)
+                expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible()
+                assert page.evaluate('JSON.stringify(FirstWordsReview.state)')==before
+                assert context.request.get(url+'/api/state').json()==stored_before
             page.reload();expect(page.get_by_role('button',name='Connect the loose power lead',exact=True)).to_be_visible(timeout=15000);expect(page.locator('#rgi-intro')).to_have_count(0)
             # Muting is a device preference, not page state: it survives the reload and the
             # control that resumes must say so.
@@ -323,9 +377,9 @@ def main():
                 log(f'Prologue: fresh reduced-motion {width}')
                 ctx=browser.new_context(viewport={'width':width,'height':height},reduced_motion='reduce',has_touch=width<500)
                 q=ctx.new_page();q.set_default_timeout(15000);q.on('pageerror',lambda e:errors.append(str(e)));q.on('console',observe_graphics);q.goto(url+'/first-words')
-                expect(q.locator('#rgi-title')).to_have_text('One lantern. Three friends.',timeout=20000)
-                q.get_by_role('button',name='Send up our lantern',exact=True).click()
-                expect(q.locator('#rgi-dialogue')).to_contain_text('All three of us')
+                expect(q.locator('#rgi-title')).to_have_text('A city that answers.',timeout=20000)
+                q.get_by_role('button',name='Wake garden lightwell',exact=True).click()
+                expect(q.locator('#rgi-dialogue')).to_contain_text('It answered!')
                 clearance=q.evaluate("""async()=>{
                     const {getGameRuntime}=await import('/game-runtime.js');
                     const point=getGameRuntime().world.projectEntity('friendship-lantern');
@@ -339,13 +393,17 @@ def main():
                 # The subtitle band owns the bottom; the focal lantern rises above it.
                 vertical_clear=clearance['lanternY']<clearance['captionTop']-16
                 assert clearance['visible'] and (horizontal_clear or vertical_clear),clearance
-                q.screenshot(path=str(out/f'prologue-lantern-release-{width}.png'),timeout=15000)
+                q.screenshot(path=str(out/f'prologue-garden-response-{width}.png'),timeout=15000)
                 # WCAG 2.2.2: reduced motion never auto-advances (the beat waits for
-                # input indefinitely), so rule I6 paints exactly one explicit control.
-                expect(q.locator('#rgi-next')).to_be_visible()
-                expect(q.get_by_role('button',name='Continue →',exact=True)).to_be_enabled()
+                # input indefinitely). The required object inspection still uses
+                # its own world-linked Look, never a generic Continue shortcut.
+                expect(q.locator('#rgi-next')).to_be_hidden()
+                expect(q.get_by_role('button',name='Look at the shaded terrace',exact=True)).to_be_visible()
                 q.wait_for_timeout(12000)
-                expect(q.locator('#rgi-title')).to_have_text('One lantern. Three friends.')
+                expect(q.locator('#rgi-title')).to_have_text('A city that answers.')
+                q.get_by_role('button',name='Look at the shaded terrace',exact=True).click()
+                expect(q.locator('#rgi-body')).to_contain_text('Two shaded seats.')
+                expect(q.get_by_role('button',name='Continue →',exact=True)).to_be_enabled()
                 # Reduced motion shows the whole beat at once: every line group with
                 # words must be painted and inside this viewport (rule I12, WCAG 2.2.2).
                 assert band_all_painted(q)=={k for k,v in band_groups(q).items() if v}
@@ -366,6 +424,16 @@ def main():
                     b=q.locator(selector).bounding_box();assert b and b['x']>=0 and b['y']>=0 and b['x']+b['width']<=width+1 and b['y']+b['height']<=height+1,(selector,b)
                 q.screenshot(path=str(out/f'prologue-reduced-{width}.png'),timeout=15000)
                 q.get_by_role('button',name='Skip opening',exact=True).click();expect(q.get_by_role('button',name='Skip control practice',exact=True)).to_be_visible(timeout=15000);ctx.close()
+            if behavior_only:
+                assert not errors,errors
+                checks.append('Fresh 360/430/desktop reduced-motion preserves the eight story states and skips safely into the separate tutorial.')
+                checks.append('Behavior-only replay covered the opening, inspection, keyboard/escape, saved-state isolation and tutorial handoff; caption-blind motion evidence was intentionally not rerun.')
+                context.close()
+                (out/'first-words-opening-behavior-report.json').write_text(json.dumps({
+                    'result':'passed','checks':checks,'page_errors':errors,
+                    'scope':'Opening and adjacent tutorial behavior only; no new caption-blind video or independent critic review.'},indent=2))
+                log('Prologue behavior check passed')
+                return
             video=page.video
             context.close()
             video.save_as(str(out/'prologue-motion-390.webm'))
@@ -389,9 +457,11 @@ def main():
             expect(blind.locator('#rgi-intro')).to_be_visible(timeout=20000)
             expect(blind.locator('#rgi-title')).to_be_hidden()
             until(blind,'()=>!FirstWordsReview.runtime.world.animating')
-            blind.get_by_role('button',name='Send up our lantern',exact=True).click();until(blind,'()=>!FirstWordsReview.runtime.world.animating')
-            # Rule I6: ambient pacing then carries the WHOLE captioned sequence with
-            # zero further input - plain beats auto-advance and the final handoff
+            blind.get_by_role('button',name='Wake garden lightwell',exact=True).click();until(blind,'()=>!FirstWordsReview.runtime.world.animating')
+            blind.get_by_role('button',name='Look at the shaded terrace',exact=True).click()
+            # Rule I6: after the deliberate receiver inspection, ambient pacing
+            # carries the remaining captioned sequence with zero further input -
+            # plain beats auto-advance and the final handoff
             # ambient-closes into the tutorial. Motion play shows no advance control.
             expect(blind.locator('#rgi-next')).to_be_hidden()
             expect(blind.locator('#rgi-intro')).to_have_count(0,timeout=420000)
@@ -414,7 +484,7 @@ def main():
                     'motion_video':'prologue-motion-390.webm',
                     'caption_blind_motion':'prologue-caption-blind-390.webm',
                     'audio_capture':'prologue-event-audio.webm',
-                    'phone_frames':['prologue-home-390.png','prologue-lantern-release-390.png','prologue-threat-cause-390.png','prologue-rupture-paused-390.png','prologue-rupture-complete-390.png','prologue-limbo-390.png','prologue-prison-reveal-390.png','prologue-speech-targeted-390.png','prologue-speech-removed-390.png','prologue-repair-handoff-390.png'],
+                    'phone_frames':['prologue-home-390.png','prologue-garden-response-390.png','prologue-threat-cause-390.png','prologue-rupture-paused-390.png','prologue-rupture-complete-390.png','prologue-limbo-390.png','prologue-prison-reveal-390.png','prologue-speech-targeted-390.png','prologue-speech-removed-390.png','prologue-repair-handoff-390.png'],
                     'reduced_motion_frames':['prologue-threat-reduced-360.png','prologue-threat-reduced-430.png','prologue-threat-reduced-1280.png','prologue-rupture-reduced-360.png','prologue-rupture-reduced-430.png','prologue-rupture-reduced-1280.png'],
                     'experience_modes':['opening','tutorial'],
                     'device':'Chromium emulation 390x844 touch plus reduced-motion 360/430/1280'

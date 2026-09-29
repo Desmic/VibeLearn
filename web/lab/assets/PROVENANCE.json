@@ -1,0 +1,63 @@
+{
+  "scope": "Isolated Bellweather visual benchmark only; no production asset or visual-quality approval",
+  "retrieved_utc_date": "2026-09-29",
+  "license": {
+    "id": "CC0-1.0",
+    "url": "https://polyhaven.com/license",
+    "note": "Poly Haven states that its HDRIs and textures are CC0."
+  },
+  "format_check": "Pinned web/vendor/playcanvas.mjs (PlayCanvas 2.22.1) includes HdrParser.canParse(context.ext === 'hdr') and RGBE handling. The HDR file has a Radiance RGBE header. This is format support, not a browser load or lighting-quality result.",
+  "assets": [
+    {
+      "id": "syferfontein_0d_clear_puresky",
+      "type": "pure-sky HDR environment",
+      "creator": "Greg Zaal (original), Jarod Guest (sky edit)",
+      "asset_page": "https://polyhaven.com/a/syferfontein_0d_clear_puresky",
+      "files_api": "https://api.polyhaven.com/files/syferfontein_0d_clear_puresky",
+      "files": [
+        {
+          "path": "syferfontein_0d_clear_puresky_1k.hdr",
+          "role": "1024 x 512 Radiance RGBE equirectangular environment",
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/syferfontein_0d_clear_puresky_1k.hdr",
+          "bytes": 1066923,
+          "source_md5": "1784020494e7f1f60b0e560770b66e15",
+          "sha256": "5f65699ed38672e9ce1f1fc12876433eb8b994fea7c0070d28466779a75c7c48"
+        }
+      ]
+    },
+    {
+      "id": "sandstone_cracks",
+      "type": "subtle warm sandstone PBR surface",
+      "creator": "Rob Tuytel",
+      "asset_page": "https://polyhaven.com/a/sandstone_cracks",
+      "files_api": "https://api.polyhaven.com/files/sandstone_cracks",
+      "use_note": "Use selectively on built surfaces; dense weathering would conflict with the utopian art direction. Normal map uses OpenGL Y convention.",
+      "files": [
+        {
+          "path": "sandstone_cracks_diff_1k.jpg",
+          "role": "1024 x 1024 diffuse",
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/sandstone_cracks/sandstone_cracks_diff_1k.jpg",
+          "bytes": 696657,
+          "source_md5": "94619de4f4d33ad9fe6711d3ad88ec4a",
+          "sha256": "cf381bbcf60aac570ce895719025a2b7adae7c03369b3d545b4f52f94e57e0e9"
+        },
+        {
+          "path": "sandstone_cracks_nor_gl_1k.jpg",
+          "role": "1024 x 1024 OpenGL normal",
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/sandstone_cracks/sandstone_cracks_nor_gl_1k.jpg",
+          "bytes": 1307622,
+          "source_md5": "e778ce4e2ecc6a2837800022196b4118",
+          "sha256": "cb983540cae33979e79862fe27b4ec23a5d41c627230d3730e9d5ff6671859f9"
+        },
+        {
+          "path": "sandstone_cracks_rough_1k.jpg",
+          "role": "1024 x 1024 roughness",
+          "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/sandstone_cracks/sandstone_cracks_rough_1k.jpg",
+          "bytes": 352483,
+          "source_md5": "800ad67a79fb6f976b9aeba32d197260",
+          "sha256": "4995b3ce148ceef48ea3bc0b83a8799fd0bf38e00c75677ff2de857a7d4cbdbb"
+        }
+      ]
+    }
+  ]
+}

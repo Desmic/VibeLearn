@@ -1,0 +1,189 @@
+{
+  "source": "https://kaylousberg.itch.io/kaykit-forest",
+  "creator": "Kay Lousberg",
+  "pack": "KayKit Forest Nature Pack 1.0 FREE",
+  "license": "CC0-1.0",
+  "acquired": "2026-09-29",
+  "archive_sha256": "2ee83e63bb7695f2d884ec27ddf6fce020789a452e7d5c5b0bbdfc4f6ea1fc8c",
+  "archive_bytes": 6435630,
+  "transformation": "Selected original glTF/bin/atlas/license files copied unchanged; no Blender hop, no recolor, no mesh modification.",
+  "status": "candidate-not-art-approved",
+  "files": [
+    {
+      "path": "Bush_4_A_Color1.bin",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/Bush_4_A_Color1.bin",
+      "bytes": 1032,
+      "sha256": "e6716cb3d232d0f24f719ef9edf61fb1218e570f3767228c4dc155eaf7e2f56f"
+    },
+    {
+      "path": "Bush_4_A_Color1.gltf",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/Bush_4_A_Color1.gltf",
+      "bytes": 3049,
+      "sha256": "56b56b9187350ad1222a4bd61112ed3c2a839a49ad876ca6e01ef17b426f3d02"
+    },
+    {
+      "path": "Grass_1_A_Singlesided_Color1.bin",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/Grass_1_A_Singlesided_Color1.bin",
+      "bytes": 660,
+      "sha256": "06b6bab266b192ad1659748fc938e1db29dfb7d775ba556f4b5132816ae60954"
+    },
+    {
+      "path": "Grass_1_A_Singlesided_Color1.gltf",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/Grass_1_A_Singlesided_Color1.gltf",
+      "bytes": 3088,
+      "sha256": "8adcb284e5b7de6b363fd13866c23b6e96c9a3a461aefecc0d5cfd67136cd3ff"
+    },
+    {
+      "path": "Rock_3_A_Color1.bin",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/Rock_3_A_Color1.bin",
+      "bytes": 4440,
+      "sha256": "8659daf4bc724f414eda02193bc6a48132b595eef7c62009b7c0a3d93a8aa9b2"
+    },
+    {
+      "path": "Rock_3_A_Color1.gltf",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/Rock_3_A_Color1.gltf",
+      "bytes": 3056,
+      "sha256": "65484de298f09f7ed5bcf781d7febde1a2df4f0f76b8a6396591240963152c88"
+    },
+    {
+      "path": "Tree_1_A_Color1.bin",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/Tree_1_A_Color1.bin",
+      "bytes": 17484,
+      "sha256": "76a10ffa74960d730f0895a2599e5d56cc50a553d6624a14422420eb9b083979"
+    },
+    {
+      "path": "Tree_1_A_Color1.gltf",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/Tree_1_A_Color1.gltf",
+      "bytes": 3061,
+      "sha256": "9d972eba9d61fc563cb7c3248f1be057190859ce2554ad2032df27c3d09e06c6"
+    },
+    {
+      "path": "Tree_2_A_Color1.bin",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/Tree_2_A_Color1.bin",
+      "bytes": 8192,
+      "sha256": "fd413ad809ff30939faf1190194654892066aba94f67ec6f96ce257fa5b34e35"
+    },
+    {
+      "path": "Tree_2_A_Color1.gltf",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/Tree_2_A_Color1.gltf",
+      "bytes": 3057,
+      "sha256": "793570b93cd350b935bc88c766317675890f102d157965d2aca3d8daef5ee49b"
+    },
+    {
+      "path": "Tree_3_A_Color1.bin",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/Tree_3_A_Color1.bin",
+      "bytes": 29740,
+      "sha256": "ea2f20e847bd3bcf748b9f1cf9932abe45967db8dcacfeafaea1f07e3da6a2e9"
+    },
+    {
+      "path": "Tree_3_A_Color1.gltf",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/Tree_3_A_Color1.gltf",
+      "bytes": 3061,
+      "sha256": "a5140f21978004544844df4c2969625724c2c263e74f798716ea9e115216a230"
+    },
+    {
+      "path": "forest_texture.png",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/forest_texture.png",
+      "bytes": 48679,
+      "sha256": "406c01e0ac1d3368fc7b26ff5fb0d3335ba5e48bd19a703540ed92ee3971ea39"
+    },
+    {
+      "path": "License.txt",
+      "source_member": "KayKit_Forest_Nature_Pack_1.0_FREE/License.txt",
+      "bytes": 1469,
+      "sha256": "987811fa42c7548ad487324531813b0210ee6d1ebd410089e881820630e3be54"
+    }
+  ],
+  "models": [
+    {
+      "name": "Tree_1_A_Color1",
+      "triangles": 530,
+      "materials": 1,
+      "bounds_min": [
+        -1.9345909357070923,
+        -0.26131799817085266,
+        -1.6255630254745483
+      ],
+      "bounds_max": [
+        1.2464021444320679,
+        3.899381160736084,
+        1.6255637407302856
+      ]
+    },
+    {
+      "name": "Tree_2_A_Color1",
+      "triangles": 336,
+      "materials": 1,
+      "bounds_min": [
+        -1.641092300415039,
+        -0.3735181987285614,
+        -1.2144396305084229
+      ],
+      "bounds_max": [
+        0.9589076042175293,
+        4.301268100738525,
+        0.7855601906776428
+      ]
+    },
+    {
+      "name": "Tree_3_A_Color1",
+      "triangles": 978,
+      "materials": 1,
+      "bounds_min": [
+        -1.552119255065918,
+        -0.26131799817085266,
+        -1.5465991497039795
+      ],
+      "bounds_max": [
+        1.5410791635513306,
+        3.245279550552368,
+        1.5465989112854004
+      ]
+    },
+    {
+      "name": "Bush_4_A_Color1",
+      "triangles": 44,
+      "materials": 1,
+      "bounds_min": [
+        -0.288410484790802,
+        -0.00021919608116149902,
+        -0.288410484790802
+      ],
+      "bounds_max": [
+        0.2884104251861572,
+        0.4341813921928406,
+        0.288410484790802
+      ]
+    },
+    {
+      "name": "Grass_1_A_Singlesided_Color1",
+      "triangles": 14,
+      "materials": 1,
+      "bounds_min": [
+        -0.143336221575737,
+        -0.019999999552965164,
+        -0.08254344761371613
+      ],
+      "bounds_max": [
+        0.14336270093917847,
+        0.5393414497375488,
+        0.04444076120853424
+      ]
+    },
+    {
+      "name": "Rock_3_A_Color1",
+      "triangles": 84,
+      "materials": 1,
+      "bounds_min": [
+        -0.5295201539993286,
+        -0.465302437543869,
+        -0.4149000942707062
+      ],
+      "bounds_max": [
+        0.42677390575408936,
+        0.393566370010376,
+        0.39257872104644775
+      ]
+    }
+  ]
+}

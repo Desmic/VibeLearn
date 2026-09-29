@@ -1,0 +1,752 @@
+{
+  "geometry": {
+    "control": {
+      "meshes": 7,
+      "materials": 7,
+      "vertices": 37344,
+      "triangles": 12128,
+      "invalidPositions": 0,
+      "invalidNormals": 0,
+      "zeroNormals": 0,
+      "zeroAreaTriangles": 0,
+      "bounds": {
+        "min": [
+          -0.49300000071525574,
+          0.009999999776482582,
+          -0.2329999953508377
+        ],
+        "max": [
+          0.35100001096725464,
+          2.004171133041382,
+          0.3199999928474426
+        ]
+      },
+      "standingY": 0.12000000022351742,
+      "groundedSoleY": 0.13
+    },
+    "terraces": {
+      "meshes": 7,
+      "materials": 7,
+      "vertices": 37344,
+      "triangles": 12128,
+      "invalidPositions": 0,
+      "invalidNormals": 0,
+      "zeroNormals": 0,
+      "zeroAreaTriangles": 0,
+      "bounds": {
+        "min": [
+          -0.49300000071525574,
+          0.009999999776482582,
+          -0.2329999953508377
+        ],
+        "max": [
+          0.35100001096725464,
+          2.004171133041382,
+          0.3199999928474426
+        ]
+      },
+      "standingY": 0.12000000022351742,
+      "groundedSoleY": 0.13
+    }
+  },
+  "runtime": {
+    "control": {
+      "device": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "renderer": "ANGLE (Intel, Intel(R) UHD Graphics (0x00009BC4) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "viewport": [
+          1102,
+          828
+        ],
+        "dpr": 1
+      },
+      "arrival": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          7
+        ],
+        "routeT": 0,
+        "paused": false,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 3,
+        "draws": 125,
+        "triangles": 194644,
+        "cameraSolids": 126,
+        "camera": [
+          1,
+          2.6120159849938847,
+          12.88039946704745
+        ],
+        "cameraMetrics": {
+          "updates": 3,
+          "updateMs": 1,
+          "queries": 4,
+          "queryMs": 0.4999999925494194,
+          "searches": 0,
+          "alternatives": 0
+        },
+        "place": "Sunward approach"
+      },
+      "ordinaryPacing": {
+        "count": 22,
+        "medianMs": 34.69999999999982,
+        "p95Ms": 62.5
+      },
+      "moved": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          4.808229999999994
+        ],
+        "routeT": 0.10833333333333334,
+        "paused": false,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 68,
+        "draws": 120,
+        "triangles": 192352,
+        "cameraSolids": 126,
+        "camera": [
+          1,
+          2.6120159849938847,
+          10.738436673065932
+        ],
+        "cameraMetrics": {
+          "updates": 68,
+          "updateMs": 8.200000010430813,
+          "queries": 91,
+          "queryMs": 2,
+          "searches": 0,
+          "alternatives": 0
+        },
+        "place": "Sunward approach"
+      },
+      "orbit": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          4.808229999999994
+        ],
+        "routeT": 0.10833333333333334,
+        "paused": false,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 81,
+        "draws": 103,
+        "triangles": 189578,
+        "cameraSolids": 126,
+        "camera": [
+          -2.21439259762194,
+          2.9906520254526514,
+          9.569740196828128
+        ],
+        "cameraMetrics": {
+          "updates": 81,
+          "updateMs": 9.099999994039536,
+          "queries": 112,
+          "queryMs": 2.4999999925494194,
+          "searches": 0,
+          "alternatives": 0
+        },
+        "place": "Sunward approach"
+      },
+      "paused": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          4.808229999999994
+        ],
+        "routeT": 0.10833333333333334,
+        "paused": true,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 81,
+        "draws": 103,
+        "triangles": 189578,
+        "cameraSolids": 126,
+        "camera": [
+          -2.21439259762194,
+          2.9906520254526514,
+          9.569740196828128
+        ],
+        "cameraMetrics": {
+          "updates": 81,
+          "updateMs": 9.099999994039536,
+          "queries": 112,
+          "queryMs": 2.4999999925494194,
+          "searches": 0,
+          "alternatives": 0
+        },
+        "place": "Sunward approach"
+      },
+      "still": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          4.808229999999994
+        ],
+        "routeT": 0.10833333333333334,
+        "paused": true,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 81,
+        "draws": 103,
+        "triangles": 189578,
+        "cameraSolids": 126,
+        "camera": [
+          -2.21439259762194,
+          2.9906520254526514,
+          9.569740196828128
+        ],
+        "cameraMetrics": {
+          "updates": 81,
+          "updateMs": 9.099999994039536,
+          "queries": 112,
+          "queryMs": 2.4999999925494194,
+          "searches": 0,
+          "alternatives": 0
+        },
+        "place": "Sunward approach"
+      },
+      "reset": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          7
+        ],
+        "routeT": 0,
+        "paused": false,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 90,
+        "draws": 125,
+        "triangles": 194644,
+        "cameraSolids": 126,
+        "camera": [
+          1,
+          2.6120159849938847,
+          12.88039946704745
+        ],
+        "cameraMetrics": {
+          "updates": 90,
+          "updateMs": 9.699999995529652,
+          "queries": 122,
+          "queryMs": 2.5999999940395355,
+          "searches": 0,
+          "alternatives": 0
+        },
+        "place": "Sunward approach"
+      },
+      "wall": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          -3.1814172252158985,
+          0.12000000022351742,
+          -1.3290698882113767
+        ],
+        "routeT": 0.4,
+        "paused": false,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 268,
+        "draws": 84,
+        "triangles": 171626,
+        "cameraSolids": 126,
+        "camera": [
+          2.5112436347637472,
+          2.8154485359007366,
+          -0.05967459502170165
+        ],
+        "cameraMetrics": {
+          "updates": 268,
+          "updateMs": 263.2000000104308,
+          "queries": 647,
+          "queryMs": 247.09999998658895,
+          "searches": 4,
+          "alternatives": 64
+        },
+        "place": "Conservatory entrance"
+      },
+      "nearWallPacing": {
+        "count": 31,
+        "medianMs": 21.19999999999891,
+        "p95Ms": 34.80000000000109
+      },
+      "rearWallProbe": null,
+      "phone": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          7
+        ],
+        "routeT": 0,
+        "paused": false,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 329,
+        "draws": 106,
+        "triangles": 191246,
+        "cameraSolids": 126,
+        "camera": [
+          1,
+          2.6120159849938847,
+          12.88039946704745
+        ],
+        "cameraMetrics": {
+          "updates": 330,
+          "updateMs": 267.90000001341105,
+          "queries": 710,
+          "queryMs": 248.2999999895692,
+          "searches": 4,
+          "alternatives": 64
+        },
+        "place": "Sunward approach"
+      },
+      "layout": {
+        "overflowX": false,
+        "rects": {
+          "controls": [
+            12,
+            743,
+            378,
+            830
+          ],
+          "route": [
+            233,
+            777.40625,
+            378,
+            830
+          ],
+          "place": [
+            128.5546875,
+            701,
+            261.4453125,
+            730
+          ],
+          "pause": [
+            335,
+            12,
+            378,
+            55
+          ]
+        }
+      },
+      "resources": [
+        {
+          "url": "http://127.0.0.1:8062/materials/sandstone_cracks_nor_gl_1k.jpg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:8062/materials/sandstone_cracks_rough_1k.jpg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:8062/atelier/atelier.json",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:8062/atelier/sunward-atelier-occlusion-v4.glb",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:8062/atelier/sunward-atelier-camera.glb",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:8062/crafted-portal/portal-swept-clean.json",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:8062/crafted-portal/sunward-portal-swept-clean.glb",
+          "status": 200
+        }
+      ],
+      "issues": [],
+      "warnings": [
+        "THREE.WebGLProgram: Program Info Log: (210,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(209,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(210,82-106): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(209,37-61): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision\n(210,82-106): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision"
+      ]
+    },
+    "terraces": {
+      "device": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "renderer": "ANGLE (Intel, Intel(R) UHD Graphics (0x00009BC4) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "viewport": [
+          1102,
+          828
+        ],
+        "dpr": 1
+      },
+      "arrival": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          7
+        ],
+        "routeT": 0,
+        "paused": false,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 3,
+        "draws": 126,
+        "triangles": 175816,
+        "cameraSolids": 126,
+        "camera": [
+          1,
+          2.6120159849938847,
+          12.88039946704745
+        ],
+        "cameraMetrics": {
+          "updates": 3,
+          "updateMs": 1,
+          "queries": 4,
+          "queryMs": 0.5,
+          "searches": 0,
+          "alternatives": 0
+        },
+        "place": "Sunward approach"
+      },
+      "ordinaryPacing": {
+        "count": 27,
+        "medianMs": 27.899999999999636,
+        "p95Ms": 34.80000000000018
+      },
+      "moved": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          4.720974999999999
+        ],
+        "routeT": 0.11666666666666667,
+        "paused": false,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 73,
+        "draws": 121,
+        "triangles": 173524,
+        "cameraSolids": 126,
+        "camera": [
+          1,
+          2.6120159849938847,
+          10.659480869347357
+        ],
+        "cameraMetrics": {
+          "updates": 73,
+          "updateMs": 8,
+          "queries": 97,
+          "queryMs": 3.400000013411045,
+          "searches": 0,
+          "alternatives": 0
+        },
+        "place": "Sunward approach"
+      },
+      "orbit": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          4.720974999999999
+        ],
+        "routeT": 0.11666666666666667,
+        "paused": false,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 85,
+        "draws": 105,
+        "triangles": 171034,
+        "cameraSolids": 126,
+        "camera": [
+          -2.1699667929989093,
+          2.9847997292486004,
+          9.512378556250086
+        ],
+        "cameraMetrics": {
+          "updates": 85,
+          "updateMs": 9.200000002980232,
+          "queries": 117,
+          "queryMs": 4.3000000193715096,
+          "searches": 0,
+          "alternatives": 0
+        },
+        "place": "Sunward approach"
+      },
+      "paused": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          4.720974999999999
+        ],
+        "routeT": 0.11666666666666667,
+        "paused": true,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 85,
+        "draws": 105,
+        "triangles": 171034,
+        "cameraSolids": 126,
+        "camera": [
+          -2.1699667929989093,
+          2.9847997292486004,
+          9.512378556250086
+        ],
+        "cameraMetrics": {
+          "updates": 85,
+          "updateMs": 9.200000002980232,
+          "queries": 117,
+          "queryMs": 4.3000000193715096,
+          "searches": 0,
+          "alternatives": 0
+        },
+        "place": "Sunward approach"
+      },
+      "still": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          4.720974999999999
+        ],
+        "routeT": 0.11666666666666667,
+        "paused": true,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 85,
+        "draws": 105,
+        "triangles": 171034,
+        "cameraSolids": 126,
+        "camera": [
+          -2.1699667929989093,
+          2.9847997292486004,
+          9.512378556250086
+        ],
+        "cameraMetrics": {
+          "updates": 85,
+          "updateMs": 9.200000002980232,
+          "queries": 117,
+          "queryMs": 4.3000000193715096,
+          "searches": 0,
+          "alternatives": 0
+        },
+        "place": "Sunward approach"
+      },
+      "reset": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          7
+        ],
+        "routeT": 0,
+        "paused": false,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 94,
+        "draws": 126,
+        "triangles": 175816,
+        "cameraSolids": 126,
+        "camera": [
+          1,
+          2.6120159849938847,
+          12.88039946704745
+        ],
+        "cameraMetrics": {
+          "updates": 94,
+          "updateMs": 9.600000001490116,
+          "queries": 127,
+          "queryMs": 4.500000014901161,
+          "searches": 0,
+          "alternatives": 0
+        },
+        "place": "Sunward approach"
+      },
+      "wall": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          -3.070177854847709,
+          0.12000000022351742,
+          -1.321438959845147
+        ],
+        "routeT": 0.4,
+        "paused": false,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 268,
+        "draws": 88,
+        "triangles": 155130,
+        "cameraSolids": 126,
+        "camera": [
+          2.6159955410699314,
+          2.815612738479941,
+          -0.02302345196471403
+        ],
+        "cameraMetrics": {
+          "updates": 268,
+          "updateMs": 256.0000000298023,
+          "queries": 648,
+          "queryMs": 242.6000000089407,
+          "searches": 4,
+          "alternatives": 66
+        },
+        "place": "Conservatory entrance"
+      },
+      "nearWallPacing": {
+        "count": 30,
+        "medianMs": 27.700000000000728,
+        "p95Ms": 27.899999999999636
+      },
+      "rearWallProbe": null,
+      "phone": {
+        "study": "facade",
+        "standingY": 0.12000000022351742,
+        "contactY": 0.131,
+        "position": [
+          1,
+          0.12000000022351742,
+          7
+        ],
+        "routeT": 0,
+        "paused": false,
+        "guided": false,
+        "guideTargetT": null,
+        "reduced": false,
+        "frames": 327,
+        "draws": 108,
+        "triangles": 172702,
+        "cameraSolids": 126,
+        "camera": [
+          1,
+          2.6120159849938847,
+          12.88039946704745
+        ],
+        "cameraMetrics": {
+          "updates": 328,
+          "updateMs": 261.6000000461936,
+          "queries": 709,
+          "queryMs": 245.00000001490116,
+          "searches": 4,
+          "alternatives": 66
+        },
+        "place": "Sunward approach"
+      },
+      "layout": {
+        "overflowX": false,
+        "rects": {
+          "controls": [
+            12,
+            743,
+            378,
+            830
+          ],
+          "route": [
+            233,
+            777.40625,
+            378,
+            830
+          ],
+          "place": [
+            128.5546875,
+            701,
+            261.4453125,
+            730
+          ],
+          "pause": [
+            335,
+            12,
+            378,
+            55
+          ]
+        }
+      },
+      "resources": [
+        {
+          "url": "http://127.0.0.1:8062/materials/sandstone_cracks_nor_gl_1k.jpg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:8062/materials/sandstone_cracks_rough_1k.jpg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:8062/atelier/atelier.json",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:8062/atelier/sunward-atelier-occlusion-v4.glb",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:8062/atelier/sunward-atelier-camera.glb",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:8062/crafted-portal/portal-swept-clean.json",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:8062/crafted-portal/sunward-portal-swept-clean.glb",
+          "status": 200
+        }
+      ],
+      "issues": [],
+      "warnings": []
+    }
+  },
+  "issues": [],
+  "passed": true
+}

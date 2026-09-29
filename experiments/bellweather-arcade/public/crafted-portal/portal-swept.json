@@ -1,0 +1,48 @@
+{
+  "name": "Sunward swept portal",
+  "original": true,
+  "tool": "5.2.2 LTS",
+  "coordinateSystem": "glTF Y-up, metres",
+  "triangles": 34108,
+  "materials": 5,
+  "aoSize": [
+    512,
+    512
+  ],
+  "colliders": [
+    {
+      "minX": -3.4844746589660645,
+      "maxX": -2.4800000190734863,
+      "minZ": -0.75,
+      "maxZ": 0.7542049288749695
+    },
+    {
+      "minX": 2.5399999618530273,
+      "maxX": 3.5391573905944824,
+      "minZ": -0.75,
+      "maxZ": 0.75
+    }
+  ],
+  "placement": {
+    "x": 1.1,
+    "y": 0.12,
+    "z": -4.4
+  },
+  "source": "authoring/sweep_portal.py",
+  "rights": "Original VibeLearn asset; no third-party geometry or images.",
+  "baseAsset": "sunward-portal.glb",
+  "unchangedBelowMetres": 3.0,
+  "sha256": "1c0d16007e16ca3c29466a2fccdfa803c1af9752761bbafa40d10836f330f24e",
+  "bounds": {
+    "min": [
+      -4.164117336273193,
+      -1.7924498319625854,
+      0.0
+    ],
+    "max": [
+      3.547327995300293,
+      0.7805595397949219,
+      7.948355674743652
+    ]
+  }
+}

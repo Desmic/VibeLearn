@@ -1,0 +1,22 @@
+{
+  "source": "https://github.com/StarKnightt/summer-cycle",
+  "commit": "8b977baad061e797c2f6c19cfcf07c1e79b23a67",
+  "license": "MIT; retained in src/vendor/summer-cycle/LICENSE",
+  "purpose": "Unmodified rendering, geometry and foliage dependencies; tree-shaken by Vite. Original scene and actors are outside vendor. No upstream reference/promotional media.",
+  "files": {
+    "core/rng.ts": "01a34fdf18fdd78a987069650672b21e5b3f7b2fcbeeb2489375620ec2ad2042",
+    "render/leafAtlas.ts": "c6ec404cd0b55da7486acdcd4c4babd634d350da380d6a9c361d0680fa7012ba",
+    "render/lightpasses.ts": "bba4e115f28dd95ecdebe890a228e24291af46ed1fc53457fab0e745af9d7cf7",
+    "render/materials.ts": "548a3c3c4d25653683d056baf8fd374bd54dd7b7d79e46bdf9252aa808a93c10",
+    "render/post.ts": "50ef07d90055b0bdd122c4dce9ddc2eb09cbccb709ab0f005f4d87312a32722b",
+    "render/profiler.ts": "632f5cbaa828ee76608c0a69cc85df0fb5816f3c6c37eee5a841bf99240281aa",
+    "render/signAtlas.ts": "ffa7a41f5333f17af97a1f63decdc5479a737ff5d88761bae65cc426588591a6",
+    "render/todUniforms.ts": "8233a2fb06f051a86a72f8841e5f1946213241c0771e427da177011c948a8ce2",
+    "world/geo.ts": "3ec9c611ef2d79a0945fbbf014d81932e7803e2bbfc28c6079756d60d4414ade",
+    "world/props.ts": "e5ffc6933cd039284241428ebed53ec7de11e8684a7627fdbf08005515f28d35",
+    "world/road.ts": "3566a0d14ba068a52ec4066655f4393da2315ad7477f1ef7a57a245ee2291abe",
+    "world/sky.ts": "9a1eec359f7a37a9aee0583795d0a06b20ddef35a739f461411b9f452a80716f",
+    "world/street.ts": "82baec6be966ca5009882d1cf0a725f5635737c52bc3520c1529f5a51640cfef",
+    "world/vegetation.ts": "b10d2ed66300e619532dc64b64bde2317f383fc6da810dbc92ba201f038b8c66"
+  }
+}

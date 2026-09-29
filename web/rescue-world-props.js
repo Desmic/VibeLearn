@@ -1,5 +1,6 @@
 /* Portable scenery and interactable shapes. No learner state or engine objects. */
-export function companionRobot(id,position,{color='teal',round=false,height=1.7,motion=null}={}){
+export function companionRobot(id,position,{color='teal',round=false,height=1.7,motion=null,shell=null,solid=false}={}){
+  if(shell)return designedCompanion(id,position,{color,round,height,motion,shell,solid});
   const e=[{id,position,...(motion?{motion}:{})}];
   const part=(name,primitive,material,p,s)=>e.push({id:id+'-'+name,parent:id,primitive,material,position:p,scale:s});
   part('body',round?'sphere':'box',color,[0,height*.43,0],[round?1.15:.7,height*.65,.65]);
@@ -69,6 +70,74 @@ export function gate(id,position,{width=2.2,height=3.6,color='gold',symbol=null,
     }
   }
   return e;
+}
+
+// Authored poses use ordinary entity transforms. The same two-link construction
+// works for different silhouettes/heights; it adds no per-frame rig or solver.
+export function companionPose(id,{height=1.7,round=false,hands={}}={}){
+  const pose={},width=round?.48:.36;
+  for(const side of [-1,1]){
+    const shoulder=[side*width,height*.65,0];
+    const hand=hands[side]||[side*.7,height*.55,.18];
+    const elbow=shoulder.map((v,k)=>(v+hand[k])*.5+(k===0?side*.09:k===1?-.1:.035));
+    pose[`${id}-hand${side}`]={position:hand};
+    pose[`${id}-elbow${side}`]={position:elbow};
+    for(const [name,a,b] of [['upper-arm',shoulder,elbow],['forearm',elbow,hand]]){
+      const delta=b.map((v,k)=>v-a[k]),length=Math.hypot(...delta);
+      pose[`${id}-${name}${side}`]={position:a.map((v,k)=>(v+b[k])*.5),
+        rotation:[Math.asin(delta[2]/length)*180/Math.PI,0,Math.atan2(-delta[0],delta[1])*180/Math.PI],
+        scale:[name==='forearm'?.17:.12,length,.12]};
+    }
+  }
+  return pose;
+}
+
+function designedCompanion(id,position,{color,round,height,motion,shell,solid}){
+  const {plate,frame,visor,eyes,trim}=shell;
+  const e=[{id,position,...(motion?{motion}:{}),...(solid?{collider:{shape:'box',halfExtents:[round?.48:.38,height*.5,.34],offset:[0,height*.5,0]}}:{})}];
+  // PlayCanvas capsules have a two-unit native height; kit dimensions describe
+  // the intended full height, like its boxes/spheres/cylinders.
+  const part=(name,primitive,material,p,s,extra={})=>e.push({id:`${id}-${name}`,parent:id,primitive,material,position:p,scale:primitive==='capsule'?[s[0],s[1]/2,s[2]]:s,...extra});
+  const h=height;
+  // Colored shell, pale inset and dark mechanical gaps give the body a clear
+  // hierarchy in sunlight. The wide and tall profiles retain distinct identities.
+  part('body','capsule',color,[0,h*.48,0],[round?1.05:.69,h*.61,.64]);
+  part('breastplate','sphere',plate,[0,h*.55,.24],[round?.78:.53,h*.32,.22]);
+  part('waist','cylinder',frame,[0,h*.29,0],[round?.68:.45,.14,.45]);
+  part('collar','cylinder',trim,[0,h*.72,0],[round?.55:.41,.08,.42]);
+  part('head','sphere',color,[0,h*.87,0],[round?1.08:.87,h*.34,.69]);
+  part('face','sphere',visor,[0,h*.865,.275],[round?.88:.71,h*.22,.16]);
+  for(const side of [-1,1]){
+    part('eye'+side,'capsule',eyes,[side*(round?.2:.16),h*.88,.357],[.085,h*(round?.047:.058),.035]);
+    part('brow'+side,'box',trim,[side*.18,h*.94,.33],[.18,.035,.04],{rotation:[0,0,side*(round?-8:10)]});
+    part('ear'+side,'cylinder',frame,[side*(round?.52:.42),h*.865,0],[.16,.09,.16],{rotation:[0,0,90]});
+    part('ear-cap'+side,'cylinder',trim,[side*(round?.57:.47),h*.865,0],[.11,.03,.11],{rotation:[0,0,90]});
+    part('shin'+side,'capsule',frame,[side*(round?.26:.2),h*.16,0],[.15,h*.24,.17]);
+    part('knee'+side,'sphere',trim,[side*(round?.26:.2),h*.235,.065],[.2,.17,.13]);
+    part('foot'+side,'capsule',color,[side*(round?.26:.2),.105,.08],[.3,.21,.49]);
+    part('sole'+side,'box',frame,[side*(round?.26:.2),.035,.1],[.29,.055,.43]);
+    part('shoulder'+side,'sphere',plate,[side*(round?.48:.36),h*.65,0],[.27,.27,.27]);
+    part('elbow'+side,'sphere',frame,[0,0,0],[.17,.17,.17]);
+    part('upper-arm'+side,'cylinder',frame,[0,0,0],[1,1,1]);
+    part('forearm'+side,'cylinder',color,[0,0,0],[1,1,1]);
+    e.push({id:`${id}-hand${side}`,parent:id,position:[side*.7,h*.55,.18]});
+    part('palm'+side,'capsule',plate,[0,0,0],[.23,.28,.2],{parent:`${id}-hand${side}`});
+    part('thumb'+side,'capsule',frame,[-side*.12,-.035,.055],[.07,.14,.08],{parent:`${id}-hand${side}`,rotation:[0,0,side*25]});
+  }
+  part('mouth','box',eyes,[0,h*.815,.349],[round?.13:.18,.025,.022]);
+  // One asymmetrical aerial and a small chest badge replace anonymous symmetry.
+  part('antenna','cylinder',frame,[-.2,h*1.04,-.025],[.035,h*.13,.035],{rotation:[0,0,-18]});
+  part('tip','sphere',trim,[-.235,h*1.105,-.025],[.11,.11,.11]);
+  part('badge','cylinder',trim,[round?-.2:.13,h*.57,.367],[.1,.025,.1],{rotation:[90,0,0]});
+  if(round){
+    part('satchel','capsule',frame,[.45,h*.4,-.02],[.28,h*.27,.4]);
+    part('satchel-flap','box',trim,[.45,h*.47,.2],[.23,.09,.025]);
+  }else{
+    part('mantle','capsule',plate,[0,h*.69,-.13],[.87,.18,.47]);
+    part('back-panel','capsule',plate,[0,h*.47,-.31],[.48,h*.49,.1]);
+  }
+  const pose=companionPose(id,{height,round});
+  return e.map(item=>pose[item.id]?{...item,...pose[item.id]}:item);
 }
 export function tower(id,position,{scale=1,color='stone'}={}){
   const e=[{id,position,scale:[scale,scale,scale],collider:{shape:'box',halfExtents:[2.6,5,2.6],offset:[0,4.6,0]}}];

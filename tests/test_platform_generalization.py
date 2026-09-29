@@ -77,8 +77,13 @@ class PlatformGeneralizationTests(unittest.TestCase):
               finishLabel:'Take the controls',directionVersion:'1',
               scenes:[
                 {{beat:0,title:'Morning shift',body:'Cargo moves while the relay hums.',
-                  direction:{{kind:'establishing',channels:['world','character','camera','interaction'],worldAfter:'The harbor routine and relay purpose are visible.'}},
-                  action:{{target:'pressure-core',label:'Check the relay'}}}},
+                  direction:{{kind:'establishing',channels:['world','character','camera','interaction'],worldAfter:'One chosen harbor response changes the relay or beacon.'}},
+                  choices:[
+                    {{target:'pressure-core',label:'Tune pressure core',patch:{{show:['gauge-lens']}},success:{{fact:'Pressure steady.'}},
+                      inspection:{{target:'gauge-lens',anchor:'gauge-lens',label:'Look at gauge trace',markers:[],
+                        patch:{{camera:'repair'}},success:{{fact:'The gauge records a safe line.'}}}}}},
+                    {{target:'storm-beacon',label:'Warn the dock',patch:{{show:['storm-beacon']}},success:{{fact:'Beacon bright.'}}}}
+                  ]}},
                 {{beat:1,title:'The surge hits',body:'The storm beacon overloads the relay.',
                   direction:{{kind:'major-event',cause:{{mode:'visible',entity:'storm-beacon'}},causeLeadMs:750,
                     channels:['world','character','camera','lighting','audio'],worldAfter:'The bridge route is unsafe and the relay is unstable.'}}}},
@@ -87,6 +92,28 @@ class PlatformGeneralizationTests(unittest.TestCase):
               ]
             }};
             validateOpeningSpec(opening);
+            let duplicateRejected=false;
+            try{{validateOpeningSpec({{...opening,scenes:[{{...opening.scenes[0],choices:[opening.scenes[0].choices[0],opening.scenes[0].choices[0]]}},...opening.scenes.slice(1)]}});}}
+            catch(_error){{duplicateRejected=true;}}
+            ensure(duplicateRejected,'opening choices must have distinct semantic targets');
+            let incompleteInspectionRejected=false;
+            try{{validateOpeningSpec({{...opening,scenes:[{{...opening.scenes[0],choices:[
+              {{...opening.scenes[0].choices[0],inspection:{{target:'gauge-lens',label:'Look'}}}},
+              opening.scenes[0].choices[1]]}},...opening.scenes.slice(1)]}});}}
+            catch(_error){{incompleteInspectionRejected=true;}}
+            ensure(incompleteInspectionRejected,'an inspection needs a semantic anchor, patch and result');
+            let badInspectionMarkerRejected=false;
+            try{{validateOpeningSpec({{...opening,scenes:[{{...opening.scenes[0],choices:[
+              {{...opening.scenes[0].choices[0],inspection:{{...opening.scenes[0].choices[0].inspection,markers:[{{label:'floating label'}}]}}}},
+              opening.scenes[0].choices[1]]}},...opening.scenes.slice(1)]}});}}
+            catch(_error){{badInspectionMarkerRejected=true;}}
+            ensure(badInspectionMarkerRejected,'inspection markers need a real world anchor');
+            let lostTimedResponseRejected=false;
+            try{{validateOpeningSpec({{...opening,scenes:[{{...opening.scenes[0],choices:[
+              {{...opening.scenes[0].choices[0],patch:{{timeline:{{duration:500}}}}}},
+              opening.scenes[0].choices[1]]}},...opening.scenes.slice(1)]}});}}
+            catch(_error){{lostTimedResponseRejected=true;}}
+            ensure(lostTimedResponseRejected,'a timed route inspection needs durable branch state');
 
             const controlSpec={{
               id:'harbor-controls',version:'1',skipAllowed:true,

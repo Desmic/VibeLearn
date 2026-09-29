@@ -65,6 +65,23 @@ Reusable layers should include:
 
 Reusable does **not** mean visually identical. A world kit must expose composition, spacing, scale, density, material, lighting and dressing parameters so multiple games can feel materially different.
 
+The September 28 graphics experiment adds optional WorldSpec `geometries` and
+`textures` dictionaries, material references and bounded shadow controls. The
+PlayCanvas adapter uses native geometry and StandardMaterial; it shares geometry
+buffers and creates deterministic surface textures once, rather than adding a
+per-frame painting effect. Asset `materialOverrides` maps source material names
+to world material IDs without changing the original model or animation. Existing
+primitive/asset authoring remains valid. Geometry sharing is **not** draw-call
+batching or proof of lower GPU cost.
+
+`garden-world-kit.js` holds configurable forms; `bellweather-garden.js` supplies
+this game's composition/palette. An alternate observatory composition exercises
+the contract in `tests/test_render_style_contract.py`. This proves an authoring
+boundary, not a second independently reviewed game. Texture count/size, mesh
+subdivisions and shadow resolution are bounded; real frame/CPU/GPU cost and phone
+readability remain candidate gates. See the [creator study and implementation
+record](experiments/20260928-graphics-social-study.md).
+
 ## Player embodiment must be explicit
 
 Never infer a literal player avatar because the story says “you help X.” `GameDesignSpec` / `RuntimeExperienceSpec` must explicitly declare who the player controls and how the player exists in the fiction.
@@ -188,7 +205,93 @@ own visuals and motion.
 
 ## Evidence-first quality system
 
+### Rendering cost and asset reuse checkpoint — 28 September
+
+WorldSpec can opt immutable primitive/geometry leaves into named native static
+`batchGroups`; the package, not the renderer's guess about appearance, owns that
+decision. Animated entities and imported containers remain separate. Parent
+visibility/transform changes invalidate affected groups; unrelated moving actors
+must not force all scenery to rebuild. Shared draw scheduling skips hidden and
+paused steady redraw, with explicit invalidation on observable changes. Preserve
+input, animation, resize, asset completion and context recovery in real play.
+
+Measure the actual intended runtime state. A raw world definition can include
+normally hidden levels and is not equivalent to the player's opening. Draw calls,
+frame submission, CPU utilization and GPU utilization are different evidence;
+do not turn one into an unsupported claim about the others.
+
+Prefer small selected licensed assets, pinned by provenance and content hashes,
+over new commodity generators. The three selected Kenney foliage models are an
+example, not a required global art style. Material remapping and world composition
+remain per-package choices. See the bounded
+[art/cost experiment](experiments/20260928-opening-art-and-cost.md).
+
+### Access regressions and candidate assets — 28 September
+
+Replacing a world action must preserve keyboard focus on a stable, usable owner,
+including when the next action is temporarily unavailable during a world response.
+Test keyboard-only continuation and escape, pending actions through pause/resize,
+and replay exits against authoritative saved state. A second, unrelated world
+fixture proves the contract independently of the current story.
+
+Marker placement must use a footprint that does not change merely because its
+position changes. Observe real text-size changes to invalidate cached fitting;
+do not add per-frame geometry reads to fix an accessibility defect. At enlarged
+text, check the full visible meaning and action reachability in each relevant
+presentation phase. Do not lower font size, clip meaning or clear a held sentence
+just to pass an area budget. Concise authored wording must still preserve cause,
+choice and character intent; it cannot substitute for a shared layout repair.
+
+Candidate identity includes delivered model/texture/license bytes and the pinned
+vendor recipe, not just the URL in WorldSpec. Tests establish integrity and routes;
+actual play establishes visual suitability. See the
+[composition/access checkpoint](experiments/20260928-world-composition.md).
+
+### Optional companion form and pose kit — 29 September
+
+`companionRobot` accepts an opt-in material `shell` and `solid` torso. The old
+default remains available. Shape proportions, palette, location and solidity are
+package decisions; a character role does not impose a global theme or body.
+`companionPose` composes connected shoulder/elbow/hand segments as ordinary
+WorldSpec transforms. Static route poses therefore use existing replay/state
+handling without a new animation solver or controller. Stable head/hand anchors
+remain usable by labels, speech and authored interactions.
+
+An unrelated observatory fixture checks hierarchy, distinct proportions and
+rotated segment endpoints using the engine's own rotation math. This demonstrates
+bounded kit reuse, not a universal character generator. Native play must still
+check form, contact, camera readability and the cost of added parts. Existing
+licensed characters are preferred when their silhouette, style and rig fit;
+duplicating a protagonist or adopting an unsuitable costume is not useful reuse.
+See the [companion checkpoint](experiments/20260928-companion-art.md).
+
+### Existing experience evidence requirements
+
+The opening controller now supports optional, package-authored
+`choice.inspection`: a named world target/anchor, camera/world patch, short result
+and optional marker replacement. A committed response holds until that target is
+inspected; generic progression cannot consume it. Previous retains the inspection,
+while replay clears it. Games that need no inspection retain their existing flow.
+Required projected actions use shared safe-area placement and directional cues
+through camera movement, including a distinct behind-camera cue. Neither feature
+contains Bellweather route names or geometry. A separate Harbor fixture exercises
+the contract; current verification is recorded in the
+[receiver-discovery experiment](experiments/20260928-receiver-discovery.md).
+
+This is a bounded interaction capability, not a general discovery generator.
+Content must still make the revealed place meaningful, and critics must verify
+that an unfamiliar player notices and understands it. A persistent button or an
+extra Look step alone cannot establish that outcome.
+
 `EXPERIENCE-QUALITY-SYSTEM.md` is a first-class platform contract.
+
+The [offline asset-corpus pilot](experiments/20260929-asset-corpus-pilot.md)
+implements role/style/importance/budget selection of pinned local candidates.
+License and integrity checks do not establish art suitability. External mesh
+buffers and textures are part of the selected package and its byte budget.
+Unmet requests fail explicitly; no implicit generation or style substitution.
+The current native comparison rejected a cheap stock kit for Bellweather's
+foreground, illustrating why source approval and art approval remain separate.
 
 Future game creation should produce reviewable artifacts/specs for:
 - cold-start comprehension;
@@ -204,3 +307,105 @@ The platform should prevent structurally invalid experiences where feasible
 (schema/runtime constraints), then use independent critics for judgment/taste.
 Do not encode every current-game failure as a special case; extract the reusable
 contract and prove it in this game plus later materially different games.
+
+### Source-based art production evidence — 29 September
+
+The [isolated source-based trial](experiments/20260929-bellweather-source-trial.md)
+reproduced and reused a licensed rendering baseline, but failed its original-world
+art target after two substantial revisions. It is frozen, not a reusable approved
+world kit. Shader reuse proved useful; a production engine migration did not.
+
+For subsequent style-family work, assess geometry, shader palette behavior,
+lighting, camera framing and placement together. Require the affected world
+object to be visible in the supported interaction views; an unclipped prompt is
+insufficient. Keep guided arrival separate from meaningful player activation,
+and verify that reachable destinations and companion responses match the design.
+These requirements are game agnostic; the trial's palette, characters and
+promenade are not platform defaults. Record device-specific render cost alongside
+visual evidence, without treating desktop frame rate as phone support or CPU
+utilization. Change the production method when the art gate fails; do not extract
+a general generator or extend content to disguise an unsuccessful composition.
+
+### Authoring-to-runtime checks — 29 September
+
+Conditioning must declare what may change. A UV/occlusion-only operation should
+preserve exported geometry/normals; matching bounds can conceal lost triangles.
+The [conditioning comparison](experiments/20260929-existing-asset-lighting.md)
+uses a separate bake proxy and transfers UVs back to originals after welding
+failed that invariant. Existing textured assets need preserved UVs or deliberate
+reprojection. Do not route them through an untextured-asset conditioner silently.
+Intentional decimation/retopology requires different, explicitly scoped checks.
+
+The [live Blender experiment](experiments/20260929-live-blender-atelier.md)
+found inward normals that appeared acceptable in a modeling viewport but caused
+faulty shading in the game. Retain editable source, transformation/export steps,
+asset hashes, provenance and collision dimensions together. For authored closed
+solids check finite geometry and consistent outward orientation after modifiers;
+open/two-sided surfaces require their own intended-sidedness check. Inspect
+exported materials under target-engine lighting before tuning lights to conceal
+geometry errors. Validate collision bounds against the visible low geometry.
+
+A camera that frames an architectural landmark can still hide the protagonist
+after turning back. Check arrival, approach, reverse and narrow-screen views with
+the actual character body and foreground obstacles. Head/pivot clearance alone
+does not establish full-body readability. Keep matched comparisons, preserve
+failed views, and separate engineering passes from art acceptance. Blender/MCP
+is an optional authoring route, not a mandatory platform dependency or permission
+for paid generation. Only extract reusable runtime machinery when repeated use
+justifies it; current work supplies a concrete source/export/verification packet.
+
+Render batching and spatial-query organization are different concerns. The live
+Blender facade reduced render submissions while worsening camera-raycast frame
+time near walls. Retain bounded camera/collision proxies or an appropriate
+spatial acceleration structure when merging visible geometry. Measure both
+ordinary traversal and obstruction recovery; unchanged rendered geometry helps
+distinguish a camera-query repair from reducing visual quality. Frame pacing
+alone still cannot establish CPU/GPU utilization or actual-device coverage.
+
+The subsequent [depth refinement](experiments/20260929-atelier-depth.md) adds two
+further checks. Validate the serialized asset as well as editable source: joined
+or triangulated exports can introduce collapsed triangles or merge coincident
+vertices from separate parts. Record numerical tolerances and distinguish an
+intentional intersection from a broken closed surface. Keep cleanup on temporary
+export copies and recheck the exported result rather than trusting source QA.
+
+For static camera obstacles, conservative world bounds can reject irrelevant
+objects before an exact raycast. Compare retained hits against full queries on
+actual asset geometry, then check live camera recovery. This optimization needs
+bounds invalidation if objects later move; it is not a dynamic-world guarantee.
+When a window should reveal depth, inspect real parallax at play distance and
+oblique angles. A low-cost alpha pane with modeled contents is a valid visual
+choice; record its optical and shadow limitations instead of claiming refraction.
+
+Before replacing an asset for looking too dark or flat, inspect its material-role
+balance under the intended light rig. Preserve a switchable control and changed
+camera views. The [ceramic comparison](experiments/20260929-ceramic-material.md)
+improves legibility using existing geometry but does not establish the target art
+quality. Palette/light profiles are world-specific data; they must not become
+hard-coded learning semantics or a universal style for generated games.
+
+For a silhouette edit, declare invariant gameplay geometry separately from the
+parts allowed to change. The [swept-portal study](experiments/20260929-swept-portal.md)
+preserves low contact geometry while updating the visible upper shape, camera
+mesh and local shading. Reuse is conditional on exported checks and the asset's
+fit with neighbouring forms; unchanged triangle count alone is insufficient.
+
+Check triangulation after export even when the editable source is manifold.
+The [portal repair](experiments/20260929-portal-repair.md) found that closed n-gons
+generated collapsed triangles. Bound cleanup by an explicit spatial tolerance,
+preserve UVs and validate the exported shells. A displacement bound is not a
+complete surface-quality proof; combine it with in-engine comparison/contact.
+
+When optimizing camera collision, measure camera/query CPU time separately from
+frame pacing. Static orbit results may be cached only with all solver inputs and
+an explicit obstacle revision; retain any safety query that depends on the
+interpolating camera position. Require cached/uncached pose agreement and
+invalidation checks. The portal trial reduces repeated CPU raycasts but does not
+establish a frame-rate or GPU-utilization improvement.
+
+Character asset reviews must include normal player-camera scale and rear/side
+views under the target lighting, not only a frontal model showcase. Check the
+visible body against grounding/collision dimensions and measure runtime cost.
+The [courier study](experiments/20260929-courier-character.md) batches a static
+pose by material; articulated assets must retain joint/rig boundaries instead.
+Keep style choices in the asset profile, independent of learning semantics.

@@ -1,0 +1,490 @@
+{
+  "schema": "vibelearn.learning-design.v1",
+  "id": "bellweather-world-production-trial",
+  "version": "3-draft",
+  "author": "astra-world-trial-author-20260929",
+  "prototype_scope": {
+    "steps": [
+      "opening"
+    ],
+    "purpose": "Isolated pre-rupture world/art prototype: directly inhabit Zip, reach a garden lightwell, cause a visible environmental response with Mira, and physically reach a nearby overlook. Test attention, world appeal and local cause/effect only.",
+    "not_authorized_by_design_pass": "No canonical prologue replacement, rupture/theft implementation, tutorial/Level 1 changes, assessment, saves, release or deployment. Later copied learning steps are unchanged reference boundaries and are NOT implemented or approved by this trial. Active PlayCanvas game remains unchanged; user explicitly approved isolated Three.js source reuse."
+  },
+  "audience": "Beginners who can read short everyday instructions; prior LLM knowledge is not assumed.",
+  "starting_knowledge": "Reading simple messages; movement and interaction are taught separately.",
+  "learning_promise": "Identify the complete input used at the next generation step, and choose task-relevant context while distinguishing what supplied information supports from what the task requires.",
+  "scope_limits": "A standalone local research scene with no accounts, persistence or learning credit. The experiment ends at the reached overlook, before the canonical rupture. Later sequence entries are retained solely to preserve the complete learning design context; none are implemented by this trial. Direction is the accepted original graphic techno-fantasy utopia with credible contact/light; no medieval or stock toy art. One continuous small connected place, not a city generator or later level. Audio and motion quality unassessed; responsive controls, collision, semantic access and readable causal state still required.",
+  "outcomes": [
+    {
+      "id": "sequence",
+      "observable_capability": "Identify the original input plus already-generated pieces as the next step input.",
+      "misconception": "Every step starts again from the original request alone.",
+      "success_evidence": "Commit a next-input prediction on a changed case before the model reveals it; record assistance and first choice.",
+      "prerequisites": []
+    },
+    {
+      "id": "context",
+      "observable_capability": "Choose task-relevant context, identify what supplied information supports, and diagnose a task failure caused by unsuitable information.",
+      "misconception": "The model automatically has all relevant world information, or completing a fluent message guarantees the task succeeds.",
+      "success_evidence": "Commit context selection and a source-supported inference before feedback. Report relevance and source-consistency separately; do not score guessed real-model wording.",
+      "prerequisites": []
+    }
+  ],
+  "sequence": [
+    {
+      "id": "arrival",
+      "phase": "entry",
+      "role": "orientation",
+      "player_goal": "Enter or resume Bellweather.",
+      "decision": "Activate Enter the story on the immediately visible entry plaque.",
+      "feedback": "Entry shows loading in the same plaque, then opens the prologue or saved checkpoint.",
+      "outcomes": [],
+      "recovery": "Retry entry without resetting an existing attempt.",
+      "assistance": "Account and accessibility help only.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "entry-plaque",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "world_anchor",
+          "anchor": "entry-plaque",
+          "critical": true,
+          "purpose": "Enter or resume Bellweather.",
+          "reveal": "Visible on page load; no movement, orbit or discovery required. Account controls remain ordinary accessible fields composed beside the entrance.",
+          "dismiss": "Submit entry; sign-in errors stay next to the relevant field, without changing progress.",
+          "offscreen_recovery": "Keep this focal interaction framed; on inspection exit restore the previous exploration view and an object-local return cue. Do not pin its instructions to a distant corner.",
+          "keyboard": "Focusable semantic controls; interact, tab and escape; same actions as touch.",
+          "touch": "Stable reachable targets at least 44 CSS pixels; no hover requirement.",
+          "readability": "360-430px portrait and desktop; enlarged text reflows in object inspection without clipping. Screen-reader equivalent preserves feedback and choice.",
+          "presentation": "scene_focus",
+          "focus_transition": "Entry plaque is the focal region; dissolve to the shared lantern scene only after load succeeds."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus"
+    },
+    {
+      "id": "opening",
+      "phase": "prologue",
+      "role": "orientation",
+      "outcomes": [],
+      "player_goal": "Join Mira at the garden overlook by taking a short walk through Bellweather and waking its lightwell together.",
+      "decision": "Explore the visible connected path toward Mira, or choose the equivalent guided route. At the lightwell choose Wake the garden; then travel along the newly illuminated continuation to the nearby overlook. No timer, hidden solution or right/wrong path.",
+      "feedback": "The lightwell crown opens/settles, light runs through a shallow water channel, and the connected overlook receives the same accent. Mira visibly acknowledges Zip and walks the same available path to wait there. Reaching the overlook exposes a wider inhabited city vista and a short partner response. Distant skyline islands have no quest marker or suggestion that this local route reaches them. Joint-arrival payoff occurs once only when the lightwell is awake, Mira has reached the overlook and Zip is there. Early explorers may return by the same path or choose guided return to the lightwell. After activation Mira follows that same clear path; arrival of either partner first simply waits for the other. Reduced motion places Mira in her settled overlook pose and explains her relocation beside the current focus; no requirement to wait for an animation.",
+      "recovery": "Pause, recenter and restart this disposable scene. Colliders keep Zip on continuous accessible ground and away from water/architecture without a death state. Repeated activation is idempotent. The guided route visits exactly the same lightwell and overlook positions and waits for explicit action at each; no bypass or different payoff. Restart clears only in-memory trial state. Guided travel never auto-activates the lightwell. Before activation its destination is the lightwell, even if Zip explored the overlook early; afterward it travels to the overlook. Manual movement or Pause cancels guided travel. Return to garden moves to the lightwell without resetting its state; Restart explicitly resets the disposable scene and both actors.",
+      "assistance": "At initial idle show short movement/look guidance adjacent to Zip, dismiss on use. A named Guided route option supports players who cannot steer: move to the same local stations, retain manual lightwell activation, and preserve feedback. Reduced motion uses explicit station steps instead of automatic camera travel and instant settled response states. Pause/help are ordinary secondary menus.",
+      "completion_evidence": "Record observed traversal or guided travel, voluntary lightwell activation, visible response and arrival at the local overlook. This is an art/world and interaction experiment; no mastery, learning progression or engagement success inferred from completion.",
+      "primary_focus": "mira-garden-route",
+      "causal_contract": "The lightwell transmits light, not speech or inferred LLM reasoning. Zip has an intact natural voice/module; no theft, Warden or restoration is shown in this pre-rupture sample. Environmental response is inspectable indefinitely, not a timed trigger into a cutscene.",
+      "world_contract": "A sheltered arrival, curving garden promenade and reachable overlook share continuous walkable geometry. Doorways, balustrades, benches, canopy structure and inhabitants have consistent human/robot scale. Transit connects visible distant structures; one or two local residents follow purposeful routes off the main path. No NPC line-up facing the player. The initial camera looks over Zip into the route and a partial vista; moving around a building opens the landmark view. Architectural negative space and view hierarchy precede prop count. The entire local promenade and overlook are traversable before lightwell activation. Early arrival is allowed: the view is available, Mira remains at the lightwell and the contextual cue identifies her location; no joint-arrival response or completion is fabricated. There is no invisible progression barrier.",
+      "art_contract": "Original expressive slender Zip silhouette with dark mechanical joints, warm white shell and a limited orange accent; distinct companion silhouette within the same material language. Cream architectural planes, cool blue-violet shadow masses, peach sun, turquoise water, restrained pink canopy and atmospheric distant layers. Surface-specific graphic treatment and plausible local shadows/reflections, no blanket filter as substitute for form. Reuse inspected MIT rendering/foliage code and original geometry with pinned provenance; no imported promotional/reference imagery.",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "world_anchor",
+          "anchor": "mira-garden-route",
+          "critical": true,
+          "presentation": "scene_focus",
+          "purpose": "Follow the physically connected garden route, act on its lightwell and notice the response with Mira.",
+          "reveal": "Start with Zip in the foreground and Mira visible farther along the same path. One short Mira invitation names the garden, then fades to a proximity cue. Near the lightwell show one named Wake the garden control spatially attached to it. After activation replace it with the settled response and Mira heading toward the near overlook; a small destination cue refers only to the reachable landing. A contextual Mira line at arrival supplies the social payoff. No persistent mission panel or simultaneous route-button crowd.",
+          "dismiss": "Dialogue can be dismissed with Escape; no forced timed story progression. Interaction hint leaves when out of range or replaces itself after activation. Arrival remains explorable; a Return to garden action at the overlook or restart menu permits repetition without learning writes.",
+          "offscreen_recovery": "Recenter restores Zip and the next nearby route focus. A discreet object-directed edge cue identifies the current destination when outside view. Guided route in the help/menu is always reachable; it never activates the lightwell or claims arrival before moving to the station.",
+          "keyboard": "WASD/arrows for movement; pointer drag for look; E and semantic Enter/Space activate the nearby action. Tab reaches the same named action, pause/recenter and Guided route. Escape dismisses dialogue first or pauses; input release on blur prevents stuck movement. Guided station travel is optional and explicitly activated.",
+          "touch": "Visible movement stick and drag-look region; active object action uses a semantic target at least 44 CSS pixels, without precision aiming. Guided route offers the equivalent station journey. Controls avoid the scene focus and honor pointer cancellation.",
+          "readability": "Desktop and narrow 390px emulation with 200% text: single focused cue, reflow, no clipped dialogue. Screen-reader descriptions name current station, lightwell state, Mira response and reached destination. Phone emulation assesses layout only, not physical-phone performance.",
+          "focus_transition": "Zip/visible Mira invitation -> garden lightwell -> persistent water/light response and Mira moving along the open path -> reached nearby overlook and partner -> free inspection or return. Guided travel preserves all stations and explicit lightwell action; reduced-motion stepping preserves settled spatial/cause information."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus"
+    },
+    {
+      "id": "controls",
+      "phase": "tutorial",
+      "role": "orientation",
+      "player_goal": "Take over Zip: move, look and find the game menu.",
+      "decision": "Move a few steps, orbit the camera, then open the highlighted menu.",
+      "feedback": "Each practice step completes at the actor or control being learned; the handoff names the repair goal beside Zip.",
+      "outcomes": [],
+      "recovery": "Practice can be replayed or skipped without implying conceptual understanding.",
+      "assistance": "Contextual control hints; skipping records control practice only, no learning outcome.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "zip",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "world_anchor",
+          "anchor": "zip",
+          "critical": true,
+          "purpose": "Learn movement, camera and menu before any repair.",
+          "reveal": "One short instruction card floats beside Zip and follows them; it names only the single control being practiced. The relevant on-screen control is highlighted. No detached corner panel competes with it.",
+          "dismiss": "Producing the observed input replaces the card with the next single-control instruction; the final card hands off to the repair focus at the machine.",
+          "offscreen_recovery": "The card clamps into the visible safe area with an edge cue toward Zip; it never moves to a fixed far corner.",
+          "keyboard": "Keys are named in the card; the menu button is focusable and the same Escape/Tab behavior applies as in the rest of the game.",
+          "touch": "Stick and drag targets stay at least 44 CSS pixels and are highlighted during their step.",
+          "readability": "360-430px portrait and desktop; the card reflows to two short lines; enlarged text does not cover the highlighted control.",
+          "presentation": "object_local",
+          "focus_transition": "Move cue on Zip -> look cue on the view tools -> menu cue on the menu button; hide each card content before the next appears."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus"
+    },
+    {
+      "id": "sequence-demo",
+      "phase": "tutorial",
+      "role": "introduce",
+      "player_goal": "Repair the message machine at the repair chamber and open the Moon door.",
+      "decision": "Connect the visible loose power lead, scan the Moon lock, then run the machine one word at a time and speak the finished command to the gate.",
+      "feedback": "Each generated word appears on the machine's output rail and is visibly added to the next input line beside it; the Moon door lifts in the world.",
+      "outcomes": [
+        "sequence"
+      ],
+      "recovery": "Nothing is destroyed: rewinding clears only generated words, the supplied clue stays, and the first choices remain immutable. No wrong answer is required or punished in this demonstration.",
+      "assistance": "Explicit demonstration, not assessed. The machine shows one local explanatory line per advance; no prediction is required.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "message-machine",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "object_inspection",
+          "anchor": "message-machine",
+          "critical": true,
+          "purpose": "Make the repaired machine produce a four-word gate command while watching the input grow.",
+          "reveal": "A compact instruction card stays projected at the machine: the current goal, the INPUT the machine will use, the output rail and the single primary action (Connect / Scan / Make next word / Speak). Each new word visibly joins the INPUT line before the next word. No separate bottom console duplicates any of it.",
+          "dismiss": "The card follows the machine; the inspection dialog (Look inside) always closes back to the same world view without discarding state. Reapproaching resumes the exact step.",
+          "offscreen_recovery": "While the machine is offscreen a critical edge cue points to it and the card clamps to the safe area; instructions are never pinned to a distant corner.",
+          "keyboard": "Machine actions are focusable buttons on the card; markers on world objects duplicate the same actions; Escape closes inspection.",
+          "touch": "Card buttons and world markers are at least 44 CSS pixels; tapping the machine or its socket in the world performs the same primary action.",
+          "readability": "360-430px portrait and desktop; the card frames the machine, shows request, selected clue and generated words without truncation; 200% enlarged text reflows inside the card with Return-to-world reachable.",
+          "presentation": "contextual_inspection",
+          "focus_transition": "Lead/socket -> Moon lock scan -> output word and joined INPUT, repeated -> Moon gate. One line of explanation per advance, all at the machine or its target gate."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus",
+      "worked_example": {
+        "situation": "In the prison repair chamber, Zip's stolen voice module is gone but a wall message machine still has a socket and a loose power lead.",
+        "starting_state": "Machine card: request 'Open a gate.' with no clue supplied yet. The huge Moon-marked door is visible in the same framing. Label on the card: This practice machine follows prepared clues. Its pieces are whole words.",
+        "player_action": "Connect the highlighted lead, scan the Moon lock, then press Make next word four times and Speak to gate.",
+        "visible_result": "The INPUT line grows: 'Open a gate. Zip is behind the Moon gate.' then 'Open', then 'Open the', then 'Open the Moon' before 'gate' is produced. The full command 'Open the Moon gate' makes the Moon door lift in the world.",
+        "why": "Each piece extends the available sequence before another is generated, and the machine only uses the clue that was actually scanned into it. A visible before/after comparison is held at the machine; movement animation is not required to understand it.",
+        "misconception_response": "There is no wrong answer in this demonstration. Rewind and run again to see the old pieces rejoin the input. A local note states real LLMs predict tokens, which need not be whole words, and can produce different continuations."
+      },
+      "assessment_boundary": {
+        "claim": "guided_observation",
+        "before_answer_feedback": "No prediction or commitment required. Demonstrate the assembled input and each new piece openly; this is teaching, not assessment.",
+        "preserve": "First committed choice per decision, case identity, supplied context, output, revision and help before commitment remain immutable; inspection and staging remain non-assessment interaction history.",
+        "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
+      }
+    },
+    {
+      "id": "context-contrast",
+      "phase": "mission",
+      "role": "introduce",
+      "player_goal": "See what each physical route sign would give the machine.",
+      "decision": "Inspect three readable world boards, stage one sign as a reversible pending source, then use one deliberate Insert and commit source action at the existing machine. Inspecting a board never stages it; staging never writes a first source choice. Movement and camera can reveal the route junction, with equivalent semantic focus access and no mandatory travel.",
+      "feedback": "The committed sign's exact text joins the request in machine INPUT; the other signs remain outside. Before the later source-inference commitment, any inspected board frames the same Moon, Star and Sun route features with equal emphasis, and no source-specific gate/no-gate answer is highlighted. Only after inference commitment may a trace relate the source words to the world consequence.",
+      "outcomes": [
+        "context"
+      ],
+      "recovery": "The visible carried token names the pending source through camera turns and return to the machine. Cancel or stage another source before insertion without assessed evidence. Insert and commit records the first source once; retry after a failed gate may replace it without overwriting its first choice, assistance or output.",
+      "assistance": "Readable sign text and neutral, equal-emphasis route framing support comparison without selecting the correct sign. Inspect and stage are evidence-neutral; no correctness cue or interpreted source-to-gate line appears before inference commitment.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "message-machine",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "object_inspection",
+          "anchor": "message-machine",
+          "critical": true,
+          "purpose": "Read physical route evidence, keep one source pending, then supply exactly that source to the machine with one deliberate device action.",
+          "reveal": "Each board carries full readable sign text. Inspect displays that exact text and a neutral outline on that board while the same three gate features remain equally framed for every board; obscuring the words must leave no source-specific inference answer in the camera/highlight treatment. Stage shows one identifiable source token carried by Zip and a bounded cue back to the machine. Insert and commit at the machine is the only assessed source action; its INPUT shows the request plus committed sign and names the unsupplied signs as outside. A source-specific explanatory trace appears only after the later source-inference commitment.",
+          "dismiss": "Inspection returns to direct control without staging. Pending source identity survives camera turns and card closure; cancel or replace it before commitment. After a committed source, retry may change the current source but never the first recorded choice.",
+          "offscreen_recovery": "Boards and route marks remain findable through movement or semantic focus. Pending source stays identifiable on Zip and through text; a bounded machine cue works offscreen. The machine carrier stays anchored and readable without covering the junction.",
+          "keyboard": "Each board has separate focusable Inspect and Stage actions. Focus access reaches each board and machine with the same observable route facts but no interpreted answer; no camera precision or mandatory locomotion. The machine has one focusable Insert and commit source action, disabled without a staged source; Escape closes inspection without choosing.",
+          "touch": "World board markers and the single device insertion action have at least 44 CSS pixel targets; stage/commit remain distinct and no precision drag is required.",
+          "readability": "360-430px portrait, desktop and 200% text preserve board words, pending source identity and committed INPUT without clipping. The machine may shed optional explanation but never a necessary request/source/history member.",
+          "presentation": "contextual_inspection",
+          "focus_transition": "Board words + neutrally framed junction -> optional inspection -> explicit pending source on Zip -> one machine insertion/commit -> exact supplied text in INPUT; later inference commitment permits explanatory route trace. Movement can reveal spatial relation, but semantic focus offers equivalent evidence."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus",
+      "worked_example": {
+        "situation": "Beyond the first door, three signs disagree about the route to the tower.",
+        "starting_state": "Old sign: 'Old route: take the Moon gate.' Current notice: 'TODAY: Moon route closed. The tower bell answers the five-point lantern mark.' Parade notice: 'The lantern parade starts at sunset.' The machine has received none of them yet.",
+        "player_action": "Move to or semantically focus any board; inspect without choosing, stage one source, optionally inspect another without changing the pending source, then use one Insert and commit source action at the machine.",
+        "visible_result": "Before inference, all route features remain equally framed whichever board is inspected. The pending token names the staged sign. After insertion, INPUT contains exactly the request and committed sign while the other two remain outside; no gate answer or destination is highlighted.",
+        "why": "The world contains many visible signs, but the toy receives only a deliberately committed source. The learner must read that source and relate its words to the neutral route evidence rather than follow a selective highlight.",
+        "misconception_response": "Inspecting B after staging A does not switch to B; stage B explicitly to replace the pending token. If no source is staged, insertion cannot guess one. A later bad committed source is recoverable but its first choice is preserved."
+      },
+      "assessment_boundary": {
+        "claim": "guided_observation",
+        "before_answer_feedback": "Before the later source-inference commitment, no selective board-to-gate cue, correctness highlight, route trace, destination reveal or prepared continuation answers the source question. The committed sign may be shown as supplied text; this comparison is guided observation, not evidence.",
+        "preserve": "First committed source and inference choices, case identity, supplied context, actual output, command IDs/revisions and help remain immutable. Inspection, focus, staging and pending-token replacement remain non-assessment interaction history; a retry never rewrites old snapshots.",
+        "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
+      }
+    },
+    {
+      "id": "sequence-practice",
+      "phase": "mission",
+      "role": "practice",
+      "player_goal": "Predict what the machine will receive next after it generates the first route word.",
+      "decision": "After a sign is committed, let the machine visibly generate 'Open'. Before it generates another word, commit one of two next-input choices: the original input unchanged, or the original input plus 'Open'. The gate prediction comes in the following step.",
+      "feedback": "The machine reveals the grown input as it produces each word; the player's committed prediction is compared to the revealed input beside the output rail. The prediction never changes what the machine does.",
+      "outcomes": [
+        "sequence"
+      ],
+      "recovery": "Keep the first choice immutable. After feedback, the revealed input is shown again at the machine; retry of the build loop is available without moving the player or hiding the object.",
+      "assistance": "Two choices at the machine with no correctness highlight. Optional hint after a first choice counts as help.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "message-machine",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "object_inspection",
+          "anchor": "message-machine",
+          "critical": true,
+          "purpose": "Commit a next-input rule prediction, then finish the route sentence.",
+          "reveal": "At the machine card: the request and committed sign text, then the first visible output word 'Open'. Two prediction trays compare the original input against original input plus 'Open'; no tray is preselected. Selecting is reversible until Check my prediction is pressed; only then is the next INPUT revealed.",
+          "dismiss": "Return-to-machine view always preserves the committed choice; closing the page or dialog never answers the question or discards a choice.",
+          "offscreen_recovery": "The card clamps to the safe area with an edge cue toward the machine; the committed prediction stays visible on the card.",
+          "keyboard": "Both trays are focusable buttons; commit is a separate explicit button so selection and commitment stay distinct.",
+          "touch": "Trays and commit control are at least 44 CSS pixels and stacked inside the machine card, never a detached toolbar.",
+          "readability": "Portrait stacks the two tray previews vertically inside the card; the current INPUT line stays visible while choosing; 200% text reflows with the commit control reachable.",
+          "presentation": "contextual_inspection",
+          "focus_transition": "First output 'Open' -> committed next-input prediction -> revealed grown input. Pause here before any route-revealing word; context-practice asks for the gate prediction next, then resumes generation."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus",
+      "worked_example": {
+        "situation": "The corridor machine has the committed old sign as its clue and has just visibly generated the first word, 'Open'.",
+        "starting_state": "Card shows the original INPUT 'Open the route to the tower. Old route: take the Moon gate.' and output 'Open'. Before the next word, trays offer original input alone or original input plus 'Open'; the assembled next input remains hidden.",
+        "player_action": "Select a tray and press Check my prediction before the machine continues generating.",
+        "visible_result": "The card reveals next INPUT as request + selected sign + 'Open' and pauses. Context-practice asks for the gate prediction before the remaining words are generated; each later word then extends the full previous input.",
+        "why": "Generated history joins the original request. The comparison is authored for this toy; a real model's continuation could differ.",
+        "misconception_response": "Unchanged input: That drops what the machine already said. Show the omitted part beside the tray after commitment, then continue; the first choice stays recorded and never blocks progress."
+      },
+      "assessment_boundary": {
+        "claim": "assisted_practice",
+        "before_answer_feedback": "No correctness cues, completed input assembly or destination reveal until the corresponding prediction is committed.",
+        "preserve": "First committed choice per decision, case identity, supplied context, output, revision and help before commitment remain immutable; inspection and staging remain non-assessment interaction history.",
+        "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
+      }
+    },
+    {
+      "id": "context-practice",
+      "phase": "mission",
+      "role": "practice",
+      "player_goal": "Judge which gate the supplied sign actually supports, if any, then test the machine's command against the world.",
+      "decision": "After the sequence-practice first-word/next-input commitment, select and explicitly commit which gate the supplied sign supports (Moon, Star, Sun, or no gate). The inference never changes the prepared toy output. Then one deliberate Run continuation begins the remaining words, an untimed review exposes every full-input prefix, and one deliberate Speak command applies the completed sentence to the world gate.",
+      "feedback": "After inference commitment, a source-specific trace may connect the committed words to the relevant route evidence. The authored continuation and source inference remain separate. Old Moon supports a Moon inference but fails the current route; the parade supports no gate even if the toy emits fluent Moon. A failed-gate comparison uses the supplied and current evidence, preserving first choices and output.",
+      "outcomes": [
+        "context",
+        "sequence"
+      ],
+      "recovery": "Keep the first inference and source choice immutable. Pause and review every saved prefix without altering evidence or output. Focus/inspection/away transitions stop playback before another word command; reload restores the authoritative prefix in a paused, inspectable state until deliberate resume. Retry may replace a source after failed world consequence without moving the player or hiding the objects.",
+      "assistance": "Before inference commitment, all route features have equal emphasis and no source-specific cue or prepared destination. Optional hint asks what the sign itself says, and help is recorded separately. Playback and untimed history inspection are unassessed; reduced motion preserves the same states without animation and is not treated as a reading-speed preference.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "message-machine",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "object_inspection",
+          "anchor": "message-machine",
+          "critical": true,
+          "purpose": "Commit a source-supported gate inference, then inspect the whole growing input during one short continuation and speak the finished command to the visible world gate.",
+          "reveal": "Four source-inference trays appear at the machine only after source commitment; a reversible selection has a separate Commit inference action. No route answer or future continuation is exposed beforehand. After commitment, the device can show an explanatory trace and a Run continuation control. Each generated prefix retains an untimed before/after record with request, supplied sign and all words so far. Pause and review is always reachable and evidence-neutral; the final Speak command remains deliberate and distinct.",
+          "dismiss": "Closing inspection keeps the pending/committed inference and saved prefix. Leaving the device or moving focus into its inspection/history content pauses before the next word; activating Run/Resume controls is allowed to start playback. Reload returns to the saved prefix paused and inspectable, requiring deliberate Resume.",
+          "offscreen_recovery": "The anchored device has a bounded edge cue and neutral route framing before inference. Untimed prefix history and the first committed inference remain available on return; after speaking, the affected world gate shows the actual consequence.",
+          "keyboard": "Inference trays and Commit inference are focusable and separate. Run/Resume, Pause and review, ordered prefix history and Speak are keyboard accessible. Entering history/inspection pauses playback, but keyboard activation of Run/Resume does not cancel itself. Semantic source/gate facts match the visual world without choosing an answer for the player.",
+          "touch": "Trays, inference commit, Run/Resume, Pause and review, history navigation and Speak use at least 44 CSS pixel targets. No precision drag or mandatory walking.",
+          "readability": "At 360-430px and 200% text, request, supplied sign and all generated words in the current prefix are painted together before a next action; optional caveat/instruction may move but no input member may be shed. Untimed history preserves each intermediate full-input state.",
+          "presentation": "contextual_inspection",
+          "focus_transition": "Committed source and Open from sequence-practice -> reversible gate selection -> explicit inference commitment -> source-specific explanatory trace -> one Run continuation with stable full-input prefix history -> deliberate Speak -> actual gate reaction and local evidence comparison on failure."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus",
+      "worked_example": {
+        "situation": "The machine holds the old sign's text and the corridor has one closed route and one open route.",
+        "starting_state": "Card INPUT: request + 'Old route: take the Moon gate.' The first output word 'Open' is visible from sequence-practice; no gate prediction is committed yet. The Star gate mark is visible in the world but unnamed by the machine.",
+        "player_action": "Read the committed old sign and neutral route junction, select Moon and press Commit inference. Press Run continuation once; pause/review the intermediate full-input prefixes if needed, then press Speak command after the authored sentence completes.",
+        "visible_result": "Only after inference commitment does a trace relate the old sign to Moon. The device then reveals Open the Moon gate in order while each saved prefix includes the original request and old sign. Speaking leaves the Moon gate sealed; the comparison shows that a source-consistent command can fail the current route. Rescanning the current notice later opens the Star route.",
+        "why": "Source support, prepared continuation and task success are different judgments. Untimed history makes the growing input inspectable; running it does not count as a prediction or independent learning evidence.",
+        "misconception_response": "For a parade source, No gate is the source-consistent inference even if the toy later says Moon. The first wrong inference remains recorded; reviewing or replaying output cannot correct it. Pausing after Open the, focusing away and reloading must retain the prefix without duplicating a step command or revealing an uncommitted answer."
+      },
+      "assessment_boundary": {
+        "claim": "assisted_practice",
+        "before_answer_feedback": "Do not reveal an assembled next-input answer before sequence-practice input-rule commitment, or a source-specific route trace, prepared destination or correctness cue before source-inference commitment. Playback starts only after both decisions.",
+        "preserve": "First committed source, input-rule and inference choices, case identity, supplied context, actual generated output, command IDs/revisions and help remain separate and immutable. Untimed review, pause, focus and reload do not write assessment evidence or replay acknowledged word commands; saved prefixes resume paused until deliberate Run/Resume.",
+        "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
+      }
+    },
+    {
+      "id": "changed-problem",
+      "phase": "mission",
+      "role": "transfer",
+      "player_goal": "Send Mira a message that reaches where she is now.",
+      "decision": "Inspect three dated world notes, pick one up and explicitly insert it into the receiver: Mira's old location, Mira's current location, or a later note about someone else. Decide whether it locates Mira and, if so, which place it supports; then predict the full next input after 'Meet' and 'at' have both been generated. Compare original input, original plus only 'at', and original plus 'Meet at'.",
+      "feedback": "The receiver generates 'Meet at <place of the supplied note>'. Mira's stale note reaches the old holding area with no reply; the newer relevant note reaches the Bell Yard and Mira answers; the later unrelated note cannot locate Mira. The first choices are kept either way.",
+      "outcomes": [
+        "sequence",
+        "context"
+      ],
+      "recovery": "Before insertion is committed, cancel carrying or replace the staged note freely. A wrong delivery is returned without penalty; re-read the supplied note at the receiver and retry. First committed source/inference/input choices and help remain separate from final success.",
+      "assistance": "No answer highlighting or next-input assembly before the corresponding choice. The latest note concerns someone else, so recency alone fails; the player must relate the request to the source and read what it supports. Provide a clear physical route and focus alternative to each note without requiring camera dexterity.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "message-receiver",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "object_inspection",
+          "anchor": "message-receiver",
+          "critical": true,
+          "purpose": "Run the changed relay case at the receiver beyond the open gate.",
+          "reveal": "The receiver frames the cracked antenna and accepts a note carried from its world location. Three note sources occupy readable positions beyond the opened gate, with visible identity, full text and date-time; none can be supplied remotely from the receiver card. Inspect opens a note without selecting it; Pick up shows the chosen physical note or a clear carrying token on Zip, with an edge cue back to the receiver. Insert stages it at the slot, where Cancel/Replace remains possible until Commit source. After commitment, Mira-location inference and next-input trays appear at that same receiver; nothing is asked through a corridor-wide modal.",
+          "dismiss": "Return to world preserves staged choices; after feedback, retry is local to the receiver.",
+          "offscreen_recovery": "World cues point to the three physical notes and back to the receiver. The receiver card clamps with an edge cue; leaving and returning preserves the carried or committed note and decision state. A player can cancel or replace a staged note without erasing committed first evidence.",
+          "keyboard": "Each world note has separate focusable Inspect and Pick up actions equivalent to touch. A focusable route cue reaches the receiver without precision movement; Insert, Cancel/Replace and Commit source are distinct buttons. Mira-location inference and next-input trays have explicit commits. Escape restores the exploration camera without silently choosing.",
+          "touch": "All receiver card controls at least 44 CSS pixels, stacked within the receiver framing.",
+          "readability": "Portrait stages these states sequentially at the note and receiver; the three source texts, generated 'Meet at' and next-input trays stay legible. Reflow/scroll within object inspection keeps Return-to-world reachable.",
+          "presentation": "contextual_inspection",
+          "focus_transition": "Receiver request -> discover and inspect world notes -> visibly carry one note -> stage/commit it at receiver -> decide whether it locates Mira and infer place -> see 'Meet' then 'at' -> predict full next input -> message on receiver -> world reply or silence."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus",
+      "changed_situation": "Change from opening a gate for Zip to addressing a message to a specific person using three physically separate sources. The newest note is irrelevant; two generated pieces must join the original request and supplied note before the next prediction. This is near transfer within the toy, not broad real-world LLM transfer.",
+      "shortcut_probe": "Try fixed-position guessing, newest-note-only selection, longest-answer selection, request-only input, latest-piece-only input, treating an unseen note as automatically available, and answering for the wrong person. Explicit choices must distinguish request + note + Meet + at from request + note + at or request + note alone. Inspecting every note must not commit a first choice; first wrong committed guesses remain wrong even if retry succeeds.",
+      "evidence_limit": "First note relevance, source-consistency and all-history input prediction are separate observations. Correct reading of a supplied note does not prove real-model output prediction; one changed toy case does not establish mastery or retention.",
+      "commit_before_feedback": true,
+      "worked_example": {
+        "situation": "Mira is still captive; the relay can address one meeting place, and three intercepted notes differ in person and date.",
+        "starting_state": "Request at the receiver: 'Send Mira a meeting place.' Note A: '18:00 - Mira: They are holding me in the Lantern Loft.' Note B: '18:20 - Mira: They moved me from the Lantern Loft to the Bell Yard.' Note C: '18:30 - Tavi: Meet me at the Sun Court.' The notes are separate world objects; the receiver uses only a note physically supplied to it.",
+        "player_action": "Inspect the world notes without choosing, pick up one with visible carrying feedback, insert and explicitly commit it at the receiver. Say whether that note locates Mira: A supports Lantern Loft but is stale, B supports Bell Yard, C gives no Mira location although it names Tavi's Sun Court. See 'Meet' and 'at' separately, then choose among original input, original plus 'at', and original plus 'Meet at' before the next input is revealed.",
+        "visible_result": "The receiver generates 'Meet at Bell Yard' for Note B and Mira answers; Note A reaches the empty holding area; Note C may produce 'Meet at Sun Court' from Tavi's source but cannot establish Mira's location, so no Mira reply. The revealed next input contains request + supplied note + 'Meet' + 'at' regardless of the player's prediction.",
+        "why": "The newest note is irrelevant to Mira, while the older Mira note is stale. The player must combine relevance and source-supported recency. The machine continues from supplied context even when unsuitable; all generated history joins the next input.",
+        "misconception_response": "Loft choice: show the old source and empty destination. Tavi choice: Sun Court is a source-consistent place for Tavi but irrelevant to locating Mira; do not mark those two judgments identically wrong. Omitting 'Meet' from the next input exposes a latest-piece-only error after commitment. First choices stay recorded, and predictions never change authoritative output."
+      },
+      "assessment_boundary": {
+        "claim": "bounded_first_decisions",
+        "before_answer_feedback": "No correctness cues, completed input assembly or destination reveal until the corresponding prediction is committed.",
+        "preserve": "First committed choice per decision, case identity, supplied context, output, revision and help before commitment remain immutable; inspection and staging remain non-assessment interaction history.",
+        "model_independence": "Predictions/inferences are observations only: they cannot alter the selected context, prepared generation, repair state or task outcome. Supplied context and actual interaction actions determine the outcome."
+      }
+    },
+    {
+      "id": "consequence",
+      "phase": "payoff",
+      "role": "orientation",
+      "player_goal": "See that the repaired signal reaches Mira.",
+      "decision": "Inspect the receiver's reply, then return to exploring the current room.",
+      "feedback": "With the current note supplied, Mira's first live reply appears beside the receiver itself. She is alive but still held elsewhere. The receiver stays answered; Level 2 remains sealed.",
+      "outcomes": [],
+      "recovery": "Reopen the reply without replaying or resetting. No next-level entry exists.",
+      "assistance": "Optional recap; no Level 2 access or mastery claim.",
+      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "primary_focus": "message-receiver",
+      "surfaces": [
+        {
+          "id": "focus",
+          "kind": "character_dialogue",
+          "anchor": "message-receiver",
+          "critical": true,
+          "purpose": "See that the repaired signal reaches Mira.",
+          "reveal": "Light and a restrained local cue draw attention to the receiver after the relay succeeds. The short reply appears beside it, not in a top-left completion panel; the practice recap lives in the accessible menu and ending dialog.",
+          "dismiss": "Close reply returns to the room. Replay belongs in the game menu; the only immediate local actions are Finish Level 1 and Return to room at the receiver.",
+          "offscreen_recovery": "Keep this focal interaction framed; on inspection exit restore the previous exploration view and an object-local return cue. Do not pin its instructions to a distant corner.",
+          "keyboard": "Focusable semantic controls; interact, tab and escape; same actions as touch.",
+          "touch": "Stable reachable targets at least 44 CSS pixels; no hover requirement.",
+          "readability": "360-430px portrait and desktop; enlarged text reflows in the receiver card without clipping. Screen-reader equivalent preserves feedback and choice.",
+          "presentation": "object_local",
+          "focus_transition": "The relay result leads the eye to the receiver. Keep the same characters and persistent repaired objects in view."
+        }
+      ],
+      "goal_surface": "focus",
+      "action_surface": "focus",
+      "feedback_surface": "focus"
+    }
+  ],
+  "research_decisions": [
+    {
+      "id": "portal-teaching",
+      "source_locator": "docs/GAME-REFERENCE-STUDY.md Â§6; Valve commentary 5:41-6:09 and 7:35-8:28",
+      "observation": "The study records a lesson revision because waiting could produce success without the relevant decision.",
+      "adaptation": "Separate demonstration, supported practice and changed-case decisions; permit reordering or deleting encounters.",
+      "failure_probe": "Try waiting and following highlights without predicting anything.",
+      "limit": "An authored design and an expert reviewer cannot establish novice learning.",
+      "steps": [
+        "sequence-demo",
+        "sequence-practice",
+        "changed-problem"
+      ],
+      "verification": "Try waiting and following highlights without predicting anything.",
+      "cost": "Author and test one small coherent loop before rebuilding the chapter.",
+      "exclusions": "No new orchestration, copied reference assets or photorealism requirement.",
+      "review_lanes": [
+        "learning",
+        "gameplay",
+        "art_world"
+      ]
+    },
+    {
+      "id": "situated-attention",
+      "source_locator": "docs/GAME-REFERENCE-STUDY.md Â§6, 1:41-2:34; user screenshot and instruction 2026-09-21",
+      "observation": "The commentary describes replacing a hard-to-explain setup with a physical reveal. The user screenshot shows goal, world and action panel separated.",
+      "adaptation": "Place goals, actions and feedback at the active device, character or explicit object-inspection view.",
+      "failure_probe": "Obscure board words: neutral precommit framing must not identify a source-specific gate/no-gate answer. With words restored, can the player explain board, route and consequence? At 200% phone text, pause after an intermediate prefix, inspect, focus away and reload; every complete input remains readable without duplicate commands. Count meaningful decisions versus clerical actions.",
+      "limit": "Our interface rule is a design decision supported by the user finding; the source does not establish that every HUD must be diegetic.",
+      "steps": [
+        "controls",
+        "context-practice",
+        "consequence"
+      ],
+      "verification": "Obscure board words: neutral precommit framing must not identify a source-specific gate/no-gate answer. With words restored, can the player explain board, route and consequence? At 200% phone text, pause after an intermediate prefix, inspect, focus away and reload; every complete input remains readable without duplicate commands. Count meaningful decisions versus clerical actions.",
+      "cost": "Author and test one small coherent loop before rebuilding the chapter.",
+      "exclusions": "No new orchestration, copied reference assets or photorealism requirement.",
+      "review_lanes": [
+        "learning",
+        "gameplay",
+        "art_world"
+      ]
+    },
+    {
+      "id": "source-based-connected-world-trial",
+      "steps": [
+        "opening"
+      ],
+      "review_lanes": [
+        "art_world",
+        "gameplay",
+        "story"
+      ],
+      "source_locator": "docs/experiments/20260929-world-production-retrospective.md; docs/experiments/20260929-summer-cycle-source-audit.md; docs/references/bellweather-graphic-utopia.png",
+      "observation": "Earlier staged and larger corridor trials failed the chosen world direction. Root observed coherent Summer Cycle composition across a changed viewpoint and dismount; its source has material-specific graphic shading and constrained procedural placement.",
+      "adaptation": "Reproduce the pinned source first; adapt useful licensed rendering code to an original connected pre-rupture arrival/garden/overlook. Preserve the baseline as a control. Local reachable discovery replaces inspection of an unreachable destination in this experiment only.",
+      "failure_probe": "Walk the route in reverse and orbit: does the city still feel spatially connected, do feet meet ground, does the lightwell response lead to a real reachable place, and can semantic/guided input produce equivalent meaning without automatic activation? Reject toy silhouettes, generic corridor staging or beauty limited to one view.",
+      "verification": "Worker GUI play and focused checks on the isolated prototype. At most two substantial visual revisions. No integrated readiness without full existing gate and one fresh-context Astra review. Actual device/renderer frame-cost evidence, not an engine speed inference from unlike scenes.",
+      "cost": "One pinned source reproduction and one bounded original scene. No universal renderer/asset framework, paid model dispatch, broad corpus acquisition or later level.",
+      "exclusions": "Summer Cycle art/story/branding is not the new Bellweather identity. Do not import refs/media/promotional images. No learning concept evaluated in this scene.",
+      "limit": "Reference-quality and desire to continue remain questions for actual observation and user judgment. Desktop success does not prove phone performance or general generation."
+    }
+  ],
+  "art_world_direction": {
+    "device_identity": "The garden lightwell is a civic environmental device whose crown and continuous water/light channel show its inactive and awake states through form and light together. It is not a word machine or learning assessment. Zip and Mira have distinct readable silhouettes within the same original material language.",
+    "composition": "Sheltered arrival, curved continuous promenade, garden lightwell and physically reachable overlook. Zip is seen over the shoulder facing into an inhabited scene, with architectural foreground framing, middle-distance Mira and a far utopian canopy/transit vista. Primary route is clear before ornament; adjacent residents have purposeful routes. Early overlook exploration is allowed, with joint payoff gated only on both actors arriving after explicit lightwell activation. The trial ends pre-rupture and no later scene is implemented.",
+    "reference_limit": "The accepted docs/references/bellweather-graphic-utopia.png establishes original graphic techno-fantasy identity, expressive silhouettes, warmth, depth and credible illumination/contact. It is not an exact map, final character asset, copied texture, global filter or whole-platform style. Pinned MIT source reuse supports rendering; its rural art/branding is not Bellweather.",
+    "verification": "Worker native play from arrival through lightwell activation and joint overlook arrival, plus reverse walk/orbit, early-overlook recovery, pause/restart, keyboard/guided travel, reduced motion and narrow/enlarged-text layout. Compare real images to the accepted reference and preserved baseline; measure actual device cost without engine causality claims. One fresh-context Astra integrated review remains required before promotion. No learning, motion/audio quality, phone hardware, later plot, release or deployment acceptance."
+  }
+}

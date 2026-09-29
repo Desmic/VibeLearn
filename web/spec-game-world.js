@@ -12,7 +12,10 @@ export function makeWorldPackage(spec,present,{cinematic=false}={}){
       const fit=()=>{
         // Authored story shots own actor positions. Restoring the gameplay view
         // during a cinematic resize would also restore its old player position.
-        if(mode==='story'||!engine.available||!spec.player?.camera?.portraitDistance)return;
+        // An explorable story beat owns its authored shot through the opening
+        // controller; applying the mission camera profile on resize would shed
+        // its world choices after a player rotates or changes viewport.
+        if(mode==='story'||mode==='story-explore'||!engine.available||!spec.player?.camera?.portraitDistance)return;
         const next=host.clientWidth/Math.max(1,host.clientHeight)<.9;
         if(next===portrait)return;portrait=next;
         const view=engine.getPlayerView();
@@ -41,7 +44,7 @@ export function makeWorldPackage(spec,present,{cinematic=false}={}){
         if(!engine.available)return;
         cancelAnimationFrame(frame);transition=null;timeline=null;
         engine.applyPatch(patch);
-        if(mode==='mission'&&patch.playerCheckpoint&&!engine.setPlayerCheckpoint(patch.playerCheckpoint)){
+        if((mode==='mission'||mode==='story-explore')&&patch.playerCheckpoint&&!engine.setPlayerCheckpoint(patch.playerCheckpoint)){
           throw new Error('The authored player checkpoint is outside the playable world.');
         }
         if(patch.timeline){
@@ -66,7 +69,10 @@ export function makeWorldPackage(spec,present,{cinematic=false}={}){
       const visibility=()=>{last=performance.now();engine.setPaused(paused||document.hidden);};
       document.addEventListener('visibilitychange',visibility);
       return {available:engine.available,engine:'playcanvas',error:engine.error,
-        setMissionState:update,setBeat:update,setMode(value){if(cinematic&&mode!==value){mode=value;engine.setControlMode(value==='story'?'overview':'third-person',spec.id);portrait=null;fit();}},applyPresentation,
+        setMissionState:update,setBeat:update,setMode(value){if(cinematic&&mode!==value){mode=value;engine.setControlMode(value==='story'?'overview':'third-person',spec.id);if(value!=='story-explore')engine.setRecenterView(null);portrait=null;fit();}},applyPresentation,
+        // Stable branch state can be layered onto a new story beat without
+        // cancelling that beat's authored motion/cues.
+        applyOverlay(patch){if(engine.available)engine.applyPatch(patch);},
         async whenReady(){
           const deadline=performance.now()+15000;
           while(engine.available&&engine.stats().assetsPending>0&&performance.now()<deadline)await new Promise(resolve=>requestAnimationFrame(resolve));
@@ -74,9 +80,11 @@ export function makeWorldPackage(spec,present,{cinematic=false}={}){
           if(!engine.available||status.assetsFailed||status.assetsPending)throw Error('The courier could not load. Reload the workshop to try again.');
         },
         setPaused(value){paused=Boolean(value);last=performance.now();engine.setPaused(paused||document.hidden);},
+        releaseInputs(){engine.releaseInputs();},
         projectEntity:(id,offset)=>engine.projectEntity(id,offset),pickSemanticAt:(x,y)=>engine.pickEntityAt(x,y),
         colliderSnapshot:()=>engine.colliderSnapshot?.()||[],
         getPlayerView:()=>engine.getPlayerView(),restorePlayerView:value=>engine.restorePlayerView(value),
+        setRecenterView:value=>engine.setRecenterView(value),
         replay(){if(previous!==null)update(previous);},
         stats:()=>({...engine.stats(),packageAdapter:'world-spec',animating:Boolean(transition||timeline)}),
         dispose(){resize.disconnect();cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',visibility);engine.dispose();}

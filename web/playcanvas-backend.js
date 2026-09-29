@@ -13,6 +13,8 @@ const TONE_MAPPINGS={
   linear:pc.TONEMAP_LINEAR,filmic:pc.TONEMAP_FILMIC,hejl:pc.TONEMAP_HEJL,
   aces:pc.TONEMAP_ACES,aces2:pc.TONEMAP_ACES2,neutral:pc.TONEMAP_NEUTRAL
 };
+const GEOMETRY_TYPES={cone:pc.ConeGeometry,cylinder:pc.CylinderGeometry,sphere:pc.SphereGeometry,torus:pc.TorusGeometry};
+const SHADOW_FILTERS={pcf1:pc.SHADOW_PCF1_32F,pcf3:pc.SHADOW_PCF3_32F,pcf5:pc.SHADOW_PCF5_32F};
 
 // One snapshot per camera solve, not per ray sample. A new solve observes moved
 // or hidden geometry; no bounds are cached across frames or scene changes.
@@ -40,15 +42,57 @@ function setTransform(entity,transform={}){
   if(transform.rotation)entity.setLocalEulerAngles(...transform.rotation);
   if(transform.scale)entity.setLocalScale(...transform.scale);
 }
-function makeMaterial(def={}){
+function makeSurfaceTexture(device,def){
+  const canvas=document.createElement('canvas');canvas.width=256;canvas.height=256;
+  const ctx=canvas.getContext('2d');
+  if(def.type==='gradient'){
+    const gradient=ctx.createLinearGradient(0,256,0,0);
+    def.colors.forEach((value,i)=>gradient.addColorStop(i/(def.colors.length-1),value));
+    ctx.fillStyle=gradient;ctx.fillRect(0,0,256,256);
+  }else{
+    let seed=def.seed??1;
+    const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+    ctx.fillStyle=def.colors[0];ctx.fillRect(0,0,256,256);
+    // Fixed object-space pigment strokes; never a screen overlay or per-frame job.
+    for(let i=0;i<350;i++){
+      ctx.fillStyle=def.colors[Math.floor(random()*def.colors.length)];
+      const x=random()*256,y=random()*256,w=2+random()*18,h=1+random()*4;
+      for(const dx of [-256,0,256])for(const dy of [-256,0,256])ctx.fillRect(x+dx,y+dy,w,h);
+    }
+  }
+  const texture=new pc.Texture(device,{name:'authored-surface',width:256,height:256,mipmaps:true,minFilter:pc.FILTER_LINEAR_MIPMAP_LINEAR,magFilter:pc.FILTER_LINEAR,
+    addressU:def.type==='gradient'?pc.ADDRESS_CLAMP_TO_EDGE:pc.ADDRESS_REPEAT,addressV:def.type==='gradient'?pc.ADDRESS_CLAMP_TO_EDGE:pc.ADDRESS_REPEAT});
+  texture.setSource(canvas);
+  return texture;
+}
+function makeMaterial(def={},textures=new Map()){
   const material=new pc.StandardMaterial();
-  material.diffuse=color(def.diffuse,'#ffffff');
-  if(def.emissive){
+  material.diffuse=color(def.unlit?'#000000':def.diffuse,'#ffffff');
+  if(def.unlit){
+    // StandardMaterial's unlit diffuse path can still inherit scene ambient.
+    // Emit the authored color/texture so sky and graphic surfaces are stable
+    // across deliberate lighting changes in the surrounding world.
+    material.useLighting=false;
+    material.emissive=color(def.emissive||def.diffuse,'#ffffff');
+    material.emissiveIntensity=Number.isFinite(def.emissiveIntensity)?def.emissiveIntensity:1;
+  }else if(def.emissive){
     material.emissive=color(def.emissive,'#000000');
     material.emissiveIntensity=Number.isFinite(def.emissiveIntensity)?def.emissiveIntensity:1;
   }
   material.metalness=Number.isFinite(def.metalness)?def.metalness:0;
+  // StandardMaterial otherwise keeps its specular workflow and ignores metalness.
+  material.useMetalness=Number.isFinite(def.metalness);
   material.gloss=Number.isFinite(def.gloss)?def.gloss:.35;
+  if(def.fog===false)material.useFog=false;
+  if(def.texture){
+    if(def.unlit){
+      material.emissiveMap=textures.get(def.texture);
+      if(def.textureRepeat)material.emissiveMapTiling=new pc.Vec2(...def.textureRepeat);
+    }else{
+      material.diffuseMap=textures.get(def.texture);
+      if(def.textureRepeat)material.diffuseMapTiling=new pc.Vec2(...def.textureRepeat);
+    }
+  }
   if(Number.isFinite(def.opacity)&&def.opacity<1){
     material.opacity=def.opacity;
     material.blendType=pc.BLEND_NORMAL;
@@ -71,6 +115,10 @@ class PlayCanvasWorld {
     this.semanticNodes=new WeakMap();
     this.baseline=new Map();
     this.materials=new Map();
+    this.geometryMeshes=new Map();
+    this.batchGroups=new Map();
+    this.batchGroupsByAncestor=new Map();
+    this.surfaceTextures=new Map();
     this.assetInstances=new Map();
     this.assetFallbackHidden=new Set();
     this.desiredAnimations=new Map();
@@ -81,6 +129,7 @@ class PlayCanvasWorld {
     this.assetErrors=[];
     this.elapsed=0;
     this.disposed=false;
+    this._surfaceWasVisible=true;
     this.cameraVariant='default';
     this.toneMapping='linear';
     this.picker=null;
@@ -101,6 +150,15 @@ class PlayCanvasWorld {
       graphicsDeviceOptions:{antialias:true,alpha:false,powerPreference:'high-performance'}
     });
     this.app=app;
+    app.autoRender=false;
+    app.renderNextFrame=true;
+    this.renderedFrameCount=0;
+    this.lastRenderedDrawCalls=0;
+    this._postrender=()=>{this.renderedFrameCount+=1;this.lastRenderedDrawCalls=app.stats.drawCalls.total;};
+    app.on('postrender',this._postrender);
+    for(const [name,definition] of Object.entries(this.spec.batchGroups||{})){
+      this.batchGroups.set(name,app.batcher.addGroup(name,false,definition.maxAabbSize));
+    }
     app.graphicsDevice.maxPixelRatio=dpr;
     // The container observer owns buffer sizing. AUTO samples clientWidth on
     // every frame, which becomes zero while a persistent stage is hidden or
@@ -120,8 +178,18 @@ class PlayCanvasWorld {
       if(Number.isFinite(fog.density))app.scene.fog.density=fog.density;
     }
 
+    for(const [name,definition] of Object.entries(this.spec.textures||{})){
+      this.surfaceTextures.set(name,makeSurfaceTexture(app.graphicsDevice,definition));
+    }
     for(const [name,definition] of Object.entries(this.spec.materials)){
-      this.materials.set(name,makeMaterial(definition));
+      this.materials.set(name,makeMaterial(definition,this.surfaceTextures));
+    }
+    for(const [name,definition] of Object.entries(this.spec.geometries||{})){
+      const geometry=new GEOMETRY_TYPES[definition.type](definition.options||{});
+      const mesh=pc.Mesh.fromGeometry(app.graphicsDevice,geometry);
+      // Hold one owner reference: instances share this buffer across the world.
+      mesh.incRefCount();
+      this.geometryMeshes.set(name,mesh);
     }
 
     this.root=new pc.Entity(`world:${this.spec.id}`);
@@ -151,6 +219,7 @@ class PlayCanvasWorld {
       // Camera composition is presentation intent in WorldSpec. Re-evaluate the
       // active semantic camera when the surface crosses portrait/landscape.
       if(this.cameraName)this.setCamera(this.cameraName);
+      this._requestRender();
     };
     this.resizeObserver=new ResizeObserver(this._resize);
     this.resizeObserver.observe(host);
@@ -169,16 +238,25 @@ class PlayCanvasWorld {
         isPlayerBlocked:(x,y,z,body)=>this._playerBlocked(x,y,z,body),
         isCameraBlocked:(x,y,z)=>this._cameraBlocked(x,y,z),
         getCameraBlocker:()=>snapshotCameraBlocker(this.entities.keys(),id=>this._colliderBounds(id)),
-        setAvatar:(position,yaw)=>{const entity=this.entities.get(this.spec.player.entity);entity?.setLocalPosition(...position);entity?.setLocalEulerAngles(0,yaw,0);},
-        setCamera:(position,target,fov)=>{this.camera.setPosition(...position);this.camera.lookAt(...target);if(fov)this.camera.camera.fov=fov;},
+        setAvatar:(position,yaw)=>{const entity=this.entities.get(this.spec.player.entity);entity?.setLocalPosition(...position);entity?.setLocalEulerAngles(0,yaw,0);this._requestRender();},
+        setCamera:(position,target,fov)=>{this.camera.setPosition(...position);this.camera.lookAt(...target);if(fov)this.camera.camera.fov=fov;this._requestRender();},
         setMoving:value=>this._setPlayerMoving(value)
       });
       this.controls.setShot(this._cameraShot(this.cameraName).shot);
       canvas.style.pointerEvents='auto';canvas.style.touchAction='none';host.tabIndex=0;
       canvas.addEventListener('webglcontextlost',()=>this.controls?.setPaused(true));
-      canvas.addEventListener('webglcontextrestored',()=>this.controls?.setPaused(this.paused));
+      canvas.addEventListener('webglcontextrestored',()=>{this.controls?.setPaused(this.paused);this._requestRender();});
     }
+    this._visibilityChange=()=>{if(!document.hidden)this._requestRender();};
+    document.addEventListener('visibilitychange',this._visibilityChange);
     app.start();
+  }
+
+  _surfaceVisible(){
+    return this.host.isConnected&&!document.hidden&&this.host.getClientRects().length>0&&this.host.clientWidth>0&&this.host.clientHeight>0;
+  }
+  _requestRender(){
+    if(!this.disposed&&this.app&&this._surfaceVisible())this.app.renderNextFrame=true;
   }
 
   _entityVisible(entity){
@@ -258,11 +336,13 @@ class PlayCanvasWorld {
   _createEntity(def){
     const entity=new pc.Entity(def.id);
     entity.enabled=def.enabled!==false;
-    if(def.primitive){
-      entity.addComponent('render',{type:def.primitive});
+    if(def.primitive||def.geometry){
+      if(def.geometry)entity.addComponent('render',{meshInstances:[new pc.MeshInstance(this.geometryMeshes.get(def.geometry),this.materials.get(def.material),entity)]});
+      else entity.addComponent('render',{type:def.primitive});
       if(def.material)entity.render.material=this.materials.get(def.material);
       entity.render.castShadows=def.castShadows!==false;
       entity.render.receiveShadows=def.receiveShadows!==false;
+      if(def.batchGroup)entity.render.batchGroupId=this.batchGroups.get(def.batchGroup).id;
     }
     setTransform(entity,def);
     const parent=def.parent?this.entities.get(def.parent):this.root;
@@ -280,6 +360,19 @@ class PlayCanvasWorld {
       scale:[entity.getLocalScale().x,entity.getLocalScale().y,entity.getLocalScale().z],
       motion:def.motion||null
     });
+    if(def.batchGroup){
+      const groupId=this.batchGroups.get(def.batchGroup).id;
+      for(let ancestor=def.id;ancestor;ancestor=this.entityDefinitions.get(ancestor)?.parent){
+        if(!this.batchGroupsByAncestor.has(ancestor))this.batchGroupsByAncestor.set(ancestor,new Set());
+        this.batchGroupsByAncestor.get(ancestor).add(groupId);
+      }
+    }
+  }
+
+  _markBatchesFor(ids){
+    const affected=new Set();
+    for(const id of ids)for(const groupId of this.batchGroupsByAncestor.get(id)||[])affected.add(groupId);
+    for(const groupId of affected)this.app.batcher.markGroupDirty(groupId);
   }
 
   _createLight(def){
@@ -291,6 +384,10 @@ class PlayCanvasWorld {
       range:Number.isFinite(def.range)?def.range:20,
       castShadows:Boolean(def.castShadows)
     });
+    for(const key of ['shadowResolution','shadowDistance','shadowBias','normalOffsetBias','numCascades']){
+      if(def[key]!=null)entity.light[key]=def[key];
+    }
+    if(def.shadowFilter)entity.light.shadowType=SHADOW_FILTERS[def.shadowFilter];
     setTransform(entity,def);
     this.root.addChild(entity);
   }
@@ -315,6 +412,13 @@ class PlayCanvasWorld {
           receiveShadows:def.receiveShadows!==false
         });
         instance.name=`${def.id}:asset`;
+        // Style a reused model without mutating its source asset or animation.
+        for(const render of instance.findComponents('render')){
+          for(const meshInstance of render.meshInstances||[]){
+            const target=assetDef.materialOverrides?.[meshInstance.material.name];
+            if(target)meshInstance.material=this.materials.get(target);
+          }
+        }
         setTransform(instance,assetDef.transform||{});
         semanticEntity.addChild(instance);
         this._bindAssetAnimations(def,assetDef,asset,instance);
@@ -328,6 +432,7 @@ class PlayCanvasWorld {
         this.assetsLoaded+=1;
         const playerIdle=def.id===this.spec.player?.entity?this.spec.player?.animations?.idle:null;
         this._applyEntityAnimation(def.id,this.desiredAnimations.get(def.id)||def.animation||playerIdle||assetDef.defaultAnimation||null,0);
+        this._requestRender();
       }catch(assetError){
         try{instance?.destroy();}catch(_){}
         this.assetsFailed+=1;
@@ -459,6 +564,7 @@ class PlayCanvasWorld {
     this.cameraVariant=variant;
     this.toneMapping=toneName;
     this.controls?.setShot(shot);
+    this._requestRender();
   }
 
   applyPatch(patch={}){
@@ -471,12 +577,17 @@ class PlayCanvasWorld {
     }
     for(const [id,alias] of Object.entries(patch.animations||{}))this._applyEntityAnimation(id,alias);
     if(patch.camera)this.setCamera(patch.camera);
+    // A changed parent also affects descendant batch members. Unrelated
+    // timeline actors must not rebuild static scenery every frame.
+    this._markBatchesFor([...(patch.show||[]),...(patch.hide||[]),...Object.keys(patch.transforms||{})]);
+    this._requestRender();
   }
 
   setState(name){
     const state=this.spec.states?.[name];
     if(!state)throw new Error(`Unknown world state ${name}`);
     this._reset();
+    for(const group of this.batchGroups.values())this.app.batcher.markGroupDirty(group.id);
     this.desiredAnimations.clear();
     for(const def of this.spec.entities){
       if(!def.asset)continue;
@@ -492,6 +603,8 @@ class PlayCanvasWorld {
   }
 
   setControlMode(mode,key){this.controls?.setMode(mode,key);}
+  releaseInputs(){this.controls?.releaseInputs();}
+  setRecenterView(value){this.controls?.setRecenterView(value);}
   getPlayerView(){return this.controls?.snapshot()||null;}
   setPlayerCheckpoint(value){return this.controls?.setCheckpoint(value)||false;}
   restorePlayerView(value){this.controls?.restore(value);}
@@ -564,6 +677,16 @@ class PlayCanvasWorld {
   }
 
   _tick(dt){
+    if(!this._surfaceVisible()){
+      this.app.renderNextFrame=false;
+      if(this._surfaceWasVisible){this._surfaceWasVisible=false;this.app.timeScale=0;}
+      return;
+    }
+    if(!this._surfaceWasVisible){
+      this._surfaceWasVisible=true;
+      this.app.timeScale=this.paused?0:1;
+      this._requestRender();
+    }
     if(this.paused)return;
     this.controls?.update(dt);
     this._updateMarkers();
@@ -571,11 +694,13 @@ class PlayCanvasWorld {
     this.elapsed+=dt;
     if(this.spec.player?.limbs){
       this.spec.player.limbs.forEach((id,i)=>this.entities.get(id)?.setLocalEulerAngles(this.playerMoving?Math.sin(this.elapsed*11+(i%2)*Math.PI)*24:0,0,0));
+      if(this.playerMoving)this._requestRender();
     }
     for(const [id,base] of this.baseline){
       const motion=base.motion;
       const entity=this.entities.get(id);
-      if(!motion||!entity?.enabled)continue;
+      if(!motion||!this._entityVisible(entity))continue;
+      this._requestRender();
       if(motion.type==='spin'){
         const a=motion.axis||[0,1,0],speed=motion.speed||15;
         entity.rotateLocal(a[0]*speed*dt,a[1]*speed*dt,a[2]*speed*dt);
@@ -592,12 +717,14 @@ class PlayCanvasWorld {
         if(Math.abs(o[0])+Math.abs(o[2])>.01)entity.setLocalEulerAngles(0,Math.atan2(o[0],o[2])*180/Math.PI+(Math.cos(this.elapsed*speed+phase)<0?180:0),0);
       }
     }
+    if([...this.assetInstances].some(([id,record])=>this._entityVisible(this.entities.get(id))&&record.instance.anim?.playing&&record.instance.anim.speed!==0))this._requestRender();
   }
 
   setPaused(value){
-    this.paused=Boolean(value);this.app.timeScale=this.paused?0:1;
+    this.paused=Boolean(value);this.app.timeScale=this.paused||!this._surfaceVisible()?0:1;
     this.controls?.setPaused(value);
     for(const record of this.assetInstances.values())if(record.instance.anim)record.instance.anim.playing=!this.paused;
+    if(this.paused)this.app.renderNextFrame=false;else this._requestRender();
   }
   replay(){if(this.state)this.setState(this.state);}
   stats(){
@@ -610,6 +737,12 @@ class PlayCanvasWorld {
       backendVersion:PLAYCANVAS_BACKEND_VERSION,worldId:this.spec.id,worldVersion:this.spec.version,
       state:this.state,camera:this.cameraName,cameraVariant:this.cameraVariant,toneMapping:this.toneMapping,
       exposure:this.app.scene.exposure,fogType:fog.type,entityCount:this.entities.size,
+      cameraClearColor:[this.camera.camera.clearColor.r,this.camera.camera.clearColor.g,this.camera.camera.clearColor.b].map(v=>Math.round(v*1000)/1000),
+      sharedGeometryCount:this.geometryMeshes.size,drawCalls:this.app.stats.drawCalls.total,
+      lastRenderedDrawCalls:this.lastRenderedDrawCalls,
+      batchGroupCount:this.batchGroups.size,batchCount:this.app.batcher._batchList?.length||0,
+      renderedFrameCount:this.renderedFrameCount,autoRender:this.app.autoRender,
+      triangles:this.app.stats.frame.triangles,frameMs:this.app.stats.frame.ms,
       colliderCount:this.spec.entities.filter(entity=>Boolean(entity.collider)).length,
       assetEntityCount:this.spec.entities.filter(entity=>Boolean(entity.asset)).length,
       assetsPending:this.assetsPending,assetsLoaded:this.assetsLoaded,assetsFailed:this.assetsFailed,
@@ -631,6 +764,7 @@ class PlayCanvasWorld {
     if(this.disposed)return;this.disposed=true;
     this.available=false;
     this.resizeObserver?.disconnect();
+    document.removeEventListener('visibilitychange',this._visibilityChange);
     this.controls?.dispose();
     try{this.picker?.destroy();}catch(_){}
     this.picker=null;
@@ -639,6 +773,17 @@ class PlayCanvasWorld {
     }
     this.assetInstances.clear();
     try{this.app.off('update',this._update);}catch(_){}
+    try{this.app.off('postrender',this._postrender);}catch(_){}
+    // Release all mesh instances before dropping the kit's owner references,
+    // while the graphics device is still alive.
+    this.root.destroy();
+    for(const mesh of this.geometryMeshes.values()){
+      mesh.decRefCount();
+      if(mesh.refCount<1)mesh.destroy();
+    }
+    this.geometryMeshes.clear();
+    for(const texture of this.surfaceTextures.values())texture.destroy();
+    this.surfaceTextures.clear();
     try{this.app.destroy();}catch(_){}
     this.canvas?.remove();
     this.entities.clear();this.entityDefinitions.clear();this.materials.clear();

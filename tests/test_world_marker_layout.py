@@ -37,7 +37,8 @@ const busy=[{left:0,right:400,top:0,bottom:800}];
 const noSpace=placeWorldMarker(marker(),{x:200,y:400},{viewportWidth:400,safeTop:200,safeBottom:600,critical:true,avoidRects:busy});
 const tooWide=placeWorldMarker(marker(500),{x:200,y:400},{viewportWidth:400,safeTop:200,safeBottom:600,critical:true});
 const ordinary=placeWorldMarker(marker(),{x:200,y:400},{viewportWidth:400,safeTop:200,safeBottom:600,avoidRects:busy});
-console.log(JSON.stringify({cases,noSpace,tooWide,ordinary}));
+const behind=placeWorldMarker(marker(170),{x:-2000,y:1200,inFront:false},{viewportWidth:390,safeTop:90,safeBottom:640,critical:true,avoidRects:[{left:0,right:95,top:540,bottom:640}]});
+console.log(JSON.stringify({cases,noSpace,tooWide,ordinary,behind}));
 '''.replace('MODULE', json.dumps((ROOT/'web/world-marker-layout.js').as_uri()))
         result = subprocess.run(['node','--input-type=module','-e',script],cwd=ROOT,
                                 capture_output=True,text=True,check=True)
@@ -51,6 +52,8 @@ console.log(JSON.stringify({cases,noSpace,tooWide,ordinary}));
         self.assertFalse(data['noSpace']['placed'])
         self.assertFalse(data['tooWide']['placed'])
         self.assertFalse(data['ordinary']['placed'])
+        self.assertTrue(data['behind']['placed'], data['behind'])
+        self.assertEqual(data['behind']['edge'], 'behind')
 
     def test_a_declared_carrier_parks_instead_of_vanishing(self):
         """Guide I9: a label that carries a decision may slide and edge-cue, but a

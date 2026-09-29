@@ -1,8 +1,9 @@
 /* Bellweather / prison proof track: story, composition and semantic presentation. */
 import {characterControlProfile} from './game-character-spec.js';
 import {messageMachine,tokenTrack,smallTree,pavilion,deliveryParcel} from './workshop-props.js';
-import {lantern,gate,tower,planter,companionRobot,capabilityModule,capabilitySocket,eventLink,speechBubble} from './rescue-world-props.js';
+import {lantern,gate,tower,planter,companionRobot,companionPose,capabilityModule,capabilitySocket,eventLink,speechBubble} from './rescue-world-props.js';
 import {makeWorldPackage} from './spec-game-world.js';
+import {bellweatherGarden,gardenGeometries,gardenMaterials,gardenTextures,gardenAssets,openingEnvironment} from './bellweather-garden.js';
 
 // Story-specific labels for the shared inspect -> stage -> commit interaction.
 export const routeSources=Object.freeze({
@@ -23,26 +24,22 @@ const addTo=(parent,items)=>items.forEach((item,index)=>e.push(index===0?{...ite
 /* Two deliberately separate places. Bellweather sells the life that is lost; the
    prison has room for movement, camera orbit and readable focal interactions. */
 e.push({id:'bellweather-zone',position:[0,0,10]},{id:'prison-zone',position:[0,0,-32]});
-part('bellweather-island','cylinder','stone',[0,-.8,0],[29,1.6,29],{parent:'bellweather-zone'});
-part('bellweather-lip','cylinder','gold',[0,-1.62,0],[29.4,.14,29.4],{parent:'bellweather-zone'});
-part('bellweather-square','cylinder','paper',[0,.02,0],[16,.08,16],{parent:'bellweather-zone'});
-part('bellweather-inlay','torus','gold',[0,.08,0],[12.5,.05,12.5],{parent:'bellweather-zone'});
-for(let i=0;i<8;i++)part(`bell-path-${i}`,'box','paper',[0,.04,7-i*2.1],[3.4,.08,1.1],{parent:'bellweather-zone'});
-addTo('bellweather-zone',tower('bell-tower',[0,0,-13],{scale:1.25}));
-addTo('bellweather-zone',tower('west-tower',[-12,0,-8],{scale:.72,color:'rose'}));
-addTo('bellweather-zone',tower('east-tower',[12,0,-8],{scale:.78,color:'teal'}));
-addTo('bellweather-zone',pavilion('market',[-11,0,5],'rose'));
-addTo('bellweather-zone',pavilion('bookshop',[11,0,3],'teal'));
-for(const side of [-1,1]){
-  for(let i=0;i<3;i++)addTo('bellweather-zone',planter(`plants-${side}-${i}`,[side*(8.5+i*1.2),0,8-i*4],1+i*.08));
-  // Trunks must sit inside the island plate (r 14.5); canopies may lean over the rim.
-  addTo('bellweather-zone',smallTree('tree-'+side,[side*10.5,0,8.5],2));
-}
-for(let i=0;i<8;i++){
-  const x=-10.5+i*3;
-  addTo('bellweather-zone',lantern('hanging-'+i,[x,6.5-Math.sin(i/7*Math.PI)*1.1,2],{scale:.7,color:i%2?'glow':'pinkGlow',floating:true}));
-}
-for(let i=0;i<5;i++)addTo('bellweather-zone',lantern('sky-lantern-'+i,[-12+i*6,11+i%2*2,-9],{scale:.55,floating:true}));
+// The first playable space is a small transit garden, with negative space around
+// two physically distinct signal objects. All dimensions and visual treatment
+// live in this package; shared movement/camera code knows none of these names.
+e.push(...bellweatherGarden());
+e.push({id:'garden-lightwell',parent:'bellweather-zone',position:[-4.5,0,-3],collider:{shape:'box',halfExtents:[.9,.9,.9],offset:[0,.9,0]}});
+part('garden-lightwell-base','cylinder','deepBlue',[0,.25,0],[1.8,.5,1.8],{parent:'garden-lightwell'});
+part('garden-lightwell-ring','torus','solarGold',[0,.65,0],[1.6,.13,1.6],{parent:'garden-lightwell'});
+part('garden-lightwell-core','sphere','aqua',[0,1.05,0],[.55,.55,.55],{parent:'garden-lightwell'});
+for(let i=0;i<5;i++){const a=i*Math.PI*2/5;part(`garden-petal-${i}`,'sphere','rose',[Math.cos(a)*1.05,1.05,Math.sin(a)*1.05],[.34,.65,.25],{parent:'garden-lightwell',enabled:false,rotation:[0,-a*180/Math.PI,35]});}
+e.push({id:'skybridge-relay',parent:'bellweather-zone',position:[4.5,0,-3.5],collider:{shape:'box',halfExtents:[.75,1,.75],offset:[0,1,0]}});
+part('skybridge-relay-plinth','cylinder','porcelain',[0,.4,0],[1.5,.8,1.5],{parent:'skybridge-relay'});
+part('skybridge-relay-fork-a','box','deepBlue',[-.52,1.5,0],[.24,2.2,.32],{parent:'skybridge-relay',rotation:[0,0,18]});
+part('skybridge-relay-fork-b','box','deepBlue',[.52,1.5,0],[.24,2.2,.32],{parent:'skybridge-relay',rotation:[0,0,-18]});
+part('skybridge-relay-eye','sphere','solarGold',[0,2.35,0],[.46,.46,.46],{parent:'skybridge-relay'});
+e.push(...eventLink('garden-signal-trace',[-4.5,1.5,7],[-3.5,1.15,-7],{material:'aqua',segments:14,radius:.23,enabled:false}));
+e.push(...eventLink('skybridge-signal-trace',[4.5,2.35,6.5],[8,10.8,-13],{material:'solarGold',segments:14,radius:.23,enabled:false}));
 
 /* A delivery has a recipient and a persistent outcome, not an endless patrol.
    Staging stays package data; shared timeline moves/cues perform the handoff. */
@@ -55,13 +52,21 @@ for(const [id,parent,position] of [
 
 /* A close social triangle gives the shared lantern a visible recipient.
    Distinct silhouettes and breathing room keep each friend legible on phones. */
-addTo('bellweather-zone',companionRobot('singer',[2.2,0,.5],{color:'coral',height:2}));
-addTo('bellweather-zone',companionRobot('friend-a',[-2.2,0,.5],{color:'teal',round:true,height:1.5}));
-e.push(...lantern('friendship-lantern',[1.9,1.2,10.7],{scale:1.15,color:'glow'}));
+const companionShell={plate:'heroShell',frame:'heroFrame',visor:'companionVisor',eyes:'companionEyes',trim:'solarGold'};
+addTo('bellweather-zone',companionRobot('singer',[1.8,0,2],{color:'companionCoral',height:2,shell:companionShell,solid:true}));
+addTo('bellweather-zone',companionRobot('friend-a',[-2.2,0,-2],{color:'companionTeal',round:true,height:1.5,shell:companionShell,solid:true}));
+e.push({id:'friendship-lantern',position:[1.9,1.2,10.7]});
+part('friendship-lantern-core','sphere','aqua',[0,0,0],[.62,.62,.62],{parent:'friendship-lantern'});
+part('friendship-lantern-orbit','torus','solarGold',[0,0,0],[1,.11,1],{parent:'friendship-lantern',rotation:[75,0,25]});
+part('friendship-lantern-tail','cone','porcelain',[0,-.65,0],[.25,.65,.25],{parent:'friendship-lantern'});
 for(const [i,color] of ['gold','teal','coral'].entries())part('friendship-light-'+i,'sphere',color,[(i-1)*.19,0,.32],[.15,.19,.08],{parent:'friendship-lantern'});
+part('mira-tap-a','sphere','solarGold',[3.88,2.52,-2.32],[.24,.24,.24],{parent:'bellweather-zone',enabled:false});
+part('mira-tap-b','sphere','solarGold',[4.15,2.78,-2.32],[.2,.2,.2],{parent:'bellweather-zone',enabled:false});
+part('tavi-mirror','torus','aqua',[-3.9,.95,-.1],[.65,.12,.65],{parent:'bellweather-zone',enabled:false,rotation:[45,0,0]});
 
 /* The playable prison is materially larger and calmer than the rejected square. */
-part('prison-floor','box','prison',[0,-.1,0],[18,.2,16],{parent:'prison-zone'});
+// The phone follow camera sits behind Zip; keep the room floor under that eye.
+part('prison-floor','box','prison',[0,-.1,7],[18,.2,32],{parent:'prison-zone'});
 part('prison-back-left','box','dark',[-6.1,4,-8.3],[5.8,8,.35],{parent:'prison-zone',collider:{shape:'box'}});
 part('prison-back-right','box','dark',[6.1,4,-8.3],[5.8,8,.35],{parent:'prison-zone',collider:{shape:'box'}});
 part('prison-back-top','box','dark',[0,7.5,-8.3],[6.4,1,.35],{parent:'prison-zone',collider:{shape:'box'}});
@@ -138,6 +143,7 @@ part('limbo-ember','sphere','blueGlow',[1.7,.34,-26.4],[.1,.1,.1],{enabled:false
 
 /* One protagonist, used in story and gameplay. */
 e.push({id:'zip',asset:'robot',position:[0,0,-28],scale:[.9,.9,.9],animation:'idle'});
+e.push({id:'zip-identity',parent:'zip',position:[0,2.15,0]});
 e.push(...capabilitySocket('zip-voice-socket',[0,1,.49],{parent:'zip'}));
 e.push(...capabilityModule('zip-voice',[0,1,.5],{parent:'zip',enabled:false}));
 e.push(...speechBubble('zip-speech',[.95,3.35,.6],{parent:'zip',scale:.9}));
@@ -180,14 +186,21 @@ const revealGroups=[
 ];
 const revealParts=revealGroups.flat();
 
-export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'12',
-  environment:{clearColor:'#172238',ambient:'#6c7694',exposure:1.05,toneMapping:'aces',fog:{type:'linear',color:'#8f91a7',start:38,end:125}},
-  materials:{stone:{diffuse:'#d8b997'},paper:{diffuse:'#f9dfba'},gold:{diffuse:'#ce9d53',gloss:.45},coral:{diffuse:'#d67a69'},ink:{diffuse:'#273144'},indigo:{diffuse:'#4c5276'},rock:{diffuse:'#717b91'},teal:{diffuse:'#548e89'},rose:{diffuse:'#c87678'},leaf:{diffuse:'#477765'},mint:{diffuse:'#91d2af',emissive:'#60a990',emissiveIntensity:.25},wood:{diffuse:'#795755'},glow:{diffuse:'#ffe5ad',emissive:'#ffc97c',emissiveIntensity:1.25},pinkGlow:{diffuse:'#ffa58c',emissive:'#e88c70',emissiveIntensity:.8},redGlow:{diffuse:'#fa9f78',emissive:'#fc705c',emissiveIntensity:1.25},cloud:{diffuse:'#efd7cc'},haze:{diffuse:'#bda8bc'},dark:{diffuse:'#20283a'},prison:{diffuse:'#35445d'},blueGlow:{diffuse:'#9fdcff',emissive:'#76bfff',emissiveIntensity:1.8},void:{diffuse:'#070b12'}},
+export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'18',
+  batchGroups:{scenery:{maxAabbSize:40}},
+  geometries:gardenGeometries,
+  textures:gardenTextures,
+  environment:{clearColor:'#a3c9eb',ambient:'#9fa8bf',exposure:1.05,toneMapping:'aces',fog:{type:'linear',color:'#c4d8e9',start:42,end:155}},
+  materials:{stone:{diffuse:'#d8b997'},paper:{diffuse:'#f9dfba'},gold:{diffuse:'#ce9d53',gloss:.45},coral:{diffuse:'#d67a69'},ink:{diffuse:'#273144'},indigo:{diffuse:'#4c5276'},rock:{diffuse:'#717b91'},teal:{diffuse:'#548e89'},rose:{diffuse:'#c87678'},leaf:{diffuse:'#477765'},mint:{diffuse:'#91d2af',emissive:'#60a990',emissiveIntensity:.25},wood:{diffuse:'#795755'},glow:{diffuse:'#ffe5ad',emissive:'#ffc97c',emissiveIntensity:1.25},pinkGlow:{diffuse:'#ffa58c',emissive:'#e88c70',emissiveIntensity:.8},redGlow:{diffuse:'#fa9f78',emissive:'#fc705c',emissiveIntensity:1.25},cloud:{diffuse:'#efd7cc'},haze:{diffuse:'#bda8bc'},dark:{diffuse:'#20283a'},prison:{diffuse:'#35445d'},blueGlow:{diffuse:'#9fdcff',emissive:'#76bfff',emissiveIntensity:1.8},void:{diffuse:'#070b12'},porcelain:{diffuse:'#f3e6d7',gloss:.48},sunstone:{diffuse:'#dcbfa9',gloss:.4},solarGold:{diffuse:'#f6c770',emissive:'#b9842c',emissiveIntensity:.36,metalness:.25,gloss:.75},deepBlue:{diffuse:'#223b70',gloss:.5},aqua:{diffuse:'#77e3df',emissive:'#46c5cc',emissiveIntensity:.72,gloss:.62}},
   assets:{robot:{type:'container',src:'/assets/quaternius-animated-robot.glb',transform:{position:[0,-.08,0],scale:[.52,.52,.52]},animations:{idle:'RobotArmature|Robot_Standing',run:'RobotArmature|Robot_Running',yes:'RobotArmature|Robot_Yes',no:'RobotArmature|Robot_No',wave:'RobotArmature|Robot_Wave'},defaultAnimation:'idle'}},
   entities:e,
-  lights:[{id:'sunlight',type:'directional',color:'#ffd8aa',intensity:.9,rotation:[45,-35,0],castShadows:true},{id:'sky-light',type:'directional',color:'#a6bce4',intensity:.4,rotation:[50,150,0]}],
+  lights:[{id:'sunlight',type:'directional',color:'#ffe0b5',intensity:1.55,rotation:[38,-35,0],castShadows:true,shadowResolution:2048,shadowDistance:45,shadowBias:.15,normalOffsetBias:.08,numCascades:2,shadowFilter:'pcf3'},{id:'sky-light',type:'directional',color:'#a4c8ef',intensity:.45,rotation:[65,145,0]}],
   cameras:{
-    home:{position:[3.5,3.6,16.9],lookAt:[0,1.6,10.7],fov:46,portrait:{position:[4,4.8,22.5],lookAt:[0,1.6,10.7],fov:50}},
+    home:{position:[4.5,4.6,21],lookAt:[0,3,0],fov:56,portrait:{position:[3,7,26],lookAt:[0,2.2,3],fov:58}},
+    gardenReveal:{position:[-7,6,19],lookAt:[-2,2,-7],fov:53,portrait:{position:[-4,6,21],lookAt:[-1,1.5,6],fov:58}},
+    skybridgeReveal:{position:[8,6,19],lookAt:[2,2,-7],fov:53,portrait:{position:[-4,5.5,18.5],lookAt:[1.4,1.5,6],fov:58}},
+    gardenDestination:{position:[-9,4.7,.5],lookAt:[-3.5,.9,-8.5],fov:52,portrait:{position:[-7.5,5,3],lookAt:[-3.5,1.1,-8.5],fov:54}},
+    skybridgeDestination:{position:[14,14,-27],lookAt:[10,9,-10],fov:53,portrait:{position:[14,14,-29],lookAt:[9,8.5,-11],fov:50}},
     rupture:{position:[11,9,26],lookAt:[0,2,9],fov:48,portrait:{position:[7,12,31],lookAt:[0,2,9],fov:48}},
     limbo:{position:[3.6,2.3,-23.6],lookAt:[0,1.15,-28],fov:44,portrait:{position:[3,3.4,-24],lookAt:[0,1.15,-28],fov:48}},
     reveal:{position:[1,8,-16],lookAt:[0,2,-33],fov:52,portrait:{position:[1,13,-5],lookAt:[0,3,-32],fov:50}},
@@ -195,6 +208,7 @@ export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'
   },
   states:{arrival:{camera:'reveal'}},
   player:characterControlProfile({entity:'zip',spawn:[0,0,-28],speed:3.2,surfaces:[
+    {bounds:[-7.5,7.5,3.5,17],height:0,whenVisible:'bellweather-zone'},
     {bounds:[-8.2,8.2,-38,-24],height:0},
     {bounds:[-8.2,8.2,-52,-38],height:0,whenVisible:'tutorial-route-open'}
   ],animations:{idle:'idle',move:'run'},animationSpeeds:{idle:0,move:1},
@@ -202,27 +216,46 @@ export const worldSpec={schemaVersion:'1',id:'bellweather-first-words',version:'
     camera:{yaw:0,pitch:25,distance:8,portraitDistance:14,minDistance:4,maxDistance:18,targetHeight:1.2,inspectCharacter:true}})
 };
 
+Object.assign(worldSpec.materials,gardenMaterials);
+Object.assign(worldSpec.assets,gardenAssets);
+worldSpec.assets.robot.materialOverrides={Main:'heroShell',Grey:'heroFrame',Black:'heroJoint'};
+
+const chamberEnvironment={clearColor:'#0c1220',ambient:'#46536b',exposure:.85,fog:{type:'linear',color:'#34415a',start:20,end:88}};
 const missionBase=()=>({
+  environment:chamberEnvironment,
   show:['zip','prison-zone','sun','star',...revealParts],
-  hide:[...speechMarks,'bellweather-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','relay-note-a','relay-note-b','relay-note-c','friend-signal-reply-light','route-machine','zip-voice','socket-core','socket-ring',...limboProps,...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
+  hide:[...speechMarks,'bellweather-zone','bellweather-sky','friendship-lantern','garden-signal-trace','skybridge-signal-trace','limbo-backdrop','rift','storm-flash','warden','stolen-voice','wrong-ring','reunion-ring','route-glow','tutorial-route-open','notice-old','notice-parade','notice-today','relay-note-a','relay-note-b','relay-note-c','friend-signal-reply-light','route-machine','zip-voice','socket-core','socket-ring',...limboProps,...Array.from({length:4},(_,i)=>`words-piece-${i}`)],
   transforms:{'moon-door':{position:[0,0,0]},'sun-door':{position:[0,0,0]},'star-door':{position:[0,0,0]},zip:{position:[0,0,-28]}},
   animations:{zip:'idle'}
 });
 
-function opening(beat){
-  const p={show:['zip',...revealParts],hide:['bellweather-zone','prison-zone','friendship-lantern','limbo-backdrop','rift','storm-flash','warden','warden-rift-link','voice-extract-link','stolen-voice','zip-voice'],transforms:{zip:{position:[0,0,10]},singer:{position:[2.2,0,.5]},'friend-a':{position:[-2.2,0,.5]},'friendship-lantern':{position:[1.9,1.2,10.7]},'moon-door':{position:[0,0,0]}},animations:{zip:'idle'}};
+// Authored static gestures stay legible in reduced motion. These use the shared
+// transform patch, with no new animation system or claim about motion quality.
+const partnerGestures={
+  rest:{...companionPose('singer',{height:2}),...companionPose('friend-a',{height:1.5,round:true})},
+  garden:{...companionPose('singer',{height:2,hands:{'-1':[-.78,1.75,.28],1:[.6,1.2,.35]}}),...companionPose('friend-a',{height:1.5,round:true,hands:{'-1':[-.9,.95,.4],1:[.65,.9,.25]}})},
+  skybridge:companionPose('singer',{height:2,hands:{'-1':[-.6,1.25,.3],1:[.58,2.18,.18]}})
+};
+function opening(beat,playerStart=[0,0,10],choiceTarget=null){
+  const responsePose=choiceTarget==='garden-lightwell'?{mira:[-.4,0,-1.4],tavi:[-3,0,-.5],signal:[-4.5,2.3,7]}:
+    choiceTarget==='skybridge-relay'?{mira:[3.3,0,-2.5],tavi:[-2.2,0,-2],signal:[4.5,2.9,6.5]}:
+    {mira:[1.8,0,2],tavi:[-2.2,0,-2],signal:[1.9,1.2,10.7]};
+  const p={show:['zip',...revealParts],hide:['bellweather-zone','bellweather-sky','prison-zone','friendship-lantern','garden-signal-trace','skybridge-signal-trace','mira-tap-a','mira-tap-b','tavi-mirror','garden-receiver-beacon','garden-receiver-arrival',...[-1,1].flatMap(side=>[`skybridge-receiver-light-${side}`,`skybridge-receiver-arrival-${side}`]),...Array.from({length:5},(_,i)=>`garden-petal-${i}`),'limbo-backdrop','rift','storm-flash','warden','warden-rift-link','voice-extract-link','stolen-voice','zip-voice'],transforms:{zip:{position:playerStart},singer:{position:beat>0?responsePose.mira:[1.8,0,2]},'friend-a':{position:beat>0?responsePose.tavi:[-2.2,0,-2]},'friendship-lantern':{position:beat>0?responsePose.signal:[1.9,1.2,10.7]},'moon-door':{position:[0,0,0]}},animations:{zip:'idle'}};
   p.hide.push(...speechMarks,'sun','star','route-machine','notice-old','notice-parade','notice-today','tutorial-route-open','wrong-ring','reunion-ring','route-glow',...limboProps);
+  Object.assign(p.transforms,partnerGestures.rest,beat>0?(choiceTarget==='garden-lightwell'?partnerGestures.garden:choiceTarget==='skybridge-relay'?partnerGestures.skybridge:{}):{});
   // Explicitly restore the cast after a prior rupture/replay hid individuals.
   p.show.push('singer','friend-a','bellworker-a','bellworker-b','bellworker-b-parcel');
   p.hide.push('bellworker-a-parcel');
   Object.assign(p.transforms,{'bellworker-a':{position:[-3.8,0,-4]},'bellworker-b':{position:[1.8,0,-4]},'bellworker-b-parcel':{position:[0,.8,.55]}});
   if(beat===0){
-    p.camera='home';p.environment={clearColor:'#172238',ambient:'#806f68',exposure:1.12,fog:{type:'linear',color:'#8f91a7',start:38,end:125}};p.show.push('bellweather-zone','zip-voice','friendship-lantern');p.animations.zip='wave';
+    p.camera='home';p.environment={...openingEnvironment};p.show.push('bellweather-zone','bellweather-sky','zip-voice','friendship-lantern');p.hide=p.hide.filter(id=>id!=='bellweather-sky');p.animations.zip='wave';
+    p.playerCheckpoint={id:'opening-terrace',position:[0,0,10],pitch:14,distance:9};
     p.show=p.show.filter(id=>id!=='bellworker-b-parcel');p.hide=p.hide.filter(id=>id!=='bellworker-a-parcel');
     p.show.push('bellworker-a-parcel');p.hide.push('bellworker-b-parcel');
     p.transforms['bellworker-a']={position:[-3.8,0,-4]};p.transforms['bellworker-b-parcel']={position:[-.95,.65,.2]};
     p.timeline={duration:4600,moves:[
-      {entity:'friendship-lantern',from:[1.9,1.2,10.7],to:[1.25,1.2,10.7],at:600,duration:1100},
+      {entity:'friendship-lantern',from:[1.9,1.2,10.7],to:[1.25,1.7,10.7],at:600,duration:1100},
+      {entity:'transit-pod',from:[10,7.6,-12],to:[20,7.6,-12],at:300,duration:3400},
       {entity:'bellworker-a',from:[-3.8,0,-4],to:[.2,0,-4],at:100,duration:1800},
       {entity:'bellworker-b-parcel',from:[-.95,.65,.2],to:[0,.8,.55],at:2000,duration:700},
       {entity:'bellworker-a',from:[.2,0,-4],to:[-3.8,0,-4],at:2800,duration:1500}
@@ -235,7 +268,7 @@ function opening(beat){
   }else if(beat===1){
     p.camera='rupture';p.environment={clearColor:'#151d30',ambient:'#665d68',exposure:1.0,fog:{type:'linear',color:'#72788c',start:32,end:110}};
     p.show.push('bellweather-zone','zip-voice','friendship-lantern','warden');p.animations.zip='no';
-    p.transforms['friendship-lantern']={position:[0,3.7,8]};
+    p.transforms['friendship-lantern']={position:choiceTarget?responsePose.signal:[0,3.7,12]};
     p.transforms.warden={position:[0,2.8,7.0],scale:[.72,.72,.72]};
     p.timeline={duration:1800,moves:[
       {entity:'warden',from:[0,2.8,7.0],to:[0,3.7,7.7],at:150,duration:900}
@@ -250,9 +283,9 @@ function opening(beat){
     p.timeline={duration:4000,moves:[
       {entity:'bellworker-a',from:[-3.8,0,-4],to:[-.8,3.8,7.4],at:900,duration:1500},
       {entity:'bellworker-b',from:[1.8,0,-4],to:[.9,4.1,7.5],at:950,duration:1450},
-      {entity:'zip',from:[0,0,10],to:[0,4.7,8],at:1050,duration:1300},
-      {entity:'singer',from:[2.2,0,.5],to:[1.1,5.4,7.5],at:950,duration:1400},
-      {entity:'friend-a',from:[-2.2,0,.5],to:[-1.1,4.6,7.2],at:950,duration:1400}
+      {entity:'zip',from:playerStart,to:[0,4.7,8],at:1050,duration:1300},
+      {entity:'singer',from:responsePose.mira,to:[1.1,5.4,7.5],at:950,duration:1400},
+      {entity:'friend-a',from:responsePose.tavi,to:[-1.1,4.6,7.2],at:950,duration:1400}
     ],cues:[
       {at:220,patch:{show:['rift','storm-flash'],cameraImpulse:{duration:760,intensity:10},environment:{clearColor:'#e8f4ff',ambient:'#d6e8ff',exposure:2.15,fog:{type:'linear',color:'#b8d5ef',start:18,end:68}}}},
       {at:520,patch:{environment:{clearColor:'#07101f',ambient:'#222d49',exposure:.62,fog:{type:'linear',color:'#263650',start:18,end:72}}}},
@@ -292,7 +325,7 @@ function opening(beat){
 }
 
 function present(s,prev){
-  if(typeof s==='number')return opening(s);
+  if(typeof s==='number'||Number.isInteger(s?.storyBeat))return opening(typeof s==='number'?s:s.storyBeat,s?.playerStart,s?.choiceTarget);
   const p=missionBase();
   // The shared control owns the actor between authored chapter checkpoints.
   // Puzzle renders must not snap the visible actor back to the original spawn.
@@ -447,16 +480,34 @@ export const speechRepairTutorialSpec={
 };
 
 export const openingSpec={
-  id:'bellweather.opening.v8',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
+  id:'bellweather.opening.v10',title:'BRING BACK THE WORDS',subtitle:'Prologue',finishLabel:'Take control →',waitForMotion:true,directionVersion:'1',
   scenes:[
-    {beat:0,audioPhase:'home',kicker:'BELLWEATHER · LANTERN NIGHT',title:'One lantern. Three friends.',body:'You are Zip. Mira made this lantern for all three of you. Send it skyward.',
-      direction:{kind:'establishing',channels:['world','character','camera','interaction','narration'],worldAfter:'The shared lantern is launched and the three friends have visibly acted together.'},
-      markers:[{entity:'singer',label:'MIRA',offset:[0,-8]},{entity:'friendship-lantern',label:'Send up our lantern',target:'release-lantern',offset:[0,-8]}],
-      action:{target:'release-lantern',label:'Send up our lantern',patch:{show:['friendship-lantern','bellworker-b-parcel'],hide:['bellworker-a-parcel'],transforms:{'bellworker-a':{position:[-3.8,0,-4]},'bellworker-b-parcel':{position:[0,.8,.55]}},animations:{zip:'wave'},timeline:{duration:2800,moves:[{entity:'friendship-lantern',from:[1.25,1.2,10.7],to:[0,3.7,8],duration:2600},{entity:'singer',from:[2.2,0,.5],to:[1.8,0,.5],duration:1000},{entity:'friend-a',from:[-2.2,0,.5],to:[-1.8,0,.5],duration:1000}],finish:{animations:{zip:'yes'}}}}},
-      success:{body:'Three lights rise above your home.',dialogue:'“Same time next year. All three of us.”'}},
-    {beat:1,audioPhase:'danger',audioCue:'capture',kicker:'ABOVE THE SQUARE',title:'A shadow over Bellweather.',body:'A black machine rises above the tower. Red light reaches into the sky.',
+    {beat:0,explore:true,preserveActor:true,exploreView:{distance:9,pitch:14,portraitDistance:15.5,portraitPitch:20},audioPhase:'home',kicker:'BELLWEATHER · SIGNAL DAY',title:'A city that answers.',body:'You are Zip. Explore or send a signal.',
+      direction:{kind:'establishing',channels:['world','character','camera','interaction','narration'],worldAfter:'Zip may explore a safe living terrace; one activated signal object gets a distinct Mira response and reveals a receiver destination.'},
+      markers:[{entity:'zip-identity',label:'ZIP · YOU',offset:[0,-8],hideWhenDone:true},{entity:'singer-head',label:'MIRA',offset:[0,-8],hideWhenDone:true},{entity:'garden-lightwell-core',label:'Wake garden lightwell',target:'garden-lightwell',offset:[0,-12]},{entity:'skybridge-relay-eye',label:'Light skybridge relay',target:'skybridge-relay',offset:[0,-12]}],
+      choices:[
+        {target:'garden-lightwell',label:'Wake garden lightwell',
+          patch:{camera:'gardenReveal',transforms:partnerGestures.garden,show:['garden-signal-trace','tavi-mirror',...Array.from({length:5},(_,i)=>`garden-petal-${i}`)],animations:{zip:'wave'},
+            timeline:{duration:2500,moves:[{entity:'friendship-lantern',from:[1.25,1.7,10.7],to:[-4.5,2.3,7],duration:1700},{entity:'singer',from:[1.8,0,2],to:[-.4,0,-1.4],duration:1300},{entity:'friend-a',from:[-2.2,0,-2],to:[-3,0,-.5],duration:1500}],
+              cues:[{at:1700,patch:{show:['garden-receiver-beacon','garden-receiver-arrival']}}],
+              finish:{show:['garden-receiver-beacon','garden-receiver-arrival'],animations:{zip:'yes'}}}},
+          carry:{show:['garden-signal-trace','tavi-mirror','garden-receiver-beacon','garden-receiver-arrival',...Array.from({length:5},(_,i)=>`garden-petal-${i}`)],transforms:{...partnerGestures.garden,singer:{position:[-.4,0,-1.4]},'friend-a':{position:[-3,0,-.5]},'friendship-lantern':{position:[-4.5,2.3,7]}}},
+          success:{body:'Mira catches your light. Tavi sends it onward.',dialogue:'Mira: “It answered!”'},
+          inspection:{markers:[],target:'garden-receiver',anchor:'garden-receiver-beacon',label:'Look at the shaded terrace',patch:{camera:'gardenDestination'},
+            success:{body:'Two shaded seats.',dialogue:'Mira: “Sit with me.”'}}},
+        {target:'skybridge-relay',label:'Light skybridge relay',
+          patch:{camera:'skybridgeReveal',transforms:partnerGestures.skybridge,show:['skybridge-signal-trace','mira-tap-a','mira-tap-b'],animations:{zip:'wave'},
+            timeline:{duration:2400,moves:[{entity:'friendship-lantern',from:[1.25,1.7,10.7],to:[4.5,2.9,6.5],duration:1700},{entity:'singer',from:[1.8,0,2],to:[3.3,0,-2.5],duration:1000}],
+              cues:[{at:1700,patch:{show:[...[-1,1].flatMap(side=>[`skybridge-receiver-light-${side}`,`skybridge-receiver-arrival-${side}`])]}}],
+              finish:{show:[...[-1,1].flatMap(side=>[`skybridge-receiver-light-${side}`,`skybridge-receiver-arrival-${side}`])],animations:{zip:'yes'}}}},
+          carry:{show:['skybridge-signal-trace','mira-tap-a','mira-tap-b',...[-1,1].flatMap(side=>[`skybridge-receiver-light-${side}`,`skybridge-receiver-arrival-${side}`])],transforms:{...partnerGestures.skybridge,singer:{position:[3.3,0,-2.5]},'friend-a':{position:[-2.2,0,-2]},'friendship-lantern':{position:[4.5,2.9,6.5]}}},
+          success:{body:'Mira lifts the signal. Two lights answer.',dialogue:'Mira: “Our balcony!”'},
+          inspection:{markers:[],target:'skybridge-receiver',anchor:'skybridge-receiver-beacon',label:'Look at the train balcony',patch:{camera:'skybridgeDestination',timeline:{duration:3200,moves:[{entity:'transit-pod',from:[10,7.6,-12],to:[14,7.6,-12],duration:3200}]}},
+            success:{body:'Trains pass below.',dialogue:'Mira: “Stay awhile?”'}}}
+      ]},
+    {beat:1,carryChoiceFrom:0,actorFromChoice:0,audioPhase:'danger',audioCue:'capture',kicker:'ABOVE THE TERRACE',title:'A shadow over Bellweather.',body:'The Warden arrives above the receiver terrace. Its red field reaches toward your lit signal path.',
       direction:{kind:'antagonist-action',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','vfx','audio','narration'],worldAfter:'The Warden is visibly acting on the sky while Bellweather reacts.'}},
-    {beat:2,audioPhase:'danger',audioCue:'rupture',kicker:'THUNDER ANSWERS',title:'The sky cracks open.',body:'The tear opens where the black machine reached. Zip and the others are pulled into the dark.',
+    {beat:2,actorFromChoice:0,audioPhase:'danger',audioCue:'rupture',kicker:'THUNDER ANSWERS',title:'The sky cracks open.',body:'The tear opens where the black machine reached. Zip and the others are pulled into the dark.',
       direction:{kind:'major-event',cause:{mode:'visible',entity:'warden'},channels:['world','character','camera','lighting','vfx','audio','narration'],worldAfter:'Bellweather is disrupted and Zip plus both friends are gone from the square.'}},
     {beat:3,audioPhase:'danger',kicker:'SOMEWHERE ELSE',title:'Silence.',body:'Zip wakes alone. No market. No friends. Bellweather is gone.',
       direction:{kind:'transition',channels:['world','character','camera','lighting','narration'],worldAfter:'Zip is isolated in an unknown dark location.'}},

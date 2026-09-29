@@ -79,7 +79,7 @@ export function validatePlayerProfile(profile,ids){
 }
 
 export function createPlayerControls(host,profile,adapter){
-  let mode='orbit',key=null,checkpoint=null,position=[...profile.spawn],yaw=profile.camera.yaw,pitch=profile.camera.pitch,distance=profile.camera.distance;
+  let mode='orbit',key=null,checkpoint=null,recenterView=null,position=[...profile.spawn],yaw=profile.camera.yaw,pitch=profile.camera.pitch,distance=profile.camera.distance;
   let orbit={target:[0,1,0],yaw:0,pitch:25,distance:15},shot=null,paused=false,moving=false,drag=null,suppressUntil=0;
   let stick=[0,0],stickPointer=null,lastFacing=0,disposed=false,presentedCamera=null;
   const keys=new Set(),cleanups=[];
@@ -102,8 +102,17 @@ export function createPlayerControls(host,profile,adapter){
   const stickEl=overlay.querySelector('.game-move-stick'),knob=overlay.querySelector('.game-stick-knob'),help=overlay.querySelector('.game-controls-help');
   function release(){keys.clear();stick=[0,0];stickPointer=null;drag=null;knob.style.transform='translate(0,0)';}
   const defaultDistance=()=>host.clientWidth/Math.max(1,host.clientHeight)<.9?(profile.camera.portraitDistance??profile.camera.distance):profile.camera.distance;
+  function homeView(){
+    const narrow=host.clientWidth/Math.max(1,host.clientHeight)<.9;
+    const authored=recenterView||{};
+    return{
+      yaw:narrow?(authored.portraitYaw??authored.yaw??profile.camera.yaw):(authored.yaw??profile.camera.yaw),
+      pitch:narrow?(authored.portraitPitch??authored.pitch??profile.camera.pitch):(authored.pitch??profile.camera.pitch),
+      distance:narrow?(authored.portraitDistance??authored.distance??defaultDistance()):(authored.distance??defaultDistance())
+    };
+  }
   function recenter(){
-    if(mode==='third-person'){yaw=profile.camera.yaw;pitch=profile.camera.pitch;distance=defaultDistance();}
+    if(mode==='third-person')({yaw,pitch,distance}=homeView());
     else if(shot)setShot(shot);
     draw();
   }
@@ -188,9 +197,19 @@ export function createPlayerControls(host,profile,adapter){
   listen(document,'visibilitychange',release);
   return{
     setShot,
+    setRecenterView(value){
+      if(value==null){recenterView=null;return;}
+      if(typeof value!=='object'||Array.isArray(value))return;
+      for(const name of ['yaw','portraitYaw','pitch','portraitPitch','distance','portraitDistance']){
+        if(value[name]!=null&&!Number.isFinite(value[name]))return;
+      }
+      for(const name of ['pitch','portraitPitch'])if(value[name]!=null&&(value[name]<5||value[name]>70))return;
+      for(const name of ['distance','portraitDistance'])if(value[name]!=null&&(value[name]<profile.camera.minDistance||value[name]>profile.camera.maxDistance))return;
+      recenterView={...value};
+    },
     setMode(value,nextKey){
       const changed=mode!==value||key!==nextKey;mode=value;key=nextKey;
-      if(changed){checkpoint=null;release();if(value==='third-person'){position=[...profile.spawn];adapter.setAvatar(position,0);yaw=profile.camera.yaw;pitch=profile.camera.pitch;distance=defaultDistance();}}
+      if(changed){checkpoint=null;recenterView=null;release();if(value==='third-person'){position=[...profile.spawn];adapter.setAvatar(position,0);yaw=profile.camera.yaw;pitch=profile.camera.pitch;distance=defaultDistance();}}
       const inspect=overlay.querySelector('[data-view="character"]');if(inspect)inspect.hidden=mode!=='third-person';
       overlay.dataset.controlMode=mode;draw();
     },
@@ -202,7 +221,8 @@ export function createPlayerControls(host,profile,adapter){
       if(!value||typeof value.id!=='string'||!value.id.trim())return false;
       if(checkpoint===value.id)return true;
       const restored=this.restore({...this.snapshot(),position:value.position,
-        yaw:value.yaw??profile.camera.yaw,pitch:value.pitch??profile.camera.pitch,lastFacing:value.facing??0});
+        yaw:value.yaw??profile.camera.yaw,pitch:value.pitch??profile.camera.pitch,
+        distance:value.distance??this.snapshot().distance,lastFacing:value.facing??0});
       if(restored)checkpoint=value.id;
       return Boolean(restored);
     },
@@ -213,14 +233,15 @@ export function createPlayerControls(host,profile,adapter){
       release();position=[value.position[0],surface.height,value.position[2]];yaw=value.yaw;pitch=clamp(value.pitch,5,70);distance=clamp(value.distance,profile.camera.minDistance,profile.camera.maxDistance);lastFacing=value.lastFacing;adapter.setAvatar(position,lastFacing);draw();return true;
     },
     setPaused(value){paused=Boolean(value);if(paused)release();},
+    releaseInputs(){release();if(moving){moving=false;adapter.setMoving(false);}},
     update(dt){
       if(blocked()){release();if(moving){moving=false;adapter.setMoving(false);}return;}
       if(mode==='third-person'){
         const x=stick[0]+Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('ArrowLeft'));
         const z=stick[1]+Number(keys.has('KeyS')||keys.has('ArrowDown'))-Number(keys.has('KeyW')||keys.has('ArrowUp'));
         const didMove=move(x,z,Math.min(dt,.05));if(didMove!==moving){moving=didMove;adapter.setMoving(moving);}
+        if(didMove)draw();
       }
-      draw();
     },
     stats(){return{mode,position:[...position],yaw,pitch,distance,moving,presentedCamera:presentedCamera?{...presentedCamera,eye:[...presentedCamera.eye],target:[...presentedCamera.target]}:null};},
     dispose(){disposed=true;release();cleanups.forEach(fn=>fn());overlay.remove();delete host.dataset.cameraMode;}

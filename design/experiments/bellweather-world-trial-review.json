@@ -1,0 +1,58 @@
+{
+  "schema": "vibelearn.learning-design-review.v1",
+  "design_sha256": "0f1b1488ed5ed941b082b045ea9c61ccb8e9d968ae376f3759803bcfb40fd614",
+  "reviewer": "independent-astra-world-trial-design-reviewer-20260929",
+  "context_separation": "Independent delegated design-only reviewer, separate from the author, initially given a fresh task context and retained for bounded v2/v3 rereviews. Read the trial design, learning-design gate and validator, current state and delivery/scope instructions, production retrospective, accepted art-direction document and image, and recorded Summer Cycle source audit. For v3 independently verified the exact digest and reread the complete opening, scope, research associations and replaced art-direction contract. No running candidate inspected or operated; no design, canonical or runtime edits. Copied later sequence entries are excluded reference context, not newly approved learning design. Source-research observations are attributed to the existing audit, not independently reproduced here. Prior needs_revision records are preserved at artifacts/world-retrospective-20260929/design-review-v1.json and design-review-v2.json.",
+  "verdict": "pass",
+  "blockers": [],
+  "findings": {
+    "progression": {
+      "verdict": "pass",
+      "reason": "The revised opening explicitly allows early overlook exploration without completion or an invisible barrier. The joint response requires lightwell activation plus both actors at the overlook; either may arrive first and wait. Guided travel, cancellation, return and explicit restart now have defined semantics. The trial stops before rupture; later sequence remains excluded.",
+      "counterexample": "Reach the overlook early, return to the lightwell, activate it, then arrive ahead of Mira. Only the final joint arrival may produce the one-time shared payoff. Repeat after guided cancellation and reduced-motion stepping; neither may fabricate activation or reset the lightwell."
+    },
+    "concept_fidelity": {
+      "verdict": "pass",
+      "reason": "Within the explicitly proposed pre-rupture opening, light is environmental transmission, not language generation or restored speech. Zip's natural voice/module remains intact; there are no outcomes, assessment writes, persistence or mastery claims in the trial. The later learning promise and toy-model examples remain excluded reference context. This is permission to investigate orientation fidelity only, not endorsement of the copied full learning sequence.",
+      "counterexample": "Activating the garden, waiting for illumination, using guided travel or restarting must never generate a learning success, source-selection record, voice-restoration claim or saved progress. A muted player must not need to infer that the illuminated channel is speech or an LLM process."
+    },
+    "decision_necessity": {
+      "verdict": "pass",
+      "reason": "The revised conditions make voluntary Wake the garden activation necessary for the joint response while leaving the vista available to early exploration. Waiting or bypassing the device cannot complete the intended causal chain. Guided input retains explicit activation and the same stations/payoff. This is an unassessed orientation choice, not a conceptual test.",
+      "counterexample": "Walk straight to the overlook, wait or repeatedly choose Guided route without waking the lightwell: no joint response. After activation, repeated input is idempotent; Return to garden preserves state, and only explicitly named Restart resets it."
+    },
+    "attention_and_access": {
+      "verdict": "pass",
+      "reason": "The opening-specific surface design keeps invitation, local action, water/light response and destination in a sequential scene focus, with no persistent detached mission panel. It specifies semantic activation, a reachable guided option, object-directed edge cues, recenter, 44px touch targets, blur/cancellation handling, 200% text and screen-reader station/state descriptions. These are implementable access requirements, not proof they work. A 390px emulation is the bounded layout probe declared here; it cannot establish the production 360-430px range or physical-phone performance.",
+      "counterexample": "Rotate until both Mira and the lightwell are behind the camera, use only Tab/Enter, then enlarge text to 200% at 390px. The named guided/action controls and recenter must remain reachable without covering the causal focus. In reduced motion, manual station steps must expose the settled water/light state and destination relationship; no automatic camera travel or timed dialogue may be required. Dismiss the opening line immediately: the proximity/destination cues must still recover the next action."
+    },
+    "research_application": {
+      "verdict": "pass",
+      "reason": "The only opening-associated research entry now matches the trial-specific global art contract: reproduce and preserve a pinned source baseline, then adapt licensed rendering techniques to original silhouettes and a connected arrival/lightwell/overlook scene. Reverse traversal, changed viewpoint, early-arrival recovery and actual device-cost checks directly probe the earlier corridor/staging and unreachable-discovery failures. Historical teaching research applies only to excluded later steps. No two-route, receiver, rupture or Warden obligation remains in the active opening contract.",
+      "counterexample": "A beautiful initial camera shot fails the intended trial if reverse walking exposes disconnected scenery, feet float, the light response points to an unreachable destination, or guided travel fabricates activation. Generic primitive forms plus pink foliage or a blanket filter do not satisfy the accepted reference. A faster frame rate in a different scene cannot establish renderer superiority, and reproduction of Summer Cycle is a control rather than acceptance of Bellweather."
+    }
+  },
+  "implementation_scope_assessment": "Implementable as one isolated opening prototype at this exact digest. The two original blockers are resolved: early exploration remains physically available with explicit joint-payoff conditions, and all active opening research/art obligations target the same pre-rupture route. No approval for canonical replacement, rupture, tutorial, Level 1, copied learning sequence, assessment, saves, integration, release or deployment. Specific companion acknowledgement, route dimensions, viewpoints and the concrete vista discovery remain ordinary art authoring choices; whether they establish attachment or desire to explore is unresolved and must be judged through later cold play. Phone hardware/performance and full production viewport coverage remain unassessed.",
+  "validation": {
+    "structure": "Passed tools/check_learning_design.py --design design/experiments/bellweather-world-trial.json --stage structure with canonical digest 0f1b1488ed5ed941b082b045ea9c61ccb8e9d968ae376f3759803bcfb40fd614.",
+    "prototype": "Passed tools/check_learning_design.py with this design and review at --stage prototype: allowed_steps is opening only; runtime_alignment remains unassessed."
+  },
+  "runtime_alignment": {
+    "verdict": "unassessed",
+    "reason": "Design-only review. No GUI play, rendering, movement, collisions, phone behavior, frame cost, motion or audio assessed. No runtime quality, novice engagement, learning, release, canonical integration or deployment approval. Later fresh-context cold GUI review remains separate."
+  },
+  "approval_stage": "prototype",
+  "approved_steps": [
+    "opening"
+  ],
+  "resolved_blockers": [
+    {
+      "id": "conflicting-opening-obligations",
+      "resolution": "Obsolete opening research removed in v2; global art direction replaced in v3 with lightwell, one continuous promenade and reachable pre-rupture overlook composition and verification."
+    },
+    {
+      "id": "early-overlook-and-completion-state",
+      "resolution": "Early overlook is freely reachable, with Mira remaining at the unactivated lightwell and a location cue. Joint payoff occurs once only after explicit activation and both actors arriving. Guided cancellation, reduced-motion relocation, return without reset and explicit disposable restart are specified."
+    }
+  ]
+}

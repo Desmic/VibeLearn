@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Bellweather · The waking garden</title><link rel="stylesheet" href="/src/style.css"></head>
+<body>
+<div id="loading" role="status"><small>BELLWEATHER</small><h1>The waking garden</h1><p>Opening the garden…</p></div>
+<main id="world" aria-label="Bellweather garden. You directly control Zip."></main>
+<nav aria-label="View and access"><button id="recenter" aria-label="Recenter on Zip">◎</button><button id="menu-toggle" aria-label="Pause and options">Ⅱ</button></nav>
+<section id="speech" role="status" aria-live="polite" hidden><small id="speaker">MIRA</small><p id="line"></p></section>
+<button id="action" hidden><kbd>E</kbd><span>Wake the garden</span></button>
+<div id="destination" aria-hidden="true" hidden>◇</div>
+<div id="hint">WASD / arrows to walk · drag to look</div>
+<div id="stick" aria-label="Touch movement"><div></div></div>
+<section id="menu" role="dialog" aria-modal="true" aria-labelledby="menu-title" hidden>
+ <small>BELLWEATHER · WORLD STUDY</small><h2 id="menu-title">Take your time.</h2>
+ <p>Walk to Mira at the lightwell, wake the garden together, then join her at the overlook.</p>
+ <button id="resume">Return to the garden</button><button id="guide">Guided route to Mira</button>
+ <label><input id="reduced" type="checkbox"> Reduce motion / step between places</label>
+ <label><input id="economy" type="checkbox"> Lighter rendering</label>
+ <button id="restart">Restart this scene</button><p class="aside">WASD or arrows: walk. Drag: look. E: nearby action. Escape: pause. Guided travel keeps you in control of the garden interaction.</p>
+</section>
+<div id="announcer" class="sr-only" aria-live="polite"></div>
+<script type="module" src="/src/main.ts"></script>
+</body></html>

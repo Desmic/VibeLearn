@@ -75,10 +75,10 @@ class GameRuntimeController{
     this._syncCanvasIdentity();this._syncTargetState();
     return this.world;
   }
-  showStory(module,target,beat,{reducedMotion=false,paused=false}={}){
+  showStory(module,target,beat,{reducedMotion=false,paused=false,explore=false}={}){
     const world=this.mount(module,target,{mode:'story',reducedMotion});
     this.mode='story';this.stage.dataset.gameRuntimeMode='story';
-    world?.setMode?.('story');world?.setBeat?.(beat);world?.setPaused?.(paused);
+    world?.setMode?.(explore?'story-explore':'story');world?.setBeat?.(beat);world?.setPaused?.(paused);
     this._syncTargetState();return world;
   }
   showMission(module,target,state,{reducedMotion=false}={}){

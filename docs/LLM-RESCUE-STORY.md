@@ -1,5 +1,14 @@
 # Bring Back the Words — story and progression treatment
 
+**Current authority — 28 September 2026:** Read `STATE.md` and the exact
+`design/learning-design.json` / `design/review.json` first. The v8 review approves
+only the opening prototype; historical episode outlines below are not approved
+runtime scope. The [story/learning core audit](experiments/20260928-story-learning-core-review.md)
+proposes the next integrated chapter board and identifies unproven learning and
+story claims. No later-level implementation or full AI-curriculum readiness follows
+from that research.
+
+
 ## 18 September: implemented prologue friendship/reveal slice
 
 Keep the direct-protagonist structure below. Lantern Night now starts with a

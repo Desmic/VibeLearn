@@ -66,7 +66,11 @@ export function placeWorldMarker(marker,point,{
   const width=Math.max(xPadding*2+1,Number(viewportWidth)||1);
   const top=Number.isFinite(safeTop)?safeTop:0;
   const bottom=Math.max(top+1,Number.isFinite(safeBottom)?safeBottom:top+1);
-  const desiredX=point.x,desiredY=point.y-yOffset;
+  // A point behind the camera has inverted screen projection. Park its action
+  // at the near edge with an explicit turn-around cue, never a false onscreen
+  // attachment. It returns to the object as soon as the camera faces it.
+  const behind=point.inFront===false;
+  const desiredX=behind?width/2:point.x,desiredY=behind?bottom+Math.max(48,marker.offsetHeight||0):point.y-yOffset;
   const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
   const occupied=avoidRects.filter(r=>r&&[r.left,r.right,r.top,r.bottom].every(Number.isFinite)&&r.right>r.left&&r.bottom>r.top);
   // A critical marker is guided by an arrow, so moving it off its anchor is legible.
@@ -107,6 +111,7 @@ export function placeWorldMarker(marker,point,{
   let position=locate();
   if(!position)return{placed:false,edge:'',insideSafeArea:false};
   const direction=p=>{
+    if(behind)return'behind';
     const dx=desiredX-p.x,dy=desiredY-p.y;
     if(Math.max(Math.abs(dx),Math.abs(dy))<.5)return'';
     return Math.abs(dx)>Math.abs(dy)?(dx<0?'left':'right'):(dy<0?'top':'bottom');

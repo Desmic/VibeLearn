@@ -1,0 +1,32 @@
+{
+  "name": "Sunward Atelier Architecture",
+  "tool": "5.2.2 LTS",
+  "original": true,
+  "colliders": [
+    {
+      "name": "left",
+      "minX": -9.25,
+      "maxX": -2.049999952316284,
+      "minZ": -6.099999904632568,
+      "maxZ": -1.690000057220459
+    },
+    {
+      "name": "right",
+      "minX": 4.59499979019165,
+      "maxX": 7.84499979019165,
+      "minZ": -6.125,
+      "maxZ": -2.309999942779541
+    }
+  ],
+  "triangles": 22968,
+  "materials": 10,
+  "source": "authoring/build_atelier.py",
+  "rights": "Original VibeLearn geometry and materials; existing portal remains separate.",
+  "cameraProxy": {
+    "file": "sunward-atelier-camera.glb",
+    "parts": 89,
+    "triangles": 8372,
+    "source": "authoring/export_atelier_camera.py",
+    "approximation": "Authored surfaces without edge bevels, per-part bounds. Invisible camera-only geometry."
+  }
+}

@@ -339,10 +339,11 @@ function render(){
     lastCue=key;
   }
   const repair=repairStep(s),controlStep=practice.step;
+  if(controlStep!=='move')skippedOpeningSummary=false;
   const relay=Boolean(s.relay_stage&&s.relay_stage!=='none');
   const [stage,goal,detail]=tutorialStage(s,complete);text('#stage-name',stage);text('#goal',goal);text('#detail',detail);
   const routeCorrection=growingBeat(s)&&s.source_inference==='none'&&s.loop_prediction==='same'&&!routeCorrectionSeen;
-  $('#detail').dataset.critical=routeCorrection?'true':'false';
+  $('#detail').dataset.critical=(routeCorrection||(skippedOpeningSummary&&controlStep==='move'))?'true':'false';
   $('#engine').dataset.anchor=controlStep!=='done'?'zip':(relay||(s.round===1&&s.status==='success'&&s.relay_stage!==undefined))?'friend-signal':s.round===1?'route-machine':'socket';
   $('#engine').setAttribute('aria-label',controlStep!=='done'?'Control practice':relay?'Message receiver':'Message machine');
   $('#machine-toggle').dataset.anchor=$('#engine').dataset.anchor;
@@ -572,7 +573,8 @@ function render(){
     const title=current?.title||current?.skill||'Try the highlighted control.';
     const instructions=current?.instructions||{};
     const instruction=host.clientWidth<700?(instructions.touch||instructions.desktop||'Use the highlighted control.'):(instructions.desktop||'Use the highlighted control.');
-    text('#stage-name','TUTORIAL · '+step.toUpperCase());text('#goal',title);text('#detail',instruction);
+    text('#stage-name','TUTORIAL · '+step.toUpperCase());text('#goal',title);
+    text('#detail',skippedOpeningSummary?`The Warden stole Zip's natural voice. The powered machine can make prepared words. ${instruction}`:instruction);
     text('#engine-label','GET YOUR BEARINGS');text('#scene-description',title+' '+instruction);
     $('#actions').replaceChildren();button('Skip control practice','skip-controls',false);
   }
@@ -688,12 +690,14 @@ $('#mute').onclick=()=>preferences.set('sound',!preferences.get('sound'));
 $('#reduced').onchange=e=>{preferences.set('motion',e.target.checked);remountMotion();};
 preferences.hydrate();
 let openingSequence=0;
+let skippedOpeningSummary=false;
 function opening(replay=false){
   const storyRuntime=replay?createGameRuntime():runtime;inOpening=true;setExperienceMode('opening');audio.setPhase('home');
   const sequence=++openingSequence;
-  const instance=openGameOpening({root:$('#adventure'),spec:chapter.openingSpec,runtime:storyRuntime,worldModule:chapter,replay,reducedMotion:reduced(),onExit:async()=>{
+  const instance=openGameOpening({root:$('#adventure'),spec:chapter.openingSpec,runtime:storyRuntime,worldModule:chapter,replay,reducedMotion:reduced(),onExit:async(reason)=>{
     observer.disconnect();
     if(!replay&&!ours())await session.start('ai-01-first-words');
+    if(!replay)skippedOpeningSummary=reason==='skip';
     inOpening=false;presented=null;world=runtime.showMission(chapter,host,view(),{reducedMotion:reduced()});pauseSystems();render();
   }});
   instance.element.classList.add('first-opening');

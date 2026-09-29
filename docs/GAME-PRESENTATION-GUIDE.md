@@ -456,6 +456,12 @@ The first best-guess implementation of these shapes is recorded in
 3. Ask: "If I delete this text, does the player still know what to do?" If yes,
    delete it; if no, stage it in the world instead.
 4. Check every overlay against B2 while the character moves and the camera orbits.
+   At a decision, also exercise drag/orbit -> Recenter and supported zoom limits:
+   required choices must stay discoverable through I4/I9, not only in the authored
+   initial camera. Recenter uses the active scene's view contract; a generic reset
+   must not erase its portrait framing. Preserve an action-derived regression for
+   any camera operation that loses carriers. A fixed-view budget pass alone does
+   not certify the player's reachable camera states.
 5. Check every opening/cinematic beat against B6 in a live capture: is the subject
    big enough to read emotion, and are its feet (and nearby props) on the ground?
 6. Reach every recovery/failure beat in play and check its option list against I7 and

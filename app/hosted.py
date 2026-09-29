@@ -147,6 +147,12 @@ def create_app(config=None, auth_provider=None):
             "QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt",
             "quaternius-blacksmith.glb",
             "QUATERNIUS-BLACKSMITH-LICENSE.txt",
+            "kenney-tree-detailed.glb",
+            "kenney-tree-oak.glb",
+            "kenney-tree-thin.glb",
+            "KENNEY-NATURE-KIT-LICENSE.txt",
+            "quaternius-birch-tree-5.glb",
+            "QUATERNIUS-STYLIZED-NATURE-BIRCH-TREE-5-LICENSE.txt",
         ):
             raise service.DomainError("NOT_FOUND", "Not found.", 404)
         return send_from_directory(ROOT / "web" / "assets", name)

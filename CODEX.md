@@ -1,5 +1,69 @@
 # vibeLearn — delivery workflow
 
+**Iteration efficiency — 29 September 2026:** User approves coherent visual
+passes with one overall composition target instead of repeated per-detail
+checkpoints. Root owns art/source, then freezes the candidate for one bounded Sol
+engineering check. Build during iteration; native inspection at meaningful visual
+milestones; repeat only checks affected by an actual repair. Use one concise pass
+record. Compare the whole scene to the reference and change method when marginal
+detail work does not close the gap. This changes cadence, not integrated gates.
+
+**Latest iteration direction — 29 September 2026:** The user requests further
+bounded improvements while retaining accumulated feedback/research. Continue the
+same small visual proof with a specific reference-backed hypothesis per pass;
+this does not authorize map growth or declare the art gate passed. The material
+and illumination comparison is in `docs/experiments/20260929-ceramic-material.md`.
+
+**Latest user sequencing — 29 September 2026:** The user will announce when a
+Hugging Face subscription is available and asks us to continue with existing
+capabilities. Defer hosted generation/subscription work. This permits the bounded
+existing-asset conditioning/lighting comparison recorded in `docs/STATE.md`;
+it does not reopen unlimited hand-modeling, map growth or learning expansion.
+
+**Production-method follow-through — 29 September 2026:** Root owning visuals
+means choosing and executing the best available art method, not hand-authoring
+every asset. Use compatible existing content, original image references,
+specialist generation and conditional Blender where they earn their cost.
+The pending asset-method comparison in `docs/STATE.md` precedes another broad
+hand-modeling/detail pass. Judge both the asset and the resulting small scene;
+neither a successful export nor better local geometry resolves the art target.
+Do not reset the two-repair allowance by renaming a scene subpass. A next trial
+after failure must identify the materially different hypothesis being tested.
+See the follow-through audit in
+`docs/experiments/20260929-world-production-retrospective.md`.
+
+**Visual priority correction — 29 September 2026:** User explicitly requires
+graphics/art to improve before expanding other world details. Keep encounter,
+NPC, story and learning expansion parked during the present isolated art pass.
+Use the existing walking scene to judge geometry, composition, foliage,
+materials, lighting and camera framing. A more complete interaction does not
+compensate for missing the art target. Root implements the visuals directly;
+Sol performs bounded engineering verification. Preserve this order in handoffs.
+
+**Visual implementation ownership — 29 September 2026:** User explicitly assigns
+world/art implementation to root Astra after repeated Sol visual misses. Root
+must perform visual production: composition, asset selection/creation, materials
+and lighting, not only send art briefs and run critique loops. Sol handles bounded engineering
+work: controls, rendering efficiency, build checks and regression verification.
+Preserve single-writer file ownership during handoffs. Judge routing by effort
+to an acceptable result, not cheap first-draft speed. Do not dispatch another
+open-ended Sol art pass without a later user change to this direction. Keep one
+fresh-context Astra reviewer for an integrated candidate; worker art inspection
+does not replace that review or the user's judgment.
+
+**Visual iteration correction — 29 September 2026:** Read the current state
+before historical gate headers below. Prove a representative playable composition
+early, before multiplying detail or running whole-product acceptance repeatedly.
+An isolated art experiment uses focused syntax/asset/interaction/performance
+checks and actual worker GUI play. Freeze after at most two substantial visual
+repairs if it still misses its explicit art target; record failure rather than
+renaming it progress. Integration still requires the full application, browser,
+presentation and cold-review gates. This changes test cadence, not acceptance.
+Reuse licensed assets and existing engine facilities; custom geometry must earn
+its cost through distinctive visible form. Do not build a new art pipeline,
+renderer abstraction or review fleet to rescue a weak composition. See
+`docs/experiments/20260929-visual-benchmark.md`.
+
 **System-first correction — 21 September 2026:** The user rejects the current
 learning progression and detached gameplay HUD/guidance. Repair the learning and
 interaction design boundary before game implementation. Follow `docs/LEARNING-DESIGN-GATE.md`: exact-design

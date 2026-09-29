@@ -8,6 +8,12 @@ const ASSET_TYPES = new Set(['container']);
 const MOTIONS = new Set(['spin','bob','pulse','patrol']);
 const FOG_TYPES = new Set(['none','linear','exp','exp2']);
 const TONE_MAPPINGS = new Set(['linear','filmic','hejl','aces','aces2','neutral']);
+const GEOMETRY_OPTIONS={
+  cone:{baseRadius:[.001,10],peakRadius:[0,10],height:[.001,20],heightSegments:[1,16,true],capSegments:[3,64,true]},
+  cylinder:{radius:[.001,10],height:[.001,20],heightSegments:[1,16,true],capSegments:[3,64,true]},
+  sphere:{radius:[.001,10],latitudeBands:[3,48,true],longitudeBands:[3,64,true]},
+  torus:{tubeRadius:[.001,10],ringRadius:[.001,10],sectorAngle:[1,360],segments:[3,96,true],sides:[3,24,true]}
+};
 
 function assert(condition,message){if(!condition)throw new Error(`WorldSpec invalid: ${message}`);}
 function vec(value,n,label){
@@ -16,6 +22,61 @@ function vec(value,n,label){
 function id(value,label){assert(typeof value==='string'&&/^[a-zA-Z0-9._:-]+$/.test(value),`${label} has invalid id`);}
 function hex(value,label){assert(typeof value==='string'&&/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(value),`${label} must be a hex color`);}
 function tone(value,label){assert(TONE_MAPPINGS.has(value),`${label} has unsupported tone mapping ${value}`);}
+function bounded(value,min,max,label,integer=false){
+  assert(Number.isFinite(value)&&value>=min&&value<=max&&(!integer||Number.isInteger(value)),`${label} must be ${integer?'an integer ':''}between ${min} and ${max}`);
+}
+function renderStyle(spec){
+  if(spec.batchGroups!=null){
+    assert(typeof spec.batchGroups==='object'&&!Array.isArray(spec.batchGroups)&&Object.keys(spec.batchGroups).length<=8,'batchGroups must be a dictionary with at most 8 entries');
+    for(const [name,group] of Object.entries(spec.batchGroups)){
+      id(name,'batch group');
+      assert(group&&typeof group==='object'&&!Array.isArray(group),'batch group must be an object');
+      assert(Object.keys(group).every(key=>key==='maxAabbSize'),`${name} has unsupported batch group option`);
+      bounded(group.maxAabbSize,1,200,`${name}.maxAabbSize`);
+    }
+  }
+  for(const [key,limit] of [['textures',16],['geometries',64]]){
+    if(spec[key]!=null)assert(typeof spec[key]==='object'&&!Array.isArray(spec[key])&&Object.keys(spec[key]).length<=limit,`${key} must be a dictionary with at most ${limit} entries`);
+  }
+  for(const [name,def] of Object.entries(spec.textures||{})){
+    id(name,'texture');
+    assert(def&&['gradient','brush'].includes(def.type),`${name} has unsupported texture type`);
+    assert(Array.isArray(def.colors)&&def.colors.length>=2&&def.colors.length<=8,`${name}.colors must contain 2 to 8 colors`);
+    def.colors.forEach(value=>hex(value,`${name}.colors`));
+    if(def.seed!=null)bounded(def.seed,0,65535,`${name}.seed`,true);
+  }
+  for(const [name,def] of Object.entries(spec.geometries||{})){
+    id(name,'geometry');
+    assert(def&&Object.hasOwn(GEOMETRY_OPTIONS,def.type),`${name} has unsupported geometry type`);
+    const options=def.options||{};
+    assert(typeof options==='object'&&!Array.isArray(options),`${name}.options must be an object`);
+    for(const [key,value] of Object.entries(options)){
+      const range=Object.hasOwn(GEOMETRY_OPTIONS[def.type],key)?GEOMETRY_OPTIONS[def.type][key]:null;
+      assert(range,`${name} has unsupported geometry option ${key}`);
+      bounded(value,range[0],range[1],`${name}.${key}`,range[2]);
+    }
+  }
+  for(const [name,def] of Object.entries(spec.materials)){
+    assert(def&&typeof def==='object'&&!Array.isArray(def),`${name} material must be an object`);
+    for(const key of ['diffuse','emissive'])if(key in def)hex(def[key],`${name}.${key}`);
+    for(const key of ['metalness','gloss','opacity'])if(key in def)bounded(def[key],0,1,`${name}.${key}`);
+    if('emissiveIntensity' in def)bounded(def.emissiveIntensity,0,8,`${name}.emissiveIntensity`);
+    if('unlit' in def)assert(typeof def.unlit==='boolean',`${name}.unlit must be boolean`);
+    if('fog' in def)assert(typeof def.fog==='boolean',`${name}.fog must be boolean`);
+    if(def.texture)assert(typeof def.texture==='string'&&Object.hasOwn(spec.textures||{},def.texture),`${name} references unknown texture`);
+    if(def.textureRepeat){vec(def.textureRepeat,2,`${name}.textureRepeat`);def.textureRepeat.forEach(v=>bounded(v,.1,32,`${name}.textureRepeat`));}
+  }
+  for(const light of spec.lights||[]){
+    assert(light&&typeof light==='object','light must be an object');
+    if(light.type)assert(['directional','omni','spot'].includes(light.type),'unsupported light type');
+    if(light.color)hex(light.color,'light.color');
+    if(light.shadowResolution!=null)assert([256,512,1024,2048].includes(light.shadowResolution),'light.shadowResolution must be 256, 512, 1024 or 2048');
+    for(const [key,min,max,integer] of [['intensity',0,8],['range',.01,250],['shadowDistance',1,150],['shadowBias',0,1],['normalOffsetBias',0,1],['numCascades',1,4,true]]){
+      if(key in light)bounded(light[key],min,max,`light.${key}`,integer);
+    }
+    if(light.shadowFilter!=null)assert(['pcf1','pcf3','pcf5'].includes(light.shadowFilter),'unsupported light.shadowFilter');
+  }
+}
 function transform(value,label){
   assert(value&&typeof value==='object'&&!Array.isArray(value),`${label} must be an object`);
   if(value.position)vec(value.position,3,`${label}.position`);
@@ -76,6 +137,12 @@ function assets(spec){
     assert(ASSET_TYPES.has(def.type),`${assetId} has unsupported asset type ${def.type}`);
     assert(typeof def.src==='string'&&/^\/[a-zA-Z0-9_./-]+$/.test(def.src)&&!def.src.includes('..'),`${assetId}.src must be a safe same-origin root path`);
     if(def.transform)transform(def.transform,`${assetId}.transform`);
+    if(def.materialOverrides){
+      assert(typeof def.materialOverrides==='object'&&!Array.isArray(def.materialOverrides),`${assetId}.materialOverrides must be an object`);
+      for(const [source,target] of Object.entries(def.materialOverrides)){
+        assert(source.length>0&&source.length<=150&&typeof target==='string'&&Object.hasOwn(spec.materials,target),`${assetId} material override must reference a known material`);
+      }
+    }
     const aliases=new Set();
     if(def.animations!=null){
       assert(typeof def.animations==='object'&&!Array.isArray(def.animations),`${assetId}.animations must be an object`);
@@ -101,6 +168,7 @@ export function validateWorldSpec(spec){
   assert(typeof spec.version==='string'&&spec.version.length>0,'version is required');
   environment(spec.environment);
   assert(spec.materials&&typeof spec.materials==='object','materials are required');
+  renderStyle(spec);
   const assetDefs=assets(spec);
   assert(Array.isArray(spec.entities)&&spec.entities.length>0,'entities are required');
   const ids=new Set();
@@ -110,8 +178,16 @@ export function validateWorldSpec(spec){
     assert(!ids.has(entity.id),`duplicate entity ${entity.id}`);
     ids.add(entity.id);entityDefs.set(entity.id,entity);
     if(entity.parent)id(entity.parent,'parent');
-    assert(!(entity.primitive&&entity.asset),`${entity.id} cannot use both primitive and asset`);
+    assert([entity.primitive,entity.asset,entity.geometry].filter(Boolean).length<=1,`${entity.id} cannot use multiple render sources`);
+    if(entity.geometry){
+      assert(typeof entity.geometry==='string'&&Object.hasOwn(spec.geometries||{},entity.geometry),`${entity.id} references unknown geometry ${entity.geometry}`);
+      assert(typeof entity.material==='string'&&Object.hasOwn(spec.materials,entity.material),`${entity.id} geometry requires a material`);
+    }
     if(entity.primitive)assert(PRIMITIVES.has(entity.primitive),`unsupported primitive ${entity.primitive}`);
+    if(entity.batchGroup!=null){
+      assert(typeof entity.batchGroup==='string'&&Object.hasOwn(spec.batchGroups||{},entity.batchGroup),`${entity.id} references unknown batch group`);
+      assert(Boolean(entity.primitive||entity.geometry)&&!entity.asset&&!entity.motion,`${entity.id} batch group requires static primitive or geometry`);
+    }
     if(entity.asset){
       id(entity.asset,`${entity.id}.asset`);
       assert(assetDefs.has(entity.asset),`${entity.id} references unknown asset ${entity.asset}`);

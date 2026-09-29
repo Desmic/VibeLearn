@@ -1,0 +1,505 @@
+{
+  "path": "/first-words",
+  "states": [
+    {
+      "name": "opening-garden-choice-desktop",
+      "goto": true,
+      "cinematic": false,
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-title')?.textContent==='A city that answers.'&&!FirstWordsReview.runtime.world.animating&&document.querySelectorAll('.rgi-target').length===2&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='body'",
+      "focal": "zip",
+      "presence": {
+        "entity": "singer",
+        "height": 2
+      },
+      "markers": ".rgi-markers .rgi-marker",
+      "carriers": [
+        {
+          "selector": ".rgi-marker[data-entity='singer-head']",
+          "min": 1
+        },
+        {
+          "selector": ".rgi-target[data-entity='garden-lightwell-core']",
+          "min": 1
+        },
+        {
+          "selector": ".rgi-target[data-entity='skybridge-relay-eye']",
+          "min": 1
+        }
+      ],
+      "required_content": [
+        {
+          "selector": ".rgi-marker[data-entity='singer-head']",
+          "includes": [
+            "MIRA"
+          ]
+        },
+        {
+          "selector": ".rgi-target[data-entity='garden-lightwell-core']",
+          "includes": [
+            "Wake garden lightwell"
+          ]
+        },
+        {
+          "selector": ".rgi-target[data-entity='skybridge-relay-eye']",
+          "includes": [
+            "Light skybridge relay"
+          ]
+        }
+      ],
+      "screenshot": "artifacts/presentation-budget-opening/garden-choice-desktop.png"
+    },
+    {
+      "name": "opening-garden-response-desktop",
+      "cinematic": true,
+      "clicks": [
+        "Wake garden lightwell"
+      ],
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-intro')?.dataset.chosenPath==='garden-lightwell'&&!FirstWordsReview.runtime.world.animating&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='speech'",
+      "wait_timeout": 30000,
+      "focal": "zip",
+      "presence": {
+        "entity": "singer",
+        "height": 2
+      },
+      "markers": ".rgi-markers .rgi-marker",
+      "required_content": [
+        {
+          "selector": "#rgi-dialogue",
+          "includes": [
+            "It answered!"
+          ]
+        },
+        {
+          "selector": ".rgi-target[data-entity='garden-receiver-beacon']",
+          "includes": [
+            "Look at the shaded terrace"
+          ]
+        }
+      ],
+      "screenshot": "artifacts/presentation-budget-opening/garden-response-desktop.png"
+    },
+    {
+      "name": "opening-garden-destination-desktop",
+      "cinematic": true,
+      "clicks": ["Look at the shaded terrace"],
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-body')?.textContent.includes('Two shaded seats.')&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='body'",
+      "focal": "garden-receiver",
+      "presence": {"entity":"garden-receiver","height":3.1},
+      "required_content": [{"selector":"#rgi-body","includes":["Two shaded seats."]}],
+      "screenshot": "artifacts/presentation-budget-opening/garden-destination-desktop.png"
+    },
+    {
+      "name": "opening-skybridge-choice-desktop",
+      "viewport": [
+        1280,
+        720
+      ],
+      "goto": true,
+      "cinematic": false,
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-title')?.textContent==='A city that answers.'&&!FirstWordsReview.runtime.world.animating&&document.querySelectorAll('.rgi-target').length===2&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='body'",
+      "focal": "zip",
+      "presence": {
+        "entity": "singer",
+        "height": 2
+      },
+      "markers": ".rgi-markers .rgi-marker",
+      "carriers": [
+        {
+          "selector": ".rgi-marker[data-entity='singer-head']",
+          "min": 1
+        },
+        {
+          "selector": ".rgi-target[data-entity='garden-lightwell-core']",
+          "min": 1
+        },
+        {
+          "selector": ".rgi-target[data-entity='skybridge-relay-eye']",
+          "min": 1
+        }
+      ],
+      "required_content": [
+        {
+          "selector": ".rgi-marker[data-entity='singer-head']",
+          "includes": [
+            "MIRA"
+          ]
+        },
+        {
+          "selector": ".rgi-target[data-entity='garden-lightwell-core']",
+          "includes": [
+            "Wake garden lightwell"
+          ]
+        },
+        {
+          "selector": ".rgi-target[data-entity='skybridge-relay-eye']",
+          "includes": [
+            "Light skybridge relay"
+          ]
+        }
+      ],
+      "screenshot": "artifacts/presentation-budget-opening/skybridge-choice-desktop.png"
+    },
+    {
+      "name": "opening-skybridge-response-desktop",
+      "cinematic": true,
+      "clicks": [
+        "Light skybridge relay"
+      ],
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-intro')?.dataset.chosenPath==='skybridge-relay'&&!FirstWordsReview.runtime.world.animating&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='speech'",
+      "wait_timeout": 30000,
+      "focal": "zip",
+      "presence": {
+        "entity": "singer",
+        "height": 2
+      },
+      "markers": ".rgi-markers .rgi-marker",
+      "required_content": [
+        {
+          "selector": "#rgi-dialogue",
+          "includes": [
+            "Our balcony!"
+          ]
+        },
+        {
+          "selector": ".rgi-target[data-entity='skybridge-receiver-beacon']",
+          "includes": [
+            "Look at the train balcony"
+          ]
+        }
+      ],
+      "screenshot": "artifacts/presentation-budget-opening/skybridge-response-desktop.png"
+    },
+    {
+      "name": "opening-skybridge-destination-desktop",
+      "cinematic": true,
+      "clicks": ["Look at the train balcony"],
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-body')?.textContent.includes('Trains pass below.')&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='body'",
+      "focal": "skybridge-receiver",
+      "presence": {"entity":"skybridge-receiver","height":2.2},
+      "required_content": [{"selector":"#rgi-body","includes":["Trains pass below."]}],
+      "screenshot": "artifacts/presentation-budget-opening/skybridge-destination-desktop.png"
+    },
+    {
+      "name": "opening-garden-choice-phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "goto": true,
+      "cinematic": false,
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-title')?.textContent==='A city that answers.'&&!FirstWordsReview.runtime.world.animating&&document.querySelectorAll('.rgi-target').length===2&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='body'",
+      "focal": "zip",
+      "presence": {
+        "entity": "singer",
+        "height": 2
+      },
+      "markers": ".rgi-markers .rgi-marker",
+      "carriers": [
+        {
+          "selector": ".rgi-marker[data-entity='singer-head']",
+          "min": 1
+        },
+        {
+          "selector": ".rgi-target[data-entity='garden-lightwell-core']",
+          "min": 1
+        },
+        {
+          "selector": ".rgi-target[data-entity='skybridge-relay-eye']",
+          "min": 1
+        }
+      ],
+      "required_content": [
+        {
+          "selector": ".rgi-marker[data-entity='singer-head']",
+          "includes": [
+            "MIRA"
+          ]
+        },
+        {
+          "selector": ".rgi-target[data-entity='garden-lightwell-core']",
+          "includes": [
+            "Wake garden lightwell"
+          ]
+        },
+        {
+          "selector": ".rgi-target[data-entity='skybridge-relay-eye']",
+          "includes": [
+            "Light skybridge relay"
+          ]
+        }
+      ],
+      "screenshot": "artifacts/presentation-budget-opening/garden-choice-phone.png",
+      "touch_controls": [
+        ".game-move-stick",
+        ".game-view-tools"
+      ],
+      "coverage_max": 0.2,
+      "coverage_max_reason": "The explorable phone opening needs the on-screen movement stick and camera cluster for direct protagonist control; informational UI must still cover no more than 15%."
+    },
+    {
+      "name": "opening-choice-paused-phone",
+      "cinematic": false,
+      "clicks": [
+        "Pause story motion"
+      ],
+      "wait_eval": "()=>document.querySelector('#rgi-intro')?.classList.contains('rgi-paused')",
+      "focal": "zip",
+      "presence": {
+        "entity": "singer",
+        "height": 2
+      },
+      "markers": ".rgi-markers .rgi-marker",
+      "carriers": [
+        {
+          "selector": ".rgi-marker[data-entity='singer-head']",
+          "min": 1
+        }
+      ],
+      "required_content": [
+        {
+          "selector": "#rgi-title",
+          "includes": [
+            "A city that answers."
+          ]
+        },
+        {
+          "selector": "#rgi-body",
+          "includes": [
+            "You are Zip.",
+            "Explore or send a signal."
+          ]
+        },
+        {
+          "selector": ".rgi-marker[data-entity='singer-head']",
+          "includes": [
+            "MIRA"
+          ]
+        }
+      ],
+      "screenshot": "artifacts/presentation-budget-opening/choice-paused-phone.png"
+    },
+    {
+      "name": "opening-garden-response-phone",
+      "cinematic": true,
+      "steps": [
+        {
+          "click": "Resume story motion"
+        },
+        {
+          "click": "Wake garden lightwell"
+        }
+      ],
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-intro')?.dataset.chosenPath==='garden-lightwell'&&!FirstWordsReview.runtime.world.animating&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='speech'",
+      "wait_timeout": 30000,
+      "focal": "zip",
+      "presence": {
+        "entity": "singer",
+        "height": 2
+      },
+      "markers": ".rgi-markers .rgi-marker",
+      "required_content": [
+        {
+          "selector": "#rgi-dialogue",
+          "includes": [
+            "It answered!"
+          ]
+        },
+        {
+          "selector": ".rgi-target[data-entity='garden-receiver-beacon']",
+          "includes": [
+            "Look at the shaded terrace"
+          ]
+        }
+      ],
+      "screenshot": "artifacts/presentation-budget-opening/garden-response-phone.png"
+    },
+    {
+      "name": "opening-garden-response-phone-200",
+      "cinematic": true,
+      "text_scale": 2,
+      "markers": ".rgi-markers .rgi-marker",
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-intro')?.dataset.chosenPath==='garden-lightwell'&&!FirstWordsReview.runtime.world.animating&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='speech'",
+      "required_content": [
+        {"selector":"#rgi-dialogue","includes":["It answered!"]},
+        {"selector":".rgi-target[data-entity='garden-receiver-beacon']","includes":["Look at the shaded terrace"]}
+      ],
+      "screenshot": "artifacts/presentation-budget-opening/garden-response-phone-200.png"
+    },
+    {
+      "name": "opening-garden-destination-phone-200",
+      "cinematic": true,
+      "text_scale": 2,
+      "clicks": ["Look at the shaded terrace"],
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-body')?.textContent.includes('Two shaded seats.')&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='body'",
+      "focal": "garden-receiver",
+      "presence": {"entity":"garden-receiver","height":3.1},
+      "required_content": [{"selector":"#rgi-body","includes":["Two shaded seats."]}],
+      "screenshot": "artifacts/presentation-budget-opening/garden-destination-phone-200.png"
+    },
+    {
+      "name": "opening-garden-destination-speech-phone-200",
+      "cinematic": true,
+      "text_scale": 2,
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-body')?.textContent.includes('Two shaded seats.')&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='speech'",
+      "focal": "garden-receiver",
+      "presence": {"entity":"garden-receiver","height":3.1},
+      "required_content": [{"selector":"#rgi-dialogue","includes":["Sit with me."]}],
+      "screenshot": "artifacts/presentation-budget-opening/garden-destination-speech-phone-200.png"
+    },
+    {
+      "name": "opening-skybridge-choice-phone",
+      "viewport": [
+        390,
+        844
+      ],
+      "goto": true,
+      "cinematic": false,
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-title')?.textContent==='A city that answers.'&&!FirstWordsReview.runtime.world.animating&&document.querySelectorAll('.rgi-target').length===2&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='body'",
+      "focal": "zip",
+      "presence": {
+        "entity": "singer",
+        "height": 2
+      },
+      "markers": ".rgi-markers .rgi-marker",
+      "carriers": [
+        {
+          "selector": ".rgi-marker[data-entity='singer-head']",
+          "min": 1
+        },
+        {
+          "selector": ".rgi-target[data-entity='garden-lightwell-core']",
+          "min": 1
+        },
+        {
+          "selector": ".rgi-target[data-entity='skybridge-relay-eye']",
+          "min": 1
+        }
+      ],
+      "required_content": [
+        {
+          "selector": ".rgi-marker[data-entity='singer-head']",
+          "includes": [
+            "MIRA"
+          ]
+        },
+        {
+          "selector": ".rgi-target[data-entity='garden-lightwell-core']",
+          "includes": [
+            "Wake garden lightwell"
+          ]
+        },
+        {
+          "selector": ".rgi-target[data-entity='skybridge-relay-eye']",
+          "includes": [
+            "Light skybridge relay"
+          ]
+        }
+      ],
+      "screenshot": "artifacts/presentation-budget-opening/skybridge-choice-phone.png",
+      "touch_controls": [
+        ".game-move-stick",
+        ".game-view-tools"
+      ],
+      "coverage_max": 0.2,
+      "coverage_max_reason": "The explorable phone opening needs the on-screen movement stick and camera cluster for direct protagonist control; informational UI must still cover no more than 15%."
+    },
+    {
+      "name": "opening-skybridge-response-phone",
+      "cinematic": true,
+      "clicks": [
+        "Light skybridge relay"
+      ],
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-intro')?.dataset.chosenPath==='skybridge-relay'&&!FirstWordsReview.runtime.world.animating&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='speech'",
+      "wait_timeout": 30000,
+      "focal": "zip",
+      "presence": {
+        "entity": "singer",
+        "height": 2
+      },
+      "markers": ".rgi-markers .rgi-marker",
+      "required_content": [
+        {
+          "selector": "#rgi-dialogue",
+          "includes": [
+            "Our balcony!"
+          ]
+        },
+        {
+          "selector": ".rgi-target[data-entity='skybridge-receiver-beacon']",
+          "includes": [
+            "Look at the train balcony"
+          ]
+        }
+      ],
+      "screenshot": "artifacts/presentation-budget-opening/skybridge-response-phone.png"
+    },
+    {
+      "name": "opening-skybridge-destination-phone",
+      "cinematic": true,
+      "clicks": ["Look at the train balcony"],
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-body')?.textContent.includes('Trains pass below.')&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='body'",
+      "focal": "skybridge-receiver",
+      "presence": {"entity":"skybridge-receiver","height":2.2},
+      "required_content": [{"selector":"#rgi-body","includes":["Trains pass below."]}],
+      "screenshot": "artifacts/presentation-budget-opening/skybridge-destination-phone.png"
+    },
+    {
+      "name": "opening-skybridge-response-phone-200",
+      "viewport": [390,844],
+      "goto": true,
+      "cinematic": true,
+      "text_scale": 2,
+      "steps": [
+        {"wait_eval":"()=>window.FirstWordsReview&&document.querySelectorAll('.rgi-target').length===2&&!FirstWordsReview.runtime.world.animating"},
+        {"click":"Light skybridge relay"}
+      ],
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-intro')?.dataset.chosenPath==='skybridge-relay'&&!FirstWordsReview.runtime.world.animating&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='speech'",
+      "focal": "zip",
+      "presence": {"entity":"singer","height":2},
+      "markers": ".rgi-markers .rgi-marker",
+      "required_content": [
+        {"selector":"#rgi-dialogue","includes":["Our balcony!"]},
+        {"selector":".rgi-target[data-entity='skybridge-receiver-beacon']","includes":["Look at the train balcony"]}
+      ],
+      "screenshot": "artifacts/presentation-budget-opening/skybridge-response-phone-200.png"
+    },
+    {
+      "name": "opening-skybridge-destination-phone-200",
+      "cinematic": true,
+      "text_scale": 2,
+      "clicks": ["Look at the train balcony"],
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-body')?.textContent.includes('Trains pass below.')&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='body'",
+      "focal": "skybridge-receiver",
+      "presence": {"entity":"skybridge-receiver","height":2.2},
+      "required_content": [{"selector":"#rgi-body","includes":["Trains pass below."]}],
+      "screenshot": "artifacts/presentation-budget-opening/skybridge-destination-phone-200.png"
+    },
+    {
+      "name": "opening-skybridge-destination-speech-phone-200",
+      "cinematic": true,
+      "text_scale": 2,
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-body')?.textContent.includes('Trains pass below.')&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='speech'",
+      "focal": "skybridge-receiver",
+      "presence": {"entity":"skybridge-receiver","height":2.2},
+      "required_content": [{"selector":"#rgi-dialogue","includes":["Stay awhile?"]}],
+      "screenshot": "artifacts/presentation-budget-opening/skybridge-destination-speech-phone-200.png"
+    },
+    {
+      "name": "opening-garden-destination-phone",
+      "viewport": [390,844],
+      "goto": true,
+      "cinematic": true,
+      "steps": [
+        {"wait_eval":"()=>window.FirstWordsReview&&document.querySelectorAll('.rgi-target').length===2&&!FirstWordsReview.runtime.world.animating"},
+        {"click":"Wake garden lightwell"},
+        {"wait_eval":"()=>document.querySelector('.rgi-target[data-entity=\"garden-receiver-beacon\"]')&&!FirstWordsReview.runtime.world.animating"},
+        {"click":"Look at the shaded terrace"}
+      ],
+      "wait_eval": "()=>window.FirstWordsReview&&document.querySelector('#rgi-body')?.textContent.includes('Two shaded seats.')&&document.querySelector('#rgi-intro')?.dataset.bandPhase==='body'",
+      "focal": "garden-receiver",
+      "presence": {"entity":"garden-receiver","height":3.1},
+      "required_content": [{"selector":"#rgi-body","includes":["Two shaded seats."]}],
+      "screenshot": "artifacts/presentation-budget-opening/garden-destination-phone.png"
+    }
+  ]
+}

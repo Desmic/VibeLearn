@@ -1,0 +1,394 @@
+{
+  "version": 1,
+  "approval_meaning": "Candidate means source/license/integrity may be used in isolated experiments only; it does not mean visual or product acceptance. No entries are approved for general product selection.",
+  "assets": [
+    {
+      "id": "quaternius.animated-robot",
+      "role": "character.robot",
+      "style_families": [
+        "graphic-techno-fantasy",
+        "harbor-industrial"
+      ],
+      "importance": [
+        "hero",
+        "supporting"
+      ],
+      "status": "candidate",
+      "license_clearance": "cleared",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source_url": "https://raw.githubusercontent.com/age2pierre/solid-akkadi/0062ceaa6dd8cda2d2b69cbcc5f80724928543bf/demo-app/public/assets/Animated_Robot.glb",
+      "source_pin": {
+        "kind": "git-blob-sha1",
+        "value": "8784b36b4a174bfc89a31150b39f1d4fd1853dfa"
+      },
+      "provenance": "web/assets/QUATERNIUS-ANIMATED-ROBOT-LICENSE.txt",
+      "provenance_sha256": "4f4e71f3b6f1c5e900bd4cd86edec7c41576d318b42004d762f89e8c6b0ca591",
+      "path": "web/assets/quaternius-animated-robot.glb",
+      "sha256": "54f1a6999cca701cdc2f8fb67bcd9a283e1154cb80cac356f031bed7c2e74cbe",
+      "bytes": 401024,
+      "runtime": {
+        "triangle_count": 3237,
+        "embedded_texture_count": 0
+      }
+    },
+    {
+      "id": "kenney.tree-oak",
+      "role": "foliage.tree",
+      "style_families": [
+        "graphic-techno-fantasy",
+        "harbor-industrial"
+      ],
+      "importance": [
+        "supporting",
+        "background"
+      ],
+      "status": "candidate",
+      "license_clearance": "cleared",
+      "license": "CC0-1.0",
+      "license_url": "https://kenney.nl/support",
+      "source_url": "https://kenney.nl/media/pages/assets/nature-kit/37ac38a37b-1677698939/kenney_nature-kit.zip",
+      "source_member": "Models/GLTF format/tree_oak.glb",
+      "source_pin": {
+        "kind": "archive-sha256",
+        "value": "fa7974a0d342bfe63c38664ba9f8ec1a4aab8ea25f099bdc56870e33588c4d9d"
+      },
+      "provenance": "web/assets/KENNEY-NATURE-KIT-LICENSE.txt",
+      "provenance_sha256": "467363cdeb3f7a2a77d8663c43c9ab10dc743f815941bd193b4481fa6d0f6cb9",
+      "path": "web/assets/kenney-tree-oak.glb",
+      "sha256": "d7fd8773674928c50c11b66d12c636d49bdcc15a8b1c7fbb98e6f63a3439a3f3",
+      "bytes": 14644,
+      "runtime": {
+        "triangle_count": 196,
+        "embedded_texture_count": 0
+      }
+    },
+    {
+      "id": "quaternius.birch-tree-5",
+      "role": "foliage.tree",
+      "style_families": [
+        "graphic-techno-fantasy"
+      ],
+      "importance": [
+        "landmark"
+      ],
+      "status": "candidate",
+      "license_clearance": "cleared",
+      "license": "CC0-1.0",
+      "license_url": "https://quaternius.com/packs/ultimatestylizednature.html",
+      "source_url": "https://drive.google.com/drive/folders/1-ob9Aade1RIM3A_XKoQAOG6XqF2IDAIC",
+      "source_pin": {
+        "kind": "packaged-output-sha256",
+        "value": "5e7b57f866ccb1e86bdf2611ac7286939aa29e663bad0b335b0c0d4b1cf826bd"
+      },
+      "provenance": "web/assets/QUATERNIUS-STYLIZED-NATURE-BIRCH-TREE-5-LICENSE.txt",
+      "provenance_sha256": "5c280b7ad41307778ec8fccf561210d83212219a347b60c17457aec033d9eb12",
+      "path": "web/assets/quaternius-birch-tree-5.glb",
+      "sha256": "5e7b57f866ccb1e86bdf2611ac7286939aa29e663bad0b335b0c0d4b1cf826bd",
+      "bytes": 1276252,
+      "runtime": {
+        "triangle_count": 4520,
+        "embedded_texture_count": 2
+      }
+    },
+    {
+      "id": "polyhaven.syferfontein-0d-clear-puresky",
+      "role": "environment.sky",
+      "style_families": [
+        "graphic-techno-fantasy",
+        "harbor-industrial"
+      ],
+      "importance": [
+        "background"
+      ],
+      "status": "candidate",
+      "license_clearance": "cleared",
+      "license": "CC0-1.0",
+      "license_url": "https://polyhaven.com/license",
+      "source_url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/syferfontein_0d_clear_puresky_1k.hdr",
+      "source_pin": {
+        "kind": "source-md5",
+        "value": "1784020494e7f1f60b0e560770b66e15"
+      },
+      "provenance": "web/lab/assets/PROVENANCE.json",
+      "provenance_sha256": "400d9011969988fe90c7ceca7defb321357ce853e446127ffecc1571612b3cf8",
+      "path": "web/lab/assets/syferfontein_0d_clear_puresky_1k.hdr",
+      "sha256": "5f65699ed38672e9ce1f1fc12876433eb8b994fea7c0070d28466779a75c7c48",
+      "bytes": 1066923,
+      "runtime": {
+        "triangle_count": 0,
+        "embedded_texture_count": 1
+      }
+    },
+    {
+      "id": "kaykit.forest.tree-1-a-color1",
+      "role": "foliage.tree",
+      "style_families": [
+        "low-poly-toy"
+      ],
+      "importance": [
+        "supporting",
+        "background"
+      ],
+      "status": "candidate",
+      "license_clearance": "cleared",
+      "license": "CC0-1.0",
+      "license_url": "https://kaylousberg.itch.io/kaykit-forest",
+      "source_url": "https://kaylousberg.itch.io/kaykit-forest",
+      "source_pin": {
+        "kind": "archive-sha256",
+        "value": "2ee83e63bb7695f2d884ec27ddf6fce020789a452e7d5c5b0bbdfc4f6ea1fc8c"
+      },
+      "provenance": "web/lab/asset-kit-assets/PROVENANCE.json",
+      "provenance_sha256": "e70fd97dbca848c9540ce919f63f114a39be94088186d12d010b3e2e94aa6606",
+      "license_record": "web/lab/asset-kit-assets/License.txt",
+      "license_sha256": "987811fa42c7548ad487324531813b0210ee6d1ebd410089e881820630e3be54",
+      "path": "web/lab/asset-kit-assets/Tree_1_A_Color1.gltf",
+      "main_bytes": 3061,
+      "dependencies": [
+        {
+          "path": "web/lab/asset-kit-assets/Tree_1_A_Color1.bin",
+          "bytes": 17484,
+          "sha256": "76a10ffa74960d730f0895a2599e5d56cc50a553d6624a14422420eb9b083979"
+        },
+        {
+          "path": "web/lab/asset-kit-assets/forest_texture.png",
+          "bytes": 48679,
+          "sha256": "406c01e0ac1d3368fc7b26ff5fb0d3335ba5e48bd19a703540ed92ee3971ea39"
+        }
+      ],
+      "bytes": 69224,
+      "sha256": "9d972eba9d61fc563cb7c3248f1be057190859ce2554ad2032df27c3d09e06c6",
+      "runtime": {
+        "triangle_count": 530,
+        "embedded_texture_count": 0,
+        "external_texture_count": 1
+      }
+    },
+    {
+      "id": "kaykit.forest.tree-2-a-color1",
+      "role": "foliage.tree",
+      "style_families": [
+        "low-poly-toy"
+      ],
+      "importance": [
+        "supporting",
+        "background"
+      ],
+      "status": "candidate",
+      "license_clearance": "cleared",
+      "license": "CC0-1.0",
+      "license_url": "https://kaylousberg.itch.io/kaykit-forest",
+      "source_url": "https://kaylousberg.itch.io/kaykit-forest",
+      "source_pin": {
+        "kind": "archive-sha256",
+        "value": "2ee83e63bb7695f2d884ec27ddf6fce020789a452e7d5c5b0bbdfc4f6ea1fc8c"
+      },
+      "provenance": "web/lab/asset-kit-assets/PROVENANCE.json",
+      "provenance_sha256": "e70fd97dbca848c9540ce919f63f114a39be94088186d12d010b3e2e94aa6606",
+      "license_record": "web/lab/asset-kit-assets/License.txt",
+      "license_sha256": "987811fa42c7548ad487324531813b0210ee6d1ebd410089e881820630e3be54",
+      "path": "web/lab/asset-kit-assets/Tree_2_A_Color1.gltf",
+      "main_bytes": 3057,
+      "dependencies": [
+        {
+          "path": "web/lab/asset-kit-assets/Tree_2_A_Color1.bin",
+          "bytes": 8192,
+          "sha256": "fd413ad809ff30939faf1190194654892066aba94f67ec6f96ce257fa5b34e35"
+        },
+        {
+          "path": "web/lab/asset-kit-assets/forest_texture.png",
+          "bytes": 48679,
+          "sha256": "406c01e0ac1d3368fc7b26ff5fb0d3335ba5e48bd19a703540ed92ee3971ea39"
+        }
+      ],
+      "bytes": 59928,
+      "sha256": "793570b93cd350b935bc88c766317675890f102d157965d2aca3d8daef5ee49b",
+      "runtime": {
+        "triangle_count": 336,
+        "embedded_texture_count": 0,
+        "external_texture_count": 1
+      }
+    },
+    {
+      "id": "kaykit.forest.tree-3-a-color1",
+      "role": "foliage.tree",
+      "style_families": [
+        "low-poly-toy"
+      ],
+      "importance": [
+        "supporting",
+        "background"
+      ],
+      "status": "candidate",
+      "license_clearance": "cleared",
+      "license": "CC0-1.0",
+      "license_url": "https://kaylousberg.itch.io/kaykit-forest",
+      "source_url": "https://kaylousberg.itch.io/kaykit-forest",
+      "source_pin": {
+        "kind": "archive-sha256",
+        "value": "2ee83e63bb7695f2d884ec27ddf6fce020789a452e7d5c5b0bbdfc4f6ea1fc8c"
+      },
+      "provenance": "web/lab/asset-kit-assets/PROVENANCE.json",
+      "provenance_sha256": "e70fd97dbca848c9540ce919f63f114a39be94088186d12d010b3e2e94aa6606",
+      "license_record": "web/lab/asset-kit-assets/License.txt",
+      "license_sha256": "987811fa42c7548ad487324531813b0210ee6d1ebd410089e881820630e3be54",
+      "path": "web/lab/asset-kit-assets/Tree_3_A_Color1.gltf",
+      "main_bytes": 3061,
+      "dependencies": [
+        {
+          "path": "web/lab/asset-kit-assets/Tree_3_A_Color1.bin",
+          "bytes": 29740,
+          "sha256": "ea2f20e847bd3bcf748b9f1cf9932abe45967db8dcacfeafaea1f07e3da6a2e9"
+        },
+        {
+          "path": "web/lab/asset-kit-assets/forest_texture.png",
+          "bytes": 48679,
+          "sha256": "406c01e0ac1d3368fc7b26ff5fb0d3335ba5e48bd19a703540ed92ee3971ea39"
+        }
+      ],
+      "bytes": 81480,
+      "sha256": "a5140f21978004544844df4c2969625724c2c263e74f798716ea9e115216a230",
+      "runtime": {
+        "triangle_count": 978,
+        "embedded_texture_count": 0,
+        "external_texture_count": 1
+      }
+    },
+    {
+      "id": "kaykit.forest.bush-4-a-color1",
+      "role": "foliage.shrub",
+      "style_families": [
+        "low-poly-toy"
+      ],
+      "importance": [
+        "supporting",
+        "background"
+      ],
+      "status": "candidate",
+      "license_clearance": "cleared",
+      "license": "CC0-1.0",
+      "license_url": "https://kaylousberg.itch.io/kaykit-forest",
+      "source_url": "https://kaylousberg.itch.io/kaykit-forest",
+      "source_pin": {
+        "kind": "archive-sha256",
+        "value": "2ee83e63bb7695f2d884ec27ddf6fce020789a452e7d5c5b0bbdfc4f6ea1fc8c"
+      },
+      "provenance": "web/lab/asset-kit-assets/PROVENANCE.json",
+      "provenance_sha256": "e70fd97dbca848c9540ce919f63f114a39be94088186d12d010b3e2e94aa6606",
+      "license_record": "web/lab/asset-kit-assets/License.txt",
+      "license_sha256": "987811fa42c7548ad487324531813b0210ee6d1ebd410089e881820630e3be54",
+      "path": "web/lab/asset-kit-assets/Bush_4_A_Color1.gltf",
+      "main_bytes": 3049,
+      "dependencies": [
+        {
+          "path": "web/lab/asset-kit-assets/Bush_4_A_Color1.bin",
+          "bytes": 1032,
+          "sha256": "e6716cb3d232d0f24f719ef9edf61fb1218e570f3767228c4dc155eaf7e2f56f"
+        },
+        {
+          "path": "web/lab/asset-kit-assets/forest_texture.png",
+          "bytes": 48679,
+          "sha256": "406c01e0ac1d3368fc7b26ff5fb0d3335ba5e48bd19a703540ed92ee3971ea39"
+        }
+      ],
+      "bytes": 52760,
+      "sha256": "56b56b9187350ad1222a4bd61112ed3c2a839a49ad876ca6e01ef17b426f3d02",
+      "runtime": {
+        "triangle_count": 44,
+        "embedded_texture_count": 0,
+        "external_texture_count": 1
+      }
+    },
+    {
+      "id": "kaykit.forest.grass-1-a-singlesided-color1",
+      "role": "foliage.grass",
+      "style_families": [
+        "low-poly-toy"
+      ],
+      "importance": [
+        "background"
+      ],
+      "status": "candidate",
+      "license_clearance": "cleared",
+      "license": "CC0-1.0",
+      "license_url": "https://kaylousberg.itch.io/kaykit-forest",
+      "source_url": "https://kaylousberg.itch.io/kaykit-forest",
+      "source_pin": {
+        "kind": "archive-sha256",
+        "value": "2ee83e63bb7695f2d884ec27ddf6fce020789a452e7d5c5b0bbdfc4f6ea1fc8c"
+      },
+      "provenance": "web/lab/asset-kit-assets/PROVENANCE.json",
+      "provenance_sha256": "e70fd97dbca848c9540ce919f63f114a39be94088186d12d010b3e2e94aa6606",
+      "license_record": "web/lab/asset-kit-assets/License.txt",
+      "license_sha256": "987811fa42c7548ad487324531813b0210ee6d1ebd410089e881820630e3be54",
+      "path": "web/lab/asset-kit-assets/Grass_1_A_Singlesided_Color1.gltf",
+      "main_bytes": 3088,
+      "dependencies": [
+        {
+          "path": "web/lab/asset-kit-assets/Grass_1_A_Singlesided_Color1.bin",
+          "bytes": 660,
+          "sha256": "06b6bab266b192ad1659748fc938e1db29dfb7d775ba556f4b5132816ae60954"
+        },
+        {
+          "path": "web/lab/asset-kit-assets/forest_texture.png",
+          "bytes": 48679,
+          "sha256": "406c01e0ac1d3368fc7b26ff5fb0d3335ba5e48bd19a703540ed92ee3971ea39"
+        }
+      ],
+      "bytes": 52427,
+      "sha256": "8adcb284e5b7de6b363fd13866c23b6e96c9a3a461aefecc0d5cfd67136cd3ff",
+      "runtime": {
+        "triangle_count": 14,
+        "embedded_texture_count": 0,
+        "external_texture_count": 1
+      }
+    },
+    {
+      "id": "kaykit.forest.rock-3-a-color1",
+      "role": "terrain.rock",
+      "style_families": [
+        "low-poly-toy"
+      ],
+      "importance": [
+        "supporting",
+        "background"
+      ],
+      "status": "candidate",
+      "license_clearance": "cleared",
+      "license": "CC0-1.0",
+      "license_url": "https://kaylousberg.itch.io/kaykit-forest",
+      "source_url": "https://kaylousberg.itch.io/kaykit-forest",
+      "source_pin": {
+        "kind": "archive-sha256",
+        "value": "2ee83e63bb7695f2d884ec27ddf6fce020789a452e7d5c5b0bbdfc4f6ea1fc8c"
+      },
+      "provenance": "web/lab/asset-kit-assets/PROVENANCE.json",
+      "provenance_sha256": "e70fd97dbca848c9540ce919f63f114a39be94088186d12d010b3e2e94aa6606",
+      "license_record": "web/lab/asset-kit-assets/License.txt",
+      "license_sha256": "987811fa42c7548ad487324531813b0210ee6d1ebd410089e881820630e3be54",
+      "path": "web/lab/asset-kit-assets/Rock_3_A_Color1.gltf",
+      "main_bytes": 3056,
+      "dependencies": [
+        {
+          "path": "web/lab/asset-kit-assets/Rock_3_A_Color1.bin",
+          "bytes": 4440,
+          "sha256": "8659daf4bc724f414eda02193bc6a48132b595eef7c62009b7c0a3d93a8aa9b2"
+        },
+        {
+          "path": "web/lab/asset-kit-assets/forest_texture.png",
+          "bytes": 48679,
+          "sha256": "406c01e0ac1d3368fc7b26ff5fb0d3335ba5e48bd19a703540ed92ee3971ea39"
+        }
+      ],
+      "bytes": 56175,
+      "sha256": "65484de298f09f7ed5bcf781d7febde1a2df4f0f76b8a6396591240963152c88",
+      "runtime": {
+        "triangle_count": 84,
+        "embedded_texture_count": 0,
+        "external_texture_count": 1
+      }
+    }
+  ],
+  "runtime_metadata_basis": "Triangle and texture counts are recorded during inventory from the pinned GLB/glTF; the resolver validates exact package bytes and hashes, but does not reparse geometry or measure GPU cost on each resolve. Shared glTF atlas bytes are counted once per independently loaded asset request, not deduplicated across a multi-asset scene."
+}

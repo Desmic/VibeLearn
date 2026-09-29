@@ -67,6 +67,46 @@ class PlayerCheckpointTests(unittest.TestCase):
         self.assertTrue(self.checkpoint({**second, 'position': [12, 2, 24]}))
         self.assertEqual(self.position(), [17, 2, 23])
 
+    def test_committing_an_action_releases_held_movement_without_a_keyup(self):
+        self.page.keyboard.down('d')
+        self.page.evaluate('controls.update(.05)')
+        self.assertTrue(self.page.evaluate('controls.stats().moving'))
+        self.page.evaluate('controls.releaseInputs()')
+        after = self.position()
+        self.page.evaluate('controls.update(.05)')
+        self.assertEqual(self.position(), after)
+        self.assertFalse(self.page.evaluate('controls.stats().moving'))
+        self.page.keyboard.up('d')
+
+    def test_optional_shot_at_checkpoint_preserves_subsequent_player_view(self):
+        self.assertTrue(self.checkpoint({'id':'terrace','position':[13,2,23],
+                                         'pitch':14,'distance':9,'yaw':22}))
+        shot=self.page.evaluate('controls.snapshot()')
+        self.assertEqual((shot['pitch'],shot['distance'],shot['yaw']),(14,9,22))
+        self.page.evaluate("controls.restore({...controls.snapshot(),pitch:24,distance:11})")
+        self.assertTrue(self.checkpoint({'id':'terrace','position':[12,2,24],
+                                         'pitch':14,'distance':9,'yaw':22}))
+        view=self.page.evaluate('controls.snapshot()')
+        self.assertEqual((view['pitch'],view['distance'],view['position']),(24,11,[13,2,23]))
+
+    def test_authored_recenter_view_uses_portrait_values_then_clears_on_mode_exit(self):
+        self.assertTrue(self.checkpoint({'id':'observatory','position':[13,2,23]}))
+        self.page.evaluate("controls.setRecenterView({yaw:35,pitch:18,distance:10,portraitPitch:22,portraitDistance:13})")
+        self.page.evaluate("controls.restore({...controls.snapshot(),yaw:80,pitch:40,distance:6})")
+        self.page.get_by_role('button', name='Recenter camera').click()
+        view=self.page.evaluate('controls.snapshot()')
+        self.assertEqual((view['yaw'],view['pitch'],view['distance'],view['position']),
+                         (35,18,10,[13,2,23]))
+        self.page.locator('#world').evaluate("el=>{el.style.width='390px';el.style.height='844px'}")
+        self.page.get_by_role('button', name='Recenter camera').click()
+        view=self.page.evaluate('controls.snapshot()')
+        self.assertEqual((view['yaw'],view['pitch'],view['distance'],view['position']),
+                         (35,22,13,[13,2,23]))
+        self.page.evaluate("()=>{controls.setMode('orbit','replay');controls.setMode('third-person','another-world')}")
+        self.page.get_by_role('button', name='Recenter camera').click()
+        view=self.page.evaluate('controls.snapshot()')
+        self.assertEqual((view['yaw'],view['pitch'],view['distance']),(0,30,8))
+
     def test_invalid_blocked_and_hidden_surface_rejections_do_not_consume_id(self):
         original = self.position()
         invalid = [None, {}, {'id': '', 'position': [13, 2, 23]},

@@ -1,12 +1,19 @@
 {
   "schema": "vibelearn.learning-design.v1",
   "id": "llm-first-principles",
-  "version": "5-draft",
+  "version": "8-draft",
   "author": "codex-implementation",
+  "prototype_scope": {
+    "steps": [
+      "opening"
+    ],
+    "purpose": "Test only the resonance-trail prologue choice, reciprocal response, path reveal, rupture, voice-loss cause and controls handoff as one playable attention-and-relationship chunk.",
+    "not_authorized_by_design_pass": "This scoped pass does not approve tutorial, Level 1, later encounters, runtime alignment, conceptual mastery, release or deployment. Entry and saved-checkpoint routing are unchanged regression boundaries."
+  },
   "audience": "Beginners who can read short everyday instructions; prior LLM knowledge is not assumed.",
   "starting_knowledge": "Reading simple messages; movement and interaction are taught separately.",
   "learning_promise": "Identify the complete input used at the next generation step, and choose task-relevant context while distinguishing what supplied information supports from what the task requires.",
-  "scope_limits": "Reviewed-design proposal for the existing saved Bellweather chapter's presentation repair, not current runtime compliance. Two concepts in an authored word-piece toy; no mastery, delayed-retention or far-transfer claim. Real tokens may be smaller than words and real models may produce different continuations. No training or attention mechanism is taught. Currentness is judged only within the sources the player supplies; the chapter never teaches 'latest note always wins' as a general rule. Motion/audio quality remain deferred.",
+  "scope_limits": "Proposed prologue-only resonance-trail revision on top of the previously reviewed Bellweather sequence; the unchanged later learning encounters are not newly runtime-aligned. Bellweather is a far-future graphic techno-fantasy utopia with credible local light/contact and consistent ground/collision rules; the accepted image is a direction, not a map or final asset specification. Two concepts in an authored word-piece toy; the opening and control handoff earn no conceptual mastery, and there is no delayed-retention or far-transfer claim. Real tokens may be smaller than words and real models may produce different continuations. No training or attention mechanism is taught. Currentness is judged only within the sources the player supplies; the chapter never teaches 'latest note always wins' as a general rule. Motion/audio quality remain deferred, while control and contact credibility remain required.",
   "outcomes": [
     {
       "id": "sequence",
@@ -61,13 +68,29 @@
       "id": "opening",
       "phase": "prologue",
       "role": "orientation",
-      "player_goal": "Release the lantern with Mira; understand why finding her matters.",
-      "decision": "Mira holds one side and asks Zip to release the other; tap or focus the lantern and activate Release together.",
-      "feedback": "The shared lantern rises; both friends look toward it. After the disruption, the missing friend and stolen voice module motivate the first playable task.",
+      "player_goal": "Act with Mira to send a signal, inspect the place your shared action reveals, then understand why finding her and recovering a way to speak matter.",
+      "decision": "On the open transit terrace, Zip can move and look freely within the safe plaza before committing. A responsive garden lightwell near Zip is an actionable curiosity: interacting with its lens routes the shared signal across the garden span; a separate skybridge relay routes it across the elevated transit span. Either direct world interaction or an immediately reachable named semantic control commits the same single choice. Walking or camera precision is never mandatory. The exploratory interaction is the meaningful path choice, not a required scouting button followed by another confirmation. This is an unassessed story choice. Once that single route choice is committed, its response waits for the player to inspect the revealed receiver through one named object-linked Look action. Inspection does not choose or confirm the route again, move Zip, grant credit or open a new traversal objective. It changes the view to the concrete destination and its invitation before the existing Warden sequence may advance.",
+      "feedback": "Garden lightwell: its suspended petals align and cast a new visible signal trace, not a traversable bridge in this prologue; Mira catches and redirects the signal with her own gesture while Tavi mirrors it, revealing a side landing and a distant receiver terrace. Skybridge relay: its track illuminates across a different arching span; Mira lifts the tether and answers Zip with two visible taps, revealing a receiver balcony above the transit line. Both responses persist without automatic advancement until the player activates a named, object-linked receiver inspection. The garden reveals a shaded receiver terrace with an empty companion seat and a locally lit arrival marker; Mira reserves the shaded seat for Zip while Tavi redirects the final light segment. The skybridge reveals an elevated receiver balcony over the transit line with paired arrival lights; Mira proposes watching the trains there together. These are specific future intentions, not accessible destinations in this slice. Inspection frames the selected destination, keeps its changed state legible, and delivers the brief invitation before the existing ambient reading dwell allows the Warden intrusion. A generic tap or Continue cannot bypass the pending inspection; Skip/Escape still exit safely and do not invent an inspection or choice. The Warden then ruptures the active signal path and separates Mira; only later, in the prison, it extracts Zip's still-attached voice module. The shared signal carried light and gesture, not speech. After theft Zip cannot call by natural voice; the later word machine synthesizes prepared commands.",
       "outcomes": [],
-      "recovery": "Replay is non-destructive; skipping still leads to the separate controls tutorial. No learning credit.",
-      "assistance": "Story text is locally placed by the active character or scene focus.",
-      "completion_evidence": "Record the action and visible result; completion alone is not conceptual understanding.",
+      "recovery": "Entry loads the prologue for a fresh attempt and resumes an existing saved checkpoint without overwriting it. Replay uses an isolated story presentation: the player may try the other path without changing commands, learning first choices or saved progress. On replay completion, Skip or Escape, return to the prior saved checkpoint and view; do not enter the fresh-run controls handoff. On a fresh opening, completion, Skip or Escape gives a short local loss-and-repair handoff and enters the separate controls tutorial. Neither path fabricates a choice or grants learning credit.",
+      "assistance": "A brief contextual move/look hint accompanies optional direct control on the terrace; nearby garden lightwell and skybridge relay also have named semantic controls at their objects. The same choice and meaning are available without travel, precise aiming or audio. Pause, previous beat, replay and reduced-motion stepping retain the chosen-path reveal and causal order.",
+      "completion_evidence": "Observe optional plaza exploration or immediate semantic choice, one responsive local landmark, Mira's distinct answer, the revealed connected destination, rupture, voice extraction and handoff. These are story comprehension observations only; no learning score or mastery follows. Before receiving intent, ask the observer which robot they controlled, what their partner contributed, what place answered, and why they might want to go there. Seeing a glow or reading an action label alone does not establish these outcomes.",
+      "path_variants": [
+        {
+          "id": "skybridge-relay",
+          "action": "Send the light signal across the skybridge relay.",
+          "mira_response": "Mira lifts the signal tether over the transit span, then answers Zip with two visible taps against it.",
+          "reveal": "The elevated line illuminates and a paired-light receiver balcony becomes visible beyond the transit arch. A distinct high receiver balcony has paired lit arrival markers and a view of the train line. Inspecting it frames this destination while Mira invites Zip to watch the trains with her."
+        },
+        {
+          "id": "garden-lightwell",
+          "action": "Wake the nearby garden lightwell and send the signal across its span.",
+          "mira_response": "The lightwell's suspended petals align; Mira catches and redirects Zip's signal through them while Tavi mirrors it from the garden edge.",
+          "reveal": "The new luminous garden span points to a side landing and a different receiver-terrace sightline, with Tavi visibly helping. A lower garden receiver terrace has an empty companion seat beneath the canopy and a lit arrival marker. Inspecting it frames the place while Mira reserves the shaded seat for Zip; Tavi redirects the final signal segment."
+        }
+      ],
+      "causal_contract": "The compact shared signal device transmits light and shared gestures, not Zip's voice. It is still their friendship lantern in function, redesigned as coherent far-future technology rather than a medieval object. The Warden first breaks the active visual route and displaces the friends; in the prison it separately takes the glowing voice module from Zip's chest. Zip is silent afterward. The later repaired machine can synthesize a prepared command to a gate or receiver, but it does not restore Zip's natural voice in this chunk. Muted and reduced-motion presentation retain path-specific poses, illuminated destinations, empty socket, captured module and readable cause/effect text without relying on audio or timed animation.",
+      "world_direction": "An inhabited, breathable elevated transit garden in a far-future utopia: designed architectural silhouettes, one working transit line, a responsive lightwell, purposeful background residents and an inviting visible receiver destination. The player may explore the bounded safe starting terrace until committing a route; after commitment the held response is inspectable, and neither light trace is a walkable bridge or invitation to traverse beyond the terrace in this prologue. Illustrated form design comes from geometry/material/lighting choices, not a screen-space halftone filter. Coherent primary light, contact shadows, occlusion and safe ground/collision support the fantasy. Keep Zip, Mira, both route objects and the chosen reveal readable from ordinary desktop and phone views; the user reference does not freeze exact layout or character assets. Later danger may alter light/palette within the same stable visual language. No crowd simulation, new level or general procedural generator is implied. Establish Zip through initial staging and input-linked response before competing social faces. Keep partner action and newly answered destination in a readable visual chain. The receiver terrace and balcony have distinct functional silhouettes within the existing receiver island; distant skyline decoration cannot substitute for the inspectable destination. Material and shadow hierarchy support this chain rather than adding equal detail everywhere.",
       "primary_focus": "shared-lantern",
       "surfaces": [
         {
@@ -75,15 +98,15 @@
           "kind": "character_dialogue",
           "anchor": "shared-lantern",
           "critical": true,
-          "purpose": "Release the lantern with Mira; understand why finding her matters.",
-          "reveal": "Frame Zip, Mira and their lantern together. Mira's one-line invitation sits beside her/lantern, with Release together beside the shared action. Subsequent event text follows its current focal character.",
-          "dismiss": "Release advances the shared beat. Skip prologue is in the accessible game menu; a short local handoff names the immediate task.",
-          "offscreen_recovery": "Keep this focal interaction framed; on inspection exit restore the previous exploration view and an object-local return cue. Do not pin its instructions to a distant corner.",
-          "keyboard": "Focusable semantic controls; interact, tab and escape; same actions as touch.",
-          "touch": "Stable reachable targets at least 44 CSS pixels; no hover requirement.",
-          "readability": "360-430px portrait and desktop; enlarged text reflows in object inspection without clipping. Screen-reader equivalent preserves feedback and choice.",
+          "purpose": "Inhabit a small living terrace, act with Mira through one spatial route, see her answer and discover a destination worth reaching before the rupture.",
+          "reveal": "Frame Zip, Mira, the nearby responsive garden lightwell, the separate skybridge relay and an open destination vista with breathing room. Optional movement/look can expose the local garden-to-span relation; either object is also focusable and fully named immediately, so travel does not gate meaning. One interaction with either object both activates its local curiosity/payoff and commits that path; no second ceremonial confirmation follows. Mira's response and the path-specific connected reveal stay in the world. Subsequent event text follows its focal character and cannot preempt the visible cause. After choice, retain a single named Look control anchored to the selected receiver with an object-directed edge cue when needed. It inspects the result rather than reconfirming the choice. No persistent Next card or detached route list is introduced.",
+          "dismiss": "One path choice triggers its response with no second confirmation. Fresh-run completion, Skip prologue and Escape provide a concise local summary of separation and voice theft before the separate controls tutorial. In saved-checkpoint replay, completion, Skip and Escape return to the prior checkpoint and view; replay and previous beat are non-destructive. Normal progression pauses after the first response until receiver inspection. After inspection, the existing readable story dwell resumes; pause and reduced-motion stepping remain available. Replay of the first beat clears its choice and inspection locally. Previous beat restores the selected inspected result without writing learning evidence.",
+          "offscreen_recovery": "Required route and pending inspection controls remain visibly object-linked and reachable through supported orbit, zoom, recenter and portrait layout. Use directional edge cues for offscreen or behind-camera objects, avoiding character/control overlap and false on-object placement. Recovering reading or choice never requires guessing a camera angle.",
+          "keyboard": "Optional WASD/arrow movement and look use existing shared controls. Both route objects have named focusable controls; Enter/Space commits one, Tab moves between them, Escape skips with a loss-and-repair summary. Previous/replay/pause remain reachable and cannot mutate a saved attempt. The single pending receiver inspection is focusable and activated by Enter/Space after the response settles; generic advance keys cannot skip it.",
+          "touch": "Optional touch movement/look use existing shared controls. Both route actions are stable targets at least 44 CSS pixels, with no hover or precision steering requirement; a direct world hit and corresponding semantic control produce the same choice. Receiver inspection has the same 44px minimum and no precise targeting or required travel.",
+          "readability": "360-430px portrait and desktop: Mira, both route objects and their spatial relation are distinguishable without covering the reveal. Enlarged text reflows the two choices and feedback without clipping. Screen-reader and reduced-motion equivalents name optional movement, chosen path, local world response, Mira's distinct action, revealed destination, rupture, voice removal and repair goal in causal order.",
           "presentation": "scene_focus",
-          "focus_transition": "The camera carries attention from the lantern to the disruption and then to Zip and the empty chest socket. Never ask for an offscreen action."
+          "focus_transition": "Open terrace with optional direct control and two reachable route objects -> one choice activates its responsive landmark and Mira's distinct reciprocal act -> connected receiver destination becomes visible -> wait for object-linked Look inspection -> frame the selected place and Mira's brief invitation -> Warden breaks the active signal path -> Zip separated -> Warden removes Zip's still-attached voice module -> empty socket and repair target. Hold each visual consequence for inspection; never ask for an offscreen action or depend on motion/audio alone."
         }
       ],
       "goal_surface": "focus",
@@ -410,8 +433,28 @@
   ],
   "research_decisions": [
     {
+      "id": "resonance-trail-opening",
+      "source_locator": "docs/experiments/20260928-sky-reach-play-study.md; artifacts/experience-brief-20260928-v2.md",
+      "observation": "Direct Sky Reach play showed an enticing place, player control and a visible transition into a new possibility; it did not establish how that game's procedural generation works or prove Bellweather's design. Bellweather's cold review found the relationship and world activity too thin despite functioning learning decisions.",
+      "adaptation": "Give Zip a small, optionally traversable utopian terrace and one consequential unassessed path choice. The nearby responsive lightwell and separate skybridge relay are world curiosities, not menu labels; activating one is the choice and changes a local landmark, Mira's reciprocal act and a connected receiver sightline. The opening's desire/relationship promise is judged separately from the later learning promise. Use the accepted graphic techno-fantasy reference for designed forms and credible local light/contact, not a medieval scene or post-process filter.",
+      "failure_probe": "Hide XP and lesson text. From entry, can a cold player freely move/look or immediately use an equivalent semantic route control, activate the near curiosity, see a physical payoff and Mira's distinct answer, identify a further destination and want to act after loss? Can they distinguish broken light from stolen voice? Repeat both routes muted, reduced-motion, phone, keyboard, skip, replay and saved-checkpoint resume. If the routes differ only by labels/camera tint, local activation is merely decorative, or walking is mandatory, reject the prologue.",
+      "limit": "This is an adaptation of observed action-to-world-response, not a claim that spaceflight, scale, procedural generation or reference assets belong in Bellweather. An expert critic cannot establish novice motivation or learning; motion and audio quality remain unassessed until observed/listened to.",
+      "steps": [
+        "opening"
+      ],
+      "verification": "Play both routes on the exact candidate through optional movement and immediate semantic choice, compare local world response, Mira action and connected receiver reveal, then test loss and handoff without sound or time-dependent animation. Check changed view, contact and active/paused/hidden renderer work.",
+      "cost": "Review and implement only the prologue slice before revising tutorial or Level 1 treatment; reuse the existing opening controller, PlayCanvas controls, world patches, pinned assets, semantic controls and simple WorldSpec geometry.",
+      "exclusions": "No new provider, universal generator, Level 2, automatic mastery, or production promotion.",
+      "review_lanes": [
+        "story",
+        "gameplay",
+        "art_world",
+        "learning"
+      ]
+    },
+    {
       "id": "portal-teaching",
-      "source_locator": "docs/GAME-REFERENCE-STUDY.md §6; Valve commentary 5:41-6:09 and 7:35-8:28",
+      "source_locator": "docs/GAME-REFERENCE-STUDY.md Â§6; Valve commentary 5:41-6:09 and 7:35-8:28",
       "observation": "The study records a lesson revision because waiting could produce success without the relevant decision.",
       "adaptation": "Separate demonstration, supported practice and changed-case decisions; permit reordering or deleting encounters.",
       "failure_probe": "Try waiting and following highlights without predicting anything.",
@@ -432,7 +475,7 @@
     },
     {
       "id": "situated-attention",
-      "source_locator": "docs/GAME-REFERENCE-STUDY.md §6, 1:41-2:34; user screenshot and instruction 2026-09-21",
+      "source_locator": "docs/GAME-REFERENCE-STUDY.md Â§6, 1:41-2:34; user screenshot and instruction 2026-09-21",
       "observation": "The commentary describes replacing a hard-to-explain setup with a physical reveal. The user screenshot shows goal, world and action panel separated.",
       "adaptation": "Place goals, actions and feedback at the active device, character or explicit object-inspection view.",
       "failure_probe": "Obscure board words: neutral precommit framing must not identify a source-specific gate/no-gate answer. With words restored, can the player explain board, route and consequence? At 200% phone text, pause after an intermediate prefix, inspect, focus away and reload; every complete input remains readable without duplicate commands. Count meaningful decisions versus clerical actions.",
@@ -454,8 +497,8 @@
   ],
   "art_world_direction": {
     "device_identity": "The message machine and the receiver are unmistakable devices: a visible input line, a slot for supplied signs/notes and an output rail with words. Their state is readable by shape and labels, not color alone. Route boards are physical wooden/metal signs whose complete text is legible in the world.",
-    "composition": "One device-scale focus per beat. On desktop the whole device and surrounding room stay visible. On phones reframe the device, reveal sequentially and keep anchored semantic controls readable; never shrink a dashboard into a bottom box or cover the corridor with modals.",
-    "reference_limit": "Portal spatial explanation motivates showing cause near effect, but does not prescribe these invented devices. Preserve Bellweather materials and character attachment; no copied assets.",
-    "verification": "Cold observer must locate the device, distinguish input/output, predict the next action and notice the result on 360-430px and desktop. Text enlargement and keyboard must not lose an action."
+    "composition": "Prologue first: Zip, Mira, responsive garden lightwell and skybridge relay share a readable open terrace with negative space and a connected distant receiver; optional walking/look make the place inhabitable, while named object controls remove a walking tax. Hold a path-specific local response, Mira act and receiver discovery before the visible rupture; the empty chest socket and Warden-held module remain distinguishable later even muted or with reduced motion. In this proof Bellweather's graphic techno-fantasy forms use designed silhouettes and spatially credible illumination/contact, not medieval cues or a comic filter. Subsequent tutorial and Level 1 are unchanged regression scope and need separate visual reconciliation. On phones reframe sequentially and keep anchored semantic controls readable; do not cover the focal world with detached panels.",
+    "reference_limit": "The accepted `docs/references/bellweather-graphic-utopia.png` is a Bellweather design direction, not a literal level map, character redesign or visual identity for all generated games. Portal spatial explanation motivates showing cause near effect but does not prescribe devices. Reuse legally pinned assets and engine facilities; no copied reference image, decorative texture overlay or photorealism mandate.",
+    "verification": "At the prologue a cold observer must try the living terrace, identify Zip/Mira, local response and different reciprocal acts on two paths, a connected receiver destination, the Warden's two distinct harms and Zip's resulting repair goal. Test ground/contact/camera from a changed position, exact screenshot/video evidence of light and silhouette, 360-430px and desktop. Later device, input/output and learning observations remain separate. Text enlargement and keyboard must not lose an action."
   }
 }
