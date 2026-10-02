@@ -22,3 +22,11 @@ dist/
 .playwright-mcp/
 debug.log
 *.blend1
+
+# Symlinked experiment dependencies (the rule above misses symlinks).
+node_modules
+# Downloaded third-party source packs (large; licences are snapshotted in
+# experiments/bellweather-arcade/public/kits/LICENSES with their hashes).
+/assets/third-party/
+# Claude's scratch reports and screenshots for review (not source).
+/Claude outputs/

@@ -1,5 +1,8 @@
 # Learning and interaction design before implementation
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 Active direction, 21 September 2026: repair the general system before rebuilding
 the game. The user rejected convoluted progression and a detached bottom workbench
 plus upper-left mission text. The attached completion screenshot is visual evidence

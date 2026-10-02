@@ -1,5 +1,12 @@
 This standalone study uses Three.js under the MIT license and the pinned MIT Summer Cycle source packet at `artifacts/opus-art-trial-input/summer-cycle`. `src/vendor/rng.ts` is a copied utility from that packet. The source packet's `LICENSE` is preserved at `src/vendor/LICENSE`. Architecture, path, pavilion, character, vegetation geometry, materials, and controls in this checkpoint are original to this experiment. The accepted Bellweather reference guides composition and is not embedded as a texture.
 
+The 30 September optional `surface=illustrated` comparison reuses the original
+route-paving kit with bounded parameters and the same PBR lights/material shader.
+Its cloud forms are original instanced sphere geometry with vertex colors; they
+replace the earlier cloud cards only in that option. No external model, generated
+image, provider call or new dependency was used. The first repainted-card attempt
+failed visual inspection and was replaced before the frozen candidate.
+
 Subsequent reuse: `src/vendor/leafAtlas.ts` is adapted from Summer Cycle at
 `8b977baad061e797c2f6c19cfcf07c1e79b23a67`; see
 `src/vendor/LEAF-ATLAS-PROVENANCE.md` and the complete `SUMMER-CYCLE-LICENSE`.

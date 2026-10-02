@@ -1,0 +1,81 @@
+{
+  "schema": "vibelearn.learning-design.v1",
+  "id": "llm-first-principles.stop1-bellweather-blossom",
+  "version": "1-as-built-draft",
+  "author": "claude, 3 Oct 2026: written from what the game does now, for Desmic's review (not yet approved)",
+  "stop": 1,
+  "place": "Bellweather (skiff at the outlook), then Blossom Isle (Gate and relay)",
+  "learning_promise": "A language engine makes text one word at a time, each new word made from everything it has read so far; and it can only use what is in front of it (its context).",
+  "decisions": [
+    "Words, not pieces, at Stop 1. Pieces (tokens) arrive at Stop 2; the skiff's 'How real AI differs' card says so.",
+    "The engine is a toy with an authored table of what Bellweather says. Brightness of its guesses is a real probability from that table, not from a trained model.",
+    "Supersedes design/learning-design.json v8-draft for the arcade game (that file describes the earlier PlayCanvas Level 1: message machine, Moon gate, notes A/B/C, prologue route choice). Its outcome ids `sequence` and `context` are kept."
+  ],
+  "outcomes": [
+    {
+      "id": "sequence",
+      "observable_capability": "Say what an engine should read to make its next word: everything so far, including the word it just made.",
+      "misconception": "The engine only needs the newest word; or it should start again from the original words each time.",
+      "success_evidence": "First-try choice of the whole sentence plus the new word when the loop is broken (skiff), and sending the whole message (relay)."
+    },
+    {
+      "id": "context",
+      "observable_capability": "Predict what a literal machine will do from the notes it is given, and choose the notes that make it do the right thing.",
+      "misconception": "The machine knows what you mean, or what is true, beyond what it was given.",
+      "success_evidence": "First-try destination prediction and note selection at the Gate; first-try channel choice at the relay."
+    }
+  ],
+  "sequence": [
+    {
+      "id": "skiff-gather", "role": "introduce", "station": "wake-skiff",
+      "player_goal": "Find the skiff's words around the outlook (Skiff, rise, toward; a decoy, sink).",
+      "decision": "None assessed. Loading 'sink' makes the skiff dip (a safe, funny failure).",
+      "feedback": "The engine's guesses fan out with real weights; the right three words make it say 'Blossom'.",
+      "outcomes": ["sequence"]
+    },
+    {
+      "id": "skiff-broken-loop", "role": "assess", "station": "wake-skiff", "decision_id": "next-input",
+      "player_goal": "The Warden broke the loop that feeds guesses back. Choose what the engine reads next.",
+      "options": { "right": "Skiff rise toward Blossom (whole-sentence)", "wrong": ["Blossom only (newest-only: babbles about petals)", "Skiff rise toward (original-only: says Blossom again, forever)", "anything else (partial)"] },
+      "commit_before_feedback": true,
+      "outcomes": ["sequence"]
+    },
+    {
+      "id": "gate-predict", "role": "assess", "station": "blossom-gate", "decision_id": "destination-prediction",
+      "player_goal": "Put up to two notes in the satchel, then predict where the Gate will open before it reads them.",
+      "notes": ["Mira's map page (true, current)", "Old festival poster (stale: the bridge fell)", "Warden's sign (a lie)", "Scribbled note (vague)"],
+      "outcomes": ["context"]
+    },
+    {
+      "id": "gate-select", "role": "assess", "station": "blossom-gate", "decision_id": "context-selection",
+      "player_goal": "Open the Gate toward Mira: only her page in the satchel does it.",
+      "outcomes": ["context"]
+    },
+    {
+      "id": "gate-source", "role": "check", "station": "blossom-gate", "decision_id": "source-support",
+      "player_goal": "Say what Mira's page actually tells you (her route; not that she is safe, not where she is held).",
+      "outcomes": ["context"]
+    },
+    {
+      "id": "relay", "role": "transfer", "station": "relay-contact", "decision_ids": ["context-selection", "next-input"],
+      "player_goal": "Tune the relay to Mira's channel (7, not the Warden's 3 or the festival's 5), then send the whole message.",
+      "outcomes": ["context", "sequence"]
+    }
+  ],
+  "evidence": {
+    "activities": ["wake-skiff", "blossom-gate", "relay-contact"],
+    "event_shape": "{activity, decision, choice, correct, first, assisted, t, rules}",
+    "first_try": "A decision's first judgement on this device counts; reloads and replays never make a later answer first (save.decidedBefore).",
+    "assisted": "Stations can mark help given toward a decision (station.helpedWith). No Stop 1 decision has a hint today."
+  },
+  "known_gaps": [
+    "Relay transfer is weak: the pinned card spells out 'Lantern channel 7. M.', so choosing 7 is close to copying. A stronger transfer makes the player infer the channel (for example from Mira's lantern colour or a clue learned on the island).",
+    "No case where the newest note is irrelevant, so 'pick the most recent note' is never tested as a misconception.",
+    "The only step outside the fiction is the optional 'How real AI differs' card; there is no out-of-fiction transfer question.",
+    "Gate and relay are still panel puzzles; the Echo & Engine redesign plans them as the ring (context) and the loop (sequence) in the world."
+  ],
+  "sources": [
+    { "id": "slp3", "title": "Jurafsky & Martin, Speech and Language Processing (3rd ed. draft), chapters on language models and LLMs", "url": "https://web.stanford.edu/~jurafsky/slp3/", "used_for": "autoregressive generation: each word conditioned on the words before it", "verify": "chapter numbers change between drafts; cite the chapter when this design is approved" },
+    { "id": "hf-llm-course", "title": "Hugging Face LLM Course, chapter 1 (how transformer language models work)", "url": "https://huggingface.co/learn/llm-course/chapter1/1", "used_for": "plain-language description of next-token prediction and context", "verify": "check the exact page before approval" }
+  ]
+}

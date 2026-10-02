@@ -7,13 +7,24 @@ import { buildCourierZip } from './src/zip-courier.ts';
 // Focused geometry and sequential runtime smoke check for the static courier study.
 // Run with Node 22's --experimental-strip-types after the native preview is paused.
 const output='../../artifacts/bellweather-arcade';
+const option=name=>process.argv.find(arg=>arg.startsWith(`--${name}=`))?.slice(name.length+3);
+const baselineUrl=option('baseline'),candidateUrl=option('candidate'),outputPrefix=option('prefix');
+if(Boolean(baselineUrl)!==Boolean(candidateUrl))throw Error('Supply both --baseline and --candidate URLs');
+if(baselineUrl&&!outputPrefix)throw Error('Explicit comparison URLs require a unique --prefix');
+if(outputPrefix&&!/^[a-z0-9-]+$/.test(outputPrefix))throw Error('Output prefix must be lowercase letters, digits or hyphens');
+for(const url of [baselineUrl,candidateUrl].filter(Boolean)){
+  const parsed=new URL(url);
+  if(parsed.origin!=='http://127.0.0.1:8062'||parsed.searchParams.get('study')!=='facade')throw Error(`Unexpected study URL: ${url}`);
+}
 const districts=process.argv.includes('--districts');
 const city=process.argv.includes('--city')||process.argv.includes('--city-final');
 const sunlit=process.argv.includes('--sunlit');
-const prefix=districts?'districts-engineering':process.argv.includes('--city-final')?'city-final-engineering':city?'city-engineering':sunlit?'sunlit-engineering':process.argv.includes('--final')?'courier-final':'courier';
+const prefix=outputPrefix??(districts?'districts-engineering':process.argv.includes('--city-final')?'city-final-engineering':city?'city-engineering':sunlit?'sunlit-engineering':process.argv.includes('--final')?'courier-final':'courier');
 await fs.mkdir(output,{recursive:true});
 const base='http://127.0.0.1:8062/?study=facade&portal=crafted&architecture=atelier&finish=daylight&palette=ceramic&form=swept-clean';
-const variants=districts?
+const characterFor=url=>new URL(url).searchParams.get('character')==='courier'?buildCourierZip:buildZip;
+const variants=baselineUrl?
+  [{name:'control',url:baselineUrl,build:characterFor(baselineUrl)},{name:'candidate',url:candidateUrl,build:characterFor(candidateUrl)}]:districts?
   [{name:'control',url:`${base}&character=courier&look=sunlit&setting=city`,build:buildCourierZip},{name:'terraces',url:`${base}&character=courier&look=sunlit&setting=city&districts=terraces`,build:buildCourierZip}]:city?
   [{name:'control',url:`${base}&character=courier&look=sunlit`,build:buildCourierZip},{name:'city',url:`${base}&character=courier&look=sunlit&setting=city`,build:buildCourierZip}]:sunlit?
   [{name:'control',url:`${base}&character=courier`,build:buildCourierZip},{name:'sunlit',url:`${base}&character=courier&look=sunlit`,build:buildCourierZip}]:
@@ -76,7 +87,7 @@ try {
       const device=await page.evaluate(()=>{const gl=document.querySelector('canvas')?.getContext('webgl2'),ext=gl?.getExtension('WEBGL_debug_renderer_info');return {userAgent:navigator.userAgent,renderer:gl&&ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl?.getParameter(gl.RENDERER)??'unavailable',viewport:[innerWidth,innerHeight],dpr:devicePixelRatio}});
       const arrival=await snap();
       if(arrival.study!=='facade'||arrival.routeT>.01||Math.abs(arrival.position[1]-result.geometry[variant.name].standingY)>1e-6)issues.push('arrival/standing height mismatch');
-      const ordinaryPacing=(sunlit||city||districts)?await pace():null;
+      const ordinaryPacing=(sunlit||city||districts||baselineUrl)?await pace():null;
       await page.screenshot({path:`${output}/${prefix}-${variant.name}-arrival.png`});
       await page.keyboard.down('w');await page.waitForTimeout(700);await page.keyboard.up('w');await page.waitForTimeout(100);
       const moved=await snap();if(moved.routeT<=arrival.routeT)issues.push('held W did not advance');
@@ -87,7 +98,7 @@ try {
       await page.locator('#restart').click();await page.waitForTimeout(100);const reset=await snap();
       if(reset.paused||reset.routeT>.01)issues.push('restart failed');
       let wall=null,nearWallPacing=null,rearWallProbe=null;
-      if(sunlit||city||districts){
+      if(sunlit||city||districts||baselineUrl){
         const walk=async(key,ms)=>{await page.keyboard.down(key);await page.waitForTimeout(ms);await page.keyboard.up(key);await page.waitForTimeout(70)};
         await walk('w',1700);await walk('a',1300);await walk('w',1600);
         await page.mouse.move(850,430);await page.mouse.down();await page.mouse.move(100,440,{steps:12});await page.mouse.up();await page.waitForTimeout(180);

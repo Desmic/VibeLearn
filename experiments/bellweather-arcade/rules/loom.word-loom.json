@@ -1,0 +1,198 @@
+{
+  "schemaVersion": "1",
+  "id": "loom.word-loom",
+  "version": "1",
+  "state": {
+    "phase": {
+      "type": "enum",
+      "values": [
+        "guided",
+        "predict",
+        "choose",
+        "done"
+      ],
+      "initial": "guided"
+    },
+    "lifted": {
+      "type": "integer",
+      "initial": 0,
+      "min": 0,
+      "max": 3
+    }
+  },
+  "actions": {
+    "lift": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "guided"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "lifted"
+            },
+            "right": 2
+          },
+          "effects": [
+            {
+              "op": "add",
+              "field": "lifted",
+              "value": 1
+            },
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "predict"
+            }
+          ],
+          "emits": [
+            "piece-lifted",
+            "band-weaves"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "add",
+              "field": "lifted",
+              "value": 1
+            }
+          ],
+          "emits": [
+            "piece-lifted"
+          ]
+        }
+      ]
+    },
+    "predict.words": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "predict"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "choose"
+        }
+      ],
+      "emits": [
+        "decide:predict-pieces:wrong:one-per-word",
+        "loom-splits"
+      ]
+    },
+    "predict.pieces": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "predict"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "choose"
+        }
+      ],
+      "emits": [
+        "decide:predict-pieces:right:pieces",
+        "loom-splits"
+      ]
+    },
+    "predict.near": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "predict"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "choose"
+        }
+      ],
+      "emits": [
+        "decide:predict-pieces:wrong:near-miss",
+        "loom-splits"
+      ]
+    },
+    "predict.letters": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "predict"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "choose"
+        }
+      ],
+      "emits": [
+        "decide:predict-pieces:wrong:one-per-letter",
+        "loom-splits"
+      ]
+    },
+    "choose.short": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "choose"
+      },
+      "effects": [],
+      "emits": [
+        "decide:choose-message:wrong:fewer-letters",
+        "name-falls-off"
+      ]
+    },
+    "choose.common": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "choose"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "done"
+        }
+      ],
+      "emits": [
+        "decide:choose-message:right:common-words",
+        "tavi-free"
+      ]
+    }
+  },
+  "objectives": {
+    "free": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "done"
+      }
+    }
+  }
+}

@@ -1,10 +1,33 @@
 # Current state — LLM learning-game proof track
 
-**29 September 2026.** This file is the current status. Older narratives live in
+**3 October 2026 — current state (supersedes everything below).** The official game is
+`experiments/bellweather-arcade` ("Bellweather: The First Words", three.js). Desmic confirmed it on
+3 Oct; PlayCanvas and the review gates below are historical. Built and hosted (claude.ai artifact,
+version 57): opening and tutorial (Mira, the lantern, the Warden's attack, the spark chase), Stop 1
+(Echo & Engine at the skiff; Blossom Isle's Gate and relay), the flight between isles, Stop 2 (Loom
+Isle), Blender-authored props and characters, and automated checks (`npm run check`, `check:parity`,
+`check:play`, AI play-testers). Waiting on Desmic's Galaxy F15 play-test. What is open and what was
+decided: `docs/DOCS-AUDIT-20261003.md`; the mechanic and stop plan: `docs/GAME-REDESIGN-ECHO.md`.
+The sections below are the 30 Sep state of the earlier work, kept for history.
+
+
+**30 September 2026.** This file is the current status. Older narratives live in
 `docs/history/STATE-20260921-24.md` and `docs/history/STATE-20260918-20.md`.
 Automated checks, critic judgment and user acceptance are separate claims.
 
 ## Current repair and gate
+
+- **30 September surface/atmosphere comparison:** Root reuses route paving for
+  broad warm slabs and flush inlays, with longer warm cast shadows; optional
+  `surface=illustrated` retains the same court. Flat cloud-card repaint failed
+  native inspection; one repair uses instanced 3D cloud forms, still visually
+  simple. Final `index-xeTQvxmO.js`; build/typecheck, native approach/courtyard/
+  reverse inspection and one bounded Sol A/B check pass. Arrival 97 calls /
+  196,534 triangles vs 126 / 175,816 control; brief timings unchanged, no speedup
+  claim. Explicit verifier URLs/prefix and pinned Playwright remove repetition
+  and a hidden local dependency. [Pass and evidence](experiments/20260930-illustrated-surfaces.md).
+  Paving improves the visual lead-in; reference fidelity/art gate remain open.
+  No story/learning expansion, engine migration or production promotion.
 
 - **29 September repository checkpoint:** All accumulated project source,
   research, licensed/original assets and editable Blender work are preserved in

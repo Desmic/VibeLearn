@@ -1,5 +1,8 @@
 # Current story candidate — Relay Rescue: The Echo Forge
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Status correction — 19 September 2026:** Despite the filename, this Relay Rescue / Echo Forge treatment is **historical story material**, not the current story candidate. The active proof track is How LLMs Work / The First Words in Bellweather; exact critic candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26`. Do not apply this file's story/character/player-role instructions to the active track.
 
 **15 September 2026 scope clarification:** this file retains the retry episode's story. The active LLM rescue revision is [LLM-RESCUE-STORY.md](LLM-RESCUE-STORY.md), following the user's rejection of the workshop story. Do not apply this legacy candidate or its prior scores to the new series. Existing retry content/evidence remain intact.

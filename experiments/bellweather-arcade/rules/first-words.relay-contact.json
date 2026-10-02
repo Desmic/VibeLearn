@@ -1,0 +1,479 @@
+{
+  "schemaVersion": "1",
+  "id": "first-words.relay-contact",
+  "version": "1",
+  "state": {
+    "phase": {
+      "type": "enum",
+      "values": [
+        "tune",
+        "words",
+        "done"
+      ],
+      "initial": "tune"
+    },
+    "channel": {
+      "type": "integer",
+      "initial": 1,
+      "min": 1,
+      "max": 9
+    },
+    "word0": {
+      "type": "boolean",
+      "initial": false
+    },
+    "word1": {
+      "type": "boolean",
+      "initial": false
+    },
+    "word2": {
+      "type": "boolean",
+      "initial": false
+    }
+  },
+  "actions": {
+    "tune.1": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "tune"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "channel",
+          "value": 1
+        }
+      ]
+    },
+    "tune.2": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "tune"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "channel",
+          "value": 2
+        }
+      ]
+    },
+    "tune.3": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "tune"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "channel",
+          "value": 3
+        }
+      ]
+    },
+    "tune.4": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "tune"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "channel",
+          "value": 4
+        }
+      ]
+    },
+    "tune.5": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "tune"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "channel",
+          "value": 5
+        }
+      ]
+    },
+    "tune.6": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "tune"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "channel",
+          "value": 6
+        }
+      ]
+    },
+    "tune.7": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "tune"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "channel",
+          "value": 7
+        }
+      ]
+    },
+    "tune.8": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "tune"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "channel",
+          "value": 8
+        }
+      ]
+    },
+    "tune.9": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "tune"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "channel",
+          "value": 9
+        }
+      ]
+    },
+    "call": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "tune"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "channel"
+            },
+            "right": 7
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "words"
+            }
+          ],
+          "emits": [
+            "decide:context-selection:right",
+            "mira-answers"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "channel"
+            },
+            "right": 3
+          },
+          "effects": [],
+          "emits": [
+            "decide:context-selection:wrong",
+            "warden-answers"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "channel"
+            },
+            "right": 5
+          },
+          "effects": [],
+          "emits": [
+            "decide:context-selection:wrong",
+            "festival-radio"
+          ]
+        },
+        {
+          "effects": [],
+          "emits": [
+            "decide:context-selection:wrong",
+            "static"
+          ]
+        }
+      ]
+    },
+    "word.0": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "words"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "word0",
+          "value": {
+            "op": "not",
+            "arg": {
+              "field": "word0"
+            }
+          }
+        }
+      ]
+    },
+    "word.1": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "words"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "word1",
+          "value": {
+            "op": "not",
+            "arg": {
+              "field": "word1"
+            }
+          }
+        }
+      ]
+    },
+    "word.2": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "words"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "word2",
+          "value": {
+            "op": "not",
+            "arg": {
+              "field": "word2"
+            }
+          }
+        }
+      ]
+    },
+    "send": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "words"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "field": "word0"
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "word1"
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "word2"
+                }
+              }
+            ]
+          },
+          "effects": [],
+          "emits": [
+            "nothing-picked"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "field": "word0"
+              },
+              {
+                "field": "word1"
+              },
+              {
+                "field": "word2"
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "done"
+            }
+          ],
+          "emits": [
+            "decide:next-input:right:all",
+            "mira-hears"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "field": "word0"
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "word1"
+                }
+              },
+              {
+                "field": "word2"
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "word0",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "word1",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "word2",
+              "value": false
+            }
+          ],
+          "emits": [
+            "decide:next-input:wrong:newest"
+          ]
+        },
+        {
+          "when": {
+            "op": "not",
+            "arg": {
+              "field": "word0"
+            }
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "word0",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "word1",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "word2",
+              "value": false
+            }
+          ],
+          "emits": [
+            "decide:next-input:wrong:no-card"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "set",
+              "field": "word0",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "word1",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "word2",
+              "value": false
+            }
+          ],
+          "emits": [
+            "decide:next-input:wrong:partial"
+          ]
+        }
+      ]
+    }
+  },
+  "objectives": {
+    "reached": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "done"
+      }
+    }
+  }
+}

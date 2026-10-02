@@ -1,5 +1,8 @@
 # VibeLearn UI/UX direction — story-first commercial game
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Current review checkpoint — 19 September 2026:** The UI/UX direction below is embodied in frozen candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26` far enough for post-CI review. The next UX work is not another redesign pass by default: run cold-observer/motion/physicality/handoff/audio/learning critics, then repair only proven blockers. Render remains on rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5`; no Level 2.
 
 **Active direction — 17 September 2026.** Read `GAME-UX-SYSTEM.md`, `GAME-OPENING-PROGRESSION.md`, `GAME-CREATION-PLATFORM.md`, `ART-WORLD-DIRECTION-CRITIC.md` and `STATE.md`.

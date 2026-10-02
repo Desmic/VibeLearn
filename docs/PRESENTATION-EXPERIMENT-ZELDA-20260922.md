@@ -1,5 +1,8 @@
 # Presentation experiment — Zelda-style non-invasive delivery (22 September 2026)
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 Decision record for the user's directive: *"keep HUD/controls non-invasive, help in
 game, don't obstruct; a sense of belonging to the world so I'm not thinking 'I have
 to read this card now then continue with the game'. Take inspiration from Zelda

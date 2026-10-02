@@ -1,5 +1,8 @@
 # VibeLearn game-generation operations
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Adopted direction, 27 September 2026.** This is an operational interpretation
 for the user-supplied *VibeLearn 3D Game Generation — Operational Architecture
 v3*, incorporating the accepted review in

@@ -1,5 +1,8 @@
 # VibeLearn 3D Game Generation — Operational Architecture v3
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Purpose:** Give implementation agents one clear production path for VibeLearn today, while keeping promising world-model/ML work in explicit research lanes that cannot silently become production dependencies.
 
 **Status:** Agent-facing execution architecture. This refines, rather than replaces, `VibeLearn_3D_World_Game_Generation_Architecture_v2.md` and the repository's existing architecture. The v2 document remains the deeper rationale/reference; this document is the operational version agents should follow.

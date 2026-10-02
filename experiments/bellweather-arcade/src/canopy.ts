@@ -26,10 +26,31 @@ export function canopyGeometry(pink:boolean,count:number){
   return g;
 }
 
+// View-space position of the player's chest, updated by the game each frame.
+export const CANOPY_FOCUS={value:new T.Vector3(0,0,-.001)};
+/** 1 while a fixed shot (cutscene, puzzle view) is on: posts and trunks within ~3 m of the lens step aside entirely */
+export const SIGHT_SHOT={value:0};
 export function canopyMaterial(pink:boolean){
   const texture=pink?blossomTexture():leafAtlas();
   const material=new T.MeshStandardMaterial({map:texture,alphaTest:.43,roughness:1,side:T.DoubleSide});
   material.onBeforeCompile=shader=>{
+    shader.uniforms.vlFocusView=CANOPY_FOCUS;
+    // Leaves near the camera, or on the sight line to Zip, shrink to nothing in
+    // the vertex shader. Culling per card (not per pixel) matters on phones: a
+    // camera inside a crown otherwise shades dozens of full-screen cards that a
+    // fragment dither would mostly discard, which cost ~120 ms a frame on the F15.
+    shader.vertexShader='uniform vec3 vlFocusView;\n'+shader.vertexShader.replace('#include <project_vertex>',`
+      #ifdef USE_INSTANCING
+        vec3 cardCentre = (modelViewMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+      #else
+        vec3 cardCentre = (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+      #endif
+      float cardAlong = clamp(dot(cardCentre, vlFocusView) / max(dot(vlFocusView, vlFocusView), 1e-4), 0.0, 1.0);
+      float cardSight = length(cardCentre - vlFocusView * cardAlong);
+      float cardKeep = smoothstep(2.0, 3.6, length(cardCentre)) * mix(1.0, smoothstep(0.6, 1.5, cardSight), step(cardAlong, 0.97));
+      transformed *= cardKeep;
+      #include <project_vertex>
+    `);
     // Coherent outward normals remove the flashing black/white facets caused by
     // randomly oriented planes. Normals follow the crown, not the viewing camera.
     shader.vertexShader='attribute vec3 canopyNormal;\n'+shader.vertexShader;
@@ -44,13 +65,48 @@ export function canopyMaterial(pink:boolean){
     // Both sides share the same crown normal; back-face flips recreate the
     // original card pattern. Shadow depth still uses the exact cutout silhouette.
     shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_begin>',T.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;',''));
-    shader.fragmentShader=shader.fragmentShader.replace('#include <alphatest_fragment>',`#include <alphatest_fragment>
-      float clearance = smoothstep(1.3, 3.4, length(vViewPosition));
-      float threshold = fract(52.9829189 * fract(dot(floor(gl_FragCoord.xy), vec2(0.06711056, 0.00583715))));
-      if (clearance < threshold) discard;
-    `);
   };
-  material.customProgramCacheKey=()=> 'painted-canopy-normal-v1';
+  material.customProgramCacheKey=()=> 'painted-canopy-normal-v3';
   const depth=new T.MeshDepthMaterial({depthPacking:T.RGBADepthPacking,map:texture,alphaTest:.43,side:T.DoubleSide});
   return {material,depth};
+}
+
+// Clear sight to Zip for any material (lobed crowns, shrubs, trunks, posts):
+// things right by the lens, or on the line from the camera to Zip, get out of
+// the way. 'shrink' collapses each instance around its own centre in the vertex
+// shader (cheapest; for instanced lobes). 'dither' screen-door fades pixels (for
+// single meshes like merged trunks). Both read CANOPY_FOCUS, like the leaf cards.
+export function clearSight<M extends T.Material>(material: M, mode: 'shrink' | 'dither', o: { near?: [number, number]; side?: [number, number] } = {}) {
+  const [n0, n1] = o.near ?? (mode === 'shrink' ? [1.4, 3.0] : [.5, 1.5]), [s0, s1] = o.side ?? (mode === 'shrink' ? [.7, 1.7] : [.25, .8]);
+  const f = (x: number) => x.toFixed(3);
+  const prev = material.onBeforeCompile.bind(material), hadOwn = material.onBeforeCompile !== T.Material.prototype.onBeforeCompile;
+  material.onBeforeCompile = (shader, renderer) => {
+    if (hadOwn) prev(shader, renderer);
+    shader.uniforms.vlFocusView = CANOPY_FOCUS; shader.uniforms.vlShot = SIGHT_SHOT;
+    if (mode === 'shrink') {
+      shader.vertexShader = 'uniform vec3 vlFocusView;\n' + shader.vertexShader.replace('#include <project_vertex>', `
+        #ifdef USE_INSTANCING
+          vec3 vlC = (modelViewMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+        #else
+          vec3 vlC = (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+        #endif
+        float vlA = clamp(dot(vlC, vlFocusView) / max(dot(vlFocusView, vlFocusView), 1e-4), 0.0, 1.0);
+        float vlS = length(vlC - vlFocusView * vlA);
+        transformed *= smoothstep(${f(n0)}, ${f(n1)}, length(vlC)) * mix(1.0, smoothstep(${f(s0)}, ${f(s1)}, vlS), step(vlA, 0.97));
+        #include <project_vertex>`);
+    } else {
+      shader.vertexShader = 'varying vec3 vlView;\n' + shader.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n  vlView = mvPosition.xyz;');
+      shader.fragmentShader = 'uniform vec3 vlFocusView;\nuniform float vlShot;\nvarying vec3 vlView;\n' + shader.fragmentShader.replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>
+        float vlA = clamp(dot(vlView, vlFocusView) / max(dot(vlFocusView, vlFocusView), 1e-4), 0.0, 1.0);
+        float vlS = length(vlView - vlFocusView * vlA);
+        float vlKeep = smoothstep(${f(n0)}, ${f(n1)}, length(vlView)) * mix(1.0, smoothstep(${f(s0)}, ${f(s1)}, vlS), step(vlA, 0.95));
+        vlKeep *= mix(1.0, smoothstep(3.0, 3.5, -vlView.z), vlShot);
+        vec2 vlP = mod(floor(gl_FragCoord.xy), 4.0);
+        float vlB = mod(vlP.x * 4.0 + vlP.y * 9.0 + vlP.x * vlP.y * 3.0, 16.0) / 16.0 + 0.03;
+        if (vlKeep < vlB) discard;`);
+    }
+  };
+  const key = material.customProgramCacheKey.bind(material);
+  material.customProgramCacheKey = () => key() + '|vl-sight-' + mode + n0 + s0;
+  return material;
 }

@@ -1,5 +1,8 @@
 # vibeLearn — delivery workflow
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Candidate stability — 29 September 2026:** Finish branch changes and source
 edits before starting a browser verification pass. Keep all files served by that
 pass fixed until it ends; a commit alone is harmless, but checkout/merge/build

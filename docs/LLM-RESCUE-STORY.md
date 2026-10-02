@@ -1,5 +1,8 @@
 # Bring Back the Words — story and progression treatment
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Current authority — 28 September 2026:** Read `STATE.md` and the exact
 `design/learning-design.json` / `design/review.json` first. The v8 review approves
 only the opening prototype; historical episode outlines below are not approved

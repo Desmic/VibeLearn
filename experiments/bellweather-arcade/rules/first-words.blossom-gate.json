@@ -1,0 +1,6325 @@
+{
+  "schemaVersion": "1",
+  "id": "first-words.blossom-gate",
+  "version": "1",
+  "state": {
+    "phase": {
+      "type": "enum",
+      "values": [
+        "arrived",
+        "bag",
+        "predict",
+        "support",
+        "run",
+        "open"
+      ],
+      "initial": "arrived"
+    },
+    "slotA": {
+      "type": "enum",
+      "values": [
+        "none",
+        "mira",
+        "poster",
+        "warden",
+        "rumour"
+      ],
+      "initial": "none"
+    },
+    "slotB": {
+      "type": "enum",
+      "values": [
+        "none",
+        "mira",
+        "poster",
+        "warden",
+        "rumour"
+      ],
+      "initial": "none"
+    },
+    "askedSupport": {
+      "type": "boolean",
+      "initial": false
+    },
+    "failed": {
+      "type": "boolean",
+      "initial": false
+    }
+  },
+  "invariants": [
+    {
+      "id": "no-duplicate-note",
+      "expression": {
+        "op": "or",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "slotB"
+            },
+            "right": "none"
+          },
+          {
+            "op": "ne",
+            "left": {
+              "field": "slotA"
+            },
+            "right": {
+              "field": "slotB"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "actions": {
+    "take-satchel": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "arrived"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "bag"
+        }
+      ],
+      "emits": [
+        "satchel-taken"
+      ]
+    },
+    "take.mira": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "bag"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "op": "or",
+              "args": [
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "slotA"
+                  },
+                  "right": "mira"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "slotB"
+                  },
+                  "right": "mira"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotA"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotA",
+              "value": "mira"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-taken"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotB"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "mira"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-taken"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotA",
+              "value": {
+                "field": "slotB"
+              }
+            },
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "mira"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-swapped"
+          ]
+        }
+      ]
+    },
+    "take.poster": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "bag"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "op": "or",
+              "args": [
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "slotA"
+                  },
+                  "right": "poster"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "slotB"
+                  },
+                  "right": "poster"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotA"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotA",
+              "value": "poster"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-taken"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotB"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "poster"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-taken"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotA",
+              "value": {
+                "field": "slotB"
+              }
+            },
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "poster"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-swapped"
+          ]
+        }
+      ]
+    },
+    "take.warden": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "bag"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "op": "or",
+              "args": [
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "slotA"
+                  },
+                  "right": "warden"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "slotB"
+                  },
+                  "right": "warden"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotA"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotA",
+              "value": "warden"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-taken"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotB"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "warden"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-taken"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotA",
+              "value": {
+                "field": "slotB"
+              }
+            },
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "warden"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-swapped"
+          ]
+        }
+      ]
+    },
+    "take.rumour": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "bag"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "op": "or",
+              "args": [
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "slotA"
+                  },
+                  "right": "rumour"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "slotB"
+                  },
+                  "right": "rumour"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotA"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotA",
+              "value": "rumour"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-taken"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotB"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "rumour"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-taken"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotA",
+              "value": {
+                "field": "slotB"
+              }
+            },
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "rumour"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-swapped"
+          ]
+        }
+      ]
+    },
+    "put.mira": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "bag"
+          },
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "slotA"
+                },
+                "right": "mira"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "slotB"
+                },
+                "right": "mira"
+              }
+            ]
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotA"
+            },
+            "right": "mira"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotA",
+              "value": {
+                "field": "slotB"
+              }
+            },
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "none"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-returned"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "none"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-returned"
+          ]
+        }
+      ]
+    },
+    "put.poster": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "bag"
+          },
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "slotA"
+                },
+                "right": "poster"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "slotB"
+                },
+                "right": "poster"
+              }
+            ]
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotA"
+            },
+            "right": "poster"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotA",
+              "value": {
+                "field": "slotB"
+              }
+            },
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "none"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-returned"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "none"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-returned"
+          ]
+        }
+      ]
+    },
+    "put.warden": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "bag"
+          },
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "slotA"
+                },
+                "right": "warden"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "slotB"
+                },
+                "right": "warden"
+              }
+            ]
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotA"
+            },
+            "right": "warden"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotA",
+              "value": {
+                "field": "slotB"
+              }
+            },
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "none"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-returned"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "none"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-returned"
+          ]
+        }
+      ]
+    },
+    "put.rumour": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "bag"
+          },
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "slotA"
+                },
+                "right": "rumour"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "slotB"
+                },
+                "right": "rumour"
+              }
+            ]
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotA"
+            },
+            "right": "rumour"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotA",
+              "value": {
+                "field": "slotB"
+              }
+            },
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "none"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-returned"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "set",
+              "field": "slotB",
+              "value": "none"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": false
+            }
+          ],
+          "emits": [
+            "note-returned"
+          ]
+        }
+      ]
+    },
+    "speak": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "bag"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "slotA"
+            },
+            "right": "none"
+          },
+          "effects": [],
+          "emits": [
+            "gate-needs-notes"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "predict"
+            }
+          ],
+          "emits": [
+            "gate-reads-notes"
+          ]
+        }
+      ]
+    },
+    "predict.lotus": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "predict"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "and",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotA"
+                            },
+                            "right": "mira"
+                          },
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotB"
+                            },
+                            "right": "mira"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotA"
+                            },
+                            "right": "warden"
+                          },
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotB"
+                            },
+                            "right": "warden"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:lotus",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "mira"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "mira"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "warden"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "warden"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:lotus",
+            "decide:context-selection:wrong"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "warden"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "warden"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:lotus",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "warden"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "warden"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:lotus",
+            "decide:context-selection:wrong"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "poster"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "poster"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:lotus",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "poster"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "poster"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:lotus",
+            "decide:context-selection:wrong"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "poster"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "poster"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "mira"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "mira"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:right:lotus",
+            "decide:context-selection:right",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "poster"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "poster"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:right:lotus",
+            "decide:context-selection:right"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "poster"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "poster"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    }
+                  },
+                  true
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:lotus",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "poster"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "poster"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "mira"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "mira"
+                    }
+                  ]
+                }
+              },
+              true
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:lotus",
+            "decide:context-selection:wrong"
+          ]
+        }
+      ]
+    },
+    "predict.east": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "predict"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "and",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotA"
+                            },
+                            "right": "mira"
+                          },
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotB"
+                            },
+                            "right": "mira"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotA"
+                            },
+                            "right": "warden"
+                          },
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotB"
+                            },
+                            "right": "warden"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:east",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "mira"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "mira"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "warden"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "warden"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:east",
+            "decide:context-selection:wrong"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "warden"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "warden"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:right:east",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "warden"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "warden"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:right:east",
+            "decide:context-selection:wrong"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "poster"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "poster"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:east",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "poster"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "poster"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:east",
+            "decide:context-selection:wrong"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "poster"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "poster"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "mira"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "mira"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:east",
+            "decide:context-selection:right",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "poster"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "poster"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:east",
+            "decide:context-selection:right"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "poster"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "poster"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    }
+                  },
+                  true
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:east",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "poster"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "poster"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "mira"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "mira"
+                    }
+                  ]
+                }
+              },
+              true
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:east",
+            "decide:context-selection:wrong"
+          ]
+        }
+      ]
+    },
+    "predict.bridge": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "predict"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "and",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotA"
+                            },
+                            "right": "mira"
+                          },
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotB"
+                            },
+                            "right": "mira"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotA"
+                            },
+                            "right": "warden"
+                          },
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotB"
+                            },
+                            "right": "warden"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:bridge",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "mira"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "mira"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "warden"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "warden"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:bridge",
+            "decide:context-selection:wrong"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "warden"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "warden"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:bridge",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "warden"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "warden"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:bridge",
+            "decide:context-selection:wrong"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "poster"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "poster"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:right:bridge",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "poster"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "poster"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:right:bridge",
+            "decide:context-selection:wrong"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "poster"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "poster"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "mira"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "mira"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:bridge",
+            "decide:context-selection:right",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "poster"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "poster"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:bridge",
+            "decide:context-selection:right"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "poster"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "poster"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    }
+                  },
+                  true
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:bridge",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "poster"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "poster"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "mira"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "mira"
+                    }
+                  ]
+                }
+              },
+              true
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:bridge",
+            "decide:context-selection:wrong"
+          ]
+        }
+      ]
+    },
+    "predict.unclear": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "predict"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "and",
+                    "args": [
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotA"
+                            },
+                            "right": "mira"
+                          },
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotB"
+                            },
+                            "right": "mira"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "or",
+                        "args": [
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotA"
+                            },
+                            "right": "warden"
+                          },
+                          {
+                            "op": "eq",
+                            "left": {
+                              "field": "slotB"
+                            },
+                            "right": "warden"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:right:unclear",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "mira"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "mira"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "warden"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "warden"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:right:unclear",
+            "decide:context-selection:wrong"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "warden"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "warden"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:unclear",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "warden"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "warden"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:unclear",
+            "decide:context-selection:wrong"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "poster"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "poster"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:unclear",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "poster"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "poster"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:unclear",
+            "decide:context-selection:wrong"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "poster"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "poster"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "mira"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "mira"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:unclear",
+            "decide:context-selection:right",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "poster"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "poster"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:wrong:unclear",
+            "decide:context-selection:right"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "and",
+                      "args": [
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "mira"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "mira"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "or",
+                          "args": [
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotA"
+                              },
+                              "right": "warden"
+                            },
+                            {
+                              "op": "eq",
+                              "left": {
+                                "field": "slotB"
+                              },
+                              "right": "warden"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "poster"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "poster"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "not",
+                    "arg": {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    }
+                  },
+                  true
+                ]
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "askedSupport"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "support"
+            },
+            {
+              "op": "set",
+              "field": "askedSupport",
+              "value": true
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:right:unclear",
+            "decide:context-selection:wrong",
+            "ask-support"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "poster"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "poster"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "mira"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "mira"
+                    }
+                  ]
+                }
+              },
+              true
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "run"
+            }
+          ],
+          "emits": [
+            "decide:destination-prediction:right:unclear",
+            "decide:context-selection:wrong"
+          ]
+        }
+      ]
+    },
+    "support.route": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "support"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "run"
+        }
+      ],
+      "emits": [
+        "decide:source-support:right:route"
+      ]
+    },
+    "support.safe": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "support"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "run"
+        }
+      ],
+      "emits": [
+        "decide:source-support:wrong:safe"
+      ]
+    },
+    "support.held": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "support"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "run"
+        }
+      ],
+      "emits": [
+        "decide:source-support:wrong:held"
+      ]
+    },
+    "run": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "run"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "mira"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "mira"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "or",
+                    "args": [
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotA"
+                        },
+                        "right": "warden"
+                      },
+                      {
+                        "op": "eq",
+                        "left": {
+                          "field": "slotB"
+                        },
+                        "right": "warden"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "bag"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": true
+            }
+          ],
+          "emits": [
+            "gate-blend"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "warden"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "warden"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "bag"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": true
+            }
+          ],
+          "emits": [
+            "gate-decoy"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "poster"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "poster"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "bag"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": true
+            }
+          ],
+          "emits": [
+            "gate-stale"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "poster"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "poster"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotA"
+                    },
+                    "right": "mira"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "slotB"
+                    },
+                    "right": "mira"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "open"
+            }
+          ],
+          "emits": [
+            "gate-open"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "op": "and",
+                  "args": [
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "mira"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "mira"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "or",
+                      "args": [
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotA"
+                          },
+                          "right": "warden"
+                        },
+                        {
+                          "op": "eq",
+                          "left": {
+                            "field": "slotB"
+                          },
+                          "right": "warden"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "warden"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "warden"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "poster"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "poster"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "op": "or",
+                  "args": [
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotA"
+                      },
+                      "right": "mira"
+                    },
+                    {
+                      "op": "eq",
+                      "left": {
+                        "field": "slotB"
+                      },
+                      "right": "mira"
+                    }
+                  ]
+                }
+              },
+              true
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "bag"
+            },
+            {
+              "op": "set",
+              "field": "failed",
+              "value": true
+            }
+          ],
+          "emits": [
+            "gate-vague"
+          ]
+        }
+      ]
+    }
+  },
+  "objectives": {
+    "open": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "open"
+      }
+    }
+  }
+}

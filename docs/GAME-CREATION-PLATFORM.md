@@ -1,5 +1,8 @@
 # VibeLearn game-creation platform — product direction
 
+> **Partly historical (3 Oct 2026).** The principles still apply to the current game (`experiments/bellweather-arcade`, see "Current direction" in `AGENTS.md`); the tools, gates, engine and story details named here are from the earlier PlayCanvas game.
+
+
 **System-first correction — 21 September 2026:** The user rejects the current
 learning progression and detached gameplay HUD/guidance. Repair the learning and
 interaction design boundary before game implementation. Follow `LEARNING-DESIGN-GATE.md`: exact-design

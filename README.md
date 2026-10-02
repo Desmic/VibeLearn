@@ -1,5 +1,10 @@
 # VibeLearn · game-first learning system
 
+**3 October 2026 — start here.** The current game is `experiments/bellweather-arcade` (three.js),
+the official direction since 3 Oct. Read "Current direction" in `AGENTS.md`. The checkpoints below
+(PlayCanvas, Relay Rescue, critic candidates) are historical.
+
+
 **Authoritative checkpoint — 19 September 2026:** The active proof track is **How LLMs Work / Episode 1: The First Words** in Bellweather on the PlayCanvas-only active path. Frozen post-CI critic candidate: `92a5ecbdc803362ee1554fca6ae811adb155bc26`; exact run: `35434565005`; sealed critic bundle: `10581437727`, retained through 19 October 2026. Render still serves rejected `ad14c5aced6cf053c7617dfb03245506e1e9dad5`; no newer candidate is deployed. Terminal PM adapter Phase 0 is merged and verified; live Terminal PM execution remains blocked by the external system's `live_run_authorized=false` checkpoint. **This paragraph supersedes conflicting “current/next” wording below; older Relay Rescue/Echo Forge and Three.js sections are historical/migration context.** Read `docs/STATE.md` and `docs/CRITIC-HANDOFF.md` first.
 
 **Current review amendment — 14 September 2026:** Current refinement adds third-person exploration, free camera controls, consistent 3D entry and full-screen mobile play to the reusable learning-game foundation. See the current contract and verification status; implementation is not accepted merely because it deploys. Read [GAME-CAMERA-INPUT.md](docs/GAME-CAMERA-INPUT.md).

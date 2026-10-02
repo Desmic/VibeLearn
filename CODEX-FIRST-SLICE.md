@@ -1,5 +1,8 @@
 # Codex task: implement and present the first Learning OS slice
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Status — historical handoff:** This file preserves the original first-slice Phase 0/1 plan. It is not the current execution authority. As of 19 September 2026 the frozen critic candidate is `92a5ecbdc803362ee1554fca6ae811adb155bc26`; read `AGENTS.md`, `CODEX.md`, `CODEX-IMPLEMENTATION-PLAN.md`, `docs/STATE.md`, and `docs/CRITIC-HANDOFF.md` before acting.
 
 ## Current product amendment — story is a gated subsystem

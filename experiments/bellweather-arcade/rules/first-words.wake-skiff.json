@@ -1,0 +1,459 @@
+{
+  "schemaVersion": "1",
+  "id": "first-words.wake-skiff",
+  "version": "1",
+  "state": {
+    "phase": {
+      "type": "enum",
+      "values": [
+        "place",
+        "catch",
+        "feed",
+        "catch-last",
+        "loop",
+        "awake"
+      ],
+      "initial": "place"
+    },
+    "caught": {
+      "type": "integer",
+      "initial": 0,
+      "min": 0,
+      "max": 2
+    },
+    "missed": {
+      "type": "boolean",
+      "initial": false
+    },
+    "pick0": {
+      "type": "boolean",
+      "initial": false
+    },
+    "pick1": {
+      "type": "boolean",
+      "initial": false
+    },
+    "pick2": {
+      "type": "boolean",
+      "initial": false
+    }
+  },
+  "actions": {
+    "place": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "place"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "catch"
+        }
+      ],
+      "emits": [
+        "word-placed"
+      ]
+    },
+    "catch": {
+      "when": {
+        "op": "or",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "catch"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "catch-last"
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "catch-last"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "loop"
+            }
+          ],
+          "emits": [
+            "word-caught",
+            "loop-runs"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "caught"
+            },
+            "right": 1
+          },
+          "effects": [
+            {
+              "op": "add",
+              "field": "caught",
+              "value": 1
+            },
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "feed"
+            }
+          ],
+          "emits": [
+            "word-caught",
+            "ready-to-feed"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "add",
+              "field": "caught",
+              "value": 1
+            }
+          ],
+          "emits": [
+            "word-caught"
+          ]
+        }
+      ]
+    },
+    "drop": {
+      "when": {
+        "op": "or",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "catch"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "catch-last"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "missed",
+          "value": true
+        }
+      ],
+      "emits": [
+        "word-dropped"
+      ]
+    },
+    "pick.0": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "feed"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "pick0",
+          "value": {
+            "op": "not",
+            "arg": {
+              "field": "pick0"
+            }
+          }
+        }
+      ]
+    },
+    "pick.1": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "feed"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "pick1",
+          "value": {
+            "op": "not",
+            "arg": {
+              "field": "pick1"
+            }
+          }
+        }
+      ]
+    },
+    "pick.2": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "feed"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "pick2",
+          "value": {
+            "op": "not",
+            "arg": {
+              "field": "pick2"
+            }
+          }
+        }
+      ]
+    },
+    "feed": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "feed"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "field": "pick0"
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "pick1"
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "pick2"
+                }
+              }
+            ]
+          },
+          "effects": [],
+          "emits": [
+            "nothing-picked"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "field": "pick0"
+              },
+              {
+                "field": "pick1"
+              },
+              {
+                "field": "pick2"
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "catch-last"
+            }
+          ],
+          "emits": [
+            "decide:next-input:right:full-sentence",
+            "core-says-next"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "not",
+                "arg": {
+                  "field": "pick0"
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "pick1"
+                }
+              },
+              {
+                "field": "pick2"
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "pick0",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "pick1",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "pick2",
+              "value": false
+            }
+          ],
+          "emits": [
+            "decide:next-input:wrong:newest-only"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "field": "pick0"
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "pick1"
+                }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "pick2"
+                }
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "pick0",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "pick1",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "pick2",
+              "value": false
+            }
+          ],
+          "emits": [
+            "decide:next-input:wrong:first-only"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "set",
+              "field": "pick0",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "pick1",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "pick2",
+              "value": false
+            }
+          ],
+          "emits": [
+            "decide:next-input:wrong:partial"
+          ]
+        }
+      ]
+    },
+    "loop-done": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "loop"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "awake"
+        }
+      ],
+      "emits": [
+        "skiff-awake"
+      ]
+    }
+  },
+  "objectives": {
+    "awake": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "awake"
+      }
+    },
+    "no-miss": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "awake"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "field": "missed"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

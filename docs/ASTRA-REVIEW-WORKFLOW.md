@@ -1,5 +1,8 @@
 # One Astra reviewer, separate critic lanes
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Upstream design gate — 21 September 2026:** Before game implementation, review
 `LEARNING-DESIGN-GATE.md` and the exact learning design independently. This is a
 design review, not cold gameplay evidence. Later GUI review must still begin cold;

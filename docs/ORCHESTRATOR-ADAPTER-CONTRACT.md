@@ -1,5 +1,8 @@
 # VibeLearn ↔ Terminal PM Agent adapter contract
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Status:** draft contract v0.1 — design semantics, not a frozen transport/API schema  
 **Date:** 18 September 2026  
 **Owning architecture:** `docs/AUTOMATED-DEVELOPMENT-SYSTEM.md`

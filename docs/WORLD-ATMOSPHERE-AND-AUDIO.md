@@ -1,5 +1,8 @@
 # World atmosphere, art direction, sound and cultural references
 
+> **Partly historical (3 Oct 2026).** The principles still apply to the current game (`experiments/bellweather-arcade`, see "Current direction" in `AGENTS.md`); the tools, gates, engine and story details named here are from the earlier PlayCanvas game.
+
+
 **Active direction — 17 September 2026.** Read `ART-WORLD-DIRECTION-CRITIC.md`, `GAME-CREATION-PLATFORM.md`, `LLM-RESCUE-STORY.md`, `GAME-OPENING-PROGRESSION.md` and `STATE.md`.
 
 ## A world worth inhabiting, not only looking at

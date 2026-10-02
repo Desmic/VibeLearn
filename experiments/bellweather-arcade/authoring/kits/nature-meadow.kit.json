@@ -1,0 +1,324 @@
+{
+  "kit": "nature-meadow",
+  "version": 1,
+  "styleFamily": "stylized-painted",
+  "notes": "Semantic roles for outdoor meadow dressing. Game code asks for roles (tree.blossom, grass.tuft), never for source file names. Sizes are native metres; a world spec picks scale ranges.",
+  "source": {
+    "name": "Stylized Nature MegaKit (Standard)",
+    "author": "Quaternius",
+    "license": "CC0-1.0",
+    "url": "https://quaternius.com/packs/stylizednaturemegakit.html",
+    "download": "https://opengameart.org/content/stylized-nature-megakit",
+    "localPath": "assets/third-party/quaternius/stylized-nature-megakit/glTF"
+  },
+  "textureMax": {
+    "default": 512,
+    "Leaves_NormalTree_C": 1024,
+    "Leaves_TwistedTree_C": 1024,
+    "Rocks_Diffuse": 1024,
+    "Flowers": 512,
+    "Leaves": 1024
+  },
+  "dropNormalMaps": true,
+  "variants": {
+    "blossom": {
+      "images": [
+        "Leaves_NormalTree_C",
+        "Leaves_TwistedTree_C"
+      ],
+      "hue": 0.955,
+      "sat": 0.5,
+      "val": 1.0,
+      "mode": "target",
+      "note": "canopy recoloured to pastel pink blossom",
+      "lift": 0.42
+    },
+    "lilac": {
+      "images": [
+        "Leaves_NormalTree_C"
+      ],
+      "hue": 0.78,
+      "sat": 0.34,
+      "val": 1.0,
+      "mode": "target",
+      "note": "lilac canopy for accents",
+      "lift": 0.26
+    },
+    "meadow": {
+      "images": [
+        "Leaves_TwistedTree_C"
+      ],
+      "hue": 0.3,
+      "sat": 0.75,
+      "val": 1.0,
+      "mode": "target",
+      "note": "autumn-red leaf cards turned spring green (hedges)"
+    },
+    "warm": {
+      "images": [
+        "PathRocks_Diffuse",
+        "Rocks_Diffuse"
+      ],
+      "hue": 0.08,
+      "sat": 0.28,
+      "val": 1.28,
+      "mode": "target",
+      "note": "grey stone warmed to sandstone"
+    },
+    "autumn": {
+      "images": [
+        "Leaves_NormalTree_C"
+      ],
+      "hue": 0.085,
+      "sat": 0.8,
+      "val": 1.0,
+      "lift": 0.42,
+      "mode": "target",
+      "note": "golden-orange canopy (weavers' isles, harvest scenes)"
+    },
+    "ember": {
+      "images": [
+        "Leaves_TwistedTree_C"
+      ],
+      "hue": 0.04,
+      "sat": 0.65,
+      "val": 1.0,
+      "lift": 0.32,
+      "mode": "target",
+      "note": "soft red-orange shrubs and hero trees"
+    }
+  },
+  "roles": {
+    "tree.broadleaf": {
+      "files": [
+        "CommonTree_1",
+        "CommonTree_2",
+        "CommonTree_3",
+        "CommonTree_4",
+        "CommonTree_5"
+      ],
+      "footprint": 0.35,
+      "tier": "dressing"
+    },
+    "tree.blossom": {
+      "files": [
+        "CommonTree_1",
+        "CommonTree_2",
+        "CommonTree_5"
+      ],
+      "variant": "blossom",
+      "footprint": 0.35,
+      "tier": "dressing"
+    },
+    "tree.lilac": {
+      "files": [
+        "CommonTree_3"
+      ],
+      "variant": "lilac",
+      "footprint": 0.35,
+      "tier": "dressing"
+    },
+    "tree.pine": {
+      "files": [
+        "Pine_1",
+        "Pine_3",
+        "Pine_5"
+      ],
+      "footprint": 0.4,
+      "tier": "dressing"
+    },
+    "tree.twisted": {
+      "files": [
+        "TwistedTree_1",
+        "TwistedTree_3"
+      ],
+      "variant": "blossom",
+      "footprint": 0.9,
+      "tier": "landmark"
+    },
+    "tree.dead": {
+      "files": [
+        "DeadTree_1",
+        "DeadTree_3"
+      ],
+      "footprint": 0.4,
+      "tier": "dressing"
+    },
+    "shrub.round": {
+      "files": [
+        "Bush_Common"
+      ],
+      "footprint": 0.9,
+      "tier": "dressing",
+      "variant": "meadow"
+    },
+    "shrub.flowering": {
+      "files": [
+        "Bush_Common_Flowers"
+      ],
+      "footprint": 0.9,
+      "tier": "dressing"
+    },
+    "plant.fern": {
+      "files": [
+        "Fern_1"
+      ],
+      "footprint": 0,
+      "tier": "scatter"
+    },
+    "plant.clover": {
+      "files": [
+        "Clover_1",
+        "Clover_2"
+      ],
+      "footprint": 0,
+      "tier": "scatter"
+    },
+    "plant.broad": {
+      "files": [
+        "Plant_1",
+        "Plant_1_Big"
+      ],
+      "footprint": 0,
+      "tier": "scatter"
+    },
+    "plant.ground": {
+      "files": [
+        "Plant_7",
+        "Plant_7_Big"
+      ],
+      "footprint": 0,
+      "tier": "scatter"
+    },
+    "flower.cluster": {
+      "files": [
+        "Flower_3_Group",
+        "Flower_4_Group"
+      ],
+      "footprint": 0,
+      "tier": "scatter"
+    },
+    "flower.single": {
+      "files": [
+        "Flower_3_Single",
+        "Flower_4_Single"
+      ],
+      "footprint": 0,
+      "tier": "scatter"
+    },
+    "grass.tuft": {
+      "files": [
+        "Grass_Common_Short",
+        "Grass_Common_Tall",
+        "Grass_Wispy_Short",
+        "Grass_Wispy_Tall"
+      ],
+      "footprint": 0,
+      "tier": "scatter"
+    },
+    "mushroom": {
+      "files": [
+        "Mushroom_Common",
+        "Mushroom_Laetiporus"
+      ],
+      "footprint": 0,
+      "tier": "scatter"
+    },
+    "pebble": {
+      "files": [
+        "Pebble_Round_1",
+        "Pebble_Round_2",
+        "Pebble_Round_3",
+        "Pebble_Square_1",
+        "Pebble_Square_3",
+        "Pebble_Square_5"
+      ],
+      "footprint": 0,
+      "tier": "scatter",
+      "variant": "warm"
+    },
+    "path.stone": {
+      "files": [
+        "RockPath_Round_Small_1",
+        "RockPath_Round_Small_2",
+        "RockPath_Round_Small_3",
+        "RockPath_Round_Thin",
+        "RockPath_Round_Wide"
+      ],
+      "footprint": 0,
+      "tier": "surface",
+      "variant": "warm"
+    },
+    "path.slab": {
+      "files": [
+        "RockPath_Square_Small_1",
+        "RockPath_Square_Small_2",
+        "RockPath_Square_Thin",
+        "RockPath_Square_Wide"
+      ],
+      "footprint": 0,
+      "tier": "surface",
+      "variant": "warm"
+    },
+    "rock.boulder": {
+      "files": [
+        "Rock_Medium_1",
+        "Rock_Medium_2",
+        "Rock_Medium_3"
+      ],
+      "footprint": 1.2,
+      "tier": "dressing",
+      "variant": "warm"
+    },
+    "petal.scatter": {
+      "files": [
+        "Petal_1",
+        "Petal_2",
+        "Petal_3",
+        "Petal_5"
+      ],
+      "footprint": 0,
+      "tier": "scatter"
+    },
+    "tree.autumn": {
+      "files": [
+        "CommonTree_2",
+        "CommonTree_4",
+        "CommonTree_5"
+      ],
+      "variant": "autumn",
+      "footprint": 0.35,
+      "tier": "dressing"
+    },
+    "shrub.ember": {
+      "files": [
+        "Bush_Common"
+      ],
+      "variant": "ember",
+      "footprint": 0.9,
+      "tier": "dressing"
+    },
+    "tree.twisted-ember": {
+      "files": [
+        "TwistedTree_3"
+      ],
+      "variant": "ember",
+      "footprint": 0.9,
+      "tier": "landmark"
+    }
+  },
+  "grade": {
+    "sat": 0.82,
+    "val": 1.04,
+    "note": "pull the saturated source toward the painted pastel family"
+  },
+  "lod": {
+    "minTris": 2500,
+    "keep": 0.38,
+    "grow": 1.3,
+    "distance": 16,
+    "foliage": "Leaf|Leaves",
+    "note": "distance version of big foliage models: trunk kept, ~38% of leaf cards kept and grown"
+  },
+  "foliageShade": 0.45
+}

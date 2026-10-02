@@ -1,5 +1,8 @@
 # Art and world-direction critic
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Design reference — 20 September 2026:** Apply `LIVING-WORLD-DESIGN.md`: curiosity,
 embodiment, visible purpose, attachment, agency, coherent beauty and payoff. These
 are general design/review principles, not a requirement for high-end graphics or

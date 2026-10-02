@@ -1,3 +1,5 @@
+import { clearSight } from './canopy';
+import { quality } from './quality';
 import * as T from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { buildVista } from './vista';
@@ -59,13 +61,22 @@ function leafBlade(parent:T.Object3D,base:T.Vector3,tip:T.Vector3,w:number,m:T.M
 function plant(parent:T.Object3D,x:number,y:number,z:number,s:number,m:T.Material){rod(parent,new T.Vector3(x,y,z),new T.Vector3(x,y+s*.84,z),.045*s,.023*s,mat.branch,5);for(let k=0;k<7;k++){const a=k*2.4,level=.28+(k%3)*.19,p=new T.Vector3(x,y+s*level,z),tip=p.clone().add(new T.Vector3(Math.cos(a)*s*.53,s*.19,Math.sin(a)*s*.53));leafBlade(parent,p,tip,s*.15,m)}}
 
 
-const sunlitBark=pigment('#685c66'),sunlitBlossomBark=pigment('#806069');
+const sunlitBark=clearSight(pigment('#685c66'),'dither'),sunlitBlossomBark=clearSight(pigment('#806069'),'dither');
+// trunks and branches step aside when they come between the camera and Zip
+clearSight(mat.branch,'dither');clearSight(mat.branchLight,'dither');
+let sharedLobe:T.BufferGeometry|undefined,sharedLobeMat:T.Material|undefined;
+const lobeGeometry=()=>sharedLobe??=new T.IcosahedronGeometry(1,1);
+const lobeMaterial=()=>sharedLobeMat??=clearSight(new T.MeshStandardMaterial({color:'#ffffff',roughness:1}),'shrink');
 export function tree(parent:T.Object3D,x:number,z:number,scale:number,pink=false,distant=false,coherent=false){
   const g=new T.Group();g.position.set(x,0,z);g.scale.setScalar(scale);parent.add(g);
   const tr=mulberry32(Math.round((x+70)*311+(z+90)*79));
   const bark=coherent?(pink?sunlitBlossomBark:sunlitBark):pink?mat.branchLight:mat.branch;
   tube(g,[new T.Vector3(0,.05,0),new T.Vector3(-.19,1.04,.08),new T.Vector3(.12,2.18,0),new T.Vector3(.1,3.35,-.08)],.18,bark);
-  const count=1260,leafGeo=canopyGeometry(pink,count),appearance=canopyMaterial(pink);
+  const q=quality(),lobes=q.lobeTrees==='all'||(q.lobeTrees==='distant'&&distant),lobePts:[T.Vector3,T.Color][]=[],keep=lobes?1:q.leafFraction,thin=mulberry32(Math.round((x+13)*97+(z+29)*53)),grow=1/Math.sqrt(Math.max(keep,.2));
+  // Shell crown (keep<1): keep the outermost cards, which carry the silhouette
+  // and the lit side; interior cards are mostly hidden but still cost fill rate.
+  const hybrid=!lobes&&keep<1,shellCards:{base:T.Vector3,dir:T.Vector3,len:number,width:number,c:T.Color}[]=[];
+  const count=Math.ceil(1260*keep)+8,leafGeo=canopyGeometry(pink,count),appearance=canopyMaterial(pink);
   const leaves=new T.InstancedMesh(leafGeo,appearance.material,count);
   leaves.castShadow=true;leaves.receiveShadow=true;leaves.frustumCulled=false;
   leaves.customDepthMaterial=appearance.depth;
@@ -73,6 +84,12 @@ export function tree(parent:T.Object3D,x:number,z:number,scale:number,pink=false
   let next=0;
   const shade=coherent?(pink?['#905b77','#b77790','#d494a7','#e6b0bc','#f2c7c4']:['#345f5d','#447363','#628969','#82a078','#aec08c']):pink?['#98526e','#b2627c','#d28197','#e69aaa','#efb2b6']:['#365944','#527447','#6b8750','#879957','#a9b365'];
   function addLeaf(base:T.Vector3,dir:T.Vector3,len:number,width:number,c:T.Color){
+    if(next>=count)return;
+    if(lobes){if(thin()<.13)lobePts.push([base.clone(),c]);next++;return;}
+    if(hybrid){shellCards.push({base:base.clone(),dir:dir.clone(),len,width,c});return;}
+    addCard(base,dir,len,width,c);
+  }
+  function addCard(base:T.Vector3,dir:T.Vector3,len:number,width:number,c:T.Color){
     if(next>=count)return;
     dummy.position.copy(base);dummy.quaternion.setFromUnitVectors(up,dir.normalize());
     dummy.quaternion.multiply(new T.Quaternion().setFromAxisAngle(up,tr()*Math.PI*2));
@@ -112,7 +129,29 @@ export function tree(parent:T.Object3D,x:number,z:number,scale:number,pink=false
     const base=new T.Vector3(Math.cos(a)*rad,y,Math.sin(a)*rad);
     addLeaf(base,new T.Vector3(Math.cos(a)*.35,range(tr,.2,.8),Math.sin(a)*.35),range(tr,.38,.7),range(tr,.55,.78),colors[Math.floor(tr()*2)]);
   }
+  let core:[T.Vector3,T.Color,number][]=[];
+  if(hybrid){
+    // rank cards by how far out they sit from the crown's centre, per direction
+    const centre=new T.Vector3(0,3.05,0),rel=(v:T.Vector3)=>{const d=v.clone().sub(centre);d.y*=.9;return d.length()};
+    // keep the outermost share of cards (exact fraction), thin the inner ones
+    const ranked=shellCards.map(l=>({l,r:rel(l.base)})).sort((a,b)=>b.r-a.r);
+    const keepN=Math.round(ranked.length*keep);
+    ranked.forEach(({l},i)=>{
+      if(i<keepN)addCard(l.base,l.dir,l.len*1.12,l.width*1.12,l.c);
+    });
+  }
+  if(lobes||core.length){
+    const pts:[T.Vector3,T.Color,number][]=lobes?lobePts.map(([p,c])=>[p,c,.34+thin()*.2]):core;
+    const puff=new T.InstancedMesh(lobeGeometry(),lobeMaterial(),pts.length);const d=new T.Object3D();
+    pts.forEach(([p,c,s],i)=>{d.position.copy(p);d.scale.set(s,s*.82,s);d.rotation.set(thin()*3,thin()*3,0);d.updateMatrix();puff.setMatrixAt(i,d.matrix);puff.setColorAt(i,c)});
+    puff.castShadow=true;puff.receiveShadow=true;puff.renderOrder=-1;g.add(puff);
+  }
+  if(lobes){
+    leafGeo.dispose();
+  } else {
+  leaves.renderOrder=1;leaves.receiveShadow=q.tier==='high';
   leaves.count=next;leaves.instanceMatrix.needsUpdate=true;if(leaves.instanceColor)leaves.instanceColor.needsUpdate=true;g.add(leaves);
+  }
   // A buttressed root ties the canopy to the terrace.
   for(let q=0;q<4;q++){const a=q*Math.PI/2+.3;rod(g,new T.Vector3(Math.cos(a)*.52,.05,Math.sin(a)*.52),new T.Vector3(0,1.36,0),.095,.045,bark,6)}
 }

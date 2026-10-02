@@ -1,5 +1,8 @@
 # Three.js story framework — legacy migration reference
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **19 September 2026 clarification:** This remains **legacy/migration reference only**. No new generic Three.js work belongs on the active path. PlayCanvas Engine is active; frozen critic candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26` is awaiting independent review. Historical “current user contract” text below must not be treated as current execution authority.
 
 **Current user contract — 13 September 2026:** Read [GAME-OPENING-PROGRESSION.md](GAME-OPENING-PROGRESSION.md) before implementation or review. The `16a655e` experience was user-rejected. Require a first-entry skippable 3D opening, tutorial with early success, gradual progression, optional non-destructive replay at every level, and no automatic opening for Level 2+ players. Remove the 2D gameplay fallback; preserve accessible HUD controls and honest 3D recovery. This amendment supersedes conflicting legacy guidance below.

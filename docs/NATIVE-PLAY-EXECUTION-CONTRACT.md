@@ -1,5 +1,8 @@
 # Native play execution boundary — 20 September 2026
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 Implemented locally: an input guard, native execution record, assignment option,
 v2 execution receipt and result-ingestion checks. Not yet connected to the
 desktop CUA executor or live Terminal PM. This is not a new orchestrator.

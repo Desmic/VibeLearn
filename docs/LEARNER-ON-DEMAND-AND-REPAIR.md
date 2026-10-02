@@ -1,5 +1,8 @@
 # Learner-facing on-demand games and conversational repair
 
+> **Partly historical (3 Oct 2026).** The principles still apply to the current game (`experiments/bellweather-arcade`, see "Current direction" in `AGENTS.md`); the tools, gates, engine and story details named here are from the earlier PlayCanvas game.
+
+
 **Product clarification — 17 September 2026.** The user selected a learner-facing product that creates a personalized game on demand, rather than a creator-operated studio as the first product. They also require future chat access to agents for flagging issues: the agent investigates, verifies, and makes an appropriate change when justified.
 
 This document owns those experience and repair contracts. Read with [GAME-CREATION-PLATFORM.md](GAME-CREATION-PLATFORM.md), [COURSE-GENERATION-GAME-SYSTEM.md](COURSE-GENERATION-GAME-SYSTEM.md), [GAME-RUNTIME-ARCHITECTURE.md](GAME-RUNTIME-ARCHITECTURE.md) and [CRITIC-POLICY.md](CRITIC-POLICY.md). It is a design specification, not a claim that on-demand generation or repair agents are implemented.

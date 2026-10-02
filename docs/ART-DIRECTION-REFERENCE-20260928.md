@@ -1,5 +1,8 @@
 # Accepted visual reference: graphic techno-fantasy utopia
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 User direction, 28 September 2026. The user retained the new graphic rebuild:
 "much better, keep this" and specified that the world should feel alive,
 expansive, worth exploring and captivating. They describe this as a reference

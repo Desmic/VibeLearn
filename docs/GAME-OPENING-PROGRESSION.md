@@ -1,5 +1,8 @@
 # 3D prologue, tutorial and progression — current product contract
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Active direction — 17 September 2026.** This document supersedes conflicting older opening/tutorial guidance. Read with `LLM-RESCUE-STORY.md`, `GAME-CREATION-PLATFORM.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`.
 
 ## Product journey versus Level 1

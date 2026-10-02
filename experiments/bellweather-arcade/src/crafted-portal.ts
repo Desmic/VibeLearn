@@ -1,8 +1,9 @@
 import * as T from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { graphicMineral } from './graphic-material';
+import { graphicMineral, loadMineralPigment } from './graphic-material';
 
 export async function loadCraftedPortal(parent:T.Object3D,cameraSolids:T.Object3D[]){
+  const pigment=await loadMineralPigment();
   const ceramic=new URLSearchParams(location.search).get('palette')==='ceramic';
   const sunlit=new URLSearchParams(location.search).get('look')==='sunlit';
   const form=new URLSearchParams(location.search).get('form');
@@ -28,7 +29,7 @@ export async function loadCraftedPortal(parent:T.Object3D,cameraSolids:T.Object3
         if(m.name.startsWith('Porcelain'))m.color.set(m.name.includes('edge')?'#fff0d8':'#eadbc3');
         if(m.name.startsWith('Coral'))m.color.set('#d8896c');
       }
-      m.aoMapIntensity=.8;graphicMineral(m,ceramic?.035:m.name.startsWith('Porcelain')?.16:.10);
+      m.aoMapIntensity=.8;graphicMineral(m,ceramic?.035:m.name.startsWith('Porcelain')?.16:.10,m.name.startsWith('Porcelain')||m.name.startsWith('Coral')?pigment:undefined);
     }
   });
   parent.add(root);root.updateMatrixWorld(true);

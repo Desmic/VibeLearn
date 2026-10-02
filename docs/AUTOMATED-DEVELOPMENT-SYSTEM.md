@@ -7,6 +7,9 @@ ten-game dossier in `GAME-REFERENCE-STUDY.md`. This is documentation of a planne
 boundary, not a new executor, live run or change to the existing critic gates.
 
 **Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer
+
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
 across all critic lanes, including mandatory art/world direction, with actual GUI
 play and video recordings as complementary evidence. Preserve separate lane
 judgments and cold observations before intent. Use the existing Codex session for

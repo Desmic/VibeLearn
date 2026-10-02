@@ -1,5 +1,8 @@
 # Current story critic — rendered story needs redesign
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Status correction — 19 September 2026:** This document records the 17 September redesign trigger and is now historical process evidence. The materially revised exact candidate is `92a5ecbdc803362ee1554fca6ae811adb155bc26` and is awaiting the sealed independent critic queue. Do not treat “next design pass” wording below as an active implementation instruction.
 
 **17 September 2026.** The user's direct review of the rendered LLM rescue candidate is authoritative: **needs_revision**.

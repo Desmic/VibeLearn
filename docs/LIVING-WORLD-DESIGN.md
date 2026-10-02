@@ -1,5 +1,8 @@
 # Beautiful, living worlds: reference principles and application
 
+> **Partly historical (3 Oct 2026).** The principles still apply to the current game (`experiments/bellweather-arcade`, see "Current direction" in `AGENTS.md`); the tools, gates, engine and story details named here are from the earlier PlayCanvas game.
+
+
 Active direction, 20 September 2026. The user names Zelda, Rockstar games,
 The Witcher 3 and Clair Obscur: Expedition 33 as inspiration. Prioritize an
 inviting, coherent world and meaningful play over cutting-edge rendering.

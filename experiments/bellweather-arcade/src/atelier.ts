@@ -1,8 +1,9 @@
 import * as T from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { graphicMineral } from './graphic-material';
+import { graphicMineral, loadMineralPigment } from './graphic-material';
 
 export async function loadAtelier(parent:T.Object3D,cameraSolids:T.Object3D[]){
+  const pigment=await loadMineralPigment();
   const finish=new URLSearchParams(location.search).get('finish');
   const conditioned=finish==='occlusion'||finish==='daylight';
   const ceramic=new URLSearchParams(location.search).get('palette')==='ceramic';
@@ -51,7 +52,7 @@ export async function loadAtelier(parent:T.Object3D,cameraSolids:T.Object3D[]){
         m.metalness=.08;m.envMapIntensity=1.2;o.castShadow=false;
       }else{
         if(conditioned)m.aoMapIntensity=sunlit?.6:ceramic?.45:.7;
-        if(!m.name.includes('Glazing')&&!m.name.includes('Brass')&&!m.name.includes('Botanical'))graphicMineral(m,districts?(m.name.includes('Porcelain')?.035:.11):conditioned?0:.10);
+        if(!m.name.includes('Glazing')&&!m.name.includes('Brass')&&!m.name.includes('Botanical'))graphicMineral(m,districts?(m.name.includes('Porcelain')?.035:.11):conditioned?0:.10,pigment);
       }
     }
   });

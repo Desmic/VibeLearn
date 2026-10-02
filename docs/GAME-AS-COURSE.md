@@ -1,5 +1,8 @@
 # The game is the course
 
+> **Partly historical (3 Oct 2026).** The principles still apply to the current game (`experiments/bellweather-arcade`, see "Current direction" in `AGENTS.md`); the tools, gates, engine and story details named here are from the earlier PlayCanvas game.
+
+
 **Current proof checkpoint — 19 September 2026:** Exact candidate `92a5ecbdc803362ee1554fca6ae811adb155bc26` is technically/evidentially green and awaiting independent critics. Phase 0 of the external-orchestrator contract is implemented, but live orchestration remains externally blocked. Do not expand the course/game or orchestration system while the current product judgment is unresolved.
 
 **Active direction — 17 September 2026.** Read `GAME-CREATION-PLATFORM.md`, `GAME-OPENING-PROGRESSION.md`, `ART-WORLD-DIRECTION-CRITIC.md`, `CRITIC-POLICY.md` and `STATE.md`.

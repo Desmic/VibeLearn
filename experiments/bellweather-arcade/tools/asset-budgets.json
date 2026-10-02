@@ -1,0 +1,53 @@
+{
+  "_about": "Phone budgets per model (Galaxy F15 class). tris = triangles drawn, draws = mesh primitives (one draw call each), bytes = download size. A file entry overrides its folder; a folder overrides the default.",
+  "default": {
+    "tris": 20000,
+    "draws": 24,
+    "materials": 8,
+    "textures": 4,
+    "bytes": 1500000
+  },
+  "folders": {
+    "props/": {
+      "tris": 4000,
+      "draws": 16,
+      "materials": 6,
+      "textures": 2,
+      "bytes": 250000
+    },
+    "kits/": {
+      "tris": 200000,
+      "draws": 160,
+      "materials": 24,
+      "textures": 24,
+      "bytes": 4000000,
+      "_note": "a kit is a library: the world draws a few of its pieces, instanced"
+    },
+    "landmarks/": {
+      "tris": 30000,
+      "draws": 8,
+      "bytes": 2000000
+    },
+    "atelier/": {
+      "tris": 30000,
+      "draws": 100,
+      "materials": 12,
+      "bytes": 2500000,
+      "_note": "facade study architecture; camera proxy has many small boxes"
+    },
+    "crafted-portal/": {
+      "tris": 40000,
+      "draws": 8,
+      "bytes": 1500000
+    },
+    "characters/": {
+      "tris": 20000,
+      "draws": 40,
+      "materials": 4,
+      "textures": 2,
+      "bytes": 300000,
+      "_note": "a body kit is a library of parts; the game merges each person's parts into one draw call"
+    }
+  },
+  "files": {}
+}

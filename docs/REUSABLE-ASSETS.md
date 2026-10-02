@@ -1,5 +1,8 @@
 # Reusable worlds, assets and mechanics
 
+> **Partly historical (3 Oct 2026).** The principles still apply to the current game (`experiments/bellweather-arcade`, see "Current direction" in `AGENTS.md`); the tools, gates, engine and story details named here are from the earlier PlayCanvas game.
+
+
 **Active platform direction — 17 September 2026.** This replaces the narrower Episode-1 inventory framing. Read `GAME-CREATION-PLATFORM.md`, `COURSE-GENERATION-GAME-SYSTEM.md`, `ART-WORLD-DIRECTION-CRITIC.md` and `STATE.md`.
 
 ## Purpose

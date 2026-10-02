@@ -1,5 +1,8 @@
 # Experience quality system — evidence before scores
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Priority clarification — 28 September 2026:** The user wants world/art and
 engaging play completed before the deeper learning-design stage. Preserve the
 [core research](experiments/20260928-story-learning-core-review.md) for that stage;

@@ -1,5 +1,8 @@
 # Private Render + Supabase pilot
 
+> **Partly historical (3 Oct 2026).** The principles still apply to the current game (`experiments/bellweather-arcade`, see "Current direction" in `AGENTS.md`); the tools, gates, engine and story details named here are from the earlier PlayCanvas game.
+
+
 **Latest deployment — 20 September 2026:** Explicitly user-requested private review
 version `74455fd7f22d6a423eb93b070bd2c9a37d0953d7` is live (deploy
 `dep-dao21bn40ujc73djt40g`). Auto-deploy remains off; database configuration and

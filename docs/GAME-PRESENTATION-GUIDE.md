@@ -1,5 +1,8 @@
 # Game presentation guide — HUD, interactions and information delivery
 
+> **Partly historical (3 Oct 2026).** The principles still apply to the current game (`experiments/bellweather-arcade`, see "Current direction" in `AGENTS.md`); the tools, gates, engine and story details named here are from the earlier PlayCanvas game.
+
+
 **Status — 22 September 2026.** System-level response to the user's rejection of the
 world-anchored candidate (rated 1/10): the prologue was still a text overlay on the
 world, and the tutorial/mission card obstructed and clipped inside the 3D view. The

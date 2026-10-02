@@ -1,5 +1,8 @@
 # Resonance-trail prologue candidate plan
 
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+
+
 **Current v8 receiver-discovery amendment.** The cold opening review found that
 the promised destination did not register as a discovery. Exact design v8 passed
 independent prototype review for `opening` only at digest

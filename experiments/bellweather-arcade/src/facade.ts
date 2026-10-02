@@ -1,14 +1,16 @@
+import { clearSight } from './canopy';
 import * as T from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { tree } from './world';
 import { mineralSurface, sandstoneDetail, plantedGround } from './surfaces';
 import { mulberry32 } from './vendor/rng';
-import { graphicMineral } from './graphic-material';
+import { graphicMineral, loadMineralPigment } from './graphic-material';
 import { loadCraftedPortal } from './crafted-portal';
 import { loadAtelier } from './atelier';
 import { buildVista } from './vista';
 import { buildOrbitalSky } from './sky-art';
+import { buildPaving } from './paving';
 
 // One designed entrance and court. The dimensions below are also the collision
 // authority: a visual change cannot silently leave an unrelated walking corridor.
@@ -21,9 +23,17 @@ export const arrival=route.getPoint(0);
 const blockers:{minX:number,maxX:number,minZ:number,maxZ:number}[]=[];
 const circles:{x:number,z:number,r:number}[]=[];
 export function nearestRoute(p:T.Vector3){let best=0,dist=Infinity;for(let i=0;i<=120;i++){const t=i/120,q=route.getPoint(t),d=(p.x-q.x)**2+(p.z-q.z)**2;if(d<dist){dist=d;best=t}}return {t:best,d:Math.sqrt(dist)}}
+// Lets optional scene dressing (e.g. inhabitants) claim floor space.
+export function addSolidCircle(x:number,z:number,r:number){circles.push({x,z,r})}
+export function addSolidBox(minX:number,maxX:number,minZ:number,maxZ:number){const b={minX,maxX,minZ,maxZ};blockers.push(b);return b}
+export function removeSolidBox(b:{minX:number,maxX:number,minZ:number,maxZ:number}){const i=blockers.indexOf(b);if(i>=0)blockers.splice(i,1)}
+// Extra walkable discs (e.g. a separate island reached by skiff).
+const regions:{x:number,z:number,r:number}[]=[];
+export function addWalkRegion(x:number,z:number,r:number){regions.push({x,z,r})}
 export function walkable(p:T.Vector3){
   const r=.34;
-  if(p.x<-9+r||p.x>9-r||p.z<-12+r||p.z>10-r)return false;
+  const inRegion=regions.some(g=>Math.hypot(p.x-g.x,p.z-g.z)<g.r-r);
+  if(!inRegion&&(p.x<-9+r||p.x>9-r||p.z<-12+r||p.z>10-r))return false;
   for(const b of blockers)if(p.x>b.minX-r&&p.x<b.maxX+r&&p.z>b.minZ-r&&p.z<b.maxZ+r)return false;
   return circles.every(c=>Math.hypot(p.x-c.x,p.z-c.z)>c.r+r);
 }
@@ -35,12 +45,14 @@ function roundShape(w:number,h:number,r:number){
 }
 
 export async function buildWorld(scene:T.Scene){
+  const pigment=await loadMineralPigment();
   const atelier=new URLSearchParams(location.search).get('architecture')==='atelier';
   const daylight=new URLSearchParams(location.search).get('finish')==='daylight';
   const ceramic=new URLSearchParams(location.search).get('palette')==='ceramic';
   const sunlit=daylight&&new URLSearchParams(location.search).get('look')==='sunlit';
   const city=sunlit&&new URLSearchParams(location.search).get('setting')==='city';
   const districts=city&&new URLSearchParams(location.search).get('districts')==='terraces';
+  const illustrated=city&&new URLSearchParams(location.search).get('surface')==='illustrated';
   blockers.length=0;circles.length=0;cameraSolids.length=0;
   const root=new T.Group();scene.add(root);const v=(x:number,y:number,z:number)=>new T.Vector3(x,y,z);
   const cream=new T.MeshStandardMaterial({color:'#eedcc0',roughness:.79,map:mineralSurface(84)});
@@ -52,8 +64,10 @@ export async function buildWorld(scene:T.Scene){
   const glass=new T.MeshPhysicalMaterial({color:'#164e59',roughness:.2,metalness:.32,clearcoat:.85});
   const green=new T.MeshStandardMaterial({color:'#466d58',roughness:.96,map:plantedGround()});
   const floor=new T.MeshStandardMaterial({color:'#cbbfa4',roughness:.83,map:mineralSurface(129),...sandstoneDetail()});
-  for(const m of [cream,porcelain,coral,blue,navy])graphicMineral(m,m===cream?.22:.12);
-  graphicMineral(floor,ceramic?.045:.16);
+  for(const m of [cream,porcelain,coral,blue,navy])graphicMineral(m,m===cream?.22:.12,m===cream||m===porcelain?pigment:undefined);
+  // slim posts and supports get out of the camera's way (the rest of the navy trim stays solid)
+  const navyPost=navy.clone();navyPost.onBeforeCompile=navy.onBeforeCompile;navyPost.customProgramCacheKey=navy.customProgramCacheKey.bind(navy);clearSight(navyPost,'dither');
+  graphicMineral(floor,ceramic?.045:.16,pigment);
   floor.normalScale.setScalar(ceramic?.055:.10);
   const glow=new T.MeshBasicMaterial({color:'#e6e5b4'});
   function mesh(g:T.BufferGeometry,m:T.Material,x:number,y:number,z:number,camera=false){
@@ -74,10 +88,31 @@ export async function buildWorld(scene:T.Scene){
   box(0,.095,-1,18,.05,22,floor);
   const random=mulberry32(472);
   const tileColors=sunlit?['#c5c3b4','#cbc7b7','#c8c4b3','#c1c2b7','#cec9b8']:ceramic?['#ded1b9','#e2d6c0','#ddd0b7','#dbd0bd','#e1d3bb']:['#c7b49c','#dbcaaf','#dfcfb4','#c1b7a8','#d1bca0'];
-  const tileMats=Array.from({length:5},(_,i)=>{const m=floor.clone();m.color.set(tileColors[i]);return graphicMineral(m,ceramic?.045:.16)});
+  const tileMats=Array.from({length:5},(_,i)=>{const m=floor.clone();m.color.set(illustrated?['#d0bb98','#d6c1a1','#cfb998','#d7c5a8','#d2bc9a'][i]:tileColors[i]);return graphicMineral(m,illustrated?.08:ceramic?.045:.16,pigment)});
   for(let row=0;row<13;row++)for(let col=0;col<11;col++){
     const x=-8.1+col*1.62,z=9.06-row*1.67;
     box(x,.124,z,1.606,.012,1.656,tileMats[Math.floor(random()*5)]);
+  }
+  if(illustrated){
+    // Reuse the original route-paving kit. Broad staggered warm slabs carry the
+    // eye through the portal; the original level walking surface stays at .13m.
+    // The 2mm bevel top is decorative, below the controller's visual tolerance.
+    const pavingMaterial=floor.clone();pavingMaterial.roughness=.64;
+    const promenade=new T.CatmullRomCurve3([v(1.35,0,10),v(.8,0,5.0),v(1.1,0,-2),v(1.1,0,-6),v(.2,0,-11.7)]);
+    const promenadeWidth=(t:number)=>3.5-1.1*T.MathUtils.smoothstep(t,.05,.48)+.9*T.MathUtils.smoothstep(t,.73,1);
+    const paving=buildPaving(root,promenade,pavingMaterial,{rows:14,warm:true,halfWidth:promenadeWidth});
+    graphicMineral(paving.material,.13,pigment);
+    for(const side of [-1,1]){
+      const points=Array.from({length:49},(_,i)=>{
+        const t=i/48,p=promenade.getPoint(t),d=promenade.getTangent(t);
+        const half=promenadeWidth(t);
+        return p.add(new T.Vector3(-d.z,0,d.x).normalize().multiplyScalar(side*(half-.6))).setY(.132);
+      });
+      // Flush narrow ceramic inlay, not a raised trip-edge or an invisible wall.
+      const positions:number[]=[],ids:number[]=[];
+      points.forEach((p,i)=>{const d=promenade.getTangent(i/48),s=new T.Vector3(-d.z,0,d.x).normalize().multiplyScalar(.025);positions.push(...p.clone().sub(s).toArray(),...p.clone().add(s).toArray());if(i<48){const j=i*2;ids.push(j,j+1,j+2,j+1,j+3,j+2)}});
+      const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(positions,3));g.setIndex(ids);g.computeVertexNormals();mesh(g,porcelain,0,0,0);
+    }
   }
   for(const x of [-8.86,8.86])box(x,.54,-1,.28,.85,22,cream,true,.06);
   box(0,.54,-11.86,18,.85,.28,cream,true,.06);
@@ -145,7 +180,7 @@ export async function buildWorld(scene:T.Scene){
   // A slender suspended roof shades the passage; open sides retain sightlines.
   box(1.08,6.1,-6.80,4.55,.20,3.5,blue,false,.10);
   for(let i=0;i<8;i++)box(-.98+i*.59,6.27,-6.8,.14,.09,3.65,brass);
-  for(const x of [-1.03,3.20])box(x,3.13,-8.14,.16,6.0,.16,navy,true,.045);
+  for(const x of [-1.03,3.20])box(x,3.13,-8.14,.16,6.0,.16,navyPost,true,.045);
   box(1.1,5.94,-8.05,4.55,.035,.11,glow);
 
   // Broad curved canopy over the left entrance. Both fascia and underside are
@@ -156,7 +191,7 @@ export async function buildWorld(scene:T.Scene){
   mesh(canopyG,cream,0,6.04,0,true);
   const lip=[v(-8.95,5.86,-.18),v(-7.6,5.86,-.70),v(-5.4,5.86,-.82),v(-3.2,5.86,-.65),v(-1.95,5.86,-.12)];tube(lip,.062,brass);
   for(const x of [-8.5,-2.35]){
-    const support=mesh(new T.CylinderGeometry(.11,.18,5.7,12),navy,x,2.97,-.10,true);circles.push({x,z:-.10,r:.18});
+    const support=mesh(new T.CylinderGeometry(.11,.18,5.7,12),navyPost,x,2.97,-.10,true);circles.push({x,z:-.10,r:.18});
     box(x,.28,-.10,.51,.30,.51,porcelain,true,.09);
   }
 
@@ -168,6 +203,12 @@ export async function buildWorld(scene:T.Scene){
     mesh(new T.CylinderGeometry(radius-.13,radius-.13,.04,44),green,x,.64,z);
     const rim=mesh(new T.TorusGeometry(radius-.06,.08,7,48),porcelain,x,.66,z);rim.rotation.x=Math.PI/2;
     circles.push({x,z,r:radius});const plants=new T.Group();plants.position.y=.62;root.add(plants);tree(plants,x,z,scale,pink,false,sunlit);
+    // Invisible camera blockers for the trunk and the branch fork, so the
+    // follow camera slides in front of the tree instead of into its limbs.
+    for(const [r,y0,y1] of [[.32,.6,2.4],[1.05,2.2,3.7]] as const){
+      const proxy=new T.Mesh(new T.CylinderGeometry(r*scale,r*scale,(y1-y0)*scale,10));
+      proxy.position.set(x,.62+(y0+y1)/2*scale,z);proxy.visible=false;root.add(proxy);cameraSolids.push(proxy);
+    }
   }
   bed(6.13,3.55,1.65,true,1.27);
   bed(-5.8,-9.2,1.65,false,1.0);
@@ -247,7 +288,7 @@ export async function buildWorld(scene:T.Scene){
     const distant=new T.Group();root.add(distant);distant.position.set(-18,-2,-12);
     const pale=cream.clone();pale.color.set('#d6dace');
     const distantBlue=navy.clone();distantBlue.color.set('#466880');
-    buildVista(distant,{stone:pale,ivory:porcelain,navy:distantBlue,trim:brass,grass:green},(parent,x,z,scale,pink)=>tree(parent,x,z,scale,pink,true,sunlit), {background:true,surround:city,districts});
+    buildVista(distant,{stone:pale,ivory:porcelain,navy:distantBlue,trim:brass,grass:green},(parent,x,z,scale,pink)=>tree(parent,x,z,scale,pink,true,sunlit), {background:true,surround:city,districts,illustrated});
     if(city){
       const orbital=new T.Group();root.add(orbital);buildOrbitalSky(orbital);
       if(districts){orbital.scale.setScalar(.78);orbital.position.set(62,15,-35);}
@@ -260,6 +301,20 @@ export async function buildWorld(scene:T.Scene){
   root.traverse(o=>{if(!(o instanceof T.Mesh)||o instanceof T.InstancedMesh||solids.has(o)||Array.isArray(o.material)||!(o.material instanceof T.MeshStandardMaterial)||o.material.transparent)return;
     const m=o.material;if(!ids.has(m))ids.set(m,ids.size);const attrs=Object.entries(o.geometry.attributes as Record<string,T.BufferAttribute>).map(([n,a])=>`${n}:${a.itemSize}`).sort().join('|');const key=`${ids.get(m)}:${!!o.geometry.index}:${attrs}:${o.castShadow}:${o.receiveShadow}`;let g=groups.get(key);if(!g){g={m,items:[]};groups.set(key,g)}g.items.push(o);
   });
+  // The merged pieces still need to stop the follow camera (stone blocks, window walls,
+  // pillars): each solid-looking piece leaves an invisible box behind for the camera only.
+  // Boxes are exact; cylinders are close enough; other shapes only when small, since an
+  // arch frame's box would fill its own doorway.
+  const tmpBox=new T.Box3(),tmpSize=new T.Vector3(),tmpC=new T.Vector3();
+  for(const {items} of groups.values())for(const o of items){
+    const type=o.geometry.type,boxy=/Box/.test(type),cyl=type==='CylinderGeometry';
+    tmpBox.setFromObject(o);tmpBox.getSize(tmpSize);tmpBox.getCenter(tmpC);
+    if(tmpBox.max.y<.45||tmpSize.y<.3||Math.min(tmpSize.x,tmpSize.z)<.08)continue;
+    if(!boxy&&!cyl&&Math.max(tmpSize.x,tmpSize.y,tmpSize.z)>1.2)continue;
+    if(cyl&&Math.min(tmpSize.x,tmpSize.z)<.18)continue;   // slim poles fade instead (clearSight)
+    const q=o.getWorldQuaternion(new T.Quaternion());if(boxy&&Math.abs(q.y)>.05&&Math.abs(q.w)>.05&&Math.max(tmpSize.x,tmpSize.z)>1.5)continue; // big rotated slabs: AABB too loose
+    const proxy=new T.Mesh(new T.BoxGeometry(tmpSize.x,tmpSize.y,tmpSize.z),new T.MeshBasicMaterial({visible:false}));proxy.position.copy(tmpC);proxy.visible=false;proxy.name='camera-proxy';root.add(proxy);cameraSolids.push(proxy);
+  }
   for(const {m,items} of groups.values())if(items.length>1){const copies=items.map(o=>o.geometry.clone().applyMatrix4(o.matrixWorld));const g=mergeGeometries(copies);copies.forEach(g=>g.dispose());if(!g)throw Error('Facade batch mismatch');const o=new T.Mesh(g,m);o.castShadow=items[0].castShadow;o.receiveShadow=items[0].receiveShadow;items.forEach(o=>o.removeFromParent());root.add(o)}
   return root;
 }

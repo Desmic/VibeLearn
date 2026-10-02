@@ -7,7 +7,7 @@ type TreeBuilder = (parent:T.Object3D,x:number,z:number,scale:number,pink?:boole
 // An authored view: the central opening is kept clear, with one garden sanctuary
 // to the right and inhabited stepped terraces to the left. Distant scenery never
 // changes the collision or destination contract of the local promenade.
-export function buildVista(parent:T.Object3D, palette:Palette, tree:TreeBuilder, options:{background?:boolean;surround?:boolean;districts?:boolean}={}){
+export function buildVista(parent:T.Object3D, palette:Palette, tree:TreeBuilder, options:{background?:boolean;surround?:boolean;districts?:boolean;illustrated?:boolean}={}){
   const background=!!options.background;
   const root=new T.Group();parent.add(root);
   const glass=new T.MeshStandardMaterial({color:'#23697c',roughness:.3,metalness:.25});
@@ -196,6 +196,31 @@ export function buildVista(parent:T.Object3D, palette:Palette, tree:TreeBuilder,
   volume(carriage,0,.65,.83,6.8,.65,.05,glass);
   for(const x of [-2.6,-.9,.9,2.6])volume(carriage,x,.67,.87,.1,.7,.06,palette.stone);
 
+  if(options.illustrated){
+    // One instanced family of actual cloud volumes: parallax and surface normals
+    // come from geometry. These are authored scenery, not a weather simulation.
+    // No cloud shadows/reflections or camera/collision queries are introduced.
+    const geometry=new T.SphereGeometry(1,16,10),position=geometry.attributes.position;
+    const colors:number[]=[];
+    const shade=new T.Color('#8290b0'),light=new T.Color('#fff0dc');
+    for(let i=0;i<position.count;i++){
+      const c=shade.clone().lerp(light,T.MathUtils.smoothstep(position.getY(i),-.85,.65));
+      colors.push(c.r,c.g,c.b);
+    }
+    geometry.setAttribute('color',new T.Float32BufferAttribute(colors,3));
+    const material=new T.MeshStandardMaterial({color:'#ffffff',vertexColors:true,roughness:1});
+    const banks=[[-110,-34,-68,1],[-40,-37,-95,1.1],[35,-35,-106,.9],[108,-38,-126,1.2],[-130,-31,-190,1.4],[-34,-35,-220,1.5],[88,-38,-240,1.6],[-126,-28,35,1.2],[116,-32,22,1.2],[22,-40,158,1.7]];
+    const clouds=new T.InstancedMesh(geometry,material,banks.length*7),transform=new T.Object3D();
+    banks.forEach(([x,y,z,size],b)=>{
+      for(let i=0;i<7;i++){
+        const height=7+4*(.5+.5*Math.sin(i*2.17+b));
+        transform.position.set(x+(i-3)*12*size,y+Math.sin(i*1.3+b)*3,z+Math.sin(i*1.71+b)*7);
+        transform.scale.set((11+3*Math.sin(i*1.9))*size,height*size,(9+2*Math.cos(i*2.1))*size);
+        transform.rotation.set(0,i*.7,.08*Math.sin(i));transform.updateMatrix();clouds.setMatrixAt(b*7+i,transform.matrix);
+      }
+    });
+    clouds.computeBoundingSphere();root.add(clouds);
+  }else{
   // Soft atmospheric banks occupy real depths below and behind the islands.
   const cloudCanvas=document.createElement('canvas');cloudCanvas.width=512;cloudCanvas.height=256;
   const ctx=cloudCanvas.getContext('2d')!;
@@ -218,6 +243,7 @@ export function buildVista(parent:T.Object3D, palette:Palette, tree:TreeBuilder,
       const bank=mesh(new T.PlaneGeometry(175,50),cloudMaterial,x,y,z);
       bank.rotation.y=angle;bank.castShadow=false;bank.receiveShadow=false;
     }
+  }
   }
   // Silhouette scenery has no local contact or shadow responsibility. Avoid
   // spending the near-field shadow budget on distant non-interactive meshes.

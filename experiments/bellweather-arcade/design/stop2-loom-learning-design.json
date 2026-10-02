@@ -1,0 +1,84 @@
+{
+  "schema": "vibelearn.learning-design.v1",
+  "id": "llm-first-principles.stop2-loom",
+  "version": "1-approved-direction",
+  "author": "claude (direction approved by Desmic, 1 Oct 2026)",
+  "stop": 2,
+  "place": "Loom Isle",
+  "learning_promise": "An engine reads pieces, not letters or whole words, and its room is counted in pieces.",
+  "decisions": [
+    "Splits are simplified and consistent, made for the game: common words are one piece; rare, long or made-up words split into familiar parts. Real tokenizer splits are explained later (a later level or a side quest).",
+    "Room (a fixed number of slots, counted in pieces) is part of Stop 2: it is where the idea pays off, because a message short in letters can still be too long in pieces.",
+    "Sources are free to read; see sources."
+  ],
+  "split_rule": {
+    "summary": "One piece per common word. A rare, long or made-up word splits into a front part, a middle part and an ending, each a piece.",
+    "why_simplified": "Real splits are irregular (they depend on spaces, capitals and training data) and hard to read on a phone. The simplified rule keeps the true idea: frequent strings are single pieces, rare strings cost more pieces.",
+    "honesty_card": "Real engines learn their pieces from huge amounts of text, so their splits look odd (spaces and capitals count). Common words are usually one piece; rare words become several. Room is counted in those pieces."
+  },
+  "room": { "slots": 6 },
+  "outcomes": [
+    {
+      "id": "pieces",
+      "observable_capability": "Predict which words in a short message are one piece and which split into several.",
+      "misconception": "The engine reads letters, or it reads whole words.",
+      "success_evidence": "Commit a piece-count prediction for a message before the loom reveals its split; first choice recorded apart from retries.",
+      "prerequisites": ["sequence"]
+    },
+    {
+      "id": "room",
+      "observable_capability": "Tell whether a message fits the engine's room by counting pieces, and choose a version that fits without losing what matters.",
+      "misconception": "Fewer letters means it fits better; or, if a message is too long, the end is cut off harmlessly.",
+      "success_evidence": "Choose between a letter-short message with rare words and a letter-longer one with common words before feedback; record whether the chosen message keeps the needed information.",
+      "prerequisites": ["pieces"]
+    }
+  ],
+  "sequence": [
+    {
+      "id": "loom-guided",
+      "role": "introduce",
+      "player_goal": "Weave the short call 'Free Tavi now'.",
+      "decision": "None assessed: Zip lifts each piece onto the rail and the loom counts slots (3 of 6).",
+      "feedback": "Every common word fills one slot; the band weaves a little.",
+      "outcomes": ["pieces"],
+      "assistance": "Demonstration; first success guaranteed.",
+      "completion_evidence": "Action only; not mastery."
+    },
+    {
+      "id": "loom-predict",
+      "role": "practice",
+      "player_goal": "The Warden's long message jams the loom. Predict how many slots it needs.",
+      "decision": "predict-pieces: pick a number of pieces before the loom splits the message.",
+      "feedback": "The rare word splits into three coloured pieces on the rail; the count shows where the prediction was off.",
+      "outcomes": ["pieces"],
+      "assistance": "A wrong prediction can happen; the split is shown afterwards and the next try is not first.",
+      "completion_evidence": "First prediction logged with correct/incorrect."
+    },
+    {
+      "id": "loom-choose",
+      "role": "changed-problem",
+      "player_goal": "Pick the message that fits the six slots and still says who to free and where.",
+      "decision": "choose-message: two candidates; one is fewer letters but uses rare words that split, the other is more letters but all common words.",
+      "feedback": "The letter-short message overflows: its last pieces fall off the rail and the needed name is lost. The common-word message fits and Tavi is freed.",
+      "outcomes": ["room"],
+      "assistance": "The tempting wrong choice is allowed; recovery is a retry with the split visible.",
+      "completion_evidence": "First choice logged; finishing alone is not mastery."
+    }
+  ],
+  "evidence": {
+    "activity": "loom-fit",
+    "decisions": ["predict-pieces", "choose-message"],
+    "event_shape": "{activity, decision, choice, correct, first, assisted, t}"
+  },
+  "sources": [
+    { "id": "hf-llm-course-ch6", "title": "Hugging Face LLM Course, chapter 6 (tokenizers; byte-pair encoding)", "url": "https://huggingface.co/learn/llm-course/en/chapter6/5", "licence": "Apache-2.0 (course repository)", "used_for": "how subword pieces are learned; common strings become single pieces" },
+    { "id": "hf-tokenizer-summary", "title": "Hugging Face Transformers docs: Tokenization algorithms", "url": "https://huggingface.co/docs/transformers/en/tokenizer_summary", "licence": "Apache-2.0 (docs source)", "used_for": "word vs character vs subword tokenization; why rare words split" },
+    { "id": "ms-understanding-tokens", "title": "Microsoft Learn: Understanding tokens", "url": "https://learn.microsoft.com/en-us/dotnet/ai/conceptual/understanding-tokens", "licence": "free to read (Microsoft Learn docs)", "used_for": "context window counted in tokens, shared by input and output" },
+    { "id": "slp3-ch2", "title": "Jurafsky & Martin, Speech and Language Processing (3rd ed. draft), chapter on words and tokens (BPE)", "url": "https://web.stanford.edu/~jurafsky/slp3/2.pdf", "licence": "free draft from the authors", "used_for": "textbook account of BPE and subword tokenization" },
+    { "id": "sennrich-2016", "title": "Sennrich, Haddow & Birch (2016), Neural Machine Translation of Rare Words with Subword Units", "url": "https://arxiv.org/abs/1508.07909", "licence": "free on arXiv", "used_for": "origin of BPE for rare words" },
+    { "id": "karpathy-minbpe", "title": "Karpathy, minbpe (code) and the lecture 'Let's build the GPT Tokenizer'", "url": "https://github.com/karpathy/minbpe", "licence": "MIT", "used_for": "a small, readable BPE; reference for the later real-splits side quest" },
+    { "id": "tiktoken", "title": "OpenAI tiktoken", "url": "https://github.com/openai/tiktoken", "licence": "MIT", "used_for": "real splits for the later side quest (not used in Stop 2)" },
+    { "id": "liu-2023-lost-middle", "title": "Liu et al. (2023), Lost in the Middle: How Language Models Use Long Contexts (TACL)", "url": "https://arxiv.org/abs/2307.03172", "licence": "free on arXiv", "used_for": "why 'it just cuts off the end harmlessly' is wrong: what is kept and where matters" },
+    { "id": "long-magerko-2020", "title": "Long & Magerko (2020), What is AI Literacy? Competencies and Design Considerations (CHI)", "url": "https://dl.acm.org/doi/10.1145/3313831.3376727", "licence": "ACM paper; free summary at circlcenter.org/what-is-ai-literacy-competencies-and-design-considerations/", "used_for": "teaching reference: make the mechanism visible and let learners act on it" }
+  ]
+}

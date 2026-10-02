@@ -1,40 +1,73 @@
 # vibeLearn — agent instructions
 
-**Current gate — 19 September 2026:** Read `docs/STATE.md` for exact candidate and local repair status; historical candidate headers are not authority over later user direction. Native computer/browser-use agents must actively play generated games now. Use one fresh-context GPT-6 Astra reviewer across all critic lanes; art/world direction is mandatory. Follow docs/ASTRA-REVIEW-WORKFLOW.md. Use current Codex usage; future Terminal PM owns orchestration. Tests, screenshots and recordings collaborate with active play; they cannot replace it. Read `docs/NATIVE-COMPUTER-USE-CRITICS.md`. Future Terminal PM integration remains planned, not a prerequisite for this gate. No Level 2 or deployment promotion without the existing review gates.
+## Current direction — 3 October 2026 (read this first)
 
-Read `docs/STATE.md` first. **`main` is the canonical development branch.** Do not create a new branch for routine iteration, review, research, or fixes. Use another branch only when isolation is materially necessary, and merge it back into `main` promptly. `deploy/render-supabase` is the pinned deployment branch and may intentionally lag `main`. Older `game/*` and `phase1/*` branches are historical unless the user explicitly revives one.
+Desmic confirmed on 3 Oct 2026:
 
-Read `CODEX.md` for the delivery loop and `CODEX-IMPLEMENTATION-PLAN.md` for scope. Latest user direction supersedes historical plans. Stop at the user's review checkpoint before Level 2/Phase 2.
+- **The game is `experiments/bellweather-arcade`**: "Bellweather: The First Words", a three.js web game that
+  teaches how language models work. It is the official direction. PlayCanvas and the earlier Level 1
+  ("Relay Rescue", message machine, Moon gate, limbo-prison opening) are **historical**. Docs that
+  describe them carry a "Historical" note at the top; read them for ideas, not as instructions.
+- **Start here:** `docs/GAME-REDESIGN-ECHO.md` (the game's core mechanic and the stop-by-stop plan),
+  `docs/DOCS-AUDIT-20261003.md` (what is open and what was decided), `experiments/bellweather-arcade/tools/CHECKS.md`
+  (how to check a build), `experiments/bellweather-arcade/tools/AI-PLAYTEST.md` (AI play-testers),
+  `docs/GENERATOR-IMPLEMENTATION-MAP.md` (which pieces are reusable data and which are still game code),
+  `docs/SAVE-AND-EVIDENCE.md` (saves and learning evidence).
+- **Art direction** is the look of the game's starting area (Bellweather): a warm, painted, festival town
+  in the sky. Enhance it from feedback; don't replace it.
+- **Audience:** young adults and adults, 18+ for now.
+- **Progression:** opening and tutorial (meet Mira, hang the lantern, the Warden's attack, catch the spark)
+  → Stop 1 (wake the skiff in Bellweather; the Gate and relay on Blossom Isle) → Stop 2 (Loom Isle) →
+  Stops 3–7 (see the order in `docs/GAME-REDESIGN-ECHO.md`). Each stop repairs part of Zip's speech
+  engine and teaches one idea through play.
+- **Quality bar:** indistinguishable from a top game (feel target: Zelda Breath of the Wild / Tears of the
+  Kingdom) while keeping the learning progression. Mechanics live in the world, not in panels.
+- **Humour stays:** Zip's jokes (simulation, NPCs, the Mario line) were asked for. Keep them.
+- **Quality gates:** the goal of the earlier review gates still stands: a system that makes games like this
+  one quickly and with reliable quality. The gates are now the automated checks (`npm run check`,
+  `npm run check:parity`, `npm run check:play`), AI play-testers, and Desmic's verdict on real devices
+  (a Galaxy F15 is the low-end phone). Automated checks may run in whatever is most practical for
+  agents (headless browsers are fine); players and Desmic give the final feedback.
+- **Reuse:** build the system and the game together. New art, rules, stories and worlds should be data
+  or reusable kit code (`src/kit/`), not one-off code, so a generator can produce the next game.
 
-## Product and build order
+## Working rules
 
-- VibeLearn is a **learner-facing product that creates personalized learning games on demand**. A creator-operated studio is not the first customer experience; authoring and review tools are internal support. Read `docs/LEARNER-ON-DEMAND-AND-REPAIR.md`. The current LLM track proves game quality and useful reusable boundaries, not the finished on-demand product. Do not build a universal generator prematurely or hard-code the track as the platform.
-- The current track uses **direct protagonist control**. Do not invent a separate literal helper/avatar because story text says “you help X.” Player embodiment is an explicit game-design decision and must match the rendered world, camera and controls.
-- The current journey is `entry -> prologue -> separate tutorial -> Level 1 -> later challenge/payoff`. Level 1 is not the tutorial. The tutorial teaches reusable play grammar and gives a clean success before the first mission.
-- Clear story, attachment, atmosphere, readable controls, spatial composition and meaningful play are requirements, not polish after implementation.
-- The world must have breathing room. Treat playable footprint, prop density, negative space, landmark spacing, camera occlusion and object intersections as design inputs. More props/detail are not automatic improvements.
-- Information delivery follows `docs/GAME-PRESENTATION-GUIDE.md`: primary gameplay information rides world events, world objects, ephemeral spatial markers and contextual prompts — persistent text panels, clipped overlays and detached cards are defects, not style choices. Before any review record, run `tools/check_presentation_budget.py` on the exact candidate in real play states; the mechanical report is required evidence for `presentation_integration`.
-- Choose chunk boundaries around a coherent player experience. Build one playable chunk at a time. The prologue is the first attention/understanding gate: finish, test and play it before tutorial or Level 1 expansion.
-- Follow `CODEX.md`: define observable success, implement, test, play through computer/browser use, critique, repair, recheck, record. Agents with computer use should inspect the **actual running experience** when relevant rather than reasoning only from source or screenshots. Do not advance with known blocking failures or unobserved required behavior. Tests alone are not done.
-- Run **story, art/world-direction, gameplay and learning** criticism as independent gates. Independent means each judged on its own evidence and each able to block the candidate, **not** a separate review session: one reviewer plays the whole experience once and scores every lane in that pass. Read `docs/EXPERIENCE-QUALITY-SYSTEM.md`, `docs/ART-WORLD-DIRECTION-CRITIC.md` and `docs/CRITIC-POLICY.md`.
-- For player-experience criticism, independence includes **context separation**, not only a different prompt. Run a cold-observer pass on the actual experience before supplying story treatment/creator rationale. Then run a design-intent comparison pass using the cold observations as evidence. Do not let prior intent fill missing visual meaning.
-- Critic evidence must match the claim: use live/browser interaction for physicality/tutorial/transition claims, motion over time for animation/cinematic claims, and actual listening for audio-quality claims when available. Screenshots/source alone cannot certify those dimensions.
-- New readiness records use `tools/check_critic_review.py` **schema v2**. Historical schema-v1 records may be read but must not qualify a new candidate. If the required evidence modality is unavailable, record the criterion as unassessed; never substitute weaker evidence to manufacture a score. Read `docs/ART-WORLD-DIRECTION-CRITIC.md` and `docs/CRITIC-POLICY.md`.
-- Parallelize only independent work that cannot bypass the active gate, such as research or test preparation. Do not build future levels/systems early.
-- Keep plans and evidence current and concise. The current user is the sole final human critic of this private proof; internal/agent scores never override direct feedback.
+- **`main` is the canonical branch.** Don't create a branch for routine work; use one only when isolation
+  is really needed and merge it back promptly. Older `game/*`, `phase1/*` and `deploy/*` branches are
+  historical unless Desmic revives one.
+- Latest user direction supersedes historical plans. When docs disagree, the dated section above wins,
+  then the newest doc.
+- Clear story, attachment, atmosphere, readable controls, spatial composition and meaningful play are
+  requirements, not polish.
+- The world needs breathing room: footprint, prop density, negative space, landmark spacing, camera
+  occlusion and intersections are design inputs. More props are not automatically better.
+- Primary gameplay information rides the world (objects, events, short-lived markers, contextual prompts).
+  Persistent panels and clipped overlays are defects.
+- Check the actual running game when a claim is about feel, motion, camera or audio. Screenshots and
+  source alone can't certify those.
+- Use direct protagonist control (Zip). Don't add a separate helper avatar because story text says
+  "you help X".
+- Pop-culture, game and film research is encouraged for ideas. Ship original characters, assets, dialogue
+  and music; never make understanding depend on a reference. Don't model characters on real people.
+- Third-party assets: CC0 or equivalent only, with the licence file snapshotted next to the asset
+  (`experiments/bellweather-arcade/public/kits/LICENSES/`). Authored models are Blender scripts in
+  `experiments/bellweather-arcade/authoring/`.
 
-## Platform and reuse
+## Learning evidence and data
 
-- Read `docs/GAME-CREATION-PLATFORM.md`. Reuse versioned learning/story/rules/world/runtime specs and shared PlayCanvas components; keep story-specific data outside shared controllers. Three.js is legacy only.
-- Prefer reusable, parameterized world kits, character/control profiles, cinematic beats, interactions, tutorial patterns, audio/HUD components and critic/test templates. Reuse must support different layout, scale, art direction and story; avoid reskinned copies.
-- Pop-culture, game, film, animation and literature research is encouraged for ideation. Extract techniques, archetypes, naming energy, pacing and motifs; ship original characters/assets/dialogue/music and never make comprehension depend on a reference.
-- Future learners can chat with agents to flag issues. Investigate the exact build, distinguish defects/preferences/confusion, make appropriate scoped changes, verify the original issue and regressions, then activate safely and report. Do not blindly patch every complaint or discard subjective feedback because CI passes.
-- Read `docs/AUTOMATED-DEVELOPMENT-SYSTEM.md`. VibeLearn has completed and merged **Phase 0** of the thin versioned adapter contract to the existing Terminal PM Agent. Terminal PM remains a separate evolving system and currently reports `live_run_authorized=false`, so no live Phase 1 orchestration run is authorized. Do not copy/extract its internal runtime, verifier, session or recovery modules into VibeLearn yet. Preserve the lean worker -> reviewer -> evidence model and treat reviewer criticism as implicitly requiring attempted proof/reproduction. Deeper coupling requires a stable relevant boundary or run evidence that the external contract is insufficient. This does not authorize a broad rewrite, autonomous production deployment or Level 2 work.
+- Rendering, XP, stars, self-report and completion do not establish mastery; missing evidence is unknown.
+  A first try is a first try once; reloads and replays never make a later answer first.
+- Learning events record activity, decision, choice, correctness, first try, assistance and the rules
+  version that judged them. Rules are data (GameRulesSpec v1) and must agree with the server's
+  interpreter (`app/game_rules.py`, checked by `tools/rules-parity.mjs`).
+- Saves and learning records will live on the server and the client, without a client-side file that lets
+  players cheat. Identity and hosting for that are still to be decided (see the audit doc).
+- Preserve learner data, supplied designs and unrelated work. Test on disposable data.
 
-## Architecture and safety
+## Server
 
-- Keep one Python modular monolith and semantic HTML/CSS/JS. Local: SQLite and loopback. Hosted: Flask/Gunicorn, PostgreSQL and verified Supabase identity, allowlist, HTTPS and scoped/RLS-protected storage. See `docs/HOSTING.md`.
-- Learner commands require session, command ID and expected revision. Preserve immutable snapshots/checkpoints/assistance/evidence and existing learning IDs. Rendering, XP, self-report and game completion do not establish mastery; missing evidence is unknown. Keep learning evidence independent of theme/engine.
-- Personalization must not silently lower learning outcomes or rewrite old assessment evidence. Separate personal package changes from shared-runtime changes; preserve saves and use explicit migration/release policy. Support reports are not reset consent.
-- Preserve learner data, supplied designs and unrelated work. Test on disposable databases. The automation architecture/code integration is now authorized, but actual paid/live-provider dispatch, untrusted runners, production mutation or broad rollout still requires an explicit configured execution/budget policy. Never fake live verification.
-- At integrated gates run `python manage.py build`, `python manage.py test` and active browser groups. Dependencies: `requirements.lock` and `requirements-dev.txt`; local preview: `python manage.py serve`.
+- The Python modular monolith in `app/` (rules interpreter, auth, storage) remains the server. Local:
+  SQLite and loopback; hosted pilot: Flask/Gunicorn, PostgreSQL and Supabase identity (`docs/HOSTING.md`).
+  The game itself currently ships as a claude.ai artifact (built from the arcade by Claude's hosted-copy script), which has no server.
+- At server changes run `python manage.py test`.

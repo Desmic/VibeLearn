@@ -1,0 +1,1835 @@
+{
+  "schemaVersion": "1",
+  "id": "first-words.wake-skiff.echo",
+  "version": "1",
+  "state": {
+    "phase": {
+      "type": "enum",
+      "values": [
+        "load",
+        "loop",
+        "auto",
+        "awake"
+      ],
+      "initial": "load"
+    },
+    "hasSkiff": {
+      "type": "boolean",
+      "initial": false
+    },
+    "hasrise": {
+      "type": "boolean",
+      "initial": false
+    },
+    "hastoward": {
+      "type": "boolean",
+      "initial": false
+    },
+    "hassink": {
+      "type": "boolean",
+      "initial": false
+    },
+    "hasBlossom": {
+      "type": "boolean",
+      "initial": false
+    },
+    "s0": {
+      "type": "enum",
+      "values": [
+        "none",
+        "Skiff",
+        "rise",
+        "toward",
+        "sink",
+        "Blossom",
+        "Isle"
+      ],
+      "initial": "none"
+    },
+    "s1": {
+      "type": "enum",
+      "values": [
+        "none",
+        "Skiff",
+        "rise",
+        "toward",
+        "sink",
+        "Blossom",
+        "Isle"
+      ],
+      "initial": "none"
+    },
+    "s2": {
+      "type": "enum",
+      "values": [
+        "none",
+        "Skiff",
+        "rise",
+        "toward",
+        "sink",
+        "Blossom",
+        "Isle"
+      ],
+      "initial": "none"
+    },
+    "s3": {
+      "type": "enum",
+      "values": [
+        "none",
+        "Skiff",
+        "rise",
+        "toward",
+        "sink",
+        "Blossom",
+        "Isle"
+      ],
+      "initial": "none"
+    },
+    "s4": {
+      "type": "enum",
+      "values": [
+        "none",
+        "Skiff",
+        "rise",
+        "toward",
+        "sink",
+        "Blossom",
+        "Isle"
+      ],
+      "initial": "none"
+    }
+  },
+  "invariants": [
+    {
+      "id": "ring-has-no-gaps",
+      "expression": {
+        "op": "and",
+        "args": [
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "ne",
+                "left": {
+                  "field": "s0"
+                },
+                "right": "none"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s1"
+                },
+                "right": "none"
+              }
+            ]
+          },
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "ne",
+                "left": {
+                  "field": "s1"
+                },
+                "right": "none"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s2"
+                },
+                "right": "none"
+              }
+            ]
+          },
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "ne",
+                "left": {
+                  "field": "s2"
+                },
+                "right": "none"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s3"
+                },
+                "right": "none"
+              }
+            ]
+          },
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "ne",
+                "left": {
+                  "field": "s3"
+                },
+                "right": "none"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s4"
+                },
+                "right": "none"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "actions": {
+    "absorb.Skiff": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "ne",
+            "left": {
+              "field": "phase"
+            },
+            "right": "awake"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "field": "hasSkiff"
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "hasSkiff",
+          "value": true
+        }
+      ],
+      "emits": [
+        "word-absorbed"
+      ]
+    },
+    "absorb.rise": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "ne",
+            "left": {
+              "field": "phase"
+            },
+            "right": "awake"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "field": "hasrise"
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "hasrise",
+          "value": true
+        }
+      ],
+      "emits": [
+        "word-absorbed"
+      ]
+    },
+    "absorb.toward": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "ne",
+            "left": {
+              "field": "phase"
+            },
+            "right": "awake"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "field": "hastoward"
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "hastoward",
+          "value": true
+        }
+      ],
+      "emits": [
+        "word-absorbed"
+      ]
+    },
+    "absorb.sink": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "ne",
+            "left": {
+              "field": "phase"
+            },
+            "right": "awake"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "field": "hassink"
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "hassink",
+          "value": true
+        }
+      ],
+      "emits": [
+        "word-absorbed"
+      ]
+    },
+    "load.Skiff": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "load"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "loop"
+              }
+            ]
+          },
+          {
+            "field": "hasSkiff"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "op": "or",
+              "args": [
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s0"
+                  },
+                  "right": "Skiff"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s1"
+                  },
+                  "right": "Skiff"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s2"
+                  },
+                  "right": "Skiff"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s3"
+                  },
+                  "right": "Skiff"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s4"
+                  },
+                  "right": "Skiff"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s0"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s0",
+              "value": "Skiff"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s1"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s1",
+              "value": "Skiff"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s2"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s2",
+              "value": "Skiff"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s3"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s3",
+              "value": "Skiff"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s4"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s4",
+              "value": "Skiff"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        }
+      ]
+    },
+    "load.rise": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "load"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "loop"
+              }
+            ]
+          },
+          {
+            "field": "hasrise"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "op": "or",
+              "args": [
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s0"
+                  },
+                  "right": "rise"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s1"
+                  },
+                  "right": "rise"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s2"
+                  },
+                  "right": "rise"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s3"
+                  },
+                  "right": "rise"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s4"
+                  },
+                  "right": "rise"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s0"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s0",
+              "value": "rise"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s1"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s1",
+              "value": "rise"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s2"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s2",
+              "value": "rise"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s3"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s3",
+              "value": "rise"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s4"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s4",
+              "value": "rise"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        }
+      ]
+    },
+    "load.toward": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "load"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "loop"
+              }
+            ]
+          },
+          {
+            "field": "hastoward"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "op": "or",
+              "args": [
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s0"
+                  },
+                  "right": "toward"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s1"
+                  },
+                  "right": "toward"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s2"
+                  },
+                  "right": "toward"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s3"
+                  },
+                  "right": "toward"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s4"
+                  },
+                  "right": "toward"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s0"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s0",
+              "value": "toward"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s1"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s1",
+              "value": "toward"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s2"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s2",
+              "value": "toward"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s3"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s3",
+              "value": "toward"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s4"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s4",
+              "value": "toward"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        }
+      ]
+    },
+    "load.sink": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "load"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "loop"
+              }
+            ]
+          },
+          {
+            "field": "hassink"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "op": "or",
+              "args": [
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s0"
+                  },
+                  "right": "sink"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s1"
+                  },
+                  "right": "sink"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s2"
+                  },
+                  "right": "sink"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s3"
+                  },
+                  "right": "sink"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s4"
+                  },
+                  "right": "sink"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s0"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s0",
+              "value": "sink"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s1"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s1",
+              "value": "sink"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s2"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s2",
+              "value": "sink"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s3"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s3",
+              "value": "sink"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s4"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s4",
+              "value": "sink"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        }
+      ]
+    },
+    "load.Blossom": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "load"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "loop"
+              }
+            ]
+          },
+          {
+            "field": "hasBlossom"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "op": "or",
+              "args": [
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s0"
+                  },
+                  "right": "Blossom"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s1"
+                  },
+                  "right": "Blossom"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s2"
+                  },
+                  "right": "Blossom"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s3"
+                  },
+                  "right": "Blossom"
+                },
+                {
+                  "op": "eq",
+                  "left": {
+                    "field": "s4"
+                  },
+                  "right": "Blossom"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s0"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s0",
+              "value": "Blossom"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s1"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s1",
+              "value": "Blossom"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s2"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s2",
+              "value": "Blossom"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s3"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s3",
+              "value": "Blossom"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s4"
+            },
+            "right": "none"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "s4",
+              "value": "Blossom"
+            }
+          ],
+          "emits": [
+            "word-loaded"
+          ]
+        }
+      ]
+    },
+    "unload.0": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "load"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "loop"
+              }
+            ]
+          },
+          {
+            "op": "ne",
+            "left": {
+              "field": "s0"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "s0",
+          "value": {
+            "field": "s1"
+          }
+        },
+        {
+          "op": "set",
+          "field": "s1",
+          "value": {
+            "field": "s2"
+          }
+        },
+        {
+          "op": "set",
+          "field": "s2",
+          "value": {
+            "field": "s3"
+          }
+        },
+        {
+          "op": "set",
+          "field": "s3",
+          "value": {
+            "field": "s4"
+          }
+        },
+        {
+          "op": "set",
+          "field": "s4",
+          "value": "none"
+        }
+      ],
+      "emits": [
+        "word-unloaded"
+      ]
+    },
+    "unload.1": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "load"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "loop"
+              }
+            ]
+          },
+          {
+            "op": "ne",
+            "left": {
+              "field": "s1"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "s1",
+          "value": {
+            "field": "s2"
+          }
+        },
+        {
+          "op": "set",
+          "field": "s2",
+          "value": {
+            "field": "s3"
+          }
+        },
+        {
+          "op": "set",
+          "field": "s3",
+          "value": {
+            "field": "s4"
+          }
+        },
+        {
+          "op": "set",
+          "field": "s4",
+          "value": "none"
+        }
+      ],
+      "emits": [
+        "word-unloaded"
+      ]
+    },
+    "unload.2": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "load"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "loop"
+              }
+            ]
+          },
+          {
+            "op": "ne",
+            "left": {
+              "field": "s2"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "s2",
+          "value": {
+            "field": "s3"
+          }
+        },
+        {
+          "op": "set",
+          "field": "s3",
+          "value": {
+            "field": "s4"
+          }
+        },
+        {
+          "op": "set",
+          "field": "s4",
+          "value": "none"
+        }
+      ],
+      "emits": [
+        "word-unloaded"
+      ]
+    },
+    "unload.3": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "load"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "loop"
+              }
+            ]
+          },
+          {
+            "op": "ne",
+            "left": {
+              "field": "s3"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "s3",
+          "value": {
+            "field": "s4"
+          }
+        },
+        {
+          "op": "set",
+          "field": "s4",
+          "value": "none"
+        }
+      ],
+      "emits": [
+        "word-unloaded"
+      ]
+    },
+    "unload.4": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "load"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "loop"
+              }
+            ]
+          },
+          {
+            "op": "ne",
+            "left": {
+              "field": "s4"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "s4",
+          "value": "none"
+        }
+      ],
+      "emits": [
+        "word-unloaded"
+      ]
+    },
+    "cast": {
+      "when": {
+        "op": "or",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "load"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "loop"
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "s0"
+            },
+            "right": "none"
+          },
+          "effects": [],
+          "emits": [
+            "nothing-loaded"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "load"
+              },
+              {
+                "op": "or",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "s0"
+                    },
+                    "right": "sink"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "s1"
+                    },
+                    "right": "sink"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "s2"
+                    },
+                    "right": "sink"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "s3"
+                    },
+                    "right": "sink"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "s4"
+                    },
+                    "right": "sink"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [],
+          "emits": [
+            "engine-says:um",
+            "skiff-hears:sink"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "phase"
+                },
+                "right": "load"
+              },
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "s0"
+                    },
+                    "right": "Skiff"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "s1"
+                    },
+                    "right": "rise"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "s2"
+                    },
+                    "right": "toward"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "s3"
+                    },
+                    "right": "none"
+                  },
+                  {
+                    "op": "eq",
+                    "left": {
+                      "field": "s4"
+                    },
+                    "right": "none"
+                  }
+                ]
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "loop"
+            },
+            {
+              "op": "set",
+              "field": "hasBlossom",
+              "value": true
+            }
+          ],
+          "emits": [
+            "engine-says:Blossom",
+            "loop-breaks"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "load"
+          },
+          "effects": [],
+          "emits": [
+            "engine-says:um"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s0"
+                },
+                "right": "Skiff"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s1"
+                },
+                "right": "rise"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s2"
+                },
+                "right": "toward"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s3"
+                },
+                "right": "Blossom"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s4"
+                },
+                "right": "none"
+              }
+            ]
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "auto"
+            }
+          ],
+          "emits": [
+            "decide:next-input:right:whole-sentence",
+            "engine-says:Isle",
+            "loop-repaired"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s0"
+                },
+                "right": "Blossom"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s1"
+                },
+                "right": "none"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s2"
+                },
+                "right": "none"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s3"
+                },
+                "right": "none"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s4"
+                },
+                "right": "none"
+              }
+            ]
+          },
+          "effects": [],
+          "emits": [
+            "decide:next-input:wrong:newest-only",
+            "engine-says:petals"
+          ]
+        },
+        {
+          "when": {
+            "op": "and",
+            "args": [
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s0"
+                },
+                "right": "Skiff"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s1"
+                },
+                "right": "rise"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s2"
+                },
+                "right": "toward"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s3"
+                },
+                "right": "none"
+              },
+              {
+                "op": "eq",
+                "left": {
+                  "field": "s4"
+                },
+                "right": "none"
+              }
+            ]
+          },
+          "effects": [],
+          "emits": [
+            "decide:next-input:wrong:original-only",
+            "engine-says:Blossom"
+          ]
+        },
+        {
+          "effects": [],
+          "emits": [
+            "decide:next-input:wrong:partial",
+            "engine-says:um"
+          ]
+        }
+      ]
+    },
+    "loop-run": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "auto"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "s4",
+          "value": "Isle"
+        },
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "awake"
+        }
+      ],
+      "emits": [
+        "engine-says:.",
+        "skiff-awake"
+      ]
+    }
+  },
+  "objectives": {
+    "awake": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "awake"
+      }
+    },
+    "every-word": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "awake"
+          },
+          {
+            "field": "hasSkiff"
+          },
+          {
+            "field": "hasrise"
+          },
+          {
+            "field": "hastoward"
+          },
+          {
+            "field": "hassink"
+          }
+        ]
+      }
+    }
+  }
+}

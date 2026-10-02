@@ -1,0 +1,55 @@
+{
+ "_about": "Provenance of authored models: each is an original model built by a script in authoring/ (no third-party geometry or textures). Rebuild the file with the script to reproduce it.",
+ "recordedOn": "2026-10-03",
+ "files": {
+  "props/skiff.glb": {
+   "origin": "original",
+   "script": "authoring/props/build_skiff.py",
+   "tool": "Blender 5.2.2 via MCP",
+   "license": "project-owned",
+   "sha256": "5ea5a2e5f78597550ff9a8198cceb7a64ef849cbf6205da19a985f773b746b0b"
+  },
+  "props/warden-ship.glb": {
+   "origin": "original",
+   "script": "authoring/props/build_warden_ship.py",
+   "tool": "Blender 5.2.2 via MCP",
+   "license": "project-owned",
+   "sha256": "97eaec7c0b4111abd885c7fe3f4cffde880a3bc759d9e268aa2d099725109f7c"
+  },
+  "props/festival-lantern.glb": {
+   "origin": "original",
+   "script": "authoring/props/build_festival_props.py",
+   "tool": "Blender 5.2.2 via MCP",
+   "license": "project-owned",
+   "sha256": "699af8758dd53518151d5967128f863f8f4b85cb569f32af75922ab2b44f66c8"
+  },
+  "props/bell-frame.glb": {
+   "origin": "original",
+   "script": "authoring/props/build_festival_props.py",
+   "tool": "Blender 5.2.2 via MCP",
+   "license": "project-owned",
+   "sha256": "c79ce850fb9d97e48192602df64a81b9648cbb6227c2c23342fe4ef346c1fcbb"
+  },
+  "props/gate-arch.glb": {
+   "origin": "original",
+   "script": "authoring/props/build_island_props.py",
+   "tool": "Blender 5.2.2 via MCP",
+   "license": "project-owned",
+   "sha256": "d7ae7294ca61dd9e0ccddf6676527c6f3e64e65ebc6ff49394a94a277d6a00fe"
+  },
+  "props/word-loom.glb": {
+   "origin": "original",
+   "script": "authoring/props/build_island_props.py",
+   "tool": "Blender 5.2.2 via MCP",
+   "license": "project-owned",
+   "sha256": "9c43b0a8b44fc442ac15b6597f3a5ed0d3928fa7a194980ad4c99cdd312fb881"
+  },
+  "characters/body-kit.glb": {
+   "origin": "original",
+   "script": "authoring/characters/build_body_kit.py",
+   "tool": "Blender 5.2.2 via MCP",
+   "license": "project-owned",
+   "sha256": "e3cfacf690c787b16fe65e8bdc51adc8a3313cb7f17ebf3e7cb78073b68da09c"
+  }
+ }
+}
