@@ -148,7 +148,7 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
       const anchor = bubbleFor.who ? bubbleFor.who.headTop : miraTop;
       anchor.getWorldPosition(tmp).project(opts.camera);
       const visible = bubbleT > 0 && !opts.host.matches('.card-open,.cutscene,.puzzle-mode') && tmp.z < 1 && Math.abs(tmp.x) < 1.1 && Math.abs(tmp.y) < 1.1;
-      bubble.hidden = !visible;
+      if (bubble.hidden !== !visible) bubble.hidden = !visible;
       if (visible) { const w = opts.host.clientWidth, h = opts.host.clientHeight, bw = bubble.offsetWidth / 2 + 8, bh = bubble.offsetHeight; bubble.style.transform = `translate(${Math.min(w - bw, Math.max(bw, (tmp.x * .5 + .5) * w))}px, ${Math.max(118 + bh, (-tmp.y * .5 + .5) * h)}px) translate(-50%, -100%)`; }  // kept on screen, below the goal line
       if (bubbleT <= 0) bubbleFor = null;
     }

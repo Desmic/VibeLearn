@@ -111,6 +111,10 @@ export function buildTownsperson(seed: number, library: T.AnimationClip[], kit?:
   let base: 'Idle' | 'Talk' | 'Stroll' = 'Idle'; const weights: Record<string, number> = { Idle: 1, Talk: 0, Stroll: 0 };
   let looking = false; const look = new T.Vector3(), lp = new T.Vector3(), np = new T.Vector3(); const hl = new T.Euler(); const q = new T.Quaternion(), e = new T.Euler(), tmp = new T.Vector3();
   let waving: T.AnimationAction | null = null;
+  // The head look is added on top of the animated pose. Clips without head/neck tracks leave
+  // those bones alone, so the look must start from the rest pose each frame or it piles up
+  // (3 Oct F15 play-test: heads spun like tops while people stared at the sky).
+  const headRest = bones.Head.quaternion.clone(), neckRest = bones.Neck.quaternion.clone();
   return {
     root, head: bones.Head, headTop,
     setBase(n) { base = n; },
@@ -124,6 +128,7 @@ export function buildTownsperson(seed: number, library: T.AnimationClip[], kit?:
       }
       if (actions.Stroll) actions.Stroll.timeScale = T.MathUtils.clamp(moving / .9, .4, 1.3);
       if (waving && !waving.isRunning()) waving = null;
+      bones.Head.quaternion.copy(headRest); bones.Neck.quaternion.copy(neckRest);
       mixer.update(reduced ? 0 : dt);
       if (looking && !reduced) {
         root.updateMatrixWorld(true); bones.Neck.getWorldPosition(tmp);

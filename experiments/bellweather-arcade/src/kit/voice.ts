@@ -13,7 +13,7 @@ import { audio } from '../sfx';
 const WARDEN_RATE = .94;
 export type VoiceFx = 'none' | 'robot' | 'warden' | 'stream' | 'radio';
 /** `voice`: a TTS voice name; `style`: the actor's direction for every line ("cold, amused menace") */
-export interface CastMember { voice: string; style?: string; fx?: VoiceFx; gain?: number }
+export interface CastMember { voice: string; style?: string; fx?: VoiceFx; gain?: number; /** the TTS model that acts this speaker (default: tools/voice.mjs's) */ model?: string }
 export type VoiceCast = Record<string, CastMember>;
 export interface PlayOpts {
   /** -1 left … 1 right (where the speaker is on screen) */
@@ -32,7 +32,7 @@ export function voiceKey(voice: string, text: string) {
   return h.toString(16).padStart(8, '0');
 }
 /** the key of one line's clip: who acts it, how, and what is said (a new direction makes a new clip) */
-export function clipKey(c: CastMember, spoken: string, direction = '') { return voiceKey(`${c.voice}|${c.style ?? ''}|${direction}`, spoken); }
+export function clipKey(c: CastMember, spoken: string, direction = '') { return voiceKey(`${c.model ? c.model + ':' : ''}${c.voice}|${c.style ?? ''}|${direction}`, spoken); }
 /** the full direction for a line: the character's style plus the line's own note */
 export function directionFor(c: CastMember, direction = '') { return [c.style, direction].filter(Boolean).join('; '); }
 /** what is actually spoken: no markup, single spaces */

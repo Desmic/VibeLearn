@@ -217,8 +217,11 @@ export function buildZipRig(): ZipRig {
   let lookTarget: T.Vector3 | null = null; const headLook = new T.Euler();
   const earVel = [0, 0], earAng = [0, 0], scarfLag = new T.Vector3(); let lastYaw = 0, smoothSpeed = 0;
   const q = new T.Quaternion(), e = new T.Euler(), tmp = new T.Vector3();
+  // secondary motion is layered on the clips' pose; bones a clip doesn't animate start from rest each frame
+  const rest = ORDER.map(n => [bones[n], bones[n].quaternion.clone()] as const);
 
   function update(dt: number, speed: number, reduced: boolean) {
+    for (const [b, r] of rest) b.quaternion.copy(r);
     t += dt;
     smoothSpeed += (speed - smoothSpeed) * Math.min(1, dt * 8);
     // locomotion blend: idle -> walk (<=1.6 m/s) -> jog (3.15 m/s)

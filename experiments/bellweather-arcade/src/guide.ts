@@ -237,11 +237,12 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       if (zipSpeed > .2) moved = true;
       // hints: walking first, then looking; each goes once done, all after 30 s
       if (hintStage !== 'off') { hintT += dt; if ((looked && moved) || hintT > 14) hintStage = 'off'; }
-      hint.hidden = hintStage === 'off' || cardOpen;
+      const hintOff = hintStage === 'off' || cardOpen; if (hint.hidden !== hintOff) hint.hidden = hintOff;
       // phones: the hint sits by the thumb stick until Zip walks; keyboards: it stands at Zip's feet
       const touch = inputMode.touch;
-      hint.textContent = touch ? (!moved ? 'Hold and drag here to walk' : 'Drag the view to look around') : (!moved ? 'W A S D to walk' : 'Drag to look around');
-      hint.classList.toggle('at-stick', touch && !moved);
+      const hintText = touch ? (!moved ? 'Hold and drag here to walk' : 'Drag the view to look around') : (!moved ? 'W A S D to walk' : 'Drag to look around');
+      if (hint.textContent !== hintText) hint.textContent = hintText;   // no needless writes: each one costs a layout on phones
+      if (hint.classList.contains('at-stick') !== (touch && !moved)) hint.classList.toggle('at-stick', touch && !moved);
       if (touch && !moved) { if (overlay.has('hint')) { overlay.unpin('hint'); } }
       else if (thinker && !overlay.has('hint')) overlay.pin('hint', hint, () => thinker ? zipFeet.copy(thinker()).setY(thinker().y - .1) : null, { rank: 5, lift: -14 });
       if (goalT > 0 && (goalT -= dt) <= 0) goal.classList.add('quiet');
@@ -254,7 +255,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       if (beacon.visible) {
         const v = beacon.position.clone(); if (!beaconArrowOnly) v.y = 1.2; v.project(camera);
         const off = v.z > 1 || Math.abs(v.x) > .92 || Math.abs(v.y) > .9;
-        edge.hidden = !off || cardOpen;
+        const eh = !off || cardOpen; if (edge.hidden !== eh) edge.hidden = eh;
         if (off) {
           // direction in the camera's own space: steady even when the target swings behind
           // (behind = the arrow points down, toward "turn around", on the target's side)
@@ -264,12 +265,12 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
           edge.style.left = `${(ex * .5 + .5) * 100}%`; edge.style.top = `${(-ey * .5 + .5) * 100}%`;
           edge.style.transform = `translate(-50%,-50%) rotate(${-a}rad)`;
         }
-      } else edge.hidden = true;
+      } else if (!edge.hidden) edge.hidden = true;
       // thought bubble
       if (thoughtT > 0) { if (!cardOpen) thoughtT -= dt; if (thoughtT <= 0) { thought.hidden = true; thoughtGap = .35; } }
       else { thoughtGap -= dt; if (thoughts.length && !cardOpen && thoughtGap <= 0 && thinker && (thoughts[0].who === 'warden' || !host.matches('.engine-mode'))) { const s = thoughts.shift()!; thoughtWho = s.who; thought.className = 'thought' + (s.who === 'warden' ? ' warden' : ''); thought.textContent = s.text; thoughtT = 2.4 + s.text.length * .05; if (s.who === 'warden') { if (voice?.has('Warden', s.text)) { void voice.play('Warden', s.text, { channel: 'bark', fx: 'stream' }); thoughtT = Math.max(thoughtT, voice.duration('Warden', s.text) + .6); } else sfx.whisper(); } else sfx.hmm(); } }
       if (thoughtT > 0 && thinker) {
-        thought.hidden = cardOpen;
+        if (thought.hidden !== cardOpen) thought.hidden = cardOpen;
         // Zip thinks over his head (and from the screen edge when off screen); the Warden is a voice at the top
         if (thoughtWho === 'warden') { overlay.unpin('thought'); thought.style.transform = `translate(${host.clientWidth / 2}px, ${Math.max(190, 120 + thought.offsetHeight)}px) translate(-50%, -100%)`; }
         else overlay.pin('thought', thought, () => thinker ? head(thinker(), zipHead, 1.9) : null, { rank: 8, edge: true, keep: true, lift: 18 });

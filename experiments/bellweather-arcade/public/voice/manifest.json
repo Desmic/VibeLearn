@@ -1,26 +1,26 @@
 {
  "_about": "Voiced lines (tools/voice.mjs). key → clip file and seconds.",
  "model": "gemini-3.8-flash-tts",
- "made": "2026-10-03T03:40:23.969Z",
+ "made": "2026-10-03T04:12:03.068Z",
  "clips": {
   "14631539": {
    "file": "14631539.mp3",
-   "dur": 6.17,
+   "dur": 5.3,
    "speaker": "Warden"
   },
   "485f5a7f": {
    "file": "485f5a7f.mp3",
-   "dur": 4.66,
+   "dur": 4.61,
    "speaker": "Mira"
   },
   "8cf886ae": {
    "file": "8cf886ae.mp3",
-   "dur": 4.01,
+   "dur": 3.7,
    "speaker": "Mira"
   },
   "ac866381": {
    "file": "ac866381.mp3",
-   "dur": 3.55,
+   "dur": 3.58,
    "speaker": "Mira"
   },
   "db87f3e8": {
@@ -30,17 +30,57 @@
   },
   "127771f0": {
    "file": "127771f0.mp3",
-   "dur": 4.82,
+   "dur": 4.01,
    "speaker": "Mira"
+  },
+  "743f5f67": {
+   "file": "743f5f67.mp3",
+   "dur": 3.46,
+   "speaker": "Neighbour"
+  },
+  "b868a348": {
+   "file": "b868a348.mp3",
+   "dur": 3.36,
+   "speaker": "Neighbour"
+  },
+  "786c5f1d": {
+   "file": "786c5f1d.mp3",
+   "dur": 3.26,
+   "speaker": "Neighbour"
+  },
+  "d7595ad7": {
+   "file": "d7595ad7.mp3",
+   "dur": 2.54,
+   "speaker": "Neighbour"
+  },
+  "b09a1c4e": {
+   "file": "b09a1c4e.mp3",
+   "dur": 3.26,
+   "speaker": "Neighbour"
+  },
+  "6640564d": {
+   "file": "6640564d.mp3",
+   "dur": 3.5,
+   "speaker": "Neighbour"
+  },
+  "d0c1e627": {
+   "file": "d0c1e627.mp3",
+   "dur": 3.38,
+   "speaker": "Neighbour"
+  },
+  "58b92dba": {
+   "file": "58b92dba.mp3",
+   "dur": 3.38,
+   "speaker": "Neighbour"
   },
   "37c1d4f1": {
    "file": "37c1d4f1.mp3",
-   "dur": 8.35,
+   "dur": 6.38,
    "speaker": "Warden"
   },
   "afe07781": {
    "file": "afe07781.mp3",
-   "dur": 5.3,
+   "dur": 4.7,
    "speaker": "Warden"
   },
   "136cbeb7": {
@@ -50,12 +90,12 @@
   },
   "dc0434c2": {
    "file": "dc0434c2.mp3",
-   "dur": 1.25,
+   "dur": 1.27,
    "speaker": "Zip"
   },
   "b846e35e": {
    "file": "b846e35e.mp3",
-   "dur": 8.47,
+   "dur": 8.26,
    "speaker": "Zip"
   }
  }

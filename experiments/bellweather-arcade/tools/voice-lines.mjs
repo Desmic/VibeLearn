@@ -22,7 +22,7 @@ const add = (speaker, text, from) => {
   const c = CAST[speaker]; if (!c) { missingCast.add(speaker); return; }
   const shown = cleanText(text), spoken = cleanText(SPOKEN[shown] ?? shown), note = DIRECTION[shown] ?? '';
   const key = clipKey(c, spoken, note);
-  if (!lines.has(key)) lines.set(key, { key, speaker, voice: c.voice, style: directionFor(c, note), text: spoken, shown, from });
+  if (!lines.has(key)) lines.set(key, { key, speaker, voice: c.voice, ...(c.model ? { model: c.model } : {}), style: directionFor(c, note), text: spoken, shown, from });
 };
 for (const s of [FIRST_WORDS_L1, STOP2_STORY]) {
   for (const [id, d] of Object.entries(s.dialogues)) for (const [lid, l] of Object.entries(d)) if (l.speaker) add(l.speaker, l.text, `${s.id}:${id}.${lid}`);

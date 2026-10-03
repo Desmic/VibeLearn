@@ -6,8 +6,11 @@
 //   node tools/voice.mjs            act what is missing, then encode
 //   node tools/voice.mjs --dry      list what would be made; calls nothing
 //   node tools/voice.mjs --force    act every line again
-//   node tools/voice.mjs --only Mira   act one speaker's lines again
+//   node tools/voice.mjs --only Mira   only this speaker's missing lines (add --force to redo them)
 //   node tools/voice.mjs --encode   (no network) master WAVs → game MP3s + manifest
+//   node tools/voice.mjs --reencode (no network) encode every master again (after changing the encoding)
+// A speaker's cast entry may name its own model (townsfolk use Flash-Lite TTS); each model
+// has its own daily quota, so one running out doesn't stop the others.
 //
 // Masters (WAV, as Gemini returns them) go to authoring/voice/ (not committed);
 // the game gets small MP3s in public/voice/ plus manifest.json. Encoding needs
@@ -26,7 +29,7 @@ if ((process.env.https_proxy || process.env.HTTPS_PROXY) && !process.env.NODE_US
 }
 const DIR = 'public/voice', MASTERS = 'authoring/voice';
 const MODEL = process.env.VOICE_MODEL || 'gemini-3.8-flash-tts';
-const URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+const urlFor = model => `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
 const flag = f => process.argv.includes(f);
 
@@ -47,9 +50,9 @@ const KEY = findKey();
 const hide = s => KEY ? String(s).split(KEY).join('<key>') : String(s);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-async function post(body) {
+async function post(body, model) {
   for (let attempt = 0; ; attempt++) {
-    const r = await fetch(URL, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': KEY }, body: JSON.stringify(body) });
+    const r = await fetch(urlFor(model), { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': KEY }, body: JSON.stringify(body) });
     if (r.ok) return r.json();
     const text = await r.text();
     // per-minute limits clear quickly; a daily quota doesn't (stop, and run again tomorrow)
@@ -67,7 +70,8 @@ async function act(l) {
     : { contents: [{ role: 'user', parts: [{ text: l.style ? `Read the line exactly as written. Delivery: ${l.style}.\nLine: ${l.text}` : l.text }] }],
         generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: l.voice } } } } };
   let r;
-  try { r = await post(body(true)); } catch (e) { if (e.status !== 400) throw e; r = await post(body(false)); }
+  const model = l.model ?? MODEL;
+  try { r = await post(body(true), model); } catch (e) { if (e.status !== 400) throw e; r = await post(body(false), model); }
   const part = r.candidates?.[0]?.content?.parts?.find(p => p.inlineData?.data);
   if (!part) throw new Error('no audio in the reply: ' + hide(JSON.stringify(r).slice(0, 300)));
   const raw = Buffer.from(part.inlineData.data, 'base64'), mime = part.inlineData.mimeType ?? '';
@@ -101,7 +105,8 @@ const hasFfmpeg = () => spawnSync('ffmpeg', ['-version'], { stdio: 'ignore' }).s
 // Game copy: trim silence at both ends, even out loudness, mono MP3 at 40 kbps (small for phones)
 function encode(key) {
   const src = path.join(MASTERS, `${key}.wav`), out = path.join(DIR, `${key}.mp3`);
-  const af = 'silenceremove=start_periods=1:start_threshold=-48dB:start_silence=0.04,areverse,silenceremove=start_periods=1:start_threshold=-48dB:start_silence=0.08,areverse,loudnorm=I=-18:TP=-2:LRA=11';
+  // trim the ends, and shorten any pause longer than 0.42 s to 0.42 s: TTS actors linger, games can't
+  const af = 'silenceremove=start_periods=1:start_threshold=-48dB:start_silence=0.04:stop_periods=-1:stop_duration=0.42:stop_threshold=-42dB:stop_silence=0.42,areverse,silenceremove=start_periods=1:start_threshold=-48dB:start_silence=0.08,areverse,loudnorm=I=-18:TP=-2:LRA=11';
   const r = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', src, '-af', af, '-ac', '1', '-ar', '24000', '-b:a', '40k', out], { encoding: 'utf8' });
   if (r.status !== 0) throw new Error('ffmpeg: ' + (r.stderr || '').slice(0, 300));
   return { file: `${key}.mp3`, dur: mp3Seconds(readFileSync(out)) };
@@ -113,20 +118,21 @@ const old = existsSync(manPath) ? JSON.parse(readFileSync(manPath, 'utf8')).clip
 mkdirSync(MASTERS, { recursive: true }); mkdirSync(DIR, { recursive: true });
 const only = arg('--only');
 const hasMaster = l => existsSync(path.join(MASTERS, `${l.key}.wav`));
-const todo = flag('--encode') ? [] : lines.filter(l => flag('--force') || (only ? l.speaker === only : !hasMaster(l) && !(old[l.key] && existsSync(path.join(DIR, old[l.key].file)))));
-console.log(`${lines.length} lines; ${todo.length} to act with ${MODEL} (${todo.reduce((n, l) => n + l.text.length, 0)} characters).`);
+const todo = flag('--encode') || flag('--reencode') ? [] : lines.filter(l => (!only || l.speaker === only) && (flag('--force') || !hasMaster(l) && !(old[l.key] && existsSync(path.join(DIR, old[l.key].file)))));
+console.log(`${lines.length} lines; ${todo.length} to act (${todo.reduce((n, l) => n + l.text.length, 0)} characters).`);
 if (flag('--dry')) { for (const l of todo) console.log(`  ${l.key}  ${l.speaker.padEnd(9)} ${l.text}   [${l.style}]`); process.exit(0); }
 if (todo.length && !KEY) { console.error('No API key: put google_api_key = ... in a .env file here or in a folder above.'); process.exit(1); }
 
-let made = 0, failed = 0, stop = false;
+let made = 0, failed = 0, stop = false; const spent = new Set();
 for (const l of todo) {
   if (stop) break;
+  if (spent.has(l.model ?? MODEL)) continue;
   try {
     const wav = await act(l); writeFileSync(path.join(MASTERS, `${l.key}.wav`), wav); made++;
     console.log(`  ✓ ${l.speaker.padEnd(9)} ${((wav.length - 44) / 48000).toFixed(1)}s  ${l.text}`);
   } catch (e) {
     failed++; console.error(`  ✗ ${l.speaker} "${l.text}": ${e.message}`);
-    if (e.daily) { console.error('Daily quota reached: run this again later; finished lines are kept.'); stop = true; }
+    if (e.daily) { const m = l.model ?? MODEL; spent.add(m); console.error(`Daily quota for ${m} reached: its lines wait for tomorrow; finished lines are kept.`); }
     if (e.status === 401 || e.status === 403) { console.error('Is the Gemini API enabled for this key?'); stop = true; }
   }
   await sleep(700);   // gentle on free-tier per-minute limits
@@ -136,7 +142,7 @@ for (const l of todo) {
 const clips = {};
 const ff = hasFfmpeg();
 for (const l of lines) {
-  const fresh = todo.includes(l) || !old[l.key] || !existsSync(path.join(DIR, old[l.key]?.file ?? '-'));
+  const fresh = flag('--reencode') || todo.includes(l) || !old[l.key] || !existsSync(path.join(DIR, old[l.key]?.file ?? '-'));
   if (!fresh && old[l.key]) { clips[l.key] = old[l.key]; continue; }
   if (!hasMaster(l)) continue;
   if (!ff) continue;

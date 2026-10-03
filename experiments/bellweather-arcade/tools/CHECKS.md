@@ -67,3 +67,18 @@ puzzle pieces. Any game built on this harness should expose the same hooks.
 second of game time (`/tmp/cine`). Use it after changing a shot list; judge timing and feel
 on a phone. In headless runs the game draws about one frame a second, so a check that waits
 for something drawn by the world overlay (a bubble, a prompt) must wait several seconds.
+
+## Scene timing
+
+`node tools/timing.mjs [--scene opening|attack]` plays a cutscene in game time and prints
+every line with its speaker and real voiced length, flagging a speaker cut off by their own
+next line. The attack film holds at its next beat until a voiced line is finished
+(`CUT_GATES` in `story.ts`), so its length grows with the voices; check it after new clips.
+
+## Voices
+
+`node tools/voice.mjs` makes missing clips (Gemini 3.8 Flash TTS; townsfolk on Flash-Lite).
+On the free tier each model allows about 10 clips a day; the script keeps what it made and
+stops a model when its day is used up. Each sandbox command has a short time limit, so run it
+per speaker (`--only Mira`) when working from Claude's sandbox. `--reencode` redoes the game
+MP3s from the WAV masters (pauses longer than 0.42 s are shortened).

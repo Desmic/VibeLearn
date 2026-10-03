@@ -31,7 +31,7 @@ export interface PinOpts {
   align?: 'bottom' | 'center';
 }
 
-interface Pin { el: HTMLElement; at: () => T.Vector3 | null; o: PinOpts; x: number; y: number; placed: boolean }
+interface Pin { el: HTMLElement; at: () => T.Vector3 | null; o: PinOpts; x: number; y: number; placed: boolean; vis?: string; tr?: string; edge?: boolean; tail?: string }
 
 export function createOverlay(host: HTMLElement, camera: T.Camera) {
   const pins = new Map<string, Pin>();
@@ -49,7 +49,7 @@ export function createOverlay(host: HTMLElement, camera: T.Camera) {
       const old = pins.get(id);
       if (old && old.el === el) { old.at = at; old.o = o; return; }
       el.style.visibility = 'hidden';   // until its first placement (no flash in a corner)
-      pins.set(id, { el, at, o, x: 0, y: 0, placed: false });
+      pins.set(id, { el, at, o, x: 0, y: 0, placed: false, vis: 'hidden' });
     },
     unpin(id: string) { const p = pins.get(id); if (!p) return; pins.delete(id); p.el.classList.remove('at-edge'); p.el.style.transform = ''; p.el.style.visibility = ''; },
     has(id: string) { return pins.has(id); },
@@ -64,20 +64,24 @@ export function createOverlay(host: HTMLElement, camera: T.Camera) {
       const s = safe(), taken: { x0: number; y0: number; x1: number; y1: number }[] = [];
       const order = [...pins.values()].sort((a, b) => (b.o.rank ?? 0) - (a.o.rank ?? 0));
       const k = 1 - Math.exp(-dt * 16);
-      for (const p of order) {
-        const el = p.el;
-        if (el.hidden) { p.placed = false; continue; }
+      // Performance (F15): read every size first, then write; and write only what changed.
+      // Interleaving reads and writes forces the browser to lay the page out once per pin.
+      const sizes = order.map(p => p.el.hidden ? null : [p.el.offsetWidth, p.el.offsetHeight] as const);
+      const setVis = (p: Pin, vis: string) => { if (p.vis !== vis) { p.vis = vis; p.el.style.visibility = vis; } };
+      order.forEach((p, i) => {
+        const el = p.el, size = sizes[i];
+        if (!size) { p.placed = false; return; }
         const at = p.at();
-        if (!at) { el.style.visibility = 'hidden'; p.placed = false; continue; }
+        if (!at) { setVis(p, 'hidden'); p.placed = false; return; }
         v.copy(at).project(camera);
         const behind = v.z > 1;
         let x = (v.x * .5 + .5) * s.w, y = (-v.y * .5 + .5) * s.h;
         if (behind) { x = s.w - x; y = s.h + 40; }   // behind the camera: mirror, and treat as below the screen
-        const bw = el.offsetWidth, bh = el.offsetHeight, lift = p.o.lift ?? 10, center = p.o.align === 'center';
+        const [bw, bh] = size, lift = p.o.lift ?? 10, center = p.o.align === 'center';
         const off = behind || x < 0 || x > s.w || y < 0 || y > s.h;
-        if (off && !p.o.edge) { el.style.visibility = 'hidden'; p.placed = false; continue; }
+        if (off && !p.o.edge) { setVis(p, 'hidden'); p.placed = false; return; }
         // the pin's bottom edge (or centre) at the point, then kept inside the safe region
-        let px = T.MathUtils.clamp(x, s.l + bw / 2, s.r - bw / 2);
+        const px = T.MathUtils.clamp(x, s.l + bw / 2, s.r - bw / 2);
         let py = center ? y + bh / 2 : y - lift;
         py = T.MathUtils.clamp(py, s.t + bh, s.b);
         // declutter: step above anything higher-ranked that it overlaps
@@ -86,21 +90,22 @@ export function createOverlay(host: HTMLElement, camera: T.Camera) {
           if (!hit) break;
           py = hit.y0 - 6;
         }
-        if (py - bh < s.t - 2 && !p.o.keep) { el.style.visibility = 'hidden'; p.placed = false; continue; }
+        if (py - bh < s.t - 2 && !p.o.keep) { setVis(p, 'hidden'); p.placed = false; return; }
         py = Math.max(py, s.t + bh);
         // sticky: glide toward the new place; snap on first show and on camera cuts
         if (!p.placed || cut || Math.hypot(px - p.x, py - p.y) > s.w * .4) { p.x = px; p.y = py; p.placed = true; }
         else { p.x += (px - p.x) * k; p.y += (py - p.y) * k; }
         taken.push({ x0: p.x - bw / 2, y0: p.y - bh, x1: p.x + bw / 2, y1: p.y });
-        el.style.visibility = '';
-        el.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px) translate(-50%, -100%)`;
+        setVis(p, '');
+        const tr = `translate(${p.x.toFixed(0)}px, ${p.y.toFixed(0)}px) translate(-50%, -100%)`;
+        if (p.tr !== tr) { p.tr = tr; el.style.transform = tr; }
         // the tail points at the thing: along the bottom edge when it is in view,
         // turned toward it (an edge cue) when it is off screen
-        const edge = off || Math.abs(px - x) > bw / 2 - 12 || y - lift > s.b + 30;
-        el.classList.toggle('at-edge', !!p.o.edge && edge);
-        el.style.setProperty('--tail', `${T.MathUtils.clamp(x - p.x, -bw / 2 + 16, bw / 2 - 16).toFixed(0)}px`);
-        if (p.o.edge && edge) el.style.setProperty('--edge-angle', `${Math.atan2(y - (p.y - bh / 2), x - p.x).toFixed(3)}rad`);
-      }
+        const edge = !!p.o.edge && (off || Math.abs(px - x) > bw / 2 - 12 || y - lift > s.b + 30);
+        if (p.edge !== edge) { p.edge = edge; el.classList.toggle('at-edge', edge); }
+        const tail = `${T.MathUtils.clamp(x - p.x, -bw / 2 + 16, bw / 2 - 16).toFixed(0)}px`;
+        if (p.tail !== tail) { p.tail = tail; el.style.setProperty('--tail', tail); }
+      });
     },
   };
   return api;

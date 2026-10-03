@@ -3,24 +3,26 @@ import type { VoiceCast } from '../kit/voice';
 // The cast of "The First Words": who voices each speaker, how they play every
 // line (`style`, the actor's direction), and the sound that makes them who they
 // are in the game (kit/voice.ts effects). Voices are Gemini 3.8 Flash TTS
-// prebuilt voices; tools/voice.mjs acts each line in public/voice/lines.json
+// prebuilt voices (townsfolk on Gemini 3.8 Flash-Lite TTS: cheaper, its own quota);
+// tools/voice.mjs acts each line in public/voice/lines.json
 // (written by tools/voice-lines.mjs). Changing a style or a line's direction
 // makes new clips for the lines it touches; nothing else is redone.
 // Zip's own voice is the story: it was torn out, so it comes back robotic and
 // broken, and clears as each piece of the speech engine returns.
+const LITE = 'gemini-3.8-flash-lite-tts';
 export const FIRST_WORDS_CAST: VoiceCast = {
   Mira:      { voice: 'Leda', style: 'a young woman at a sky-town festival: warm, curious, quick, a little teasing' },
   Warden:    { voice: 'Algenib', style: 'a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts', fx: 'warden' },
   Zip:       { voice: 'Puck', style: 'a small, brave courier robot: eager, bright, clipped', fx: 'robot' },
   Gate:      { voice: 'Fenrir', style: 'a pompous talking stone gate who loves rules: theatrical, smug, posh British accent' },
   Tavi:      { voice: 'Achird', style: 'a kind young weaver, friendly and a bit flustered' },
-  Neighbour: { voice: 'Sadaltager', style: 'a cheerful older townsman' },
-  Gardener:  { voice: 'Gacrux', style: 'a warm, motherly gardener' },
+  Neighbour: { voice: 'Sadaltager', model: LITE, style: 'a cheerful older townsman' },
+  Gardener:  { voice: 'Gacrux', model: LITE, style: 'a warm, motherly gardener' },
   // townsfolk greeting Zip as he passes (worlds/bellweather-lines.ts gives each one a voice)
-  folk0:     { voice: 'Umbriel', style: 'a relaxed townsperson chatting in passing', gain: .85 },
-  folk1:     { voice: 'Callirrhoe', style: 'an easy-going townsperson chatting in passing, light Irish accent', gain: .85 },
-  folk2:     { voice: 'Rasalgethi', style: 'a thoughtful townsperson, light Indian English accent', gain: .85 },
-  folk3:     { voice: 'Vindemiatrix', style: 'a gentle townsperson, light Australian accent', gain: .85 },
+  folk0:     { voice: 'Umbriel', model: LITE, style: 'a relaxed townsperson chatting in passing', gain: .85 },
+  folk1:     { voice: 'Callirrhoe', model: LITE, style: 'an easy-going townsperson chatting in passing, light Irish accent', gain: .85 },
+  folk2:     { voice: 'Rasalgethi', model: LITE, style: 'a thoughtful townsperson, light Indian English accent', gain: .85 },
+  folk3:     { voice: 'Vindemiatrix', model: LITE, style: 'a gentle townsperson, light Australian accent', gain: .85 },
 };
 
 /** lines whose bubble text isn't what is said aloud */
