@@ -49,7 +49,7 @@ control, beside the target; rule I1: act on the thing).
 
 | | Phone (touch) | Desktop (keyboard and mouse) |
 | --- | --- | --- |
-| Move | floating thumb stick, lower left (press anywhere there; harder = faster) | W A S D or arrows |
+| Move | floating thumb stick, lower left (past half-way Zip jogs; a gentle push walks) | W A S D or arrows (Zip jogs; hold Shift to walk) |
 | Look | drag anywhere else | drag |
 | Act | tap the prompt beside the thing, or the thing itself | **E** (the prompt shows the key cap) |
 | Talk on | tap anywhere | Space, Enter or E |

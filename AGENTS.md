@@ -62,6 +62,21 @@ Desmic confirmed on 3 Oct 2026:
   (`experiments/bellweather-arcade/public/kits/LICENSES/`). Authored models are Blender scripts in
   `experiments/bellweather-arcade/authoring/`.
 
+## How to verify a change (lessons from the 3 Oct F15 play-tests)
+
+- **Measure before you fix.** Before any change that can move frame rate, record a baseline with the
+  benchmark (`#bench=1`, see `experiments/bellweather-arcade/tools/CHECKS.md`) on the same machine, then
+  measure again after. Never report a speed change without both numbers.
+- **Know the device ratio.** Headless and laptop numbers are not phone numbers. Keep the laptop↔F15 ratio
+  from runs of the same build (CHECKS.md, "Device ratio") and predict the phone from it; confirm on the phone.
+- **Play the whole game after a large change**, on real rendering (the Claude app's browser or a phone),
+  in both input modes (touch and keyboard), start to the last stop. Headless checks prove the flow
+  works, not that it looks, sounds, times or feels right.
+- **Check animation, camera and timing by watching**, and dialogue/cutscene timing with
+  `tools/timing.mjs`. Layered motion (look-at, springs) must start from a known pose each frame.
+- **State what you can actually do before offering it.** Check a capability (a tool, a network host, a
+  permission) before telling the user it is available.
+
 ## Learning evidence and data
 
 - Rendering, XP, stars, self-report and completion do not establish mastery; missing evidence is unknown.

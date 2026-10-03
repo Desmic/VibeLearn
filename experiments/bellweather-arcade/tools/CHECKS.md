@@ -82,3 +82,24 @@ On the free tier each model allows about 10 clips a day; the script keeps what i
 stops a model when its day is used up. Each sandbox command has a short time limit, so run it
 per speaker (`--only Mira`) when working from Claude's sandbox. `--reencode` redoes the game
 MP3s from the WAV masters (pauses longer than 0.42 s are shortened).
+
+## Frame-rate benchmark and the device ratio
+
+Open the game with `bench=1` (on the hosted copy: `#bench=1&title=0&story=0&quality=medium`,
+or `quality=high`; add `adaptive=0` to hold the resolution fixed). It visits four fixed
+views (hero vista, looking back, bell garden, courtyard), five seconds each, and prints a
+table: fps as played (capped by the screen's refresh), the 90th-percentile frame, the
+uncapped cost of a frame (drawn back to back and forced to finish: this shows headroom a
+60 Hz screen hides), the resolution scale, draw calls and triangles (`kit/bench.ts`).
+
+Rules: measure **before** changing anything that can move frame rate, on the same device,
+then after. The page must be visible: a hidden or covered browser throttles drawing.
+
+Device ratio. The phone is the target, but most runs happen elsewhere. Keep a table of the
+same build measured on each device; the ratio of frame costs predicts the phone from a
+laptop run (and is re-checked on the phone before a release):
+
+| Build | Device | Tier | Mean fps | Mean cost ms | Notes |
+| --- | --- | --- | --- | --- | --- |
+| v59 (baseline artifact) | laptop, Claude app browser (Intel UHD) | medium | — | — | to measure |
+| v59 | Galaxy F15 | high | ~45 (Desmic, 3 Oct, adaptive) | — | resolution fell to ~0.6x |
