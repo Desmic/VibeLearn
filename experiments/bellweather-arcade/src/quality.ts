@@ -26,9 +26,13 @@ export interface Quality {
 }
 
 const TIERS: Record<Tier, Omit<Quality, 'choice' | 'tier'>> = {
+  // 3 Oct (F15 play-test): Medium/High looked soft because they were judged
+  // against 60 fps and fell to 60% resolution. A steady 45 fps reads as smooth
+  // on a phone, so Medium/High aim for that, start at full resolution and keep most of their
+  // resolution (never below ~1.2x CSS pixels); only Low trades resolution for frame rate freely.
   low:    { antialias: false, maxPixelRatio: .9,  minPixelRatio: .5,  targetMs: 16.7, shadowMap: 1024, leafFraction: .38, cloudRings: 1, islands: 4, cloudLobes: .45, canopyDetail: .5, birds: false, people: true, strokes: false, lobeTrees: 'all', reflections: false },
-  medium: { antialias: false, maxPixelRatio: 1.25, minPixelRatio: .6, targetMs: 16.7, shadowMap: 2048, leafFraction: .6,  cloudRings: 2, islands: 7, cloudLobes: .75, canopyDetail: .8, birds: true,  people: true, strokes: true, lobeTrees: 'distant', reflections: false },
-  high:   { antialias: true,  maxPixelRatio: 2,   minPixelRatio: .6, targetMs: 16.7, shadowMap: 2048, leafFraction: 1,   cloudRings: 3, islands: 9, cloudLobes: 1,   canopyDetail: 1,  birds: true,  people: true, strokes: true, lobeTrees: 'none', reflections: true },
+  medium: { antialias: false, maxPixelRatio: 1.6, minPixelRatio: 1.2, targetMs: 22.2, shadowMap: 2048, leafFraction: .6,  cloudRings: 2, islands: 7, cloudLobes: .75, canopyDetail: .8, birds: true,  people: true, strokes: true, lobeTrees: 'distant', reflections: false },
+  high:   { antialias: true,  maxPixelRatio: 2.25, minPixelRatio: 1.5, targetMs: 24, shadowMap: 2048, leafFraction: 1,   cloudRings: 3, islands: 9, cloudLobes: 1,   canopyDetail: 1,  birds: true,  people: true, strokes: true, lobeTrees: 'none', reflections: true },
 };
 
 const KEY = 'bellweather.graphics';
@@ -81,7 +85,7 @@ export function quality(): Quality {
 // (timer queries where the browser has them, otherwise frames forced to finish
 // with readPixels, which over-reads a little). High costs ~1.5x Medium at equal
 // resolution (MSAA, full leaf cards, pool reflection), so High is chosen only
-// when that estimate leaves headroom under a 60 fps frame (16.7 ms).
+// when that estimate fits a 60 fps frame with a little slack (High aims for 45+ fps).
 export async function autoBenchmark(renderer: import('three').WebGLRenderer, scene: import('three').Scene, camera: import('three').Camera): Promise<{ tier: Tier; ms: number; via: string }> {
   const gl = renderer.getContext() as WebGL2RenderingContext, px = new Uint8Array(4), prev = renderer.getPixelRatio();
   renderer.setPixelRatio(Math.min(devicePixelRatio, TIERS.high.maxPixelRatio));
@@ -101,7 +105,7 @@ export async function autoBenchmark(renderer: import('three').WebGLRenderer, sce
   if (times.length < 3) { via = 'finish'; times.length = 0; for (let i = 0; i < 7; i++) { const t = performance.now(); renderer.render(scene, camera); sync(); times.push(performance.now() - t); } }
   renderer.setPixelRatio(prev);
   times.sort((a, b) => a - b); const ms = times[times.length >> 1];
-  const tier: Tier = ms * 1.5 <= 11 ? 'high' : 'medium';
+  const tier: Tier = ms * 1.5 <= 16 ? 'high' : 'medium'; // High holds ~45 fps or better
   try { localStorage.setItem(KEY + '.auto', tier); } catch { /* storage unavailable: the URL carries it */ }
   return { tier, ms: +ms.toFixed(1), via };
 }

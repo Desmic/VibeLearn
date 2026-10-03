@@ -67,7 +67,7 @@ export function buildRelay(o: Opts) {
   const finish = () => {
     sfx.chime(); o.ping(); el.hidden = true; active = false; o.host.classList.remove('puzzle-mode');
     g.say('Zip! I kept the lantern. Follow my marks. They\'re taking us past Loom Isle.', [{ label: 'I\'m coming', kind: 'primary', act: () =>
-      st.finish(() => o.onDone()) }], { speaker: 'Mira' });
+      st.finish(() => o.onDone()) }], { speaker: 'Mira', via: 'Relay' });
   };
   const bind = () => {
     el.onclick = e => {

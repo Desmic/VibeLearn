@@ -195,12 +195,13 @@ function glanceAtGoal(dt:number){
   if(glanceT>0){if(dragging){glanceT=0;return}glanceT-=dt;let d=((glanceYaw-yaw+Math.PI*3)%(Math.PI*2))-Math.PI;yaw+=d*Math.min(1,dt*2.2);facadeMoveYaw=yaw}
 }
 // test hook: a fixed camera for look-dev shots (__arcade.frame)
-let camOverride:{p:T.Vector3,t:T.Vector3}|null=null;const shakeV=new T.Vector3();
+let camOverride:{p:T.Vector3,t:T.Vector3}|null=null;let lastCut:number|undefined;  // a directed shot's cut number: a new one snaps the camera (a film cut)
+const shakeV=new T.Vector3();
 function cameraUpdate(dt:number){if(camOverride){camera.position.copy(camOverride.p);camera.lookAt(camOverride.t);return}
   const started=performance.now();
   if(dt<.5)glanceAtGoal(dt);
   // Puzzle shot: a fixed, readable view of the speech rail while it is in use.
-  const shot=story?.shot;SIGHT_SHOT.value=shot||guide?.cardOpen?1:0;if(shot){camera.position.lerp(shot.pos,Math.min(1,dt*4));look.lerp(shot.look,Math.min(1,dt*4));const k=reduced?0:((shot as {shake?:number}).shake??0);if(k>.01)camera.position.add(shakeV.set((Math.random()-.5)*k*.5,(Math.random()-.5)*k*.35,(Math.random()-.5)*k*.5));camera.lookAt(look);return;}
+  const shot=story?.shot;SIGHT_SHOT.value=shot||guide?.cardOpen?1:0;if(shot){const sc=(shot as {cut?:number}).cut,r=(shot as {rate?:number}).rate??4;if(sc!==undefined&&sc!==lastCut){camera.position.copy(shot.pos);look.copy(shot.look)}lastCut=sc;camera.position.lerp(shot.pos,Math.min(1,dt*r));look.lerp(shot.look,Math.min(1,dt*Math.max(r,3)));const k=reduced?0:((shot as {shake?:number}).shake??0);if(k>.01)camera.position.add(shakeV.set((Math.random()-.5)*k*.5,(Math.random()-.5)*k*.35,(Math.random()-.5)*k*.5));camera.lookAt(look);return;}
   if(cameraQueryBounds.length!==cameraSolids.length)invalidateCameraGeometry();
   if(facadeStudy){
     const pivot=zip.position.clone().add(new T.Vector3(0,1.5,0));
@@ -297,7 +298,7 @@ if(paintedStudy){try{await Promise.race([renderer.compileAsync(scene,camera),new
 // soft contact shadow instead of forcing a full shadow-map redraw every step.
 if(paintedStudy){zip.traverse(o=>{o.castShadow=false});renderer.shadowMap.needsUpdate=true;if(contact.material instanceof T.MeshBasicMaterial)contact.material.opacity=.42;}
 const post=paintedStudy&&new URLSearchParams(location.search).get('paintpost')==='1'?createPaintedPost(renderer,scene,camera):null;
-const governor=paintedStudy&&!paintedParams.get('capture')?frameGovernor():null;(window as any).__vlBudget=budget;
+const governor=paintedStudy&&!paintedParams.get('capture')?frameGovernor(gfx.targetMs):null;(window as any).__vlBudget=budget;
 const adaptRes=paintedStudy&&paintedParams.get('adaptive')!=='0'&&!paintedParams.get('capture')?adaptiveResolution(renderer,()=>{renderer.setSize(innerWidth,innerHeight);post?.resize()},gfx.targetMs,gfx.minPixelRatio,gfx.maxPixelRatio,()=>{if(post)post.render();else renderer.render(scene,camera)}):null;
 function render(){
   // Camera orbit does not change light-space shadows. Refresh when the sole
@@ -367,13 +368,13 @@ window.addEventListener('keydown',e=>{if(e.code==='Escape'){e.preventDefault();p
 
 let dragging:{id:number,x:number,y:number}|null=null;renderer.domElement.addEventListener('pointerdown',e=>{if(paused)return;dragging={id:e.pointerId,x:e.clientX,y:e.clientY};renderer.domElement.setPointerCapture(e.pointerId)});renderer.domElement.addEventListener('pointermove',e=>{if(!dragging||e.pointerId!==dragging.id)return;yaw-=(e.clientX-dragging.x)*.004;pitch=T.MathUtils.clamp(pitch+(e.clientY-dragging.y)*.0035,-.13,.9);dragging.x=e.clientX;dragging.y=e.clientY;get('hint').style.opacity='0'});const stopDrag=()=>dragging=null;renderer.domElement.addEventListener('pointerup',stopDrag);renderer.domElement.addEventListener('pointercancel',stopDrag);renderer.domElement.addEventListener('wheel',e=>{if(paused)return;e.preventDefault();zoom=T.MathUtils.clamp(zoom+e.deltaY*.006,3.7,10.5)},{passive:false});for(const b of document.querySelectorAll<HTMLButtonElement>('[data-dir]')){const dir=b.dataset.dir!;b.addEventListener('pointerdown',e=>{if(paused)return;b.setPointerCapture(e.pointerId);held.add(dir);guideTargetT=null});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>held.delete(dir))}
 
-window.addEventListener('resize',()=>{renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);post?.resize();camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();applyLens();cameraUpdate(1);if(paused&&!document.hidden)render()});renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();pause(true);get('menu').querySelector('p')!.textContent='The view needs a reload.';announce('Graphics context lost. Reload this disposable study.')});
+window.addEventListener('resize',()=>{renderer.setPixelRatio(adaptRes?adaptRes.ratio():Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);post?.resize();camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();applyLens();cameraUpdate(1);if(paused&&!document.hidden)render()});renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();pause(true);get('menu').querySelector('p')!.textContent='The view needs a reload.';announce('Graphics context lost. Reload this disposable study.')});
 
 // Diagnostics for performance profiling (scene graph access only).
 // If the browser drops the GPU context (driver reset, memory pressure, too many
 // tabs), say so plainly instead of leaving a blank screen.
 renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();const l=get('loading');l.hidden=false;l.style.cursor='pointer';l.style.textAlign='center';l.style.padding='24px';l.textContent='The browser paused the graphics (GPU reset). Tap to reload the game.';l.onclick=()=>location.reload();console.warn('[vl] webgl context lost')});
-(window as any).__vlDebug={scene,renderer,camera,sun,walkable,get zipRig(){return zipRig}};
+(window as any).__vlGuide=guide;(window as any).__vlDebug={scene,renderer,camera,sun,walkable,get zipRig(){return zipRig}};
 Object.defineProperty(window,'__arcade',{value:{
   snapshot:()=>({study:facadeStudy?'facade':'arcade',standingY:standingY0+groundLift,contactY:contactY0+groundLift,position:zip.position.toArray(),routeT:nearestRoute(zip.position).t,paused,guided:guideTargetT!==null,guideTargetT,reduced,frames,draws:renderer.info.render.calls,triangles:renderer.info.render.triangles,cameraSolids:cameraSolids.length,camera:camera.position.toArray(),cameraMetrics:{...cameraMetrics},place:positionText}),
   invalidateCameraGeometry,

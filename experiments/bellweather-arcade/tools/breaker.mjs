@@ -43,7 +43,7 @@ const firstTryIntegrity = async (where) => {
 // hold a key in game time (fast-forwarded: software rendering is too slow to play in real time)
 const hold = (key, ms) => page.evaluate(([k, s]) => window.__arcade.simulate(s, { keys: [k] }), [key, ms / 1000]);
 const walkTo = (x, z, s = 4) => page.evaluate(([x, z, s]) => window.__arcade.simulate(s, { walkTo: [x, z] }), [x, z, s]);
-const startTown = async () => { await h.fresh('&title=0'); await card('Play'); await page.locator('canvas').first().click({ position: { x: 200, y: 300 } }).catch(() => {}); };
+const startTown = async () => { await h.fresh('&title=0'); await h.skipOpening(); await page.locator('canvas').first().click({ position: { x: 200, y: 300 } }).catch(() => {}); };
 const startIsle = async () => { await h.fresh('&title=0&beat=land'); await card('OK'); };
 
 // ---------------------------------------------------------------- probes
@@ -140,16 +140,16 @@ await segment('scum', async () => {
 await segment('pause', async () => {
   // pause and resume inside the attack cutscene, the catch game and the flight
   await startTown();
-  await pose(4.4, -9.4); await act('Talk'); await card('Next'); await card('Hang the lantern'); await card('Hum'); await card('Look up');
+  await pose(4.4, -9.4); await act('Talk'); await h.talkMira(); await h.waitBeat('attack', 10000);
   await page.waitForTimeout(2000); await page.keyboard.press('Escape'); await page.waitForTimeout(1500);
   const pausedBeat = await beat(); await page.keyboard.press('Escape'); await page.waitForTimeout(500);
   check('attack continues after pause', await waitFor(async () => (await beat()) !== 'attack' || await page.locator('.story-skip').isVisible(), 20000), pausedBeat);
-  await page.locator('.story-skip').click().catch(() => {}); await card('Catch the spark', 60000);
+  await page.locator('.story-skip').click().catch(() => {}); await h.waitBeat('spark', 60000);
   // restart from the pause menu while the story runs
   await page.keyboard.press('Escape'); await page.locator('#restart').click().catch(() => {}); await page.waitForTimeout(1500);
   await invariants('restart from pause during the spark chase');
   const g = await goal();
-  check('story goal survives "restart" from the menu', /spark/i.test(g ?? ''), g, 'warn');
+  check('story goal survives "restart" from the menu', /spark|voice/i.test(g ?? ''), g, 'warn');
   // island restart: must not drop Zip into the hidden town
   await startIsle();
   await page.keyboard.press('Escape'); await page.locator('#restart').click().catch(() => {}); await page.waitForTimeout(1500);
@@ -161,9 +161,9 @@ await segment('pause', async () => {
 await segment('skip', async () => {
   // skip the attack at the earliest moment and right after the shield
   await startTown();
-  await pose(4.4, -9.4); await act('Talk'); await card('Next'); await card('Hang the lantern'); await card('Hum'); await card('Look up');
+  await pose(4.4, -9.4); await act('Talk'); await h.talkMira(); await h.waitBeat('attack', 10000);
   await page.locator('.story-skip').click({ timeout: 10000 }); await page.waitForTimeout(800);
-  await card('Catch the spark', 60000);
+  await h.waitBeat('spark', 60000);
   check('no shield button left after skipping', !(await page.locator('.context-act', { hasText: 'Shield' }).isVisible()));
   check('checkpoint "spark" saved after skip', (await save()) === 'spark', await save());
   await invariants('after skip');

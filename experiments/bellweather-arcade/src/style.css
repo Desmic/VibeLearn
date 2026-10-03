@@ -14,7 +14,7 @@
 .control-hint{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);padding:12px 20px;border-radius:24px;background:#143a5dcc;color:#fff9e9;font:600 16px Trebuchet MS,Arial,sans-serif;pointer-events:none;z-index:4;animation:vl-breathe 2.2s ease-in-out infinite;white-space:nowrap}
 @keyframes vl-breathe{50%{opacity:.7}}
 .context-act{position:absolute;right:20px;bottom:78px;z-index:5;min-width:150px;padding:14px 20px;border-radius:26px;border:2px solid #fff0b3;background:#e89b3c;color:#fff;font:700 16px Trebuchet MS,Arial,sans-serif;box-shadow:0 6px 20px #08213b77;animation:vl-pop .25s ease-out}
-@keyframes vl-pop{from{transform:scale(.8);opacity:0}}
+@keyframes vl-pop{from{scale:.8;opacity:0}}
 .story-card{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);width:min(94vw,460px);padding:14px 16px;border-radius:18px;background:#f5efdff7;border:2px solid #d7ae79;color:#173b5c;box-shadow:0 10px 30px #071c3666;z-index:6;animation:vl-pop .2s ease-out}
 .story-card p{margin:0 0 12px;font-size:16px;line-height:1.4}
 .story-choices{display:flex;flex-wrap:wrap;gap:8px}
@@ -164,4 +164,54 @@
 .engine-mode .brand{visibility:hidden}
 .engine-mode .thought:not(.warden){opacity:0}
 .holo-chip:disabled{opacity:.45;box-shadow:none}
-.cutscene .control-hint,.cutscene .thought:not(.warden){display:none}
+.cutscene .control-hint{display:none}
+
+/* ── In the world (3 Oct, F15 play-test): speech bubbles, barks, prompts, brackets ──
+   Positions come from kit/overlay.ts (inline transform); these rules only draw. */
+.story-card.bubble{left:0;top:0;bottom:auto;width:max-content;max-width:min(84vw,330px);padding:12px 15px 10px;border-radius:20px;border-width:2px;transform-origin:50% 100%;cursor:default}
+.story-card.bubble p{font-size:15.5px;margin:0 0 8px}
+.story-card.bubble::after,.speech.bark::after{content:'';position:absolute;left:calc(50% + var(--tail,0px));bottom:-11px;margin-left:-10px;border:10px solid transparent;border-bottom:0;border-top-color:#d7ae79}
+.story-card.bubble::before{content:'';position:absolute;left:calc(50% + var(--tail,0px));bottom:-8px;margin-left:-8px;border:8px solid transparent;border-bottom:0;border-top-color:#f5efdf;z-index:1}
+.story-card.bubble .who,.speech.bark .who{position:absolute;left:14px;top:-11px;padding:1px 9px;border-radius:9px;background:#1c4972;color:#fff3db;font:700 11px Trebuchet MS,Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.story-card.bubble p:has(.who){padding-top:3px}
+.story-card.bubble .story-choices button{min-height:40px;padding:8px 12px;font-size:14.5px}
+.story-card.bubble .story-choices.advance-row{margin-top:-14px;margin-right:-8px}
+/* off screen: the tail turns into a pointer toward the speaker */
+.at-edge::after,.story-card.bubble.at-edge::before{display:none}
+.story-card.bubble.at-edge,.speech.bark.at-edge{box-shadow:0 0 0 3px #ffd36b88,0 10px 30px #071c3666}
+.speech.bark{max-width:min(62vw,240px);padding:9px 13px 8px;border:2px solid #d7ae79;animation:vl-pop .18s ease-out;transform-origin:50% 100%;z-index:5}
+.speech.bark .who{font-size:10px;top:-10px}
+.speech.bark[hidden]{display:none}
+.speech.bark.warden{background:#2a1f40f2;color:#efe4ff;border-color:#8f6ad8;box-shadow:0 0 24px #9d7bff88;font-weight:600}
+.speech.bark.warden::after{border-top-color:#8f6ad8}.speech.bark.warden .who{background:#8f6ad8;color:#1d1430}
+.speech.bark.static{background:#e8eef4;color:#56677a;font:700 16px/1.2 'Courier New',monospace;letter-spacing:.12em;animation:vl-static .12s steps(2) infinite}
+@keyframes vl-static{50%{translate:1px -1px;opacity:.85}}
+.speech.bark.zip{background:#fff;border-color:#9fd6ff}
+.tap-prompt{position:absolute;left:0;top:0;z-index:5;pointer-events:none;width:84px;height:84px;display:flex;align-items:flex-end;justify-content:center}
+.tap-prompt i{position:absolute;left:50%;top:50%;width:62px;height:62px;margin:-31px 0 0 -31px;border-radius:50%;border:3px solid #fff3c4;box-shadow:0 0 0 2px #0b213855,0 0 18px #ffd36b;animation:vl-ring 1.3s ease-out infinite}
+@keyframes vl-ring{0%{scale:.55;opacity:1}100%{scale:1.25;opacity:0}}
+.tap-prompt span{position:relative;top:22px;font:800 15px Trebuchet MS,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#fff8e1;-webkit-text-stroke:4px #10263d;paint-order:stroke fill;animation:vl-bob 1s ease-in-out infinite}
+.target-brackets{position:absolute;left:0;top:0;z-index:3;width:76px;height:76px;padding:0;border:0;background:
+ linear-gradient(#ffe7a3,#ffe7a3) 0 0/16px 3px,linear-gradient(#ffe7a3,#ffe7a3) 0 0/3px 16px,
+ linear-gradient(#ffe7a3,#ffe7a3) 100% 0/16px 3px,linear-gradient(#ffe7a3,#ffe7a3) 100% 0/3px 16px,
+ linear-gradient(#ffe7a3,#ffe7a3) 0 100%/16px 3px,linear-gradient(#ffe7a3,#ffe7a3) 0 100%/3px 16px,
+ linear-gradient(#ffe7a3,#ffe7a3) 100% 100%/16px 3px,linear-gradient(#ffe7a3,#ffe7a3) 100% 100%/3px 16px;background-repeat:no-repeat;filter:drop-shadow(0 0 2px #10263d) drop-shadow(0 0 6px #ffd36b88);animation:vl-brackets 1.4s ease-in-out infinite;cursor:pointer;touch-action:none}
+.target-brackets[hidden]{display:none}
+@keyframes vl-brackets{50%{scale:1.12}}
+.goal-line{transition:opacity .6s,scale .6s,translate .6s;transform-origin:50% 0}
+.goal-line.quiet{opacity:.62;scale:.88;translate:0 -6px}
+.toast.pop{left:0;top:0;padding:7px 16px;font-size:17px;animation:vl-rise .9s cubic-bezier(.2,1.4,.4,1)}
+@keyframes vl-rise{0%{scale:.4;opacity:0;translate:0 14px}35%{scale:1.08;opacity:1}100%{translate:0 0}}
+.control-hint{left:0;top:0;font-size:14px;padding:9px 16px}
+.story-card.ribbon{top:64px;bottom:auto;width:min(92vw,400px);padding:10px 14px 8px;background:#f5efdfe8}
+.story-card.ribbon .star-row span{font-size:30px}
+.story-card.ribbon .star-title{font-size:16px!important;margin:0 0 2px!important}
+.story-card.ribbon .star-list{font-size:12.5px;margin:0 0 6px}
+.story-card.ribbon .story-choices{justify-content:center}.story-card.ribbon .story-choices button{flex:0 0 auto;min-height:36px;padding:6px 18px}
+@media(max-width:600px){.story-card.ribbon{top:100px}}
+/* cutscenes are framed like film: bars slide in, the HUD steps away */
+.letterbox{position:absolute;inset:0;pointer-events:none;z-index:5}
+.letterbox i{position:absolute;left:0;right:0;height:0;background:#06121f;transition:height .5s ease}
+.letterbox i:first-child{top:0}.letterbox i:last-child{bottom:0}
+.cutscene .letterbox i{height:7.5vh}
+.cutscene .context-act{bottom:calc(7.5vh + 18px)}

@@ -70,6 +70,9 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   // The Gate is a character: a literal-minded doorman with a face on its
   // keystone. It opens exactly where the notes in your satchel say. Rules are rules.
   const face = new T.Group(); face.position.set(0, 3.05, .32); gateGrp.add(face);
+  // the Gate talks in a bubble over its carved face; Mira's voice comes out of the relay
+  const faceAt = new T.Vector3(); g.anchor('Gate', () => root.visible ? face.getWorldPosition(faceAt).setY(faceAt.y + .55) : null);
+  const relayAt = new T.Vector3(); g.anchor('Relay', () => root.visible ? relayAt.copy(RELAY).setY(RELAY.y + 3.6) : null);
   face.add(new T.Mesh(new T.BoxGeometry(1.5, .82, .18), stone('#f4ead6')));
   const eyes = [-1, 1].map(side => {
     const white = new T.Mesh(new T.SphereGeometry(.2, 16, 12), new T.MeshBasicMaterial({ color: '#ffffff' })); white.scale.z = .5; white.position.set(side * .33, .08, .1); face.add(white);

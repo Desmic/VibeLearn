@@ -84,13 +84,13 @@ export function buildEcho(scene: T.Scene, o: Opts) {
       return best;
     },
     /** the one-button action for a source in reach, if any */
-    action(z: T.Vector3): { label: string; use: () => void } | null {
+    action(z: T.Vector3): { label: string; use: () => void; at: T.Vector3 } | null {
       if (!enabled || flying) return null;
       let near: typeof motes[number] | null = null, nd = 1e9;
       for (const m of motes) { if (m.taken) continue; const p = where(m), d = Math.hypot(p.x - z.x, p.z - z.z); if (d < m.s.reach && d < nd) { nd = d; near = m; } }
       if (!near) { g.label('echo-line', null); return null; }
       const p = where(near); g.label('echo-line', near.s.line, tmp.copy(p).setY(p.y + .45));
-      const m = near; return { label: `Absorb “${m.s.word}”`, use: () => { take(m); } };
+      const m = near; return { label: `Absorb “${m.s.word}”`, use: () => { take(m); }, at: m.grp.position };
     },
     tick(dt: number) {
       t += dt; fx.tick(dt);

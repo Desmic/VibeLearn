@@ -238,10 +238,11 @@ export function adaptiveResolution(renderer: T.WebGLRenderer, onResize: () => vo
   // so "headroom" can't be read from them. Drop quickly when frames run long;
   // probe upward after a quiet spell, and back off for longer if the probe fails.
   const max = Math.min(devicePixelRatio, maxRatio), min = Math.min(minRatio, max);
-  let ratio = Math.min(max, 1), frames: number[] = [], last = performance.now(), changedAt = last, lastUp = -1e9, upDelay = 6000;
+  // Start at the tier's full resolution (the player chose it); step down only if needed.
+  let ratio = max, frames: number[] = [], last = performance.now(), changedAt = last, lastUp = -1e9, upDelay = 6000;
   renderer.setPixelRatio(ratio); onResize();
   const apply = (next: number, now: number) => { ratio = next; renderer.setPixelRatio(ratio); onResize(); redraw(); changedAt = now; frames = []; };
-  return function tick() {
+  const tick = Object.assign(function tick() {
     const now = performance.now(); const dt = now - last; last = now;
     if (dt > 250) { frames = []; return; }           // tab switch or hitch: not a steady-state sample
     if (now - changedAt < 700) return;               // let the new size settle before judging
@@ -254,5 +255,6 @@ export function adaptiveResolution(renderer: T.WebGLRenderer, onResize: () => vo
     } else if (med <= targetMs * 1.08 && ratio < max - .01 && now - changedAt > upDelay) {
       lastUp = now; apply(Math.min(max, ratio + .1), now);
     }
-  };
+  }, { ratio: () => ratio });
+  return tick;
 }

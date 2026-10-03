@@ -49,7 +49,9 @@ const LINES: Record<string, string[]> = {
   stroll3: ['Up early, Zip?', 'The outlook\'s breezy today.'],
   mira: ['There you are, Zip! The garden bell has been waiting for you.', 'Come look: the Blossom Isle is clear today.'],
 };
-// After the Warden's attack the town talks about nothing else (the story sets root.userData.after).
+// After the Warden's attack the town talks about nothing else (the story sets root.userData.after),
+// and keeps glancing at the sky where the ship went (over the town, toward the Blossom Isle).
+const GONE = new T.Vector3(0, 30, 46);
 const AFTER = [
   'That ship took Mira! Right off the outlook.', 'The bells rang on their own. Never seen that.',
   'It flew off past the Blossom Isle.', 'Stay safe, courier. Something is wrong today.',
@@ -111,23 +113,29 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
     if (zip) zipHead.copy(zip.pos).setY(zip.pos.y + 1.5);
     // alarm (the Warden's ship overhead): everyone stops, turns and stares up at it
     const alarm = root.userData.alarm as T.Vector3 | null | undefined;
+    // afterwards nobody strolls: people stand where they were, still watching the sky the ship left by
+    const after = !!root.userData.after && !alarm;
     if (alarm) {
+      // the first moment: the two nearest point up at it (an arm raised), the rest just stare
+      if (!wasAlarm) [...folk].sort((a, b) => a.root.position.distanceToSquared(alarm) - b.root.position.distanceToSquared(alarm)).slice(0, 2).forEach((p, i) => setTimeout(() => p.wave(), 300 + i * 700));
       for (const p of folk) { p.lookAt(alarm); rotateToward(p.root, Math.atan2(-(alarm.x - p.root.position.x), -(alarm.z - p.root.position.z)), dt * 2.2); }
+      miraP?.lookAt(alarm);
       wasAlarm = true;
     } else if (wasAlarm) { wasAlarm = false; for (const p of folk) p.lookAt(null); }
     // strollers advance unless greeting
     for (const s of strollers) {
-      const greeting = s.g.timer >= 0 || !!alarm;
+      const greeting = s.g.timer >= 0 || !!alarm || after;
       if (!greeting && !reduced) s.u += dt * s.speed / s.a.distanceTo(s.b);
       const cyc = s.u % 2, f = cyc < 1 ? cyc : 2 - cyc, e = f * f * (3 - 2 * f);
       s.p.root.position.lerpVectors(s.a, s.b, e);
       const moving = greeting ? 0 : Math.min(1, Math.min(f, 1 - f) * 6) * s.speed;
       s.p.setBase(moving > .05 ? 'Stroll' : 'Idle');
-      if (greeting && zip) rotateToward(s.p.root, Math.atan2(-(zip.pos.x - s.p.root.position.x), -(zip.pos.z - s.p.root.position.z)), dt * 3);
+      if (after && s.g.timer < 0) { rotateToward(s.p.root, Math.atan2(-(GONE.x - s.p.root.position.x), -(GONE.z - s.p.root.position.z)), dt * 1.5); s.p.lookAt(GONE); }
+      else if (greeting && zip) rotateToward(s.p.root, Math.atan2(-(zip.pos.x - s.p.root.position.x), -(zip.pos.z - s.p.root.position.z)), dt * 3);
       else { const dir = cyc < 1 ? 1 : -1; rotateToward(s.p.root, Math.atan2(-(s.b.x - s.a.x) * dir, -(s.b.z - s.a.z) * dir), dt * 4); }
       s.p.update(dt, moving, reduced);
     }
-    for (const p of still) p.update(dt, 0, reduced);
+    for (const p of still) { if (after && !greeters.some(g => g.who === p && g.timer >= 0)) p.lookAt(GONE); p.update(dt, 0, reduced); }
     // greetings: notice Zip nearby, look, wave, say a line; Zip answers
     for (const g of greeters) {
       g.cool -= dt;
@@ -159,7 +167,7 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
     if (miraP) {
       // in conversation (a story card is open nearby) she talks and looks at Zip
       const chatting = mira.root.visible && opts.host.matches('.card-open') && !!zip && Math.hypot(zip.pos.x - mira.root.position.x, zip.pos.z - mira.root.position.z) < 6;
-      miraP.setBase(chatting ? 'Talk' : 'Idle'); if (chatting) miraP.lookAt(zipHead); else if (miraG.timer < 0) miraP.lookAt(null);
+      miraP.setBase(chatting ? 'Talk' : 'Idle'); if (chatting) miraP.lookAt(zipHead); else if (miraG.timer < 0) miraP.lookAt((root.userData.alarm as T.Vector3 | null) ?? null);
       if (mira.root.visible) miraP.update(dt, 0, reduced);
     } else if (!reduced && mira.root.visible) mira.animate(t, 0, false);
     flock(t);

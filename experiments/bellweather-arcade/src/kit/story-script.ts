@@ -45,6 +45,8 @@ export interface ScriptGuide {
   setGoal(text: string | null): void;
   setBeacon(at: T.Vector3 | null, arrowOnly?: boolean): void;
   stars(title: string, rows: [boolean, string][], then: () => void): void;
+  /** a line said in passing over the speaker's head (no buttons; play goes on) */
+  bark?(who: string, text: string, sec?: number, opts?: { tone?: 'warden' | 'static' | 'zip' }): void;
 }
 
 const fill = (s: string, v: Record<string, string | number> = {}) => s.replace(/\{(\w+)\}/g, (_, k) => String(v[k] ?? `{${k}}`));
@@ -78,6 +80,11 @@ export function createScriptRunner(script: StoryScript, g: ScriptGuide, o: {
       const d = script.dialogues[id]; if (!d) throw Error(`story ${script.id}: no dialogue ${id}`);
       const line = d[from]; if (!line) throw Error(`story ${script.id}: dialogue ${id} has no line ${from}`);
       g.say(line.text, (line.choices ?? []).map(c => ({ label: c.label, kind: c.kind, advance: c.advance ?? ((line.choices ?? []).length === 1 && c.label === 'Next'), act: () => { if (!c.next) g.close(); if (c.on) handlers[c.on]?.(); if (c.next) run.dialogue(id, handlers, c.next); } })), { speaker: line.speaker });
+    },
+    /** say one line in passing, over its speaker's head (cutscenes, reactions); falls back to a caption */
+    bark(id: string, at = 'start', sec?: number, tone?: 'warden' | 'static' | 'zip') {
+      const l = script.dialogues[id]?.[at]; if (!l) throw Error(`story ${script.id}: no line ${id}.${at}`);
+      if (g.bark) g.bark(l.speaker ?? 'Zip', l.text, sec, tone ? { tone } : {}); else g.say(l.text, [], { speaker: l.speaker });
     },
     thought(id: string) { const t = script.thoughts[id]; if (!t) throw Error(`story ${script.id}: no thought ${id}`); return t; },
     think(id: string) { const t = run.thought(id); g.think(t.text, t.who); },

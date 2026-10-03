@@ -19,22 +19,25 @@ await segment('title', async () => {
   check('menu reads "Start training run"', await page.locator('.title-menu .primary', { hasText: 'Start training run' }).isVisible());
   await shot('menu');
   await page.locator('.title-menu .primary').click();
-  check('story starts after the title', await waitFor(() => page.locator('.story-card button', { hasText: 'Play' }).isVisible(), 20000));
+  check('story starts after the title (cold open on Mira)', await waitFor(() => page.evaluate(() => (window.__vlStory?.debug?.opening ?? -1) >= 0 || window.__vlStory?.debug?.beat === 'meet'), 20000));
 });
 
 await segment('meet', async () => {
-  if (!(await page.locator('.story-card button', { hasText: 'Play' }).isVisible().catch(() => false))) { await page.evaluate(() => localStorage.clear()); await open('&title=0'); }
-  await card('Play');
+  if ((await beat()) !== 'meet') { await page.evaluate(() => localStorage.clear()); await open('&title=0'); }
+  await shot('cold-open'); await h.skipOpening();
   check('goal: meet Mira', /Meet Mira/.test(await goal() ?? ''), await goal());
+  check('no card at the bottom in the cold open', !(await page.locator('.story-card:not([hidden])').count()));
   await pose(4.4, -9.4); await act('Talk');
-  await card('Next'); await card('Hang the lantern'); await card('Hum'); await card('Look up');
-  check('attack cutscene starts', await beat() === 'attack', await beat());
+  check('Mira talks in a bubble over her head', await waitFor(() => page.locator('.story-card.bubble').isVisible(), 15000, 300));
+  await shot('mira-bubble');
+  await h.talkMira();
+  check('attack cutscene starts', await h.waitBeat('attack', 10000), await beat());
   await page.locator('.context-act', { hasText: 'Shield' }).waitFor({ state: 'visible', timeout: 120000 }); await page.locator('.context-act').click();
   await shot('attack');
   // the rest of the cutscene is long at software-rendered frame rates: use its Skip button
   await page.waitForTimeout(3000); await page.locator('.story-skip').click(); await page.waitForTimeout(800);
-  await card('Catch the spark', 60000);
-  check('spark beat after the attack', await beat() === 'spark', await beat());
+  check('spark beat after the attack', await h.waitBeat('spark', 30000), await beat());
+  check('no card after the attack (the film says it)', !(await page.locator('.story-card:not([hidden])').count()));
   check('saved at checkpoint "spark"', await save() === 'spark', await save());
 });
 
@@ -44,9 +47,8 @@ await segment('spark', async () => {
     const d = await page.evaluate(() => window.__vlStory.debug.spark);
     await pose(d[0] + (i < 6 ? 1.6 : .25), d[2] + (i < 6 ? .6 : .25), Math.PI); await page.waitForTimeout(1500);
   }
-  check('spark caught', await beat() === 'skiff' || await page.locator('.story-card button', { hasText: 'Beep' }).isVisible(), await beat());
-  await card('Beep boop'); await card('Let');
-  check('saved at checkpoint "skiff"', await save() === 'skiff', await save());
+  check('spark caught', await h.waitBeat('skiff', 10000), await beat());
+  check('saved at checkpoint "skiff"', await waitFor(async () => await save() === 'skiff', 8000, 250), await save());
   check('goal: find the skiff\'s words', /skiff's words/.test(await goal() ?? ''), await goal());
 });
 
@@ -56,6 +58,9 @@ await segment('skiff', async () => {
   const sim = s => page.evaluate(s => window.__arcade.simulate(s), s);
   const carried = () => page.evaluate(() => window.__vlStory.debug.carried);
   check('goal asks for the skiff\'s words', /skiff's words \(0 of 3\)/.test(await goal() ?? ''), await goal());
+  await pose(-6.2, -9.6, 0); await page.waitForTimeout(800);
+  check('the first word wears a "Tap" prompt (tutorial in the world)', await waitFor(() => page.evaluate(() => !!document.querySelector('.tap-prompt') && window.__vlGuide.overlay.has('prompt-absorb')), 15000, 300));
+  await shot('tap-prompt');
   for (const [x, z, w] of [[-6.2, -9.6, 'rise'], [-3.6, -9.6, 'sink'], [6.0, -9.6, 'toward'], [2.4, -10.3, 'Skiff']]) {
     await pose(x, z, 0); await act('Absorb'); await sim(1.2);
     check(`absorbed "${w}"`, (await carried()).includes(w), JSON.stringify(await carried()));
@@ -78,7 +83,7 @@ await segment('skiff', async () => {
   await sim(3.5); await chip('Blossom').click(); await page.locator('.holo-cast').click(); await sim(14);
   check('stars after waking the skiff', await waitFor(() => page.locator('.star-row').isVisible(), 60000));
   await shot('stars');
-  await page.locator('.story-card button.primary').click(); await page.waitForTimeout(600);
+  await h.stars();
   const ev = (await learning()).filter(e => e.activity === 'wake-skiff');
   check('loop choices logged', ev.length === 2 && ev[0].choice === 'original-only' && !ev[0].correct && ev[1].correct, JSON.stringify(ev.map(e => [e.choice, e.correct, e.first])));
   check('only the first loop choice counts as first try', ev.filter(e => e.first).length === 1, ev.map(e => e.first).join(','));
@@ -90,7 +95,7 @@ await segment('flight', async () => {
   check('flight running', await waitFor(async () => (await beat()) === 'fly', 30000), await beat());
   await page.waitForTimeout(3000); await shot('flying');
   check('lands on the Blossom Isle', await waitFor(() => page.locator('.star-row').isVisible(), 300000, 1000));
-  await page.locator('.story-card button.primary').click(); await page.waitForTimeout(600);
+  await h.stars();
   check('saved at checkpoint "land"', await save() === 'land', await save());
 });
 
@@ -110,7 +115,7 @@ await segment('isle', async () => {
   await card('Yes'); await page.waitForTimeout(1200);
   check('gate stars', await page.locator('.star-row').isVisible());
   await shot('gate-open');
-  await page.locator('.story-card button.primary').click(); await page.waitForTimeout(600);
+  await h.stars();
   check('saved at checkpoint "gate-open"', await save() === 'gate-open', await save());
   check('goal: call Mira', /Call Mira/.test(await goal() ?? ''), await goal());
 });
@@ -130,7 +135,7 @@ await segment('relay', async () => {
   await card('coming'); await page.waitForTimeout(1200);
   check('relay stars', await page.locator('.star-row').isVisible());
   await shot('relay-stars');
-  await page.locator('.story-card button.primary').click(); await page.waitForTimeout(800);
+  await h.stars();
   check('Stop 2 begins: board the skiff to Loom Isle', /Board the skiff to Loom Isle/.test(await goal() ?? ''), await goal());
   const ev = (await learning()).filter(e => e.activity === 'relay-contact');
   check('relay choices logged with first-try flags', ev.length >= 2 && ev[0].first === true, JSON.stringify(ev.map(e => [e.decision, e.choice, e.first])));
@@ -165,7 +170,7 @@ await segment('loom', async () => {
   await shot('loom-stars');
   const ev = (await learning()).filter(e => e.activity === 'loom-fit');
   check('loom decisions logged, first tries kept apart', ev.length === 3 && ev[0].decision === 'predict-pieces' && ev[0].first && !ev[0].correct && ev[1].first && !ev[1].correct && !ev[2].first && ev[2].correct, JSON.stringify(ev.map(e => [e.decision, e.choice, e.correct, e.first])));
-  await page.locator('.story-card button.primary').click(); await page.waitForTimeout(800);
+  await h.stars();
   await card('What is it'); await card('Thanks');
   check('end of Stop 2 reached', /Stop 2 for now/.test(await goal() ?? ''), await goal());
 });

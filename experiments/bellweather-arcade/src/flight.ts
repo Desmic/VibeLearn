@@ -12,6 +12,8 @@ import { sfx } from './sfx';
 interface Opts {
   guide: Guide; input: () => { x: number; y: number };
   ride: (p: T.Vector3 | null, yaw: number) => void;
+  /** a ring flown through (n so far) or missed: the story's commentary */
+  onRing?: (n: number) => void; onMiss?: (n: number) => void;
 }
 export interface FlightResult { rings: number; total: number; spotted: number }
 
@@ -94,8 +96,8 @@ export function buildFlight(scene: T.Scene, o: Opts) {
       // rings: hit, or passed by
       if (next < rings.length) {
         const r = rings[next], d = pos.distanceTo(r.p), ahead = tmp.copy(pos).sub(r.p).dot(r.dir);
-        if (d < 2.6) { r.state = 'hit'; r.m.material = doneMat; result.rings++; boost = 1.6; sfx.catch(); g.toast(`Ring ${result.rings}! Whoosh!`, 900); g.thinkOnce('rings', 'Flying through rings? Somebody\'s played games before.'); if (result.rings >= 4) g.thinkOnce('warden-flight', 'I can hear you thinking up there, courier.', 'warden'); next++; }
-        else if (ahead > 0 && d < 16) { r.state = 'miss'; r.m.material = missMat; next++; }
+        if (d < 2.6) { r.state = 'hit'; r.m.material = doneMat; result.rings++; boost = 1.6; sfx.catch(); g.toast(`Ring ${result.rings}!`, 900); o.onRing?.(result.rings); next++; }
+        else if (ahead > 0 && d < 16) { r.state = 'miss'; r.m.material = missMat; next++; o.onMiss?.(next - result.rings); }
         if (next < rings.length) g.setBeacon(LANE[next].clone().setY(LANE[next].y - 1.2), true); else g.setBeacon(landing, true);
       } else if (Math.hypot(pos.x - landing.x, pos.z - landing.z) < 14) { landT = 0; sfx.chime(); g.toast('Blossom Isle!', 1400); }
       // drones: flying through a searchlight gets you spotted (a jolt, not a fail)

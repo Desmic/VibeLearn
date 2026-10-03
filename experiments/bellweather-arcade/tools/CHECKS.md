@@ -58,3 +58,12 @@ puzzle pieces. Any game built on this harness should expose the same hooks.
 
 - 1 Oct: "Restart" in the pause menu dropped Zip into the hidden town while he was on
   Blossom Isle. It now returns him to the island landing, and does nothing mid-flight.
+- 3 Oct: the off-screen goal arrow was never added to the page (a comment swallowed the
+  call). It shows now.
+
+## Look-dev for cutscenes
+
+`node tools/_cine.mjs` plays the cold open and the attack and saves a screenshot about every
+second of game time (`/tmp/cine`). Use it after changing a shot list; judge timing and feel
+on a phone. In headless runs the game draws about one frame a second, so a check that waits
+for something drawn by the world overlay (a bubble, a prompt) must wait several seconds.
