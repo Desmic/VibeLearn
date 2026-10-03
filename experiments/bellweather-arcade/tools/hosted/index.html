@@ -1,0 +1,32 @@
+<title>Bellweather Painted Study</title>
+<link rel="stylesheet" href="style.css">
+<style>
+:root{--ink:#fff6e6;--pill:#163b60d9;--edge:#ffdfab88;--on:#df9b64;--ground:#0e2e51}
+body{background:var(--ground);color:var(--ink)}
+.variant{position:absolute;right:12px;top:74px;z-index:5;display:flex;gap:2px;padding:3px;border:1px solid var(--edge);border-radius:20px;background:var(--pill);backdrop-filter:blur(8px)}
+.variant a{color:var(--ink);text-decoration:none;font-size:12px;padding:5px 12px;border-radius:16px;white-space:nowrap}
+.variant a[aria-current="true"]{background:var(--on);color:#18395e}
+.variant a:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+@media(max-width:600px){.variant{top:66px;right:10px}.variant a{padding:4px 9px;font-size:11px}}
+</style>
+<script>
+// Variant comes from a bare #token: #painted (default), #before, #nopost, #nobackdrop.
+(function(){
+  var base='study=facade&portal=crafted&architecture=atelier&finish=daylight&palette=ceramic&form=swept-clean&character=courier&look=sunlit&setting=city&districts=terraces&surface=illustrated';
+  // #painted&quality=high: extra settings ride in the hash so they survive the
+  // reload inside the claude.ai frame, where storage may not persist.
+  var parts=(location.hash||'#painted').slice(1).split('&'),v=parts[0];
+  var extra={painted:'&render=painted',before:'',nopost:'&render=painted&paintpost=0',nobackdrop:'&render=painted&backdrop=0'}[v];
+  if(extra===undefined){v='painted';extra='&render=painted'}
+  var keep=parts.slice(1).filter(function(p){return /^(quality|stats|auto|adaptive|beat|title|mech|bench|story)=[a-z0-9-]+$/.test(p)});
+  window.__vlSearch='?'+base+extra+(keep.length?'&'+keep.join('&'):''); window.__vlVariant=v;
+  window.addEventListener('hashchange',function(){location.reload()});
+  function show(msg){var el=document.getElementById('loading');if(el){el.hidden=false;el.style.padding='24px';el.style.textAlign='center';el.textContent='The study could not start: '+msg}}
+  window.addEventListener('error',function(e){show((e.message||'script error')+(e.filename?' ('+e.filename.split('/').pop()+':'+e.lineno+')':''))});
+  window.addEventListener('unhandledrejection',function(e){var r=e.reason;show(r&&r.message?r.message:String(r))});
+  setTimeout(function(){var el=document.getElementById('loading');if(el&&!el.hidden&&/Opening/.test(el.textContent))show('still loading after 25 s; a file may be blocked.')},25000);
+})();
+</script>
+<div id="app"><div id="world"></div><div class="brand" aria-hidden="true"><b>BELLWEATHER</b><span>THE GARDEN ARCADE</span></div><div class="hint" id="hint">Walk the garden path · drag to look</div><button id="pause" class="round top" aria-label="Pause">Ⅱ</button><div id="place" class="place" aria-live="polite">Garden arcade</div><div id="controls" aria-label="Walking controls"><div class="pad"><button data-dir="forward" aria-label="Walk forward">↑</button><div><button data-dir="left" aria-label="Walk left">←</button><button data-dir="back" aria-label="Walk back">↓</button><button data-dir="right" aria-label="Walk right">→</button></div></div><button id="route" class="route">Walk to overlook <span>↗</span></button></div><div id="menu" class="menu" hidden><div class="menu-card"><h1>Garden arcade</h1><p>A quiet walk through Bellweather.</p><button id="resume">Continue walking</button><button id="restart">Return to arrival</button><button id="recenter">Recenter camera</button><label><input type="checkbox" id="reduced"> Reduce motion</label></div></div><div id="loading">Opening the garden…</div><div class="sr" id="announcer" aria-live="polite"></div></div><nav class="variant" aria-label="Rendering variant"><a href="#painted" id="v-painted">Painted</a><a href="#before" id="v-before">Before</a></nav>
+<script>document.getElementById('v-'+(window.__vlVariant==='before'?'before':'painted')).setAttribute('aria-current','true');</script>
+<script type="module" src="./src/main.js"></script>

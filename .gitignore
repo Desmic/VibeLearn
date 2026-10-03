@@ -33,3 +33,6 @@ node_modules
 
 # voice masters (WAV from tools/voice.mjs; the game uses the MP3s in public/voice)
 /experiments/bellweather-arcade/authoring/voice/
+# game build outputs (tools/build.sh, tools/build-hosted.py)
+/experiments/bellweather-arcade/out/
+/experiments/bellweather-arcade/hosted/

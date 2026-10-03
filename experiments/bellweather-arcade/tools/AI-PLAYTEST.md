@@ -11,7 +11,7 @@ can guess without learning, and moments where a new player gets stuck.
 2. Give an agent (a Claude subagent today; a model API later) the API below and a persona.
    It observes, looks at the screenshot, acts, and writes notes (`confusion`, `bug`,
    `exploit`, `delight`, `idea`) as it goes.
-3. Before ending, the agent answers the kid test as two separate questions (`{"type":"verdict","look":"yes|no|unsure","keepPlaying":"yes|no|unsure","why":"…"}`): would a young player stop and look? Would they understand it and want to keep playing? (Desmic's test, 17 Sep: a game can be pretty and still lose them.)
+3. Before ending, the agent answers the first-look test as two separate questions (`{"type":"verdict","look":"yes|no|unsure","keepPlaying":"yes|no|unsure","why":"…"}`): would a new player stop and look? Would they understand it and want to keep playing? (Desmic's test, 17 Sep: a game can be pretty and still lose them. It was first framed for children; the audience is now 18+.)
 4. `{"type":"end"}` writes `report.md` next to the screenshots and `playlog.jsonl`.
 
 API: `GET /observe` (screenshot path, goal, card, buttons, toasts, thoughts) and `POST /act`
@@ -24,8 +24,8 @@ findings as "check with a person", not as facts.
 
 ## Personas used
 
-- **Newcomer**: a curious 12-year-old who has never seen the game; tries the obvious thing
-  first; notes every moment of doubt.
+- **Newcomer**: an adult (the audience is 18+, decided 3 Oct) who has never seen the game and
+  plays games casually; tries the obvious thing first; notes every moment of doubt.
 - **Loophole hunter**: plays once to judge the lesson, then tries to get the reward without
   understanding: elimination, memorising positions, reloading after a wrong answer, mashing,
   leaving mid-puzzle, falling off.

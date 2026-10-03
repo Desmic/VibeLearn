@@ -16,7 +16,7 @@
 //   {type:'key', key}              press a key (e.g. Escape)
 //   {type:'reload'}                reload the page (as a player might)
 //   {type:'note', text, kind}      write to the play log: kind confusion|bug|exploit|delight|idea
-//   {type:'verdict', look, keepPlaying, why}   the kid test (two separate answers, yes|no|unsure):
+//   {type:'verdict', look, keepPlaying, why}   the first-look test (two separate answers, yes|no|unsure):
 //                                  would a young player stop and look? would they understand and want to keep playing?
 //   {type:'end'}                   finish: writes the report and stops
 import http from 'node:http';
@@ -89,7 +89,7 @@ function report() {
   const errs = h.errors.map(e => `- ${e.msg}`).join('\n') || '- none';
   const by = k => notes.filter(n => n.kind === k).map(n => `- (step ${n.step}) ${n.text}`).join('\n') || '- none';
   const kid = verdict ? `- Would a young player stop and look? **${verdict.look}**\n- Would they understand it and want to keep playing? **${verdict.keepPlaying}**\n- Why: ${verdict.why ?? ''}` : '- not given (send {type:\'verdict\'} before ending)';
-  const md = `# AI play-test\n\nSteps: ${step}. Screenshots and the full log (playlog.jsonl) are in this folder.\n\n## The kid test\n${kid}\n\n## Confusing moments\n${by('confusion')}\n\n## Bugs\n${by('bug')}\n\n## Loopholes and exploits\n${by('exploit')}\n\n## What worked\n${by('delight')}\n\n## Ideas\n${by('idea')}\n\n## Other notes\n${by('note')}\n\n## Page errors\n${errs}\n`;
+  const md = `# AI play-test\n\nSteps: ${step}. Screenshots and the full log (playlog.jsonl) are in this folder.\n\n## The first-look test\n${kid}\n\n## Confusing moments\n${by('confusion')}\n\n## Bugs\n${by('bug')}\n\n## Loopholes and exploits\n${by('exploit')}\n\n## What worked\n${by('delight')}\n\n## Ideas\n${by('idea')}\n\n## Other notes\n${by('note')}\n\n## Page errors\n${errs}\n`;
   writeFileSync(`${OUT}/report.md`, md); return md;
 }
 

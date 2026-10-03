@@ -8,7 +8,9 @@ Desmic confirmed on 3 Oct 2026:
   teaches how language models work. It is the official direction. PlayCanvas and the earlier Level 1
   ("Relay Rescue", message machine, Moon gate, limbo-prison opening) are **historical**. Docs that
   describe them carry a "Historical" note at the top; read them for ideas, not as instructions.
-- **Start here:** `docs/PLAY-DESIGN-20261003.md` (why and how to play; the in-world UI rules from the F15 play-test),
+- **New to the project? Read `docs/START-HERE.md` first** (what to read, where things are, how to build,
+  check and ship, agent environments, mistakes not to repeat). How to play-test: `docs/PLAYTEST-METHODS.md`.
+- **Then:** `docs/PLAY-DESIGN-20261003.md` (why and how to play; the in-world UI rules from the F15 play-test),
   `docs/GAME-REDESIGN-ECHO.md` (the game's core mechanic and the stop-by-stop plan),
   `docs/DOCS-AUDIT-20261003.md` (what is open and what was decided), `experiments/bellweather-arcade/tools/CHECKS.md`
   (how to check a build), `experiments/bellweather-arcade/tools/AI-PLAYTEST.md` (AI play-testers),

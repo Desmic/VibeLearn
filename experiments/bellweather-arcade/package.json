@@ -8,6 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview --host 127.0.0.1 --port 8062 --strictPort",
+    "build:out": "bash tools/build.sh",
+    "build:hosted": "python3 tools/build-hosted.py",
     "check": "tsc --noEmit -p tsconfig.build.json && node tools/storycheck.mjs --root out && node tools/assetcheck.mjs",
     "check:parity": "node tools/rules-parity.mjs",
     "check:play": "node tools/flowcheck.mjs && node tools/breaker.mjs"
