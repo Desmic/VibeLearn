@@ -46,7 +46,7 @@ export interface ScriptGuide {
   setBeacon(at: T.Vector3 | null, arrowOnly?: boolean): void;
   stars(title: string, rows: [boolean, string][], then: () => void): void;
   /** a line said in passing over the speaker's head (no buttons; play goes on) */
-  bark?(who: string, text: string, sec?: number, opts?: { tone?: 'warden' | 'static' | 'zip' }): void;
+  bark?(who: string, text: string, sec?: number, opts?: { tone?: 'warden' | 'static' | 'zip' }): number | void;
 }
 
 const fill = (s: string, v: Record<string, string | number> = {}) => s.replace(/\{(\w+)\}/g, (_, k) => String(v[k] ?? `{${k}}`));
@@ -82,9 +82,11 @@ export function createScriptRunner(script: StoryScript, g: ScriptGuide, o: {
       g.say(line.text, (line.choices ?? []).map(c => ({ label: c.label, kind: c.kind, advance: c.advance ?? ((line.choices ?? []).length === 1 && c.label === 'Next'), act: () => { if (!c.next) g.close(); if (c.on) handlers[c.on]?.(); if (c.next) run.dialogue(id, handlers, c.next); } })), { speaker: line.speaker });
     },
     /** say one line in passing, over its speaker's head (cutscenes, reactions); falls back to a caption */
-    bark(id: string, at = 'start', sec?: number, tone?: 'warden' | 'static' | 'zip') {
+    /** returns how long the line is voiced for (0 when silent), so a cutscene can wait for it */
+    bark(id: string, at = 'start', sec?: number, tone?: 'warden' | 'static' | 'zip'): number {
       const l = script.dialogues[id]?.[at]; if (!l) throw Error(`story ${script.id}: no line ${id}.${at}`);
-      if (g.bark) g.bark(l.speaker ?? 'Zip', l.text, sec, tone ? { tone } : {}); else g.say(l.text, [], { speaker: l.speaker });
+      if (g.bark) return g.bark(l.speaker ?? 'Zip', l.text, sec, tone ? { tone } : {}) || 0;
+      g.say(l.text, [], { speaker: l.speaker }); return 0;
     },
     thought(id: string) { const t = script.thoughts[id]; if (!t) throw Error(`story ${script.id}: no thought ${id}`); return t; },
     think(id: string) { const t = run.thought(id); g.think(t.text, t.who); },

@@ -9,6 +9,8 @@ import { audio } from '../sfx';
 // characters their sound (a robot whose voice is coming back, a villain, a
 // radio, a voice inside your head).
 
+/** the Warden is played a touch slow: deeper, without making long lines drag */
+const WARDEN_RATE = .94;
 export type VoiceFx = 'none' | 'robot' | 'warden' | 'stream' | 'radio';
 /** `voice`: a TTS voice name; `style`: the actor's direction for every line ("cold, amused menace") */
 export interface CastMember { voice: string; style?: string; fx?: VoiceFx; gain?: number }
@@ -55,6 +57,8 @@ export function createVoice(cast: VoiceCast, opts: { base: string; spoken?: Reco
     const c = cast[speaker]; if (!c) return null;
     const shown = cleanText(text), k = clipKey(c, cleanText(opts.spoken?.[shown] ?? shown), opts.direction?.[shown]); return clips[k] ? k : null;
   };
+  // one voice at a time per speaker (a new bark from the Warden cuts his last one short)
+  const bySpeaker = new Map<string, { stop: () => void }>();
   let line: { stop: () => void } | null = null, crushCurves = new Map<number, Float32Array<ArrayBuffer>>();
 
   const crush = (levels: number) => {
@@ -66,6 +70,7 @@ export function createVoice(cast: VoiceCast, opts: { base: string; spoken?: Reco
   async function play(speaker: string, text: string, o: PlayOpts = {}) {
     const key = keyOf(speaker, text); if (!key) return null;
     if ((o.channel ?? 'line') === 'line') { line?.stop(); line = null; }
+    bySpeaker.get(speaker)?.stop();
     const a = audio(); if (!a) return null;
     const buf = await decode(key); if (!buf) return null;
     const { ctx, master } = a, c = cast[speaker], fx = o.fx ?? c.fx ?? 'none', t0 = ctx.currentTime + .02;
@@ -96,7 +101,7 @@ export function createVoice(cast: VoiceCast, opts: { base: string; spoken?: Reco
       }
     } else if (fx === 'warden' || fx === 'stream') {
       // deeper and slower, with a cold echo; inside Zip's head (the Stream) it is thinner and further away
-      src.playbackRate.value = .88;
+      src.playbackRate.value = WARDEN_RATE;
       const echo = ctx.createDelay(1), fb = ctx.createGain(), wet = ctx.createGain();
       echo.delayTime.value = fx === 'stream' ? .19 : .11; fb.gain.value = fx === 'stream' ? .42 : .25; wet.gain.value = fx === 'stream' ? .5 : .28;
       echo.connect(fb); fb.connect(echo); echo.connect(wet); wet.connect(out);
@@ -113,6 +118,7 @@ export function createVoice(cast: VoiceCast, opts: { base: string; spoken?: Reco
     const handle = { stop: () => { out.gain.setTargetAtTime(0, ctx.currentTime, .03); setTimeout(stopAll, 120); }, duration: buf.duration / src.playbackRate.value };
     src.onended = () => { for (const x of extra) try { x.stop(); } catch { /* */ } if (line === handle) line = null; };
     if ((o.channel ?? 'line') === 'line') line = handle;
+    bySpeaker.set(speaker, handle);
     return handle;
   }
 
@@ -121,7 +127,7 @@ export function createVoice(cast: VoiceCast, opts: { base: string; spoken?: Reco
     /** a clip exists for this speaker and line */
     has: (speaker: string, text: string) => !!keyOf(speaker, text),
     /** seconds the clip lasts as played (0 if none) */
-    duration(speaker: string, text: string) { const k = keyOf(speaker, text); if (!k) return 0; const f = cast[speaker].fx; return clips[k].dur / (f === 'warden' || f === 'stream' ? .88 : f === 'robot' ? 1.04 : 1); },
+    duration(speaker: string, text: string) { const k = keyOf(speaker, text); if (!k) return 0; const f = cast[speaker].fx; return clips[k].dur / (f === 'warden' || f === 'stream' ? WARDEN_RATE : f === 'robot' ? 1.04 : 1); },
     /** start downloading every clip (small files); decoding waits until a line plays */
     preloadAll() { void ready.then(() => { let i = 0; for (const k of Object.keys(clips)) setTimeout(() => void fetchClip(k), 40 * i++); }); },
     play,

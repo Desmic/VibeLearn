@@ -330,13 +330,16 @@ export function buildStory(scene: T.Scene, o: Opts) {
   let shielded = false, dash = -1; const dashFrom = new T.Vector3(), dashTo = new T.Vector3();
   const shield = () => { if (shielded) return; shielded = true; dash = 0; dashFrom.copy(o.zip()); dashTo.copy(miraAt).lerp(dashFrom, .45); sfx.whoosh(); action(null); };
   const startAttack = () => {
-    chosen.clear();
+    chosen.clear(); cutHold = 0;
     g.close(); g.hush(['sim', 'npc', 'npc2', 'idle1', 'idle2']); talking = false; enter('attack'); cut = 0; skip.hidden = false; dimTo = 1; action(null);
     o.host.classList.add('cutscene'); ship.visible = true; ship.position.copy(far);
   };
   // The cold open: Mira calls from the outlook; the camera shows where she is, then hands over.
-  let opening = -1;
-  const startOpening = () => { chosen.clear(); opening = 0; o.host.classList.add('cutscene'); skip.hidden = false; enter('meet'); };
+  let opening = -1, cutHold = 0;
+  // beats the attack film may hold at while a voiced line finishes (beam, the Warden's lines, the bolt, the static, the end)
+  const CUT_GATES = [4.45, 6.65, 7.35, 11.35, 13.35];
+  const voiced = (sec: number) => { if (sec > 0) cutHold = Math.max(cutHold, t + sec - .25); };
+  const startOpening = () => { chosen.clear(); cutHold = 0; opening = 0; o.host.classList.add('cutscene'); skip.hidden = false; enter('meet'); };
   const endOpening = () => { if (opening < 0) return; opening = -1; shot = null; o.host.classList.remove('cutscene'); skip.hidden = true; g.startControlHints(); };
   // A fixed shot shouldn't open on a post or trunk filling the edge of the frame. Feel along
   // both frame edges; if something solid stands close to the lens, step sideways away from
@@ -464,9 +467,9 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (opening >= 0) {
         // cold open: Mira at the outlook, calling; then the camera swings back to Zip
         const c0 = opening; opening += dt; const c = opening;
-        if (c0 < .5 && c >= .5) story.bark('call', 'start', 2.6);
+        if (c0 < .5 && c >= .5) voiced(story.bark('call', 'start', 2.6));
         frame(miraAt, [[-1.3, 1.45, 3.3], [.8, 1.45, 3.4], [-2.6, 1.5, 2.2]], tmp3.copy(miraAt).add(tmp2.set(-.6, 1.55, -1.2)), 100, 4, 3.2);
-        if (c >= 3.4) endOpening();
+        if (c >= 3.4 && t >= cutHold) endOpening();
         return;
       }
       if (cut >= 0) {
@@ -475,7 +478,10 @@ export function buildStory(scene: T.Scene, o: Opts) {
         //  (slow motion: Shield her!)  ·  4 the bolt tears Zip's voice out  ·  5 the ship leaves over
         //  the town, toward the Blossom Isle  ·  6 Zip tries to shout; only static.
         const slow = !shielded && cut > 4.6 && cut < 6.0;
-        const c0 = cut; cut += dt * (slow ? .35 : 1); const c = cut;
+        // a voiced line holds the film at the next beat until it has been said
+        const c0 = cut; let next = cut + dt * (slow ? .35 : 1);
+        if (t < cutHold) for (const gate of CUT_GATES) if (c0 < gate && next >= gate) { next = gate - 1e-4; break; }
+        cut = next; const c = cut;
         const zH = zHead.copy(z).setY(z.y + 1.1);
         // the ship: down out of the clouds, hover, then up and away over the town
         if (c < 3.2) ship.position.lerpVectors(far, hover, T.MathUtils.smoothstep(c, 0, 3.2));
@@ -511,17 +517,17 @@ export function buildStory(scene: T.Scene, o: Opts) {
         if (c0 < .4 && c >= .4) { sfx.rumble(.6); const l = life(); if (l) l.alarm = ship.position; }
         if (c0 < 1.1 && c >= 1.1) story.bark('alarm', 'start', 2);
         if (c0 < 1.9 && c >= 1.9) { bells?.nudge(.9); skiff.gust(1); shake = Math.max(shake, .18); sfx.rumble(.8); story.bark('alarm', 'inside', 1.8); }
-        if (c0 < 2.6 && c >= 2.6) { sfx.hum(2); shake = Math.max(shake, .12); story.bark('warden', 'start', 2.4, 'warden'); }
+        if (c0 < 2.6 && c >= 2.6) { sfx.hum(2); shake = Math.max(shake, .12); voiced(story.bark('warden', 'start', 2.4, 'warden')); }
         if (c0 < 4.5 && c >= 4.5) { sfx.whoosh(); sfx.rumble(.7); }
         if (c0 < 5.0 && c >= 5.0) story.bark('mira_cry', 'start', 1.6);
-        if (shielded && c0 < 6.1 && c >= 6.1) story.bark('warden', 'shielded', 1.8, 'warden');
-        if (c0 < 6.7 && c >= 6.7) story.bark('warden', 'take', 1.9, 'warden');
+        if (shielded && c0 < 6.1 && c >= 6.1) voiced(story.bark('warden', 'shielded', 1.8, 'warden'));
+        if (c0 < 6.7 && c >= 6.7) voiced(story.bark('warden', 'take', 1.9, 'warden'));
         if (c0 < 7.4 && c >= 7.4) { sparkFrom.copy(zH); spark.visible = true; sfx.zap(); sfx.static(); sfx.rumble(1); shake = .55; bells?.nudge(1.3); skiff.gust(1.6); sparkFx.burst(zH, 26, 2.2, HOLO.made); }
         if (c > 7.4 && c < 9.4) { const k = (c - 7.4) / 2; spark.position.lerpVectors(sparkFrom, SPARK_AT, k); spark.position.y = T.MathUtils.lerp(1.2, .6, k) + Math.sin(k * Math.PI) * 4; }
         if (c0 < 9.4 && c >= 9.4) bells?.nudge(.8);   // the spark lands in the bell garden: every bell rings
-        if (c0 < 8.5 && c >= 8.5) story.bark('warden', 'leave', 2.6, 'warden');
+        if (c0 < 8.5 && c >= 8.5) voiced(story.bark('warden', 'leave', 2.6, 'warden'));
         if (c0 < 9.6 && c >= 9.6) story.thinkOnce('mario');
-        if (c0 < 11.4 && c >= 11.4) { sfx.static(); story.bark('static', 'start', 1.6, 'static'); }
+        if (c0 < 11.4 && c >= 11.4) { sfx.static(); voiced(story.bark('static', 'start', 1.6, 'static')); }
         shake *= Math.exp(-dt * 2.6);
         // the shots
         const mid = tmp.set((z.x + miraAt.x) / 2, 0, (z.z + miraAt.z) / 2);

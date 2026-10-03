@@ -19,6 +19,11 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync, readdirSy
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 
+// Node's fetch ignores HTTPS_PROXY unless asked; behind a proxy (a sandbox, an office) run again with it on
+if ((process.env.https_proxy || process.env.HTTPS_PROXY) && !process.env.NODE_USE_ENV_PROXY) {
+  const r = spawnSync(process.execPath, ['--no-warnings', ...process.argv.slice(1)], { stdio: 'inherit', env: { ...process.env, NODE_USE_ENV_PROXY: '1' } });
+  process.exit(r.status ?? 1);
+}
 const DIR = 'public/voice', MASTERS = 'authoring/voice';
 const MODEL = process.env.VOICE_MODEL || 'gemini-3.8-flash-tts';
 const URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;

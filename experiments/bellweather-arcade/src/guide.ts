@@ -113,15 +113,16 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
     /** name a thing that can speak or be pointed at ('Mira', 'Warden', 'Gate', …) */
     anchor(name: string, at: (() => T.Vector3 | null) | null) { if (at) anchors.set(name, at); else anchors.delete(name); },
     /** a line said in passing over a speaker's head: no buttons, play carries on */
-    bark(who: string, text: string, sec = 0, opts: { tone?: 'warden' | 'static' | 'zip' } = {}) {
+    bark(who: string, text: string, sec = 0, opts: { tone?: 'warden' | 'static' | 'zip' } = {}): number {
       const at = who === 'Zip' ? () => thinker ? head(thinker(), zipHead, 1.75) : null : anchors.get(who);
-      if (!at) { api.toast(text, Math.max(1200, (sec || 2.4 + text.length * .05) * 1000)); return; }
+      if (!at) { api.toast(text, Math.max(1200, (sec || 2.4 + text.length * .05) * 1000)); return 0; }
       const b = barks.find(x => x.who === who) ?? barks.find(x => x.t <= 0) ?? barks.reduce((a, x) => x.t < a.t ? x : a);
       b.who = who; b.t = sec || 2.2 + text.length * .055; b.el.hidden = false; b.el.className = 'speech bark' + (opts.tone ? ' ' + opts.tone : '');
       b.el.innerHTML = ''; if (who !== 'Zip') { const n = document.createElement('b'); n.className = 'who'; n.textContent = who; b.el.appendChild(n); }
       b.el.appendChild(document.createTextNode(text));
       overlay.pin('bark-' + barks.indexOf(b), b.el, at, { rank: 9, edge: true, lift: 12 });
-      if (voice?.has(who, text)) { void voice.play(who, text, { channel: 'bark', clarity: opts.tone === 'static' ? 0 : zipClarity, ...placeVoice(at()) }); b.t = Math.max(b.t, voice.duration(who, text) + .5); }
+      if (voice?.has(who, text)) { void voice.play(who, text, { channel: 'bark', clarity: opts.tone === 'static' ? 0 : zipClarity, ...placeVoice(at()) }); b.t = Math.max(b.t, voice.duration(who, text) + .5); return voice.duration(who, text); }
+      return 0;
     },
     get barking() { return barks.some(b => b.t > 0); },
     /** give the guide a voice: lines with a recorded clip are spoken */

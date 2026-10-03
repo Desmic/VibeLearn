@@ -1,4 +1,62 @@
 {
- "_about": "Voiced lines (tools/voice.mjs). key → clip file and seconds. Empty until the clips are made.",
- "clips": {}
+ "_about": "Voiced lines (tools/voice.mjs). key → clip file and seconds.",
+ "model": "gemini-3.8-flash-tts",
+ "made": "2026-10-03T03:40:23.969Z",
+ "clips": {
+  "14631539": {
+   "file": "14631539.mp3",
+   "dur": 6.17,
+   "speaker": "Warden"
+  },
+  "485f5a7f": {
+   "file": "485f5a7f.mp3",
+   "dur": 4.66,
+   "speaker": "Mira"
+  },
+  "8cf886ae": {
+   "file": "8cf886ae.mp3",
+   "dur": 4.01,
+   "speaker": "Mira"
+  },
+  "ac866381": {
+   "file": "ac866381.mp3",
+   "dur": 3.55,
+   "speaker": "Mira"
+  },
+  "db87f3e8": {
+   "file": "db87f3e8.mp3",
+   "dur": 3.05,
+   "speaker": "Mira"
+  },
+  "127771f0": {
+   "file": "127771f0.mp3",
+   "dur": 4.82,
+   "speaker": "Mira"
+  },
+  "37c1d4f1": {
+   "file": "37c1d4f1.mp3",
+   "dur": 8.35,
+   "speaker": "Warden"
+  },
+  "afe07781": {
+   "file": "afe07781.mp3",
+   "dur": 5.3,
+   "speaker": "Warden"
+  },
+  "136cbeb7": {
+   "file": "136cbeb7.mp3",
+   "dur": 2.66,
+   "speaker": "Zip"
+  },
+  "dc0434c2": {
+   "file": "dc0434c2.mp3",
+   "dur": 1.25,
+   "speaker": "Zip"
+  },
+  "b846e35e": {
+   "file": "b846e35e.mp3",
+   "dur": 8.47,
+   "speaker": "Zip"
+  }
+ }
 }
