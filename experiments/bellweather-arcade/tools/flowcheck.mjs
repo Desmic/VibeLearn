@@ -3,7 +3,9 @@
 // It is a regression net, not a play-test: feel, timing and fun still need a
 // person in a real browser.
 //
-//   node tools/flowcheck.mjs [--base http://localhost:8765] [--out flowcheck] [--only title,meet,...]
+//   node tools/flowcheck.mjs [--input mouse|touch|keyboard] [--base http://localhost:8765] [--out flowcheck] [--only title,meet,...]
+// --input plays as a phone (taps, thumb stick) or a laptop (E, Space, number keys, WASD);
+// tools/playthrough.mjs runs both and puts the screenshots side by side.
 //
 // Writes <out>/report.json, <out>/report.md and screenshots. Exit code 1 when a
 // check fails. Segments: title, meet (Mira + attack), spark, skiff (catch game),
@@ -11,14 +13,46 @@
 import { harness } from './harness.mjs';
 
 const h = await harness({ title: 'Flow check', outDefault: 'flowcheck' });
-const { page, check, open, shot, card, act, pose, save, goal, beat, learning, waitFor, segment, zip } = h;
+const { page, check, press, open, shot, card, act, pose, save, goal, beat, learning, waitFor, segment, zip } = h;
+
+// how the player moves, per device: a thumb stick on a phone (light tilt walks, full tilt jogs),
+// WASD on a laptop (Shift walks). Runs with --input touch or keyboard.
+await segment('controls', async () => {
+  if (h.INPUT === 'mouse') return;
+  await h.fresh('&title=0&story=0'); await page.waitForTimeout(1500);
+  const want = h.INPUT === 'touch' ? 'touch' : 'desktop', mode = await page.evaluate(() => document.documentElement.dataset.input);
+  check(`the game knows it is held as "${want}"`, mode === want, mode);
+  const dist = async move => { const a = await zip(); await move(); const b = await zip(); return Math.hypot(b[0] - a[0], b[2] - a[2]); };
+  const sim = s => page.evaluate(s => window.__arcade.simulate(s), s);
+  if (h.INPUT === 'touch') {
+    check('no arrow buttons on a phone', !(await page.locator('#controls .pad').isVisible()));
+    check('the thumb stick rests faintly in the lower left', await page.locator('.stick-base').isVisible());
+    const run = await dist(() => h.stick([0, -1], 1.5)), walk = await dist(() => h.stick([0, -1], 1.5, 22));
+    check('full tilt jogs', run > 3, run.toFixed(2) + ' m in 1.5 s');
+    check('a light tilt walks, slower', walk > .3 && walk < run * .7, `${walk.toFixed(2)} m vs ${run.toFixed(2)} m`);
+    const side = await dist(() => h.stick([1, 0], 1));
+    check('the stick steers sideways too', side > 1.5, side.toFixed(2));
+    await shot('stick');
+  } else {
+    check('no thumb stick on a laptop', !(await page.locator('.stick-zone').isVisible()));
+    const hold = async (keys, sec) => { for (const k of keys) await page.keyboard.down(k); await sim(sec); for (const k of [...keys].reverse()) await page.keyboard.up(k); };
+    const run = await dist(() => hold(['KeyW'], 1.5)), walk = await dist(() => hold(['Shift', 'KeyW'], 1.5));
+    check('W jogs', run > 3, run.toFixed(2) + ' m in 1.5 s');
+    check('Shift+W walks, slower', walk > .3 && walk < run * .7, `${walk.toFixed(2)} m vs ${run.toFixed(2)} m`);
+    const side = await dist(() => hold(['KeyD'], 1));
+    check('D steps sideways', side > 1.5, side.toFixed(2));
+    await page.keyboard.press('e'); await page.waitForTimeout(300);
+    check('E with nothing to act on does nothing harmful', !(await page.locator('.story-card:not([hidden])').count()));
+    await shot('keyboard');
+  }
+});
 
 await segment('title', async () => {
   await h.fresh();
   check('title screen shows', await page.locator('.title-screen').isVisible());
   check('menu reads "Start training run"', await page.locator('.title-menu .primary', { hasText: 'Start training run' }).isVisible());
   await shot('menu');
-  await page.locator('.title-menu .primary').click();
+  await press(page.locator('.title-menu .primary'));
   check('story starts after the title (cold open on Mira)', await waitFor(() => page.evaluate(() => (window.__vlStory?.debug?.opening ?? -1) >= 0 || window.__vlStory?.debug?.beat === 'meet'), 20000));
 });
 
@@ -31,11 +65,12 @@ await segment('meet', async () => {
   check('Mira talks in a bubble over her head', await waitFor(() => page.locator('.story-card.bubble').isVisible(), 15000, 300));
   await shot('mira-bubble');
   await h.talkMira();
-  check('attack cutscene starts', await h.waitBeat('attack', 10000), await beat());
-  await page.locator('.context-act', { hasText: 'Shield' }).waitFor({ state: 'visible', timeout: 120000 }); await page.locator('.context-act').click();
+  check('attack cutscene starts', await h.until(async () => (await beat()) === 'attack', 20), await beat());
+  await h.until(() => page.locator('.context-act', { hasText: 'Shield' }).isVisible(), 20);
+  await act('Shield', 60000);
   await shot('attack');
   // the rest of the cutscene is long at software-rendered frame rates: use its Skip button
-  await page.waitForTimeout(3000); await page.locator('.story-skip').click(); await page.waitForTimeout(800);
+  await page.waitForTimeout(3000); await press(page.locator('.story-skip')); await page.waitForTimeout(800);
   check('spark beat after the attack', await h.waitBeat('spark', 30000), await beat());
   check('no card after the attack (the film says it)', !(await page.locator('.story-card:not([hidden])').count()));
   check('saved at checkpoint "spark"', await save() === 'spark', await save());
@@ -48,7 +83,7 @@ await segment('spark', async () => {
     await pose(d[0] + (i < 6 ? 1.6 : .25), d[2] + (i < 6 ? .6 : .25), Math.PI); await page.waitForTimeout(1500);
   }
   check('spark caught', await h.waitBeat('skiff', 10000), await beat());
-  check('saved at checkpoint "skiff"', await waitFor(async () => await save() === 'skiff', 8000, 250), await save());
+  check('saved at checkpoint "skiff"', await h.until(async () => await save() === 'skiff', 10), await save());
   check('goal: find the skiff\'s words', /skiff's words/.test(await goal() ?? ''), await goal());
 });
 
@@ -70,17 +105,17 @@ await segment('skiff', async () => {
   check('hologram engine opens', await page.locator('.engine-tray').isVisible());
   const chip = w => page.locator('.holo-chip', { hasText: new RegExp('^' + w + '$') });
   // the decoy first: the skiff hears "sink"
-  await chip('sink').click(); await page.locator('.holo-cast').click(); await sim(3);
+  await press(chip('sink')); await press(page.locator('.holo-cast')); await sim(3);
   check('casting "sink" sinks the skiff', await page.locator('.engine-prompt', { hasText: 'sank' }).isVisible());
-  await sim(3.5); await page.locator('button[data-act="clear"]').click();
-  for (const w of ['Skiff', 'rise', 'toward']) await chip(w).click();
-  await page.locator('.holo-cast').click(); await sim(4.5);
+  await sim(3.5); await press(page.locator('button[data-act="clear"]'));
+  for (const w of ['Skiff', 'rise', 'toward']) await press(chip(w));
+  await press(page.locator('.holo-cast')); await sim(4.5);
   check('the engine says "Blossom" and the loop breaks', await page.locator('.engine-prompt', { hasText: 'is broken' }).isVisible());
   await shot('loop-broken');
   // a wrong first try: cast again from the original words only
-  await page.locator('.holo-cast').click(); await sim(4.5);
+  await press(page.locator('.holo-cast')); await sim(4.5);
   check('same words in, same guess out', await page.locator('.engine-prompt', { hasText: 'again' }).isVisible());
-  await sim(3.5); await chip('Blossom').click(); await page.locator('.holo-cast').click(); await sim(14);
+  await sim(3.5); await press(chip('Blossom')); await press(page.locator('.holo-cast')); await sim(14);
   check('stars after waking the skiff', await waitFor(() => page.locator('.star-row').isVisible(), 60000));
   await shot('stars');
   await h.stars();
@@ -122,16 +157,16 @@ await segment('isle', async () => {
 
 await segment('relay', async () => {
   if (page.url() === 'about:blank') await open('');
-  if (!/Call Mira/.test(await goal() ?? '')) { await page.evaluate(() => localStorage.setItem('bellweather.save.v1', JSON.stringify({ at: 'gate-open', when: Date.now() }))); await open(''); await page.locator('.title-screen button', { hasText: 'Continue' }).click(); await page.waitForTimeout(3500); }
+  if (!/Call Mira/.test(await goal() ?? '')) { await page.evaluate(() => localStorage.setItem('bellweather.save.v1', JSON.stringify({ at: 'gate-open', when: Date.now() }))); await open(''); await press(page.locator('.title-screen button', { hasText: 'Continue' })); await page.waitForTimeout(3500); }
   await pose(0, 43.4); await act('relay');
   check('relay console opens', await page.locator('.relay-console').isVisible());
   check('pinned notes readable on the console', await page.locator('.relay-notes').isVisible());
-  await page.locator('.relay-tick[data-ch="3"]').click(); await page.locator('.relay-console button', { hasText: 'Call' }).click(); await page.waitForTimeout(600);
+  await press(page.locator('.relay-tick[data-ch="3"]')); await press(page.locator('.relay-console button', { hasText: 'Call' })); await page.waitForTimeout(600);
   check('channel 3 is the Warden', /Warden/.test(await page.locator('.relay-read').textContent()));
-  await page.locator('.relay-tick[data-ch="7"]').click(); await page.locator('.relay-console button', { hasText: 'Call' }).click();
+  await press(page.locator('.relay-tick[data-ch="7"]')); await press(page.locator('.relay-console button', { hasText: 'Call' }));
   await page.locator('.relay-console .chip', { hasText: 'Channel' }).waitFor({ timeout: 20000 });
-  for (const w of ['Channel', 'Mira', "it's"]) await page.locator('.relay-console .chip', { hasText: w }).click();
-  await page.locator('.relay-console button', { hasText: 'Send' }).click(); await page.waitForTimeout(600);
+  for (const w of ['Channel', 'Mira', "it's"]) await press(page.locator('.relay-console .chip', { hasText: w }));
+  await press(page.locator('.relay-console button', { hasText: 'Send' })); await page.waitForTimeout(600);
   await card('coming'); await page.waitForTimeout(1200);
   check('relay stars', await page.locator('.star-row').isVisible());
   await shot('relay-stars');
@@ -153,18 +188,18 @@ await segment('loom', async () => {
   await pose(-34, 97.6); await act('Word Loom');
   await card('help'); await card('Show me');
   check('loom console opens', await page.locator('.loom-console').isVisible());
-  for (const w of ['Free', 'the', 'weaver']) { await page.locator('.loom-console .chip', { hasText: new RegExp('^' + w + '$') }).click(); await page.waitForTimeout(300); }
+  for (const w of ['Free', 'the', 'weaver']) { await press(page.locator('.loom-console .chip', { hasText: new RegExp('^' + w + '$') })); await page.waitForTimeout(300); }
   await page.locator('.loom-console button', { hasText: 'Got it' }).waitFor({ timeout: 15000 });
   await shot('loom-rule');
-  await page.locator('.loom-console button', { hasText: 'Got it' }).click(); await page.waitForTimeout(500);
-  await page.locator('.loom-console button', { hasText: /^6$/ }).click(); await page.waitForTimeout(600);
+  await press(page.locator('.loom-console button', { hasText: 'Got it' })); await page.waitForTimeout(500);
+  await press(page.locator('.loom-console button', { hasText: /^6$/ })); await page.waitForTimeout(600);
   check('the loom shows the split and the overflow', await page.locator('.loom-spill').isVisible() && (await page.locator('.loom-piece').count()) === 9, await page.locator('.loom-piece').count());
   await shot('loom-split');
-  await page.locator('.loom-console button', { hasText: 'shorter' }).click(); await page.waitForTimeout(500);
-  await page.locator('.loom-choice', { hasText: 'Unhex' }).click(); await page.waitForTimeout(700);
+  await press(page.locator('.loom-console button', { hasText: 'shorter' })); await page.waitForTimeout(500);
+  await press(page.locator('.loom-choice', { hasText: 'Unhex' })); await page.waitForTimeout(700);
   check('the letter-short call loses the name', /Free <b>who\?<\/b>|Free who\?/.test(await page.locator('.loom-console').innerHTML()));
-  await page.locator('.loom-console button', { hasText: 'other call' }).click(); await page.waitForTimeout(500);
-  await page.locator('.loom-choice', { hasText: 'Please' }).click();
+  await press(page.locator('.loom-console button', { hasText: 'other call' })); await page.waitForTimeout(500);
+  await press(page.locator('.loom-choice', { hasText: 'Please' }));
   await page.locator('.star-row').first().waitFor({ timeout: 20000 });
   check('loom stars', await page.locator('.star-row').first().isVisible());
   await shot('loom-stars');
@@ -180,7 +215,7 @@ await segment('resume', async () => {
   const label = await page.locator('.title-menu .primary').textContent();
   check('title offers Continue with the saved place', /Continue: Loom Isle/.test(label), label);
   check('title offers a new run', await page.locator('.title-menu button', { hasText: 'Start a new training run' }).isVisible());
-  await page.locator('.title-menu .primary').click(); await page.waitForTimeout(3500);
+  await press(page.locator('.title-menu .primary')); await page.waitForTimeout(3500);
   check('continues on Loom Isle', /Loom Isle/.test(await page.locator('#place').textContent()), await page.locator('#place').textContent());
 });
 
@@ -189,7 +224,7 @@ await segment('views', async () => {
   const views = [['', 'hero-vista', [.3, -11.2, 0]], ['', 'looking-back', [1, -8.5, Math.PI]], ['&beat=land', 'isle-gate', [0, 52.5, 0]], ['&beat=land', 'isle-relay', [0, 44, Math.PI]]];
   let at = null;
   for (const [extra, name, p] of views) {
-    if (extra !== at) { await open('&title=0' + extra); at = extra; await page.evaluate(() => document.querySelectorAll('.story-card').forEach(e => e.style.visibility = 'hidden')); await page.waitForTimeout(4000); }
+    if (extra !== at) { await open('&title=0' + extra); at = extra; if (!extra) await h.skipOpening(); await page.evaluate(() => document.querySelectorAll('.story-card').forEach(e => e.style.visibility = 'hidden')); await page.waitForTimeout(4000); }
     await pose(...p); await page.waitForTimeout(1500); await shot(name);
     const s = await page.evaluate(() => window.__arcade.snapshot()); check(`${name}: draws ${s.draws}, triangles ${s.triangles}`, s.draws < 400, '');
   }

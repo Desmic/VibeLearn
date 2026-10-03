@@ -36,3 +36,6 @@ node_modules
 # game build outputs (tools/build.sh, tools/build-hosted.py)
 /experiments/bellweather-arcade/out/
 /experiments/bellweather-arcade/hosted/
+/experiments/bellweather-arcade/flowcheck/
+/experiments/bellweather-arcade/breaker/
+/experiments/bellweather-arcade/playthrough/

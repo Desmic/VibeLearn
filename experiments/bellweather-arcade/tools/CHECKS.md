@@ -11,7 +11,8 @@ replace people playing for feel and fun.
 | `camwalk.mjs` | Walks the opening routes with the real follow camera and scores every half second (Zip on screen, view blocked, lens inside something, too close). | ~5 min |
 | `replay.mjs` | Replays an AI play-test's actions in a fresh session and scores the camera after each step, so a reported moment can be reproduced. | a few minutes |
 | `playserver.mjs` | The body of the AI play-tester: a game session an agent drives step by step, seeing only screenshots, text and buttons. Writes a play log and a report. See `AI-PLAYTEST.md`. | as long as the play |
-| `flowcheck.mjs` | Plays the whole game the intended way: title → Mira → attack → spark → absorb words + hologram engine at the skiff → flight → gate → relay → Loom Isle (Stop 2) → save and Continue → fixed camera views. Checks checkpoints, first-try logging, stars, and that nothing errors. | ~10 min |
+| `flowcheck.mjs` | Plays the whole game the intended way: title → Mira → attack → spark → absorb words + hologram engine at the skiff → flight → gate → relay → Loom Isle (Stop 2) → save and Continue → fixed camera views. Checks checkpoints, first-try logging, stars, and that nothing errors. `--input touch` plays as a phone (taps on prompts, tap-anywhere to read on, the thumb stick); `--input keyboard` as a laptop (E, Space, number keys, WASD/Shift, 1024×640); default `mouse` clicks. Touch and keyboard add a `controls` segment (stick tilt/jog, Shift-walk, which controls show). | ~15 min |
+| `playthrough.mjs` | Runs `flowcheck` as a phone, then as a laptop, then `timing`, one after another, and writes `index.html` linking each run's **contact sheet** (`sheet.html`: every screenshot, failures on top) and the timing log. The before-publishing check for big changes. | ~35 min |
 | `breaker.mjs` | Plays like a speedrunner or a mean tester and checks that the game's promises still hold (below). | ~15–20 min |
 
 ```
@@ -19,13 +20,15 @@ node tools/storycheck.mjs [--root out]
 node tools/assetcheck.mjs [--root public] [--json]
 node tools/rules-parity.mjs [--app ../../app] [--walks 300]
 node tools/playserver.mjs [--port 7788] [--out playtest]   # then GET /observe, POST /act
-node tools/flowcheck.mjs [--out flowcheck] [--only title,meet,...] [--base URL] [--root out]
+node tools/flowcheck.mjs [--input mouse|touch|keyboard] [--out flowcheck] [--only controls,title,meet,...] [--base URL] [--root out]
+node tools/playthrough.mjs [--out playthrough] [--only touch,keyboard,timing]
 node tools/breaker.mjs  [--out breaker] [--only oob,walls,mash,order,scum,pause,skip,resize,monkey] [--minutes 4] [--seed 1337]
 ```
 
 Both write `report.md`, `report.json` and screenshots into `--out`, and exit with code 1
-on a failure. They share `harness.mjs` (static server, phone-sized headless browser,
-helpers, report).
+on a failure. They share `harness.mjs` (static server, headless browser sized for the input mode, helpers
+that act the way the chosen player would — `press`, `card`, `act`, `stick` — report and contact
+sheet).
 
 ## The promises the breaker checks
 

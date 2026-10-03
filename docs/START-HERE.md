@@ -59,6 +59,8 @@ npm run check                        # types + story scripts + asset budgets
 node tools/flowcheck.mjs             # plays start to end of Stop 2 headless (~15 min)
 node tools/breaker.mjs               # tries to break it (~20 min); run AFTER flowcheck, never together
 node tools/timing.mjs                # every cutscene line with its voiced length
+node tools/playthrough.mjs           # whole game as a phone AND as a laptop + timing (~35 min);
+                                     #   open playthrough/index.html and look at the contact sheets
 python3 tools/build-hosted.py --dest ../hosted-build    # the claude.ai copy (see section 6)
 ```
 
@@ -78,8 +80,9 @@ Test URLs (add to the query, or after `#painted` on the hosted copy):
   published for comparison (section 6).
 - **Headless numbers are not phone numbers.** The headless browser renders in software
   (~1–5 fps). Use the laptop↔F15 ratio table in `tools/CHECKS.md`; confirm on the phone.
-- **After a big change, play the whole game** start to end in both input modes and review
-  the screenshots and timing log, not only pass/fail counts (`docs/PLAYTEST-METHODS.md`).
+- **After a big change, play the whole game** start to end in both input modes
+  (`tools/playthrough.mjs`) and review the contact sheets and timing log, not only
+  pass/fail counts (`docs/PLAYTEST-METHODS.md`).
 - **Layered motion starts from a known pose every frame** (head look-at, springs). The
   3 Oct "heads spin like tops" bug was an offset multiplied onto last frame's pose.
 - **DOM over the 3D view:** read all sizes first, then write; write only what changed.

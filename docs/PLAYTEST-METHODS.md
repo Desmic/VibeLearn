@@ -8,7 +8,7 @@ method sees everything; each change needs the right mix.
 
 | Method | Real GPU / fps | Feel (motion, camera, controls) | Flow and logic | Timing | Coverage per hour | Repeatable | Cost to Desmic |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| **A. Scripted headless play-through** (cloud, Playwright + game hooks: `flowcheck`, `breaker`, `timing`, `_cine`) | no (software GL, ~1–5 fps) | no (stills only) | **yes**, every beat, both input modes | **yes** (game-time logs with real voice lengths) | whole game, ~15 min | **yes** | none |
+| **A. Scripted headless play-through** (cloud, Playwright + game hooks: `playthrough` = `flowcheck` as phone + as laptop + `timing`; `breaker`, `_cine`) | no (software GL, ~1–5 fps) | no (stills only) | **yes**, every beat, both input modes | **yes** (game-time logs with real voice lengths) | whole game, ~15 min | **yes** | none |
 | **B. AI play-tester** (`tools/playserver.mjs` + an agent with a persona) | no | partly (reads screenshots like a newcomer) | yes, unscripted: finds confusion and loopholes | coarse | one path, slow | partly | none |
 | **C. Claude app browser pane** (on Desmic's laptop) | **yes** (Intel UHD integrated) | barely: screenshot round trips of seconds | slow, by hand | no | a few minutes of game per hour | no | pane must stay visible |
 | **D. Screen control of Chrome** (computer use) | yes (whichever GPU Chrome uses) | barely (same round trips) | slow | no | very low | no | approvals; desktop busy |
@@ -24,8 +24,9 @@ keys, seconds apart. The sandbox on the laptop has no browser or GPU at all.
 
 1. **During work:** A for every change that touches story, UI, input or timing (fast, full
    coverage). `tools/timing.mjs` for any cutscene or dialogue change.
-2. **Before publishing a big change:** a full A run in **both** input modes (touch
-   emulation and keyboard), *and a human-style review of its screenshot strip and timing
+2. **Before publishing a big change:** `node tools/playthrough.mjs` (both input modes:
+   phone taps + thumb stick at 393×760, laptop E/Space/numbers/WASD at 1024×640, then the
+   timing log), *and a human-style review of its contact sheets (`sheet.html`) and timing
    log*, not just the pass count. Look for: animation poses that changed, heads/limbs at odd
    angles, UI covering subjects, text clipping, prompts in the wrong place.
 3. **Anything that can change frame rate:** F before and after, on the same device; record
@@ -41,4 +42,17 @@ keys, seconds apart. The sandbox on the laptop has no browser or GPU at all.
   poses* in stills, not jerky motion).
 - Real frame rate and resolution → F (numbers), G (feel).
 - Audio mix and voice acting → G (A checks that clips exist and how long they are).
-- Touch: A emulates a touch screen; a real thumb on a 6.5" screen is G.
+- Touch: A sends real touch events (taps on prompts, a dragged thumb stick) on an emulated
+  phone; a real thumb on a 6.5" screen (reach, mis-taps, palm on the stick) is G.
+- A measures distances and speeds in game time; it can't tell whether a speed *feels* right.
+
+## Lessons from building the two-mode play-through (3 Oct)
+
+- Taps must wait for the target to hold still: prompts pop in with a short scale animation
+  that takes seconds at software frame rates, and a tap on a moving button lands nowhere.
+  `locator.tap()` waits for a stable element; a raw `touchscreen.tap(x, y)` does not.
+- Cutscenes crawl at software frame rates, worse on the laptop-sized screen: wait on them in
+  **game time** (`h.until(fn, seconds)` fast-forwards with `__arcade.simulate`), not wall time.
+- The first two-mode run found real issues the mouse-only run never showed (see the 3 Oct
+  report): overlapping bubbles after Skip, the camera pressing into Zip by the skiff's words,
+  the thumb-stick hint far from the stick.
