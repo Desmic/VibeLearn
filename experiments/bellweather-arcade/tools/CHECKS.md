@@ -91,9 +91,16 @@ MP3s from the WAV masters (pauses longer than 0.42 s are shortened).
 Open the game with `bench=1` (on the hosted copy: `#bench=1&title=0&story=0&quality=medium`,
 or `quality=high`; add `adaptive=0` to hold the resolution fixed). It visits four fixed
 views (hero vista, looking back, bell garden, courtyard), five seconds each, and prints a
-table: fps as played (capped by the screen's refresh), the 90th-percentile frame, the
-uncapped cost of a frame (drawn back to back and forced to finish: this shows headroom a
-60 Hz screen hides), the resolution scale, draw calls and triangles (`kit/bench.ts`).
+table: fps as played (snapped to the screen's refresh steps), the 90th-percentile frame,
+the resolution scale, draw calls and triangles; then a **resolution sweep**: every view
+again at 0.6×, 0.8×, 1×, 1.25×, 1.5×, 2× held fixed (up to the screen's own density), so
+one run gives the sharpness-vs-fps curve and builds/devices compare on equal pixels
+(`kit/bench.ts`, ~1.5–2 min). In-game: *Graphics → Run frame-rate test*.
+
+The forced-finish "cost" column was dropped from the table (still in the JSON): on
+Windows/ANGLE `readPixels` waits on the whole pipeline and read 44 ms on a build running at
+72 fps. Fps snaps to refresh steps (144 Hz laptop: 72 / 48 / 24), so read the sweep, not one
+number.
 
 Rules: measure **before** changing anything that can move frame rate, on the same device,
 then after. The page must be visible: a hidden or covered browser throttles drawing.
@@ -104,5 +111,11 @@ laptop run (and is re-checked on the phone before a release):
 
 | Build | Device | Tier | Mean fps | Mean cost ms | Notes |
 | --- | --- | --- | --- | --- | --- |
-| v59 (baseline artifact) | laptop, Claude app browser (Intel UHD) | medium | — | — | to measure |
+| v59 (baseline artifact) | laptop Chrome, Intel UHD, 958×814 @1, 144 Hz | medium | 66.2 | — | adaptive settled at 0.6–0.72×; looking-back 48.5 (3 Oct, run by Claude via Claude in Chrome) |
+| v67 | same laptop | medium | 47.8 (47.6 on a repeat) | — | held at 1.0× by the new Medium floor; looking-back 24 |
+| v68 sweep | same laptop | medium | 0.6×: 71.8 · 0.8×: 65.4 · 1.0×: 47.8 | — | worst view 70.4 / 47.8 / 24.2. Equal to v59 at equal pixels: the drop is the resolution floor alone |
 | v59 | Galaxy F15 | high | ~45 (Desmic, 3 Oct, adaptive) | — | resolution fell to ~0.6x |
+| v68 sweep | Galaxy F15 | medium | — | — | **to measure** (one tap; gives the F15 curve and the laptop↔F15 ratio) |
+
+Pixels, not ratios, compare across devices: the laptop at 1.0× draws 958×814 = 0.78 MP; the
+F15 (393×851 CSS, DPR 2.625) draws 0.33 MP at 1.0× and 0.12 MP at 0.6×.

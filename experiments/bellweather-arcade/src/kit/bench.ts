@@ -8,6 +8,7 @@
 
 export interface BenchView { name: string; go: () => void }
 export interface BenchRow { view: string; fps: number; medianMs: number; p90Ms: number; costMs: number; res: number; draws: number; tris: number }
+export interface SweepRow { res: number; fps: number[]; meanFps: number; worstP90Ms: number }
 
 export async function runBench(o: {
   views: BenchView[]; host: HTMLElement; label: string;
@@ -17,6 +18,9 @@ export async function runBench(o: {
   /** draw one frame now; with `gl`, frames are also timed back to back and forced to finish
    *  (the cost of a frame without the display's refresh cap: 60 fps screens hide headroom) */
   render?: () => void; gl?: WebGLRenderingContext | WebGL2RenderingContext;
+  /** after the as-played pass, hold each of these resolutions in turn and measure every view:
+   *  what sharpness costs on this device (needs setRes; ratios above the screen's are skipped) */
+  sweep?: number[]; setRes?: (r: number | null) => void;
 }) {
   const warm = o.warmSec ?? 2.5, measure = o.measureSec ?? 5;
   const panel = document.createElement('pre'); panel.className = 'bench-panel'; panel.setAttribute('aria-live', 'polite');
@@ -44,10 +48,31 @@ export async function runBench(o: {
     rows.push({ view: v.name, fps: +(1000 / med).toFixed(1), medianMs: +med.toFixed(1), p90Ms: +p90.toFixed(1), costMs: +cost.toFixed(1), res: +s.res.toFixed(2), draws: s.draws, tris: s.tris });
   }
   const mean = rows.reduce((n, r) => n + r.fps, 0) / rows.length, meanCost = rows.reduce((n, r) => n + r.costMs, 0) / rows.length;
-  panel.textContent = head + rows.map(fmt).join('\n') + `\nMEAN ${mean.toFixed(1)} fps  cost ${meanCost.toFixed(1)} ms  — done`;
-  const result = { label: o.label, gpu: o.gpu, screen: [innerWidth, innerHeight, devicePixelRatio], rows, meanFps: +mean.toFixed(1), meanCostMs: +meanCost.toFixed(1) };
+  const top = head + rows.map(fmt).join('\n') + `\nMEAN ${mean.toFixed(1)} fps as played`;
+  // the sweep: the same views at fixed resolutions, so builds and devices compare on equal pixels
+  const sweep: SweepRow[] = [];
+  const ratios = (o.sweep ?? []).filter(r => r <= Math.max(1, devicePixelRatio) + .001);
+  if (ratios.length && o.setRes) {
+    for (const r of ratios) {
+      o.setRes(r); const fps: number[] = []; let worst = 0;
+      for (const v of o.views) {
+        v.go(); panel.textContent = top + '\n\nRESOLUTION SWEEP (fps per view)\n' + sweep.map(fmtSweep).join('\n') + `\n${r}x ${v.name}: measuring…`;
+        let t0 = performance.now(); while (performance.now() - t0 < 1200) await frame();
+        const dts: number[] = []; let last = await frame(); t0 = last;
+        while (last - t0 < 2500) { const t = await frame(); dts.push(t - last); last = t; }
+        dts.sort((a, b) => a - b); fps.push(+(1000 / dts[dts.length >> 1]).toFixed(1)); worst = Math.max(worst, dts[Math.floor(dts.length * .9)]);
+      }
+      sweep.push({ res: r, fps, meanFps: +(fps.reduce((a, b) => a + b, 0) / fps.length).toFixed(1), worstP90Ms: +worst.toFixed(1) });
+    }
+    o.setRes(null);
+  }
+  panel.textContent = top + (sweep.length ? '\n\nRESOLUTION SWEEP (fps per view: ' + o.views.map(v => v.name).join(', ') + ')\n' + sweep.map(fmtSweep).join('\n') : '') + '\n— done';
+  const result = { label: o.label, gpu: o.gpu, screen: [innerWidth, innerHeight, devicePixelRatio], rows, meanFps: +mean.toFixed(1), meanCostMs: +meanCost.toFixed(1), sweep };
   (window as unknown as { __vlBench: unknown }).__vlBench = result;
   console.info('[bench]', JSON.stringify(result));
   return result;
 }
-const fmt = (r: BenchRow) => `${r.view.padEnd(13)} ${String(r.fps).padStart(5)} fps  p90 ${String(r.p90Ms).padStart(5)} ms  cost ${String(r.costMs).padStart(5)} ms  res ${r.res}x  ${r.draws} dr  ${(r.tris / 1000).toFixed(0)}k tri`;
+// (the forced-finish "cost" stays in the JSON but is not shown: on Windows/ANGLE readPixels waits on the
+//  whole pipeline, so it read 44 ms on a build running at 72 fps; compare fps at equal resolution instead)
+const fmt = (r: BenchRow) => `${r.view.padEnd(13)} ${String(r.fps).padStart(5)} fps  p90 ${String(r.p90Ms).padStart(5)} ms  res ${r.res}x  ${r.draws} dr  ${(r.tris / 1000).toFixed(0)}k tri`;
+const fmtSweep = (s: SweepRow) => `${(s.res + 'x').padEnd(6)} mean ${String(s.meanFps).padStart(5)} fps  worst p90 ${String(s.worstP90Ms).padStart(5)} ms  [${s.fps.join(' / ')}]`;

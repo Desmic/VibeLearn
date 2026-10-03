@@ -12,13 +12,28 @@ method sees everything; each change needs the right mix.
 | **B. AI play-tester** (`tools/playserver.mjs` + an agent with a persona) | no | partly (reads screenshots like a newcomer) | yes, unscripted: finds confusion and loopholes | coarse | one path, slow | partly | none |
 | **C. Claude app browser pane** (on Desmic's laptop) | **yes** (Intel UHD integrated) | barely: screenshot round trips of seconds | slow, by hand | no | a few minutes of game per hour | no | pane must stay visible |
 | **D. Screen control of Chrome** (computer use) | yes (whichever GPU Chrome uses) | barely (same round trips) | slow | no | very low | no | approvals; desktop busy |
-| **E. Claude in Chrome extension** | yes | barely | slow | no | low | no | uses Desmic's real browser profile |
+| **E. Claude in Chrome extension** | **yes** (laptop GPU) | barely | slow | no | low | partly | none: **use it for the frame-rate test** (below) |
 | **F. In-game frame-rate test** (`bench=1`, *Graphics → Run frame-rate test*) | **yes**, on any device | no | no | no | 40 s per run | **yes** | one tap on the phone |
 | **G. Desmic on the F15 / laptop** | **yes** | **yes** (the only real judge) | yes | yes | — | no | Desmic's time |
 
 Why C–E rarely help: the hosted game runs inside claude.ai's cross-origin frame, so an agent
 there cannot use the game's hooks or fast-forward; it can only look at pictures and press
 keys, seconds apart. The sandbox on the laptop has no browser or GPU at all.
+
+## Running the frame-rate test yourself (agents): Claude in Chrome
+
+Don't hand the benchmark to Desmic when Chrome is connected (3 Oct feedback: "lazy response,
+use claude extension on chrome"). It runs on the laptop's real GPU:
+
+1. One tab in the session's tab group; open the artifact URL (baseline or current). Never two
+   game tabs at once; never pick a Chrome profile yourself.
+2. The game frame's address is hidden and cross-origin, so no JS hooks: drive the game's own
+   UI. Title menu → *Graphics* → tier (reloads) → *Graphics* → *Run frame-rate test*.
+3. Wait in ≤ 60 s chunks (a longer batch times out), then `zoom` on the top of the page to
+   read the table. Same tier, same "Show frame rate" setting, for every build compared.
+4. Record the rows in `tools/CHECKS.md` (device-ratio table) the same turn.
+
+The F15 is the one thing an agent can't reach: ask for one sweep run per release there.
 
 ## The routine
 

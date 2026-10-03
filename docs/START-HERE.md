@@ -87,6 +87,9 @@ Test URLs (add to the query, or after `#painted` on the hosted copy):
   3 Oct "heads spin like tops" bug was an offset multiplied onto last frame's pose.
 - **DOM over the 3D view:** read all sizes first, then write; write only what changed.
 - **Say what you can do only after checking** (a tool, a network host, a permission).
+- **Exhaust your own tools before asking Desmic to run something.** Before writing "you
+  run it", list what's connected (Chrome extension, browser pane, device shell) and try.
+  Only the F15 itself is out of reach.
 
 ## 6. Shipping and the places work lives
 
@@ -109,6 +112,7 @@ Test URLs (add to the query, or after `#painted` on the hosted copy):
 | Cloud workspace (Linux) | build, headless browser (software GL), all checks, ffmpeg, publish artifacts | reach Desmic's files directly; GPU; Google APIs (egress policy) |
 | Sandbox on Desmic's laptop (`device_bash`) | read/write `E:\Projects\VibeLearn`, git commit, ffmpeg, node, call allowed hosts (Gemini API) | GPU or browser; background processes (each call ≤ ~3 min, then everything it started ends); git push (no login); delete files without permission |
 | Claude app browser pane | real laptop GPU (Intel UHD), see/click the hosted game | reach into the game's frame (cross-origin): no hooks, no fast-forward; must be visible or it throttles |
+| Claude in Chrome (extension) | real laptop GPU; open the artifact, click the game's own UI, read the screen: **run the frame-rate test yourself** (`docs/PLAYTEST-METHODS.md`) | the game frame's address/hooks (hidden, cross-origin); waits over ~60 s per call |
 | Screen control (computer use) | see and click approved apps | type into terminals/IDEs (click-only by policy) |
 | Desmic's F15 / laptop | the truth for feel and fps | — |
 

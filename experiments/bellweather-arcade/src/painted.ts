@@ -242,8 +242,10 @@ export function adaptiveResolution(renderer: T.WebGLRenderer, onResize: () => vo
   let ratio = max, frames: number[] = [], last = performance.now(), changedAt = last, lastUp = -1e9, upDelay = 6000;
   renderer.setPixelRatio(ratio); onResize();
   const apply = (next: number, now: number) => { ratio = next; renderer.setPixelRatio(ratio); onResize(); redraw(); changedAt = now; frames = []; };
+  let held = false;
   const tick = Object.assign(function tick() {
     const now = performance.now(); const dt = now - last; last = now;
+    if (held) return;
     if (dt > 250) { frames = []; return; }           // tab switch or hitch: not a steady-state sample
     if (now - changedAt < 700) return;               // let the new size settle before judging
     frames.push(dt);
@@ -255,6 +257,10 @@ export function adaptiveResolution(renderer: T.WebGLRenderer, onResize: () => vo
     } else if (med <= targetMs * 1.08 && ratio < max - .01 && now - changedAt > upDelay) {
       lastUp = now; apply(Math.min(max, ratio + .1), now);
     }
-  }, { ratio: () => ratio });
+  }, {
+    ratio: () => ratio,
+    /** hold one resolution (a benchmark sweep), or null to hand control back (from the tier's full resolution) */
+    hold(r: number | null) { held = r !== null; apply(r ?? max, performance.now()); },
+  });
   return tick;
 }
