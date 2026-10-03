@@ -10,7 +10,7 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
   id: 'first-words.l1', title: 'The First Words — Level 1',
   // what the game must provide for this script to play
   needs: {
-    handlers: ['hangLantern', 'lookUp', 'board', 'afterCoil'],
+    handlers: ['toLantern', 'lookUp', 'board', 'afterCoil'],
     anchors: ['mira', 'spark', 'pilotStone'],
   },
   beats: [
@@ -29,7 +29,8 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     // the cold open: Mira calls from the outlook (a bark; the camera shows where she is)
     call: { start: { speaker: 'Mira', text: 'Zip! Up here! The skiff\'s ready!' } },
     mira: {
-      start: { speaker: 'Mira', text: 'There you are! Hang the lantern on the skiff for me?', choices: [{ label: 'Hang it', kind: 'primary', on: 'hangLantern', next: 'beep' }] },
+      // she asks; Zip does it in the world (the first time the player acts on a thing: tap it, or E)
+      start: { speaker: 'Mira', text: 'There you are! Hang the lantern on the skiff for me?', choices: [{ label: 'Next', on: 'toLantern' }] },
       beep: { speaker: 'Mira', text: 'Zip, why do you beep before you answer? Other bots don\'t.', choices: [{ label: 'Beep?', kind: 'primary', next: 'blink' }, { label: 'Beep boop.', next: 'blink' }] },
       blink: { speaker: 'Mira', text: 'And you blink. The bell-ringer bot has never once blinked.', choices: [{ label: 'Next', next: 'look' }] },
       look: { speaker: 'Mira', text: 'You\'re a strange little courier. Wait… what\'s that noise?', choices: [{ label: 'Next', on: 'lookUp' }] },
@@ -89,7 +90,7 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     zap: 'Zap!', lantern: 'Lantern hung ✓',
   },
   labels: {
-    talkMira: 'Talk to Mira', bellGarden: 'Bell garden', gather: 'Find the skiff\'s words ({n} of {total})', wakeSkiff: 'Wake the skiff at the outlook', shieldMira: 'Shield Mira!', skip: 'Skip ›',
+    talkMira: 'Talk to Mira', hangLantern: 'Hang the lantern', lanternGoal: 'Hang the lantern on the skiff', bellGarden: 'Bell garden', gather: 'Find the skiff\'s words ({n} of {total})', wakeSkiff: 'Wake the skiff at the outlook', shieldMira: 'Shield Mira!', skip: 'Skip ›',
   },
   stars: {
     flight: {

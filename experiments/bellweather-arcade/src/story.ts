@@ -357,7 +357,17 @@ export function buildStory(scene: T.Scene, o: Opts) {
   };
   const talk = () => {
     talking = true; goal(null, null); o.teleport(ZIP_MARK.x, ZIP_MARK.z, ZIP_FACE);
-    story.dialogue('mira', { hangLantern: () => { skiff.showLantern(true); sfx.chime(); story.toast('lantern', 1600); }, lookUp: () => { sfx.rumble(.4); later(.6, startAttack); } });
+    story.dialogue('mira', miraTalk);
+  };
+  // Mira asks; the player does it: walk to the skiff and hang the lantern (tap it, or E)
+  let lanternTask = false;
+  const miraTalk: Record<string, () => void> = {
+    toLantern: () => { talking = false; lanternTask = true; goal(S.labels.lanternGoal, PILOT_STONE); },
+    lookUp: () => { sfx.rumble(.4); later(.6, startAttack); },
+  };
+  const hangLantern = () => {
+    lanternTask = false; action(null); goal(null, null); skiff.showLantern(true); sfx.chime(); story.toast('lantern', 1600);
+    later(.9, () => { talking = true; o.teleport(ZIP_MARK.x, ZIP_MARK.z, ZIP_FACE); story.dialogue('mira', miraTalk, 'beep'); });
   };
 
   const speakSkiff = () => { action(null); enter('puzzle'); o.teleport(4.0, -11.5, Math.PI / 2); skiff.start(fly); };
@@ -540,7 +550,8 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (skiff.active) { shown = '#'; return; }
       if (g.cardOpen) { action(null); return; }
       const near = (p: T.Vector3, r: number) => Math.hypot(z.x - p.x, z.z - p.z) < r;
-      if (beat === 'meet' && near(miraAt, 2.4)) action(S.labels.talkMira, talk, over(miraAt, 1.1));
+      if (beat === 'meet' && lanternTask) { if (near(PILOT_STONE, 2.8)) action(S.labels.hangLantern, hangLantern, skiff.at(bracket)); else action(null); }
+      else if (beat === 'meet' && near(miraAt, 2.4)) action(S.labels.talkMira, talk, over(miraAt, 1.1));
       else if (beat === 'skiff' && ECHO) {
         // words first (a source in reach wins), then the engine at the pilot stone
         const a = echo.action(z);

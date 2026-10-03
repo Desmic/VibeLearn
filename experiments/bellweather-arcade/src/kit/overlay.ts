@@ -40,7 +40,7 @@ export function createOverlay(host: HTMLElement, camera: T.Camera) {
 
   const safe = () => {
     const w = host.clientWidth, h = host.clientHeight, phone = w < 600;
-    return { w, h, l: 8, r: w - 8, t: phone ? 118 : 70, b: h - (phone ? 132 : 104) };
+    return { w, h, l: 8, r: w - 8, t: phone ? 118 : 70, b: h - (phone ? 150 : 110) };   // clear of the place name and the thumb
   };
 
   const api = {

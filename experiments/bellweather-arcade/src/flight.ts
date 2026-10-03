@@ -1,6 +1,7 @@
 import * as T from 'three';
 import type { Guide } from './guide';
 import { sfx } from './sfx';
+import { inputMode } from './kit/input-mode';
 
 // Steered skiff flight over a set distance: the reward between islands.
 // The skiff flies itself forward; you steer (left/right) and climb or dive
@@ -59,7 +60,7 @@ export function buildFlight(scene: T.Scene, o: Opts) {
       skiff = boat; scene.add(boat); root.visible = true; active = true; onDone = done; landing.copy(land); landT = -1; next = 0;
       result = { rings: 0, total: LANE.length, spotted: 0 }; rings.forEach(r => { r.state = 'open'; r.m.material = ringMat; });
       pos.copy(boat.position); heading = Math.atan2(-(LANE[0].z - pos.z), LANE[0].x - pos.x); speed = 7; sfx.whoosh();
-      g.setBeacon(LANE[0].clone().setY(LANE[0].y - 1.2), true); g.toast('◀ ▶ steer   ▲ ▼ climb and dive', 3200);
+      g.setBeacon(LANE[0].clone().setY(LANE[0].y - 1.2), true); g.toast(inputMode.touch ? 'Steer with the stick' : 'W A S D to steer and climb', 3200);
     },
     get shot() {
       if (!active) return null;

@@ -2,6 +2,7 @@ import * as T from 'three';
 import { sfx } from './sfx';
 import { createOverlay } from './kit/overlay';
 import type { Voice } from './kit/voice';
+import { inputMode } from './kit/input-mode';
 
 // Player guidance shared by every beat and every future subject's game:
 // one goal line, one beacon in the world (with an edge arrow when it is off
@@ -47,7 +48,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
   const brackets = document.createElement('button'); brackets.className = 'target-brackets'; brackets.hidden = true; brackets.setAttribute('aria-hidden', 'true'); brackets.tabIndex = -1; host.appendChild(brackets);
   let bracketAt: T.Vector3 | null = null;
   const head = (p: T.Vector3 | null, out: T.Vector3, y = 1.95) => p ? out.copy(p).setY(p.y + y) : null;
-  const zipHead = new T.Vector3(), zipFeet = new T.Vector3(), toastAt = new T.Vector3();
+  const zipHead = new T.Vector3(), zipFeet = new T.Vector3(), toastAt = new T.Vector3(), actAt = new T.Vector3();
   let goalT = 0;
   // voiced lines (kit/voice.ts): a speaker's line plays from where they stand (panned, quieter far away)
   let voice: Voice | null = null, zipClarity = 1;
@@ -146,7 +147,17 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
     /** move the target brackets with a moving thing */
     setActionAt(at: T.Vector3) { if (bracketAt) bracketAt.copy(at); },
     /** the one context action; `at` is the thing it acts on (it gets target brackets, which can be tapped too) */
-    setAction(label: string | null, fn?: () => void, at?: T.Vector3 | null) { act.hidden = !label || cardOpen; act.textContent = label ?? ''; actFn = fn ?? null; bracketAt = label && at ? (bracketAt ?? new T.Vector3()).copy(at) : null; if (!bracketAt) { brackets.hidden = true; overlay.unpin('brackets'); } else { brackets.hidden = cardOpen; overlay.pin('brackets', brackets, () => bracketAt, { rank: 2, align: 'center' }); } },
+    // The action is a contextual prompt beside the thing it acts on (one verb + one control):
+    // a tap target on phones, "E" on keyboards. With no thing named, it rides over Zip.
+    setAction(label: string | null, fn?: () => void, at?: T.Vector3 | null) {
+      act.hidden = !label || cardOpen; actFn = fn ?? null;
+      if ((act.dataset.label ?? '') !== (label ?? '')) { act.dataset.label = label ?? ''; act.innerHTML = label ? `<kbd aria-hidden="true">E</kbd><span>${label.replace(/[<&]/g, c => c === '<' ? '&lt;' : '&amp;')}</span>` : ''; act.setAttribute('aria-label', label ?? ''); }
+      bracketAt = label && at ? (bracketAt ?? new T.Vector3()).copy(at) : null;
+      if (!bracketAt) { brackets.hidden = true; overlay.unpin('brackets'); } else { brackets.hidden = cardOpen; overlay.pin('brackets', brackets, () => bracketAt, { rank: 2, align: 'center' }); }
+      if (label) overlay.pin('act', act, () => bracketAt ?? (thinker ? head(thinker(), actAt, 2.15) : null), { rank: 9.8, keep: true, edge: true, lift: bracketAt ? 44 : 8 }); else overlay.unpin('act');
+    },
+    /** the action key (E): use the offered action, if there is one */
+    actNow() { if (!act.hidden && actFn && !cardOpen) { sfx.tap(); actFn(); return true; } return false; },
     // One short line (speaker optional), optional chips, and 1-4 choices.
     // `via`: the anchor the voice comes from when it isn't the speaker's own (Mira over the relay)
     say(text: string, choices: Choice[] = [], opts: { speaker?: string; chips?: ChipOpt; picked?: Set<number>; pictures?: boolean; at?: () => T.Vector3 | null; via?: string } = {}) {
@@ -170,14 +181,18 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
         const go = (e?: Event) => { if (done) return; if (e?.type === 'pointerup' && (performance.now() - opened < 280 || (e.target as Element)?.closest?.('button,input,label,.menu'))) return; /* a stray world tap from the moment the card opened doesn't skip it */ e?.stopPropagation(); done = true; advanceOff?.(); advanceOff = null; sfx.tap(); c.act(); };
         const b = document.createElement('button'); b.className = 'advance'; b.setAttribute('aria-label', c.label);
         b.innerHTML = `<span class="sr">${c.label}</span><span aria-hidden="true">▾</span>`; b.addEventListener('click', go); row.appendChild(b); row.classList.add('advance-row');
-        const onKey = (e: KeyboardEvent) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); go(e); } };
+        const onKey = (e: KeyboardEvent) => { if (e.key === ' ' || e.key === 'Enter' || (e.code === 'KeyE' && !e.repeat)) { e.preventDefault(); go(e); } };
         host.addEventListener('pointerup', go); window.addEventListener('keydown', onKey);
         advanceOff = () => { host.removeEventListener('pointerup', go); window.removeEventListener('keydown', onKey); };
         b.focus({ preventScroll: true });
         return;
       }
-      for (const c of choices) { const b = document.createElement('button'); b.textContent = c.label; if (c.kind) b.className = c.kind; b.addEventListener('click', e => { e.stopPropagation(); sfx.tap(); c.act(); }); row.appendChild(b); }
-      if (choices[0]) (row.firstChild as HTMLButtonElement).focus({ preventScroll: true });
+      // real choices: tap on phones; on keyboards each carries its number key (1, 2, …)
+      choices.forEach((c, i) => { const b = document.createElement('button'); b.innerHTML = `<kbd aria-hidden="true">${i + 1}</kbd>`; b.appendChild(document.createTextNode(c.label)); if (c.kind) b.className = c.kind; b.addEventListener('click', e => { e.stopPropagation(); sfx.tap(); c.act(); }); row.appendChild(b); });
+      const opened = performance.now();
+      const onNum = (e: KeyboardEvent) => { const n = +e.key; if (n >= 1 && n <= choices.length && performance.now() - opened > 200) { e.preventDefault(); advanceOff?.(); advanceOff = null; sfx.tap(); choices[n - 1].act(); } };
+      window.addEventListener('keydown', onNum); advanceOff = () => window.removeEventListener('keydown', onNum);
+      if (choices[0] && !inputMode.touch) (row.firstChild as HTMLButtonElement).focus({ preventScroll: true });
     },
     setThinker(fn: () => T.Vector3) { thinker = fn; },
     think(text: string | string[], who: 'zip' | 'warden' = 'zip') { for (const x of Array.isArray(text) ? text : [text]) thoughts.push({ text: x, who }); },
@@ -222,9 +237,12 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       // hints: walking first, then looking; each goes once done, all after 30 s
       if (hintStage !== 'off') { hintT += dt; if ((looked && moved) || hintT > 14) hintStage = 'off'; }
       hint.hidden = hintStage === 'off' || cardOpen;
-      hint.textContent = !moved ? 'Tap the ground to walk' : 'Drag to look around';
-      // the hint stands at Zip's feet, where the walking happens
-      if (thinker && !overlay.has('hint')) overlay.pin('hint', hint, () => thinker ? zipFeet.copy(thinker()).setY(thinker().y - .1) : null, { rank: 5, lift: -54 });
+      // phones: the hint sits by the thumb stick until Zip walks; keyboards: it stands at Zip's feet
+      const touch = inputMode.touch;
+      hint.textContent = touch ? (!moved ? 'Hold and drag here to walk' : 'Drag the view to look around') : (!moved ? 'W A S D to walk' : 'Drag to look around');
+      hint.classList.toggle('at-stick', touch && !moved);
+      if (touch && !moved) { if (overlay.has('hint')) { overlay.unpin('hint'); } }
+      else if (thinker && !overlay.has('hint')) overlay.pin('hint', hint, () => thinker ? zipFeet.copy(thinker()).setY(thinker().y - .1) : null, { rank: 5, lift: -14 });
       if (goalT > 0 && (goalT -= dt) <= 0) goal.classList.add('quiet');
       for (const b of barks) if (b.t > 0 && (b.t -= dt) <= 0) { b.el.hidden = true; b.who = ''; }
       // beacon pulse and the edge arrow when the target is off screen

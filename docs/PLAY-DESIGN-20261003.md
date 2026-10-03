@@ -41,6 +41,27 @@ Rules (BotW's Great Plateau, Portal, Celeste, and the presentation guide):
 5. **Never explain what the player just saw.** Twelve words a sentence. The player is smart.
 6. **Failure is safe and funny** (load *sink* and the skiff dips).
 
+## How the player acts (input profiles, second F15 pass)
+
+Interaction is game design, so each kind of player gets controls native to their device,
+and every action is offered where it happens (presentation guide rung 4: one verb, one
+control, beside the target; rule I1: act on the thing).
+
+| | Phone (touch) | Desktop (keyboard and mouse) |
+| --- | --- | --- |
+| Move | floating thumb stick, lower left (press anywhere there; harder = faster) | W A S D or arrows |
+| Look | drag anywhere else | drag |
+| Act | tap the prompt beside the thing, or the thing itself | **E** (the prompt shows the key cap) |
+| Talk on | tap anywhere | Space, Enter or E |
+| Choose | tap a choice | number keys **1**, **2** (shown on the choices) |
+| Fly | the same stick | W A S D |
+
+The game follows the last input used (`kit/input-mode.ts` sets `html[data-input]`), so a
+touch laptop switches cleanly. The old bottom-right action button and the arrow pad are
+gone; *Shield Mira!* now appears on Mira, *Talk to Mira* beside her, *Absorb "rise"* on the
+word. Mira's lantern is the first act-on-a-thing lesson: she asks, and Zip walks to the
+skiff and hangs it himself (no dialogue button).
+
 ## The loop, and the ceiling
 
 **Loop:** explore → words call out (a chime, a glint) → absorb them → compose in the

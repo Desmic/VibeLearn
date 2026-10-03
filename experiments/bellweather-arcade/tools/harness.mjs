@@ -55,7 +55,8 @@ export async function harness({ title, outDefault }) {
     // the cold open (Mira calls from the outlook) can be skipped like any cutscene
     skipOpening: async () => { await page.waitForFunction(() => window.__vlStory?.debug, null, { timeout: 30000 }); if ((await page.evaluate(() => window.__vlStory.debug.opening)) >= 0) await page.locator('.story-skip').click({ timeout: 10000 }).catch(() => {}); await page.waitForTimeout(400); },
     // Mira's conversation, up to the attack (lines advance; "Beep?" is a real choice)
-    talkMira: async () => { await h.card('Hang it'); await h.card('Beep?'); await h.card('Next'); await h.card('Next'); },
+    // Mira asks for the lantern; Zip hangs it on the skiff (an action in the world), then she talks on
+    talkMira: async () => { await h.card('Next'); await h.pose(2.6, -10.3, 0); await h.act('Hang'); await h.card('Beep?', 30000); await h.card('Next'); await h.card('Next'); },
     waitBeat: async (b, timeout = 60000) => h.waitFor(async () => (await page.evaluate(() => window.__vlStory?.debug?.beat)) === b, timeout, 250),
     // a stars banner carries on by itself after a few seconds; tap it if it is still up
     stars: async () => { await page.locator('.story-card.ribbon button.primary').click({ timeout: 3000 }).catch(() => {}); await page.waitForTimeout(600); },
