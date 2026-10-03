@@ -18,6 +18,8 @@ import { buildPaintedLandmarks, tickLandmarks } from './painted-landmarks';
 import { buildPaintedLife } from './painted-life';
 import { buildGuide } from './guide';
 import { buildStory } from './story';
+import { createVoice } from './kit/voice';
+import { FIRST_WORDS_CAST, FIRST_WORDS_SPOKEN, FIRST_WORDS_DIRECTION } from './worlds/first-words-voice';
 import { sfx } from './sfx';
 import { createBumpFeedback } from './kit/bump';
 import { loadBodyKit, type BodyKit } from './kit/body-kit';
@@ -265,10 +267,12 @@ if(paintedStudy){
 }
 const paintedParams=new URLSearchParams(location.search);
 const promenade=paintedStudy&&paintedParams.get('promenade')!=='0'?buildPromenade(scene,{box:facade.addSolidBox,circle:facade.addSolidCircle,walk:(x,z)=>walkable(new T.Vector3(x,0,z)),sunDir:sun.position.clone().sub(sun.target.position),renderer,camera,reflections:gfx.reflections}):null;
-const lifeTick=paintedStudy&&paintedParams.get('life')!=='0'?buildPaintedLife(scene,facade.addSolidCircle,gfx.birds,{clips:libraryClips,kit:bodyKit,camera,host:worldElement.parentElement!,onGreet:from=>{zipRig?.lookAt(from);greetUntil=elapsed+4;waveBackAt=elapsed+.75}}):null;
+const lifeTick=paintedStudy&&paintedParams.get('life')!=='0'?buildPaintedLife(scene,facade.addSolidCircle,gfx.birds,{clips:libraryClips,kit:bodyKit,camera,host:worldElement.parentElement!,onGreet:from=>{zipRig?.lookAt(from);greetUntil=elapsed+4;waveBackAt=elapsed+.75},speak:(v,t,at)=>guide?.speakAt(v,t,at)??0}):null;
 const storyOn=paintedStudy&&paintedParams.get('puzzle')!=='0'&&paintedParams.get('story')!=='0';
 const appHost=worldElement.parentElement!;
 const guide=storyOn?buildGuide(scene,appHost,camera,renderer.domElement):null;
+// voiced lines: clips made ahead of time (tools/voice.mjs); a line without one stays a silent bubble
+if(guide&&paintedParams.get('voices')!=='0'){const voice=createVoice(FIRST_WORDS_CAST,{base:'/voice/',spoken:FIRST_WORDS_SPOKEN,direction:FIRST_WORDS_DIRECTION});guide.setVoice(voice);voice.preloadAll();(window as any).__vlVoice=voice}
 // Tap to walk: tap the ground and Zip walks there (phones, and anyone who
 // prefers pointing to arrows). Lowest priority: puzzle taps are checked first.
 let walkTarget:T.Vector3|null=null,walkStuck=0,walkDetour=0,walkDetourT=0;

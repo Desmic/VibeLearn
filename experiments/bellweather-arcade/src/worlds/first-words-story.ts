@@ -42,8 +42,10 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
       leave: { speaker: 'Warden', text: 'Want her back? Come and get her, thinker.' },
     },
     mira_cry: { start: { speaker: 'Mira', text: 'Zip!' } },
+    // the town, as the ship comes down
+    alarm: { start: { speaker: 'Neighbour', text: 'What is THAT?' }, inside: { speaker: 'Gardener', text: 'Everyone inside!' } },
     // Zip tries to shout after her: only static comes out
-    static: { start: { text: 'MIR— kkzzht… krrsh…' } },
+    static: { start: { speaker: 'Zip', text: 'MIR— kkzzht… krrsh…' } },
     'awake-echo': {
       start: { speaker: 'Zip', text: '“Skiff, rise toward Blossom Isle.”', choices: [{ label: 'Board the skiff', kind: 'primary', on: 'board' }, { label: 'How real AI differs', kind: 'quiet', next: 'real' }] },
       real: { speaker: 'Zip', text: 'Real models guess pieces of words, learned from huge amounts of text. The loop is the same: each new piece joins the input.', choices: [{ label: 'Board the skiff', kind: 'primary', on: 'board' }] },

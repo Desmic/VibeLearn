@@ -1,6 +1,7 @@
 import * as T from 'three';
 import { sfx } from './sfx';
 import { createOverlay } from './kit/overlay';
+import type { Voice } from './kit/voice';
 
 // Player guidance shared by every beat and every future subject's game:
 // one goal line, one beacon in the world (with an edge arrow when it is off
@@ -48,6 +49,15 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
   const head = (p: T.Vector3 | null, out: T.Vector3, y = 1.95) => p ? out.copy(p).setY(p.y + y) : null;
   const zipHead = new T.Vector3(), zipFeet = new T.Vector3(), toastAt = new T.Vector3();
   let goalT = 0;
+  // voiced lines (kit/voice.ts): a speaker's line plays from where they stand (panned, quieter far away)
+  let voice: Voice | null = null, zipClarity = 1;
+  const camPos = new T.Vector3();
+  const placeVoice = (at: T.Vector3 | null | undefined) => {
+    if (!at) return { pan: 0, gain: 1 };
+    const p = overlay.project(at), w = host.clientWidth || 1;
+    camPos.setFromMatrixPosition(camera.matrixWorld);
+    return { pan: p ? (p.x / w) * 2 - 1 : 0, gain: Math.max(.35, Math.min(1, 1.25 - at.distanceTo(camPos) / 22)) };
+  };
 
   let looked = false, moved = false, hintT = 0, hintStage: 'off' | 'on' = 'off';
   let down: { x: number; y: number } | null = null;
@@ -110,8 +120,15 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       b.el.innerHTML = ''; if (who !== 'Zip') { const n = document.createElement('b'); n.className = 'who'; n.textContent = who; b.el.appendChild(n); }
       b.el.appendChild(document.createTextNode(text));
       overlay.pin('bark-' + barks.indexOf(b), b.el, at, { rank: 9, edge: true, lift: 12 });
+      if (voice?.has(who, text)) { void voice.play(who, text, { channel: 'bark', clarity: opts.tone === 'static' ? 0 : zipClarity, ...placeVoice(at()) }); b.t = Math.max(b.t, voice.duration(who, text) + .5); }
     },
     get barking() { return barks.some(b => b.t > 0); },
+    /** give the guide a voice: lines with a recorded clip are spoken */
+    setVoice(v: Voice | null) { voice = v; },
+    /** how clear Zip's (robot) voice is: 0 broken … 1 clean */
+    set zipClarity(k: number) { zipClarity = k; },
+    /** say a line aloud from a point in the world without a bubble (townsfolk greetings): seconds it lasts, 0 if unvoiced */
+    speakAt(speaker: string, text: string, at: T.Vector3) { if (!voice?.has(speaker, text)) return 0; void voice.play(speaker, text, { channel: 'bark', ...placeVoice(at) }); return voice.duration(speaker, text); },
     /** a tutorial prompt on a thing in the world: a pulsing ring and one verb ("Tap"), no card */
     prompt(id: string, at: (() => T.Vector3 | null) | null, verb = 'Tap') {
       let el = prompts.get(id);
@@ -139,6 +156,8 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       if (at && !at()) at = undefined;   // the speaker isn't in the world right now: the card at the bottom
       card.classList.toggle('bubble', !!at && !opts.chips);
       if (at && !opts.chips) overlay.pin('card', card, at, { rank: 10, edge: true, keep: true, lift: 14 }); else overlay.unpin('card');
+      if (voice && opts.speaker && voice.has(opts.speaker, text)) void voice.play(opts.speaker, text, { channel: 'line', fx: opts.via ? 'radio' : undefined, clarity: zipClarity, ...placeVoice(at?.()) });
+      else voice?.stopLine();
       if (opts.chips) card.appendChild(chipRow(opts.chips, opts.picked ?? new Set()));
       const p = document.createElement('p');
       if (opts.speaker && opts.speaker !== 'Zip') { const b = document.createElement('b'); b.className = 'who'; b.textContent = opts.speaker; if (!card.classList.contains('bubble')) b.textContent += ': '; p.appendChild(b); }
@@ -197,7 +216,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       if (!l) { const el = document.createElement('div'); el.className = 'world-label'; host.appendChild(el); l = { el, at: new T.Vector3() }; labels.set(id, l); }
       if (l.el.textContent !== text) l.el.textContent = text; if (at) l.at.copy(at);
     },
-    close() { advanceOff?.(); advanceOff = null; cardOpen = false; host.classList.remove('card-open'); card.hidden = true; card.classList.remove('bubble', 'ribbon'); overlay.unpin('card'); if (actFn && act.textContent) act.hidden = false; if (bracketAt) brackets.hidden = false; },
+    close() { voice?.stopLine(); advanceOff?.(); advanceOff = null; cardOpen = false; host.classList.remove('card-open'); card.hidden = true; card.classList.remove('bubble', 'ribbon'); overlay.unpin('card'); if (actFn && act.textContent) act.hidden = false; if (bracketAt) brackets.hidden = false; },
     tick(dt: number, zipSpeed: number, t: number) {
       if (zipSpeed > .2) moved = true;
       // hints: walking first, then looking; each goes once done, all after 30 s
@@ -229,7 +248,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       } else edge.hidden = true;
       // thought bubble
       if (thoughtT > 0) { if (!cardOpen) thoughtT -= dt; if (thoughtT <= 0) { thought.hidden = true; thoughtGap = .35; } }
-      else { thoughtGap -= dt; if (thoughts.length && !cardOpen && thoughtGap <= 0 && thinker && (thoughts[0].who === 'warden' || !host.matches('.engine-mode'))) { const s = thoughts.shift()!; thoughtWho = s.who; thought.className = 'thought' + (s.who === 'warden' ? ' warden' : ''); thought.textContent = s.text; thoughtT = 2.4 + s.text.length * .05; if (s.who === 'warden') sfx.whisper(); else sfx.hmm(); } }
+      else { thoughtGap -= dt; if (thoughts.length && !cardOpen && thoughtGap <= 0 && thinker && (thoughts[0].who === 'warden' || !host.matches('.engine-mode'))) { const s = thoughts.shift()!; thoughtWho = s.who; thought.className = 'thought' + (s.who === 'warden' ? ' warden' : ''); thought.textContent = s.text; thoughtT = 2.4 + s.text.length * .05; if (s.who === 'warden') { if (voice?.has('Warden', s.text)) { void voice.play('Warden', s.text, { channel: 'bark', fx: 'stream' }); thoughtT = Math.max(thoughtT, voice.duration('Warden', s.text) + .6); } else sfx.whisper(); } else sfx.hmm(); } }
       if (thoughtT > 0 && thinker) {
         thought.hidden = cardOpen;
         // Zip thinks over his head (and from the screen edge when off screen); the Warden is a voice at the top

@@ -24,6 +24,7 @@ import { createSwingers } from './kit/swing';
 import { loadBodyKit, assembleLook } from './kit/body-kit';
 import { clearSight } from './canopy';
 import { tickHolo, beam as holoBeam, sparks as holoSparks, HOLO } from './kit/holo';
+import { ZIP_CLARITY } from './worlds/first-words-voice';
 import { ECHO_SOURCES, ECHO_NEEDED, ECHO_SKIFF_RULES, ECHO_SKIFF_STATION } from './worlds/first-words-echo';
 
 // Level 1 story controller. One goal at a time, always with a beacon; the
@@ -415,6 +416,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
     },
     tick(dt: number) {
       t += dt; tickHolo(dt); sparkFx.tick(dt); const z = o.zip();
+      g.zipClarity = beat === 'loom-done' ? ZIP_CLARITY.loom : ZIP_CLARITY.skiff;   // his voice clears as engine pieces return
       const sky = beat === 'fly' || beat === 'isle' || beat.startsWith('loom') || beat === 'to-loom';
       if (sky !== skyShown) { skyShown = sky; world.show('next', sky); world.show('route', sky); }
       if (sky) world.tick(z);
@@ -497,8 +499,8 @@ export function buildStory(scene: T.Scene, o: Opts) {
         }
         // sound and the town's reaction
         if (c0 < .4 && c >= .4) { sfx.rumble(.6); const l = life(); if (l) l.alarm = ship.position; }
-        if (c0 < 1.1 && c >= 1.1) g.bark('Neighbour', 'What is THAT?', 2);
-        if (c0 < 1.9 && c >= 1.9) { bells?.nudge(.9); skiff.gust(1); shake = Math.max(shake, .18); sfx.rumble(.8); g.bark('Gardener', 'Everyone inside!', 1.8); }
+        if (c0 < 1.1 && c >= 1.1) story.bark('alarm', 'start', 2);
+        if (c0 < 1.9 && c >= 1.9) { bells?.nudge(.9); skiff.gust(1); shake = Math.max(shake, .18); sfx.rumble(.8); story.bark('alarm', 'inside', 1.8); }
         if (c0 < 2.6 && c >= 2.6) { sfx.hum(2); shake = Math.max(shake, .12); story.bark('warden', 'start', 2.4, 'warden'); }
         if (c0 < 4.5 && c >= 4.5) { sfx.whoosh(); sfx.rumble(.7); }
         if (c0 < 5.0 && c >= 5.0) story.bark('mira_cry', 'start', 1.6);

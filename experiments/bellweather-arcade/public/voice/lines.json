@@ -1,0 +1,896 @@
+{
+ "_about": "Lines to speak (written by tools/voice-lines.mjs; clips made by tools/voice.mjs). key = clipKey(cast member, text, direction) in src/kit/voice.ts.",
+ "lines": [
+  {
+   "key": "d1dfc192",
+   "speaker": "folk0",
+   "voice": "Umbriel",
+   "style": "a relaxed townsperson chatting in passing",
+   "text": "A ship that listens. What was it listening for?",
+   "shown": "A ship that listens. What was it listening for?",
+   "from": "town:after"
+  },
+  {
+   "key": "18ef3ed1",
+   "speaker": "folk0",
+   "voice": "Umbriel",
+   "style": "a relaxed townsperson chatting in passing",
+   "text": "Did you see it? All ears, that thing.",
+   "shown": "Did you see it? All ears, that thing.",
+   "from": "town:after"
+  },
+  {
+   "key": "19713454",
+   "speaker": "folk0",
+   "voice": "Umbriel",
+   "style": "a relaxed townsperson chatting in passing",
+   "text": "Go after her, Zip. We'll keep the lanterns lit.",
+   "shown": "Go after her, Zip. We'll keep the lanterns lit.",
+   "from": "town:after"
+  },
+  {
+   "key": "68d084b0",
+   "speaker": "folk0",
+   "voice": "Umbriel",
+   "style": "a relaxed townsperson chatting in passing",
+   "text": "It flew off past the Blossom Isle.",
+   "shown": "It flew off past the Blossom Isle.",
+   "from": "town:after"
+  },
+  {
+   "key": "ffa2bc22",
+   "speaker": "folk0",
+   "voice": "Umbriel",
+   "style": "a relaxed townsperson chatting in passing",
+   "text": "Mira asked after you. She's by the outlook.",
+   "shown": "Mira asked after you. She's by the outlook.",
+   "from": "town:chatA"
+  },
+  {
+   "key": "b0de3c40",
+   "speaker": "folk0",
+   "voice": "Umbriel",
+   "style": "a relaxed townsperson chatting in passing",
+   "text": "Morning, courier! The bell garden hums louder when you pass.",
+   "shown": "Morning, courier! The bell garden hums louder when you pass.",
+   "from": "town:chatA"
+  },
+  {
+   "key": "a2399a39",
+   "speaker": "folk0",
+   "voice": "Umbriel",
+   "style": "a relaxed townsperson chatting in passing",
+   "text": "My lilies closed the moment it came.",
+   "shown": "My lilies closed the moment it came.",
+   "from": "town:after"
+  },
+  {
+   "key": "5278cb88",
+   "speaker": "folk0",
+   "voice": "Umbriel",
+   "style": "a relaxed townsperson chatting in passing",
+   "text": "Stay safe, courier. Something is wrong today.",
+   "shown": "Stay safe, courier. Something is wrong today.",
+   "from": "town:after"
+  },
+  {
+   "key": "95827812",
+   "speaker": "folk0",
+   "voice": "Umbriel",
+   "style": "a relaxed townsperson chatting in passing",
+   "text": "That ship took Mira! Right off the outlook.",
+   "shown": "That ship took Mira! Right off the outlook.",
+   "from": "town:after"
+  },
+  {
+   "key": "cf9ea3fb",
+   "speaker": "folk0",
+   "voice": "Umbriel",
+   "style": "a relaxed townsperson chatting in passing",
+   "text": "The bells rang on their own. Never seen that.",
+   "shown": "The bells rang on their own. Never seen that.",
+   "from": "town:after"
+  },
+  {
+   "key": "7fd05ab5",
+   "speaker": "folk0",
+   "voice": "Umbriel",
+   "style": "a relaxed townsperson chatting in passing",
+   "text": "The outlook's breezy today.",
+   "shown": "The outlook's breezy today.",
+   "from": "town:stroll3"
+  },
+  {
+   "key": "669d66ff",
+   "speaker": "folk0",
+   "voice": "Umbriel",
+   "style": "a relaxed townsperson chatting in passing",
+   "text": "Up early, Zip?",
+   "shown": "Up early, Zip?",
+   "from": "town:stroll3"
+  },
+  {
+   "key": "c6019d38",
+   "speaker": "folk1",
+   "voice": "Callirrhoe",
+   "style": "an easy-going townsperson chatting in passing, light Irish accent",
+   "text": "A ship that listens. What was it listening for?",
+   "shown": "A ship that listens. What was it listening for?",
+   "from": "town:after"
+  },
+  {
+   "key": "95b334b7",
+   "speaker": "folk1",
+   "voice": "Callirrhoe",
+   "style": "an easy-going townsperson chatting in passing, light Irish accent",
+   "text": "Did you see it? All ears, that thing.",
+   "shown": "Did you see it? All ears, that thing.",
+   "from": "town:after"
+  },
+  {
+   "key": "4a8d53c6",
+   "speaker": "folk1",
+   "voice": "Callirrhoe",
+   "style": "an easy-going townsperson chatting in passing, light Irish accent",
+   "text": "Go after her, Zip. We'll keep the lanterns lit.",
+   "shown": "Go after her, Zip. We'll keep the lanterns lit.",
+   "from": "town:after"
+  },
+  {
+   "key": "3549015e",
+   "speaker": "folk1",
+   "voice": "Callirrhoe",
+   "style": "an easy-going townsperson chatting in passing, light Irish accent",
+   "text": "It flew off past the Blossom Isle.",
+   "shown": "It flew off past the Blossom Isle.",
+   "from": "town:after"
+  },
+  {
+   "key": "eed84cf4",
+   "speaker": "folk1",
+   "voice": "Callirrhoe",
+   "style": "an easy-going townsperson chatting in passing, light Irish accent",
+   "text": "Lovely day for a walk, courier.",
+   "shown": "Lovely day for a walk, courier.",
+   "from": "town:stroll1"
+  },
+  {
+   "key": "169b697f",
+   "speaker": "folk1",
+   "voice": "Callirrhoe",
+   "style": "an easy-going townsperson chatting in passing, light Irish accent",
+   "text": "Lovely day for a walk.",
+   "shown": "Lovely day for a walk.",
+   "from": "town:stroll1"
+  },
+  {
+   "key": "a5a3de6b",
+   "speaker": "folk1",
+   "voice": "Callirrhoe",
+   "style": "an easy-going townsperson chatting in passing, light Irish accent",
+   "text": "My lilies closed the moment it came.",
+   "shown": "My lilies closed the moment it came.",
+   "from": "town:after"
+  },
+  {
+   "key": "af57a466",
+   "speaker": "folk1",
+   "voice": "Callirrhoe",
+   "style": "an easy-going townsperson chatting in passing, light Irish accent",
+   "text": "Stay safe, courier. Something is wrong today.",
+   "shown": "Stay safe, courier. Something is wrong today.",
+   "from": "town:after"
+  },
+  {
+   "key": "1f61d0fc",
+   "speaker": "folk1",
+   "voice": "Callirrhoe",
+   "style": "an easy-going townsperson chatting in passing, light Irish accent",
+   "text": "That ship took Mira! Right off the outlook.",
+   "shown": "That ship took Mira! Right off the outlook.",
+   "from": "town:after"
+  },
+  {
+   "key": "1c125dc9",
+   "speaker": "folk1",
+   "voice": "Callirrhoe",
+   "style": "an easy-going townsperson chatting in passing, light Irish accent",
+   "text": "The bells rang on their own. Never seen that.",
+   "shown": "The bells rang on their own. Never seen that.",
+   "from": "town:after"
+  },
+  {
+   "key": "7f8e1814",
+   "speaker": "folk2",
+   "voice": "Rasalgethi",
+   "style": "a thoughtful townsperson, light Indian English accent",
+   "text": "A ship that listens. What was it listening for?",
+   "shown": "A ship that listens. What was it listening for?",
+   "from": "town:after"
+  },
+  {
+   "key": "b634f173",
+   "speaker": "folk2",
+   "voice": "Rasalgethi",
+   "style": "a thoughtful townsperson, light Indian English accent",
+   "text": "Did you see it? All ears, that thing.",
+   "shown": "Did you see it? All ears, that thing.",
+   "from": "town:after"
+  },
+  {
+   "key": "fe0f7bc6",
+   "speaker": "folk2",
+   "voice": "Rasalgethi",
+   "style": "a thoughtful townsperson, light Indian English accent",
+   "text": "Every message here starts small. One word, then the next.",
+   "shown": "Every message here starts small. One word, then the next.",
+   "from": "town:reader"
+  },
+  {
+   "key": "ff4a3ada",
+   "speaker": "folk2",
+   "voice": "Rasalgethi",
+   "style": "a thoughtful townsperson, light Indian English accent",
+   "text": "Go after her, Zip. We'll keep the lanterns lit.",
+   "shown": "Go after her, Zip. We'll keep the lanterns lit.",
+   "from": "town:after"
+  },
+  {
+   "key": "51564262",
+   "speaker": "folk2",
+   "voice": "Rasalgethi",
+   "style": "a thoughtful townsperson, light Indian English accent",
+   "text": "It flew off past the Blossom Isle.",
+   "shown": "It flew off past the Blossom Isle.",
+   "from": "town:after"
+  },
+  {
+   "key": "f12c242f",
+   "speaker": "folk2",
+   "voice": "Rasalgethi",
+   "style": "a thoughtful townsperson, light Indian English accent",
+   "text": "My lilies closed the moment it came.",
+   "shown": "My lilies closed the moment it came.",
+   "from": "town:after"
+  },
+  {
+   "key": "0c3e3f18",
+   "speaker": "folk2",
+   "voice": "Rasalgethi",
+   "style": "a thoughtful townsperson, light Indian English accent",
+   "text": "Shh. I'm reading about the first words ever sent.",
+   "shown": "Shh. I'm reading about the first words ever sent.",
+   "from": "town:reader"
+  },
+  {
+   "key": "d2af7fd2",
+   "speaker": "folk2",
+   "voice": "Rasalgethi",
+   "style": "a thoughtful townsperson, light Indian English accent",
+   "text": "Stay safe, courier. Something is wrong today.",
+   "shown": "Stay safe, courier. Something is wrong today.",
+   "from": "town:after"
+  },
+  {
+   "key": "1504ca98",
+   "speaker": "folk2",
+   "voice": "Rasalgethi",
+   "style": "a thoughtful townsperson, light Indian English accent",
+   "text": "That ship took Mira! Right off the outlook.",
+   "shown": "That ship took Mira! Right off the outlook.",
+   "from": "town:after"
+  },
+  {
+   "key": "0d8c24fd",
+   "speaker": "folk2",
+   "voice": "Rasalgethi",
+   "style": "a thoughtful townsperson, light Indian English accent",
+   "text": "The bells rang on their own. Never seen that.",
+   "shown": "The bells rang on their own. Never seen that.",
+   "from": "town:after"
+  },
+  {
+   "key": "afc12dc3",
+   "speaker": "folk3",
+   "voice": "Vindemiatrix",
+   "style": "a gentle townsperson, light Australian accent",
+   "text": "A courier! Deliveries are running early today.",
+   "shown": "A courier! Deliveries are running early today.",
+   "from": "town:canopy"
+  },
+  {
+   "key": "8fc758bc",
+   "speaker": "folk3",
+   "voice": "Vindemiatrix",
+   "style": "a gentle townsperson, light Australian accent",
+   "text": "A ship that listens. What was it listening for?",
+   "shown": "A ship that listens. What was it listening for?",
+   "from": "town:after"
+  },
+  {
+   "key": "cf83d027",
+   "speaker": "folk3",
+   "voice": "Vindemiatrix",
+   "style": "a gentle townsperson, light Australian accent",
+   "text": "Busy day? Me too.",
+   "shown": "Busy day? Me too.",
+   "from": "town:stroll2"
+  },
+  {
+   "key": "d833db4b",
+   "speaker": "folk3",
+   "voice": "Vindemiatrix",
+   "style": "a gentle townsperson, light Australian accent",
+   "text": "Did you see it? All ears, that thing.",
+   "shown": "Did you see it? All ears, that thing.",
+   "from": "town:after"
+  },
+  {
+   "key": "4ec72542",
+   "speaker": "folk3",
+   "voice": "Vindemiatrix",
+   "style": "a gentle townsperson, light Australian accent",
+   "text": "Go after her, Zip. We'll keep the lanterns lit.",
+   "shown": "Go after her, Zip. We'll keep the lanterns lit.",
+   "from": "town:after"
+  },
+  {
+   "key": "468e956a",
+   "speaker": "folk3",
+   "voice": "Vindemiatrix",
+   "style": "a gentle townsperson, light Australian accent",
+   "text": "It flew off past the Blossom Isle.",
+   "shown": "It flew off past the Blossom Isle.",
+   "from": "town:after"
+  },
+  {
+   "key": "cf1be987",
+   "speaker": "folk3",
+   "voice": "Vindemiatrix",
+   "style": "a gentle townsperson, light Australian accent",
+   "text": "My lilies closed the moment it came.",
+   "shown": "My lilies closed the moment it came.",
+   "from": "town:after"
+  },
+  {
+   "key": "0f889b10",
+   "speaker": "folk3",
+   "voice": "Vindemiatrix",
+   "style": "a gentle townsperson, light Australian accent",
+   "text": "Oh! Hello there, little courier.",
+   "shown": "Oh! Hello there, little courier.",
+   "from": "town:stroll2"
+  },
+  {
+   "key": "0a4f8c71",
+   "speaker": "folk3",
+   "voice": "Vindemiatrix",
+   "style": "a gentle townsperson, light Australian accent",
+   "text": "Stay a while. The shade under the arch is the best in town.",
+   "shown": "Stay a while. The shade under the arch is the best in town.",
+   "from": "town:canopy"
+  },
+  {
+   "key": "94e899fa",
+   "speaker": "folk3",
+   "voice": "Vindemiatrix",
+   "style": "a gentle townsperson, light Australian accent",
+   "text": "Stay safe, courier. Something is wrong today.",
+   "shown": "Stay safe, courier. Something is wrong today.",
+   "from": "town:after"
+  },
+  {
+   "key": "e2f88440",
+   "speaker": "folk3",
+   "voice": "Vindemiatrix",
+   "style": "a gentle townsperson, light Australian accent",
+   "text": "That ship took Mira! Right off the outlook.",
+   "shown": "That ship took Mira! Right off the outlook.",
+   "from": "town:after"
+  },
+  {
+   "key": "49b28f35",
+   "speaker": "folk3",
+   "voice": "Vindemiatrix",
+   "style": "a gentle townsperson, light Australian accent",
+   "text": "The bells rang on their own. Never seen that.",
+   "shown": "The bells rang on their own. Never seen that.",
+   "from": "town:after"
+  },
+  {
+   "key": "044eb3dc",
+   "speaker": "Gardener",
+   "voice": "Gacrux",
+   "style": "a warm, motherly gardener",
+   "text": "A ship that listens. What was it listening for?",
+   "shown": "A ship that listens. What was it listening for?",
+   "from": "town:after"
+  },
+  {
+   "key": "737877eb",
+   "speaker": "Gardener",
+   "voice": "Gacrux",
+   "style": "a warm, motherly gardener",
+   "text": "Did you see it? All ears, that thing.",
+   "shown": "Did you see it? All ears, that thing.",
+   "from": "town:after"
+  },
+  {
+   "key": "b1c5ad7e",
+   "speaker": "Gardener",
+   "voice": "Gacrux",
+   "style": "a warm, motherly gardener; urgent shout to the crowd",
+   "text": "Everyone inside!",
+   "shown": "Everyone inside!",
+   "from": "first-words.l1:alarm.inside"
+  },
+  {
+   "key": "1855a4a2",
+   "speaker": "Gardener",
+   "voice": "Gacrux",
+   "style": "a warm, motherly gardener",
+   "text": "Go after her, Zip. We'll keep the lanterns lit.",
+   "shown": "Go after her, Zip. We'll keep the lanterns lit.",
+   "from": "town:after"
+  },
+  {
+   "key": "0bf9a30d",
+   "speaker": "Gardener",
+   "voice": "Gacrux",
+   "style": "a warm, motherly gardener",
+   "text": "Heard the old machine answered someone yesterday.",
+   "shown": "Heard the old machine answered someone yesterday.",
+   "from": "town:chatB"
+  },
+  {
+   "key": "dc91fc4a",
+   "speaker": "Gardener",
+   "voice": "Gacrux",
+   "style": "a warm, motherly gardener",
+   "text": "It flew off past the Blossom Isle.",
+   "shown": "It flew off past the Blossom Isle.",
+   "from": "town:after"
+  },
+  {
+   "key": "2fa40af8",
+   "speaker": "Gardener",
+   "voice": "Gacrux",
+   "style": "a warm, motherly gardener",
+   "text": "Mind the lilies. They close when a message goes astray.",
+   "shown": "Mind the lilies. They close when a message goes astray.",
+   "from": "town:chatB"
+  },
+  {
+   "key": "8fc06c67",
+   "speaker": "Gardener",
+   "voice": "Gacrux",
+   "style": "a warm, motherly gardener",
+   "text": "My lilies closed the moment it came.",
+   "shown": "My lilies closed the moment it came.",
+   "from": "town:after"
+  },
+  {
+   "key": "7b55ff1a",
+   "speaker": "Gardener",
+   "voice": "Gacrux",
+   "style": "a warm, motherly gardener",
+   "text": "Stay safe, courier. Something is wrong today.",
+   "shown": "Stay safe, courier. Something is wrong today.",
+   "from": "town:after"
+  },
+  {
+   "key": "e38d63a0",
+   "speaker": "Gardener",
+   "voice": "Gacrux",
+   "style": "a warm, motherly gardener",
+   "text": "That ship took Mira! Right off the outlook.",
+   "shown": "That ship took Mira! Right off the outlook.",
+   "from": "town:after"
+  },
+  {
+   "key": "60b67cd5",
+   "speaker": "Gardener",
+   "voice": "Gacrux",
+   "style": "a warm, motherly gardener",
+   "text": "The bells rang on their own. Never seen that.",
+   "shown": "The bells rang on their own. Never seen that.",
+   "from": "town:after"
+  },
+  {
+   "key": "a6d39ed8",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "An empty satchel? I need notes, pal. Rules are rules!",
+   "shown": "An empty satchel? I need notes, pal. Rules are rules!",
+   "from": "island.ts"
+  },
+  {
+   "key": "132a18a9",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "East Falls! The sign said so. Rules are rules!",
+   "shown": "East Falls! The sign said so. Rules are rules!",
+   "from": "island.ts"
+  },
+  {
+   "key": "3c70cc49",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Halt! I'm the Gate. I open only where notes tell me. Rules are rules!",
+   "shown": "Halt! I'm the Gate. I open only where notes tell me. Rules are rules!",
+   "from": "island.ts"
+  },
+  {
+   "key": "9e8c5044",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Huh. Nobody told me the bridge fell. That poster is old news!",
+   "shown": "Huh. Nobody told me the bridge fell. That poster is old news!",
+   "from": "island.ts"
+  },
+  {
+   "key": "5a242946",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Lotus? East? Falls? Two notes that disagree! My hinges hurt.",
+   "shown": "Lotus? East? Falls? Two notes that disagree! My hinges hurt.",
+   "from": "island.ts"
+  },
+  {
+   "key": "a78af2f6",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Old Bridge, coming right up!",
+   "shown": "Old Bridge, coming right up!",
+   "from": "island.ts"
+  },
+  {
+   "key": "34917e06",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Oops. I can't tell a real clue from a planted order. I just do what notes say.",
+   "shown": "Oops. I can't tell a real clue from a planted order. I just do what notes say.",
+   "from": "island.ts"
+  },
+  {
+   "key": "8d810a58",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Open to… somewhere? I need a place, pal.",
+   "shown": "Open to… somewhere? I need a place, pal.",
+   "from": "island.ts"
+  },
+  {
+   "key": "70462ca9",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Past the Lotus Terraces it is! Mind the step.",
+   "shown": "Past the Lotus Terraces it is! Mind the step.",
+   "from": "island.ts"
+  },
+  {
+   "key": "485f5a7f",
+   "speaker": "Mira",
+   "voice": "Leda",
+   "style": "a young woman at a sky-town festival: warm, curious, quick, a little teasing",
+   "text": "And you blink. The bell-ringer bot has never once blinked.",
+   "shown": "And you blink. The bell-ringer bot has never once blinked.",
+   "from": "first-words.l1:mira.blink"
+  },
+  {
+   "key": "8cf886ae",
+   "speaker": "Mira",
+   "voice": "Leda",
+   "style": "a young woman at a sky-town festival: warm, curious, quick, a little teasing",
+   "text": "Come look: the Blossom Isle is clear today.",
+   "shown": "Come look: the Blossom Isle is clear today.",
+   "from": "town:mira"
+  },
+  {
+   "key": "ac866381",
+   "speaker": "Mira",
+   "voice": "Leda",
+   "style": "a young woman at a sky-town festival: warm, curious, quick, a little teasing",
+   "text": "There you are, Zip! The garden bell has been waiting for you.",
+   "shown": "There you are, Zip! The garden bell has been waiting for you.",
+   "from": "town:mira"
+  },
+  {
+   "key": "db87f3e8",
+   "speaker": "Mira",
+   "voice": "Leda",
+   "style": "a young woman at a sky-town festival: warm, curious, quick, a little teasing",
+   "text": "There you are! Hang the lantern on the skiff for me?",
+   "shown": "There you are! Hang the lantern on the skiff for me?",
+   "from": "first-words.l1:mira.start"
+  },
+  {
+   "key": "127771f0",
+   "speaker": "Mira",
+   "voice": "Leda",
+   "style": "a young woman at a sky-town festival: warm, curious, quick, a little teasing",
+   "text": "You're a strange little courier. Wait… what's that noise?",
+   "shown": "You're a strange little courier. Wait… what's that noise?",
+   "from": "first-words.l1:mira.look"
+  },
+  {
+   "key": "28a5ae2c",
+   "speaker": "Mira",
+   "voice": "Leda",
+   "style": "a young woman at a sky-town festival: warm, curious, quick, a little teasing",
+   "text": "Zip, why do you beep before you answer? Other bots don't.",
+   "shown": "Zip, why do you beep before you answer? Other bots don't.",
+   "from": "first-words.l1:mira.beep"
+  },
+  {
+   "key": "807f8aec",
+   "speaker": "Mira",
+   "voice": "Leda",
+   "style": "a young woman at a sky-town festival: warm, curious, quick, a little teasing; screaming his name as she is pulled into the sky",
+   "text": "Zip!",
+   "shown": "Zip!",
+   "from": "first-words.l1:mira_cry.start"
+  },
+  {
+   "key": "0a3ef319",
+   "speaker": "Mira",
+   "voice": "Leda",
+   "style": "a young woman at a sky-town festival: warm, curious, quick, a little teasing",
+   "text": "Zip! I kept the lantern. Follow my marks. They're taking us past Loom Isle.",
+   "shown": "Zip! I kept the lantern. Follow my marks. They're taking us past Loom Isle.",
+   "from": "relay.ts"
+  },
+  {
+   "key": "be15bb15",
+   "speaker": "Mira",
+   "voice": "Leda",
+   "style": "a young woman at a sky-town festival: warm, curious, quick, a little teasing; calling across a courtyard, waving",
+   "text": "Zip! Up here! The skiff's ready!",
+   "shown": "Zip! Up here! The skiff's ready!",
+   "from": "first-words.l1:call.start"
+  },
+  {
+   "key": "e1f9ca74",
+   "speaker": "Neighbour",
+   "voice": "Sadaltager",
+   "style": "a cheerful older townsman",
+   "text": "A ship that listens. What was it listening for?",
+   "shown": "A ship that listens. What was it listening for?",
+   "from": "town:after"
+  },
+  {
+   "key": "7edf05d3",
+   "speaker": "Neighbour",
+   "voice": "Sadaltager",
+   "style": "a cheerful older townsman",
+   "text": "Did you see it? All ears, that thing.",
+   "shown": "Did you see it? All ears, that thing.",
+   "from": "town:after"
+  },
+  {
+   "key": "a79678fa",
+   "speaker": "Neighbour",
+   "voice": "Sadaltager",
+   "style": "a cheerful older townsman",
+   "text": "Go after her, Zip. We'll keep the lanterns lit.",
+   "shown": "Go after her, Zip. We'll keep the lanterns lit.",
+   "from": "town:after"
+  },
+  {
+   "key": "5b483c02",
+   "speaker": "Neighbour",
+   "voice": "Sadaltager",
+   "style": "a cheerful older townsman",
+   "text": "It flew off past the Blossom Isle.",
+   "shown": "It flew off past the Blossom Isle.",
+   "from": "town:after"
+  },
+  {
+   "key": "a1c84c4f",
+   "speaker": "Neighbour",
+   "voice": "Sadaltager",
+   "style": "a cheerful older townsman",
+   "text": "My lilies closed the moment it came.",
+   "shown": "My lilies closed the moment it came.",
+   "from": "town:after"
+  },
+  {
+   "key": "976c5232",
+   "speaker": "Neighbour",
+   "voice": "Sadaltager",
+   "style": "a cheerful older townsman",
+   "text": "Stay safe, courier. Something is wrong today.",
+   "shown": "Stay safe, courier. Something is wrong today.",
+   "from": "town:after"
+  },
+  {
+   "key": "4bb090b8",
+   "speaker": "Neighbour",
+   "voice": "Sadaltager",
+   "style": "a cheerful older townsman",
+   "text": "That ship took Mira! Right off the outlook.",
+   "shown": "That ship took Mira! Right off the outlook.",
+   "from": "town:after"
+  },
+  {
+   "key": "779fe3dd",
+   "speaker": "Neighbour",
+   "voice": "Sadaltager",
+   "style": "a cheerful older townsman",
+   "text": "The bells rang on their own. Never seen that.",
+   "shown": "The bells rang on their own. Never seen that.",
+   "from": "town:after"
+  },
+  {
+   "key": "dd1f2c1a",
+   "speaker": "Neighbour",
+   "voice": "Sadaltager",
+   "style": "a cheerful older townsman",
+   "text": "The falls sing on still days. Listen.",
+   "shown": "The falls sing on still days. Listen.",
+   "from": "town:view"
+  },
+  {
+   "key": "e624292f",
+   "speaker": "Neighbour",
+   "voice": "Sadaltager",
+   "style": "a cheerful older townsman; shocked, shouting up at the sky",
+   "text": "What is THAT?",
+   "shown": "What is THAT?",
+   "from": "first-words.l1:alarm.start"
+  },
+  {
+   "key": "a0ea140e",
+   "speaker": "Neighbour",
+   "voice": "Sadaltager",
+   "style": "a cheerful older townsman",
+   "text": "You can see the Blossom Isle from here. Beautiful, isn't it?",
+   "shown": "You can see the Blossom Isle from here. Beautiful, isn't it?",
+   "from": "town:view"
+  },
+  {
+   "key": "416b55b2",
+   "speaker": "Tavi",
+   "voice": "Achird",
+   "style": "a kind young weaver, friendly and a bit flustered",
+   "text": "A splitter spool. Now you can break words into pieces too.",
+   "shown": "A splitter spool. Now you can break words into pieces too.",
+   "from": "first-words.stop2:thanks.gift"
+  },
+  {
+   "key": "eb8c7fb6",
+   "speaker": "Tavi",
+   "voice": "Achird",
+   "style": "a kind young weaver, friendly and a bit flustered",
+   "text": "Free! Mira passed through here. She left you this.",
+   "shown": "Free! Mira passed through here. She left you this.",
+   "from": "first-words.stop2:thanks.start"
+  },
+  {
+   "key": "e821a21e",
+   "speaker": "Tavi",
+   "voice": "Achird",
+   "style": "a kind young weaver, friendly and a bit flustered",
+   "text": "The loom reads pieces, not words. Six slots on the rail, that's all.",
+   "shown": "The loom reads pieces, not words. Six slots on the rail, that's all.",
+   "from": "first-words.stop2:tavi.how"
+  },
+  {
+   "key": "26051cd4",
+   "speaker": "Tavi",
+   "voice": "Achird",
+   "style": "a kind young weaver, friendly and a bit flustered; muffled, calling from behind heavy cloth",
+   "text": "Who's there? The Warden jammed my loom. I'm stuck behind the cloth!",
+   "shown": "Who's there? The Warden jammed my loom. I'm stuck behind the cloth!",
+   "from": "first-words.stop2:tavi.start"
+  },
+  {
+   "key": "14631539",
+   "speaker": "Warden",
+   "voice": "Algenib",
+   "style": "a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts; whispered inside someone's head",
+   "text": "…Still thinking in there, little courier? Good.",
+   "shown": "…Still thinking in there, little courier? Good.",
+   "from": "first-words.l1:thought.stream-warden"
+  },
+  {
+   "key": "37c1d4f1",
+   "speaker": "Warden",
+   "voice": "Algenib",
+   "style": "a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts; slow, savouring each word",
+   "text": "Bellweather's courier. You beep. You blink. You think.",
+   "shown": "Bellweather's courier. You beep. You blink. You think.",
+   "from": "first-words.l1:warden.start"
+  },
+  {
+   "key": "afe07781",
+   "speaker": "Warden",
+   "voice": "Algenib",
+   "style": "a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts",
+   "text": "Brave, too. Machines aren't brave.",
+   "shown": "Brave, too. Machines aren't brave.",
+   "from": "first-words.l1:warden.shielded"
+  },
+  {
+   "key": "eb796486",
+   "speaker": "Warden",
+   "voice": "Algenib",
+   "style": "a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts; whispered, dry, almost friendly",
+   "text": "I played that one too. Nobody finishes the rings.",
+   "shown": "I played that one too. Nobody finishes the rings.",
+   "from": "first-words.l1:thought.ring-veteran"
+  },
+  {
+   "key": "2026fb12",
+   "speaker": "Warden",
+   "voice": "Algenib",
+   "style": "a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts; whispered inside someone's head",
+   "text": "Six slots, little courier. Spend them wisely.",
+   "shown": "Six slots, little courier. Spend them wisely.",
+   "from": "first-words.stop2:thought.loom-warden"
+  },
+  {
+   "key": "b9d1c562",
+   "speaker": "Warden",
+   "voice": "Algenib",
+   "style": "a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts; calm, final, as he strikes",
+   "text": "Thinking, I allow. Talking, I don't.",
+   "shown": "Thinking, I allow. Talking, I don't.",
+   "from": "first-words.l1:warden.take"
+  },
+  {
+   "key": "3d3424dc",
+   "speaker": "Warden",
+   "voice": "Algenib",
+   "style": "a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts; mocking, leaving",
+   "text": "Want her back? Come and get her, thinker.",
+   "shown": "Want her back? Come and get her, thinker.",
+   "from": "first-words.l1:warden.leave"
+  },
+  {
+   "key": "4ba7783e",
+   "speaker": "Warden",
+   "voice": "Algenib",
+   "style": "a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts; whispered inside someone's head",
+   "text": "Your loop is cracked, little courier. Think around it.",
+   "shown": "Your loop is cracked, little courier. Think around it.",
+   "from": "first-words.l1:thought.loop-broken"
+  },
+  {
+   "key": "136cbeb7",
+   "speaker": "Zip",
+   "voice": "Puck",
+   "style": "a small, brave courier robot: eager, bright, clipped; a command, careful and proud: his first words back",
+   "text": "“Skiff, rise toward Blossom Isle.”",
+   "shown": "“Skiff, rise toward Blossom Isle.”",
+   "from": "first-words.l1:awake-echo.start"
+  },
+  {
+   "key": "dc0434c2",
+   "speaker": "Zip",
+   "voice": "Puck",
+   "style": "a small, brave courier robot: eager, bright, clipped; a desperate shout after her",
+   "text": "Mira! Mira!",
+   "shown": "MIR— kkzzht… krrsh…",
+   "from": "first-words.l1:static.start"
+  },
+  {
+   "key": "b846e35e",
+   "speaker": "Zip",
+   "voice": "Puck",
+   "style": "a small, brave courier robot: eager, bright, clipped",
+   "text": "Real models guess pieces of words, learned from huge amounts of text. The loop is the same: each new piece joins the input.",
+   "shown": "Real models guess pieces of words, learned from huge amounts of text. The loop is the same: each new piece joins the input.",
+   "from": "first-words.l1:awake-echo.real"
+  }
+ ]
+}

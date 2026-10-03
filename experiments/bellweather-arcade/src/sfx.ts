@@ -28,6 +28,8 @@ function noise(dur: number, vol = .2, from = 1800, to = 300, delay = 0) {
   g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(.001, t0 + dur);
   s.connect(f); f.connect(g); g.connect(master); s.start(t0);
 }
+/** the shared audio graph (voices play through the same master, so Sound off mutes them too) */
+export function audio(): { ctx: AudioContext; master: GainNode } | null { const c = ensure(); return c && master ? { ctx: c, master } : null; }
 const buzz = (ms: number | number[]) => { try { navigator.vibrate?.(ms); } catch { /* not on this device */ } };
 
 export const sfx = {

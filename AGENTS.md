@@ -48,6 +48,10 @@ Desmic confirmed on 3 Oct 2026:
 - Speech and prompts live in the world: speakers talk in bubbles over their heads, others bark in passing,
   tutorial prompts sit on the thing to touch (`src/kit/overlay.ts`, `guide.ts`). Never explain what the
   player just saw; cutscenes are directed shots, not captions.
+- Spoken lines are voiced from the story data: the cast and each line's direction live in
+  `src/worlds/first-words-voice.ts`; `node tools/voice-lines.mjs` (after a build) lists the lines and
+  `node tools/voice.mjs` acts the new ones with Gemini 3.8 Flash TTS (key in `.env`, never committed).
+  A line without a clip still shows; it is just silent.
 - Check the actual running game when a claim is about feel, motion, camera or audio. Screenshots and
   source alone can't certify those.
 - Use direct protagonist control (Zip). Don't add a separate helper avatar because story text says

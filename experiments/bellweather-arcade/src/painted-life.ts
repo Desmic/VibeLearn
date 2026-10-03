@@ -3,6 +3,7 @@ import { mulberry32 } from './vendor/rng';
 import { buildMira } from './companions';
 import { buildTownsperson, type Townsperson } from './townsfolk-rig';
 import { MIRA_LOOK, type BodyKit } from './kit/body-kit';
+import { TOWN_LINES, TOWN_AFTER, TOWN_VOICES } from './worlds/bellweather-lines';
 
 // Signs of life for `render=painted`: a few townsfolk in long coats and woven
 // hats (original designs, echoing the reference's inhabitants), Mira waiting at
@@ -33,70 +34,56 @@ function birds(root: T.Object3D, center: T.Vector3, n: number) {
   };
 }
 
-interface LifeOptions { clips: T.AnimationClip[]; kit?: BodyKit | null; camera: T.Camera; host: HTMLElement; onGreet?: (from: T.Vector3) => void; }
-interface Greeter { who: Townsperson | null; pos: () => T.Vector3; lines: string[]; cool: number; timer: number; spoken: number; wave: boolean; turn?: (target: T.Vector3, dt: number) => void; }
+interface LifeOptions { clips: T.AnimationClip[]; kit?: BodyKit | null; camera: T.Camera; host: HTMLElement; onGreet?: (from: T.Vector3) => void;
+  /** say a line aloud (voiced lines): returns how long it lasts, 0 if unvoiced */
+  speak?: (voice: string, text: string, at: T.Vector3) => number; }
+interface Greeter { who: Townsperson | null; pos: () => T.Vector3; lines: string[]; voice: string; cool: number; timer: number; spoken: number; wave: boolean; turn?: (target: T.Vector3, dt: number) => void; }
 
-// Original lines. They sketch the world and hint at where to go; later they
-// come from the course's StoryWorldSpec instead of being hard-coded here.
-const LINES: Record<string, string[]> = {
-  chatA: ['Morning, courier! The bell garden hums louder when you pass.', 'Mira asked after you. She\'s by the outlook.'],
-  chatB: ['Mind the lilies. They close when a message goes astray.', 'Heard the old machine answered someone yesterday.'],
-  view: ['You can see the Blossom Isle from here. Beautiful, isn\'t it?', 'The falls sing on still days. Listen.'],
-  canopy: ['A courier! Deliveries are running early today.', 'Stay a while. The shade under the arch is the best in town.'],
-  reader: ['Shh. I\'m reading about the first words ever sent.', 'Every message here starts small. One word, then the next.'],
-  stroll1: ['Lovely day for a walk.', 'Lovely day for a walk, courier.'],
-  stroll2: ['Oh! Hello there, little courier.', 'Busy day? Me too.'],
-  stroll3: ['Up early, Zip?', 'The outlook\'s breezy today.'],
-  mira: ['There you are, Zip! The garden bell has been waiting for you.', 'Come look: the Blossom Isle is clear today.'],
-};
-// After the Warden's attack the town talks about nothing else (the story sets root.userData.after),
-// and keeps glancing at the sky where the ship went (over the town, toward the Blossom Isle).
+// What the townsfolk say, and in whose voice, is data (worlds/bellweather-lines.ts).
+const LINES = TOWN_LINES, AFTER = TOWN_AFTER;
+// ...and they keep glancing at the sky where the ship went (over the town, toward the Blossom Isle).
 const GONE = new T.Vector3(0, 30, 46);
-const AFTER = [
-  'That ship took Mira! Right off the outlook.', 'The bells rang on their own. Never seen that.',
-  'It flew off past the Blossom Isle.', 'Stay safe, courier. Something is wrong today.',
-  'A ship that listens. What was it listening for?', 'Did you see it? All ears, that thing.',
-  'Go after her, Zip. We\'ll keep the lanterns lit.', 'My lilies closed the moment it came.',
-];
 
 export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true, opts: LifeOptions) {
   const root = new T.Group(); root.name = 'painted-life'; scene.add(root);
   const greeters: Greeter[] = [];
   const folk: Townsperson[] = [];
-  const place = (seed: number, x: number, z: number, faceY: number, base: 'Idle' | 'Talk', lines: string[]) => {
+  const place = (seed: number, x: number, z: number, faceY: number, base: 'Idle' | 'Talk', key: string) => {
+    const lines = LINES[key];
     const p = buildTownsperson(seed, opts.clips, opts.kit); p.root.position.set(x, .13, z); p.root.rotation.y = faceY; p.setBase(base);
     root.add(p.root); solid(x, z, .36); folk.push(p);
     const home = faceY;
-    greeters.push({ who: p, pos: () => p.root.position, lines, cool: 0, timer: -1, spoken: 0, wave: true,
+    greeters.push({ who: p, pos: () => p.root.position, lines, voice: TOWN_VOICES[key] ?? 'folk0', cool: 0, timer: -1, spoken: 0, wave: true,
       turn: (target, dt) => { const want = Math.atan2(-(target.x - p.root.position.x), -(target.z - p.root.position.z)); rotateToward(p.root, want, dt * 2.5, home, 1.3); } });
   };
   // two neighbours talking by the outlook; one taking in the view
-  place(3, -5.4, -11.1, -Math.PI / 2 + .3, 'Talk', LINES.chatA);
-  place(8, -4.3, -11.0, Math.PI / 2 - .2, 'Talk', LINES.chatB);
-  place(14, 6.6, -11.0, 0, 'Idle', LINES.view);
+  place(3, -5.4, -11.1, -Math.PI / 2 + .3, 'Talk', 'chatA');
+  place(8, -4.3, -11.0, Math.PI / 2 - .2, 'Talk', 'chatB');
+  place(14, 6.6, -11.0, 0, 'Idle', 'view');
   // someone waiting under the arrival canopy, and a figure reading near the bench
-  place(21, -6.8, 6.4, .9, 'Idle', LINES.canopy);
-  place(27, 6.9, 1.2, -1.9, 'Idle', LINES.reader);
+  place(21, -6.8, 6.4, .9, 'Idle', 'canopy');
+  place(27, 6.9, 1.2, -1.9, 'Idle', 'reader');
   // Strollers keep to open ground away from the route; they pause to greet.
   const strollers: { p: Townsperson, a: T.Vector3, b: T.Vector3, speed: number, u: number, g: Greeter }[] = [];
-  const stroll = (seed: number, a: [number, number], b: [number, number], speed: number, u: number, lines: string[]) => {
+  const stroll = (seed: number, a: [number, number], b: [number, number], speed: number, u: number, key: string) => {
+    const lines = LINES[key];
     const p = buildTownsperson(seed, opts.clips, opts.kit); p.setBase('Stroll'); root.add(p.root); folk.push(p);
     // the shadow map is baked once, so a walker's shadow would stay behind; walkers get a soft contact shade instead
     p.root.traverse(o => { o.castShadow = false; }); p.root.add(contactShade());
-    const g: Greeter = { who: p, pos: () => p.root.position, lines, cool: 0, timer: -1, spoken: 0, wave: true };
+    const g: Greeter = { who: p, pos: () => p.root.position, lines, voice: TOWN_VOICES[key] ?? 'folk0', cool: 0, timer: -1, spoken: 0, wave: true };
     greeters.push(g);
     strollers.push({ p, a: new T.Vector3(a[0], .13, a[1]), b: new T.Vector3(b[0], .13, b[1]), speed, u, g });
   };
-  stroll(33, [-7.6, 0.4], [-2.4, 0.9], .55, .1, LINES.stroll1);
-  stroll(38, [3.4, -0.6], [7.6, 0.6], .48, .62, LINES.stroll2);
-  stroll(41, [-7.6, -6.8], [-1.6, -6.9], .5, .35, LINES.stroll3);
+  stroll(33, [-7.6, 0.4], [-2.4, 0.9], .55, .1, 'stroll1');
+  stroll(38, [3.4, -0.6], [7.6, 0.6], .48, .62, 'stroll2');
+  stroll(41, [-7.6, -6.8], [-1.6, -6.9], .5, .35, 'stroll3');
   // Mira waits at the outlook, turned toward the arriving player
   // Mira is built from the body kit (a person, with the shared clips) when it loaded; the old rig otherwise
   const miraP = opts.kit ? buildTownsperson(97, opts.clips, opts.kit, MIRA_LOOK) : null;
   const mira = miraP ? { root: miraP.root, animate: (_t: number, _s: number, _r: boolean) => {} } : buildMira(); mira.root.name = 'Mira'; mira.root.userData.fade = { halfW: .4, y0: 0, y1: 1.9, dither: !!miraP }; mira.root.position.set(5.3, .13, -10.95); mira.root.rotation.y = Math.PI - .5; root.add(mira.root); solid(5.3, -10.95, .38);
   const miraHome = mira.root.rotation.y;
   const miraTop = new T.Object3D(); miraTop.position.set(0, 2.05, 0); mira.root.add(miraTop);
-  const miraG: Greeter = { who: miraP, pos: () => mira.root.position, lines: LINES.mira, cool: 0, timer: -1, spoken: 0, wave: false,
+  const miraG: Greeter = { who: miraP, pos: () => mira.root.position, lines: LINES.mira, voice: 'Mira', cool: 0, timer: -1, spoken: 0, wave: false,
     turn: (target, dt) => rotateToward(mira.root, Math.atan2(-(target.x - mira.root.position.x), -(target.z - mira.root.position.z)), dt * 2, miraHome, 1.6) };
   greeters.push(miraG);
   const still = folk.filter(p => !strollers.some(s => s.p === p));
@@ -105,7 +92,8 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
   // Speech bubbles are DOM (crisp text at any render scale), anchored above heads.
   const bubble = document.createElement('div'); bubble.className = 'speech'; bubble.hidden = true; bubble.setAttribute('aria-live', 'polite'); opts.host.appendChild(bubble);
   let bubbleFor: Greeter | null = null, bubbleT = 0;
-  const say = (g: Greeter, text: string) => { bubble.textContent = text; bubble.hidden = false; bubbleFor = g; bubbleT = 3.6; };
+  const voiceAt = new T.Vector3();
+  const say = (g: Greeter, text: string) => { bubble.textContent = text; bubble.hidden = false; bubbleFor = g; const dur = opts.speak?.(g.voice, text, voiceAt.copy(g.pos()).setY(g.pos().y + 1.7)) ?? 0; bubbleT = Math.max(3.6, dur + .8); };
 
   let t = 0, wasAlarm = false; const zipHead = new T.Vector3(), tmp = new T.Vector3(), greetFrom = new T.Vector3();
   const tick = (dt: number, reduced: boolean, zip?: { pos: T.Vector3, speed: number }) => {

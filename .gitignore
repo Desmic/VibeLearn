@@ -30,3 +30,6 @@ node_modules
 /assets/third-party/
 # Claude's scratch reports and screenshots for review (not source).
 /Claude outputs/
+
+# voice masters (WAV from tools/voice.mjs; the game uses the MP3s in public/voice)
+/experiments/bellweather-arcade/authoring/voice/
