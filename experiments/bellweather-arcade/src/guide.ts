@@ -81,7 +81,10 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
   // Thought bubbles never block play.
   // Queued, one at a time, and held while a card is open.
   const thought = document.createElement('div'); thought.className = 'thought'; thought.hidden = true; host.appendChild(thought);
-  const thoughts: { text: string; who: 'zip' | 'warden' }[] = [], thoughtSeen = new Set<string>(); let thoughtWho: 'zip' | 'warden' = 'zip', thoughtT = 0, thoughtGap = 0, thinker: (() => T.Vector3) | null = null;
+  // a thought that waited too long (a card, the engine, a flight) has lost its moment: Zip's
+  // "Words have a taste" belongs to the first word, not to landing on the next island
+  const THOUGHT_STALE = 40; let thoughtClock = 0;
+  const thoughts: { text: string; who: 'zip' | 'warden'; at: number }[] = [], thoughtSeen = new Set<string>(); let thoughtWho: 'zip' | 'warden' = 'zip', thoughtT = 0, thoughtGap = 0, thinker: (() => T.Vector3) | null = null;
   // toasts and star results
   const toastEl = document.createElement('div'); toastEl.className = 'toast'; toastEl.hidden = true; host.appendChild(toastEl);
   let toastTimer = 0;
@@ -125,6 +128,8 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       return 0;
     },
     get barking() { return barks.some(b => b.t > 0); },
+    /** end passing lines at once (one speaker's, or everyone's): bubble and voice */
+    quiet(who?: string) { for (const b of barks) if (b.t > 0 && (!who || b.who === who)) { if (b.who) voice?.stopSpeaker(b.who); b.t = 0; b.el.hidden = true; b.who = ''; } },
     /** give the guide a voice: lines with a recorded clip are spoken */
     setVoice(v: Voice | null) { voice = v; },
     /** how clear Zip's (robot) voice is: 0 broken … 1 clean */
@@ -162,6 +167,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
     // One short line (speaker optional), optional chips, and 1-4 choices.
     // `via`: the anchor the voice comes from when it isn't the speaker's own (Mira over the relay)
     say(text: string, choices: Choice[] = [], opts: { speaker?: string; chips?: ChipOpt; picked?: Set<number>; pictures?: boolean; at?: () => T.Vector3 | null; via?: string } = {}) {
+      if (opts.speaker) api.quiet(opts.speaker);   // a speaker who starts talking ends their own passing line (no two bubbles for one person)
       cardOpen = true; host.classList.add('card-open'); act.hidden = true; brackets.hidden = true; card.hidden = false; card.innerHTML = '';
       // a speaker who is somewhere in the world talks in a bubble over their head
       let at = opts.at ?? (opts.via ? anchors.get(opts.via) : opts.speaker ? opts.speaker === 'Zip' ? (() => thinker ? head(thinker(), zipHead, 1.75) : null) : anchors.get(opts.speaker) : undefined);
@@ -196,7 +202,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       if (choices[0] && !inputMode.touch) (row.firstChild as HTMLButtonElement).focus({ preventScroll: true });
     },
     setThinker(fn: () => T.Vector3) { thinker = fn; },
-    think(text: string | string[], who: 'zip' | 'warden' = 'zip') { for (const x of Array.isArray(text) ? text : [text]) thoughts.push({ text: x, who }); },
+    think(text: string | string[], who: 'zip' | 'warden' = 'zip') { for (const x of Array.isArray(text) ? text : [text]) thoughts.push({ text: x, who, at: thoughtClock }); },
     thinkOnce(id: string, text: string | string[], who: 'zip' | 'warden' = 'zip') { if (thoughtSeen.has(id)) return false; thoughtSeen.add(id); api.think(text, who); return true; },
     get thinking() { return thoughtT > 0 || thoughts.length > 0; },
     /** drop queued thoughts and hide the current one (a cutscene starts); `skip` ids will never play */
@@ -267,6 +273,8 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
         }
       } else if (!edge.hidden) edge.hidden = true;
       // thought bubble
+      thoughtClock += dt;
+      while (thoughts.length && thoughts[0].who === 'zip' && thoughtClock - thoughts[0].at > THOUGHT_STALE) thoughts.shift();
       if (thoughtT > 0) { if (!cardOpen) thoughtT -= dt; if (thoughtT <= 0) { thought.hidden = true; thoughtGap = .35; } }
       else { thoughtGap -= dt; if (thoughts.length && !cardOpen && thoughtGap <= 0 && thinker && (thoughts[0].who === 'warden' || !host.matches('.engine-mode'))) { const s = thoughts.shift()!; thoughtWho = s.who; thought.className = 'thought' + (s.who === 'warden' ? ' warden' : ''); thought.textContent = s.text; thoughtT = 2.4 + s.text.length * .05; if (s.who === 'warden') { if (voice?.has('Warden', s.text)) { void voice.play('Warden', s.text, { channel: 'bark', fx: 'stream' }); thoughtT = Math.max(thoughtT, voice.duration('Warden', s.text) + .6); } else sfx.whisper(); } else sfx.hmm(); } }
       if (thoughtT > 0 && thinker) {

@@ -84,12 +84,16 @@ export function createOverlay(host: HTMLElement, camera: T.Camera) {
         const px = T.MathUtils.clamp(x, s.l + bw / 2, s.r - bw / 2);
         let py = center ? y + bh / 2 : y - lift;
         py = T.MathUtils.clamp(py, s.t + bh, s.b);
-        // declutter: step above anything higher-ranked that it overlaps
-        for (let guard = 0; guard < 4; guard++) {
+        // declutter: step above anything higher-ranked that it overlaps; when there is no room
+        // above (the top of the safe region), step below it instead, and keep going that way
+        let down = false;
+        for (let guard = 0; guard < 6; guard++) {
           const hit = taken.find(r => px + bw / 2 > r.x0 && px - bw / 2 < r.x1 && py > r.y0 && py - bh < r.y1);
           if (!hit) break;
-          py = hit.y0 - 6;
+          if (!down && hit.y0 - 6 - bh >= s.t) py = hit.y0 - 6;
+          else { down = true; py = hit.y1 + 6 + bh; }
         }
+        if (down && py > s.b) { if (!p.o.keep) { setVis(p, 'hidden'); p.placed = false; return; } py = s.b; }
         if (py - bh < s.t - 2 && !p.o.keep) { setVis(p, 'hidden'); p.placed = false; return; }
         py = Math.max(py, s.t + bh);
         // sticky: glide toward the new place; snap on first show and on camera cuts

@@ -146,7 +146,7 @@ let yaw=0,pitch=arrivalPitch,zoom=arrivalZoom,facadeMoveYaw=0,last=performance.n
 const keys=new Set<string>();const held=new Set<string>();let stick:Joystick|null=null,stickSpeed=1;const desired=new T.Vector3(),look=new T.Vector3(),cameraDelta=new T.Vector3(),ray=new T.Raycaster();
 const cameraBoxHit=new T.Vector3(),cameraCandidates:T.Object3D[]=[];
 const cameraMetrics={updates:0,updateMs:0,queries:0,queryMs:0,searches:0,alternatives:0};
-let camDist=0;const camDir=new T.Vector3(),camSide=new T.Vector3(),camOrigin=new T.Vector3(),camLift=new T.Vector3();
+let camDist=0,camOver=0;const CAM_OVER=.95;const camDir=new T.Vector3(),camSide=new T.Vector3(),camOrigin=new T.Vector3(),camLift=new T.Vector3();
 const cacheOrbit=new URLSearchParams(location.search).get('cameraCache')!=='off';
 const orbitCache={valid:false,position:new T.Vector3(),yaw:NaN,pitch:NaN,zoom:NaN,geometryRevision:-1,selected:new T.Vector3(),available:0};
 // The current study's camera solids are static. Any future runtime geometry
@@ -229,10 +229,15 @@ function cameraUpdate(dt:number){if(camOverride){camera.position.copy(camOverrid
       const hit=firstCameraHit(camOrigin,cameraDelta,.15);
       if(hit)clear=Math.min(clear,Math.max(.9,hit.distance-.3));
     }
+    // A low thing behind Zip (a pedestal, a planter, a rail) shouldn't press the camera into his
+    // back: if a line from a little higher up is much clearer, rise and look over it instead.
+    let over=0;
+    if(clear<full*.6){let high=full;for(const o of [-1,0,1]){camOrigin.copy(pivot).addScaledVector(camSide,o);camOrigin.y+=CAM_OVER;cameraDelta.copy(camDir).multiplyScalar(full);const hit=firstCameraHit(camOrigin,cameraDelta,.15);if(hit)high=Math.min(high,Math.max(.9,hit.distance-.3))}if(high>clear+1.2){clear=high;over=CAM_OVER}}
+    camOver=dt>=.5?over:camOver+(over-camOver)*(1-Math.exp(-dt*4));
     if(!(camDist>0)||dt>=.5)camDist=clear;
     else camDist+=(clear-camDist)*(1-Math.exp(-dt*(clear<camDist?18:2.5)));
     const tight=1-T.MathUtils.smoothstep(camDist,1.3,3.2);
-    desired.copy(pivot).addScaledVector(camDir,camDist);
+    desired.copy(pivot).addScaledVector(camDir,camDist);desired.y+=camOver;
     // Whiskers: squeezed against a wall, the camera eases round to the side with more room
     // (only while Zip moves and the player isn't steering the camera), like third-person games do.
     if(tight>.35&&!dragging&&moveAmount>0&&!story?.shot){const pinned=camDist<1.8;let best=yaw,bestClear=camClearAt(yaw)+.6;for(const d of pinned?[-.45,.45,-.9,.9,-1.6,1.6,Math.PI]:[-.45,.45,-.9,.9]){const c=camClearAt(yaw+d)-Math.abs(d)*.25;if(c>bestClear){bestClear=c;best=yaw+d}}if(best!==yaw){yaw+=(best-yaw)*Math.min(1,dt*(pinned?3.2:1.6));facadeMoveYaw=yaw}}
@@ -271,10 +276,11 @@ if(paintedStudy){
 }
 const paintedParams=new URLSearchParams(location.search);
 const promenade=paintedStudy&&paintedParams.get('promenade')!=='0'?buildPromenade(scene,{box:facade.addSolidBox,circle:facade.addSolidCircle,walk:(x,z)=>walkable(new T.Vector3(x,0,z)),sunDir:sun.position.clone().sub(sun.target.position),renderer,camera,reflections:gfx.reflections}):null;
-const lifeTick=paintedStudy&&paintedParams.get('life')!=='0'?buildPaintedLife(scene,facade.addSolidCircle,gfx.birds,{clips:libraryClips,kit:bodyKit,camera,host:worldElement.parentElement!,onGreet:from=>{zipRig?.lookAt(from);greetUntil=elapsed+4;waveBackAt=elapsed+.75},speak:(v,t,at)=>guide?.speakAt(v,t,at)??0}):null;
+let lifeOverlay:import('./kit/overlay').Overlay|null=null;   // the guide's overlay, once the guide exists (it is built after the townsfolk)
+const lifeTick=paintedStudy&&paintedParams.get('life')!=='0'?buildPaintedLife(scene,facade.addSolidCircle,gfx.birds,{clips:libraryClips,kit:bodyKit,camera,host:worldElement.parentElement!,onGreet:from=>{zipRig?.lookAt(from);greetUntil=elapsed+4;waveBackAt=elapsed+.75},speak:(v,t,at)=>guide?.speakAt(v,t,at)??0,overlay:()=>lifeOverlay}):null;
 const storyOn=paintedStudy&&paintedParams.get('puzzle')!=='0'&&paintedParams.get('story')!=='0';
 const appHost=worldElement.parentElement!;
-const guide=storyOn?buildGuide(scene,appHost,camera,renderer.domElement):null;
+const guide=storyOn?buildGuide(scene,appHost,camera,renderer.domElement):null;lifeOverlay=guide?.overlay??null;
 // phones move with a floating thumb stick (lower left); keyboards with WASD; both look by dragging
 stick=createJoystick(appHost,{onUse:()=>get('hint').style.opacity='0'});
 // voiced lines: clips made ahead of time (tools/voice.mjs); a line without one stays a silent bubble
@@ -340,6 +346,8 @@ if(paintedStudy){
     b.addEventListener('click',()=>{if(gfx.choice===value&&value!=='auto')return;saveChoice(value);const hv=(window as any).__vlVariant,extra=value==='auto'?'&auto=measure':'';if(hv)location.hash=`${hv}&quality=${value}${extra}`;else{const u=new URL(location.href);u.searchParams.set('quality',value);if(extra)u.searchParams.set('auto','measure');location.replace(u.toString())}});row.appendChild(b);
   }
   box.appendChild(row);
+  // a frame-rate test anyone can run (here and on a phone): reloads into the benchmark at this quality
+  {const tb=document.createElement('button');tb.type='button';tb.className='gfx-option';tb.textContent='Run frame-rate test';tb.style.cssText='width:100%;margin-top:6px';tb.addEventListener('click',()=>{const hv=(window as any).__vlVariant,q=gfx.choice;if(hv)location.hash=`${hv}&quality=${q}&bench=1&title=0&story=0`;else{const u=new URL(location.href);for(const [k,v] of [['quality',q],['bench','1'],['title','0'],['story','0']])u.searchParams.set(k,v);location.replace(u.toString())}});box.appendChild(tb)}
   const note=document.createElement('p');note.className='gfx-note';note.textContent=gfx.choice==='auto'?`Auto chose ${gfx.tier[0].toUpperCase()+gfx.tier.slice(1)} for this device. Changing reloads the scene.`:'Changing reloads the scene.';box.appendChild(note);
   const statsLabel=document.createElement('label');const statsBox=document.createElement('input');statsBox.type='checkbox';statsBox.id='frame-stats';
   statsLabel.append(statsBox,' Show frame rate');box.appendChild(statsLabel);
@@ -384,7 +392,9 @@ window.addEventListener('resize',()=>{renderer.setPixelRatio(adaptRes?adaptRes.r
 // If the browser drops the GPU context (driver reset, memory pressure, too many
 // tabs), say so plainly instead of leaving a blank screen.
 renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();const l=get('loading');l.hidden=false;l.style.cursor='pointer';l.style.textAlign='center';l.style.padding='24px';l.textContent='The browser paused the graphics (GPU reset). Tap to reload the game.';l.onclick=()=>location.reload();console.warn('[vl] webgl context lost')});
-(window as any).__vlGuide=guide;(window as any).__vlDebug={scene,renderer,camera,sun,walkable,get zipRig(){return zipRig}};
+(window as any).__vlGuide=guide;(window as any).__vlDebug={scene,renderer,camera,sun,walkable,get zipRig(){return zipRig},
+  // for tests: what squeezes the follow camera (how far it sits, and what stands between Zip and where it wants to be)
+  camSqueeze(){const pivot=zip.position.clone().add(new T.Vector3(0,1.5,0)),hits:string[]=[];ray.set(pivot,camDir);ray.far=zoom;for(const h of ray.intersectObjects(cameraSolids,true).slice(0,4)){let o:T.Object3D|null=h.object;const path:string[]=[];while(o&&path.length<4){if(o.name)path.push(o.name);o=o.parent}hits.push(`${h.distance.toFixed(2)} ${path.join('<')||h.object.type}`)}const g=cameraGrid?.hit(pivot,camDir,zoom);return {camDist:+camDist.toFixed(2),zoom:+zoom.toFixed(2),hits,grid:g&&g<zoom?+g.toFixed(2):null}}};
 Object.defineProperty(window,'__arcade',{value:{
   snapshot:()=>({study:facadeStudy?'facade':'arcade',standingY:standingY0+groundLift,contactY:contactY0+groundLift,position:zip.position.toArray(),routeT:nearestRoute(zip.position).t,paused,guided:guideTargetT!==null,guideTargetT,reduced,frames,draws:renderer.info.render.calls,triangles:renderer.info.render.triangles,cameraSolids:cameraSolids.length,camera:camera.position.toArray(),cameraMetrics:{...cameraMetrics},place:positionText}),
   invalidateCameraGeometry,

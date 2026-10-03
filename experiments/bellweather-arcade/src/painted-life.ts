@@ -1,4 +1,5 @@
 import * as T from 'three';
+import type { Overlay } from './kit/overlay';
 import { mulberry32 } from './vendor/rng';
 import { buildMira } from './companions';
 import { buildTownsperson, type Townsperson } from './townsfolk-rig';
@@ -36,7 +37,10 @@ function birds(root: T.Object3D, center: T.Vector3, n: number) {
 
 interface LifeOptions { clips: T.AnimationClip[]; kit?: BodyKit | null; camera: T.Camera; host: HTMLElement; onGreet?: (from: T.Vector3) => void;
   /** say a line aloud (voiced lines): returns how long it lasts, 0 if unvoiced */
-  speak?: (voice: string, text: string, at: T.Vector3) => number; }
+  speak?: (voice: string, text: string, at: T.Vector3) => number;
+  /** the shared world overlay, when there is one: the bubble then takes its turn with every other
+   *  pinned bubble and prompt (they step aside for each other) instead of placing itself */
+  overlay?: () => Overlay | null; }
 interface Greeter { who: Townsperson | null; pos: () => T.Vector3; lines: string[]; voice: string; cool: number; timer: number; spoken: number; wave: boolean; turn?: (target: T.Vector3, dt: number) => void; }
 
 // What the townsfolk say, and in whose voice, is data (worlds/bellweather-lines.ts).
@@ -92,7 +96,7 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
   // Speech bubbles are DOM (crisp text at any render scale), anchored above heads.
   const bubble = document.createElement('div'); bubble.className = 'speech'; bubble.hidden = true; bubble.setAttribute('aria-live', 'polite'); opts.host.appendChild(bubble);
   let bubbleFor: Greeter | null = null, bubbleT = 0;
-  const voiceAt = new T.Vector3();
+  const voiceAt = new T.Vector3(), bubbleAt = new T.Vector3();
   const say = (g: Greeter, text: string) => { bubble.textContent = text; bubble.hidden = false; bubbleFor = g; const dur = opts.speak?.(g.voice, text, voiceAt.copy(g.pos()).setY(g.pos().y + 1.7)) ?? 0; bubbleT = Math.max(3.6, dur + .8); };
 
   let t = 0, wasAlarm = false; const zipHead = new T.Vector3(), tmp = new T.Vector3(), greetFrom = new T.Vector3();
@@ -143,7 +147,14 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
       }
     }
     // bubble follows its speaker
-    if (bubbleFor) {
+    const ov = opts.overlay?.();
+    if (bubbleFor && ov) {
+      bubbleT -= dt;
+      const show = bubbleT > 0 && !opts.host.matches('.card-open,.cutscene,.puzzle-mode');
+      if (bubble.hidden !== !show) bubble.hidden = !show;
+      if (!ov.has('folk-bubble')) ov.pin('folk-bubble', bubble, () => bubbleFor ? (bubbleFor.who ? bubbleFor.who.headTop : miraTop).getWorldPosition(bubbleAt) : null, { rank: 6, lift: 10 });
+      if (bubbleT <= 0) { bubbleFor = null; bubble.hidden = true; ov.unpin('folk-bubble'); }
+    } else if (bubbleFor) {
       bubbleT -= dt;
       const anchor = bubbleFor.who ? bubbleFor.who.headTop : miraTop;
       anchor.getWorldPosition(tmp).project(opts.camera);

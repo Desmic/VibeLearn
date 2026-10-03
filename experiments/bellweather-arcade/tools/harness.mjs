@@ -103,7 +103,13 @@ export async function harness({ title, outDefault }) {
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     },
     becomeTouch,
-    pose: (x, z, yaw = 0) => page.evaluate(([x, z, yaw]) => window.__arcade.pose(x, z, yaw, .2, 6, yaw), [x, z, yaw]).then(() => page.waitForTimeout(1200)),
+    // teleport Zip (a test shortcut). A spot a player can't stand on (inside a planter, a wall)
+    // gives pictures no player will see, e.g. the camera pressed into Zip's back: warn about it.
+    pose: async (x, z, yaw = 0) => {
+      const ok = await page.evaluate(([x, z]) => { const w = window.__vlDebug?.walkable, s = window.__vlStory?.debug?.beat; return !w || !['meet', 'spark', 'skiff', 'attack'].includes(s) || w({ x, y: 0, z, clone() { return { ...this }; } }); }, [x, z]);
+      if (!ok) check(`posed on walkable ground (${x}, ${z})`, false, 'a player cannot stand here; move the test spot', 'warn');
+      await page.evaluate(([x, z, yaw]) => window.__arcade.pose(x, z, yaw, .2, 6, yaw), [x, z, yaw]); await page.waitForTimeout(1200);
+    },
     save: () => page.evaluate(() => JSON.parse(localStorage.getItem('bellweather.save.v1') || 'null')?.at ?? null),
     goal: () => page.evaluate(() => { const g = document.querySelector('.goal-line'); return g && !g.hidden ? g.textContent : null; }),
     beat: () => page.evaluate(() => window.__vlStory?.debug?.beat),

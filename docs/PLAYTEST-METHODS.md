@@ -53,6 +53,12 @@ keys, seconds apart. The sandbox on the laptop has no browser or GPU at all.
   `locator.tap()` waits for a stable element; a raw `touchscreen.tap(x, y)` does not.
 - Cutscenes crawl at software frame rates, worse on the laptop-sized screen: wait on them in
   **game time** (`h.until(fn, seconds)` fast-forwards with `__arcade.simulate`), not wall time.
-- The first two-mode run found real issues the mouse-only run never showed (see the 3 Oct
-  report): overlapping bubbles after Skip, the camera pressing into Zip by the skiff's words,
-  the thumb-stick hint far from the stick.
+- The first two-mode run found real issues the mouse-only run never showed: Mira's skipped
+  cold-open line left on screen under her real one, the thumb-stick hint far from the stick,
+  townsfolk bubbles that placed themselves outside the overlay (so prompts landed on their
+  text), Zip thoughts shown long after their moment. Fixed 3 Oct (v67).
+- One "finding" was the test's own doing: it teleported Zip *inside* planters (the word spots),
+  so the camera pressed into his back. `h.pose` now warns when a spot isn't walkable ground.
+  Still worth having: the camera now rises to look over a low thing behind Zip.
+- After any change to `main.ts` wiring, load the game once before a long run: a 35-minute
+  play-through that times out at "Opening the garden…" is a startup error.

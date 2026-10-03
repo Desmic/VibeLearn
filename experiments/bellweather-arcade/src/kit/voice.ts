@@ -132,6 +132,8 @@ export function createVoice(cast: VoiceCast, opts: { base: string; spoken?: Reco
     preloadAll() { void ready.then(() => { let i = 0; for (const k of Object.keys(clips)) setTimeout(() => void fetchClip(k), 40 * i++); }); },
     play,
     stopLine() { line?.stop(); line = null; },
+    /** cut one speaker short (their bark or line) */
+    stopSpeaker(speaker: string) { bySpeaker.get(speaker)?.stop(); bySpeaker.delete(speaker); },
     get count() { return Object.keys(clips).length; },
   };
 }

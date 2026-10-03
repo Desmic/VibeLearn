@@ -340,7 +340,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
   const CUT_GATES = [4.45, 6.65, 7.35, 11.35, 13.35];
   const voiced = (sec: number) => { if (sec > 0) cutHold = Math.max(cutHold, t + sec - .25); };
   const startOpening = () => { chosen.clear(); cutHold = 0; opening = 0; o.host.classList.add('cutscene'); skip.hidden = false; enter('meet'); };
-  const endOpening = () => { if (opening < 0) return; opening = -1; shot = null; o.host.classList.remove('cutscene'); skip.hidden = true; g.startControlHints(); };
+  const endOpening = () => { if (opening < 0) return; opening = -1; g.quiet('Mira'); shot = null; o.host.classList.remove('cutscene'); skip.hidden = true; g.startControlHints(); };
   // A fixed shot shouldn't open on a post or trunk filling the edge of the frame. Feel along
   // both frame edges; if something solid stands close to the lens, step sideways away from
   // it (near things slide out of frame), never through a wall.

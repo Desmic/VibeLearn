@@ -187,10 +187,10 @@
 .speech.bark.static{background:#e8eef4;color:#56677a;font:700 16px/1.2 'Courier New',monospace;letter-spacing:.12em;animation:vl-static .12s steps(2) infinite}
 @keyframes vl-static{50%{translate:1px -1px;opacity:.85}}
 .speech.bark.zip{background:#fff;border-color:#9fd6ff}
-.tap-prompt{position:absolute;left:0;top:0;z-index:5;pointer-events:none;width:84px;height:84px;display:flex;align-items:flex-end;justify-content:center}
+.tap-prompt{position:absolute;left:0;top:0;z-index:5;pointer-events:none;width:84px;height:122px;   /* tall enough to hold its label, so other bubbles keep clear of the word too */display:flex;align-items:flex-end;justify-content:center}
 .tap-prompt i{position:absolute;left:50%;top:50%;width:62px;height:62px;margin:-31px 0 0 -31px;border-radius:50%;border:3px solid #fff3c4;box-shadow:0 0 0 2px #0b213855,0 0 18px #ffd36b;animation:vl-ring 1.3s ease-out infinite}
 @keyframes vl-ring{0%{scale:.55;opacity:1}100%{scale:1.25;opacity:0}}
-.tap-prompt span{position:relative;top:22px;font:800 15px Trebuchet MS,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#fff8e1;-webkit-text-stroke:4px #10263d;paint-order:stroke fill;animation:vl-bob 1s ease-in-out infinite}
+.tap-prompt span{position:relative;top:0;font:800 15px Trebuchet MS,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#fff8e1;-webkit-text-stroke:4px #10263d;paint-order:stroke fill;animation:vl-bob 1s ease-in-out infinite}
 .target-brackets{position:absolute;left:0;top:0;z-index:3;width:76px;height:76px;padding:0;border:0;background:
  linear-gradient(#ffe7a3,#ffe7a3) 0 0/16px 3px,linear-gradient(#ffe7a3,#ffe7a3) 0 0/3px 16px,
  linear-gradient(#ffe7a3,#ffe7a3) 100% 0/16px 3px,linear-gradient(#ffe7a3,#ffe7a3) 100% 0/3px 16px,
@@ -235,4 +235,4 @@ html:not([data-input=touch]) .stick-zone,.card-open .stick-zone,.cutscene .stick
 .stick-base{position:absolute;left:92px;top:calc(100% - 118px);width:116px;height:116px;margin:-58px 0 0 -58px;border-radius:50%;border:2px solid #fff7e4aa;background:radial-gradient(#10263d22,#10263d55);opacity:.5;transition:opacity .25s;pointer-events:none}
 .stick-base.live{opacity:1;transition:none}
 .stick-knob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:#fff6e2e6;box-shadow:0 3px 12px #08213b88;border:2px solid #ffd36b}
-.control-hint.at-stick{transform:none!important;left:24px;top:auto;bottom:calc(44% + 8px);visibility:visible!important}
+.control-hint.at-stick{transform:none!important;left:24px;top:auto;bottom:188px;visibility:visible!important}   /* just above the resting stick ring (centre 118px up, 58px radius) */

@@ -93,10 +93,11 @@ await segment('skiff', async () => {
   const sim = s => page.evaluate(s => window.__arcade.simulate(s), s);
   const carried = () => page.evaluate(() => window.__vlStory.debug.carried);
   check('goal asks for the skiff\'s words', /skiff's words \(0 of 3\)/.test(await goal() ?? ''), await goal());
-  await pose(-6.2, -9.6, 0); await page.waitForTimeout(800);
+  await pose(-7.4, -10.4, 0); await page.waitForTimeout(800);
   check('the first word wears a "Tap" prompt (tutorial in the world)', await waitFor(() => page.evaluate(() => !!document.querySelector('.tap-prompt') && window.__vlGuide.overlay.has('prompt-absorb')), 15000, 300));
   await shot('tap-prompt');
-  for (const [x, z, w] of [[-6.2, -9.6, 'rise'], [-3.6, -9.6, 'sink'], [6.0, -9.6, 'toward'], [2.4, -10.3, 'Skiff']]) {
+  // spots a player can stand on, within reach of each word
+  for (const [x, z, w] of [[-7.4, -10.4, 'rise'], [-3.6, -9.6, 'sink'], [4.8, -10.3, 'toward'], [2.4, -10.3, 'Skiff']]) {
     await pose(x, z, 0); await act('Absorb'); await sim(1.2);
     check(`absorbed "${w}"`, (await carried()).includes(w), JSON.stringify(await carried()));
   }
