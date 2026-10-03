@@ -29,10 +29,13 @@ const TIERS: Record<Tier, Omit<Quality, 'choice' | 'tier'>> = {
   // 3 Oct (F15 play-test): Medium/High looked soft because they were judged
   // against 60 fps and fell to 60% resolution. A steady 45 fps reads as smooth
   // on a phone, so Medium/High aim for that, start at full resolution and keep most of their
-  // resolution (never below 1x CSS pixels on Medium, 1.25x on High: still far sharper than the old 0.6x);
+  // resolution (never below 0.8x on Medium, 1.25x on High: still far sharper than the old 0.6x);
   // only Low trades resolution for frame rate freely. Second F15 pass: 1.2/1.5 floors cost too much fps.
   low:    { antialias: false, maxPixelRatio: .9,  minPixelRatio: .5,  targetMs: 16.7, shadowMap: 1024, leafFraction: .38, cloudRings: 1, islands: 4, cloudLobes: .45, canopyDetail: .5, birds: false, people: true, strokes: false, lobeTrees: 'all', reflections: false },
-  medium: { antialias: false, maxPixelRatio: 1.5, minPixelRatio: 1.0, targetMs: 22.2, shadowMap: 2048, leafFraction: .6,  cloudRings: 2, islands: 7, cloudLobes: .75, canopyDetail: .8, birds: true,  people: true, strokes: true, lobeTrees: 'distant', reflections: false },
+  // Medium floor 0.8 (4 Oct, measured): the F15 holds 90 fps up to 1.0x in every view, so it
+  // never needs the floor; the laptop (Intel UHD, ~0.78 MP at 1x) halves to 24 fps in the heaviest
+  // view at 1.0x and holds 48 at 0.8x. Desmic chose sharpness: 0.8 is the lowest it goes.
+  medium: { antialias: false, maxPixelRatio: 1.5, minPixelRatio: 0.8, targetMs: 22.2, shadowMap: 2048, leafFraction: .6,  cloudRings: 2, islands: 7, cloudLobes: .75, canopyDetail: .8, birds: true,  people: true, strokes: true, lobeTrees: 'distant', reflections: false },
   high:   { antialias: true,  maxPixelRatio: 2,   minPixelRatio: 1.25, targetMs: 24, shadowMap: 2048, leafFraction: 1,   cloudRings: 3, islands: 9, cloudLobes: 1,   canopyDetail: 1,  birds: true,  people: true, strokes: true, lobeTrees: 'none', reflections: true },
 };
 

@@ -34,6 +34,13 @@ use claude extension on chrome"). It runs on the laptop's real GPU:
 4. Record the rows in `tools/CHECKS.md` (device-ratio table) the same turn.
 
 The F15 is the one thing an agent can't reach: ask for one sweep run per release there.
+Notes from the runs:
+- The test now asks for a screen wake lock, falling back to a muted video. The panel's first
+  line says which worked, and whether it ran in an in-app web view (the Claude app) or a
+  browser.
+- On 4 Oct the game frame stopped taking clicks in one Chrome session: three tries, then
+  stop and say so (don't loop). Reloading the tab didn't help that time; it may need the
+  Chrome window in front.
 
 ## The routine
 

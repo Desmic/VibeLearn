@@ -115,7 +115,19 @@ laptop run (and is re-checked on the phone before a release):
 | v67 | same laptop | medium | 47.8 (47.6 on a repeat) | — | held at 1.0× by the new Medium floor; looking-back 24 |
 | v68 sweep | same laptop | medium | 0.6×: 71.8 · 0.8×: 65.4 · 1.0×: 47.8 | — | worst view 70.4 / 47.8 / 24.2. Equal to v59 at equal pixels: the drop is the resolution floor alone |
 | v59 | Galaxy F15 | high | ~45 (Desmic, 3 Oct, adaptive) | — | resolution fell to ~0.6x |
-| v68 sweep | Galaxy F15 | medium | — | — | **to measure** (one tap; gives the F15 curve and the laptop↔F15 ratio) |
+| v68 sweep | Galaxy F15, **inside the Claude app** (web view), 384×673 @2.81, 90 Hz | medium | as played 78.8 at 1.44–1.5× (looking-back 45) · sweep 0.6/0.8/1.0×: 90.1 · 1.25×: 78.9 · 1.5×: 67.3 · 2×: 56.3 | — | (Desmic, 4 Oct) every view holds the 90 Hz cap up to 1.0×; the heaviest view (looking-back) drops to 45 from 1.25×. The phone slept during the run (v69 asks for a wake lock) |
+
+**What the two devices say (4 Oct).** Compare in megapixels, not ratios. The F15 holds its
+refresh cap (90) in every view up to ~0.26 MP (1.0×). The heaviest view drops one refresh
+step at ~0.4 MP. The laptop's heaviest view drops a step at ~0.5 MP (0.8×) and two steps at
+0.78 MP (1.0×). So for this scene the F15, even inside the Claude app's web view, has about
+the laptop's per-pixel throughput. **Rule of thumb: a laptop run at the same megapixels
+predicts the F15 to within one refresh step.** A real browser on the phone will only be
+faster.
+
+**Decision (Desmic, 4 Oct): sharpness.** Medium resolution floor 0.8× (was 1.0×), ceiling
+1.5×. On the F15, Medium sits at 1.44–1.5× and never needs the floor. On the laptop, the
+heaviest view can drop to 0.8× (48 fps instead of 24).
 
 Pixels, not ratios, compare across devices: the laptop at 1.0× draws 958×814 = 0.78 MP; the
 F15 (393×851 CSS, DPR 2.625) draws 0.33 MP at 1.0× and 0.12 MP at 0.6×.

@@ -26,9 +26,12 @@ export async function runBench(o: {
   const panel = document.createElement('pre'); panel.className = 'bench-panel'; panel.setAttribute('aria-live', 'polite');
   panel.style.cssText = 'position:absolute;left:8px;right:8px;top:8px;z-index:50;margin:0;padding:10px 12px;border-radius:12px;background:#0b1d30e8;color:#e8f6ff;font:12px/1.45 ui-monospace,Consolas,monospace;white-space:pre-wrap;pointer-events:none';
   o.host.appendChild(panel);
+  const awake = await keepAwake();
   const frame = () => new Promise<number>(r => requestAnimationFrame(r));
   const rows: BenchRow[] = [];
-  const head = `BENCH ${o.label}\n${o.gpu ?? ''}\n${innerWidth}x${innerHeight} @${devicePixelRatio}\n`;
+  // where it ran matters: an in-app web view (the Claude app) is slower than the phone's browser
+  const where = /; wv\)/.test(navigator.userAgent) ? 'in-app web view' : 'browser';
+  const head = `BENCH ${o.label}\n${o.gpu ?? ''}\n${innerWidth}x${innerHeight} @${devicePixelRatio} · ${where} · screen kept awake: ${awake.how}\n`;
   panel.textContent = head + 'settling…';
   { const s0 = performance.now(); for (let i = 0; i < 30 || performance.now() - s0 < 3000; i++) await frame(); }   // shaders compiled, assets in
   for (const v of o.views) {
@@ -66,13 +69,32 @@ export async function runBench(o: {
     }
     o.setRes(null);
   }
+  awake.release();
   panel.textContent = top + (sweep.length ? '\n\nRESOLUTION SWEEP (fps per view: ' + o.views.map(v => v.name).join(', ') + ')\n' + sweep.map(fmtSweep).join('\n') : '') + '\n— done';
-  const result = { label: o.label, gpu: o.gpu, screen: [innerWidth, innerHeight, devicePixelRatio], rows, meanFps: +mean.toFixed(1), meanCostMs: +meanCost.toFixed(1), sweep };
+  const result = { label: o.label, gpu: o.gpu, screen: [innerWidth, innerHeight, devicePixelRatio], where, awake: awake.how, rows, meanFps: +mean.toFixed(1), meanCostMs: +meanCost.toFixed(1), sweep };
   (window as unknown as { __vlBench: unknown }).__vlBench = result;
   console.info('[bench]', JSON.stringify(result));
   return result;
 }
 // (the forced-finish "cost" stays in the JSON but is not shown: on Windows/ANGLE readPixels waits on the
 //  whole pipeline, so it read 44 ms on a build running at 72 fps; compare fps at equal resolution instead)
+// A phone that dims or sleeps mid-run ruins the numbers. Ask for a screen wake lock; inside a
+// frame that may not allow it (a hosted artifact), fall back to a tiny muted looping video, which
+// mobile browsers treat as "something is playing". Best effort: the panel says which worked.
+async function keepAwake(): Promise<{ how: string; release: () => void }> {
+  try {
+    const lock = await (navigator as unknown as { wakeLock?: { request: (t: string) => Promise<{ release: () => Promise<void> }> } }).wakeLock?.request('screen');
+    if (lock) return { how: 'wake lock', release: () => void lock.release().catch(() => {}) };
+  } catch { /* not allowed here */ }
+  try {
+    const c = document.createElement('canvas'); c.width = c.height = 2; const g = c.getContext('2d')!;
+    const v = document.createElement('video'); v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute('playsinline', '');
+    v.style.cssText = 'position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none';
+    v.srcObject = c.captureStream(1); document.body.appendChild(v);
+    let n = 0; const tick = setInterval(() => { g.fillStyle = n++ % 2 ? '#000' : '#010101'; g.fillRect(0, 0, 2, 2); }, 1000);
+    await v.play();
+    return { how: 'video (keep an eye on it)', release: () => { clearInterval(tick); v.remove(); } };
+  } catch { return { how: 'no: tap the screen now and then', release: () => {} }; }
+}
 const fmt = (r: BenchRow) => `${r.view.padEnd(13)} ${String(r.fps).padStart(5)} fps  p90 ${String(r.p90Ms).padStart(5)} ms  res ${r.res}x  ${r.draws} dr  ${(r.tris / 1000).toFixed(0)}k tri`;
 const fmtSweep = (s: SweepRow) => `${(s.res + 'x').padEnd(6)} mean ${String(s.meanFps).padStart(5)} fps  worst p90 ${String(s.worstP90Ms).padStart(5)} ms  [${s.fps.join(' / ')}]`;
