@@ -98,7 +98,9 @@ await segment('skiff', async () => {
   await shot('tap-prompt');
   // spots a player can stand on, within reach of each word
   for (const [x, z, w] of [[-7.4, -10.4, 'rise'], [-3.6, -9.6, 'sink'], [4.8, -10.3, 'toward'], [2.4, -10.3, 'Skiff']]) {
-    await pose(x, z, 0); await act('Absorb'); await sim(1.2);
+    // turn the camera until the word is the one on offer (the prompt picks what you aim at)
+    for (const yaw of [0, .8, -.8, 1.6, -1.6, 2.4, -2.4, 3.14]) { await pose(x, z, yaw); await sim(.3); if (await page.locator('.context-act', { hasText: `“${w}”` }).isVisible()) break; }
+    await act(`“${w}”`); await sim(1.2);
     check(`absorbed "${w}"`, (await carried()).includes(w), JSON.stringify(await carried()));
   }
   check('goal: wake the skiff', /Wake the skiff/.test(await goal() ?? ''), await goal());
@@ -158,7 +160,7 @@ await segment('isle', async () => {
 
 await segment('relay', async () => {
   if (page.url() === 'about:blank') await open('');
-  if (!/Call Mira/.test(await goal() ?? '')) { await page.evaluate(() => localStorage.setItem('bellweather.save.v1', JSON.stringify({ at: 'gate-open', when: Date.now() }))); await open(''); await press(page.locator('.title-screen button', { hasText: 'Continue' })); await page.waitForTimeout(3500); }
+  if (!/Call Mira/.test(await goal() ?? '')) { await h.seedSave('gate-open', ['wake-skiff', 'blossom-gate']); await open(''); await press(page.locator('.title-screen button', { hasText: 'Continue' })); await page.waitForTimeout(3500); }
   await pose(0, 43.4); await act('relay');
   check('relay console opens', await page.locator('.relay-console').isVisible());
   check('pinned notes readable on the console', await page.locator('.relay-notes').isVisible());

@@ -24,6 +24,8 @@ find it wrong.
 3. `docs/GAME-REDESIGN-ECHO.md` — the core mechanic (absorb words, speak through the
    hologram engine) and the order of stops.
 4. `docs/PLAYTEST-METHODS.md` — every way to play/test the game, and which to use when.
+   `docs/TEST-CONTRACT.md` — the hooks and data every game exposes so all the tools work on it
+   (part of "done" for any new game).
 5. `experiments/bellweather-arcade/tools/CHECKS.md` — the checks, benchmark, timing, voices.
 6. `docs/DOCS-AUDIT-20261003.md` — what is open, what was decided, what is historical.
 
@@ -59,7 +61,8 @@ npm run check                        # types + story scripts + asset budgets
 node tools/flowcheck.mjs             # plays start to end of Stop 2 headless (~15 min)
 node tools/breaker.mjs               # tries to break it (~20 min); run AFTER flowcheck, never together
 node tools/timing.mjs                # every cutscene line with its voiced length
-node tools/playthrough.mjs           # whole game as a phone AND as a laptop + timing (~35 min);
+node tools/speedrun.mjs --input touch   # walks the game, times it, proves no learning is skippable (~6 min)
+node tools/playthrough.mjs           # whole game as a phone AND as a laptop + timing + speedrun (~45 min);
                                      #   open playthrough/index.html and look at the contact sheets
 python3 tools/build-hosted.py --dest ../hosted-build    # the claude.ai copy (see section 6)
 ```

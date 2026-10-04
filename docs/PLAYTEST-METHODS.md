@@ -8,7 +8,7 @@ method sees everything; each change needs the right mix.
 
 | Method | Real GPU / fps | Feel (motion, camera, controls) | Flow and logic | Timing | Coverage per hour | Repeatable | Cost to Desmic |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| **A. Scripted headless play-through** (cloud, Playwright + game hooks: `playthrough` = `flowcheck` as phone + as laptop + `timing`; `breaker`, `_cine`) | no (software GL, ~1–5 fps) | no (stills only) | **yes**, every beat, both input modes | **yes** (game-time logs with real voice lengths) | whole game, ~15 min | **yes** | none |
+| **A. Scripted headless play-through** (cloud, Playwright + game hooks: `playthrough` = `flowcheck` as phone + as laptop + `timing` + `speedrun` (+ `breaker` as a phone); `_cine`) | no (software GL, ~1–5 fps) | no (stills only) | **yes**, every beat, both input modes | **yes** (game-time logs with real voice lengths) | whole game, ~15 min | **yes** | none |
 | **B. AI play-tester** (`tools/playserver.mjs` + an agent with a persona) | no | partly (reads screenshots like a newcomer) | yes, unscripted: finds confusion and loopholes | coarse | one path, slow | partly | none |
 | **C. Claude app browser pane** (on Desmic's laptop) | **yes** (Intel UHD integrated) | barely: screenshot round trips of seconds | slow, by hand | no | a few minutes of game per hour | no | pane must stay visible |
 | **D. Screen control of Chrome** (computer use) | yes (whichever GPU Chrome uses) | barely (same round trips) | slow | no | very low | no | approvals; desktop busy |
@@ -67,6 +67,32 @@ Notes from the runs:
 - Touch: A sends real touch events (taps on prompts, a dragged thumb stick) on an emulated
   phone; a real thumb on a 6.5" screen (reach, mis-taps, palm on the stick) is G.
 - A measures distances and speeds in game time; it can't tell whether a speed *feels* right.
+
+## Speedrun, break and tamper tests (4 Oct)
+
+These run on any game that keeps the test contract (`docs/TEST-CONTRACT.md`).
+
+- **`speedrun.mjs`** walks the game for real, along a 0.25 m path planned over the game's own
+  walkable ground, and times it. It proves from data that no learning station can be skipped.
+- **`breaker.mjs --input touch`** breaks it like a phone player would.
+- **The `tamper` probe** edits the save by hand and checks that the learning can't be skipped.
+
+First findings (4 Oct):
+
+- **Speedrun to the end of Stop 2: 154.8 game seconds.** Skiff puzzle about 22 s, the Gate
+  about 26 s, the Loom about 23 s. Every station had to be answered, and every checkpoint was
+  earned.
+- **"rise" is hard to reach.** The skiff needs "rise", whose word floats 1.1 m from the decoy
+  "sink". It can only be absorbed from a pocket behind the planter, reached by a strip about
+  0.5 m wide along the wall. "sink" is offered across the open courtyard. With one prompt at a
+  time (the nearest wins), the decoy is the easy one. **Fixed the same day:** the prompt now
+  picks the word the camera is aimed at (`echo.ts`; rule in `PLAY-DESIGN-20261003.md`).
+- **The satchel "finding" was the bot's.** It stopped 1.86 m from the satchel, just outside
+  the 1.7 m prompt range. The bot now steps in to 1 m first, and only reports a design note
+  when that doesn't help.
+- **The game's own tap-to-walk can't route around the courtyard wall.** It gets stuck at
+  (3.1, −3.2) on the way to Mira. Players steer, so it matters little, but it is why the
+  tests plan their own paths.
 
 ## Lessons from building the two-mode play-through (3 Oct)
 

@@ -45,6 +45,41 @@ export async function harness({ title, outDefault }) {
 
   const Q = 'study=facade&finish=daylight&render=painted&quality=low&auto=0';
   let cdp = null;
+  // In-page path planner (game-agnostic: needs only __arcade.walkable and snapshot). A* on a
+  // 0.25 m grid over a box around Zip and the target; the goal is the walkable cell nearest the
+  // target within `near` m (targets are often solid: a person, a stone). Line-of-sight smoothing.
+  const NAV = () => { window.__vlTestNav = (tx, tz, near) => {
+    const W = (x, z) => window.__arcade.walkable(x, z), p = window.__arcade.snapshot().position, S = .25, M = 10;   // 0.25 m: narrow strips (0.5 m) must count
+    const x0 = Math.min(p[0], tx) - M, z0 = Math.min(p[2], tz) - M, nx = Math.ceil((Math.max(p[0], tx) + M - x0) / S), nz = Math.ceil((Math.max(p[2], tz) + M - z0) / S);
+    if (Math.hypot(p[0] - tx, p[2] - tz) <= near) return { ok: true, path: [] };
+    const reach = Math.max(near, .3);   // a tighter goal can fall between grid cells
+    const ok = new Uint8Array(nx * nz); for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) ok[i * nz + j] = W(x0 + i * S, z0 + j * S) ? 1 : 0;
+    const cell = (x, z) => [Math.round((x - x0) / S), Math.round((z - z0) / S)], id = (i, j) => i * nz + j;
+    const [si, sj] = cell(p[0], p[2]); for (let di = -2; di <= 2; di++) for (let dj = -2; dj <= 2; dj++) { const i = si + di, j = sj + dj; if (i >= 0 && j >= 0 && i < nx && j < nz && Math.hypot(di, dj) * S <= .5) ok[id(i, j)] = 1; }   // Zip may stand in a notch finer than the grid: let him step out
+    const goals = new Set(); for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) if (ok[id(i, j)] && Math.hypot(x0 + i * S - tx, z0 + j * S - tz) <= reach) goals.add(id(i, j));
+    if (!goals.size) return { ok: false, reason: 'unreachable (no walkable ground near the target)' };
+    const g = new Float32Array(nx * nz).fill(1e9), from = new Int32Array(nx * nz).fill(-1), open = [[0, id(si, sj)]]; g[id(si, sj)] = 0;
+    const hfn = k => Math.hypot(x0 + Math.floor(k / nz) * S - tx, z0 + (k % nz) * S - tz);
+    let end = -1;
+    // binary heap on f = g + h; stale entries are skipped when popped
+    const push = e => { open.push(e); let i = open.length - 1; while (i > 0) { const q = (i - 1) >> 1; if (open[q][0] <= open[i][0]) break; [open[q], open[i]] = [open[i], open[q]]; i = q; } };
+    const pop = () => { const top = open[0], last = open.pop(); if (open.length) { open[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < open.length && open[l][0] < open[m][0]) m = l; if (r < open.length && open[r][0] < open[m][0]) m = r; if (m === i) break; [open[m], open[i]] = [open[i], open[m]]; i = m; } } return top; };
+    const done = new Uint8Array(nx * nz);
+    while (open.length) { const [, cur] = pop(); if (done[cur]) continue; done[cur] = 1;
+      if (goals.has(cur)) { end = cur; break; }
+      const ci = Math.floor(cur / nz), cj = cur % nz;
+      for (const [di, dj] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]) { const ni = ci + di, nj = cj + dj; if (ni < 0 || nj < 0 || ni >= nx || nj >= nz) continue; const n = id(ni, nj); if (!ok[n]) continue; if (di && dj && (!ok[id(ci + di, cj)] || !ok[id(ci, cj + dj)])) continue;
+        const c = g[cur] + (di && dj ? 1.414 : 1) * S; if (c < g[n]) { g[n] = c; from[n] = cur; push([c + hfn(n), n]); } } }
+    if (end < 0) return { ok: false, reason: 'unreachable (no walkable path)' };
+    const cells = []; for (let k = end; k >= 0; k = from[k]) cells.unshift([x0 + Math.floor(k / nz) * S, z0 + (k % nz) * S]);
+    const clear = (a, b) => { const d = Math.hypot(b[0] - a[0], b[1] - a[1]); for (let t = 0; t <= d; t += .2) if (!W(a[0] + (b[0] - a[0]) * t / d, a[1] + (b[1] - a[1]) * t / d)) return false; return true; };
+    // smooth with line of sight, but never skip more than 2 m at once: the game's own walk-to
+    // (with its detour logic) is only trusted over short, clear legs, e.g. along a narrow strip
+    const path = []; let a = [p[0], p[2]], k = 1;
+    while (k < cells.length) { let far = k; while (far + 1 < cells.length && far - k < 8 && clear(a, cells[far + 1])) far++; path.push(cells[far]); a = cells[far]; k = far + 1; }
+    if (W(tx, tz) && clear(path.length ? path[path.length - 1] : [p[0], p[2]], [tx, tz])) path.push([tx, tz]);   // the exact spot, when it is open ground
+    return { ok: true, path };
+  }; };
   // in touch mode the game must believe a finger is in charge: one tap where nothing listens
   const becomeTouch = async () => { if (INPUT !== 'touch') return; await page.touchscreen.tap(page.viewportSize().width / 2, 8); await page.waitForTimeout(150); };
   const h = {
@@ -52,7 +87,7 @@ export async function harness({ title, outDefault }) {
     open: async (extra = '') => {
       await page.goto(`${BASE}/?${Q}${extra}`, { timeout: 180000 });
       await page.waitForFunction(() => document.getElementById('loading')?.hidden, null, { timeout: 240000 });
-      await page.waitForTimeout(1200); await becomeTouch();
+      await page.waitForTimeout(1200); await becomeTouch(); await page.evaluate(NAV);
     },
     // the first load only exists to clear the save; loads it started are cut off by the
     // second navigation ("Failed to fetch"), which is the test's doing, not the game's
@@ -110,11 +145,40 @@ export async function harness({ title, outDefault }) {
       if (!ok) check(`posed on walkable ground (${x}, ${z})`, false, 'a player cannot stand here; move the test spot', 'warn');
       await page.evaluate(([x, z, yaw]) => window.__arcade.pose(x, z, yaw, .2, 6, yaw), [x, z, yaw]); await page.waitForTimeout(1200);
     },
+    /** a save at checkpoint `at` WITH the learning evidence it needs (the game refuses a bare one:
+     *  kit/progress.ts). Tests that start mid-story use this; the breaker's tamper probe doesn't. */
+    seedSave: async (at, stations) => page.evaluate(([at, st]) => { localStorage.setItem('bellweather.save.v1', JSON.stringify({ at, when: Date.now() })); const d = JSON.parse(localStorage.getItem('bellweather.decided.v1') || '[]'); for (const s of st) if (!d.some(k => k.startsWith(s + '|'))) d.push(s + '|seeded-by-test'); localStorage.setItem('bellweather.decided.v1', JSON.stringify(d)); }, [at, stations]),
     save: () => page.evaluate(() => JSON.parse(localStorage.getItem('bellweather.save.v1') || 'null')?.at ?? null),
     goal: () => page.evaluate(() => { const g = document.querySelector('.goal-line'); return g && !g.hidden ? g.textContent : null; }),
     beat: () => page.evaluate(() => window.__vlStory?.debug?.beat),
     learning: () => page.evaluate(() => window.__vlLearning ?? []),
     zip: () => page.evaluate(() => window.__arcade.snapshot().position),
+    /** Walk like a player who knows the way: plan a path over the game's own walkable probe
+     *  (A* on a 0.25 m grid, in the page), then follow it in game time. Stops early when
+     *  `until()` is true. Returns { ok, reason, secs, dist }: reason 'unreachable' means no
+     *  walkable path exists to the target (a goal marker a player can't reach on foot). */
+    walkTo: async (target, { until = null, near = 1.2, maxSecs = 90 } = {}) => {
+      let secs = 0, dist = 0, replans = 0;
+      while (secs < maxSecs) {
+        if (until && await until()) return { ok: true, reason: 'until', secs, dist };
+        const plan = await page.evaluate(([tx, tz, near]) => window.__vlTestNav(tx, tz, near), [target[0], target[1], near]);
+        if (!plan.ok) return { ok: false, reason: plan.reason, secs, dist };
+        if (!plan.path.length) return { ok: true, reason: 'arrived', secs, dist };
+        let progressed = false, reachedAll = true;
+        for (const wp of plan.path) {
+          for (let k = 0; k < 16; k++) {   // ≤ 8 s per waypoint
+            const r = await page.evaluate(wp => { const a = window.__arcade.snapshot().position; window.__arcade.simulate(.5, { walkTo: wp }); const b = window.__arcade.snapshot().position; return [Math.hypot(b[0] - a[0], b[2] - a[2]), Math.hypot(b[0] - wp[0], b[2] - wp[1])]; }, wp);
+            secs += .5; dist += r[0]; if (r[0] > .05) progressed = true;
+            if (until && await until()) return { ok: true, reason: 'until', secs, dist };
+            if (r[1] < .35) break;
+            if (r[0] < .02) { reachedAll = false; break; }   // blocked: replan from here
+          }
+        }
+        if (reachedAll && !progressed) return { ok: true, reason: 'arrived', secs, dist };   // already within a step of the goal
+        if (!progressed && ++replans > 3) return { ok: false, reason: 'stuck', secs, dist };
+      }
+      return { ok: false, reason: 'timeout', secs, dist };
+    },
     /** fast-forward game time (no drawing) until fn() is true; for cutscenes, which crawl at software frame rates */
     until: async (fn, gameSeconds = 20) => { for (let s = 0; s < gameSeconds; s += .25) { if (await fn()) return true; await page.evaluate(() => window.__arcade.simulate(.25)); } return !!(await fn()); },
     waitFor: async (fn, timeout = 120000, step = 500) => { const t0 = Date.now(); while (Date.now() - t0 < timeout) { if (await fn()) return true; await page.waitForTimeout(step); } return false; },

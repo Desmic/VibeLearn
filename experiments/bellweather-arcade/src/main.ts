@@ -396,7 +396,7 @@ renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();c
   // for tests: what squeezes the follow camera (how far it sits, and what stands between Zip and where it wants to be)
   camSqueeze(){const pivot=zip.position.clone().add(new T.Vector3(0,1.5,0)),hits:string[]=[];ray.set(pivot,camDir);ray.far=zoom;for(const h of ray.intersectObjects(cameraSolids,true).slice(0,4)){let o:T.Object3D|null=h.object;const path:string[]=[];while(o&&path.length<4){if(o.name)path.push(o.name);o=o.parent}hits.push(`${h.distance.toFixed(2)} ${path.join('<')||h.object.type}`)}const g=cameraGrid?.hit(pivot,camDir,zoom);return {camDist:+camDist.toFixed(2),zoom:+zoom.toFixed(2),hits,grid:g&&g<zoom?+g.toFixed(2):null}}};
 Object.defineProperty(window,'__arcade',{value:{
-  snapshot:()=>({study:facadeStudy?'facade':'arcade',standingY:standingY0+groundLift,contactY:contactY0+groundLift,position:zip.position.toArray(),routeT:nearestRoute(zip.position).t,paused,guided:guideTargetT!==null,guideTargetT,reduced,frames,draws:renderer.info.render.calls,triangles:renderer.info.render.triangles,cameraSolids:cameraSolids.length,camera:camera.position.toArray(),cameraMetrics:{...cameraMetrics},place:positionText}),
+  snapshot:()=>({elapsed:+elapsed.toFixed(2),study:facadeStudy?'facade':'arcade',standingY:standingY0+groundLift,contactY:contactY0+groundLift,position:zip.position.toArray(),routeT:nearestRoute(zip.position).t,paused,guided:guideTargetT!==null,guideTargetT,reduced,frames,draws:renderer.info.render.calls,triangles:renderer.info.render.triangles,cameraSolids:cameraSolids.length,camera:camera.position.toArray(),cameraMetrics:{...cameraMetrics},place:positionText}),
   invalidateCameraGeometry,
   // read-only probe for automated checks: is this spot walkable for Zip?
   walkable:(x:number,z:number)=>walkable(new T.Vector3(x,(standingY0+groundLift),z)),
@@ -458,7 +458,7 @@ if(paintedStudy&&gfx.choice==='auto'&&!autoWasMeasured()&&!paintedParams.get('ca
   if(bench.tier!==gfx.tier){const hv=(window as any).__vlVariant;if(hv)location.hash=`${hv}&auto=${bench.tier}`;else{const u=new URL(location.href);u.searchParams.set('auto',bench.tier);location.replace(u.toString())}await new Promise(()=>{});}
 }
 render();get('loading').hidden=true;
-if(story&&!paintedParams.get('beat')&&paintedParams.get('title')!=='0'&&!paintedParams.get('capture')){const saved=save.load();title=buildTitle({host:appHost,resume:saved?PLACE[saved.at]:null,onContinue:()=>saved&&story.start(saved.at),onStart:()=>{save.clear();story.start()},onGraphics:()=>pause(true),reduced:()=>reduced})}else story?.start();
+if(story&&!paintedParams.get('beat')&&paintedParams.get('title')!=='0'&&!paintedParams.get('capture')){const saved=save.loadVerified();title=buildTitle({host:appHost,resume:saved?PLACE[saved.at]:null,onContinue:()=>saved&&story.start(saved.at),onStart:()=>{save.clear();story.start()},onGraphics:()=>pause(true),reduced:()=>reduced})}else story?.start();
 schedule();
 
 // Frame-rate benchmark (kit/bench.ts): `bench=1` visits fixed views and reports fps and frame cost.

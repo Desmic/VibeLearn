@@ -62,6 +62,13 @@ gone; *Shield Mira!* now appears on Mira, *Talk to Mira* beside her, *Absorb "ri
 word. Mira's lantern is the first act-on-a-thing lesson: she asks, and Zip walks to the
 skiff and hangs it himself (no dialogue button).
 
+**Which thing the one prompt picks (4 Oct, from the speedrun bot).** Among things in reach,
+the one the camera is aimed at wins: the one most centred within about 35°. If nothing is in
+that cone, the nearest wins. "Nearest only" made the decoy "sink", one step closer, the only
+word E could take. To get "rise", the player had to squeeze through a 0.5 m strip behind a
+planter. Aim-first is how BotW/TotK pick targets. Keep it for every future multi-target
+spot.
+
 ## The loop, and the ceiling
 
 **Loop:** explore → words call out (a chime, a glint) → absorb them → compose in the

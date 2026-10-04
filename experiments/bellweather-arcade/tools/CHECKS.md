@@ -13,7 +13,8 @@ replace people playing for feel and fun.
 | `playserver.mjs` | The body of the AI play-tester: a game session an agent drives step by step, seeing only screenshots, text and buttons. Writes a play log and a report. See `AI-PLAYTEST.md`. | as long as the play |
 | `flowcheck.mjs` | Plays the whole game the intended way: title → Mira → attack → spark → absorb words + hologram engine at the skiff → flight → gate → relay → Loom Isle (Stop 2) → save and Continue → fixed camera views. Checks checkpoints, first-try logging, stars, and that nothing errors. `--input touch` plays as a phone (taps on prompts, tap-anywhere to read on, the thumb stick); `--input keyboard` as a laptop (E, Space, number keys, WASD/Shift, 1024×640); default `mouse` clicks. Touch and keyboard add a `controls` segment (stick tilt/jog, Shift-walk, which controls show). | ~15 min |
 | `playthrough.mjs` | Runs `flowcheck` as a phone, then as a laptop, then `timing`, one after another, and writes `index.html` linking each run's **contact sheet** (`sheet.html`: every screenshot, failures on top) and the timing log. The before-publishing check for big changes. | ~35 min |
-| `breaker.mjs` | Plays like a speedrunner or a mean tester and checks that the game's promises still hold (below). | ~15–20 min |
+| `breaker.mjs` | Plays like a mean tester and checks that the game's promises still hold (below). `--input touch` plays as a phone: rapid taps, thumb stick, the pause button. | ~15–20 min |
+| `speedrun.mjs` | Walks the whole game the fastest correct way: a path planned over the game's own walkable ground (no teleports), every cutscene skipped, nothing read, every puzzle right first time. Times each checkpoint in game seconds (`pacing.json`). Fails if a goal can't be reached on foot, if a prompt never shows near its goal, if any learning station (from data) ends with no answers, or if a checkpoint is reached without the stations its progress spec requires. Notes, as warnings, places where the player must step around another prompt. | ~6 min |
 
 ```
 node tools/storycheck.mjs [--root out]
@@ -22,7 +23,8 @@ node tools/rules-parity.mjs [--app ../../app] [--walks 300]
 node tools/playserver.mjs [--port 7788] [--out playtest]   # then GET /observe, POST /act
 node tools/flowcheck.mjs [--input mouse|touch|keyboard] [--out flowcheck] [--only controls,title,meet,...] [--base URL] [--root out]
 node tools/playthrough.mjs [--out playthrough] [--only touch,keyboard,timing]
-node tools/breaker.mjs  [--out breaker] [--only oob,walls,mash,order,scum,pause,skip,resize,monkey] [--minutes 4] [--seed 1337]
+node tools/breaker.mjs  [--input mouse|touch] [--out breaker] [--only oob,walls,mash,order,scum,pause,skip,resize,tamper,monkey] [--minutes 4] [--seed 1337]
+node tools/speedrun.mjs [--input touch|keyboard] [--out speedrun] [--verbose]
 ```
 
 Both write `report.md`, `report.json` and screenshots into `--out`, and exit with code 1
@@ -44,6 +46,11 @@ sheet).
 - **Pause, restart and skip are safe.** Pausing inside the cutscene keeps the story going.
   "Restart" on the island keeps Zip on the island. Skipping the attack still saves the
   checkpoint.
+- **A hand-edited save can't skip the learning.** A save claiming the end of Stop 2 with no
+  answers resumes at "Wake the skiff". One past the relay, with the relay unanswered, resumes
+  at the gate. A broken save offers a new run. A *forged* learning record is still believed:
+  that is a warning, because only progress signed on a server can stop it
+  (`kit/progress.ts`, `worlds/first-words-progress.ts`).
 - **Rotation works.** Turning the phone mid-puzzle keeps the relay console fully on screen.
 - **Random play doesn't break anything.** Minutes of random taps, keys, buttons and pauses
   (including reloads that random clicks cause) never leave Zip stuck or the screen in a bad

@@ -1,7 +1,10 @@
 // Breaker: tries to break the game the way a speedrunner or a mean play-tester
 // would, and checks that the game's promises still hold afterwards.
 //
-//   node tools/breaker.mjs [--only oob,walls,mash,order,scum,pause,skip,resize,monkey] [--minutes 3]
+//   node tools/breaker.mjs [--input mouse|touch|keyboard] [--only oob,walls,mash,order,scum,pause,skip,resize,tamper,monkey] [--minutes 3]
+//
+// --input touch plays as a phone: rapid taps instead of clicks, the thumb stick instead of
+// arrow keys, the pause button instead of Escape (tools/playthrough.mjs runs it that way too).
 //
 // Promises (invariants) checked after every probe:
 //  - Zip never stands somewhere unwalkable, never falls through the world;
@@ -40,10 +43,21 @@ const firstTryIntegrity = async (where) => {
   const dup = []; for (let i = 1; i < ev.length; i++) if (ev[i].activity === ev[i - 1].activity && ev[i].decision === ev[i - 1].decision && ev[i].choice === ev[i - 1].choice && ev[i].t - ev[i - 1].t < 400) dup.push(ev[i].activity + ':' + ev[i].choice);
   check(`${where}: no double-logged decisions from fast repeat clicks`, !dup.length, dup.join(', '), 'warn');
 };
-// hold a key in game time (fast-forwarded: software rendering is too slow to play in real time)
-const hold = (key, ms) => page.evaluate(([k, s]) => window.__arcade.simulate(s, { keys: [k] }), [key, ms / 1000]);
+const TOUCH = h.INPUT === 'touch';
+// hold a direction in game time (fast-forwarded: software rendering is too slow to play in real
+// time): an arrow key on a keyboard, the thumb stick pushed that way on a phone
+const STICK = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
+const hold = (key, ms) => TOUCH ? h.stick(STICK[key], ms / 1000) : page.evaluate(([k, s]) => window.__arcade.simulate(s, { keys: [k] }), [key, ms / 1000]);
+/** hit a control n times as fast as the input allows: taps on a phone, forced clicks otherwise */
+const hit = async (loc, n = 1) => {
+  loc = loc.first();
+  // a thumb aims at a button that holds still (prompts pop in), then fires as fast as it can
+  if (TOUCH) { if (!(await loc.tap({ timeout: 3000 }).then(() => true).catch(() => false))) return; const b = await loc.boundingBox().catch(() => null); if (!b) return; for (let i = 1; i < n; i++) await page.touchscreen.tap(b.x + b.width / 2, b.y + b.height / 2).catch(() => {}); return; }
+  for (let i = 0; i < n; i++) await loc.click({ force: true, noWaitAfter: true, timeout: 800 }).catch(() => {});
+};
+const tapAt = (x, y) => TOUCH ? page.touchscreen.tap(x, y) : page.mouse.click(x, y);
 const walkTo = (x, z, s = 4) => page.evaluate(([x, z, s]) => window.__arcade.simulate(s, { walkTo: [x, z] }), [x, z, s]);
-const startTown = async () => { await h.fresh('&title=0'); await h.skipOpening(); await page.locator('canvas').first().click({ position: { x: 200, y: 300 } }).catch(() => {}); };
+const startTown = async () => { await h.fresh('&title=0'); await h.skipOpening(); await tapAt(200, 300).catch(() => {}); };
 const startIsle = async () => { await h.fresh('&title=0&beat=land'); await card('OK'); };
 
 // ---------------------------------------------------------------- probes
@@ -85,17 +99,19 @@ await segment('mash', async () => {
   await startIsle();
   await pose(2.0, 54.6);
   const actBtn = page.locator('.context-act').first(); await actBtn.waitFor({ timeout: 20000 });
-  for (let i = 0; i < 6; i++) await actBtn.click({ force: true, noWaitAfter: true }).catch(() => {});
+  await hit(actBtn, 6);
   await page.waitForTimeout(800); await invariants('mash satchel');
-  await page.locator('.story-card button').first().click().catch(() => {});
-  await pose(-4.5, 52.2); for (let i = 0; i < 5; i++) await page.locator('.context-act').first().click({ force: true, noWaitAfter: true }).catch(() => {});
-  await pose(4.6, 50.8); for (let i = 0; i < 5; i++) await page.locator('.context-act').first().click({ force: true, noWaitAfter: true }).catch(() => {});
-  await pose(5.4, 52.2); for (let i = 0; i < 5; i++) await page.locator('.context-act').first().click({ force: true, noWaitAfter: true }).catch(() => {});
+  await hit(page.locator('.story-card button'));
+  await pose(-4.5, 52.2); await hit(page.locator('.context-act'), 5);
+  await pose(4.6, 50.8); await hit(page.locator('.context-act'), 5);
+  await pose(5.4, 52.2); await hit(page.locator('.context-act'), 5);
   const n = await page.locator('.satchel-bar .chip.rail').count();
   check('satchel never holds more than two notes', n <= 2, `${n} notes`);
-  await pose(0, 49.2); await act('Gate');
+  // (a tap burst can already have opened the Gate's question: the prompt moved under the thumb to
+  // the next target, as it does on a phone; that's fine as long as the promises hold)
+  await pose(0, 49.2); if (!(await page.locator('.story-card:not([hidden])').count())) await act('Gate');
   // answer a choice card with a burst of clicks on every button
-  for (let i = 0; i < 3; i++) { const b = page.locator('.story-card button'); const c = await b.count(); for (let k = 0; k < c; k++) await b.nth(k).click({ force: true, noWaitAfter: true, timeout: 500 }).catch(() => {}); await page.waitForTimeout(300); }
+  for (let i = 0; i < 3; i++) { const b = page.locator('.story-card button'); const c = await b.count(); for (let k = 0; k < c; k++) await hit(b.nth(k)); await page.waitForTimeout(300); }
   await page.waitForTimeout(1500);
   await invariants('mash gate cards'); await firstTryIntegrity('mash gate');
   await shot('mash');
@@ -141,18 +157,18 @@ await segment('pause', async () => {
   // pause and resume inside the attack cutscene, the catch game and the flight
   await startTown();
   await pose(4.4, -9.4); await act('Talk'); await h.talkMira(); await h.waitBeat('attack', 10000);
-  await page.waitForTimeout(2000); await page.keyboard.press('Escape'); await page.waitForTimeout(1500);
-  const pausedBeat = await beat(); await page.keyboard.press('Escape'); await page.waitForTimeout(500);
+  await page.waitForTimeout(2000); await (TOUCH ? hit(page.locator('#pause')) : page.keyboard.press('Escape')); await page.waitForTimeout(1500);
+  const pausedBeat = await beat(); await (TOUCH ? hit(page.locator('#resume')) : page.keyboard.press('Escape')); await page.waitForTimeout(500);
   check('attack continues after pause', await waitFor(async () => (await beat()) !== 'attack' || await page.locator('.story-skip').isVisible(), 20000), pausedBeat);
-  await page.locator('.story-skip').click().catch(() => {}); await h.waitBeat('spark', 60000);
+  await h.press(page.locator('.story-skip')).catch(() => {}); await h.waitBeat('spark', 60000);
   // restart from the pause menu while the story runs
-  await page.keyboard.press('Escape'); await page.locator('#restart').click().catch(() => {}); await page.waitForTimeout(1500);
+  await (TOUCH ? hit(page.locator('#pause')) : page.keyboard.press('Escape')); await page.waitForTimeout(300); await hit(page.locator('#restart')); await page.waitForTimeout(1500);
   await invariants('restart from pause during the spark chase');
   const g = await goal();
   check('story goal survives "restart" from the menu', /spark|voice/i.test(g ?? ''), g, 'warn');
   // island restart: must not drop Zip into the hidden town
   await startIsle();
-  await page.keyboard.press('Escape'); await page.locator('#restart').click().catch(() => {}); await page.waitForTimeout(1500);
+  await (TOUCH ? hit(page.locator('#pause')) : page.keyboard.press('Escape')); await page.waitForTimeout(300); await hit(page.locator('#restart')); await page.waitForTimeout(1500);
   const p = await zip(); const place = await page.locator('#place').textContent();
   check('"restart" on the island keeps Zip on the island', p[2] > 36, `Zip at ${p.map(v => v.toFixed(1)).join(', ')}, place "${place}"`);
   await shot('restart-island');
@@ -162,7 +178,7 @@ await segment('skip', async () => {
   // skip the attack at the earliest moment and right after the shield
   await startTown();
   await pose(4.4, -9.4); await act('Talk'); await h.talkMira(); await h.waitBeat('attack', 10000);
-  await page.locator('.story-skip').click({ timeout: 10000 }); await page.waitForTimeout(800);
+  await h.press(page.locator('.story-skip'), { timeout: 10000 }); await page.waitForTimeout(800);
   await h.waitBeat('spark', 60000);
   check('no shield button left after skipping', !(await page.locator('.context-act', { hasText: 'Shield' }).isVisible()));
   check('checkpoint "spark" saved after skip', (await save()) === 'spark', await save());
@@ -171,8 +187,8 @@ await segment('skip', async () => {
 
 await segment('resize', async () => {
   // rotate the phone in the middle of the relay puzzle and the catch game
-  await page.evaluate(() => localStorage.setItem('bellweather.save.v1', JSON.stringify({ at: 'gate-open', when: Date.now() })));
-  await open(''); await page.locator('.title-screen button', { hasText: 'Continue' }).click(); await page.waitForTimeout(3500);
+  await h.seedSave('gate-open', ['wake-skiff', 'blossom-gate']);
+  await open(''); await h.press(page.locator('.title-screen button', { hasText: 'Continue' })); await page.waitForTimeout(3500);
   await pose(0, 43.4); await act('relay');
   for (const [w, hgt] of [[760, 393], [393, 760], [1280, 720]]) {
     await page.setViewportSize({ width: w, height: hgt }); await page.waitForTimeout(1200);
@@ -183,18 +199,39 @@ await segment('resize', async () => {
   await page.setViewportSize({ width: 393, height: 760 });
 });
 
+await segment('tamper', async () => {
+  // A save edited by hand must not skip the learning (kit/progress.ts + worlds/*-progress.ts):
+  // the game resumes at the furthest checkpoint the learning record supports.
+  const KEYS = { save: 'bellweather.save.v1', decided: 'bellweather.decided.v1' };
+  const titleLabel = async () => { await page.locator('.title-menu .primary').waitFor({ timeout: 30000 }); return page.locator('.title-menu .primary').textContent(); };
+  const fake = (at, decided) => page.evaluate(([k, at, d]) => { localStorage.clear(); localStorage.setItem(k.save, at === null ? '{not json' : JSON.stringify({ at, when: Date.now() })); localStorage.setItem(k.decided, JSON.stringify(d)); }, [KEYS, at, decided]);
+  await h.fresh('');
+  await fake('loom-done', []); await open('');
+  let label = await titleLabel();
+  check('a bare "end of Stop 2" save resumes where the record allows (Wake the skiff)', /Wake the skiff/.test(label) && (await save()) === 'skiff', `${label} · save now ${await save()}`);
+  await fake('loom', ['wake-skiff|next-input', 'blossom-gate|context-selection']); await open('');
+  label = await titleLabel();
+  check('a save past the relay without the relay answered resumes at the gate', /past the gate/.test(label) && (await save()) === 'gate-open', `${label} · save now ${await save()}`);
+  await fake(null, []); await open('');
+  check('a broken save is ignored (no crash, a new run offered)', /Start training run/.test(await titleLabel()), await titleLabel());
+  await fake('loom-done', ['wake-skiff|x', 'blossom-gate|x', 'relay-contact|x', 'loom-fit|x']); await open('');
+  label = await titleLabel();
+  check('a save with a forged learning record is still believed (client-only limit: needs signed progress on a server)', !/Tavi freed/.test(label), label, 'warn');
+  await invariants('after tampered saves');
+});
+
 await segment('monkey', async () => {
   // random chaos with the invariants checked every few actions
   const t0 = Date.now(); let n = 0, fails = 0;
   await startIsle();
   const actions = [
-    async () => page.mouse.click(10 + rand() * 370, 120 + rand() * 600),
+    async () => tapAt(10 + rand() * 370, 120 + rand() * 600),
     async () => hold(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'][Math.floor(rand() * 4)], 300 + rand() * 2500),
     async () => walkTo((rand() - .5) * 30, 48 + (rand() - .5) * 30, 3),
-    async () => { const b = page.locator('button:visible'); const c = await b.count(); if (c) await b.nth(Math.floor(rand() * c)).click({ timeout: 800, force: true }).catch(() => {}); },
-    async () => page.locator('.context-act:visible').first().click({ timeout: 500 }).catch(() => {}),
-    async () => page.locator('.story-card button.primary:visible').first().click({ timeout: 500 }).catch(() => {}),
-    async () => { if (rand() < .15) { await page.keyboard.press('Escape'); await page.waitForTimeout(300); await page.keyboard.press('Escape'); } },
+    async () => { const b = page.locator('button:visible'); const c = await b.count(); if (c) await hit(b.nth(Math.floor(rand() * c))); },
+    async () => hit(page.locator('.context-act:visible'), 1 + Math.floor(rand() * 3)),
+    async () => hit(page.locator('.story-card button.primary:visible')),
+    async () => { if (rand() < .15) { if (TOUCH) { await hit(page.locator('#pause')); await page.waitForTimeout(300); await hit(page.locator('#resume')); } else { await page.keyboard.press('Escape'); await page.waitForTimeout(300); await page.keyboard.press('Escape'); } } },
   ];
   let reloads = 0;
   // wait for the game to be up again after a reload; a reload can itself be interrupted by
@@ -203,7 +240,7 @@ await segment('monkey', async () => {
     for (let k = 0; k < 4; k++) {
       try {
         await page.waitForFunction(() => !!window.__arcade && document.getElementById('loading')?.hidden, null, { timeout: 240000 }); await page.waitForTimeout(1500);
-        const t = page.locator('.title-screen .title-menu .primary'); if (await t.isVisible().catch(() => false)) await t.click().catch(() => {});
+        const t = page.locator('.title-screen .title-menu .primary'); if (await t.isVisible().catch(() => false)) await h.press(t).catch(() => {});
         await page.waitForTimeout(2500); return;
       } catch (e) { if (!/context was destroyed|navigation|Target closed/.test(e.message)) throw e; }
     }

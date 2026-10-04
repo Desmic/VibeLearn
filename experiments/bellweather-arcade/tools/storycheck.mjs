@@ -42,6 +42,14 @@ for (const [f, m] of mods) for (const [k, v] of Object.entries(m)) {
   if (stationKit && Array.isArray(v) && v.length && v.every(s => s && s.kind === 'station')) report(`${f} ${k}`, stationKit.validateStations(v, { rules, anchors }));
 }
 
+// progress specs (kit/progress.ts): checkpoints and the stations each one requires exist
+const progressKit = await import(src('kit/progress.js')).catch(() => null);
+if (progressKit) {
+  const stationIds = [];
+  for (const [, m] of mods) for (const v of Object.values(m)) for (const st of (Array.isArray(v) ? v : [v])) if (st && typeof st === 'object' && st.kind === 'station') stationIds.push(st.id);
+  for (const [f, m] of mods) for (const [k, v] of Object.entries(m)) if (v && typeof v === 'object' && Array.isArray(v.order) && v.requires) report(`${f} ${k}`, progressKit.validateProgress(v, stationIds).map(msg => ({ level: 'error', where: 'progress', msg })));
+}
+
 // content checks a level ships with (does the content agree with its rules' answers?)
 for (const [f, m] of mods) for (const [k, v] of Object.entries(m)) if (typeof v === 'function' && k.endsWith('_CONTENT_CHECK')) {
   report(`${f} ${k}`, v().map(msg => ({ level: 'error', where: 'content', msg })));
