@@ -18,6 +18,7 @@ the same names.
 | `__arcade.pose(x, z, yaw, …)` | teleport, for checks that don't test movement (never in the speedrun) |
 | `__vlGuide.beaconAt`, `.goalText`, `.cardOpen`, `.actNow()`, `.overlay.debug()` | the goal marker the speedrun follows; whether a dialogue is open; where every in-world label sits |
 | `__vlStory.debug.beat` (+ game-specific fields) | which story beat is running |
+| `__vlStations[id]` (kit/station.ts) → `{ spec, state, history, allowed(a) }` | each learning station's live rules state and the moves it has applied: the speedrun plays stations from this |
 | `__vlBench` after `bench=1` | frame-rate results, including the resolution sweep |
 | `__vlVoice` (kit/voice.ts), `__vlScape` (kit/soundscape.ts: `mood`, `music`, `testPhrase()`) | voiced-line lengths (timing); the mix check |
 | `__vlDebug.camSqueeze()` | what pushes the follow camera in |
@@ -34,6 +35,8 @@ the same names.
 | `#pause`, `#resume`, `#restart` | pause menu |
 | `.stick-zone` / `.stick-base` | the floating thumb stick (phones) |
 | `html[data-input=touch|desktop]` | which kind of player the game thinks it has |
+| **`[data-action="<rules action>"]`** on every control that sends a rules action | dialogue choices (`Choice.action`), in-world prompts (`setAction(…, action)`), puzzle chips and buttons. A bot plays any station from its rules by pressing these; nothing else about the puzzle needs to be known |
+| `.puzzle-mode` / `.engine-mode` on the game host while a puzzle UI is open | wait for the puzzle's controls instead of walking away |
 
 ## 3. Data the game declares (tools read it from the build)
 
@@ -62,11 +65,14 @@ tamper and break probes) is shared.
 - **Done (4 Oct): the answer key comes from the rules.** `tools/rulecheck.mjs` solves every
   puzzle from its rules data and prints the fewest-moves perfect run (semantic actions, e.g.
   `take-satchel → take.mira → speak → predict.lotus → support.route → run`).
-- **Still per game:** which button or prompt each semantic action is (the speedrun's UI
-  steps).
-- **Next step for the system:** stations declare that mapping as data (action → control).
-  Then the speedrun route is generated, and a new game comes with its speedrun and
-  play-through for free.
+- **Done (4 Oct): stations play from their rules.** Every control that sends a rules action
+  is tagged `data-action`. The speedrun's `playStation(id)` re-plans from the live rules
+  state at every step: it takes any move on a shortest no-mistake path, so moves that can come
+  in any order are taken in whatever order the world offers them. It finds the move's control
+  on screen, or its prompt in the world (walking, and exploring when there is no marker), or
+  opens the station. It knows nothing about the puzzle beyond its rules.
+- **Still written by hand:** only the story between stations (talk to Mira, catch the spark,
+  board). Next: story beats declare their goal action as data, so that part generates too.
 
 ## 5. What the tools prove, per game, before anyone plays it
 

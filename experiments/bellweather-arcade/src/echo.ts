@@ -84,7 +84,7 @@ export function buildEcho(scene: T.Scene, o: Opts) {
       return best;
     },
     /** the one-button action for a source in reach, if any */
-    action(z: T.Vector3): { label: string; use: () => void; at: T.Vector3 } | null {
+    action(z: T.Vector3): { label: string; use: () => void; at: T.Vector3; action: string } | null {
       if (!enabled || flying) return null;
       // Of the words in reach, the one the player is looking at wins, then the nearest (as in
       // BotW: turn the camera to pick). Nearest alone made a decoy one step closer the only
@@ -101,7 +101,7 @@ export function buildEcho(scene: T.Scene, o: Opts) {
       }
       if (!near) { g.label('echo-line', null); return null; }
       const p = where(near); g.label('echo-line', near.s.line, tmp.copy(p).setY(p.y + .45));
-      const m = near; return { label: `Absorb “${m.s.word}”`, use: () => { take(m); }, at: m.grp.position };
+      const m = near; return { label: `Absorb “${m.s.word}”`, use: () => { take(m); }, at: m.grp.position, action: 'absorb.' + m.s.word };
     },
     tick(dt: number) {
       t += dt; fx.tick(dt);

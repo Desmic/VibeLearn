@@ -377,7 +377,8 @@ export function buildStory(scene: T.Scene, o: Opts) {
   // one context action for whatever is in reach
   let shown = '', shownFn: (() => void) | undefined;
   // `at`: the thing it acts on (target brackets in the world; tapping them works like the button)
-  const action = (label: string | null, fn?: () => void, at?: T.Vector3 | null) => { if ((label ?? '') !== shown || fn !== shownFn) { shown = label ?? ''; shownFn = fn; g.setAction(label, fn, at); } else if (at) g.setActionAt(at); };
+  // `ruleAction`: the rules action it sends, if any (tagged on the prompt for tests: docs/TEST-CONTRACT.md)
+  const action = (label: string | null, fn?: () => void, at?: T.Vector3 | null, ruleAction?: string) => { if ((label ?? '') !== shown || fn !== shownFn) { shown = label ?? ''; shownFn = fn; g.setAction(label, fn, at, ruleAction); } else if (at) g.setActionAt(at); };
   const bracket = new T.Vector3(), promptAt = new T.Vector3(); const over = (p: T.Vector3, y = 1.0) => bracket.copy(p).setY(p.y + y);
 
   return {
@@ -549,7 +550,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
         if (c >= 13.4) { cut = -1; endAttack(); }
         return;
       }
-      if (beat === 'isle') { const a = isle.tick(dt, z); if (!g.cardOpen && a) action(a.label, a.use); else action(null); return; }
+      if (beat === 'isle') { const a = isle.tick(dt, z); if (!g.cardOpen && a) action(a.label, a.use, undefined, a.action); else action(null); return; }
       if (beat === 'to-loom') { isle.tick(dt, z); if (!g.cardOpen && Math.hypot(z.x - MOOR.x, z.z - MOOR.z) < 2.2) action(stop2.label('board'), board, over(MOOR, 1.2)); else action(null); return; }
       if (beat.startsWith('loom')) {
         if (taviFree >= 0 && taviFree < 1) { taviFree = Math.min(1, taviFree + dt / 1.2); cloth.position.y = LOOM_AT.y + .95 - taviFree * 1.2; (cloth.material as T.MeshLambertMaterial).opacity = .92 * (1 - taviFree); tavi.position.z = LOOM_AT.z - .75 + taviFree * 1.9; if (taviFree >= 1) cloth.visible = false; }
@@ -567,7 +568,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
       else if (beat === 'skiff' && ECHO) {
         // words first (a source in reach wins), then the engine at the pilot stone
         const a = echo.action(z);
-        if (a) action(a.label, a.use, a.at);
+        if (a) action(a.label, a.use, a.at, a.action);
         else if (near(PILOT_STONE, ECHO_SKIFF_STATION.place.r)) action(ECHO_SKIFF_STATION.action, openEngine, over(PILOT_STONE, .5));
         else action(null);
         if ((gatherT -= dt) <= 0) { gatherT = .8; gatherGoal(); }

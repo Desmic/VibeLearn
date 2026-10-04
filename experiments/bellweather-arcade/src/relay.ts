@@ -24,18 +24,18 @@ export function buildRelay(o: Opts) {
   const dialSvg = () => {
     const ticks = Array.from({ length: 9 }, (_, i) => {
       const a = (-135 + i * 33.75) * Math.PI / 180, x = 90 + Math.sin(a) * 70, y = 90 - Math.cos(a) * 70;
-      return `<g class="relay-tick${i + 1 === ch() ? ' on' : ''}" data-ch="${i + 1}"><circle cx="${x}" cy="${y}" r="15"/><text x="${x}" y="${y + 5}" text-anchor="middle">${i + 1}</text></g>`;
+      return `<g class="relay-tick${i + 1 === ch() ? ' on' : ''}" data-ch="${i + 1}" data-action="tune.${i + 1}"><circle cx="${x}" cy="${y}" r="15"/><text x="${x}" y="${y + 5}" text-anchor="middle">${i + 1}</text></g>`;
     }).join('');
     const a = -135 + (ch() - 1) * 33.75;
     return `<svg class="relay-dial" viewBox="0 0 180 180" aria-label="Relay dial, channel ${ch()}"><circle cx="90" cy="90" r="46" class="knob"/><line x1="90" y1="90" x2="90" y2="52" class="needle" transform="rotate(${a} 90 90)"/><circle cx="90" cy="90" r="7" class="hub"/>${ticks}</svg>`;
   };
   const tune = (msg = 'Static… Turn the dial to a channel, then call.') => {
     active = true; g.close(); el.hidden = false; o.host.classList.add('puzzle-mode');
-    el.innerHTML = `<div class="relay-head">RELAY · CH <b>${ch()}</b></div><p class="relay-notes">Pinned notes: ${RELAY_NOTES}</p>${dialSvg()}<p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="call">Call on channel ${ch()}</button><button class="quiet" data-act="close">Step away</button></div>`;
+    el.innerHTML = `<div class="relay-head">RELAY · CH <b>${ch()}</b></div><p class="relay-notes">Pinned notes: ${RELAY_NOTES}</p>${dialSvg()}<p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="call" data-action="call">Call on channel ${ch()}</button><button class="quiet" data-act="close">Step away</button></div>`;
   };
   const words = (msg = 'The relay has said three words. <b>Tap the words it should read</b> to make the next one, then Send.') => {
     const ws = ['Channel 7.', 'Mira,', 'it\'s'];
-    el.innerHTML = `<div class="relay-head">RELAY · CH <b>7</b> · <span class="live">LIVE</span></div><div class="rail-chips">${ws.map((w, i) => `<button class="chip${pickedNow().has(i) ? ' picked' : ''}" data-w="${i}">${w}</button>`).join('')}<span class="chip empty">…</span></div><p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="send">Send</button></div>`;
+    el.innerHTML = `<div class="relay-head">RELAY · CH <b>7</b> · <span class="live">LIVE</span></div><div class="rail-chips">${ws.map((w, i) => `<button class="chip${pickedNow().has(i) ? ' picked' : ''}" data-w="${i}" data-action="word.${i}">${w}</button>`).join('')}<span class="chip empty">…</span></div><p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="send" data-action="send">Send</button></div>`;
     el.onclick = e => {
       const b = (e.target as HTMLElement).closest('button'); if (!b) return; e.stopPropagation(); sfx.tap();
       if (b.dataset.w) { st.act('word.' + b.dataset.w); words(); return; }

@@ -100,8 +100,10 @@ export function createStation(spec: StationSpec, host: StationHost, rules: GameR
     },
     finish(then: () => void) { host.stars(spec.stars.title, st.earned(), then); },
     /** an action zone for this station, for the game's one context button */
-    zone(at: T.Vector3, when: () => boolean, use: () => void) { return { at, r: spec.place.r, label: spec.action, when, use }; },
+    zone(at: T.Vector3, when: () => boolean, use: () => void, action?: string) { return { at, r: spec.place.r, label: spec.action, when, use, action }; },
   };
+  // test hook (docs/TEST-CONTRACT.md): each station's rules state and the actions it has applied
+  (((globalThis as any).__vlStations ??= {}) as Record<string, unknown>)[spec.id] = st;
   return st;
 }
 export type Station = ReturnType<typeof createStation>;

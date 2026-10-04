@@ -20,6 +20,7 @@ const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ?
 const root = resolve(arg('root', 'out'));
 const src = p => pathToFileURL(resolve(root, 'src', p)).href;
 const { GameRulesEngine } = await import(src('kit/game-rules.js'));
+import { explore, route, CAP } from './lib/solve.mjs';
 
 const specs = [], stations = [];
 for (const f of readdirSync(resolve(root, 'src/worlds')).filter(f => f.endsWith('.js'))) {
@@ -30,7 +31,6 @@ for (const f of readdirSync(resolve(root, 'src/worlds')).filter(f => f.endsWith(
   }
 }
 
-const CAP = 200000, key = s => JSON.stringify(s);
 let failures = 0, warnings = 0;
 const say = (lvl, msg) => { if (lvl === '✗') failures++; if (lvl === '!') warnings++; console.log(`  ${lvl} ${msg}`); };
 const results = {};
@@ -49,36 +49,12 @@ const SELF = specs.length; specs.push(TRAP);
 let selfFailuresFrom = 0;
 for (const spec of specs) {
   if (spec === TRAP) { selfFailuresFrom = failures; console.log('\n(self-test: a trapped puzzle, which must fail)'); }
-  const eng = new GameRulesEngine(spec), actions = Object.keys(spec.actions);
   const goal = Object.keys(spec.objectives ?? {})[0];
   const station = stations.find(s => s.rules === spec.id);
   console.log(`\n${spec.id}${station ? `  (station "${station.name}")` : ''}  goal: ${goal ?? '(no objective)'}`);
-  // explore: every reachable state, every allowed action
-  const start = eng.initialState(), ids = new Map([[key(start), 0]]), states = [start], edges = [];   // edges[i] = [{ to, action, events }]
-  const isGoal = s => !!goal && !!eng.objectives(s)[goal];   // the engine's own objective evaluation
-  for (let i = 0; i < states.length && states.length < CAP; i++) {
-    const out = [];
-    for (const a of actions) {
-      if (!eng.allowed(states[i], a)) continue;
-      let t; try { t = eng.apply(states[i], a); } catch { continue; }   // an invariant would break: the game refuses it
-      const k = key(t.state); let j = ids.get(k);
-      if (j === undefined) { j = states.length; ids.set(k, j); states.push(t.state); }
-      out.push({ to: j, action: a, events: t.events.map(e => e.id) });
-    }
-    edges.push(out);
-  }
-  while (edges.length < states.length) edges.push([]);
-  if (states.length >= CAP) say('!', `stopped exploring at ${CAP} states (the proof below covers those only)`);
-  const goalSet = new Set(states.map((s, i) => [s, i]).filter(([s]) => isGoal(s)).map(([, i]) => i));
-  const wrong = e => e.events.some(id => /^decide:[^:]+:wrong/.test(id));
-  // shortest path to the goal, optionally without wrong answers
-  const route = (allowWrong) => {
-    const prev = new Map([[0, null]]), q = [0];
-    while (q.length) { const i = q.shift(); if (goalSet.has(i)) { const path = []; for (let k = i; prev.get(k); k = prev.get(k).from) path.unshift(prev.get(k).e.action); return path; }
-      for (const e of edges[i]) if (!prev.has(e.to) && (allowWrong || !wrong(e))) { prev.set(e.to, { from: i, e }); q.push(e.to); } }
-    return null;
-  };
-  const any = route(true), perfect = route(false);
+  const g = explore(GameRulesEngine, spec), { states, edges, goals: goalSet } = g;
+  if (g.capped) say('!', `stopped exploring at ${CAP} states (the proof below covers those only)`);
+  const any = route(g, true), perfect = route(g, false);
   if (!goal) { say('!', 'no objective: nothing to prove'); continue; }
   any ? say('✓', `solvable (${states.length} states reachable)`) : say('✗', `NOT solvable: no reachable state meets "${goal}"`);
   perfect ? say('✓', `perfect run in ${perfect.length} moves: ${perfect.join(' → ')}`) : any && say('✗', 'cannot be finished without a wrong answer');

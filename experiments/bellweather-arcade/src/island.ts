@@ -82,7 +82,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   });
   const mouth = new T.Mesh(new T.TorusGeometry(.2, .035, 6, 20, Math.PI), new T.MeshBasicMaterial({ color: '#4a3a2a' })); mouth.rotation.z = Math.PI; mouth.position.set(0, -.2, .12); face.add(mouth);
   let mood: 'idle' | 'talk' | 'smug' | 'dizzy' | 'oops' | 'happy' = 'idle', talkT = 0, blink = 2;
-  const gateSays = (text: string, choices: { label: string; kind?: 'primary' | 'quiet'; act: () => void }[] = [], m: typeof mood = 'talk') => { mood = m; talkT = Math.min(2.2, text.length * .045); sfx.speak(Math.min(6, 2 + Math.floor(text.length / 14))); g.say(text, choices, { speaker: 'Gate' }); };
+  const gateSays = (text: string, choices: { label: string; kind?: 'primary' | 'quiet'; act: () => void; action?: string }[] = [], m: typeof mood = 'talk') => { mood = m; talkT = Math.min(2.2, text.length * .045); sfx.speak(Math.min(6, 2 + Math.floor(text.length / 14))); g.say(text, choices, { speaker: 'Gate' }); };
   // satchel on a pedestal by the landing
   const ped = satchelPedestal(); mergeStatic(ped.group, [ped.satchel]); ped.group.position.copy(CLASP).setY(.1); root.add(ped.group);
   const satchelObj = ped.satchel;
@@ -155,10 +155,10 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   const noteAction = (n: Note) => {
     if (!hasBag()) return null;
     const b = bag();
-    if (b.includes(n.id)) return { label: 'Put it back', use: () => { if (gateSt.act('put.' + n.id).ok) { sfx.place(); changed(); } } };
-    if (b.length < 2) return { label: 'Take the note', use: () => { if (gateSt.act('take.' + n.id).ok) { sfx.catch(); g.toast(n.short + ' in the satchel', 1000); changed(); } } };
+    if (b.includes(n.id)) return { label: 'Put it back', action: 'put.' + n.id, use: () => { if (gateSt.act('put.' + n.id).ok) { sfx.place(); changed(); } } };
+    if (b.length < 2) return { label: 'Take the note', action: 'take.' + n.id, use: () => { if (gateSt.act('take.' + n.id).ok) { sfx.catch(); g.toast(n.short + ' in the satchel', 1000); changed(); } } };
     const old = NOTES.find(x => x.id === b[0])!;
-    return { label: `Swap for ${old.short}`, use: () => { if (gateSt.act('take.' + n.id).ok) { sfx.catch(); changed(); } } };
+    return { label: `Swap for ${old.short}`, action: 'take.' + n.id, use: () => { if (gateSt.act('take.' + n.id).ok) { sfx.catch(); changed(); } } };
   };
   const changed = () => { renderBag(); goalNow(); };
 
@@ -170,8 +170,8 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       if (r.events.includes('gate-needs-notes')) { gateSays('An empty satchel? I need notes, pal. Rules are rules!', [{ label: 'OK', act: () => { mood = 'idle'; g.close(); } }], 'smug'); return; }
       const read = bag().map(b => NOTES.find(n => n.id === b)!.text.replace(/ \(.*\)$/, '')).join(' … ');
       gateSays(`Let me read your notes: ${read} Now guess: where will I open?`, [
-        { label: 'Lotus Terraces', act: () => gate.predict('lotus') }, { label: 'East Falls', act: () => gate.predict('east') },
-        { label: 'Old Bridge', act: () => gate.predict('bridge') }, { label: 'Can\'t tell', act: () => gate.predict('unclear') },
+        { label: 'Lotus Terraces', action: 'predict.lotus', act: () => gate.predict('lotus') }, { label: 'East Falls', action: 'predict.east', act: () => gate.predict('east') },
+        { label: 'Old Bridge', action: 'predict.bridge', act: () => gate.predict('bridge') }, { label: 'Can\'t tell', action: 'predict.unclear', act: () => gate.predict('unclear') },
       ]);
     },
     predict(p: string) {
@@ -179,9 +179,9 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       const right = r.judged.find(j => j.decision === 'destination-prediction')?.correct;
       g.toast(right ? 'Good call!' : 'Let\'s see…', 900);
       if (r.events.includes('ask-support')) { g.say('What does Mira\'s page tell you?', [
-        { label: 'Her route: Lotus Terraces, then bell gardens', act: () => { gateSt.act('support.route'); gate.run(); } },
-        { label: 'That she is safe', act: () => { gateSt.act('support.safe'); gate.run(); } },
-        { label: 'Where she is held', act: () => { gateSt.act('support.held'); gate.run(); } },
+        { label: 'Her route: Lotus Terraces, then bell gardens', action: 'support.route', act: () => { gateSt.act('support.route'); gate.run(); } },
+        { label: 'That she is safe', action: 'support.safe', act: () => { gateSt.act('support.safe'); gate.run(); } },
+        { label: 'Where she is held', action: 'support.held', act: () => { gateSt.act('support.held'); gate.run(); } },
       ]); }
       else gate.run();
     },
@@ -210,8 +210,8 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   } });
 
   const things = [
-    { at: CLASP, r: 1.7, label: 'Take the satchel', when: () => !hasBag() && phase !== 'off', use: () => { if (!gateSt.act('take-satchel').ok) return; satchelObj.visible = false; phase = 'bag'; renderBag(); sfx.catch(); g.say('A satchel for notes. The Gate reads only what\'s inside.', [{ label: 'Got it', kind: 'primary', act: () => { g.close(); goalNow(); } }]); } },
-    gateSt.zone(anchors[gateSt.spec.place.anchor], () => phase === 'bag', () => gate.speak()),
+    { at: CLASP, r: 1.7, label: 'Take the satchel', action: 'take-satchel', when: () => !hasBag() && phase !== 'off', use: () => { if (!gateSt.act('take-satchel').ok) return; satchelObj.visible = false; phase = 'bag'; renderBag(); sfx.catch(); g.say('A satchel for notes. The Gate reads only what\'s inside.', [{ label: 'Got it', kind: 'primary', act: () => { g.close(); goalNow(); } }]); } },
+    gateSt.zone(anchors[gateSt.spec.place.anchor], () => phase === 'bag', () => gate.speak(), 'speak'),
     relaySt.zone(anchors[relaySt.spec.place.anchor], () => phase === 'open' && !relay.active, () => relay.open()),
   ];
 
@@ -233,7 +233,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       }
       if (phase === 'off') return null;
       t += dt;
-      let best: { label: string; use: () => void } | null = null, bd = 1e9;
+      let best: { label: string; use: () => void; action?: string } | null = null, bd = 1e9;
       for (const th of things) { if (!th.when()) continue; const d = Math.hypot(zip.x - th.at.x, zip.z - th.at.z); if (d < th.r && d < bd) { bd = d; best = th; } }
       // notes: the nearest one within reach shows its text and offers its action
       let nearNote: Note | null = null, nd = 1.8;
@@ -265,7 +265,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       if (crumble > 0) { crumble = Math.max(0, crumble - dt); const s = crumble > 0 ? Math.max(.05, Math.abs(Math.cos((2.4 - crumble) / 2.4 * Math.PI))) : 1; seal.scale.x = sealLow.scale.x = s; }
       if (ping > 0) { ping = Math.max(0, ping - dt); dishMat.emissiveIntensity = .1 + 1.2 * Math.abs(Math.sin(t * 6)) * (ping / 3); }
       path.forEach((d, i) => (d.material as T.MeshBasicMaterial).color.setHSL(.47, .5, .7 + .1 * Math.sin(t * 3 - i * .6)));
-      return best ? { label: best.label, use: best.use } : null;
+      return best ? { label: best.label, use: best.use, action: best.action } : null;
     },
   };
 }

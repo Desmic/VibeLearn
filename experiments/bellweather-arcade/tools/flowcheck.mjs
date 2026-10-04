@@ -143,8 +143,15 @@ await segment('isle', async () => {
   check('island art dressed (kit loaded)', await waitFor(() => page.evaluate(() => !!window.__vlDebug.scene.getObjectByName('island-dressing:blossom-isle')), 60000));
   await shot('arrive');
   await pose(2.0, 54.6); await act('satchel'); await card('Got it');
-  await pose(-4.5, 52.2); await act('Take');
-  await pose(4.6, 50.8); await act('Take');
+  // take a note; if the press didn't take (seen once in ~5 laptop runs at software frame rates),
+  // say what the prompt was (a real dropped press would be a bug) and press again
+  const notes = () => page.locator('.satchel-bar .chip.rail').count();
+  const take = async (x, z) => {
+    await pose(x, z); const n = await notes(), before = await page.evaluate(() => { const a = document.querySelector('.context-act'); return `${a?.dataset.label} / ${a?.dataset.action} / hidden=${a?.hidden}`; });
+    await act('Take'); await page.evaluate(() => window.__arcade.simulate(.5));
+    if ((await notes()) === n) { check(`a press on "Take the note" at ${x},${z} took the note`, false, `prompt was: ${before}; retrying`, 'warn'); await act('Take'); }
+  };
+  await take(-4.5, 52.2); await take(4.6, 50.8);
   check('satchel holds two notes', (await page.locator('.satchel-bar .chip.rail').count()) === 2);
   await pose(0, 49.2); await act('Gate');
   await card('East'); await card('route'); await page.waitForTimeout(800); await card('Carry');

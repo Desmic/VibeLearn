@@ -37,7 +37,7 @@ export function buildLoom(o: Opts) {
     view = 'guided';
     const lifted = st.state.lifted as number, words = c.guided.pieces.map(p => p.join(''));
     show(`${head()}<p class="relay-read">Lift each piece onto the rail. <b>Tap them</b>, one by one.</p>
-      <div class="rail-chips">${words.map((w, i) => `<button class="chip${i < lifted ? ' picked' : ''}" data-lift="${i}" ${i < lifted ? 'disabled' : ''}>${w}</button>`).join('')}</div>
+      <div class="rail-chips">${words.map((w, i) => `<button class="chip${i < lifted ? ' picked' : ''}" data-lift="${i}" data-action="lift" ${i < lifted ? 'disabled' : ''}>${w}</button>`).join('')}</div>
       ${rail(words.slice(0, lifted))}<p class="relay-read loom-count">${lifted} of ${c.slots} slots</p>`);
     el.onclick = e => {
       const b = (e.target as HTMLElement).closest('button'); if (!b || b.disabled) return; e.stopPropagation();
@@ -56,7 +56,7 @@ export function buildLoom(o: Opts) {
     view = 'predict'; o.onShake?.(); sfx.whisper();
     show(`${head('JAMMED')}<p class="relay-read">The Warden jammed in a long message:</p><p class="relay-notes loom-msg">“${c.jammed.text}”</p>
       <p class="relay-read">How many <b>slots</b> will the loom need for it?</p>
-      <div class="story-choices">${order.map(p => `<button class="primary" data-p="${p.action}">${p.label}</button>`).join('')}</div>`);
+      <div class="story-choices">${order.map(p => `<button class="primary" data-p="${p.action}" data-action="${p.action}">${p.label}</button>`).join('')}</div>`);
     el.onclick = e => {
       const b = (e.target as HTMLElement).closest('button'); if (!b?.dataset.p) return; e.stopPropagation(); sfx.tap();
       const r = st.act(b.dataset.p); if (!r.ok) return;
@@ -73,7 +73,7 @@ export function buildLoom(o: Opts) {
   const choose = (msg = 'Pick the call that <b>fits six slots</b> and still says who to free.') => {
     view = 'choose';
     show(`${head()}<p class="relay-read">${msg}</p>
-      <div class="loom-choices">${choiceOrder.map(x => `<button class="loom-choice" data-c="${x.action}">“${x.message.text}”</button>`).join('')}</div>`);
+      <div class="loom-choices">${choiceOrder.map(x => `<button class="loom-choice" data-c="${x.action}" data-action="${x.action}">“${x.message.text}”</button>`).join('')}</div>`);
     el.onclick = e => {
       const b = (e.target as HTMLElement).closest('button'); if (!b?.dataset.c) return; e.stopPropagation(); sfx.tap();
       const r = st.act(b.dataset.c); if (!r.ok) return;

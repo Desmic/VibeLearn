@@ -94,6 +94,28 @@ First findings (4 Oct):
   (3.1, −3.2) on the way to Mira. Players steer, so it matters little, but it is why the
   tests plan their own paths.
 
+## Puzzles proved from their rules, and played from them (4 Oct)
+
+- **`rulecheck.mjs`** (in `npm run check`, under 1 s) proves every puzzle from its rules data:
+  it can be finished, it can be finished without a wrong answer, it has no softlock, and every
+  decision has right and wrong answers. It prints the answer key. All 5 pass.
+- **The speedrun now plays every learning station from its rules alone**, through
+  `data-action` tags.
+
+What building the rules-only player taught (useful for any agent that plays games):
+
+- **Re-plan from the live state.** Don't follow the answer key in order: moves that can come
+  in any order (which word first) come in whatever order the world offers them.
+- **Don't open a puzzle early.** Opening the skiff engine with two of three words led off the
+  perfect path. Open a station only when its own move is a good one, or when no remaining good
+  move is the kind found out in the world (learned while walking).
+- **When there's no goal marker** ("Read the notes"), explore like a player: walkable spots
+  in widening rings, nearest first.
+- **Busy UIs animate in real time.** Wait while any tagged control is disabled, and while a
+  puzzle UI is open with its next controls not yet shown.
+- **Pace:** a rules-only player finishes Stop 2 in about 219 game seconds; the hand-tuned
+  route took 144. The difference is exploring for the notes and waiting on animations.
+
 ## Lessons from building the two-mode play-through (3 Oct)
 
 - Taps must wait for the target to hold still: prompts pop in with a short scale animation

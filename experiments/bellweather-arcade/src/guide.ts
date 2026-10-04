@@ -19,7 +19,9 @@ import { inputMode } from './kit/input-mode';
 export type TapHandler = (ray: T.Raycaster) => boolean;
 export interface Choice { label: string; act: () => void; kind?: 'primary' | 'quiet';
   /** a plain 'go on' (not a real choice): no button; the line advances with a tap anywhere, Space or Enter, like a top game's dialogue box */
-  advance?: boolean }
+  advance?: boolean;
+  /** the rules action this choice sends (docs/TEST-CONTRACT.md: every control that sends a rules action says which) */
+  action?: string }
 export interface ChipOpt { words: string[]; selectable?: boolean; tones?: ('rail' | 'tray' | 'read' | 'empty')[] }
 
 export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, canvas: HTMLElement) {
@@ -155,8 +157,9 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
     /** the one context action; `at` is the thing it acts on (it gets target brackets, which can be tapped too) */
     // The action is a contextual prompt beside the thing it acts on (one verb + one control):
     // a tap target on phones, "E" on keyboards. With no thing named, it rides over Zip.
-    setAction(label: string | null, fn?: () => void, at?: T.Vector3 | null) {
+    setAction(label: string | null, fn?: () => void, at?: T.Vector3 | null, action?: string) {
       act.hidden = !label || cardOpen; actFn = fn ?? null;
+      if ((act.dataset.action ?? '') !== (action ?? '')) { if (action) act.dataset.action = action; else delete act.dataset.action; }
       if ((act.dataset.label ?? '') !== (label ?? '')) { act.dataset.label = label ?? ''; act.innerHTML = label ? `<kbd aria-hidden="true">E</kbd><span>${label.replace(/[<&]/g, c => c === '<' ? '&lt;' : '&amp;')}</span>` : ''; act.setAttribute('aria-label', label ?? ''); }
       bracketAt = label && at ? (bracketAt ?? new T.Vector3()).copy(at) : null;
       if (!bracketAt) { brackets.hidden = true; overlay.unpin('brackets'); } else { brackets.hidden = cardOpen; overlay.pin('brackets', brackets, () => bracketAt, { rank: 2, align: 'center' }); }
@@ -195,7 +198,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
         return;
       }
       // real choices: tap on phones; on keyboards each carries its number key (1, 2, …)
-      choices.forEach((c, i) => { const b = document.createElement('button'); b.innerHTML = `<kbd aria-hidden="true">${i + 1}</kbd>`; b.appendChild(document.createTextNode(c.label)); if (c.kind) b.className = c.kind; b.addEventListener('click', e => { e.stopPropagation(); sfx.tap(); c.act(); }); row.appendChild(b); });
+      choices.forEach((c, i) => { const b = document.createElement('button'); b.innerHTML = `<kbd aria-hidden="true">${i + 1}</kbd>`; b.appendChild(document.createTextNode(c.label)); if (c.kind) b.className = c.kind; if (c.action) b.dataset.action = c.action; b.addEventListener('click', e => { e.stopPropagation(); sfx.tap(); c.act(); }); row.appendChild(b); });
       const opened = performance.now();
       const onNum = (e: KeyboardEvent) => { const n = +e.key; if (n >= 1 && n <= choices.length && performance.now() - opened > 200) { e.preventDefault(); advanceOff?.(); advanceOff = null; sfx.tap(); choices[n - 1].act(); } };
       window.addEventListener('keydown', onNum); advanceOff = () => window.removeEventListener('keydown', onNum);
