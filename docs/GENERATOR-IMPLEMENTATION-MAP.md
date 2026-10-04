@@ -167,6 +167,9 @@ in `story.ts` to join the levels.
 - **Saves** (`src/kit/save.ts`): checkpoint plus learning record, resumed only as far as the
   record supports (`kit/progress.ts`). A game gives keys and progress. **lib**
 - **Targeting** (`src/kit/target.ts`): what a prompt is about; aimed beats near. **lib**
+- **Utterance** (`src/kit/utter.ts`, data `worlds/utter-lab.ts`): say a thing into existence from
+  carried words; judged by function (span, light, prop); proved by `tools/uttercheck.mjs`. Draft
+  mechanic, test area only (`docs/UTTER-DESIGN.md`). **lib + data**
 - **Voices** (`kit/voice.ts`): effects are generic (`robot`, `villain`, `villain-inner`, `radio`)
   and the audio output is passed in, so the kit no longer imports game code. **lib**
 - **Story scripts**: `protagonist` and `thoughtVoices` are data (which thinkers are voiced, by whom). **data**

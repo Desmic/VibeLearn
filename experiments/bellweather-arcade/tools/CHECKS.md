@@ -15,6 +15,8 @@ person's verdict on a build. Why and how: `docs/QUALITY-SYSTEM.md`.
 | `kitcheck.mjs` | The kit imports nothing from the game; system code (kit, `lib/`, system-scope tools) names nothing from the game's world (manifest `nouns`, storage keys) outside comments; every tool is listed in `checks.json`; every escape in `quality/escapes.json` is generalized and caught by a listed check. In `npm run check`. | <1 s |
 | `kittest.mjs` | Unit tests for pure kit rules on made-up cases (targeting: aimed beats near, lined-up things defer to priority; earned progress). In `npm run check`. | <1 s |
 | `npm run check:fixture` | Runs the manifest, story, station, progress and rules checks and the intent generator on `fixtures/night-market`, a second, different game (data only): proof the checks aren't this game's. In `npm run check`. | ~2 s |
+| `uttercheck.mjs` | Proves every place that asks the player to say a thing into existence (`kit/utter.ts`) is solvable from the words it offers, with more than one working phrasing and at least two ways to be wrong. In `npm run check`. | <1 s |
+| `utterlab.mjs` | Plays the utterance test area (`lab=utter`): wrong phrases fail visibly, right ones work; walks across the bridges it made. | ~6 min |
 | `quality.mjs` | The gate: reads every report for this build (`quality/<build>/`) and gives each lane pass / fail / warn / unresolved, never averaged; lists what would resolve each open lane. Exit 1 on a fail. | <1 s |
 | `affected.mjs` | Changed files (git, or given) → the checks to run, with cost. | <1 s |
 | `verdict.mjs` | A person's verdict on a build (`--lane feel --status pass|fail --by Desmic --note …`); the build id is in the pause menu. | — |

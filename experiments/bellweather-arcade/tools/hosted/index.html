@@ -18,7 +18,7 @@ body{background:var(--ground);color:var(--ink)}
   var parts=(location.hash||'#painted').slice(1).split('&'),v=parts[0];
   var extra={painted:'&render=painted',before:'',nopost:'&render=painted&paintpost=0',nobackdrop:'&render=painted&backdrop=0'}[v];
   if(extra===undefined){v='painted';extra='&render=painted'}
-  var keep=parts.slice(1).filter(function(p){return /^(quality|stats|auto|adaptive|beat|title|mech|bench|story)=[a-z0-9-]+$/.test(p)});
+  var keep=parts.slice(1).filter(function(p){return /^(quality|stats|auto|adaptive|beat|title|mech|bench|story|lab)=[a-z0-9-]+$/.test(p)});
   window.__vlSearch='?'+base+extra+(keep.length?'&'+keep.join('&'):''); window.__vlVariant=v;
   window.addEventListener('hashchange',function(){location.reload()});
   function show(msg){var el=document.getElementById('loading');if(el){el.hidden=false;el.style.padding='24px';el.style.textAlign='center';el.textContent='The study could not start: '+msg}}

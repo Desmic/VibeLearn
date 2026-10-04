@@ -23,6 +23,7 @@ gate reads (section 7, and `docs/QUALITY-SYSTEM.md`).
 | `__vlStations[id]` (kit/station.ts) → `{ spec, state, history, allowed(a) }` | each learning station's live rules state and the moves it has applied: the speedrun plays stations from this |
 | `__vlBench` after `bench=1` | frame-rate results, including the resolution sweep |
 | `__vlVoice` (kit/voice.ts), `__vlScape` (kit/soundscape.ts: `mood`, `music`, `testPhrase()`), `__vlAudio()` → `{ ctx, master }` | voiced-line lengths (timing); the mix check measures the master bus |
+| `__vlUtterLab` (`sites`), `__vlUtterLog` (every phrase spoken and what the kit made of it) | the utterance test area (`lab=utter`, kit/utter.ts) |
 | `__vlBuild` (also shown in the pause menu) | which build this is: reports and a person's verdict name it |
 | `__vlDebug.camSqueeze()` | what pushes the follow camera in |
 

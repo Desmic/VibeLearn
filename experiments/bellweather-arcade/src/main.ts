@@ -33,6 +33,8 @@ import { loadProp } from './kit/kit';
 import { buildTitle } from './title';
 import { save, PLACE } from './save';
 import { BUILD } from './build-info';
+import { buildUtterLab } from './utter-lab';
+import { UTTER_LAB } from './worlds/utter-lab';
 import { CANOPY_FOCUS, SIGHT_SHOT } from './canopy';
 import { collectFaders, fadeOccluders } from './occluders';
 import { frameGovernor, budget } from './kit/budget';
@@ -299,13 +301,16 @@ const walkMark=new T.Mesh(new T.RingGeometry(.2,.3,28).rotateX(-Math.PI/2),new T
 guide?.onTap(r=>{if(story?.frozen||title?.active||ridePos||paused)return false;const d=r.ray.direction,o=r.ray.origin;if(d.y>-.02)return false;const p=o.clone().addScaledVector(d,(.13-o.y)/d.y);if(p.distanceTo(zip.position)>30)return false;walkTarget=p;walkStuck=0;walkDetour=0;walkDetourT=0;walkMark.position.set(p.x,.16,p.z);walkMark.visible=true;return true});
 const sunBase=sun.intensity,ambBase=ambient.intensity;
 let ridePos:T.Vector3|null=null,rideYaw=0,townHidden=false;let title:ReturnType<typeof buildTitle>|null=null;
-const story=guide?buildStory(scene,{guide,camera,cameraClear:(a,b)=>{const d=b.clone().sub(a),h=firstCameraHit(a,d,.15);return h?h.distance:d.length()},host:appHost,zip:()=>zip.position,aspect:()=>camera.aspect,
+const labId=paintedParams.get('lab');   // a test area off the story path (lab=utter)
+const story=guide&&!labId?buildStory(scene,{guide,camera,cameraClear:(a,b)=>{const d=b.clone().sub(a),h=firstCameraHit(a,d,.15);return h?h.distance:d.length()},host:appHost,zip:()=>zip.position,aspect:()=>camera.aspect,
   addBox:facade.addSolidBox,removeBox:facade.removeSolidBox as any,solid:facade.addSolidCircle,addWalk:facade.addWalkRegion,
   onEvent:e=>{const seen=save.learning() as {activity:string,decision:string}[];if(save.decidedBefore(e.activity,e.decision)||seen.some(x=>x.activity===e.activity&&x.decision===e.decision))e.first=false;save.logEvent(e);console.info('[learning]',JSON.stringify(e))},walkable:(x,z)=>walkable(new T.Vector3(x,0,z)),enterIsland:blockers=>{for(const o of [townRoot,scene.getObjectByName('painted-promenade'),scene.getObjectByName('painted-life'),scene.getObjectByName('speech-puzzle')])if(o)o.visible=false;townHidden=true;cameraSolids.push(...blockers);invalidateCameraGeometry();},ride:(p,y)=>{ridePos=p?(ridePos??new T.Vector3()).copy(p):null;rideYaw=y},input:()=>({x:(Number(keys.has('KeyD')||keys.has('ArrowRight')||held.has('right'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')||held.has('left')))||(stick?.vector.x??0),y:(Number(keys.has('KeyW')||keys.has('ArrowUp')||held.has('forward'))-Number(keys.has('KeyS')||keys.has('ArrowDown')||held.has('back')))||(stick?.vector.y??0)}),
   dim:k=>{sun.intensity=sunBase*(1-.6*k);ambient.intensity=ambBase*(1-.35*k)},
   density:{low:.5,medium:.8,high:1}[quality().tier],
   adopt:(root,blockers)=>{if(paintedStudy&&paintedParams.get('pbr')!=='1')lambertize(root);if(faders)faders.push(...collectFaders(root));if(townHidden&&blockers.length){cameraSolids.push(...blockers);invalidateCameraGeometry()}renderer.compileAsync(root,camera,scene).catch(()=>{})},
   setGround:(y:number)=>{groundLift=y;zip.position.y=standingY0+groundLift;contact.position.y=contactY0+groundLift},teleport:(x,z,y)=>{guideTargetT=null;zip.position.set(x,(standingY0+groundLift),z);contact.position.set(x,(contactY0+groundLift),z);zip.rotation.y=y;yaw=y;facadeMoveYaw=y;updateLocation();cameraUpdate(1)}}):null;
+const utterLab=guide&&labId==='utter'?buildUtterLab(scene,{guide,host:appHost,zip:()=>zip.position,addWalk:facade.addWalkRegion,spec:UTTER_LAB,setYaw:y=>{yaw=y},yaw:()=>yaw,teleport:(x,z)=>{zip.position.set(x,(standingY0+groundLift),z);contact.position.set(x,(contactY0+groundLift),z);zip.rotation.y=-Math.PI/2;yaw=-Math.PI/2;facadeMoveYaw=-Math.PI/2;updateLocation();cameraUpdate(1)}}):null;
+if(utterLab){appHost.classList.add('story-mode');(window as any).__vlUtterLab=utterLab;}
 if(story){appHost.classList.add('story-mode');const mp=document.querySelector('.menu-card p');if(mp)mp.textContent='Paused. Zip waits patiently, like a good NPC.';(window as any).__vlStory=story;}
 if(story){const lab=document.createElement('label');lab.innerHTML='<input type="checkbox" id="sound"> Sound';get('reduced').parentElement!.after(lab);const cb=lab.querySelector('input')!;cb.checked=!sfx.muted;cb.addEventListener('change',()=>sfx.setMuted(!cb.checked));
   if(scape){const ml=document.createElement('label');ml.innerHTML='<input type="checkbox" id="music"> Music';lab.after(ml);const mc=ml.querySelector('input')!;mc.checked=scape.music;mc.addEventListener('change',()=>{scape.music=mc.checked})}}
@@ -377,7 +382,7 @@ function updateStats(now:number){
 }
 function tick(now:number){raf=0;if(paused||document.hidden)return;const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;elapsed+=dt;move(dt);const zipSpeed=dt>0?moveAmount/dt:0;
   if(zipRig){if(waveBackAt>0&&elapsed>=waveBackAt){waveBackAt=-1;if(zipSpeed<.4)zipRig.wave()}if(greetUntil>0&&elapsed>greetUntil){greetUntil=-1;zipRig.lookAt(null)}}
-  zipRig?.update(dt,zipSpeed,reduced);if(!townHidden)lifeTick?.(dt,reduced,{pos:zip.position,speed:zipSpeed});story?.tick(dt);guide?.tick(dt,zipSpeed,elapsed);
+  zipRig?.update(dt,zipSpeed,reduced);if(!townHidden)lifeTick?.(dt,reduced,{pos:zip.position,speed:zipSpeed});story?.tick(dt);utterLab?.tick(dt);guide?.tick(dt,zipSpeed,elapsed);
   if(scape){const bs=story?FIRST_WORDS_BEAT_SOUND[story.beat]:null;scape.setMood(title?.active||story?.inCutscene?null:story?bs?.mood??null:'town');scape.setPlace(title?.active?null:bs?.place??'town');scape.tick(dt)}
   if(!reduced){if(!townHidden)promenade?.tick(dt);if(paintedStudy)tickLandmarks(dt);}cameraUpdate(dt);render();updateStats(now);schedule()}
 
@@ -418,7 +423,7 @@ Object.defineProperty(window,'__arcade',{value:{
     for(const k of input.keys??[])keys.add(k);
     if(input.walkTo){walkTarget=new T.Vector3(input.walkTo[0],.13,input.walkTo[1]);walkStuck=0;walkDetour=0;walkDetourT=0}
     const n=Math.max(1,Math.round(seconds/.05));
-    for(let i=0;i<n&&!paused;i++){const dt=.05;elapsed+=dt;move(dt);const sp=moveAmount/dt;zipRig?.update(dt,sp,reduced);story?.tick(dt);guide?.tick(dt,sp,elapsed);cameraUpdate(dt)}
+    for(let i=0;i<n&&!paused;i++){const dt=.05;elapsed+=dt;move(dt);const sp=moveAmount/dt;zipRig?.update(dt,sp,reduced);story?.tick(dt);utterLab?.tick(dt);guide?.tick(dt,sp,elapsed);cameraUpdate(dt)}
     for(const k of input.keys??[])keys.delete(k);
     if(input.walkTo){walkTarget=null;walkMark.visible=false}
     render();return {position:zip.position.toArray()};

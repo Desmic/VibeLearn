@@ -27,6 +27,18 @@ t('progress: a save past its learning resumes where the record allows', verified
 t('progress: an earned save resumes where it was', verifiedCheckpoint(P, 'c', new Set(['s1', 's2'])) === 'c');
 t('progress: a later checkpoint dropping a requirement is caught', validateProgress({ order: ['a', 'b'], requires: { a: ['s1'], b: ['s2'] } }, ['s1', 's2']).length === 1);
 
+// kit/utter.ts: phrases are read in order; the first thing named is made at once
+const { speak } = await kit('utter.js');
+const U = { lexicon: { bridge: { kind: 'thing', thing: 'bridge' }, long: { kind: 'size', scale: 2 }, paper: { kind: 'material', material: 'paper', weak: true }, away: { kind: 'facing', away: true } },
+  things: { bridge: { archetype: 'span', size: 4 }, noodle: { archetype: 'span', size: 6, weak: true } }, guesses: { long: 'noodle' } };
+const gap = { need: { archetype: 'span', length: 7 }, slots: 3 };
+t('utter: modifiers before the thing shape it', speak(U, ['long', 'bridge'], gap).works);
+t('utter: a modifier after the thing is too late', speak(U, ['bridge', 'long'], gap).reason === 'too-short' && speak(U, ['bridge', 'long'], gap).late[0] === 'long');
+t('utter: a weak material gives way', speak(U, ['long', 'paper', 'bridge'], gap).reason === 'too-weak');
+t('utter: facing away is the wrong way', speak(U, ['away', 'long', 'bridge'], gap).reason === 'wrong-way');
+t('utter: no thing named, the engine finishes the phrase with its guess', speak(U, ['long'], gap).guessed && speak(U, ['long'], gap).thing === 'noodle');
+t('utter: words past the context are not read', speak(U, ['long', 'bridge'], { ...gap, slots: 1 }).thing === 'noodle');
+
 R.write(null);
 console.log(`\n${fails} failures`);
 process.exit(fails ? 1 : 0);

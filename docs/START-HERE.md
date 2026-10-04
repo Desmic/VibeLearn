@@ -29,6 +29,8 @@ find it wrong.
 5. `experiments/bellweather-arcade/tools/CHECKS.md` — the checks, benchmark, timing, voices.
    With it, `docs/QUALITY-SYSTEM.md`: how the system knows a game is good (lanes, reports, the
    gate, the game manifest, escapes) and how an agent or orchestrator plugs in.
+   Draft mechanic under review: `docs/UTTER-DESIGN.md` (Zip says things into existence; test
+   area `lab=utter`).
 6. `docs/DOCS-AUDIT-20261003.md` — what is open, what was decided, what is historical.
 
 Docs with a **Historical** banner describe earlier games: mine them for ideas, never follow
