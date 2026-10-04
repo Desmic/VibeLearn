@@ -19,6 +19,7 @@ the same names.
 | `__vlGuide.beaconAt`, `.goalText`, `.cardOpen`, `.actNow()`, `.overlay.debug()` | the goal marker the speedrun follows; whether a dialogue is open; where every in-world label sits |
 | `__vlStory.debug.beat` (+ game-specific fields) | which story beat is running |
 | `__vlBench` after `bench=1` | frame-rate results, including the resolution sweep |
+| `__vlVoice` (kit/voice.ts), `__vlScape` (kit/soundscape.ts: `mood`, `music`, `testPhrase()`) | voiced-line lengths (timing); the mix check |
 | `__vlDebug.camSqueeze()` | what pushes the follow camera in |
 
 ## 2. What the page shows (selectors tools press or read)

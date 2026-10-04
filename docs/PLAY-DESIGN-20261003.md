@@ -104,6 +104,26 @@ and speed lines in the sky lanes. Evidence stays honest: a first try counts once
   neighbours shout. Afterwards the town talks of nothing else, and her hat stays where she
   fell.
 
+## Sound of the world (4 Oct)
+
+Before this the world was silent between events. `kit/soundscape.ts` adds a synthesized
+soundscape: no files, light on phones.
+
+- **Ambience per place:** wind that gusts, birds, the distant falls, bell chimes. After the
+  attack the town's birds fall quiet.
+- **Sparse music per story beat,** in the open-world style: a few soft piano notes, then long
+  silence.
+  - town: bright pentatonic;
+  - after the attack: minor, with a low drone;
+  - puzzles: very sparse;
+  - flight: lydian lift;
+  - each isle: its own colour.
+- **Music rests in cutscenes and dips under every spoken line.** Its own switch is in the pause
+  menu (*Music*).
+- **Moods and places are data** (`worlds/first-words-sound.ts`).
+- **Levels are measured** (`tools/mixcheck.mjs`): ambience about 17 dB and music about 8 dB
+  under the voices.
+
 ## Next (in order)
 
 1. The Gate, relay and loom stop being panels (Echo & Engine): the same verbs as the skiff.

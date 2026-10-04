@@ -382,6 +382,9 @@ export function buildStory(scene: T.Scene, o: Opts) {
 
   return {
     get placeName() { return placeName; },
+    /** the story beat, and whether a cutscene (the cold open or the attack) is playing: for the soundscape */
+    get beat() { return beat; },
+    get inCutscene() { return cut >= 0 || opening >= 0; },
     debugTap: (w: string) => skiff.debugTap(w), debugFeed: () => skiff.debugFeed(),
     get debug() { return { script: S.id, beat, cut, opening, mech: ECHO ? 'echo' : 'classic', echo: echoSt.state, carried: echo.carried, engine: engine.active, loom: loomSt.state, hops, spark: sparkHome.toArray(), stones: skiff.debugStones(), core: skiff.debugCore() }; },
     /** what the camera should keep clear sight of (foliage on the way steps aside); null = Zip */

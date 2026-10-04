@@ -24,7 +24,9 @@ import { createJoystick, type Joystick } from './kit/joystick';
 import './kit/input-mode';
 import { createVoice } from './kit/voice';
 import { FIRST_WORDS_CAST, FIRST_WORDS_SPOKEN, FIRST_WORDS_DIRECTION } from './worlds/first-words-voice';
-import { sfx } from './sfx';
+import { sfx, audio } from './sfx';
+import { createSoundscape } from './kit/soundscape';
+import { FIRST_WORDS_SOUND, FIRST_WORDS_BEAT_SOUND } from './worlds/first-words-sound';
 import { createBumpFeedback } from './kit/bump';
 import { loadBodyKit, type BodyKit } from './kit/body-kit';
 import { loadProp } from './kit/kit';
@@ -284,7 +286,11 @@ const guide=storyOn?buildGuide(scene,appHost,camera,renderer.domElement):null;li
 // phones move with a floating thumb stick (lower left); keyboards with WASD; both look by dragging
 stick=createJoystick(appHost,{onUse:()=>get('hint').style.opacity='0'});
 // voiced lines: clips made ahead of time (tools/voice.mjs); a line without one stays a silent bubble
-if(guide&&paintedParams.get('voices')!=='0'){const voice=createVoice(FIRST_WORDS_CAST,{base:'/voice/',spoken:FIRST_WORDS_SPOKEN,direction:FIRST_WORDS_DIRECTION});guide.setVoice(voice);voice.preloadAll();(window as any).__vlVoice=voice}
+// the soundscape: ambience per place, sparse music per story beat (kit/soundscape.ts, worlds/first-words-sound.ts); `music=0` silences it
+const scape=paintedStudy&&paintedParams.get('music')!=='0'&&!paintedParams.get('capture')?createSoundscape(audio,FIRST_WORDS_SOUND):null;(window as any).__vlScape=scape;
+if(guide&&paintedParams.get('voices')!=='0'){const voice=createVoice(FIRST_WORDS_CAST,{base:'/voice/',spoken:FIRST_WORDS_SPOKEN,direction:FIRST_WORDS_DIRECTION});guide.setVoice(voice);voice.preloadAll();(window as any).__vlVoice=voice;
+  // music dips under every spoken line
+  const play=voice.play;voice.play=(sp,tx,o)=>{scape?.duck(voice.duration(sp,tx)+.4);return play(sp,tx,o)}}
 // Tap to walk: tap the ground and Zip walks there (phones, and anyone who
 // prefers pointing to arrows). Lowest priority: puzzle taps are checked first.
 let walkTarget:T.Vector3|null=null,walkStuck=0,walkDetour=0,walkDetourT=0;
@@ -300,7 +306,8 @@ const story=guide?buildStory(scene,{guide,camera,cameraClear:(a,b)=>{const d=b.c
   adopt:(root,blockers)=>{if(paintedStudy&&paintedParams.get('pbr')!=='1')lambertize(root);if(faders)faders.push(...collectFaders(root));if(townHidden&&blockers.length){cameraSolids.push(...blockers);invalidateCameraGeometry()}renderer.compileAsync(root,camera,scene).catch(()=>{})},
   setGround:(y:number)=>{groundLift=y;zip.position.y=standingY0+groundLift;contact.position.y=contactY0+groundLift},teleport:(x,z,y)=>{guideTargetT=null;zip.position.set(x,(standingY0+groundLift),z);contact.position.set(x,(contactY0+groundLift),z);zip.rotation.y=y;yaw=y;facadeMoveYaw=y;updateLocation();cameraUpdate(1)}}):null;
 if(story){appHost.classList.add('story-mode');const mp=document.querySelector('.menu-card p');if(mp)mp.textContent='Paused. Zip waits patiently, like a good NPC.';(window as any).__vlStory=story;}
-if(story){const lab=document.createElement('label');lab.innerHTML='<input type="checkbox" id="sound"> Sound';get('reduced').parentElement!.after(lab);const cb=lab.querySelector('input')!;cb.checked=!sfx.muted;cb.addEventListener('change',()=>sfx.setMuted(!cb.checked));}
+if(story){const lab=document.createElement('label');lab.innerHTML='<input type="checkbox" id="sound"> Sound';get('reduced').parentElement!.after(lab);const cb=lab.querySelector('input')!;cb.checked=!sfx.muted;cb.addEventListener('change',()=>sfx.setMuted(!cb.checked));
+  if(scape){const ml=document.createElement('label');ml.innerHTML='<input type="checkbox" id="music"> Music';lab.after(ml);const mc=ml.querySelector('input')!;mc.checked=scape.music;mc.addEventListener('change',()=>{scape.music=mc.checked})}}
 if(paintedStudy&&paintedParams.get('pbr')!=='1')lambertize(scene);
 faders=paintedStudy?collectFaders(scene):null;lastFade=performance.now();
 if(paintedStudy&&paintedParams.get('camgrid')!=='0'){
@@ -368,7 +375,9 @@ function updateStats(now:number){
 }
 function tick(now:number){raf=0;if(paused||document.hidden)return;const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;elapsed+=dt;move(dt);const zipSpeed=dt>0?moveAmount/dt:0;
   if(zipRig){if(waveBackAt>0&&elapsed>=waveBackAt){waveBackAt=-1;if(zipSpeed<.4)zipRig.wave()}if(greetUntil>0&&elapsed>greetUntil){greetUntil=-1;zipRig.lookAt(null)}}
-  zipRig?.update(dt,zipSpeed,reduced);if(!townHidden)lifeTick?.(dt,reduced,{pos:zip.position,speed:zipSpeed});story?.tick(dt);guide?.tick(dt,zipSpeed,elapsed);if(!reduced){if(!townHidden)promenade?.tick(dt);if(paintedStudy)tickLandmarks(dt);}cameraUpdate(dt);render();updateStats(now);schedule()}
+  zipRig?.update(dt,zipSpeed,reduced);if(!townHidden)lifeTick?.(dt,reduced,{pos:zip.position,speed:zipSpeed});story?.tick(dt);guide?.tick(dt,zipSpeed,elapsed);
+  if(scape){const bs=story?FIRST_WORDS_BEAT_SOUND[story.beat]:null;scape.setMood(title?.active||story?.inCutscene?null:story?bs?.mood??null:'town');scape.setPlace(title?.active?null:bs?.place??'town');scape.tick(dt)}
+  if(!reduced){if(!townHidden)promenade?.tick(dt);if(paintedStudy)tickLandmarks(dt);}cameraUpdate(dt);render();updateStats(now);schedule()}
 
 let greetUntil=-1,waveBackAt=-1;
 const captureMode=new URLSearchParams(location.search).get('capture')==='1';
