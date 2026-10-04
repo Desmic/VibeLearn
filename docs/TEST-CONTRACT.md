@@ -58,15 +58,21 @@ where. Today that is the `ROUTE` block in `tools/speedrun.mjs` and the segments 
 `tools/flowcheck.mjs`. Everything else (walking, skipping, answering cards, timing, coverage,
 tamper and break probes) is shared.
 
-- **Next step for the system:** generate the route from the rules data (`worlds/*-rules`,
-  `game-rules.ts`), which already knows every correct answer.
-- **Then:** a new game comes with its speedrun and play-through for free.
+- **Done (4 Oct): the answer key comes from the rules.** `tools/rulecheck.mjs` solves every
+  puzzle from its rules data and prints the fewest-moves perfect run (semantic actions, e.g.
+  `take-satchel → take.mira → speak → predict.lotus → support.route → run`).
+- **Still per game:** which button or prompt each semantic action is (the speedrun's UI
+  steps).
+- **Next step for the system:** stations declare that mapping as data (action → control).
+  Then the speedrun route is generated, and a new game comes with its speedrun and
+  play-through for free.
 
 ## 5. What the tools prove, per game, before anyone plays it
 
 | Question | Tool | Fails when |
 | --- | --- | --- |
 | Can it be finished, start to end, by tapping (phone) and by keyboard (laptop)? | `playthrough.mjs` (flowcheck twice) | any beat can't be reached in either mode |
+| Is every puzzle solvable, winnable without a wrong answer, and free of softlocks? Does every decision have right and wrong answers? | `rulecheck.mjs` (rules data only, <1 s) | any of those fails |
 | Can every goal be reached on foot? Does every action show up where the goal points? | `speedrun.mjs` | a goal marker is unreachable; a prompt is never offered nearby |
 | Can a fast player skip the learning? | `speedrun.mjs` (from station data) | a station has no answers at the end |
 | Is each checkpoint earned? | `speedrun.mjs` + the breaker's `tamper` probe | a checkpoint without its stations; a hand-edited save resumes too far |
