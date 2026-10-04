@@ -1,4 +1,4 @@
-# Say it into being: the utterance mechanic (draft for review, 4 Oct 2026)
+# Say it into being: the utterance mechanic (4 Oct 2026)
 
 Desmic's idea (4 Oct): Zip utters things into existence and uses them to get through the
 world. It should be fun, funny when wrong, and keep players imagining. Each piece of the speech
@@ -117,8 +117,65 @@ appears with no loading screen (the hologram weave covers the wait).
 5. **The catalogue grows:** every generated thing is cached and can be reviewed into the
    authored catalogue.
 
+## Decisions (Desmic, 4 Oct 2026)
+
+1. **If it works well, it becomes the core mechanic of the game.** So the test area's job is to
+   find out whether it works well, with evidence, before it joins the story.
+2. **Words come from the world first.** Typing comes in later levels, if all this works out.
+3. **Funny failures are right**, *if executed well*: asking for a bridge and getting a long
+   noodle should be funny to watch, not just to read.
+
+## Is it working? Three cold AI play-tests of the test area (4 Oct)
+
+Each run used a fresh newcomer persona on a phone screen. It read the intent only after its own
+account (`tools/playserver.mjs --intent utter`). The test area was changed between runs.
+
+| Run | Finished | Stop and look | Keep playing | Fun / funny | Main finding |
+| --- | --- | --- | --- | --- | --- |
+| 1 | yes, 59 steps | yes | unsure | mildly; the jokes were only in the text, never something you could see | failures not readable; the camera swung away; "I never said how long" after "tiny" read as wrong; the language-model idea didn't reach the player |
+| 2 | no, stuck at the doorway | yes | unsure | yes: the autocomplete jokes made the player laugh ("paper" became a plane, "jelly" a bean) | "rope bridge" made only a rope; couldn't find where to speak at the doorway; a snag at the end of a bridge |
+| 3 | yes, 53 steps | yes | **yes** | **fun**; laughed at the jelly bridge working, the toy-sized "tiny bridge", the teeny lantern | "jelly stone" read as arbitrary; the late-word rule never came up; the camera disorients after a success; the lit doorway revealed nothing |
+
+What changed between runs:
+
+- **After run 1:**
+  - The engine's reading floats over the place: words that shaped the thing in gold, words said
+    too late in grey (they drop off), its own guess in brackets.
+  - A dotted line shows how far the gap needs a thing to reach.
+  - Each failure is played out: a short bridge tips into the sky, a noodle or paper bridge sags
+    and flops, a bean bounces off, a plane loops away, a dim lantern flickers out.
+  - The camera holds a side shot until the lines are said.
+  - Lines depend on the cause ("I said tiny. It listened. Very literally.").
+  - A stone lantern is dark.
+  - You walk across before the next place asks anything.
+  - Words are collected from signs and things in the world (Echo).
+- **After run 2:**
+  - Compounds work as in English: "rope bridge" is a bridge made of rope (`asMaterial` in the kit;
+    "bridge rope" still makes the rope too late).
+  - A gold ring shows where to stand to speak, and the speak area is wider.
+  - Bridges carry on a metre onto the far side.
+  - Successes get their own lines.
+- **After run 3:**
+  - "stone" is a thing as well as a material, so "jelly stone" makes a jelly stone.
+  - Speak appears only once Zip carries a word.
+  - After a success, the camera faces the way on.
+  - The dark doorway hides a new gold word, "sky" (a teaser of the next power).
+  - The goal no longer resets after the end.
+
+Still open:
+
+- **The language-model framing doesn't reach players.** All three read the 3-word limit as a menu
+  cap, not a context window. This is the main design problem left. Options:
+  - an engine hologram that shows the reading (like the skiff's);
+  - one line from Zip when the cap bites ("only three fit in my head");
+  - let the story carry it.
+- **The late-word rule** only comes up if a player puts a describing word after the thing. That's
+  rare in English. Maybe a later place where order matters.
+- **Moving around** small platforms with the follow camera is the least fun part. This is a
+  general camera task; the real mechanic will live in the full-size world.
+
 ## Open questions for Desmic
 
-1. Introduce the mechanic after Stop 2 (proposal above), or earlier?
-2. Keep words strictly from the world (no typing), or allow typed words on a laptop later?
-3. Tone of failures: is a "long noodle" bridge the right kind of silly?
+1. When it joins the story: after Stop 2 (proposal above), or as Stop 1's power, before the skiff?
+2. The context-window framing: show the engine's reading as a hologram (like the skiff), or keep it
+   light and let Zip say it once?

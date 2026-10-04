@@ -138,3 +138,10 @@ The gate recorded the comparison as the `comprehension` lane: **fail** for that 
   stick until later), no camera drag, a 5 s tap timeout on a popping-in prompt ("Shield Mira!").
 - One game change it caused: aim choosing between a word and the engine (introduced the same
   day) hid the plaque's word; words come first again at the pilot stone.
+
+## Utterance test area, three cold runs (4 Oct 2026; `--start '&lab=utter' --intent utter`)
+
+Keep playing went unsure → unsure → **yes**; fun went "mildly" → "laughed" → "fun". The lesson
+for any mechanic: **a joke the player only reads is half a joke.** Every failure has to be seen
+happening (the short bridge tipping into the sky), with the camera holding on it until the line
+is said. Details and the changes between runs: `docs/UTTER-DESIGN.md`.

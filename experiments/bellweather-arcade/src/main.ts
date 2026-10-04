@@ -34,7 +34,7 @@ import { buildTitle } from './title';
 import { save, PLACE } from './save';
 import { BUILD } from './build-info';
 import { buildUtterLab } from './utter-lab';
-import { UTTER_LAB } from './worlds/utter-lab';
+import { UTTER_LAB, UTTER_LAB_SOURCES } from './worlds/utter-lab';
 import { CANOPY_FOCUS, SIGHT_SHOT } from './canopy';
 import { collectFaders, fadeOccluders } from './occluders';
 import { frameGovernor, budget } from './kit/budget';
@@ -138,6 +138,7 @@ if(zipRig&&libraryClips.length)zipRig.useClips(libraryClips.filter(c=>['Idle','W
 const zip=zipRig?zipRig.root:new URLSearchParams(location.search).get('character')==='courier'?buildCourierZip():buildZip();
 // islands can sit higher than the town (Loom Isle): the ground Zip stands on is lifted
 let groundLift=0;
+let utterLab:ReturnType<typeof buildUtterLab>|null=null;   // the utterance test area (lab=utter), set up after the guide
 const standingY0=facadeStudy ? .130-new T.Box3().setFromObject(zip).min.y : .13;
 zip.position.copy(arrival).setY((standingY0+groundLift));scene.add(zip);
 
@@ -212,7 +213,7 @@ function cameraUpdate(dt:number){if(camOverride){camera.position.copy(camOverrid
   const started=performance.now();
   if(dt<.5)glanceAtGoal(dt);
   // Puzzle shot: a fixed, readable view of the speech rail while it is in use.
-  const shot=story?.shot;SIGHT_SHOT.value=shot||guide?.cardOpen?1:0;if(shot){const sc=(shot as {cut?:number}).cut,r=(shot as {rate?:number}).rate??4;if(sc!==undefined&&sc!==lastCut){camera.position.copy(shot.pos);look.copy(shot.look)}lastCut=sc;camera.position.lerp(shot.pos,Math.min(1,dt*r));look.lerp(shot.look,Math.min(1,dt*Math.max(r,3)));const k=reduced?0:((shot as {shake?:number}).shake??0);if(k>.01)camera.position.add(shakeV.set((Math.random()-.5)*k*.5,(Math.random()-.5)*k*.35,(Math.random()-.5)*k*.5));camera.lookAt(look);return;}
+  const shot=(story?.shot??utterLab?.shot);SIGHT_SHOT.value=shot||guide?.cardOpen?1:0;if(shot){const sc=(shot as {cut?:number}).cut,r=(shot as {rate?:number}).rate??4;if(sc!==undefined&&sc!==lastCut){camera.position.copy(shot.pos);look.copy(shot.look)}lastCut=sc;camera.position.lerp(shot.pos,Math.min(1,dt*r));look.lerp(shot.look,Math.min(1,dt*Math.max(r,3)));const k=reduced?0:((shot as {shake?:number}).shake??0);if(k>.01)camera.position.add(shakeV.set((Math.random()-.5)*k*.5,(Math.random()-.5)*k*.35,(Math.random()-.5)*k*.5));camera.lookAt(look);return;}
   if(cameraQueryBounds.length!==cameraSolids.length)invalidateCameraGeometry();
   if(facadeStudy){
     const pivot=zip.position.clone().add(new T.Vector3(0,1.5,0));
@@ -245,7 +246,7 @@ function cameraUpdate(dt:number){if(camOverride){camera.position.copy(camOverrid
     desired.copy(pivot).addScaledVector(camDir,camDist);desired.y+=camOver;
     // Whiskers: squeezed against a wall, the camera eases round to the side with more room
     // (only while Zip moves and the player isn't steering the camera), like third-person games do.
-    if(tight>.35&&!dragging&&moveAmount>0&&!story?.shot){const pinned=camDist<1.8;let best=yaw,bestClear=camClearAt(yaw)+.6;for(const d of pinned?[-.45,.45,-.9,.9,-1.6,1.6,Math.PI]:[-.45,.45,-.9,.9]){const c=camClearAt(yaw+d)-Math.abs(d)*.25;if(c>bestClear){bestClear=c;best=yaw+d}}if(best!==yaw){yaw+=(best-yaw)*Math.min(1,dt*(pinned?3.2:1.6));facadeMoveYaw=yaw}}
+    if(tight>.35&&!dragging&&moveAmount>0&&!(story?.shot??utterLab?.shot)){const pinned=camDist<1.8;let best=yaw,bestClear=camClearAt(yaw)+.6;for(const d of pinned?[-.45,.45,-.9,.9,-1.6,1.6,Math.PI]:[-.45,.45,-.9,.9]){const c=camClearAt(yaw+d)-Math.abs(d)*.25;if(c>bestClear){bestClear=c;best=yaw+d}}if(best!==yaw){yaw+=(best-yaw)*Math.min(1,dt*(pinned?3.2:1.6));facadeMoveYaw=yaw}}
     // pressed right up against Zip: rise over him and look down, rather than fill the screen with him
     const squeeze=1-T.MathUtils.smoothstep(camDist,.9,1.8);
     if(tight>0){camLift.set(0,tight*.55,0).add(desired);cameraDelta.subVectors(camLift,pivot);const up=firstCameraHit(pivot,cameraDelta,.15);if(!up||up.distance>cameraDelta.length())desired.copy(camLift)}
@@ -309,7 +310,7 @@ const story=guide&&!labId?buildStory(scene,{guide,camera,cameraClear:(a,b)=>{con
   density:{low:.5,medium:.8,high:1}[quality().tier],
   adopt:(root,blockers)=>{if(paintedStudy&&paintedParams.get('pbr')!=='1')lambertize(root);if(faders)faders.push(...collectFaders(root));if(townHidden&&blockers.length){cameraSolids.push(...blockers);invalidateCameraGeometry()}renderer.compileAsync(root,camera,scene).catch(()=>{})},
   setGround:(y:number)=>{groundLift=y;zip.position.y=standingY0+groundLift;contact.position.y=contactY0+groundLift},teleport:(x,z,y)=>{guideTargetT=null;zip.position.set(x,(standingY0+groundLift),z);contact.position.set(x,(contactY0+groundLift),z);zip.rotation.y=y;yaw=y;facadeMoveYaw=y;updateLocation();cameraUpdate(1)}}):null;
-const utterLab=guide&&labId==='utter'?buildUtterLab(scene,{guide,host:appHost,zip:()=>zip.position,addWalk:facade.addWalkRegion,spec:UTTER_LAB,setYaw:y=>{yaw=y},yaw:()=>yaw,teleport:(x,z)=>{zip.position.set(x,(standingY0+groundLift),z);contact.position.set(x,(contactY0+groundLift),z);zip.rotation.y=-Math.PI/2;yaw=-Math.PI/2;facadeMoveYaw=-Math.PI/2;updateLocation();cameraUpdate(1)}}):null;
+utterLab=guide&&labId==='utter'?buildUtterLab(scene,{guide,host:appHost,camera,zip:()=>zip.position,addWalk:facade.addWalkRegion,spec:UTTER_LAB,sources:UTTER_LAB_SOURCES,setYaw:y=>{yaw=y},teleport:(x,z)=>{zip.position.set(x,(standingY0+groundLift),z);contact.position.set(x,(contactY0+groundLift),z);zip.rotation.y=-Math.PI/2;yaw=-Math.PI/2;facadeMoveYaw=-Math.PI/2;updateLocation();cameraUpdate(1)}}):null;
 if(utterLab){appHost.classList.add('story-mode');(window as any).__vlUtterLab=utterLab;}
 if(story){appHost.classList.add('story-mode');const mp=document.querySelector('.menu-card p');if(mp)mp.textContent='Paused. Zip waits patiently, like a good NPC.';(window as any).__vlStory=story;}
 if(story){const lab=document.createElement('label');lab.innerHTML='<input type="checkbox" id="sound"> Sound';get('reduced').parentElement!.after(lab);const cb=lab.querySelector('input')!;cb.checked=!sfx.muted;cb.addEventListener('change',()=>sfx.setMuted(!cb.checked));

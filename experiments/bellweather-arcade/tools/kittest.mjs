@@ -37,6 +37,9 @@ t('utter: a modifier after the thing is too late', speak(U, ['bridge', 'long'], 
 t('utter: a weak material gives way', speak(U, ['long', 'paper', 'bridge'], gap).reason === 'too-weak');
 t('utter: facing away is the wrong way', speak(U, ['away', 'long', 'bridge'], gap).reason === 'wrong-way');
 t('utter: no thing named, the engine finishes the phrase with its guess', speak(U, ['long'], gap).guessed && speak(U, ['long'], gap).thing === 'noodle');
+const U2 = { ...U, lexicon: { ...U.lexicon, rope: { kind: 'thing', thing: 'rope', asMaterial: { material: 'rope' } } }, things: { ...U.things, rope: { archetype: 'prop', size: 1 } } };
+t('utter: a thing word before another thing is its material ("rope bridge")', (m => m.thing === 'bridge' && m.material === 'rope')(speak(U2, ['rope', 'bridge'], gap)));
+t('utter: ...but after it, too late ("bridge rope")', (m => m.thing === 'bridge' && m.late[0] === 'rope')(speak(U2, ['bridge', 'rope'], gap)));
 t('utter: words past the context are not read', speak(U, ['long', 'bridge'], { ...gap, slots: 1 }).thing === 'noodle');
 
 R.write(null);

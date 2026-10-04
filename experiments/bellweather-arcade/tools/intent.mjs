@@ -27,6 +27,20 @@ export function buildIntent(GAME) {
   return { json: j, md };
 }
 
+/** the intent of an utterance place set (kit/utter.ts), for play-testing a test area like lab=utter */
+export function buildUtterIntent(spec) {
+  const md = ['# What this area means to communicate', '',
+    'You are a small robot whose speech engine can say things into existence. Words come from the world (absorb them from signs and things).',
+    'You build a short phrase from them; the engine reads it in order, like a language model reads its context:', '',
+    '- size and material words shape the thing named after them; words said after the thing come too late;',
+    '- if you stop before naming a thing, the engine finishes the phrase with its own likeliest guess;',
+    '- only the first few words are read (its context is small);',
+    '- vague phrases get the most likely thing, not the one you meant; every word matters.', '',
+    'Wrong phrases are meant to fail in funny, readable ways (too short, too weak, the wrong way, the wrong kind of thing, too dim).', '',
+    '## The places', ...spec.sites.map(s => `- **${s.asks}**: up to ${s.slots} words`), ''].join('\n');
+  return { md, json: { sites: spec.sites.map(s => ({ asks: s.asks, slots: s.slots })) } };
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const i = process.argv.indexOf('--root'), { GAME } = await loadGame(i > 0 ? process.argv[i + 1] : 'out');
   const it = buildIntent(GAME);

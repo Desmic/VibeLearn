@@ -29,12 +29,21 @@
 import http from 'node:http';
 import { writeFileSync, appendFileSync } from 'node:fs';
 import { harness, arg } from './harness.mjs';
-import { buildIntent } from './intent.mjs';
+import { buildIntent, buildUtterIntent } from './intent.mjs';
+import { resolve as resolvePath } from 'node:path';
+import { pathToFileURL as toUrl } from 'node:url';
 
 const PORT = +arg('port', 7788);
 const h = await harness({ title: 'AI play-test', outDefault: 'playtest', tool: 'playserver', lane: 'comprehension' });
 const { page, OUT, GAME } = h;
 const PERSONA = arg('persona', 'newcomer');
+// --intent utter: the intent of the utterance test area (lab=utter) instead of the whole game's
+const INTENT = arg('intent', 'game');
+const intentMd = async () => {
+  if (INTENT !== 'utter') return buildIntent(GAME).md;
+  const { UTTER_LAB } = await import(toUrl(resolvePath(arg('root', 'out'), 'src/worlds/utter-lab.js')).href);
+  return buildUtterIntent(UTTER_LAB).md;
+};
 const LOG = `${OUT}/playlog.jsonl`; writeFileSync(LOG, '');
 let step = 0; const notes = [];
 const log = o => appendFileSync(LOG, JSON.stringify({ step, t: Date.now(), ...o }) + '\n');
@@ -133,7 +142,7 @@ const server = http.createServer(async (req, res) => {
     if (req.url.startsWith('/observe')) return send(200, await observe());
     if (req.url.startsWith('/intent')) {
       if (!understanding || !verdict) return send(409, { error: 'cold first: send {type:"understand"} and {type:"verdict"} before reading the intent' });
-      log({ intentRead: true }); return send(200, { md: buildIntent(GAME).md });
+      log({ intentRead: true }); return send(200, { md: await intentMd() });
     }
     if (req.url.startsWith('/act') && req.method === 'POST') {
       let body = ''; for await (const c of req) body += c;

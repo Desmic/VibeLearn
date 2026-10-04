@@ -21,9 +21,9 @@ export interface ThingSpec {
   look: string;
 }
 export type WordSpec =
-  | { kind: 'thing'; thing: string }
+  | { kind: 'thing'; thing: string; /** before another thing, it says what that thing is made of ("rope bridge") */ asMaterial?: { material: string; weak?: boolean; glow?: number } }
   | { kind: 'size'; scale: number }
-  | { kind: 'material'; material: string; weak?: boolean }
+  | { kind: 'material'; material: string; weak?: boolean; /** light made of it shines this much (stone: barely) */ glow?: number }
   | { kind: 'facing'; away: boolean };
 export interface SiteSpec {
   id: string;
@@ -43,7 +43,8 @@ export interface UtterSpec {
   /** when no thing is named, the engine finishes the phrase itself: modifier -> the thing it guesses */
   guesses: Record<string, string>;
   sites: SiteSpec[];
-  /** what the world says for each outcome (keys: Reason), {thing} and {word} are filled in */
+  /** what the world says for each outcome (keys: Reason, plus 'late', 'guessed', and optional
+   *  '<reason>-sized' when a size word caused it); {thing}, {word} and {material} are filled in */
   lines: Record<string, string>;
 }
 
@@ -59,6 +60,8 @@ export interface Made {
   away: boolean;
   /** words read after the thing was already made: too late to change it */
   late: string[];
+  /** a size word shaped it (so "too short" was asked for, not just unsaid): the last one read */
+  sized: boolean; sizeWord: string | null;
   works: boolean;
   reason: Reason;
 }
@@ -67,24 +70,28 @@ export interface Made {
  *  named is made at once, with the modifiers read so far; words after it are too late. With no
  *  thing named, the engine finishes the phrase with its own guess for the last modifier. */
 export function speak(spec: UtterSpec, words: string[], site: SiteSpec): Made {
-  let scale = 1, material: string | null = null, weak = false, away = false, thing: string | null = null, guessed = false;
+  let scale = 1, material: string | null = null, weak = false, away = false, thing: string | null = null, guessed = false, sized = false, glow = 1, sizeWord: string | null = null;
   const late: string[] = [];
-  const apply = (w: WordSpec) => {
-    if (w.kind === 'size') scale *= w.scale;
-    else if (w.kind === 'material') { material = w.material; weak = weak || !!w.weak; }
+  const apply = (w: WordSpec, word: string) => {
+    if (w.kind === 'size') { scale *= w.scale; sized = true; sizeWord = word; }
+    else if (w.kind === 'material') { material = w.material; weak = weak || !!w.weak; glow = w.glow ?? 1; }
     else if (w.kind === 'facing') away = w.away;
   };
-  for (const word of words.slice(0, site.slots)) {
-    const w = spec.lexicon[word]; if (!w) continue;
-    if (thing) { late.push(word); continue; }
-    if (w.kind === 'thing') thing = w.thing; else apply(w);
-  }
+  const read = words.slice(0, site.slots);
+  read.forEach((word, i) => {
+    const w = spec.lexicon[word]; if (!w) return;
+    if (thing) { late.push(word); return; }
+    // a thing word right before another thing word is a material, as in English ("rope bridge")
+    const nextW = spec.lexicon[read[i + 1]];
+    if (w.kind === 'thing' && w.asMaterial && nextW?.kind === 'thing') { apply({ kind: 'material', ...w.asMaterial }, word); return; }
+    if (w.kind === 'thing') thing = w.thing; else apply(w, word);
+  });
   if (!thing) {
     const last = [...words.slice(0, site.slots)].reverse().find(x => spec.guesses[x]);
     if (last) { thing = spec.guesses[last]; guessed = true; }
   }
   const t = thing ? spec.things[thing] : null;
-  const made = { thing, guessed, size: t ? +(t.size * scale).toFixed(2) : 0, material, weak: weak || !!t?.weak, away, late, works: false, reason: 'nothing' as Reason };
+  const made = { thing, guessed, size: t ? +(t.size * scale * (t.archetype === 'light' ? glow : 1)).toFixed(2) : 0, material, weak: weak || !!t?.weak, away, late, sized, sizeWord, works: false, reason: 'nothing' as Reason };
   if (!t) return made;
   const n = site.need;
   if (t.archetype !== n.archetype) made.reason = 'wrong-kind';
@@ -102,6 +109,13 @@ export function phrases(site: SiteSpec): string[][] {
 }
 
 /** problems in a spec (empty: fine) */
+/** the line for an outcome, most specific first: '<reason>-<material>', '<reason>-<size word>',
+ *  '<reason>-<thing>', '<reason>-sized', then '<reason>' */
+export function lineFor(spec: UtterSpec, m: Made): string {
+  const L = spec.lines;
+  return (m.material && L[`${m.reason}-${m.material}`]) || (m.sizeWord && L[`${m.reason}-${m.sizeWord}`]) || (m.thing && L[`${m.reason}-${m.thing}`]) || (m.sized && L[`${m.reason}-sized`]) || L[m.reason] || '';
+}
+
 export function validateUtter(spec: UtterSpec): string[] {
   const out: string[] = [];
   for (const [word, w] of Object.entries(spec.lexicon)) if (w.kind === 'thing' && !spec.things[w.thing]) out.push(`word "${word}" names unknown thing "${w.thing}"`);
