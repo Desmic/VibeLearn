@@ -13,7 +13,8 @@ import { audio } from '../sfx';
 const WARDEN_RATE = .94;
 export type VoiceFx = 'none' | 'robot' | 'warden' | 'stream' | 'radio';
 /** `voice`: a TTS voice name; `style`: the actor's direction for every line ("cold, amused menace") */
-export interface CastMember { voice: string; style?: string; fx?: VoiceFx; gain?: number; /** the TTS model that acts this speaker (default: tools/voice.mjs's) */ model?: string }
+export interface CastMember { voice: string; style?: string; fx?: VoiceFx; gain?: number; /** the TTS model that acts this speaker (default: tools/voice.mjs's) */ model?: string;
+  /** pace of the game copy, applied when clips are encoded (pitch kept): actors who linger can be tightened without a re-take */ tempo?: number }
 export type VoiceCast = Record<string, CastMember>;
 export interface PlayOpts {
   /** -1 left … 1 right (where the speaker is on screen) */

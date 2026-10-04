@@ -103,10 +103,10 @@ function mp3Seconds(buf) {
 
 const hasFfmpeg = () => spawnSync('ffmpeg', ['-version'], { stdio: 'ignore' }).status === 0;
 // Game copy: trim silence at both ends, even out loudness, mono MP3 at 40 kbps (small for phones)
-function encode(key) {
+function encode(key, tempo = 1) {
   const src = path.join(MASTERS, `${key}.wav`), out = path.join(DIR, `${key}.mp3`);
   // trim the ends, and shorten any pause longer than 0.42 s to 0.42 s: TTS actors linger, games can't
-  const af = 'silenceremove=start_periods=1:start_threshold=-48dB:start_silence=0.04:stop_periods=-1:stop_duration=0.42:stop_threshold=-42dB:stop_silence=0.42,areverse,silenceremove=start_periods=1:start_threshold=-48dB:start_silence=0.08,areverse,loudnorm=I=-18:TP=-2:LRA=11';
+  const af = 'silenceremove=start_periods=1:start_threshold=-48dB:start_silence=0.04:stop_periods=-1:stop_duration=0.42:stop_threshold=-42dB:stop_silence=0.42,areverse,silenceremove=start_periods=1:start_threshold=-48dB:start_silence=0.08,areverse,loudnorm=I=-18:TP=-2:LRA=11' + (tempo !== 1 ? `,atempo=${tempo}` : '');   // a character's pace (cast data): pitch kept
   const r = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', src, '-af', af, '-ac', '1', '-ar', '24000', '-b:a', '40k', out], { encoding: 'utf8' });
   if (r.status !== 0) throw new Error('ffmpeg: ' + (r.stderr || '').slice(0, 300));
   return { file: `${key}.mp3`, dur: mp3Seconds(readFileSync(out)) };
@@ -146,7 +146,7 @@ for (const l of lines) {
   if (!fresh && old[l.key]) { clips[l.key] = old[l.key]; continue; }
   if (!hasMaster(l)) continue;
   if (!ff) continue;
-  try { clips[l.key] = { ...encode(l.key), speaker: l.speaker }; } catch (e) { console.error(`  ✗ encode ${l.key}: ${e.message}`); }
+  try { clips[l.key] = { ...encode(l.key, l.tempo ?? 1), speaker: l.speaker }; } catch (e) { console.error(`  ✗ encode ${l.key}: ${e.message}`); }
 }
 writeFileSync(manPath, JSON.stringify({ _about: 'Voiced lines (tools/voice.mjs). key → clip file and seconds.', model: MODEL, made: new Date().toISOString(), clips }, null, 1) + '\n');
 const waiting = lines.filter(l => hasMaster(l) && !clips[l.key]).length;

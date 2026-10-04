@@ -12,7 +12,8 @@ import type { VoiceCast } from '../kit/voice';
 const LITE = 'gemini-3.8-flash-lite-tts';
 export const FIRST_WORDS_CAST: VoiceCast = {
   Mira:      { voice: 'Leda', style: 'a young woman at a sky-town festival: warm, curious, quick, a little teasing' },
-  Warden:    { voice: 'Algenib', style: 'a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts', fx: 'warden' },
+  // tempo 1.15: the actor reads him at ~1.5 words/s, which stretched the attack film to 25 s (4 Oct timing run)
+  Warden:    { voice: 'Algenib', style: 'a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts', fx: 'warden', tempo: 1.15 },
   Zip:       { voice: 'Puck', style: 'a small, brave courier robot: eager, bright, clipped', fx: 'robot' },
   Gate:      { voice: 'Fenrir', style: 'a pompous talking stone gate who loves rules: theatrical, smug, posh British accent' },
   Tavi:      { voice: 'Achird', style: 'a kind young weaver, friendly and a bit flustered' },

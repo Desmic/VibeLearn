@@ -330,12 +330,12 @@ export function buildStory(scene: T.Scene, o: Opts) {
   let shielded = false, dash = -1; const dashFrom = new T.Vector3(), dashTo = new T.Vector3();
   const shield = () => { if (shielded) return; shielded = true; dash = 0; dashFrom.copy(o.zip()); dashTo.copy(miraAt).lerp(dashFrom, .45); sfx.whoosh(); action(null); };
   const startAttack = () => {
-    chosen.clear(); cutHold = 0;
+    chosen.clear(); cutHold = 0; shouted = false; marioAt = -1;
     g.close(); g.hush(['sim', 'npc', 'npc2', 'idle1', 'idle2']); talking = false; enter('attack'); cut = 0; skip.hidden = false; dimTo = 1; action(null);
     o.host.classList.add('cutscene'); ship.visible = true; ship.position.copy(far);
   };
   // The cold open: Mira calls from the outlook; the camera shows where she is, then hands over.
-  let opening = -1, cutHold = 0;
+  let opening = -1, cutHold = 0, shouted = false, marioAt = -1;
   // beats the attack film may hold at while a voiced line finishes (beam, the Warden's lines, the bolt, the static, the end)
   const CUT_GATES = [4.45, 6.65, 7.35, 11.35, 13.35];
   const voiced = (sec: number) => { if (sec > 0) cutHold = Math.max(cutHold, t + sec - .25); };
@@ -526,8 +526,11 @@ export function buildStory(scene: T.Scene, o: Opts) {
         if (c > 7.4 && c < 9.4) { const k = (c - 7.4) / 2; spark.position.lerpVectors(sparkFrom, SPARK_AT, k); spark.position.y = T.MathUtils.lerp(1.2, .6, k) + Math.sin(k * Math.PI) * 4; }
         if (c0 < 9.4 && c >= 9.4) bells?.nudge(.8);   // the spark lands in the bell garden: every bell rings
         if (c0 < 8.5 && c >= 8.5) voiced(story.bark('warden', 'leave', 2.6, 'warden'));
-        if (c0 < 9.6 && c >= 9.6) story.thinkOnce('mario');
-        if (c0 < 11.4 && c >= 11.4) { sfx.static(); voiced(story.bark('static', 'start', 1.6, 'static')); }
+        // after the Warden's last word, not over it; and it gets a moment before Zip tries to shout
+        // (the story order: she's gone → "Is this Mario?" → he shouts → no voice)
+        if (c >= 9.6 && t >= cutHold && story.thinkOnce('mario')) { marioAt = t; voiced(2.8); }
+        // he tries to shout her name 2.4 s into the joke (before the film's last gate opens, so the end waits for it)
+        if (c >= 11.4 && marioAt >= 0 && t >= marioAt + 2.4 && !shouted) { shouted = true; sfx.static(); voiced(story.bark('static', 'start', 1.6, 'static') + .6); }
         shake *= Math.exp(-dt * 2.6);
         // the shots
         const mid = tmp.set((z.x + miraAt.x) / 2, 0, (z.z + miraAt.z) / 2);

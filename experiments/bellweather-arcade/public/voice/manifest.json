@@ -1,12 +1,62 @@
 {
  "_about": "Voiced lines (tools/voice.mjs). key → clip file and seconds.",
  "model": "gemini-3.8-flash-tts",
- "made": "2026-10-03T04:12:03.068Z",
+ "made": "2026-10-04T10:41:33.158Z",
  "clips": {
   "14631539": {
    "file": "14631539.mp3",
-   "dur": 5.3,
+   "dur": 4.66,
    "speaker": "Warden"
+  },
+  "5a5f93a7": {
+   "file": "5a5f93a7.mp3",
+   "dur": 4.06,
+   "speaker": "Gardener"
+  },
+  "e1ff5b88": {
+   "file": "e1ff5b88.mp3",
+   "dur": 3.94,
+   "speaker": "Gardener"
+  },
+  "2ea472b5": {
+   "file": "2ea472b5.mp3",
+   "dur": 1.54,
+   "speaker": "Gardener"
+  },
+  "06322c5d": {
+   "file": "06322c5d.mp3",
+   "dur": 3.58,
+   "speaker": "Gardener"
+  },
+  "4c02ccae": {
+   "file": "4c02ccae.mp3",
+   "dur": 2.9,
+   "speaker": "Gardener"
+  },
+  "7aae2a97": {
+   "file": "7aae2a97.mp3",
+   "dur": 2.81,
+   "speaker": "Gardener"
+  },
+  "89558dd7": {
+   "file": "89558dd7.mp3",
+   "dur": 4.37,
+   "speaker": "Gardener"
+  },
+  "90a6690e": {
+   "file": "90a6690e.mp3",
+   "dur": 3.22,
+   "speaker": "Gardener"
+  },
+  "a6d39ed8": {
+   "file": "a6d39ed8.mp3",
+   "dur": 5.21,
+   "speaker": "Gate"
+  },
+  "132a18a9": {
+   "file": "132a18a9.mp3",
+   "dur": 4.82,
+   "speaker": "Gate"
   },
   "485f5a7f": {
    "file": "485f5a7f.mp3",
@@ -31,6 +81,26 @@
   "127771f0": {
    "file": "127771f0.mp3",
    "dur": 4.01,
+   "speaker": "Mira"
+  },
+  "28a5ae2c": {
+   "file": "28a5ae2c.mp3",
+   "dur": 4.39,
+   "speaker": "Mira"
+  },
+  "807f8aec": {
+   "file": "807f8aec.mp3",
+   "dur": 0.89,
+   "speaker": "Mira"
+  },
+  "0a3ef319": {
+   "file": "0a3ef319.mp3",
+   "dur": 4.37,
+   "speaker": "Mira"
+  },
+  "be15bb15": {
+   "file": "be15bb15.mp3",
+   "dur": 2.64,
    "speaker": "Mira"
   },
   "743f5f67": {
@@ -73,14 +143,54 @@
    "dur": 3.38,
    "speaker": "Neighbour"
   },
+  "7b921be1": {
+   "file": "7b921be1.mp3",
+   "dur": 3.67,
+   "speaker": "Neighbour"
+  },
+  "b6a717c2": {
+   "file": "b6a717c2.mp3",
+   "dur": 1.49,
+   "speaker": "Neighbour"
+  },
+  "87c53cb3": {
+   "file": "87c53cb3.mp3",
+   "dur": 4.25,
+   "speaker": "Neighbour"
+  },
   "37c1d4f1": {
    "file": "37c1d4f1.mp3",
-   "dur": 6.38,
+   "dur": 5.57,
    "speaker": "Warden"
   },
   "afe07781": {
    "file": "afe07781.mp3",
-   "dur": 4.7,
+   "dur": 4.1,
+   "speaker": "Warden"
+  },
+  "eb796486": {
+   "file": "eb796486.mp3",
+   "dur": 4.1,
+   "speaker": "Warden"
+  },
+  "2026fb12": {
+   "file": "2026fb12.mp3",
+   "dur": 4.73,
+   "speaker": "Warden"
+  },
+  "b9d1c562": {
+   "file": "b9d1c562.mp3",
+   "dur": 4.08,
+   "speaker": "Warden"
+  },
+  "3d3424dc": {
+   "file": "3d3424dc.mp3",
+   "dur": 3.7,
+   "speaker": "Warden"
+  },
+  "4ba7783e": {
+   "file": "4ba7783e.mp3",
+   "dur": 5.21,
    "speaker": "Warden"
   },
   "136cbeb7": {
