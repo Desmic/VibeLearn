@@ -1,5 +1,3 @@
-import { audio } from '../sfx';
-
 // Voiced lines. Every spoken line is a small audio clip made ahead of time from
 // the story's own text (tools/voice-lines.mjs lists the lines, tools/voice.mjs
 // has Gemini TTS act each one, directed by the cast's notes; nothing calls a
@@ -9,9 +7,13 @@ import { audio } from '../sfx';
 // characters their sound (a robot whose voice is coming back, a villain, a
 // radio, a voice inside your head).
 
-/** the Warden is played a touch slow: deeper, without making long lines drag */
-const WARDEN_RATE = .94;
-export type VoiceFx = 'none' | 'robot' | 'warden' | 'stream' | 'radio';
+/** a villain is played a touch slow: deeper, without making long lines drag */
+const VILLAIN_RATE = .94;
+/** `villain`: deeper, slower, a cold echo; `villain-inner`: the same voice heard inside the
+ *  protagonist's head (thinner, further away); `robot`: metal and dropouts by `clarity`; `radio` */
+export type VoiceFx = 'none' | 'robot' | 'villain' | 'villain-inner' | 'radio';
+/** where voices play: the game's shared audio context and master bus (null until audio may start) */
+export type AudioOut = () => { ctx: AudioContext; master: GainNode } | null;
 /** `voice`: a TTS voice name; `style`: the actor's direction for every line ("cold, amused menace") */
 export interface CastMember { voice: string; style?: string; fx?: VoiceFx; gain?: number; /** the TTS model that acts this speaker (default: tools/voice.mjs's) */ model?: string;
   /** pace of the game copy, applied when clips are encoded (pitch kept): actors who linger can be tightened without a re-take */ tempo?: number }
@@ -39,7 +41,8 @@ export function directionFor(c: CastMember, direction = '') { return [c.style, d
 /** what is actually spoken: no markup, single spaces */
 export function cleanText(t: string) { return t.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(); }
 
-export function createVoice(cast: VoiceCast, opts: { base: string; spoken?: Record<string, string>; direction?: Record<string, string> }) {
+export function createVoice(cast: VoiceCast, opts: { base: string; audio: AudioOut; spoken?: Record<string, string>; direction?: Record<string, string> }) {
+  const audio = opts.audio;
   let clips: Record<string, { file: string; dur: number }> = {};
   const ready = fetch(opts.base + 'manifest.json').then(r => r.ok ? r.json() : { clips: {} }).then(m => { clips = m.clips ?? {}; }).catch(() => { /* no voices yet: bubbles only */ });
   const bytes = new Map<string, Promise<ArrayBuffer | null>>(), decoded = new Map<string, AudioBuffer>();
@@ -58,7 +61,7 @@ export function createVoice(cast: VoiceCast, opts: { base: string; spoken?: Reco
     const c = cast[speaker]; if (!c) return null;
     const shown = cleanText(text), k = clipKey(c, cleanText(opts.spoken?.[shown] ?? shown), opts.direction?.[shown]); return clips[k] ? k : null;
   };
-  // one voice at a time per speaker (a new bark from the Warden cuts his last one short)
+  // one voice at a time per speaker (a new bark cuts that speaker's last one short)
   const bySpeaker = new Map<string, { stop: () => void }>();
   let line: { stop: () => void } | null = null, crushCurves = new Map<number, Float32Array<ArrayBuffer>>();
 
@@ -100,14 +103,14 @@ export function createVoice(cast: VoiceCast, opts: { base: string; spoken?: Reco
         n.buffer = nb; const nf = ctx.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 2600; const ng = ctx.createGain(); ng.gain.value = .12 * (1 - clarity);
         n.connect(nf); nf.connect(ng); ng.connect(out); extra.push(n);
       }
-    } else if (fx === 'warden' || fx === 'stream') {
-      // deeper and slower, with a cold echo; inside Zip's head (the Stream) it is thinner and further away
-      src.playbackRate.value = WARDEN_RATE;
+    } else if (fx === 'villain' || fx === 'villain-inner') {
+      // deeper and slower, with a cold echo; inside the protagonist's head it is thinner and further away
+      src.playbackRate.value = VILLAIN_RATE;
       const echo = ctx.createDelay(1), fb = ctx.createGain(), wet = ctx.createGain();
-      echo.delayTime.value = fx === 'stream' ? .19 : .11; fb.gain.value = fx === 'stream' ? .42 : .25; wet.gain.value = fx === 'stream' ? .5 : .28;
+      echo.delayTime.value = fx === 'villain-inner' ? .19 : .11; fb.gain.value = fx === 'villain-inner' ? .42 : .25; wet.gain.value = fx === 'villain-inner' ? .5 : .28;
       echo.connect(fb); fb.connect(echo); echo.connect(wet); wet.connect(out);
-      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = fx === 'stream' ? 2600 : 3800; stage(lp); lp.connect(echo);
-      if (fx === 'stream') { const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 320; stage(hp); out.gain.value *= .75; }
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = fx === 'villain-inner' ? 2600 : 3800; stage(lp); lp.connect(echo);
+      if (fx === 'villain-inner') { const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 320; stage(hp); out.gain.value *= .75; }
       const low = ctx.createBiquadFilter(); low.type = 'lowshelf'; low.frequency.value = 220; low.gain.value = 6; stage(low);
     } else if (fx === 'radio') {
       const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1400; bp.Q.value = .9; stage(bp);
@@ -128,7 +131,7 @@ export function createVoice(cast: VoiceCast, opts: { base: string; spoken?: Reco
     /** a clip exists for this speaker and line */
     has: (speaker: string, text: string) => !!keyOf(speaker, text),
     /** seconds the clip lasts as played (0 if none) */
-    duration(speaker: string, text: string) { const k = keyOf(speaker, text); if (!k) return 0; const f = cast[speaker].fx; return clips[k].dur / (f === 'warden' || f === 'stream' ? WARDEN_RATE : f === 'robot' ? 1.04 : 1); },
+    duration(speaker: string, text: string) { const k = keyOf(speaker, text); if (!k) return 0; const f = cast[speaker].fx; return clips[k].dur / (f === 'villain' || f === 'villain-inner' ? VILLAIN_RATE : f === 'robot' ? 1.04 : 1); },
     /** start downloading every clip (small files); decoding waits until a line plays */
     preloadAll() { void ready.then(() => { let i = 0; for (const k of Object.keys(clips)) setTimeout(() => void fetchClip(k), 40 * i++); }); },
     play,

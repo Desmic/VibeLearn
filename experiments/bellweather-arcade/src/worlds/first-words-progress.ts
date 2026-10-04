@@ -11,4 +11,5 @@ export const FIRST_WORDS_PROGRESS: ProgressSpec = {
     loom: ['wake-skiff', 'blossom-gate', 'relay-contact'],
     'loom-done': ['wake-skiff', 'blossom-gate', 'relay-contact', 'loom-fit'],
   },
+  names: { spark: 'Catch the spark', skiff: 'Wake the skiff', land: 'Blossom Isle', 'gate-open': 'Blossom Isle, past the gate', loom: 'Loom Isle', 'loom-done': 'Loom Isle, Tavi freed' },
 };

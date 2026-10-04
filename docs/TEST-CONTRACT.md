@@ -6,7 +6,9 @@ When an agent builds a new game, the contract is part of "done". Then every tool
 one, and quality checks don't have to be re-invented per game.
 
 Bellweather keeps it today. Where the names below say `__arcade` / `__vlStory`, a new game uses
-the same names.
+the same names. Game names, storage keys and data come from the game's **manifest**
+(`src/game.ts`, section 3); results go into the shared **report format**, which the quality
+gate reads (section 7, and `docs/QUALITY-SYSTEM.md`).
 
 ## 1. Hooks in the page (test-only, no effect on play)
 
@@ -20,7 +22,8 @@ the same names.
 | `__vlStory.debug.beat` (+ game-specific fields) | which story beat is running |
 | `__vlStations[id]` (kit/station.ts) → `{ spec, state, history, allowed(a) }` | each learning station's live rules state and the moves it has applied: the speedrun plays stations from this |
 | `__vlBench` after `bench=1` | frame-rate results, including the resolution sweep |
-| `__vlVoice` (kit/voice.ts), `__vlScape` (kit/soundscape.ts: `mood`, `music`, `testPhrase()`) | voiced-line lengths (timing); the mix check |
+| `__vlVoice` (kit/voice.ts), `__vlScape` (kit/soundscape.ts: `mood`, `music`, `testPhrase()`), `__vlAudio()` → `{ ctx, master }` | voiced-line lengths (timing); the mix check measures the master bus |
+| `__vlBuild` (also shown in the pause menu) | which build this is: reports and a person's verdict name it |
 | `__vlDebug.camSqueeze()` | what pushes the follow camera in |
 
 ## 2. What the page shows (selectors tools press or read)
@@ -40,6 +43,14 @@ the same names.
 
 ## 3. Data the game declares (tools read it from the build)
 
+- **The manifest** (`src/game.ts` exports `GAME`, type `kit/manifest.ts`; tools load
+  `out/src/game.js`): id, title, what it teaches, audience, protagonist, the test entry query,
+  storage keys, the live stations and their rules, the progress spec, the story scripts,
+  sound, voice cast, learning-design files, input modes, target devices, its own test module,
+  and the **nouns** of its world (system code must not use them: `tools/kitcheck.mjs`).
+  `validateManifest` checks the parts agree (every station's rules listed, every checkpoint's
+  stations listed…); `storycheck` runs it.
+
 - **Learning stations**: `{ kind: 'station', id, name, decisions: [{ id, asks }] }`. Every
   answer is logged as `{ activity: stationId, decision, choice, correct, first }`.
   - The speedrun fails if any station ends a full run with no answers: the learning could be
@@ -57,10 +68,12 @@ the same names.
 
 ## 4. The one game-specific piece: the route
 
-Each game writes its **route**: the correct answers to its puzzles, and which action to take
-where. Today that is the `ROUTE` block in `tools/speedrun.mjs` and the segments of
-`tools/flowcheck.mjs`. Everything else (walking, skipping, answering cards, timing, coverage,
-tamper and break probes) is shared.
+Each game writes its own test module (`manifest.tests`, e.g. `tools/games/first-words.mjs`):
+`helpers(h)` returning `toPlay()` (fresh start to free play), its scene helpers, and
+`speedrunRoute()` (the story between stations). The harness adds them to `h`. Everything
+else (walking, skipping, answering cards, playing stations, timing, coverage, tamper and break
+probes) is shared. `tools/flowcheck.mjs` (the scripted journey) is still written for this
+game; `tools/checks.json` marks every tool's scope.
 
 - **Done (4 Oct): the answer key comes from the rules.** `tools/rulecheck.mjs` solves every
   puzzle from its rules data and prints the fewest-moves perfect run (semantic actions, e.g.
@@ -97,3 +110,11 @@ tamper and break probes) is shared.
   exploits. Add probes when traversal arrives.
 - **Feel isn't tested:** smoothness, camera comfort and control feel still need a person on a
   real device (`docs/PLAYTEST-METHODS.md`).
+
+## 7. Reports and the gate
+
+Every check, AI play-test and person's verdict writes a `vibelearn.report.v1`
+(`tools/lib/report.mjs`): results with a lane, a status (pass / fail / warn / unresolved), the
+claim, detail, evidence and how to reproduce, bound to the build (`out/build.json`). Copies go
+to `quality/<build>/`; `node tools/quality.mjs` gives one verdict per lane, never averaged.
+`node tools/affected.mjs` says which checks a change calls for. See `docs/QUALITY-SYSTEM.md`.

@@ -8,7 +8,7 @@ import * as T from 'three';
 export const holoClock = { value: 0 };
 export const tickHolo = (dt: number) => { holoClock.value += dt; };
 
-export const HOLO = { found: '#6fe0c9', made: '#ffd36b', warden: '#b07bff', warn: '#ff7a8a', dim: '#3c8f9c' };
+export const HOLO = { found: '#6fe0c9', made: '#ffd36b', foe: '#b07bff', warn: '#ff7a8a', dim: '#3c8f9c' };
 
 const VERT = /* glsl */`
 varying vec2 vUv; varying vec3 vN; varying vec3 vV; varying float vY;

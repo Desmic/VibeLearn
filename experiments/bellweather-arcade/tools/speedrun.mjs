@@ -14,30 +14,23 @@
 //  - PACING: game seconds to each checkpoint and per beat; the floor a skilled player can't beat.
 //    Compare runs over time: a stop that gets much shorter may have lost its learning.
 //
-// Game-agnostic except ROUTE below: the puzzle answers and which action to take where. When
-// an agent builds a new game, it writes that game's ROUTE from the rules data; the rest stays.
-import { readdirSync, writeFileSync } from 'node:fs';
+// Game-agnostic: stations, rules and progress come from the game's manifest (src/game.ts). The
+// one game-specific piece is the story between stations (talk to someone, board, fly), which
+// the game writes in its tests module (manifest.tests: speedrunRoute). Each station inside it
+// plays from its rules alone.
+import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { harness, arg } from './harness.mjs';
 import { perfectRun, explore, distances, goodMoves } from './lib/solve.mjs';
 
 const ROOT = arg('root', 'out');
-const mod = p => import(pathToFileURL(resolve(ROOT, 'src', p)).href);
-// ---- what the game's data declares: learning stations and the progress spec
-const stations = [], progress = [], rulesById = {};
-const { GameRulesEngine } = await mod('kit/game-rules.js');
-for (const f of readdirSync(resolve(ROOT, 'src/worlds')).filter(f => f.endsWith('.js'))) {
-  const m = await mod('worlds/' + f);
-  for (const v of Object.values(m)) {
-    for (const s of (Array.isArray(v) ? v : [v])) if (s && typeof s === 'object' && s.kind === 'station' && !stations.some(x => x.id === s.id)) stations.push({ id: s.id, name: s.name, decisions: (s.decisions ?? []).map(d => d.id) });
-    if (v && typeof v === 'object' && Array.isArray(v.order) && v.requires) progress.push(v);
-    if (v && typeof v === 'object' && v.schemaVersion === '1' && v.actions) rulesById[v.id] = v;
-  }
-}
-
-const h = await harness({ title: 'Speedrun', outDefault: 'speedrun' });
-const { page, check, shot, save, beat, goal, segment } = h;
+const h = await harness({ title: 'Speedrun', outDefault: 'speedrun', tool: 'speedrun', lane: 'world' });
+const { page, check, shot, save, beat, goal, segment, GAME } = h;
+// ---- what the game's manifest declares: learning stations, their rules, the progress spec
+const { GameRulesEngine } = await import(pathToFileURL(resolve(ROOT, 'src/kit/game-rules.js')).href);
+const stations = GAME.stations.map(s => ({ id: s.id, name: s.name, decisions: (s.decisions ?? []).map(d => d.id) }));
+const progress = [GAME.progress], rulesById = Object.fromEntries(GAME.rules.map(r => [r.id, r]));
 const clock = () => page.evaluate(() => window.__arcade.snapshot().elapsed);
 const sim = s => page.evaluate(s => window.__arcade.simulate(s), s);
 const visible = sel => page.evaluate(sel => { const e = document.querySelector(sel); return !!e && !e.hidden && getComputedStyle(e).display !== 'none' && getComputedStyle(e).visibility !== 'hidden'; }, sel);
@@ -74,7 +67,7 @@ const follow = async (re, { maxSecs = 120, quiet = false } = {}) => {   // (no m
         const spots = await page.evaluate(() => { const z = window.__arcade.snapshot().position, out = []; for (let r = 1.5; r <= 15; r += 1.5) for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2, x = z[0] + Math.cos(a) * r, y = z[2] + Math.sin(a) * r; if (window.__arcade.walkable(x, y)) out.push([x, y]); } return out; });
         const seen = [];
         while (spots.length && (await clock()) - start < maxSecs) {
-          const here = await h.zip(); spots.sort((p, q) => Math.hypot(p[0] - here[0], p[1] - here[2]) - Math.hypot(q[0] - here[0], q[1] - here[2]));
+          const here = await h.player(); spots.sort((p, q) => Math.hypot(p[0] - here[0], p[1] - here[2]) - Math.hypot(q[0] - here[0], q[1] - here[2]));
           const sp = spots.shift(); if (seen.some(v => Math.hypot(v[0] - sp[0], v[1] - sp[1]) < 1.2)) continue; seen.push(sp);
           const w = await h.walkTo(sp, { until: want, near: .4, maxSecs: 8 }); if (w.reason === 'until' || await want()) break;
         }
@@ -89,12 +82,12 @@ const follow = async (re, { maxSecs = 120, quiet = false } = {}) => {   // (no m
     if (r.reason === 'arrived' && !(await want())) {
       // at the marker but another action is offered (one prompt at a time: the nearest thing wins).
       // Look for a standing spot around the marker where the wanted action is offered.
-      const atMarker = await actLabel(), from = await h.zip();
+      const atMarker = await actLabel(), from = await h.player();
       const spots = await page.evaluate(([bx, bz]) => { const out = []; for (const rr of [1, 1.5, 2, 2.5, 3, 3.5]) for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2, x = bx + Math.cos(a) * rr, z = bz + Math.sin(a) * rr; if (window.__arcade.walkable(x, z)) out.push([x, z]); } return out.slice(0, 40); }, b);
       let found = false;
       for (const sp of spots) { if ((await clock()) - start > maxSecs) break; const w = await h.walkTo(sp, { until: want, near: .3, maxSecs: 6 }); if (w.reason !== 'until') await sim(.3); if (await want()) { found = true; break; } }
       if (!found) { if (!quiet) check(`the action ${re} is offered somewhere near the goal marker`, false, `tried ${spots.length} spots; action "${await actLabel()}"`); return null; }
-      const here = await h.zip(), d = Math.hypot(here[0] - b[0], here[2] - b[1]).toFixed(1), g = await goal();
+      const here = await h.player(), d = Math.hypot(here[0] - b[0], here[2] - b[1]).toFixed(1), g = await goal();
       findings.add(atMarker
         ? `"${g}": at the marker the prompt offered "${atMarker}" (nearer); the wanted "${await actLabel()}" only from (${here[0].toFixed(1)}, ${here[2].toFixed(1)}), ${d} m from the marker.`
         : `"${g}": nothing is offered where the marker leads; "${await actLabel()}" only from (${here[0].toFixed(1)}, ${here[2].toFixed(1)}), ${d} m from the marker (it led to (${from[0].toFixed(1)}, ${from[2].toFixed(1)})).`);
@@ -120,7 +113,7 @@ const answer = async (prefs = [], max = 8) => {
  *  Nothing here knows this game's puzzles: a generated game's stations play the same way. */
 const playStation = async (id) => {
   const rulesId = await page.evaluate(id => window.__vlStations?.[id]?.spec.rules, id);
-  const spec = rulesById[rulesId]; if (!spec) { check(`station "${id}" found with its rules`, false, String(rulesId)); return; }
+  const spec = rulesById[rulesId]; if (!spec) { check(`station "${id}" found with its rules`, false, String(rulesId), 'fail', 'learning'); return; }
   const key = perfectRun(GameRulesEngine, spec), label = await page.evaluate(id => window.__vlStations[id].spec.action, id);
   if (VERBOSE) console.log(`  · station ${id}: ${key.join(' → ')}`);
   // Re-plan from the live rules state at every step, like a player who knows the rules: take any
@@ -130,9 +123,9 @@ const playStation = async (id) => {
   const live = () => page.evaluate(id => window.__vlStations[id].state, id);
   for (let step = 0; step < key.length * 8; step++) {
     const { at, left, moves } = goodMoves(g, dist, await live());
-    if (at < 0) { check(`station "${id}": the live state is one the rules can reach`, false, JSON.stringify(await live())); return; }
+    if (at < 0) { check(`station "${id}": the live state is one the rules can reach`, false, JSON.stringify(await live()), 'fail', 'learning'); return; }
     if (left === 0) break;
-    if (!moves.length) { check(`station "${id}": a no-mistake move exists from here`, false, `state ${JSON.stringify(await live())}`); return; }
+    if (!moves.length) { check(`station "${id}": a no-mistake move exists from here`, false, `state ${JSON.stringify(await live())}`, 'fail', 'learning'); return; }
     // 1) a tagged control on screen for a good move (if it's there but disabled, the UI is busy: wait for it)
     let pressed = false;
     for (const a of moves) {
@@ -174,10 +167,10 @@ const playStation = async (id) => {
     if (await follow(async () => (await inWorld()) || (await openerOK()), { maxSecs: 60, quiet: true }) !== null) continue;
     // 5) not in the world: open the station with its own prompt
     if (await follow(async () => { const m = await page.evaluate(() => document.querySelector('.context-act:not([hidden])')?.dataset.action ?? null); return (await actLabel()) === label && (!m || goodMoves(g, dist, await live()).moves.includes(m)); }, { maxSecs: 45, quiet: true }) !== null) continue;
-    check(`station "${id}": found a control for one of ${moves.join(', ')}`, false, `goal "${await goal()}", action "${await actLabel()}"`); return;
+    check(`station "${id}": found a control for one of ${moves.join(', ')}`, false, `goal "${await goal()}", action "${await actLabel()}"`, 'fail', 'learning'); return;
   }
   const end = goodMoves(g, dist, await live());
-  if (end.left !== 0) { check(`station "${id}" played from its rules (every move from a tagged control)`, false, `${end.left} moves left; history ${JSON.stringify(await page.evaluate(id => window.__vlStations[id].history, id))}`); return; }
+  if (!check(`station "${id}" played from its rules (every move from a tagged control)`, end.left === 0, end.left === 0 ? `${key.length} moves` : `${end.left} moves left; history ${JSON.stringify(await page.evaluate(id => window.__vlStations[id].history, id))}`, 'fail', 'learning')) return;
   await note('station ' + id);
 };
 const findings = new Set();
@@ -186,61 +179,35 @@ const worldKinds = new Set(), kind = a => a.split('.')[0];
 const seeWorld = async () => { const a = await page.evaluate(() => document.querySelector('.context-act:not([hidden])')?.dataset.action ?? null); if (a) worldKinds.add(kind(a)); return a; };   // things a player would feel, worth a design look (not failures)
 const chip = (scope, w) => page.locator(`${scope} .chip, ${scope} .holo-chip`, { hasText: new RegExp('^' + w + '$') });
 
-// ---- ROUTE (game-specific): The First Words, start to the end of Stop 2, the fastest correct way.
-// Only the story between stations is written here; each learning station plays from its rules.
+// ---- the route: the game's own story between stations (manifest.tests → speedrunRoute).
+// Every learning station inside it plays from its rules (playStation above).
+if (!h.speedrunRoute) throw Error(`${GAME.tests} has no speedrunRoute: write the story between stations there`);
 await segment('run', async () => {
   await h.fresh(); t0.game = await clock(); t0.real = Date.now();
-  await h.press(page.locator('.title-menu .primary')); await page.waitForTimeout(800);
-  await h.skipOpening(); await note();
-  // Meet Mira, hang the lantern, sit through nothing
-  await follow(/Talk/); await answer([/Beep/]);
-  await follow(/Hang/); await answer([/Beep/]);
-  await until(async () => (await beat()) === 'attack', 20); await note();
-  await until(() => visible('.story-skip'), 10); await skipCutscene();
-  await until(async () => (await beat()) === 'spark', 20); await note();
-  // Catch the spark (it moves: keep re-planning toward it)
-  for (let i = 0; i < 60 && (await beat()) === 'spark'; i++) { const b = await beacon(); if (b) await h.walkTo(b, { near: .3, maxSecs: 3, until: async () => (await beat()) !== 'spark' }); await sim(.4); }
-  check('caught the spark', (await beat()) === 'skiff', await beat()); await note();
-  // Wake the skiff: the three words it needs (never the decoy), then the engine, right first time
-  await playStation('wake-skiff');
-  await until(() => visible('.star-row'), 30); await note(); await h.stars(); await answer([/Board/]);
-  // Fly to Blossom Isle (the flight ends by itself)
-  await until(() => visible('.star-row'), 240); await note(); await h.stars();
-  // Blossom Isle: satchel, only Mira's page, the gate
-  await answer([/OK/]);
-  await playStation('blossom-gate');
-  await until(() => visible('.star-row'), 10); await note(); await h.stars();
-  // The relay: Mira's channel first time
-  await playStation('relay-contact');
-  await answer([/coming/]); await until(() => visible('.star-row'), 10); await note(); await h.stars();
-  // Stop 2: board, fly over, free Tavi with the right call first time
-  await follow(/Board/); await answer([/Onward/]); await until(async () => /Loom Isle/.test(await page.locator('#place').textContent()), 30); await note();
-  await playStation('loom-fit');
-  await until(() => visible('.star-row'), 20); await note(); await h.stars();
-  await answer([/What is it/, /Thanks/]); await until(async () => /Stop 2 for now/.test(await goal() ?? ''), 10); await note();
-  check('reached the end of Stop 2', /Stop 2 for now/.test(await goal() ?? ''), await goal());
-  await shot('end');
+  await h.speedrunRoute({ follow, answer, until, sim, note, beacon, visible, playStation, skipCutscene, beat, goal, check, shot });
 });
 
 // ---- what the run proves
 await segment('report', async () => {
-  const log = await page.evaluate(() => { try { return JSON.parse(localStorage.getItem('bellweather.learning.v1') || '[]'); } catch { return []; } });
+  const log = await h.learningLog();
   for (const st of stations) {
     const ev = log.filter(e => e.activity === st.id);
-    check(`learning can't be skipped: "${st.name}" answered`, ev.length > 0, `${ev.length} answers; decisions asked: ${[...new Set(ev.map(e => e.decision))].join(', ') || 'none'} of ${st.decisions.join(', ')}`);
+    check(`learning can't be skipped: "${st.name}" answered`, ev.length > 0, `${ev.length} answers; decisions asked: ${[...new Set(ev.map(e => e.decision))].join(', ') || 'none'} of ${st.decisions.join(', ')}`, 'fail', 'learning');
     const firstWrong = ev.filter(e => e.first && !e.correct);
-    if (ev.length) check(`"${st.name}": the right answer counts as a first try`, !firstWrong.length, firstWrong.map(e => e.decision + ':' + e.choice).join(', ') || 'all first tries correct', 'warn');
+    if (ev.length) check(`"${st.name}": the right answer counts as a first try`, !firstWrong.length, firstWrong.map(e => e.decision + ':' + e.choice).join(', ') || 'all first tries correct', 'warn', 'learning');
   }
   const answered = new Set(log.map(e => e.activity));
   for (const p of progress) for (const r of reached) {
     const need = p.requires[r.at] ?? [];   // the record at the end covers the whole run
-    check(`checkpoint "${r.at}" earned (${need.join(', ') || 'nothing required'})`, need.every(s => answered.has(s)), need.filter(s => !answered.has(s)).join(', '));
+    check(`checkpoint "${r.at}" earned (${need.join(', ') || 'nothing required'})`, need.every(s => answered.has(s)), need.filter(s => !answered.has(s)).join(', '), 'fail', 'learning');
   }
   const total = reached.length ? reached[reached.length - 1].t : 0;
   console.log('\nPACING (game seconds from Start)\n' + reached.map(r => `  ${r.at.padEnd(10)} ${String(r.t).padStart(7)} s   (real ${r.real} s)`).join('\n'));
   console.log('BEATS\n' + beats.map((b, i) => `  ${String(b.beat).padEnd(12)} from ${String(b.t).padStart(7)} s${beats[i + 1] ? `  (${(beats[i + 1].t - b.t).toFixed(1)} s)` : ''}`).join('\n'));
   writeFileSync(`${h.OUT}/pacing.json`, JSON.stringify({ when: new Date().toISOString(), input: h.INPUT, total, checkpoints: reached, beats, stations: stations.map(s => ({ id: s.id, answers: log.filter(e => e.activity === s.id).length })) }, null, 1));
   for (const f of findings) check('design note: ' + f, false, '', 'warn');
-  check(`speedrun total ${total} game seconds (Start to end of Stop 2)`, total > 0, '');
+  const lost = h.report.results.filter(r => r.lane === 'world' && r.status === 'fail').length;
+  check('every goal on the route reached on foot, its action offered where the goal pointed', !lost, lost ? `${lost} failures above` : `${reached.length} checkpoints walked`, 'fail', 'world');
+  check(`speedrun total ${total} game seconds (Start to the end)`, total > 0, '', 'fail', 'pacing');
 });
 await h.finish();

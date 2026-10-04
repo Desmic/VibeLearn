@@ -1,6 +1,7 @@
 import * as T from 'three';
 import type { Guide } from './guide';
 import type { LearningEvent } from './speech-puzzle';
+import { pickTarget } from './kit/target';
 import { createStation } from './kit/station';
 import { station, rulesFor } from './worlds/first-words-stations';
 import { sfx } from './sfx';
@@ -226,20 +227,23 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
     // resume past the gate (from a save): satchel taken, Mira's page carried, seal gone
     restoreOpen() { gateSt.restore(['take-satchel', 'take.mira', 'speak', 'predict.lotus', 'support.route', 'run']); phase = 'open'; satchelObj.visible = false; seal.visible = sealLow.visible = false; path.forEach(d => (d.visible = true)); renderBag(); goalNow(); },
     greet(then: () => void) { gateSays('Halt! I\'m the Gate. I open only where notes tell me. Rules are rules!', [{ label: 'OK', kind: 'primary', act: () => { mood = 'idle'; g.close(); then(); } }], 'smug'); },
-    tick(dt: number, zip: T.Vector3) {
+    /** `aim`: the camera's look direction on the ground, so the prompt follows where the player looks */
+    tick(dt: number, zip: T.Vector3, aim: { x: number; z: number } | null = null) {
       if (detail) {
         detail.visible = Math.hypot(zip.x - ISLE.x, zip.z - ISLE.z) < budget.radius && budget.level < 2;
         if (shedAt !== budget.level) { shedAt = budget.level; const keep = budget.level ? .5 : 1.01; detail.children.forEach(c => { c.visible = (c.userData.rank ?? 0) < keep; }); }
       }
       if (phase === 'off') return null;
       t += dt;
-      let best: { label: string; use: () => void; action?: string } | null = null, bd = 1e9;
-      for (const th of things) { if (!th.when()) continue; const d = Math.hypot(zip.x - th.at.x, zip.z - th.at.z); if (d < th.r && d < bd) { bd = d; best = th; } }
-      // notes: the nearest one within reach shows its text and offers its action
-      let nearNote: Note | null = null, nd = 1.8;
-      if (phase === 'arrived' || phase === 'bag') for (const n of NOTES) { const d = Math.hypot(zip.x - n.at.x, zip.z - n.at.z); if (d < nd) { nd = d; nearNote = n; } }
+      // what the prompt is about (kit/target.ts): of the things and notes in reach, the one the
+      // player is looking at, then the nearest. A note in reach shows its text the same way.
+      type Pick = { th: typeof things[number] | null; n: Note | null };
+      const thingC = things.filter(th => th.when()).map(th => ({ item: { th, n: null } as Pick, x: th.at.x, z: th.at.z, r: th.r }));
+      const noteC = phase === 'arrived' || phase === 'bag' ? NOTES.map(n => ({ item: { th: null, n } as Pick, x: n.at.x, z: n.at.z, r: 1.8 })) : [];
+      const pick = pickTarget([...thingC, ...noteC], zip, aim), nearNote = pickTarget(noteC, zip, aim)?.item.n ?? null;
       for (const n of NOTES) g.label('note-' + n.id, n === nearNote && !g.cardOpen ? `${n.short}: ${n.text}` : null, n.at.clone().setY(1.75));
-      if (nearNote && nd < bd) { const a = noteAction(nearNote); best = a ?? best; }
+      let best: { label: string; use: () => void; action?: string } | null = pick?.item.th ?? null;
+      if (pick?.item.n) best = noteAction(pick.item.n) ?? pickTarget(thingC, zip, aim)?.item.th ?? null;
       g.label('relay-notes', phase === 'open' && !relay.active && !g.cardOpen && Math.hypot(zip.x - RELAY.x, zip.z - RELAY.z) < 3.2 ? 'Notes pinned to the relay: ' + relay.pinned : null, RELAY.clone().setY(2.3));
       // the Gate's face: eyes follow Zip, blinks, and moods
       talkT = Math.max(0, talkT - dt); blink -= dt; if (blink < -.12) blink = 2 + Math.random() * 3;

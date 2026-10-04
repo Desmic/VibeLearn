@@ -163,9 +163,9 @@ export function buildEngine(scene: T.Scene, o: Opts) {
   };
   const breakLoop = () => {
     // the new word tries to flow back into the ring, but the Warden's bolt cracked the loop
-    const curve = buildLoop(ring().length, .58); setHolo(loopMat, { color: HOLO.warden, intensity: 2.2 });
+    const curve = buildLoop(ring().length, .58); setHolo(loopMat, { color: HOLO.foe, intensity: 2.2 });
     const m = glyph('Blossom', { height: .27, color: HOLO.made, intensity: 2.4 }); holo.add(m);
-    let k = 0; const step = () => { k += .05; m.position.copy(curve.getPointAt(Math.min(.58, k))); if (k < .58) later(.03, step); else { sfx.zap(); sfx.glitch(); fx.burst(toWorld(m.position), 22, 2.2, HOLO.warden); holo.remove(m); o.carry('Blossom'); o.onThought?.('loop-broken'); back(L.loopBroken, .4); } };
+    let k = 0; const step = () => { k += .05; m.position.copy(curve.getPointAt(Math.min(.58, k))); if (k < .58) later(.03, step); else { sfx.zap(); sfx.glitch(); fx.burst(toWorld(m.position), 22, 2.2, HOLO.foe); holo.remove(m); o.carry('Blossom'); o.onThought?.('loop-broken'); back(L.loopBroken, .4); } };
     later(.5, step);
   };
   const repairLoop = () => {

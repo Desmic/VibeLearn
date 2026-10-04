@@ -27,6 +27,8 @@ find it wrong.
    `docs/TEST-CONTRACT.md` — the hooks and data every game exposes so all the tools work on it
    (part of "done" for any new game).
 5. `experiments/bellweather-arcade/tools/CHECKS.md` — the checks, benchmark, timing, voices.
+   With it, `docs/QUALITY-SYSTEM.md`: how the system knows a game is good (lanes, reports, the
+   gate, the game manifest, escapes) and how an agent or orchestrator plugs in.
 6. `docs/DOCS-AUDIT-20261003.md` — what is open, what was decided, what is historical.
 
 Docs with a **Historical** banner describe earlier games: mine them for ideas, never follow
@@ -57,7 +59,9 @@ experiments/bellweather-arcade/      THE GAME
 cd experiments/bellweather-arcade
 npm ci                               # three, typescript, playwright (vite for `npm run dev`)
 bash tools/build.sh                  # -> out/ (the build the checks and the hosted copy use)
-npm run check                        # types + story scripts + asset budgets
+npm run check                        # types + manifest + story + rules + kit boundary + asset budgets
+node tools/affected.mjs              # which slower checks your change calls for
+node tools/quality.mjs               # one verdict per lane for this build (reports in quality/<build>/)
 node tools/flowcheck.mjs             # plays start to end of Stop 2 headless (~15 min)
 node tools/breaker.mjs               # tries to break it (~20 min); run AFTER flowcheck, never together
 node tools/timing.mjs                # every cutscene line with its voiced length
@@ -133,3 +137,12 @@ Network from sandboxes follows the org's allow-list (Claude admin settings). Nod
 - Third-party assets CC0 only, licence snapshotted. Original characters; none resembling
   real people. Voices: Gemini 3.8 Flash TTS (townsfolk Flash-Lite); key in `.env`, never committed.
 - Learning evidence: a first try counts once; rewards are not mastery.
+- System and game stay apart: reusable code goes in `src/kit/` and system tools; game names,
+  keys and data come from the manifest (`src/game.ts`). `kitcheck` fails otherwise. A thing
+  only this game needs goes in `src/worlds/` (data) or `tools/games/<id>.mjs` (its tests).
+- Lanes are never averaged and unresolved is not pass (`docs/QUALITY-SYSTEM.md`). Only Desmic's
+  verdict on a build accepts it. Anything he finds that the checks passed becomes an entry in
+  `quality/escapes.json`: a general rule and the check that now catches it.
+- The system is built for agents too: players will one day make games by chatting with it, and
+  orchestrators will run its pipelines. Everything an agent needs is a file or a command
+  (`tools/checks.json`, `src/game.ts`, `quality/<build>/quality.json`); keep it that way.

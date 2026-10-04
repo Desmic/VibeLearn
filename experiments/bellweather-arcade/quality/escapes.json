@@ -1,0 +1,228 @@
+{
+  "schema": "vibelearn.escapes.v1",
+  "_about": "Things a person (or a later check) found that the checks of the day missed, each turned into a general rule and a system change that now catches it. Successor of docs/quality-failure-corpus.json (the old critic system's corpus, 7 incidents), kept to its rules: the generalized failure and the invariant name nothing from one game (tools/kitcheck.mjs checks against the manifest's nouns); prevention is never 'remind the reviewer' alone; every entry names the check (tools/checks.json) that now catches it, or says it is still open. Add an entry whenever Desmic or a player finds something the checks passed. See docs/QUALITY-SYSTEM.md.",
+  "escapes": [
+    {
+      "id": "qe-resolution-without-floor",
+      "found": {
+        "date": "2026-10-03",
+        "by": "Desmic",
+        "where": "Galaxy F15, v59"
+      },
+      "symptom": "The game looked soft on the phone: adaptive resolution had fallen to about 0.6x on every quality tier to hold 45 fps.",
+      "why_missed": "The checks measured frame rate only, never the resolution it was bought with; headless runs can't show a phone's sharpness.",
+      "generalized_failure": "Frame-rate adaptation trades away sharpness without a floor, and no measurement reports the resolution a device actually renders at.",
+      "invariant": "Every quality tier has a resolution floor; the frame-rate test reports resolution alongside frame rate, swept over several resolutions, and devices are compared in megapixels.",
+      "prevention": [
+        {
+          "layer": "data",
+          "what": "quality tiers carry minPixelRatio (Medium 0.8, chosen by Desmic 4 Oct)"
+        },
+        {
+          "layer": "kit",
+          "what": "kit/bench.ts resolution sweep (0.6 to 2x), wake lock, in-app web view noted"
+        },
+        {
+          "layer": "process",
+          "what": "frame-rate verdicts are recorded per build (tools/verdict.mjs --lane performance)"
+        }
+      ],
+      "caught_by": [
+        "bench",
+        "verdict"
+      ],
+      "lanes": [
+        "performance",
+        "feel"
+      ],
+      "status": "prevented"
+    },
+    {
+      "id": "qe-finishable-not-understood",
+      "found": {
+        "date": "2026-10-03",
+        "by": "Desmic",
+        "where": "Galaxy F15 play-test"
+      },
+      "symptom": "Why to play and how to play were both unclear; the abduction didn't read; cards at the bottom pulled the eye away from the world; some lines spoon-fed.",
+      "why_missed": "The checks proved the game could be finished; nothing measured what a newcomer understood, and the AI play-testers of the day were briefed with the design.",
+      "generalized_failure": "Checks prove a game can be finished, while nothing measures, cold, whether a newcomer understands why to play, how to play and what is being taught.",
+      "invariant": "A cold account (place, who, goal, controls, lesson) is recorded before the design is read, then compared with the intent generated from the game's own data; each gap is a finding in the comprehension lane.",
+      "prevention": [
+        {
+          "layer": "check",
+          "what": "tools/playserver.mjs refuses /intent until the cold account and the first-look verdict are in; gaps become results"
+        },
+        {
+          "layer": "data",
+          "what": "tools/intent.mjs generates the intent from manifest, beats, stations and learning designs"
+        },
+        {
+          "layer": "kit",
+          "what": "speech and prompts live in the world (kit/overlay.ts), never a bottom card for a speaker with a body"
+        }
+      ],
+      "caught_by": [
+        "playserver"
+      ],
+      "lanes": [
+        "comprehension"
+      ],
+      "status": "partial: an AI player approximates a newcomer; a real beginner play-test is still owed"
+    },
+    {
+      "id": "qe-one-input-mode",
+      "found": {
+        "date": "2026-10-03",
+        "by": "the first two-mode play-through",
+        "where": "phone-shaped touch run"
+      },
+      "symptom": "On a phone: a skipped cold-open line stayed under the real one; the thumb-stick hint sat far from the stick; townsfolk bubbles escaped the overlay so prompts landed on their text; stale thoughts appeared long after their moment.",
+      "why_missed": "Every scripted check clicked with a mouse on one screen shape.",
+      "generalized_failure": "Automated play used one input mode and one screen shape, so input- and layout-specific defects were invisible.",
+      "invariant": "Every input mode the game supports is played start to end on its own screen shape, through the controls a player of that device uses, with a contact sheet a person can scan.",
+      "prevention": [
+        {
+          "layer": "check",
+          "what": "playthrough runs flowcheck as touch (393x760, taps, stick) and keyboard (1024x640, E/Space/1-2/WASD)"
+        },
+        {
+          "layer": "contract",
+          "what": "manifest.input lists the modes; html[data-input] says which the game believes"
+        },
+        {
+          "layer": "kit",
+          "what": "everything pinned in the world goes through one overlay host with declutter"
+        }
+      ],
+      "caught_by": [
+        "flowcheck",
+        "breaker"
+      ],
+      "lanes": [
+        "flow"
+      ],
+      "status": "prevented"
+    },
+    {
+      "id": "qe-nearest-not-aimed",
+      "found": {
+        "date": "2026-10-03",
+        "by": "full play-through review (contact sheets)",
+        "where": "the word-catching area"
+      },
+      "symptom": "Standing where two words were close, the prompt named the nearer one, not the one the player was looking at; one word was hard to pick at all.",
+      "why_missed": "The scripted run posed the player beside each target, where nearest and aimed agree.",
+      "generalized_failure": "Targeting picked the nearest candidate, so the prompt could name something other than what the player was looking at.",
+      "invariant": "The action prompt names what the player aims at (the smallest angle within a cone of the look direction), falling back to the nearest; tests approach targets with the camera aimed, not only posed beside them.",
+      "prevention": [
+        {
+          "layer": "kit",
+          "what": "kit/target.ts pickTarget: aimed (within ~35 degrees) beats near, lined-up things defer to priority; used by the words and by the island's things and notes. Between a word and the engine, words still come first (an aim contest hid a word from the 4 Oct newcomer)"
+        },
+        {
+          "layer": "check",
+          "what": "flowcheck aims the camera at words; speedrun reports places where one prompt hides another"
+        }
+      ],
+      "caught_by": [
+        "flowcheck"
+      ],
+      "lanes": [
+        "world",
+        "feel"
+      ],
+      "status": "prevented"
+    },
+    {
+      "id": "qe-save-skips-learning",
+      "found": {
+        "date": "2026-10-04",
+        "by": "Claude, designing the break tester",
+        "where": "browser storage"
+      },
+      "symptom": "Editing the save in the browser resumed at the last stop with none of the learning done.",
+      "why_missed": "No check edited saves; progress was a plain checkpoint name.",
+      "generalized_failure": "Progress was stored as a position, so a hand-edited or copied save could skip the learning it stands for.",
+      "invariant": "A checkpoint is only resumed when the learning record shows the stations it requires; otherwise the game resumes at the furthest checkpoint the record supports. Forged records remain a known client-side limit until progress is signed on a server.",
+      "prevention": [
+        {
+          "layer": "kit",
+          "what": "kit/progress.ts + kit/save.ts: loadVerified"
+        },
+        {
+          "layer": "data",
+          "what": "manifest.progress: order, requires, names"
+        },
+        {
+          "layer": "check",
+          "what": "breaker tamper cases generated from the progress spec; speedrun checks each checkpoint was earned"
+        }
+      ],
+      "caught_by": [
+        "breaker",
+        "speedrun",
+        "storycheck"
+      ],
+      "lanes": [
+        "learning",
+        "robustness"
+      ],
+      "status": "partial: forged learning records are still believed (warned)"
+    },
+    {
+      "id": "qe-device-sleeps-during-measurement",
+      "found": {
+        "date": "2026-10-04",
+        "by": "Desmic",
+        "where": "Galaxy F15, frame-rate test inside the Claude app"
+      },
+      "symptom": "The phone went to sleep while the benchmark ran.",
+      "why_missed": "The benchmark was only ever run on machines that don't sleep.",
+      "generalized_failure": "A measurement that runs without input for minutes didn't keep the device awake.",
+      "invariant": "Long measurements on a device hold a wake lock (or a muted-video fallback) and report the environment they ran in (browser or in-app web view).",
+      "prevention": [
+        {
+          "layer": "kit",
+          "what": "kit/bench.ts keepAwake() and environment line"
+        }
+      ],
+      "caught_by": [
+        "bench"
+      ],
+      "lanes": [
+        "performance"
+      ],
+      "status": "prevented"
+    },
+    {
+      "id": "qe-vacuous-probe",
+      "found": {
+        "date": "2026-10-04",
+        "by": "Claude, after the harness started warning about unwalkable test spots",
+        "where": "break tester, phone mode, mash segment"
+      },
+      "symptom": "The 'mash the notes' probe passed with 0 notes in the satchel and 0 Gate answers: its taps had timed out on prompts still popping in, so nothing it claimed to test had happened.",
+      "why_missed": "The probe only checked that nothing bad happened afterwards; with its setup silently skipped, that is always true.",
+      "generalized_failure": "A probe whose setup silently failed still passed, because it only checked that nothing bad happened afterwards.",
+      "invariant": "Every probe checks that its setup happened; if it did not, the result is unresolved (the gate shows it), never a pass. Test spots are checked to be places a player can stand.",
+      "prevention": [
+        {
+          "layer": "check",
+          "what": "breaker reports 'unresolved' when the mash setup isn't reached; a thumb waits for a popping-in prompt to hold still"
+        },
+        {
+          "layer": "check",
+          "what": "harness pose warns on any spot the game's walkable probe rejects, on every island"
+        }
+      ],
+      "caught_by": [
+        "breaker"
+      ],
+      "lanes": [
+        "robustness"
+      ],
+      "status": "prevented"
+    }
+  ]
+}

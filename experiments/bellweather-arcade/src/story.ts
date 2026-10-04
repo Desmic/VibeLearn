@@ -56,6 +56,7 @@ type Beat = 'meet' | 'attack' | 'spark' | 'skiff' | 'puzzle' | 'fly' | 'isle' | 
 // both of them against the open sky (the outlook sits under a canopy).
 const ZIP_MARK = new T.Vector3(3.4, .13, -9.4), ZIP_FACE = -.886, CAM = new T.Vector3(3.3, 1.9, -5.4);
 const SKIFF_ST = station('wake-skiff');
+const aimV = new T.Vector3();   // the camera's look, for prompts that follow the player's aim (kit/target.ts)
 export const SPARK_AT = new T.Vector3(-2, .13, 1.5);   // in the bell garden, by the pink bed
 // the bell frame stands over the garden's north entrance (the passage from the outlook)
 const BELL_FRAME = new T.Vector3(1.25, .13, -2.1);
@@ -550,8 +551,8 @@ export function buildStory(scene: T.Scene, o: Opts) {
         if (c >= 13.4) { cut = -1; endAttack(); }
         return;
       }
-      if (beat === 'isle') { const a = isle.tick(dt, z); if (!g.cardOpen && a) action(a.label, a.use, undefined, a.action); else action(null); return; }
-      if (beat === 'to-loom') { isle.tick(dt, z); if (!g.cardOpen && Math.hypot(z.x - MOOR.x, z.z - MOOR.z) < 2.2) action(stop2.label('board'), board, over(MOOR, 1.2)); else action(null); return; }
+      if (beat === 'isle') { o.camera.getWorldDirection(aimV); const a = isle.tick(dt, z, aimV); if (!g.cardOpen && a) action(a.label, a.use, undefined, a.action); else action(null); return; }
+      if (beat === 'to-loom') { isle.tick(dt, z, null); if (!g.cardOpen && Math.hypot(z.x - MOOR.x, z.z - MOOR.z) < 2.2) action(stop2.label('board'), board, over(MOOR, 1.2)); else action(null); return; }
       if (beat.startsWith('loom')) {
         if (taviFree >= 0 && taviFree < 1) { taviFree = Math.min(1, taviFree + dt / 1.2); cloth.position.y = LOOM_AT.y + .95 - taviFree * 1.2; (cloth.material as T.MeshLambertMaterial).opacity = .92 * (1 - taviFree); tavi.position.z = LOOM_AT.z - .75 + taviFree * 1.9; if (taviFree >= 1) cloth.visible = false; }
         taviHead.position.y = 1.2 + Math.sin(t * 2) * .02;
@@ -566,7 +567,9 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (beat === 'meet' && lanternTask) { if (near(PILOT_STONE, 2.8)) action(S.labels.hangLantern, hangLantern, skiff.at(bracket)); else action(null); }
       else if (beat === 'meet' && near(miraAt, 2.4)) action(S.labels.talkMira, talk, over(miraAt, 1.1));
       else if (beat === 'skiff' && ECHO) {
-        // words first (a source in reach wins), then the engine at the pilot stone
+        // words first (a word in reach wins, picked by aim among the words: kit/target.ts via echo),
+        // then the engine at the pilot stone. Letting aim choose between a word and the engine
+        // hid the plaque's word from a newcomer (AI play-test, 4 Oct): collect first, then speak.
         const a = echo.action(z);
         if (a) action(a.label, a.use, a.at, a.action);
         else if (near(PILOT_STONE, ECHO_SKIFF_STATION.place.r)) action(ECHO_SKIFF_STATION.action, openEngine, over(PILOT_STONE, .5));

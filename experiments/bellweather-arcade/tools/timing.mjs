@@ -6,21 +6,25 @@
 // Flags: OVERLAP (two lines from the same speaker at once, or a line cut off),
 // DEAD AIR (more than 2.5 s with nothing said or happening in a cutscene).
 import { harness, arg } from './harness.mjs';
-const h = await harness({ title: 'Scene timing', outDefault: '/tmp/timing' });
-const { page, check } = h;
+const h = await harness({ title: 'Scene timing', outDefault: '/tmp/timing', tool: 'timing', lane: 'timing' });
+const { page, check, GAME } = h;
+// thinkers whose thoughts are voiced (e.g. a villain heard inside your head); the protagonist's own are silent text
+const VOICED = Object.assign({}, ...GAME.stories.map(s => s.thoughtVoices ?? {}));
 const scene = arg('scene', 'all');
 
 // record every line the guide shows or speaks, in game time
-const instrument = () => page.evaluate(() => {
+const instrument = () => page.evaluate(([VOICED, ME]) => {
   const g = window.__vlGuide, v = window.__vlVoice, log = window.__vlTiming = [];
   let gameT = 0; window.__vlTimingClock = dt => { gameT += dt; };
   const wrap = (name, f) => function (...a) {
-    const [who, text] = name === 'say' ? [a[2]?.speaker ?? '(card)', a[0]] : name === 'think' ? [a[1] === 'warden' ? 'Warden (Stream)' : 'Zip (thought)', a[0]] : [a[0], a[1]];
-    for (const t of [text].flat()) log.push({ t: +gameT.toFixed(2), kind: name, who, text: String(t).replace(/<[^>]+>/g, '').slice(0, 70), dur: who.startsWith('Zip (') ? 0 : +(v?.duration(who.replace(' (Stream)', ''), t) ?? 0).toFixed(2), beat: window.__vlStory?.debug?.beat, cut: +(window.__vlStory?.debug?.cut ?? -1).toFixed(2) });
+    const voiced = name === 'think' ? VOICED[a[1]] : null;
+    const [who, text] = name === 'say' ? [a[2]?.speaker ?? '(card)', a[0]] : name === 'think' ? [voiced ? voiced + ' (inner)' : ME + ' (thought)', a[0]] : [a[0], a[1]];
+    const speaker = name === 'think' ? voiced : who;
+    for (const t of [text].flat()) log.push({ t: +gameT.toFixed(2), kind: name, who, text: String(t).replace(/<[^>]+>/g, '').slice(0, 70), dur: speaker ? +(v?.duration(speaker, t) ?? 0).toFixed(2) : 0, beat: window.__vlStory?.debug?.beat, cut: +(window.__vlStory?.debug?.cut ?? -1).toFixed(2) });
     return f.apply(this, a);
   };
   for (const k of ['say', 'bark', 'think']) g[k] = wrap(k, g[k].bind(g));
-});
+}, [VOICED, GAME.protagonist]);
 const run = async (seconds, until) => {
   for (let s = 0; s < seconds; s += .25) {
     await page.evaluate(() => { window.__arcade.simulate(.25); window.__vlTimingClock(.25); });

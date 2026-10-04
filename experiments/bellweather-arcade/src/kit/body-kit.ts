@@ -74,7 +74,8 @@ const HAIR = ['#2b2220', '#5a3a28', '#8a5a32', '#c9a26a', '#d8d2c8', '#3a2a4a', 
 const CLOTH = ['#2d4f7a', '#c8733f', '#6b4f8a', '#e6d7b8', '#3f6d6a', '#9b4a52', '#5d7a3a', '#d9b45a', '#41607a'];
 const STRAW = ['#dcb978', '#e8cf95', '#c9a466'];
 
-const face = (skin: string, hair: string): LookPart[] => [
+/** the shared face parts: skin and hair colours */
+export const face = (skin: string, hair: string): LookPart[] => [
   { part: 'head.round', main: skin }, { part: 'face.eyes' }, { part: 'face.glints' }, { part: 'face.brows', accent: hair },
   { part: 'face.nose-ears', main: skin }, { part: 'face.smile' }, { part: 'neck.skin', main: skin }, { part: 'hands.bare', main: skin },
 ];
@@ -100,21 +101,3 @@ export function townsfolkLook(seed: number): Look {
   return { parts, height: .92 + r() * .14 };
 }
 
-/** Mira: Zip's friend, the courier's courier. A wide sun hat with a teal ribbon,
- *  an orange vest over a cream shirt, a teal skirt and a satchel full of map pages. */
-export const MIRA_LOOK: Look = {
-  height: .9,
-  parts: [
-    ...face('#d9a07a', '#2f3552'),
-    { part: 'hair.bob', main: '#2f3552' },
-    { part: 'hat.wide', main: '#ead08f', accent: '#2fa79a' },
-    { part: 'top.vest', main: '#f4e8d2', accent: '#d9733a' },
-    { part: 'arms.sleeve', main: '#f4e8d2', accent: '#2fa79a' },
-    { part: 'arms.puff', main: '#f4e8d2' },
-    { part: 'lower.skirt', main: '#2e6f6a', accent: '#ead08f' },
-    { part: 'legs.stockings', main: '#3a3550' },
-    { part: 'shoes.boot', main: '#6a4630' },
-    { part: 'bag.satchel', main: '#8c5a34', accent: '#e2b45c' },
-    { part: 'bag.strap', main: '#6e4428' },
-  ],
-};

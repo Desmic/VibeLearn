@@ -12,3 +12,5 @@ mkdir -p out/three && cp -r node_modules/three/build node_modules/three/examples
 python3 tools/fiximports.py
 sed -e 's#<script type="module" src="/src/main.ts"></script>#<link rel="stylesheet" href="/style.css"><script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script><script type="module" src="/src/main.js"></script>#' index.html > out/index.html
 mkdir -p out/tools && find tools -maxdepth 1 -type f -exec cp -t out/tools/ {} +
+# the build's identity (reports and verdicts are bound to it): out/build.json
+node tools/lib/build-id.mjs --write >/dev/null

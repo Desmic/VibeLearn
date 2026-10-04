@@ -158,6 +158,22 @@ in `story.ts` to join the levels.
 | puzzle constraint | catch game, notes-in-satchel limit, relay channel and words |
 | environment zones | world specs + kits |
 
+## Added 4 Oct: the game as one manifest, and what keeps the system apart
+
+- **Game manifest** (`src/kit/manifest.ts`, `src/game.ts`): one data object naming the live
+  stations, rules, progress, stories, sound, cast, storage keys, input modes, devices, the
+  game's test module and the nouns of its world. Tools, AI play-testers and agents read it
+  instead of one game's names. **lib + data**
+- **Saves** (`src/kit/save.ts`): checkpoint plus learning record, resumed only as far as the
+  record supports (`kit/progress.ts`). A game gives keys and progress. **lib**
+- **Targeting** (`src/kit/target.ts`): what a prompt is about; aimed beats near. **lib**
+- **Voices** (`kit/voice.ts`): effects are generic (`robot`, `villain`, `villain-inner`, `radio`)
+  and the audio output is passed in, so the kit no longer imports game code. **lib**
+- **Story scripts**: `protagonist` and `thoughtVoices` are data (which thinkers are voiced, by whom). **data**
+- **Boundary**: `tools/kitcheck.mjs` fails if the kit imports game code or system code names
+  the game; `fixtures/night-market` is a second game (data only) the data checks also run on.
+  See `docs/QUALITY-SYSTEM.md`.
+
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).
 2. ~~Station archetype~~ (done 1 Oct: `first-words-stations.ts` + `kit/station.ts`).

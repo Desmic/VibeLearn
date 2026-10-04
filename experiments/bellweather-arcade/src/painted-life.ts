@@ -3,7 +3,8 @@ import type { Overlay } from './kit/overlay';
 import { mulberry32 } from './vendor/rng';
 import { buildMira } from './companions';
 import { buildTownsperson, type Townsperson } from './townsfolk-rig';
-import { MIRA_LOOK, type BodyKit } from './kit/body-kit';
+import type { BodyKit } from './kit/body-kit';
+import { MIRA_LOOK } from './worlds/first-words-looks';
 import { TOWN_LINES, TOWN_AFTER, TOWN_VOICES } from './worlds/bellweather-lines';
 
 // Signs of life for `render=painted`: a few townsfolk in long coats and woven

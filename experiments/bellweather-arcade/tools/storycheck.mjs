@@ -11,11 +11,29 @@ const src = (p) => pathToFileURL(resolve(root, 'src', p)).href;
 const { validateScript } = await import(src('kit/story-script.js'));
 const stationKit = await import(src('kit/station.js')).catch(() => null);
 
+import { createReport } from './lib/report.mjs';
+import { loadGame, gameArg } from './lib/game.mjs';
+const FIXTURE = !!gameArg();
+const R = createReport({ tool: FIXTURE ? 'storycheck-fixture' : 'storycheck', lane: FIXTURE ? 'system' : 'content', root });
 let errors = 0, warns = 0;
-const report = (name, issues) => {
-  for (const i of issues) { i.level === 'error' ? errors++ : warns++; console.log(`${i.level === 'error' ? '✗' : '!'} ${name} · ${i.where}: ${i.msg}`); }
-  if (!issues.length) console.log(`✓ ${name}`);
+const report = (name, issues, lane) => {
+  for (const i of issues) { i.level === 'error' ? errors++ : warns++; console.log(`${i.level === 'error' ? '✗' : '!'} ${name} · ${i.where}: ${i.msg}`); R.add(i.level === 'error' ? 'fail' : 'warn', `${name} · ${i.where}: ${i.msg}`, { lane }); }
+  if (!issues.length) { console.log(`✓ ${name}`); R.add('pass', `${name} is valid`, { lane }); }
 };
+// the game manifest (kit/manifest.ts): parts that refer to each other agree
+let G = null;
+try { G = (await loadGame(root)).GAME; report(`manifest ${G.id}`, [], 'system'); } catch (e) { report('manifest', [{ level: 'error', where: gameArg() ?? 'src/game.ts', msg: e.message }], 'system'); }
+// another game's manifest (fixtures/*): check its own stories, stations and progress with the kit's validators, then stop
+if (FIXTURE) {
+  const { validateProgress } = await import(src('kit/progress.js'));
+  if (G) {
+    for (const st of G.stories) report(`${G.id} story ${st.id}`, validateScript(st));
+    const anchors = G.stories.flatMap(st => st.needs?.anchors ?? []);
+    report(`${G.id} stations`, stationKit.validateStations(G.stations, { rules: G.rules, anchors }));
+    report(`${G.id} progress`, validateProgress(G.progress, G.stations.map(x => x.id)).map(msg => ({ level: 'error', where: 'progress', msg })));
+  }
+  R.write(null); console.log(`\n${errors} errors, ${warns} warnings`); process.exit(errors ? 1 : 0);
+}
 
 const mods = [];
 for (const f of readdirSync(resolve(root, 'src/worlds')).filter(f => f.endsWith('.js'))) mods.push([f, await import(src('worlds/' + f))]);
@@ -63,7 +81,8 @@ const broken = {
   thoughts: {}, toasts: {}, labels: {}, stars: {},
 };
 const caught = validateScript(broken).map(i => i.msg).join(' | ');
-for (const want of ['unknown anchor', 'unknown thought', 'duplicate beat', 'no handler', 'missing line', 'words']) if (!caught.includes(want)) { errors++; console.log(`✗ self-test: did not catch "${want}"`); }
+for (const want of ['unknown anchor', 'unknown thought', 'duplicate beat', 'no handler', 'missing line', 'words']) if (!caught.includes(want)) { errors++; console.log(`✗ self-test: did not catch "${want}"`); R.add('fail', `self-test: catches "${want}"`, { lane: 'system' }); }
+R.write(null);
 
 console.log(`\n${errors} errors, ${warns} warnings`);
 process.exit(errors ? 1 : 0);

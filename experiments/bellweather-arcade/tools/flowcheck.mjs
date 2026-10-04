@@ -12,8 +12,9 @@
 // flight, isle (satchel, notes, gate), relay, loom (Stop 2), resume (save + Continue), views.
 import { harness } from './harness.mjs';
 
-const h = await harness({ title: 'Flow check', outDefault: 'flowcheck' });
-const { page, check, press, open, shot, card, act, pose, save, goal, beat, learning, waitFor, segment, zip } = h;
+const h = await harness({ title: 'Flow check', outDefault: 'flowcheck', tool: 'flowcheck', lane: 'flow' });
+const { page, check, press, open, shot, card, act, pose, save, goal, beat, learning, waitFor, segment } = h;
+const zip = h.player;
 
 // how the player moves, per device: a thumb stick on a phone (light tilt walks, full tilt jogs),
 // WASD on a laptop (Shift walks). Runs with --input touch or keyboard.
@@ -189,7 +190,7 @@ await segment('relay', async () => {
 await segment('loom', async () => {
   // Stop 2, built from data: board the skiff, land on Loom Isle, free Tavi at the Word Loom
   if (!/Board the skiff/.test(await goal() ?? '')) { await open('&title=0&beat=to-loom'); await page.waitForTimeout(2500); }
-  await pose(-3.2, 55.2); await act('Board');
+  await pose(-3.6, 55.2); await act('Board');   // walkable ground beside the mooring
   await card('Onward'); await page.waitForTimeout(2500);
   check('lands on Loom Isle', /Loom Isle/.test(await page.locator('#place').textContent()), await page.locator('#place').textContent());
   check('saved at checkpoint "loom"', (await save()) === 'loom', await save());

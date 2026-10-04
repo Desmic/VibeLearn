@@ -32,6 +32,7 @@ import { loadBodyKit, type BodyKit } from './kit/body-kit';
 import { loadProp } from './kit/kit';
 import { buildTitle } from './title';
 import { save, PLACE } from './save';
+import { BUILD } from './build-info';
 import { CANOPY_FOCUS, SIGHT_SHOT } from './canopy';
 import { collectFaders, fadeOccluders } from './occluders';
 import { frameGovernor, budget } from './kit/budget';
@@ -288,7 +289,7 @@ stick=createJoystick(appHost,{onUse:()=>get('hint').style.opacity='0'});
 // voiced lines: clips made ahead of time (tools/voice.mjs); a line without one stays a silent bubble
 // the soundscape: ambience per place, sparse music per story beat (kit/soundscape.ts, worlds/first-words-sound.ts); `music=0` silences it
 const scape=paintedStudy&&paintedParams.get('music')!=='0'&&!paintedParams.get('capture')?createSoundscape(audio,FIRST_WORDS_SOUND):null;(window as any).__vlScape=scape;
-if(guide&&paintedParams.get('voices')!=='0'){const voice=createVoice(FIRST_WORDS_CAST,{base:'/voice/',spoken:FIRST_WORDS_SPOKEN,direction:FIRST_WORDS_DIRECTION});guide.setVoice(voice);voice.preloadAll();(window as any).__vlVoice=voice;
+if(guide&&paintedParams.get('voices')!=='0'){const voice=createVoice(FIRST_WORDS_CAST,{base:'/voice/',audio,spoken:FIRST_WORDS_SPOKEN,direction:FIRST_WORDS_DIRECTION});guide.setVoice(voice);voice.preloadAll();(window as any).__vlVoice=voice;(window as any).__vlAudio=audio;
   // music dips under every spoken line
   const play=voice.play;voice.play=(sp,tx,o)=>{scape?.duck(voice.duration(sp,tx)+.4);return play(sp,tx,o)}}
 // Tap to walk: tap the ground and Zip walks there (phones, and anyone who
@@ -358,6 +359,7 @@ if(paintedStudy){
   const note=document.createElement('p');note.className='gfx-note';note.textContent=gfx.choice==='auto'?`Auto chose ${gfx.tier[0].toUpperCase()+gfx.tier.slice(1)} for this device. Changing reloads the scene.`:'Changing reloads the scene.';box.appendChild(note);
   const statsLabel=document.createElement('label');const statsBox=document.createElement('input');statsBox.type='checkbox';statsBox.id='frame-stats';
   statsLabel.append(statsBox,' Show frame rate');box.appendChild(statsLabel);
+  {const bl=document.createElement('p');bl.className='gfx-note build-id';bl.textContent=`Build ${BUILD}`;box.appendChild(bl);(window as any).__vlBuild=BUILD;}
   card.insertBefore(box,card.querySelector('label'));
   statsEl=document.createElement('div');statsEl.className='frame-stats';statsEl.setAttribute('aria-live','off');worldElement.parentElement!.appendChild(statsEl);
   let on=false;try{on=localStorage.getItem('bellweather.stats')==='1'}catch{}

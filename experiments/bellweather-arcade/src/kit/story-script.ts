@@ -13,7 +13,8 @@ export interface Line {
   /** `advance`: a plain 'go on' rather than a decision (no button; tap anywhere). A lone 'Next' counts as one. */
   choices?: { label: string; kind?: 'primary' | 'quiet'; on?: string; next?: string; advance?: boolean }[];
 }
-export interface Thought { who?: 'zip' | 'warden'; text: string | string[] }
+/** `who`: whose thought (default: the protagonist's own); the game styles each thinker */
+export interface Thought { who?: string; text: string | string[] }
 export interface BeatSpec {
   id: string;
   goal?: { text: string; at?: string; arrowOnly?: boolean } | null;   // `at` names an anchor the game provides
@@ -25,6 +26,10 @@ export interface BeatSpec {
 export interface StarsSpec { title: string; rows: (string | { got: string; missed: string })[] }
 export interface StoryScript {
   id: string; title: string;
+  /** the cast name of the character the player controls (says lines with no speaker) */
+  protagonist?: string;
+  /** thinkers whose thoughts are voiced, and by which cast member (e.g. a villain heard inside your head) */
+  thoughtVoices?: Record<string, string>;
   beats: BeatSpec[];
   /** each dialogue is a chain of lines; a line's choice may jump to another line id */
   dialogues: Record<string, Record<string, Line> & { start: Line }>;
@@ -39,14 +44,14 @@ export interface StoryScript {
 export interface ScriptGuide {
   say(text: string, choices: { label: string; kind?: 'primary' | 'quiet'; act: () => void }[], opts?: { speaker?: string }): void;
   close(): void;
-  think(text: string | string[], who?: 'zip' | 'warden'): void;
-  thinkOnce(id: string, text: string | string[], who?: 'zip' | 'warden'): boolean;
+  think(text: string | string[], who?: string): void;
+  thinkOnce(id: string, text: string | string[], who?: string): boolean;
   toast(text: string, ms?: number): void;
   setGoal(text: string | null): void;
   setBeacon(at: T.Vector3 | null, arrowOnly?: boolean): void;
   stars(title: string, rows: [boolean, string][], then: () => void): void;
   /** a line said in passing over the speaker's head (no buttons; play goes on) */
-  bark?(who: string, text: string, sec?: number, opts?: { tone?: 'warden' | 'static' | 'zip' }): number | void;
+  bark?(who: string, text: string, sec?: number, opts?: { tone?: string }): number | void;
 }
 
 const fill = (s: string, v: Record<string, string | number> = {}) => s.replace(/\{(\w+)\}/g, (_, k) => String(v[k] ?? `{${k}}`));
@@ -83,9 +88,9 @@ export function createScriptRunner(script: StoryScript, g: ScriptGuide, o: {
     },
     /** say one line in passing, over its speaker's head (cutscenes, reactions); falls back to a caption */
     /** returns how long the line is voiced for (0 when silent), so a cutscene can wait for it */
-    bark(id: string, at = 'start', sec?: number, tone?: 'warden' | 'static' | 'zip'): number {
+    bark(id: string, at = 'start', sec?: number, tone?: string): number {
       const l = script.dialogues[id]?.[at]; if (!l) throw Error(`story ${script.id}: no line ${id}.${at}`);
-      if (g.bark) return g.bark(l.speaker ?? 'Zip', l.text, sec, tone ? { tone } : {}) || 0;
+      if (g.bark) return g.bark(l.speaker ?? script.protagonist ?? '', l.text, sec, tone ? { tone } : {}) || 0;
       g.say(l.text, [], { speaker: l.speaker }); return 0;
     },
     thought(id: string) { const t = script.thoughts[id]; if (!t) throw Error(`story ${script.id}: no thought ${id}`); return t; },

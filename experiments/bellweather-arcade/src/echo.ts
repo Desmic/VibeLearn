@@ -1,3 +1,4 @@
+import { pickTarget } from './kit/target';
 import * as T from 'three';
 import type { Guide } from './guide';
 import { sfx } from './sfx';
@@ -86,19 +87,10 @@ export function buildEcho(scene: T.Scene, o: Opts) {
     /** the one-button action for a source in reach, if any */
     action(z: T.Vector3): { label: string; use: () => void; at: T.Vector3; action: string } | null {
       if (!enabled || flying) return null;
-      // Of the words in reach, the one the player is looking at wins, then the nearest (as in
-      // BotW: turn the camera to pick). Nearest alone made a decoy one step closer the only
-      // word E could take (speedrun finding, 4 Oct: "rise" behind "sink").
-      o.camera.getWorldDirection(look); look.y = 0; look.normalize();
-      let near: typeof motes[number] | null = null, nd = 1e9;
-      for (const m of motes) {
-        if (m.taken) continue; const p = where(m), dx = p.x - z.x, dz = p.z - z.z, d = Math.hypot(dx, dz); if (d >= m.s.reach) continue;
-        // aim first: a word within ~35° of where the camera looks is picked by angle (the most
-        // centred wins, so two words a metre apart can be told apart by turning); otherwise nearest
-        const facing = d > .01 ? (dx * look.x + dz * look.z) / d : 1, ang = Math.acos(Math.max(-1, Math.min(1, facing)));
-        const score = ang < .6 ? ang : 10 + d;
-        if (score < nd) { nd = score; near = m; }
-      }
+      // Of the words in reach, the one the player is looking at wins, then the nearest
+      // (kit/target.ts; nearest alone made a decoy one step closer the only word E could take).
+      o.camera.getWorldDirection(look);
+      const near = pickTarget(motes.filter(m => !m.taken).map(m => { const p = where(m); return { item: m, x: p.x, z: p.z, r: m.s.reach }; }), z, look)?.item ?? null;
       if (!near) { g.label('echo-line', null); return null; }
       const p = where(near); g.label('echo-line', near.s.line, tmp.copy(p).setY(p.y + .45));
       const m = near; return { label: `Absorb “${m.s.word}”`, use: () => { take(m); }, at: m.grp.position, action: 'absorb.' + m.s.word };

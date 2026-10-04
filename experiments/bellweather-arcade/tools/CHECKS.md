@@ -1,11 +1,25 @@
 # Automated checks
 
-Two headless checks run against a build of the game. They're a safety net. They don't
+Headless checks run against a build of the game. They're a safety net. They don't
 replace people playing for feel and fun.
+
+**The quality system (4 Oct):** every check writes the same report (`lib/report.mjs`, bound to
+the build in `out/build.json`); `node tools/quality.mjs` gives one verdict per lane;
+`node tools/affected.mjs` says which checks a change calls for; `checks.json` lists every check
+with its lanes, scope, cost and what it proves (the list an agent or orchestrator reads);
+`kitcheck.mjs` keeps the kit and system tools free of this game; `verdict.mjs` records a
+person's verdict on a build. Why and how: `docs/QUALITY-SYSTEM.md`.
 
 | Check | What it does | Time |
 | --- | --- | --- |
-| `storycheck.mjs` | Checks story scripts, stations, rules specs and island entities in the build: ids, handlers, anchors, dialogue jumps, decisions the rules judge, content that must agree with the rules' answers; lines follow the house style. No browser. | ~1 s |
+| `kitcheck.mjs` | The kit imports nothing from the game; system code (kit, `lib/`, system-scope tools) names nothing from the game's world (manifest `nouns`, storage keys) outside comments; every tool is listed in `checks.json`; every escape in `quality/escapes.json` is generalized and caught by a listed check. In `npm run check`. | <1 s |
+| `kittest.mjs` | Unit tests for pure kit rules on made-up cases (targeting: aimed beats near, lined-up things defer to priority; earned progress). In `npm run check`. | <1 s |
+| `npm run check:fixture` | Runs the manifest, story, station, progress and rules checks and the intent generator on `fixtures/night-market`, a second, different game (data only): proof the checks aren't this game's. In `npm run check`. | ~2 s |
+| `quality.mjs` | The gate: reads every report for this build (`quality/<build>/`) and gives each lane pass / fail / warn / unresolved, never averaged; lists what would resolve each open lane. Exit 1 on a fail. | <1 s |
+| `affected.mjs` | Changed files (git, or given) → the checks to run, with cost. | <1 s |
+| `verdict.mjs` | A person's verdict on a build (`--lane feel --status pass|fail --by Desmic --note …`); the build id is in the pause menu. | — |
+| `intent.mjs` | What the game means to communicate, generated from its data (for the AI play-tester's comparison step). | <1 s |
+| `storycheck.mjs` | Validates the game manifest (`src/game.ts`), then checks story scripts, stations, rules specs and island entities in the build: ids, handlers, anchors, dialogue jumps, decisions the rules judge, content that must agree with the rules' answers; lines follow the house style. No browser. | ~1 s |
 | `rulecheck.mjs` | Proves things about every puzzle from its rules data alone (GameRulesSpec): explores every reachable state with the game's own rules engine and checks it is **solvable**, can be won **without a wrong answer**, every decision its station declares has a **right and a wrong** answer, and there is **no softlock** (from every reachable state the goal can still be reached). Prints each puzzle's fewest-moves perfect run (the answer key). Self-tests on a trapped puzzle. In `npm run check`. | <1 s |
 | `mixcheck.mjs` | Measures the real audio output (an analyser on the master bus): ambience 12–25 dB under the voices, music under them but heard, nothing clipping. Run after changing any sound level. | ~1 min |
 | `assetcheck.mjs` | Reads every GLB the game ships and reports its phone cost (triangles, draw calls, materials, textures, size) against the budgets in `asset-budgets.json`. Over budget fails. No browser. | <1 s |
@@ -48,9 +62,9 @@ sheet).
 - **Pause, restart and skip are safe.** Pausing inside the cutscene keeps the story going.
   "Restart" on the island keeps Zip on the island. Skipping the attack still saves the
   checkpoint.
-- **A hand-edited save can't skip the learning.** A save claiming the end of Stop 2 with no
-  answers resumes at "Wake the skiff". One past the relay, with the relay unanswered, resumes
-  at the gate. A broken save offers a new run. A *forged* learning record is still believed:
+- **A hand-edited save can't skip the learning.** Cases are generated from the progress spec:
+  a save at the last checkpoint with no answers resumes where the record allows ("Wake the
+  skiff"); one missing the last station resumes one checkpoint back. A broken save offers a new run. A *forged* learning record is still believed:
   that is a warning, because only progress signed on a server can stop it
   (`kit/progress.ts`, `worlds/first-words-progress.ts`).
 - **Rotation works.** Turning the phone mid-puzzle keeps the relay console fully on screen.

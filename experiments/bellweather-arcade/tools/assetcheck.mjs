@@ -61,5 +61,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   console.log('file'.padEnd(50), 'tris'.padStart(7), 'draws'.padStart(6), 'mats'.padStart(5), 'tex'.padStart(4), 'size'.padStart(8));
   for (const r of rows) console.log((r.over.length ? '✗ ' : '✓ ') + r.file.padEnd(48), String(r.tris).padStart(7), String(r.draws).padStart(6), String(r.materials).padStart(5), String(r.textures).padStart(4), kb(r.bytes).padStart(8), r.over.length ? '  over: ' + r.over.join(', ') : '');
   console.log(`\n${rows.length} models, ${fails} over budget.`);
+  // the standard report (needs a build for its id; without one, the table above is the result)
+  if (existsSync('out/build.json')) {
+    const { createReport } = await import('./lib/report.mjs');
+    const R = createReport({ tool: 'assetcheck', lane: 'performance' });
+    for (const r of rows) R.add(r.over.length ? 'fail' : 'pass', `${r.file} within its budget`, { detail: `${r.tris} tris, ${r.draws} draws, ${kb(r.bytes)}${r.over.length ? '; over: ' + r.over.join(', ') : ''}` });
+    R.add('unresolved', 'frame rate on the low-end phone at the chosen resolution', { detail: 'measured on the device: #bench=1 or Pause → Run frame-rate test, then tools/verdict.mjs --lane performance' });
+    R.write(null);
+  }
   process.exit(fails ? 1 : 0);
 }

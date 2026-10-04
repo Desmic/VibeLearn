@@ -1,6 +1,6 @@
 # Native computer/browser-use critics
 
-> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding.
+> **Historical (3 Oct 2026).** Written for the earlier PlayCanvas game and its review process. The current game is `experiments/bellweather-arcade`; see "Current direction" in `AGENTS.md`. Ideas here may still help; instructions here are not binding. What was kept from this review process, and what replaced the rest: `QUALITY-SYSTEM.md` (4 Oct 2026).
 
 
 **Latest user direction — 20 September 2026:** Use one fresh-context Astra reviewer

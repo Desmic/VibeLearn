@@ -26,7 +26,7 @@ const add = (speaker, text, from) => {
 };
 for (const s of [FIRST_WORDS_L1, STOP2_STORY]) {
   for (const [id, d] of Object.entries(s.dialogues)) for (const [lid, l] of Object.entries(d)) if (l.speaker) add(l.speaker, l.text, `${s.id}:${id}.${lid}`);
-  for (const [id, t] of Object.entries(s.thoughts)) if (t.who === 'warden') for (const x of [t.text].flat()) add('Warden', x, `${s.id}:thought.${id}`);
+  for (const [id, t] of Object.entries(s.thoughts)) { const v = t.who && s.thoughtVoices?.[t.who]; if (v) for (const x of [t.text].flat()) add(v, x, `${s.id}:thought.${id}`); }
 }
 for (const [k, ls] of Object.entries(TOWN_LINES)) for (const l of ls) add(TOWN_VOICES[k] ?? 'folk0', l, `town:${k}`);
 // after the attack, any townsperson may say any of these: one clip per townsfolk voice

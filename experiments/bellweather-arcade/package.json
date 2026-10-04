@@ -10,9 +10,12 @@
     "preview": "vite preview --host 127.0.0.1 --port 8062 --strictPort",
     "build:out": "bash tools/build.sh",
     "build:hosted": "python3 tools/build-hosted.py",
-    "check": "tsc --noEmit -p tsconfig.build.json && node tools/storycheck.mjs --root out && node tools/rulecheck.mjs --root out && node tools/assetcheck.mjs",
+    "check": "tsc --noEmit -p tsconfig.build.json && node tools/storycheck.mjs --root out && node tools/rulecheck.mjs --root out && node tools/kitcheck.mjs && node tools/kittest.mjs && npm run -s check:fixture && node tools/assetcheck.mjs",
     "check:parity": "node tools/rules-parity.mjs",
-    "check:play": "node tools/playthrough.mjs --only touch,keyboard,timing,speedrun,breaker"
+    "check:play": "node tools/playthrough.mjs --only touch,keyboard,timing,speedrun,breaker",
+    "quality": "node tools/quality.mjs",
+    "affected": "node tools/affected.mjs",
+    "check:fixture": "node tools/storycheck.mjs --root out --game fixtures/night-market/game.mjs && node tools/rulecheck.mjs --root out --game fixtures/night-market/game.mjs && node tools/intent.mjs --game fixtures/night-market/game.mjs > /dev/null"
   },
   "dependencies": {
     "three": "0.186.0"

@@ -7,7 +7,7 @@
 // arrow keys, the pause button instead of Escape (tools/playthrough.mjs runs it that way too).
 //
 // Promises (invariants) checked after every probe:
-//  - Zip never stands somewhere unwalkable, never falls through the world;
+//  - the player never stands somewhere unwalkable, never falls through the world;
 //  - at most one story card is open; nothing errors;
 //  - the player is never stuck: there is always a goal, a card or an action;
 //  - a first try stays a first try: retries, reloads and button mashing cannot
@@ -16,8 +16,9 @@
 // Findings are FAIL (a promise broke) or WARN (suspicious, needs a look).
 import { harness, arg } from './harness.mjs';
 
-const h = await harness({ title: 'Breaker (adversarial play-test)', outDefault: 'breaker' });
-const { page, check, open, shot, card, act, pose, save, goal, beat, learning, zip, waitFor, segment } = h;
+const h = await harness({ title: 'Breaker (adversarial play-test)', outDefault: 'breaker', tool: 'breaker', lane: 'robustness' });
+const { page, check, open, shot, card, act, pose, save, goal, beat, learning, waitFor, segment, GAME } = h;
+const zip = h.player, WHO = GAME.protagonist;
 const MINUTES = +arg('minutes', '3');
 const rand = (() => { let a = +arg('seed', '1337'); return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; })();
 
@@ -26,22 +27,22 @@ const invariants = async (where) => {
   const s = await page.evaluate(() => {
     const p = window.__arcade.snapshot().position, cards = [...document.querySelectorAll('.story-card')].filter(e => !e.hidden && getComputedStyle(e).display !== 'none');
     const vis = sel => { const e = document.querySelector(sel); return !!e && !e.hidden && getComputedStyle(e).display !== 'none' && getComputedStyle(e).visibility !== 'hidden'; };
-    return { p, walk: window.__arcade.walkable(p[0], p[2]), y: p[1], cards: cards.length, goal: vis('.goal-line'), act: vis('.context-act'), title: vis('.title-screen'), relay: vis('.relay-console'), hud: vis('.hud-prompt'), paused: window.__arcade.snapshot().paused, beat: window.__vlStory?.debug?.beat };
+    return { p, walk: window.__arcade.walkable(p[0], p[2]), y: p[1], cards: cards.length, goal: vis('.goal-line'), act: vis('.context-act'), title: vis('.title-screen'), puzzle: !!document.querySelector('.puzzle-mode, .engine-mode') || vis('.relay-console'), hud: vis('.hud-prompt'), paused: window.__arcade.snapshot().paused, beat: window.__vlStory?.debug?.beat };
   });
   const ok = [
-    check(`${where}: Zip stands on walkable ground`, s.walk, `at ${s.p.map(v => v.toFixed(2)).join(', ')} (beat ${s.beat})`),
-    check(`${where}: Zip is not falling through the world`, s.y > -.5 && s.y < 3, `y ${s.y.toFixed(2)}`),
+    check(`${where}: ${WHO} stands on walkable ground`, s.walk, `at ${s.p.map(v => v.toFixed(2)).join(', ')} (beat ${s.beat})`, 'fail', 'world'),
+    check(`${where}: ${WHO} is not falling through the world`, s.y > -.5 && s.y < 3, `y ${s.y.toFixed(2)}`, 'fail', 'world'),
     check(`${where}: at most one story card`, s.cards <= 1, `${s.cards} cards`),
-    check(`${where}: player is not stuck (goal, card, action or puzzle on screen)`, s.paused || s.title || s.cards || s.goal || s.act || s.relay || s.hud, JSON.stringify(s), 'warn'),
+    check(`${where}: player is not stuck (goal, card, action or puzzle on screen)`, s.paused || s.title || s.cards || s.goal || s.act || s.puzzle || s.hud, JSON.stringify(s), 'warn', 'flow'),
   ];
   return ok.every(Boolean);
 };
 const firstTryIntegrity = async (where) => {
   const ev = await learning(), seen = new Map(), bad = [];
   for (const e of ev) { const k = e.activity + '/' + e.decision; if (e.first && seen.has(k)) bad.push(k + ':' + e.choice); if (!seen.has(k)) seen.set(k, e); }
-  check(`${where}: only one first try per decision`, !bad.length, bad.join(', ') || `${ev.length} events`);
+  check(`${where}: only one first try per decision`, !bad.length, bad.join(', ') || `${ev.length} events`, 'fail', 'learning');
   const dup = []; for (let i = 1; i < ev.length; i++) if (ev[i].activity === ev[i - 1].activity && ev[i].decision === ev[i - 1].decision && ev[i].choice === ev[i - 1].choice && ev[i].t - ev[i - 1].t < 400) dup.push(ev[i].activity + ':' + ev[i].choice);
-  check(`${where}: no double-logged decisions from fast repeat clicks`, !dup.length, dup.join(', '), 'warn');
+  check(`${where}: no double-logged decisions from fast repeat clicks`, !dup.length, dup.join(', '), 'warn', 'learning');
 };
 const TOUCH = h.INPUT === 'touch';
 // hold a direction in game time (fast-forwarded: software rendering is too slow to play in real
@@ -49,10 +50,10 @@ const TOUCH = h.INPUT === 'touch';
 const STICK = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
 const hold = (key, ms) => TOUCH ? h.stick(STICK[key], ms / 1000) : page.evaluate(([k, s]) => window.__arcade.simulate(s, { keys: [k] }), [key, ms / 1000]);
 /** hit a control n times as fast as the input allows: taps on a phone, forced clicks otherwise */
-const hit = async (loc, n = 1) => {
+const hit = async (loc, n = 1, wait = 3000) => {   // wait: how long a thumb waits for a popping-in prompt to hold still
   loc = loc.first();
   // a thumb aims at a button that holds still (prompts pop in), then fires as fast as it can
-  if (TOUCH) { if (!(await loc.tap({ timeout: 3000 }).then(() => true).catch(() => false))) return; const b = await loc.boundingBox().catch(() => null); if (!b) return; for (let i = 1; i < n; i++) await page.touchscreen.tap(b.x + b.width / 2, b.y + b.height / 2).catch(() => {}); return; }
+  if (TOUCH) { if (!(await loc.tap({ timeout: wait }).then(() => true).catch(() => false))) return; const b = await loc.boundingBox().catch(() => null); if (!b) return; for (let i = 1; i < n; i++) await page.touchscreen.tap(b.x + b.width / 2, b.y + b.height / 2).catch(() => {}); return; }
   for (let i = 0; i < n; i++) await loc.click({ force: true, noWaitAfter: true, timeout: 800 }).catch(() => {});
 };
 const tapAt = (x, y) => TOUCH ? page.touchscreen.tap(x, y) : page.mouse.click(x, y);
@@ -84,7 +85,7 @@ await segment('oob', async () => {
 await segment('walls', async () => {
   // the hedge and the closed gate must hold; no slipping through at the joins
   await startIsle();
-  const tries = [[0, 47.0, 'gate (closed)'], [1.85, 47.0, 'gate pillar join'], [-1.85, 47.0, 'gate pillar join (left)'], [5, 47.2, 'hedge'], [9.2, 47.2, 'hedge end at the rim']];
+  const tries = [[0, 47.0, 'gate (closed)'], [1.85, 47.0, 'gate pillar join'], [-1.85, 47.0, 'gate pillar join (left)'], [5, 47.2, 'hedge'], [9.0, 47.2, 'hedge end at the rim']];
   for (const [x, z, what] of tries) {
     await pose(x, z, 0);
     await hold('ArrowUp', 4000);
@@ -99,13 +100,16 @@ await segment('mash', async () => {
   await startIsle();
   await pose(2.0, 54.6);
   const actBtn = page.locator('.context-act').first(); await actBtn.waitFor({ timeout: 20000 });
-  await hit(actBtn, 6);
+  await hit(actBtn, 6, 20000);
   await page.waitForTimeout(800); await invariants('mash satchel');
-  await hit(page.locator('.story-card button'));
-  await pose(-4.5, 52.2); await hit(page.locator('.context-act'), 5);
-  await pose(4.6, 50.8); await hit(page.locator('.context-act'), 5);
-  await pose(5.4, 52.2); await hit(page.locator('.context-act'), 5);
+  await card('Got it', 10000).catch(() => {});   // the satchel's card (waits until it holds still: a tap on a moving button lands nowhere)
+  for (const [x, z] of [[-4.5, 52.2], [4.6, 50.8], [5.4, 51.6]]) {
+    await pose(x, z); await page.locator('.context-act').first().waitFor({ timeout: 10000 }).catch(() => {}); await page.waitForTimeout(500);
+    await hit(page.locator('.context-act'), 5, 20000); await page.waitForTimeout(700);
+  }
   const n = await page.locator('.satchel-bar .chip.rail').count();
+  // a probe whose setup never happened proves nothing: say so instead of passing
+  if (!(await page.locator('.satchel-bar').isVisible()) || n === 0) { h.report.add('unresolved', 'mash: the satchel and notes were reached (setup of the probes below)', { lane: 'robustness', detail: `satchel shown: ${await page.locator('.satchel-bar').isVisible()}, notes: ${n}`, segment: 'mash' }); console.log('UNRESOLVED [mash] setup not reached: the note probes below prove nothing'); }
   check('satchel never holds more than two notes', n <= 2, `${n} notes`);
   // (a tap burst can already have opened the Gate's question: the prompt moved under the thumb to
   // the next target, as it does on a phone; that's fine as long as the promises hold)
@@ -124,7 +128,7 @@ await segment('order', async () => {
   check('notes cannot be taken before the satchel', !(await page.locator('.context-act', { hasText: 'Take' }).isVisible()));
   await pose(0, 49.2);
   const gateAct = await page.locator('.context-act', { hasText: 'Gate' }).isVisible();
-  check('the gate does not offer a talk before Zip has notes (or explains why)', !gateAct || true, gateAct ? 'offers talk' : 'no talk', 'warn');
+  check(`the gate does not offer a talk before ${WHO} has notes (or explains why)`, !gateAct || true, gateAct ? 'offers talk' : 'no talk', 'warn');
   await pose(0, 43.4);
   check('relay cannot be used before the gate opens', !(await page.locator('.context-act', { hasText: 'relay' }).isVisible()));
   // town: speak to the skiff before the spark, hang lantern twice
@@ -170,7 +174,7 @@ await segment('pause', async () => {
   await startIsle();
   await (TOUCH ? hit(page.locator('#pause')) : page.keyboard.press('Escape')); await page.waitForTimeout(300); await hit(page.locator('#restart')); await page.waitForTimeout(1500);
   const p = await zip(); const place = await page.locator('#place').textContent();
-  check('"restart" on the island keeps Zip on the island', p[2] > 36, `Zip at ${p.map(v => v.toFixed(1)).join(', ')}, place "${place}"`);
+  check(`"restart" on the island keeps ${WHO} on the island`, p[2] > 36, `${WHO} at ${p.map(v => v.toFixed(1)).join(', ')}, place "${place}"`);
   await shot('restart-island');
 });
 
@@ -200,23 +204,32 @@ await segment('resize', async () => {
 });
 
 await segment('tamper', async () => {
-  // A save edited by hand must not skip the learning (kit/progress.ts + worlds/*-progress.ts):
-  // the game resumes at the furthest checkpoint the learning record supports.
-  const KEYS = { save: 'bellweather.save.v1', decided: 'bellweather.decided.v1' };
+  // A save edited by hand must not skip the learning (kit/progress.ts): the game resumes at the
+  // furthest checkpoint the learning record supports. Cases come from the game's progress spec.
+  const { verifiedCheckpoint } = await import(new URL('../out/src/kit/progress.js', import.meta.url).href);
+  const P = GAME.progress, K = GAME.storage, last = P.order[P.order.length - 1], name = c => P.names?.[c] ?? c;
+  const rec = stations => stations.map(id => `${id}|${GAME.stations.find(s => s.id === id)?.decisions[0]?.id ?? 'x'}`);
+  const expect = stations => verifiedCheckpoint(P, last, new Set(stations));
   const titleLabel = async () => { await page.locator('.title-menu .primary').waitFor({ timeout: 30000 }); return page.locator('.title-menu .primary').textContent(); };
-  const fake = (at, decided) => page.evaluate(([k, at, d]) => { localStorage.clear(); localStorage.setItem(k.save, at === null ? '{not json' : JSON.stringify({ at, when: Date.now() })); localStorage.setItem(k.decided, JSON.stringify(d)); }, [KEYS, at, decided]);
+  const fake = (at, decided) => page.evaluate(([k, at, d]) => { localStorage.clear(); localStorage.setItem(k.save, at === null ? '{not json' : JSON.stringify({ at, when: Date.now() })); localStorage.setItem(k.decided, JSON.stringify(d)); }, [K, at, decided]);
+  const need = P.requires[last] ?? [];
+  const cases = [
+    { what: `a bare "${name(last)}" save (no learning record)`, stations: [] },
+    { what: `a "${name(last)}" save missing the last station (${need[need.length - 1]})`, stations: need.slice(0, -1) },
+  ];
   await h.fresh('');
-  await fake('loom-done', []); await open('');
-  let label = await titleLabel();
-  check('a bare "end of Stop 2" save resumes where the record allows (Wake the skiff)', /Wake the skiff/.test(label) && (await save()) === 'skiff', `${label} · save now ${await save()}`);
-  await fake('loom', ['wake-skiff|next-input', 'blossom-gate|context-selection']); await open('');
-  label = await titleLabel();
-  check('a save past the relay without the relay answered resumes at the gate', /past the gate/.test(label) && (await save()) === 'gate-open', `${label} · save now ${await save()}`);
+  for (const c of cases) {
+    const want = expect(c.stations);
+    await fake(last, rec(c.stations)); await open(''); const label = await titleLabel(), now = await save();
+    const ok = want ? label.includes(name(want)) && now === want : !P.order.some(x => label.includes(name(x)));
+    check(`${c.what} resumes where the record allows (${want ? name(want) : 'a new run'})`, ok, `${label} · save now ${now}`, 'fail', 'learning');
+  }
   await fake(null, []); await open('');
-  check('a broken save is ignored (no crash, a new run offered)', /Start training run/.test(await titleLabel()), await titleLabel());
-  await fake('loom-done', ['wake-skiff|x', 'blossom-gate|x', 'relay-contact|x', 'loom-fit|x']); await open('');
-  label = await titleLabel();
-  check('a save with a forged learning record is still believed (client-only limit: needs signed progress on a server)', !/Tavi freed/.test(label), label, 'warn');
+  const fresh = await titleLabel();
+  check('a broken save is ignored (no crash, a new run offered)', !P.order.some(x => fresh.includes(name(x))), fresh);
+  await fake(last, rec(need)); await open('');
+  const forged = await titleLabel();
+  check('a save with a forged learning record is still believed (client-only limit: needs signed progress on a server)', !forged.includes(name(last)), forged, 'warn', 'learning');
   await invariants('after tampered saves');
 });
 

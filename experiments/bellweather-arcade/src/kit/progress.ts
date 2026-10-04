@@ -11,6 +11,8 @@ export interface ProgressSpec {
   order: string[];
   /** checkpoint -> station ids that must have at least one answered decision */
   requires: Record<string, string[]>;
+  /** what the player sees for each checkpoint ("Continue: Blossom Isle") */
+  names?: Record<string, string>;
 }
 
 /** stations with at least one answered decision, from keys like "activity|decision" */
@@ -32,6 +34,8 @@ export function validateProgress(spec: ProgressSpec, stationIds: string[]): stri
     if (!spec.order.includes(c)) out.push(`requires names unknown checkpoint "${c}"`);
     for (const s of req) if (!stationIds.includes(s)) out.push(`checkpoint "${c}" requires unknown station "${s}"`);
   }
+  for (const c of Object.keys(spec.names ?? {})) if (!spec.order.includes(c)) out.push(`names gives a name to unknown checkpoint "${c}"`);
+  if (spec.names) for (const c of spec.order) if (!spec.names[c]) out.push(`checkpoint "${c}" has no name`);
   // a later checkpoint needs at least what an earlier one did (progress only adds learning)
   let prev: string[] = [];
   for (const c of spec.order) { const r = spec.requires[c] ?? []; for (const s of prev) if (!r.includes(s)) out.push(`checkpoint "${c}" drops "${s}", required earlier`); prev = r.length ? r : prev; }

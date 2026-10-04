@@ -8,6 +8,7 @@ import type { StoryScript } from '../kit/story-script';
 
 export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchors: string[] } } = {
   id: 'first-words.l1', title: 'The First Words — Level 1',
+  protagonist: 'Zip', thoughtVoices: { warden: 'Warden' },
   // what the game must provide for this script to play
   needs: {
     handlers: ['toLantern', 'lookUp', 'board', 'afterCoil'],

@@ -117,6 +117,7 @@ export function checkLoomContent(c: LoomContent) {
 
 export const STOP2_STORY: StoryScript & { needs: { handlers: string[]; anchors: string[] } } = {
   id: 'first-words.stop2', title: 'The First Words — Stop 2: Loom Isle',
+  protagonist: 'Zip', thoughtVoices: { warden: 'Warden' },
   needs: { handlers: ['board', 'openLoom', 'endStop'], anchors: ['skiffMoor', 'word-loom'] },
   beats: [
     { id: 'to-loom', goal: { text: 'Board the skiff to Loom Isle', at: 'skiffMoor' }, thoughts: [{ id: 'loom-next', delay: .8 }] },

@@ -21,9 +21,15 @@ const root = resolve(arg('root', 'out'));
 const src = p => pathToFileURL(resolve(root, 'src', p)).href;
 const { GameRulesEngine } = await import(src('kit/game-rules.js'));
 import { explore, route, CAP } from './lib/solve.mjs';
+import { loadGame, gameArg } from './lib/game.mjs';
+import { createReport } from './lib/report.mjs';
+const { GAME } = await loadGame(root);
+const FIXTURE = !!gameArg();   // another game's manifest (fixtures/*): its rules only, reports kept apart
+const R = createReport({ tool: FIXTURE ? `rulecheck-fixture-${GAME.id}` : 'rulecheck', lane: FIXTURE ? 'system' : 'learning', root, game: GAME.id });
 
-const specs = [], stations = [];
-for (const f of readdirSync(resolve(root, 'src/worlds')).filter(f => f.endsWith('.js'))) {
+// the game's live rules first (its manifest), then any other rules data in the build
+const specs = [...GAME.rules], stations = [...GAME.stations];
+if (!FIXTURE) for (const f of readdirSync(resolve(root, 'src/worlds')).filter(f => f.endsWith('.js'))) {
   const m = await import(src('worlds/' + f));
   for (const v of Object.values(m)) {
     if (v && typeof v === 'object' && v.schemaVersion === '1' && v.actions && !specs.includes(v)) specs.push(v);
@@ -32,7 +38,9 @@ for (const f of readdirSync(resolve(root, 'src/worlds')).filter(f => f.endsWith(
 }
 
 let failures = 0, warnings = 0;
-const say = (lvl, msg) => { if (lvl === '✗') failures++; if (lvl === '!') warnings++; console.log(`  ${lvl} ${msg}`); };
+let cur = '';
+const say = (lvl, msg) => { if (lvl === '✗') failures++; if (lvl === '!') warnings++; console.log(`  ${lvl} ${msg}`); if (cur !== TRAP_ID) R.add(lvl === '✓' ? 'pass' : lvl === '✗' ? 'fail' : 'warn', `${cur}: ${msg}`, { repro: 'node tools/rulecheck.mjs' }); };
+const TRAP_ID = 'selftest.trap';
 const results = {};
 
 // self-test: a puzzle with a trap (smash breaks the lever for good) and a choice whose only
@@ -50,8 +58,9 @@ let selfFailuresFrom = 0;
 for (const spec of specs) {
   if (spec === TRAP) { selfFailuresFrom = failures; console.log('\n(self-test: a trapped puzzle, which must fail)'); }
   const goal = Object.keys(spec.objectives ?? {})[0];
-  const station = stations.find(s => s.rules === spec.id);
-  console.log(`\n${spec.id}${station ? `  (station "${station.name}")` : ''}  goal: ${goal ?? '(no objective)'}`);
+  const station = stations.find(s => s.rules === spec.id); cur = spec.id;
+  const live = GAME.rules.includes(spec) || spec === TRAP;
+  console.log(`\n${spec.id}${station ? `  (station "${station.name}")` : ''}  goal: ${goal ?? '(no objective)'}${live ? '' : '  [not in the manifest: not live]'}`);
   const g = explore(GameRulesEngine, spec), { states, edges, goals: goalSet } = g;
   if (g.capped) say('!', `stopped exploring at ${CAP} states (the proof below covers those only)`);
   const any = route(g, true), perfect = route(g, false);
@@ -89,5 +98,7 @@ console.log(caught === 2 ? '\n✓ self-test: the trapped puzzle was caught (soft
 delete results[TRAP.id];
 specs.splice(SELF, 1);
 if (arg('json')) writeFileSync(arg('json'), JSON.stringify(results, null, 1));
+R.add(caught === 2 ? 'pass' : 'fail', 'self-test: a trapped puzzle is caught (softlock, no perfect run)', { lane: 'system' });
+R.write(null, { answerKeys: results });
 console.log(`\n${specs.length} rules specs · ${failures} failures, ${warnings} warnings`);
 process.exit(failures ? 1 : 0);

@@ -5,18 +5,31 @@ sees only what a player sees (a screenshot, the words and buttons on screen) and
 what to do next. It finds the things scripts can't: unclear lines, hidden goals, answers you
 can guess without learning, and moments where a new player gets stuck.
 
-## How it runs
+## How it runs (cold first, then intent: 4 Oct)
 
-1. Start a session: `node tools/playserver.mjs --port 7788 --out playtest [--start '&title=0&beat=to-loom']`
-2. Give an agent (a Claude subagent today; a model API later) the API below and a persona.
-   It observes, looks at the screenshot, acts, and writes notes (`confusion`, `bug`,
-   `exploit`, `delight`, `idea`) as it goes.
-3. Before ending, the agent answers the first-look test as two separate questions (`{"type":"verdict","look":"yes|no|unsure","keepPlaying":"yes|no|unsure","why":"…"}`): would a new player stop and look? Would they understand it and want to keep playing? (Desmic's test, 17 Sep: a game can be pretty and still lose them. It was first framed for children; the audience is now 18+.)
-4. `{"type":"end"}` writes `report.md` next to the screenshots and `playlog.jsonl`.
+1. Start a session: `node tools/playserver.mjs --port 7788 --out playtest --persona newcomer [--start '&title=0&beat=to-loom']`
+2. Give an agent (a Claude subagent today; a model API later) the API below and a persona,
+   **and nothing about the design**: no docs, no story, no answers. It observes, looks at the
+   screenshot, acts, and writes notes (`confusion`, `bug`, `exploit`, `delight`, `idea`) as it goes.
+3. **Cold account** (`{"type":"understand","place":…,"who":…,"goal":…,"controls":…,"lesson":…,"unsure":…}`):
+   in its own words, what the game has communicated. Frozen once compared.
+4. **First-look test**, two separate questions (`{"type":"verdict","look":"yes|no|unsure","keepPlaying":"yes|no|unsure","why":"…"}`): would a new player stop and look? Would they understand it and want to keep playing? (Desmic's test, 17 Sep: a game can be pretty and still lose them. The audience is 18+.)
+5. **Only then** `GET /intent` (refused before 3 and 4): what the game means to communicate,
+   generated from its data (`tools/intent.mjs`). The agent compares:
+   `{"type":"compare","matches":[…],"gaps":[{"intended":…,"observed":…,"severity":"blocker|major|minor"}]}`.
+   This is the old critic system's best rule: the design must not fill in what the game didn't show.
+6. `{"type":"end"}` writes `report.md` and the standard report (lane `comprehension`; bugs →
+   `flow`, exploits → `learning`), read by `tools/quality.mjs`.
+
+An AI player approximates a newcomer; it doesn't replace one. It can't feel motion or hear
+the music, and it acts seconds after each screenshot. A real beginner play-test is still owed.
 
 API: `GET /observe` (screenshot path, goal, card, buttons, toasts, thoughts) and `POST /act`
-with `tap`, `tapAt`, `move`, `wait`, `key`, `reload`, `note`, `end` (see the top of
-`playserver.mjs`).
+with `tap`, `tapAt`, `move`, `look` (drag to turn the camera), `wait`, `key`, `reload`, `note`,
+`understand`, `verdict`, `compare`, `end` (see the top of `playserver.mjs`). With `--input touch`
+every action is a phone's: taps that wait for a prompt to hold still, the thumb stick, a
+one-finger drag to look (fixed 4 Oct: the first cold run tapped with a mouse, so the game
+believed it was on a laptop and showed the keyboard hint, and it had no way to turn the camera).
 
 Limits to keep in mind: an agent acts seconds after each screenshot, so anything that needs
 quick reactions (catching a falling word) looks harder than it is for a person. Treat those
@@ -105,3 +118,23 @@ follow camera every half second.
 
 Note on the AI tester: it counts leaves framing the top of a shot as a fault. Some of that is
 deliberate composition; the fixed talk and cutscene shots were left as they are.
+
+## First cold run (4 Oct 2026, newcomer, phone; build b-a3e92533a7ec)
+
+82 steps from the title through waking the skiff (2 of 3 stars). Cold account before the
+intent: understood the world, Zip, Mira's abduction, the word-ring engine and "it predicts the
+next word and feeds the guess back". First look: **stop and look: yes; keep playing: unsure**.
+The gate recorded the comparison as the `comprehension` lane: **fail** for that build.
+
+- **Blocker:** "Get your voice back" (the spark chase) couldn't be navigated: about 25 steps
+  circling the arch, the edge arrow flipping sides, the spark never seen; finished by accident.
+  (The same complaint as the 1 Oct newcomer run: still open.)
+- **Major (learning):** the loop-fix decision wasn't a decision: "Blossom" was the only word in
+  the tray, so "fixed the loop first try" was earned without choosing what the engine reads.
+- **Camera** pressed into Zip's head near the arch (steps 23, 45, 53, 57).
+- **Two ways to collect words** (the tutorial's "Tap" circle and the "Absorb" prompt) read as
+  two mechanics; the first word taken was never shown.
+- Tester artifacts, now fixed in the play server: mouse taps on a phone (the keyboard hint, no
+  stick until later), no camera drag, a 5 s tap timeout on a popping-in prompt ("Shield Mira!").
+- One game change it caused: aim choosing between a word and the engine (introduced the same
+  day) hid the plaque's word; words come first again at the pilot stone.
