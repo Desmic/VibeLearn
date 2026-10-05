@@ -34,6 +34,11 @@ export interface SiteSpec {
   words: string[];
   /** how many words the engine reads at once (its context) */
   slots: number;
+  /** a failure that hands the player the fix: when a phrase here fails for `reason`, the player
+   *  gains `word` (e.g. "bridge" comes up short, and "long" falls out of the miss). The lesson is
+   *  met by doing the obvious thing, not by reading a sign. uttercheck proves the failure can
+   *  happen from `words` alone and that the place is solvable once `word` is added. */
+  teaches?: { reason: Reason; word: string };
 }
 export interface UtterSpec {
   schema: 'vibelearn.utter.v1';
@@ -101,9 +106,10 @@ export function speak(spec: UtterSpec, words: string[], site: SiteSpec): Made {
   return made;
 }
 
-/** every phrase of 1..slots distinct words from the site's words, in order (for proofs and hints) */
-export function phrases(site: SiteSpec): string[][] {
-  const out: string[][] = [], w = site.words;
+/** every phrase of 1..slots distinct words from the site's words, in order (for proofs and hints);
+ *  `extra` adds words the player may hold by then (e.g. one a failure taught) */
+export function phrases(site: SiteSpec, extra: string[] = []): string[][] {
+  const out: string[][] = [], w = [...new Set([...site.words, ...extra])];
   const go = (cur: string[]) => { if (cur.length) out.push(cur); if (cur.length === site.slots) return; for (const x of w) if (!cur.includes(x)) go([...cur, x]); };
   go([]); return out;
 }
@@ -125,6 +131,8 @@ export function validateUtter(spec: UtterSpec): string[] {
     if (ids.has(s.id)) out.push(`site "${s.id}" twice`); ids.add(s.id);
     for (const w of s.words) if (!spec.lexicon[w]) out.push(`site "${s.id}" offers unknown word "${w}"`);
     if (s.slots < 1) out.push(`site "${s.id}" reads no words`);
+    if (s.teaches && !spec.lexicon[s.teaches.word]) out.push(`site "${s.id}" teaches unknown word "${s.teaches.word}"`);
+    if (s.teaches && !spec.lines[`taught-${s.teaches.word}`] && !spec.lines.taught) out.push(`site "${s.id}" teaches "${s.teaches.word}" but there is no "taught" line`);
   }
   for (const r of ['works', 'too-short', 'too-weak', 'wrong-way', 'wrong-kind', 'too-dim', 'nothing'] as Reason[]) if (!spec.lines[r]) out.push(`no line for outcome "${r}"`);
   return out;

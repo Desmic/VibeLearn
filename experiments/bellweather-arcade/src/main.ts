@@ -34,7 +34,7 @@ import { buildTitle } from './title';
 import { save, PLACE } from './save';
 import { BUILD } from './build-info';
 import { buildUtterLab } from './utter-lab';
-import { UTTER_LAB, UTTER_LAB_SOURCES } from './worlds/utter-lab';
+import { UTTER_LAB, UTTER_LAB_SOURCES, UTTER_LAB_B, UTTER_LAB_B_SOURCES, UTTER_LAB_B_VARIANT } from './worlds/utter-lab';
 import { CANOPY_FOCUS, SIGHT_SHOT } from './canopy';
 import { collectFaders, fadeOccluders } from './occluders';
 import { frameGovernor, budget } from './kit/budget';
@@ -181,7 +181,7 @@ const announce=(s:string)=>{get('announcer').textContent=s};
 
 function setPlace(s:string){if(positionText!==s){positionText=s;get('place').textContent=s;announce(s)}}
 
-function updateLocation(){if(story?.placeName){setPlace(story.placeName);return}const n=nearestRoute(zip.position);if(facadeStudy){setPlace(n.t>.82?'Inner courtyard':n.t>.34?'Conservatory entrance':'Sunward approach');get('route').innerHTML=n.t>.87?'Return to entrance <span>↙</span>':'Walk through entrance <span>↗</span>';return}setPlace(n.t>.82?'Overlook pavilion':n.t>.34?'Garden lightwell':'Garden arcade');get('route').innerHTML=n.t>.87?'Return to arcade <span>↙</span>':'Walk to overlook <span>↗</span>'}
+function updateLocation(){const pn=story?.placeName??utterLab?.placeName;if(pn){setPlace(pn);return}const n=nearestRoute(zip.position);if(facadeStudy){setPlace(n.t>.82?'Inner courtyard':n.t>.34?'Conservatory entrance':'Sunward approach');get('route').innerHTML=n.t>.87?'Return to entrance <span>↙</span>':'Walk through entrance <span>↗</span>';return}setPlace(n.t>.82?'Overlook pavilion':n.t>.34?'Garden lightwell':'Garden arcade');get('route').innerHTML=n.t>.87?'Return to arcade <span>↙</span>':'Walk to overlook <span>↗</span>'}
 
 // Painted study on portrait phones: aim a little higher and widen the lens so
 // Zip sits in the lower third and the vista, not the character, fills the frame.
@@ -310,7 +310,8 @@ const story=guide&&!labId?buildStory(scene,{guide,camera,cameraClear:(a,b)=>{con
   density:{low:.5,medium:.8,high:1}[quality().tier],
   adopt:(root,blockers)=>{if(paintedStudy&&paintedParams.get('pbr')!=='1')lambertize(root);if(faders)faders.push(...collectFaders(root));if(townHidden&&blockers.length){cameraSolids.push(...blockers);invalidateCameraGeometry()}renderer.compileAsync(root,camera,scene).catch(()=>{})},
   setGround:(y:number)=>{groundLift=y;zip.position.y=standingY0+groundLift;contact.position.y=contactY0+groundLift},teleport:(x,z,y)=>{guideTargetT=null;zip.position.set(x,(standingY0+groundLift),z);contact.position.set(x,(contactY0+groundLift),z);zip.rotation.y=y;yaw=y;facadeMoveYaw=y;updateLocation();cameraUpdate(1)}}):null;
-utterLab=guide&&labId==='utter'?buildUtterLab(scene,{guide,host:appHost,camera,zip:()=>zip.position,addWalk:facade.addWalkRegion,spec:UTTER_LAB,sources:UTTER_LAB_SOURCES,setYaw:y=>{yaw=y},teleport:(x,z)=>{zip.position.set(x,(standingY0+groundLift),z);contact.position.set(x,(contactY0+groundLift),z);zip.rotation.y=-Math.PI/2;yaw=-Math.PI/2;facadeMoveYaw=-Math.PI/2;updateLocation();cameraUpdate(1)}}):null;
+const labB=labId==='utter-b';   // a variant of the test area, to compare designs (docs/UTTER-DESIGN.md)
+utterLab=guide&&(labId==='utter'||labB)?buildUtterLab(scene,{guide,host:appHost,camera,zip:()=>zip.position,addWalk:facade.addWalkRegion,spec:labB?UTTER_LAB_B:UTTER_LAB,sources:labB?UTTER_LAB_B_SOURCES:UTTER_LAB_SOURCES,variant:labB?UTTER_LAB_B_VARIANT:undefined,setYaw:y=>{yaw=y},teleport:(x,z)=>{zip.position.set(x,(standingY0+groundLift),z);contact.position.set(x,(contactY0+groundLift),z);zip.rotation.y=-Math.PI/2;yaw=-Math.PI/2;facadeMoveYaw=-Math.PI/2;updateLocation();cameraUpdate(1)}}):null;
 if(utterLab){appHost.classList.add('story-mode');(window as any).__vlUtterLab=utterLab;}
 if(story){appHost.classList.add('story-mode');const mp=document.querySelector('.menu-card p');if(mp)mp.textContent='Paused. Zip waits patiently, like a good NPC.';(window as any).__vlStory=story;}
 if(story){const lab=document.createElement('label');lab.innerHTML='<input type="checkbox" id="sound"> Sound';get('reduced').parentElement!.after(lab);const cb=lab.querySelector('input')!;cb.checked=!sfx.muted;cb.addEventListener('change',()=>sfx.setMuted(!cb.checked));

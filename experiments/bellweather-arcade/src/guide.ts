@@ -219,7 +219,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { toastEl.hidden = true; }, ms);
     },
     // 1-3 stars with the reason for each one earned or missed
-    stars(title: string, rows: [boolean, string][], then?: () => void) {
+    stars(title: string, rows: [boolean, string][], then?: () => void, opts: { stay?: boolean } = {}) {
       const n = rows.filter(r => r[0]).length;
       // a banner across the top of the view (the world stays in sight), carrying on by itself
       cardOpen = true; host.classList.add('card-open'); act.hidden = true; card.hidden = false; card.innerHTML = '';
@@ -233,7 +233,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       const row = document.createElement('div'); row.className = 'story-choices'; card.appendChild(row);
       let gone = false; const go = () => { if (gone) return; gone = true; clearTimeout(auto); card.classList.remove('ribbon'); api.close(); then?.(); };
       const b = document.createElement('button'); b.className = 'primary'; b.textContent = n === 3 ? 'Brilliant!' : 'Continue'; b.addEventListener('click', e => { e.stopPropagation(); sfx.tap(); go(); }); row.appendChild(b);
-      const auto = window.setTimeout(go, 3800 + rows.length * 500);
+      const auto = opts.stay ? 0 : window.setTimeout(go, 3800 + rows.length * 500);   // `stay`: waits for the tap
     },
     label(id: string, text: string | null, at?: T.Vector3) {
       let l = labels.get(id);

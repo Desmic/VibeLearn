@@ -10,7 +10,7 @@ The game runs on a phone screen ({width}×{height} pixels) behind a local server
 - `curl -s -X POST localhost:{port}/act -d '<json>'` does one thing with your hands:
   - `{"type":"tap","label":"<text on a button>"}` taps a button by its label;
   - `{"type":"tapAt","x":<px>,"y":<px>}` taps a point on the screen;
-  - `{"type":"move","dir":"forward|back|left|right","seconds":<1-8>}` holds the thumb stick;
+  - `{"type":"move","dir":"forward|back|left|right","seconds":<0.2-8>}` holds the thumb stick (a quick push is a little step);
   - `{"type":"look","dx":<px>,"dy":<px>}` drags a finger to turn the camera (dx 150 turns right);
   - `{"type":"wait","seconds":<1-10>}` puts the phone down for a moment while it plays on;
   - `{"type":"think","text":"..."}` says something out loud, if something comes to mind, the way you'd mutter to yourself. It's optional.

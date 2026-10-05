@@ -4,6 +4,7 @@
 // tools/uttercheck.mjs proves it. Lines follow the house style (twelve words a sentence).
 import type { UtterSpec } from '../kit/utter';
 import type { WordSource } from './first-words-echo';
+import type { LabVariant } from '../utter-lab';
 
 export const UTTER_LAB: UtterSpec = {
   schema: 'vibelearn.utter.v1',
@@ -80,3 +81,52 @@ export const UTTER_LAB_SOURCES: WordSource[] = [
   { id: 'stone', word: 'stone', line: 'A stone. Very stony.', kind: 'object', at: [70.4, -41.8], y: 1.3, reach: 2.6 },
   { id: 'lantern-hook', word: 'lantern', line: '“Lantern hook.” The lantern is missing.', kind: 'sign', at: [81.4, -41.8], y: 2.0, reach: 2.6 },
 ];
+
+// ── Variant B (lab=utter-b, 5 Oct): built from the first blind play-test (docs/UTTER-DESIGN.md,
+// run 5). Told nothing, a newcomer said the obvious phrase at every place, every one worked, and
+// it never saw a failure, which is where most of the ideas live. So here the failures are on the
+// main path, not a side quest:
+//   - the likeliest bridge is a short one: "bridge" alone falls short of the first gap, and
+//     "long" isn't lying around: the miss hands it over (SiteSpec.teaches);
+//   - after a miss the ring opens with your phrase still in it, so the natural fix ("add long")
+//     puts the word after the bridge, too late: order is met by doing, not told;
+//   - the paper sign dares you; bigger platforms, fewer words lying around, each platform named.
+// Variant A stays as Desmic reviews it; both are blind-tested the same way to compare.
+// B's first version had "long" on a sign by the first gap: the blind tester (run 6) collected
+// both words before speaking and said "long bridge" first time, so it never missed at all.
+export const UTTER_LAB_B: UtterSpec = {
+  ...UTTER_LAB,
+  id: 'first-words.utter-lab-b',
+  lexicon: { ...UTTER_LAB.lexicon, long: { kind: 'size', scale: 2.6 } },
+  things: { ...UTTER_LAB.things, bridge: { archetype: 'span', size: 3, look: 'bridge' } },
+  sites: [
+    // "long" isn't lying around: the obvious "bridge" comes up short, and the miss hands over "long"
+    { id: 'first-gap', asks: 'Cross the gap', need: { archetype: 'span', length: 3.9 }, words: ['bridge', 'tiny'], slots: 3, teaches: { reason: 'too-short', word: 'long' } },
+    { id: 'wide-gap', asks: 'Cross the wide gap', need: { archetype: 'span', length: 7.5 }, words: ['long', 'bridge', 'tiny', 'rope', 'plank', 'paper', 'jelly', 'stone'], slots: 3 },
+    { id: 'dark-door', asks: 'Light the dark doorway', need: { archetype: 'light', brightness: 1 }, words: ['long', 'bridge', 'tiny', 'rope', 'plank', 'paper', 'jelly', 'stone', 'lantern'], slots: 3 },
+  ],
+  lines: {
+    ...UTTER_LAB.lines,
+    'too-short': 'A {thing}. The likeliest one. Shorter than I needed.',
+    'too-weak-paper': 'Paper. They did dare me.',
+    'taught-long': 'I never said how long. “Long.” That’s the word I was missing.',
+    'hint-late': 'The bridge was made the moment I said it. Say how long first.',
+  },
+};
+/** platforms of radius 3.8 at x 60, 71 and 85.6 (src/utter-lab.ts lays them out from the radius) */
+export const UTTER_LAB_B_SOURCES: WordSource[] = [
+  { id: 'bridge-sign', word: 'bridge', line: '“BRIDGE OUT,” says the sign. Out where?', kind: 'sign', at: [60.5, -41.2], y: 2.0, reach: 2.6 },
+  { id: 'tiny-sign', word: 'tiny', line: 'A tiny sign. It just says “tiny”.', kind: 'sign', at: [58.2, -36.9], y: 1.2, reach: 2.6 },
+  { id: 'rope-coil', word: 'rope', line: 'A coil of rope. Very coiled.', kind: 'object', at: [68.4, -41.9], y: 1.0, reach: 2.6 },
+  { id: 'plank-pile', word: 'plank', line: 'A pile of planks. One is labelled “plank”.', kind: 'object', at: [68.8, -38.1], y: 1.1, reach: 2.6 },
+  { id: 'paper-note', word: 'paper', line: '“A paper bridge? Go on. We dare you.” Signed, the builders.', kind: 'sign', at: [70.6, -42.4], y: 1.7, reach: 2.6 },
+  { id: 'jelly-jar', word: 'jelly', line: 'A jar of jelly. Wobbly. Pink. Suspicious.', kind: 'object', at: [72.2, -37.9], y: 1.1, reach: 2.6 },
+  { id: 'stone', word: 'stone', line: 'A stone. Very stony.', kind: 'object', at: [73.0, -42.0], y: 1.3, reach: 2.6 },
+  { id: 'lantern-hook', word: 'lantern', line: '“Lantern hook.” The lantern is missing.', kind: 'sign', at: [84.4, -41.9], y: 2.0, reach: 2.6 },
+];
+export const UTTER_LAB_B_VARIANT: LabVariant = {
+  radius: 3.8, remember: true,
+  places: ['The first gap', 'The wide gap', 'The dark doorway'],
+  firstFail: 'Not what I meant. But I did say it. Wrong is free here.',
+  summaryStays: true,
+};

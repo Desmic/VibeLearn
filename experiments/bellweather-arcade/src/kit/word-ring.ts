@@ -103,9 +103,10 @@ export function createWordRing(o: WordRingOpts) {
     get isOpen() { return !root.hidden; },
     get busy() { return busy; },
     get slots() { return [...slots]; },
-    /** open with the words carried and the size of the context */
-    open(words: string[], n: number) {
-      carried = [...words]; N = n; slots = []; busy = false; readT = -1; build();
+    /** open with the words carried and the size of the context; `start` puts a phrase back in the
+     *  slots (e.g. the last one said here), so fixing a phrase means editing it, as in a chat box */
+    open(words: string[], n: number, start: string[] = []) {
+      carried = [...words]; N = n; slots = start.filter((w, i) => carried.includes(w) && start.indexOf(w) === i).slice(0, n); busy = false; readT = -1; build();
       root.hidden = false; holo.visible = true; cone.mesh.visible = true; t = 0; o.cue?.('open');
     },
     close() {

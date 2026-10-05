@@ -45,7 +45,8 @@ import { pathToFileURL as toUrl } from 'node:url';
 
 const PORT = +arg('port', 7788);
 // one report per persona and protocol, so several testers of one build sit side by side in quality/<build>/
-const h = await harness({ title: 'AI play-test', outDefault: 'playtest', tool: `playserver-${arg('protocol', 'blind')}-${arg('persona', arg('protocol', 'blind') === 'blind' ? 'commuter' : 'newcomer')}`, lane: 'comprehension' });
+const LAB = (arg('start', '').match(/lab=([a-z0-9-]+)/) ?? [])[1];   // a test area or variant: kept apart in the report name
+const h = await harness({ title: 'AI play-test', outDefault: 'playtest', tool: `playserver-${arg('protocol', 'blind')}-${arg('persona', arg('protocol', 'blind') === 'blind' ? 'commuter' : 'newcomer')}${LAB ? '-' + LAB : ''}`, lane: 'comprehension' });
 const { page, OUT, GAME } = h;
 const PROTOCOL = arg('protocol', 'blind');
 const PERSONAS = JSON.parse(readFileSync('tools/playtest/personas.json', 'utf8')).personas;
@@ -116,8 +117,11 @@ async function act(a) {
   switch (a.type) {
     case 'tap': {
       // a finger lands on what can be pressed: a greyed-out twin with the same label (a word already placed) is skipped
-      const b = page.locator('button:visible:not([disabled]), .context-act:visible', { hasText: String(a.label) }).first();
-      if (!(await b.count())) return { ok: false, why: `no visible button with "${a.label}"` };
+      // labels are matched as a person reads them: line breaks and spacing don't matter ("✦ Speak" is "✦\nSpeak")
+      const norm = x => String(x).replace(/\s+/g, ' ').trim().toLowerCase(), want = norm(a.label);
+      const all = page.locator('button:visible:not([disabled]), .context-act:visible'), n = await all.count();
+      let b = null; for (let i = 0; i < n && !b; i++) { const el = all.nth(i); if (norm(await el.innerText().catch(() => '')).includes(want) || norm(await el.getAttribute('aria-label') ?? '').includes(want)) b = el; }
+      if (!b) return { ok: false, why: `no visible button with "${a.label}"` };
       // as this session's player would: a finger on a phone (waits for a popping-in prompt to hold still), a click otherwise
       await h.press(b, { timeout: 20000 }).catch(e => { throw new Error('could not tap: ' + e.message.split('\n')[0]); });
       await page.waitForTimeout(600); break;
@@ -136,7 +140,7 @@ async function act(a) {
       await page.evaluate(() => window.__arcade?.simulate?.(2.5)); break;
     case 'move': {
       const key = { forward: 'KeyW', back: 'KeyS', left: 'KeyA', right: 'KeyD' }[a.dir]; if (!key) return { ok: false, why: 'dir must be forward|back|left|right' };
-      const sec = Math.min(8, +a.seconds || 1);
+      const sec = Math.max(.2, Math.min(8, +a.seconds || 1));   // a nudge is a fifth of a second
       if (h.INPUT === 'touch') await h.stick({ forward: [0, -1], back: [0, 1], left: [-1, 0], right: [1, 0] }[a.dir], sec);   // the thumb stick, as on a phone
       else await page.evaluate(([k, s]) => window.__arcade.simulate(s, { keys: [k] }), [key, sec]);
       await page.waitForTimeout(300); break;

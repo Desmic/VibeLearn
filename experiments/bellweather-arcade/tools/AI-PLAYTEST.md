@@ -221,3 +221,20 @@ Play-server fixes from this run:
   reads words in order" line).
 - A tap by label skips a greyed-out twin with the same label.
 - Failed actions are logged in the trace.
+
+## Blind runs 6 and 7: variant B of the test area (5 Oct 2026)
+
+Same brief, same persona, a fresh tester each time, `--start '&lab=utter-b'`. The results and what
+they mean for the design are in `docs/UTTER-DESIGN.md`. Compare runs with
+`node tools/playtest/compare.mjs <run dirs> --names …`.
+
+Play-server fixes from these runs:
+- **Label matching ignores line breaks:** "✦ Speak" now finds "✦\nSpeak". Before this, testers
+  tapped the orb by screen position.
+- **Stick pushes can be as short as 0.2 s:** a 1 s minimum overshot a bridge entrance. The brief
+  says so, and the blind check caught the first wording ("short", "small" are design words here).
+- **Reports carry the area or variant in their name** (`playserver-blind-commuter-utter-b`).
+
+The writing capture can still miss a speech bubble that is fading in at the moment of the
+screenshot. The tester sees it in the picture, so the interviewer checks screenshots before
+calling a quote invented.

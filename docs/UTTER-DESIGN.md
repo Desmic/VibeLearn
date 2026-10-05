@@ -225,6 +225,68 @@ What this means for the design (proposals; nothing changed yet):
 - **Shorter walks between a word and where it's used**, distinct-looking platforms, and a place
   label that changes. Zip got stuck against a signpost twice.
 
+### Variant B and two more blind runs (5 Oct)
+
+Variant B (`#painted&lab=utter-b`) is a separate test area that puts failure on the main path.
+Variant A, the one you review, is unchanged. The same blind brief and the same persona were used,
+and each run had a fresh tester:
+
+- **B1 (run 6):** the likeliest bridge is short (3 m) and "long" sits on a sign by the first gap.
+  - The tester collected both words before speaking and said "long bridge" first time.
+  - It never failed. Having the right word in reach is enough to skip the lesson.
+- **B2 (run 7):** "long" isn't lying around.
+  - The obvious "bridge" comes up short, and the miss hands over "long" (a new kit rule,
+    `SiteSpec.teaches`: *a failure that gives the fix*).
+  - The ring reopens with your last phrase still in it.
+  - The paper sign dares you, and Zip says "Wrong is free here."
+  - The platforms are bigger and named, and the end summary waits for a tap.
+
+| | A (run 5) | B1 (run 6) | B2 (run 7) |
+| --- | --- | --- | --- |
+| saying makes a thing | unprompted | unprompted | unprompted |
+| words come from the world | unprompted | unprompted | unprompted |
+| only a few fit | unprompted (an inventory cap) | unprompted (cap) | unprompted (cap) |
+| read in order, late words too late | when pointed at | probed | probed |
+| a cut-short phrase gets the likeliest guess | **misread** | **misread** | **misread** |
+| vague gets the likeliest thing | when pointed at | when pointed at | probed |
+| failures show why | when pointed at | missed | **unprompted** |
+| it's how a language model works | missed | missed | **probed**: "like autocomplete" |
+| keep playing (0–10) / next part | 6 / yes | 6 / yes | 7 / yes |
+| failures met | 0 of 6 | 0 of 6 | 1 of 6 |
+
+`node tools/playtest/compare.mjs` makes this table. One run per variant is a lead, not a verdict.
+
+What B2's one forced failure did:
+- It became "the best moment": "Most games would have shown a red X there. This one gave me exactly
+  what I'd asked for… and the character worked out why on its own."
+- "Wrong is free here" was "the nicest line in the game. It took the pressure off."
+- "The likeliest one" made them think of autocomplete, the first time the language-model link
+  came out before the reveal.
+- The limit: "the robot named the missing word before I'd figured it out myself… The game solved
+  it for me."
+
+What all three blind runs agree on, so these are probably real:
+
+1. **Players never fail on purpose.** "On a bus I just want the thing to work."
+   - Joke and dare signs read as warnings.
+   - Some feared a cost: "I wasn't sure it wouldn't cost me something, like a restart."
+   - Only failures on the main path get met.
+2. **The engine's guess was misread every time.** "long" alone was predicted to make "nothing" or
+   "Long… what?". To be learned, it has to happen to the player.
+3. **Word order comes from English, not from the engine.** Everyone put describing words first
+   because that's English, so "too late" was never met. As built, the order rule mostly agrees
+   with grammar, so it can't teach anything. Making it visible needs a phrase people naturally say
+   in the other order, or a different way to show reading in order (e.g. the thing starting to
+   form at the first word).
+4. **"Three at a time, for now" reads as an upgradeable inventory cap**, never as memory. No one
+   hit the limit.
+5. **Movement is the main friction every time:**
+   - the camera swinging after each made thing;
+   - overshooting a bridge entrance;
+   - hunting for the speak spot.
+6. **Every place needs one new idea.** In B the wide gap took the same phrase again ("didn't feel
+   like a new puzzle").
+
 Still open:
 
 - **The language-model framing doesn't reach players.** All three read the 3-word limit as a menu
