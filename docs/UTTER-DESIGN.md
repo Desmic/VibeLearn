@@ -125,6 +125,32 @@ appears with no loading screen (the hologram weave covers the wait).
 3. **Funny failures are right**, *if executed well*: asking for a bridge and getting a long
    noodle should be funny to watch, not just to read.
 
+4. **Show the engine's reading as a hologram (4 Oct, later).** The game's HUD can show the
+   limits. It should be visually appealing and fun to touch, never a boring card. Other decisions
+   wait until Desmic has played it.
+
+## The word ring (built 4 Oct: `src/kit/word-ring.ts`)
+
+Speaking no longer opens a card. Zip projects his engine as a hologram in the world, with a beam
+from his chest:
+
+- **Slots: the context window.** Three gold sockets in a shallow arc. The limit is on the ring
+  itself ("2 / 3 words", then "3 / 3 words · full"). A fourth word bounces off the full ring
+  ("Full. My engine holds 3 words.").
+- **Words carried** float below as glowing chips. Tap one and it flies into the next slot; tap a
+  slotted word to take it back out.
+- **The speak orb** sits above and pulses when there is something to say. Tapping it makes the
+  ring *read* its slots in order: a beam sweeps left to right. Then the words leave for the
+  world, where the reading hangs over the place.
+- **Controls:**
+  - Phone: taps.
+  - Laptop: number keys load words; Backspace takes the last one out; Enter, Space or E speak;
+    Escape steps away.
+  - Every piece carries a `data-action` tag for the tests.
+- **Built as a kit piece, not a lab hack.** It's game-agnostic: pieces are pinned to a point in the
+  world but laid out in screen pixels, so they're big and tappable and always fit a phone. The
+  skiff's engine can move onto it next, giving one engine UI for the whole game.
+
 ## Is it working? Three cold AI play-tests of the test area (4 Oct)
 
 Each run used a fresh newcomer persona on a phone screen. It read the intent only after its own
@@ -161,6 +187,17 @@ What changed between runs:
   - After a success, the camera faces the way on.
   - The dark doorway hides a new gold word, "sky" (a teaser of the next power).
   - The goal no longer resets after the end.
+
+**Run 4** (with the word ring): finished in 61 steps. Stop and look: **yes**; keep playing:
+**yes**. "Gently fun"; "long bridge felt like a real aha". The speaking interface is "easy to use on
+a phone… the 3-word cap is explained clearly". After it:
+
+- A weak span now fails as weak even when it is also too short, so "paper bridge" pays off the
+  sign's joke ("Paper. The sign did warn me.").
+- Standing on the speak ring always offers Speak.
+- Going back no longer shows "Walk across" again.
+- The end shows a summary that gives reasons to replay: every place on the first phrase, funny
+  failures found (x of 6), words used (x of 10).
 
 Still open:
 

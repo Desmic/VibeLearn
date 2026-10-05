@@ -95,7 +95,7 @@ export function speak(spec: UtterSpec, words: string[], site: SiteSpec): Made {
   if (!t) return made;
   const n = site.need;
   if (t.archetype !== n.archetype) made.reason = 'wrong-kind';
-  else if (n.archetype === 'span') made.reason = made.away ? 'wrong-way' : made.size < n.length ? 'too-short' : made.weak ? 'too-weak' : 'works';
+  else if (n.archetype === 'span') made.reason = made.away ? 'wrong-way' : made.weak ? 'too-weak' : made.size < n.length ? 'too-short' : 'works';   // a weak span fails as weak (the more visible joke) even if short too
   else made.reason = made.size < n.brightness ? 'too-dim' : 'works';
   made.works = made.reason === 'works';
   return made;

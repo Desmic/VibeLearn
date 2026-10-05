@@ -23,7 +23,8 @@ const absorb = async src => {
 const speakSeq = async (site, words, name) => {
   await h.walkTo(site.from, { near: .6 });
   await h.act('Speak', 20000);
-  for (const w of words) await h.press(page.locator(`.holo-chip[data-w="${w}"]`));
+  for (const w of words) await h.press(page.locator(`.wr-chip[data-w="${w}"]`));
+  await page.waitForTimeout(400); await h.shot(name + '-ring');
   await h.press(page.locator('[data-action="speak"]'));
   for (let i = 0; i < 8; i++) { await sim(.4); await page.waitForTimeout(250); }
   await h.shot(name + '-made');
@@ -50,5 +51,7 @@ for (const src of L.sources.filter(s => onPlatform(s, 82.4))) await absorb(src);
 h.check('"tiny lantern" is too dim', (await speakSeq(C, ['tiny', 'lantern'], 'c-tiny'))?.reason === 'too-dim');
 h.check('"long lantern" lights the doorway', (await speakSeq(C, ['long', 'lantern'], 'c-long'))?.works);
 h.check('the lab says it is done', /lab is done/.test(await h.goal() ?? ''), await h.goal());
+await h.until(() => page.evaluate(() => !!document.querySelector('.star-row')), 12);
+h.check('a summary banner shows what was done (and what is left to find)', await page.evaluate(() => !!document.querySelector('.star-row')));
 await h.shot('end');
 await h.finish();

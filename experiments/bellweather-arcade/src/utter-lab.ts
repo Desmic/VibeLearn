@@ -4,6 +4,7 @@ import { sfx } from './sfx';
 import { HOLO, glyph, holoMaterial, sparks, faceCamera } from './kit/holo';
 import { speak, lineFor, type Made, type UtterSpec } from './kit/utter';
 import { pickTarget } from './kit/target';
+import { createWordRing } from './kit/word-ring';
 import { buildEcho } from './echo';
 import type { WordSource } from './worlds/first-words-echo';
 
@@ -25,7 +26,7 @@ interface Opts {
   setYaw: (y: number) => void;
   spec: UtterSpec; sources: WordSource[];
 }
-type Site = { s: UtterSpec['sites'][number]; at: T.Vector3; from: T.Vector3; solved: boolean };
+type Site = { s: UtterSpec['sites'][number]; at: T.Vector3; from: T.Vector3; solved: boolean; crossed?: boolean };
 
 export function buildUtterLab(scene: T.Scene, o: Opts) {
   const g = o.guide, spec = o.spec, root = new T.Group(); root.name = 'utter-lab'; scene.add(root);
@@ -179,19 +180,23 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
     fx.burst(site.at.clone().setY(.8), 16, 1.6, HOLO.made); sfx.speak(4);
   };
 
-  // ── speaking: the engine tray (the same one the skiff uses), with the words Zip carries ──
-  const tray = document.createElement('div'); tray.className = 'engine-tray'; tray.hidden = true; o.host.appendChild(tray);
-  const line = document.createElement('div'); line.className = 'engine-prompt'; line.hidden = true; o.host.appendChild(line);
-  let open: Site | null = null, said: string[] = [], busy = false, shot: { pos: T.Vector3; look: T.Vector3; rate: number; cut: number } | null = null, cuts = 0;
+  // ── speaking: the word ring, a hologram of the engine's context (kit/word-ring.ts) ──
+  let open: Site | null = null, busy = false, shot: { pos: T.Vector3; look: T.Vector3; rate: number; cut: number } | null = null, cuts = 0;
   const usable = () => echo.carried.filter(w => spec.lexicon[w]);
-  const render = () => {
-    if (!open) return;
-    const s = open.s, words = usable();
-    line.innerHTML = `${s.asks}. Say it: <b>${said.length ? said.join(' ') : '…'}</b> <span style="opacity:.7">(up to ${s.slots} words)</span>`;
-    tray.innerHTML = `<div class="engine-words">${words.length ? words.map(w => `<button class="holo-chip" data-w="${w}" data-action="say.${w}" ${said.includes(w) || said.length >= s.slots ? 'disabled' : ''}>${w}</button>`).join('') : '<span class="holo-none">No words yet. Absorb some from the signs and things around you.</span>'}</div>
-      <div class="engine-buttons"><button class="holo-cast" data-act="speak" data-action="speak" ${said.length ? '' : 'disabled'}>Speak ✦</button>${said.length ? '<button class="holo-quiet" data-act="clear" aria-label="Clear">↺ Clear</button>' : ''}<button class="holo-quiet" data-act="close">Step away</button></div>`;
+  const ring = createWordRing({ scene, host: o.host, camera: o.camera,
+    anchor: () => o.zip().clone().add(new T.Vector3(.35, 1.75, .25)),
+    source: () => o.zip().clone().add(new T.Vector3(0, 1.0, 0)),
+    cue: c => ({ load: () => sfx.place(), unload: () => sfx.tap(), full: () => sfx.boing(), speak: () => sfx.speak(3), open: () => sfx.whoosh(), close: () => {} })[c](),
+    say: t => g.bark('Zip', t, 2.2),
+    onSpeak: words => { if (open) say(open, words); },
+    onClose: () => { o.host.classList.remove('puzzle-mode'); echo.showOrbit(true); if (!busy) { shot = null; open = null; } },
+  });
+  const openRing = (site: Site) => {
+    open = site; o.host.classList.add('puzzle-mode'); echo.showOrbit(false);
+    // frame Zip and the ring from the front-side, the gap behind them
+    const z = o.zip(); shot = { pos: z.clone().add(new T.Vector3(1.4, 2.9, 3.9)), look: z.clone().add(new T.Vector3(.3, 1.45, 0)), rate: 3, cut: ++cuts };
+    ring.open(usable(), site.s.slots);
   };
-  const close = () => { open = null; said = []; tray.hidden = line.hidden = true; o.host.classList.remove('puzzle-mode'); echo.showOrbit(true); };
   const fill = (m: Made, t: string, word = '') => t.replace('{thing}', m.thing ?? 'nothing').replace('{word}', word).replace('{material}', m.material ?? '');
   // what the engine read, over the place: words that shaped the thing in gold, words said too late
   // in grey (they drop off), the engine's own guess in brackets; words past its context struck out
@@ -208,7 +213,7 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
   };
   const fails = new Map<string, number>(); let hinted = false;
   const say = (site: Site, words: string[]) => {
-    const m = speak(spec, words, site.s); close(); busy = true;
+    const m = speak(spec, words, site.s); busy = true; open = null;
     g.bark('Zip', words.join(' ') + '!', 1.4); sfx.speak(words.length + 1);
     // a directed shot from the side, so the made thing is in view (the follow camera returns after)
     const L = Math.max(1.5, Math.min(8, m.size || 2)), span = site.s.need.archetype === 'span';
@@ -231,23 +236,15 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
       later(Math.max(d, 3.2), () => { busy = false; shot = null; o.setYaw(-Math.PI / 2); });
     });
   };
-  tray.addEventListener('click', e => {
-    const b = (e.target as HTMLElement).closest('button') as HTMLButtonElement | null; if (!b || b.disabled || !open) return;
-    if (b.dataset.w) { said.push(b.dataset.w); sfx.place(); render(); return; }
-    if (b.dataset.act === 'clear') { said = []; sfx.tap(); render(); return; }
-    if (b.dataset.act === 'close') { close(); return; }
-    if (b.dataset.act === 'speak') say(open, [...said]);
-  });
-
   g.setThinker(o.zip);
   o.teleport(X0 - 1, Z);
   later(1.2, () => g.bark('Zip', 'Words everywhere. If I say a thing, does it happen?', 3));
   later(4.6, () => g.bark('Zip', 'My engine reads words in order. Three at a time, for now.', 3));
   let goalSite = -1; const aimV = new T.Vector3();
   const api = {
-    sites, echo, sources: o.sources, get open() { return !!open; }, get shot() { return shot; }, get busy() { return busy; },
+    sites, echo, ring, sources: o.sources, get open() { return ring.isOpen; }, get shot() { return shot; }, get busy() { return busy; },
     tick(dt: number) {
-      clock += dt; fx.tick(dt); echo.tick(dt);
+      clock += dt; fx.tick(dt); echo.tick(dt); ring.tick(dt);
       for (const q of queue.filter(q => q.t <= clock)) { queue.splice(queue.indexOf(q), 1); q.fn(); }
       for (const r of [...readings]) {
         r.t += dt; faceCamera(r.grp, o.camera); r.grp.scale.setScalar(Math.min(1, r.t * 4));
@@ -273,12 +270,27 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
       }
       // the next unsolved place: its goal, and the prompt when Zip stands at its edge
       // after a span works, walk across it before the next place asks anything
-      const z0 = o.zip(), crossing = sites.every(x => x.solved) ? undefined : sites.find((x, i) => x.solved && x.s.need.archetype === 'span' && z0.x < centres[i + 1] - R + .6);
+      const z0 = o.zip();
+      sites.forEach((x, i) => { if (x.solved && x.s.need.archetype === 'span' && z0.x >= centres[i + 1] - R + .6) x.crossed = true; });
+      const crossing = sites.every(x => x.solved) ? undefined : sites.find(x => x.solved && x.s.need.archetype === 'span' && !x.crossed);
       const next = crossing ? -2 : sites.findIndex(x => !x.solved);
       if (next !== goalSite) {
         goalSite = next;
         if (next === -2) { g.setGoal('Walk across'); g.setBeacon(new T.Vector3(centres[sites.indexOf(crossing!) + 1], 1.2, Z)); }
-        else if (next < 0) { g.setGoal('The lab is done. More words soon.'); g.setBeacon(null); fx.burst(o.zip().clone().setY(1.4), 30, 2.4, HOLO.made); sfx.chime(); later(1, () => g.bark('Zip', 'I talked my way across the sky. Mira would laugh.', 3)); }
+        else if (next < 0) { g.setGoal('The lab is done. More words soon.'); g.setBeacon(null); fx.burst(o.zip().clone().setY(1.4), 30, 2.4, HOLO.made); sfx.chime(); later(1, () => g.bark('Zip', 'I talked my way across the sky. Mira would laugh.', 3));
+          // what you did here, with reasons to come back: the ways to fail you haven't seen, the words you haven't used
+          later(4.6, () => {
+            const log: (Made & { words: string[]; site: string })[] = (window as any).__vlUtterLog ?? [];
+            const kinds = new Set(log.filter(m => !m.works).map(m => m.reason)), used = new Set(log.flatMap(m => m.words)), all = new Set(o.sources.map(x => x.word));
+            const firstTry = sites.every(x => log.find(m => m.site === x.s.id)?.works);
+            g.stars('Said into being', [
+              [true, 'Crossed two gaps and lit the dark'],
+              [firstTry, firstTry ? 'Every place on your first phrase' : 'Every place on the first phrase (try again?)'],
+              [kinds.size >= 4, `Funny failures found: ${kinds.size} of 6`],
+              [[...all].every(w => used.has(w)), `Words you used: ${[...all].filter(w => used.has(w)).length} of ${all.size}`],
+            ], () => {});
+          });
+        }
         else { g.setGoal(sites[next].s.asks); g.setBeacon(sites[next].from.clone().setY(1.2)); }
         rings.forEach((r, i) => (r.visible = i === next));
       }
@@ -289,9 +301,10 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
       const z = o.zip(), a = echo.action(z), here = next >= 0 ? sites[next] : null;
       const atSpot = !!here && usable().length > 0 && (Math.hypot(z.x - here.from.x, z.z - here.from.z) < 2.2 || Math.hypot(z.x - here.at.x, z.z - here.at.z) < 2.6);
       o.camera.getWorldDirection(aimV);
-      const pick = a && atSpot ? pickTarget([{ item: 'word', x: a.at.x, z: a.at.z, r: Infinity }, { item: 'speak', x: here!.at.x, z: here!.at.z, r: Infinity, priority: 1 }], z, aimV)?.item : a ? 'word' : atSpot ? 'speak' : null;
+      const onRing = !!here && Math.hypot(z.x - here.from.x, z.z - here.from.z) < .9;
+      const pick = onRing && atSpot ? 'speak' : a && atSpot ? pickTarget([{ item: 'word', x: a.at.x, z: a.at.z, r: Infinity }, { item: 'speak', x: here!.at.x, z: here!.at.z, r: Infinity, priority: 1 }], z, aimV)?.item : a ? 'word' : atSpot ? 'speak' : null;
       if (pick === 'word') g.setAction(a!.label, a!.use, a!.at, a!.action);
-      else if (pick === 'speak') g.setAction('Speak', () => { open = here; said = []; tray.hidden = line.hidden = false; o.host.classList.add('puzzle-mode'); echo.showOrbit(false); render(); }, here!.at.clone().setY(1.1), 'open-speak');
+      else if (pick === 'speak') g.setAction('Speak', () => openRing(here!), here!.at.clone().setY(1.1), 'open-speak');
       else g.setAction(null);
     },
   };

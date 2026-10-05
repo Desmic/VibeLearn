@@ -40,6 +40,7 @@ gate reads (section 7, and `docs/QUALITY-SYSTEM.md`).
 | `.stick-zone` / `.stick-base` | the floating thumb stick (phones) |
 | `html[data-input=touch|desktop]` | which kind of player the game thinks it has |
 | **`[data-action="<rules action>"]`** on every control that sends a rules action | dialogue choices (`Choice.action`), in-world prompts (`setAction(…, action)`), puzzle chips and buttons. A bot plays any station from its rules by pressing these; nothing else about the puzzle needs to be known |
+| `.word-ring` (kit/word-ring.ts): `.wr-chip[data-action=say.<word>]`, `.wr-slot[data-action=unsay.<i>]`, `.wr-core[data-action=speak]`, `.wr-close` | the speaking hologram: load words into the context slots, take them out, speak |
 | `.puzzle-mode` / `.engine-mode` on the game host while a puzzle UI is open | wait for the puzzle's controls instead of walking away |
 
 ## 3. Data the game declares (tools read it from the build)
