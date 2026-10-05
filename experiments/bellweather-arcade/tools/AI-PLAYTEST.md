@@ -238,3 +238,54 @@ Play-server fixes from these runs:
 The writing capture can still miss a speech bubble that is fading in at the moment of the
 screenshot. The tester sees it in the picture, so the interviewer checks screenshots before
 calling a quote invented.
+
+## Blind run 8: the main game from the title (6 Oct 2026; commuter; the baseline before camera fixes)
+
+This was the first blind run of the real game. The tester played 77 steps and stopped during the
+skiff flight: "the word-engine bit was the fun part, the walking around was a slog". It scored
+6/10 ("If moving around were smooth, I'd have said 7 or 8") and would play the next part, but
+"I'd give up quickly if the next area has a lot of wandering before the puzzle."
+
+| Idea | How it came out |
+| --- | --- |
+| premise (Zip, Mira, the Warden, the goals) | unprompted |
+| it teaches how next-word prediction works | **unprompted**, said aloud at step 68: "oh it is predicting the next word. like autocomplete. I feed its guess back in" |
+| sequence (the engine reads everything so far) | **misread**: predicted that "Blossom" alone would give "Isle" ("You don't need 'Skiff, rise, toward'") |
+| context (only what it's given) | probed (not reached in play) |
+| pieces / room | missed (not reached; pieces only from the optional card) |
+
+Honest issues it surfaced, each now measured or fixed:
+
+- **The camera pressed into Zip's head** near the arch: "half my screenshots were a close-up of a
+  robot face". `tools/moveprobe.mjs` found it in 17 of 64 sweep frames at one arch spot.
+- **The spark chase** ("Get your voice back"), the third run in a row to nearly quit here:
+  - the arrow flipped sides when the goal was behind;
+  - the spark hopped away four times, often behind the player;
+  - the catch went unnoticed.
+- **Stuck on edges and poles.** moveprobe: pushing along an edge moved 0.00 m (a dead stop).
+- **The flight:** holding the stick up climbed, so the distance grew (117 m to 133 m). The tester
+  thought it was flying the wrong way.
+- **Testing-tool issues, fixed:**
+  - a pulsing "Shield Mira!" could never be tapped, because Playwright waits for a button to hold
+    still; the play server now taps where the button is, like a finger;
+  - the strict phase order stopped the interviewer going back to a moment, so it's relaxed:
+    recall first, the reveal last;
+  - the play log now records where the player stood.
+- **Design:**
+  - the loop puzzle never makes the player compare "the last word" with "everything so far", so
+    that misconception survives;
+  - after "Now it feeds itself…" the engine takes only one step;
+  - pieces are taught only by an optional card;
+  - the hint ("name, then action, then way") made the engine feel like a pattern check rather
+    than prediction.
+
+## Blind run 9: lab variant B with working memory (6 Oct 2026)
+
+Word order came out unprompted for the first time. The ring kept the failed phrase, so the natural
+fix put "long" after the bridge, and it was too late. The engine's guess was misread again
+(4 of 4 runs), and working memory never bit, because no phrase needed four words. Details are in
+`docs/UTTER-DESIGN.md`. `compare.mjs` now has a run-by-run table for the lab.
+
+Testing-tool note: the 3D word labels in the scene (on signs and objects) aren't in the play log's
+text, because they're drawn in WebGL, not the page. The interviewer checks the screenshots before
+calling a quoted word invented.

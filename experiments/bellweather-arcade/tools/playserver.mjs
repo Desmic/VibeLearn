@@ -92,6 +92,8 @@ async function observe() {
       labels: txt('.world-label'),
       panels: txt('.relay-console, .sentence-strip, .satchel-bar, .star-list, .title-screen'),
       screen: [innerWidth, innerHeight],
+      // where the player stands (for the play log and replays only; never sent to a blind tester)
+      at: (() => { try { const p = window.__arcade?.snapshot?.().position; return p ? p.map(v => +v.toFixed(2)) : null; } catch { return null; } })(),
       // everything written on the screen, whatever the game calls it (speech bubbles, counters, signs):
       // visible text outside buttons, in page order. Game-agnostic: no class names needed.
       writing: (() => { const out = [], seen = new Set();
@@ -122,8 +124,11 @@ async function act(a) {
       const all = page.locator('button:visible:not([disabled]), .context-act:visible'), n = await all.count();
       let b = null; for (let i = 0; i < n && !b; i++) { const el = all.nth(i); if (norm(await el.innerText().catch(() => '')).includes(want) || norm(await el.getAttribute('aria-label') ?? '').includes(want)) b = el; }
       if (!b) return { ok: false, why: `no visible button with "${a.label}"` };
-      // as this session's player would: a finger on a phone (waits for a popping-in prompt to hold still), a click otherwise
-      await h.press(b, { timeout: 20000 }).catch(e => { throw new Error('could not tap: ' + e.message.split('\n')[0]); });
+      // as this session's player would. A finger lands where the button is now, even if it's pulsing
+      // or still popping in (Playwright's own tap waits for it to hold still, and a pulsing "Shield
+      // Mira!" never did: blind test 5 Oct); a click otherwise
+      if (h.INPUT === 'touch') { await b.waitFor({ state: 'visible', timeout: 20000 }); const bb = await b.boundingBox(); if (!bb) return { ok: false, why: `"${a.label}" is not on the screen` }; await page.touchscreen.tap(bb.x + bb.width / 2, bb.y + bb.height / 2); }
+      else await h.press(b, { timeout: 20000 }).catch(e => { throw new Error('could not tap: ' + e.message.split('\n')[0]); });
       await page.waitForTimeout(600); break;
     }
     case 'look': {   // drag to turn the camera: dx, dy in screen pixels (e.g. {dx: 150} turns right)
@@ -184,7 +189,7 @@ function trace() {
         o.toast && `toast “${o.toast}”`, o.thought && `thought “${o.thought}”`, o.labels?.length && `labels ${o.labels.map(x => `“${x}”`).join(' ')}`,
         o.panels?.length && `panels ${o.panels.map(x => `“${x.replace(/\s+/g, ' ').slice(0, 160)}”`).join(' ')}`,
         o.writing?.length && `all writing ${o.writing.map(x => `“${x.slice(0, 160)}”`).join(' ')}`, o.buttons?.length && `buttons [${o.buttons.join(' | ')}]`].filter(Boolean).join('; ');
-      L.push(`- **step ${e.step}** (${e.shot}): ${bits === last ? '(screen text unchanged)' : bits || '(no text)'}`); last = bits;
+      L.push(`- **step ${e.step}** (${e.shot})${o.at ? ` at ${o.at[0]},${o.at[2]}` : ''}: ${bits === last ? '(screen text unchanged)' : bits || '(no text)'}`); last = bits;
     } else if (e.act && !['understand', 'verdict', 'compare'].includes(e.act.type)) {
       const a = e.act, d = a.type === 'think' ? `said: “${a.text}”` : a.type === 'tap' ? `tapped “${a.label}”` : a.type === 'tapAt' ? `tapped the screen at ${a.x},${a.y}` : a.type === 'move' ? `held the stick ${a.dir} ${a.seconds ?? 1}s` : a.type === 'look' ? `dragged to look (${a.dx ?? 0}, ${a.dy ?? 0})` : a.type === 'wait' ? `waited ${a.seconds ?? 1}s` : a.type === 'stop' ? 'put the phone down' : JSON.stringify(a);
       repeat = d === prevAct && a.type !== 'think' ? repeat + 1 : 0; prevAct = d;
@@ -208,14 +213,16 @@ async function ask(m) {
   if (role === 'interviewer') {
     const p = PHASES.indexOf(m.phase);
     if (p < 0) return [400, { error: `phase must be one of ${PHASES.join(', ')}` }];
-    if (p < phaseAt) return [409, { error: `the interview is at "${PHASES[phaseAt]}"; phases go in order (${PHASES.join(' → ')})` }];
+    // open questions first, the reveal last; in between the interviewer may go back to a moment
+    if (!interview.length && m.phase !== 'recall') return [409, { error: 'start with recall: an open question, before anything specific' }];
+    if (revealed && p < PHASES.indexOf('reveal')) return [409, { error: 'the intent has been revealed: questions now are after-reveal (phase "reveal")' }];
     if (interview.length && interview.at(-1).role === 'interviewer') return [409, { error: 'one question at a time: wait for the answer' }];
     if (!revealed && p < PHASES.indexOf('reveal')) {
       const leaks = questionLeaks(text, await design(), met());
       if (leaks.length) { refusals.push({ phase: m.phase, text, leaks }); appendFileSync(IVLOG, JSON.stringify({ refused: true, phase: m.phase, text, leaks }) + '\n');
         return [409, { error: `refused: "${leaks.join('", "')}" ${leaks.length > 1 ? 'are' : 'is'} not something the player has met (not on their screen, not in their own words) or ${leaks.length > 1 ? 'suggest' : 'suggests'} a judgement. Rephrase in their words; don't swap in a synonym for the same idea.`, leaks }]; }
     }
-    phaseAt = p; if (m.phase === 'reveal') revealed = true;
+    phaseAt = Math.max(phaseAt, p); if (m.phase === 'reveal') revealed = true;
   } else if (!interview.length || interview.at(-1).role !== 'interviewer') return [409, { error: 'no question is waiting for an answer' }];
   const e = { n: interview.length + 1, role, phase: role === 'player' ? interview.at(-1).phase : m.phase, text: text.slice(0, 4000), afterReveal: revealed && !(role === 'interviewer' && m.phase === 'reveal' && !interview.some(x => x.phase === 'reveal')), t: Date.now() };
   interview.push(e); appendFileSync(IVLOG, JSON.stringify(e) + '\n');

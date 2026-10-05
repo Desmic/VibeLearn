@@ -34,6 +34,14 @@ export interface SiteSpec {
   words: string[];
   /** how many words the engine reads at once (its context) */
   slots: number;
+  /** when more words are said than fit: 'first' (default) keeps the first ones and never reads
+   *  the rest; 'recent' is a working memory: each new word pushes the oldest out, as a language
+   *  model's context window drops its oldest text. Then order matters beyond grammar: the
+   *  words said first are the first forgotten. */
+  memory?: 'first' | 'recent';
+  /** words already in the engine when the player arrives (someone else's phrase): with a working
+   *  memory, every word the player adds pushes one of them out, so forgetting is met by doing */
+  preload?: string[];
   /** a failure that hands the player the fix: when a phrase here fails for `reason`, the player
    *  gains `word` (e.g. "bridge" comes up short, and "long" falls out of the miss). The lesson is
    *  met by doing the obvious thing, not by reading a sign. uttercheck proves the failure can
@@ -65,6 +73,8 @@ export interface Made {
   away: boolean;
   /** words read after the thing was already made: too late to change it */
   late: string[];
+  /** words that fell out of the engine's working memory before it read (SiteSpec.memory 'recent') */
+  forgotten: string[];
   /** a size word shaped it (so "too short" was asked for, not just unsaid): the last one read */
   sized: boolean; sizeWord: string | null;
   works: boolean;
@@ -82,7 +92,10 @@ export function speak(spec: UtterSpec, words: string[], site: SiteSpec): Made {
     else if (w.kind === 'material') { material = w.material; weak = weak || !!w.weak; glow = w.glow ?? 1; }
     else if (w.kind === 'facing') away = w.away;
   };
-  const read = words.slice(0, site.slots);
+  // more words than fit: the engine keeps the first ones (the rest are never read), or, with a
+  // working memory ('recent'), the newest ones: the oldest fall out, as from a model's context
+  const recent = site.memory === 'recent' && words.length > site.slots;
+  const read = recent ? words.slice(-site.slots) : words.slice(0, site.slots), forgotten = recent ? words.slice(0, words.length - site.slots) : [];
   read.forEach((word, i) => {
     const w = spec.lexicon[word]; if (!w) return;
     if (thing) { late.push(word); return; }
@@ -92,11 +105,11 @@ export function speak(spec: UtterSpec, words: string[], site: SiteSpec): Made {
     if (w.kind === 'thing') thing = w.thing; else apply(w, word);
   });
   if (!thing) {
-    const last = [...words.slice(0, site.slots)].reverse().find(x => spec.guesses[x]);
+    const last = [...read].reverse().find(x => spec.guesses[x]);
     if (last) { thing = spec.guesses[last]; guessed = true; }
   }
   const t = thing ? spec.things[thing] : null;
-  const made = { thing, guessed, size: t ? +(t.size * scale * (t.archetype === 'light' ? glow : 1)).toFixed(2) : 0, material, weak: weak || !!t?.weak, away, late, sized, sizeWord, works: false, reason: 'nothing' as Reason };
+  const made = { thing, guessed, size: t ? +(t.size * scale * (t.archetype === 'light' ? glow : 1)).toFixed(2) : 0, material, weak: weak || !!t?.weak, away, late, forgotten, sized, sizeWord, works: false, reason: 'nothing' as Reason };
   if (!t) return made;
   const n = site.need;
   if (t.archetype !== n.archetype) made.reason = 'wrong-kind';
@@ -108,9 +121,9 @@ export function speak(spec: UtterSpec, words: string[], site: SiteSpec): Made {
 
 /** every phrase of 1..slots distinct words from the site's words, in order (for proofs and hints);
  *  `extra` adds words the player may hold by then (e.g. one a failure taught) */
-export function phrases(site: SiteSpec, extra: string[] = []): string[][] {
+export function phrases(site: SiteSpec, extra: string[] = [], max = site.slots): string[][] {
   const out: string[][] = [], w = [...new Set([...site.words, ...extra])];
-  const go = (cur: string[]) => { if (cur.length) out.push(cur); if (cur.length === site.slots) return; for (const x of w) if (!cur.includes(x)) go([...cur, x]); };
+  const go = (cur: string[]) => { if (cur.length) out.push(cur); if (cur.length === max) return; for (const x of w) if (!cur.includes(x)) go([...cur, x]); };
   go([]); return out;
 }
 
@@ -129,7 +142,8 @@ export function validateUtter(spec: UtterSpec): string[] {
   const ids = new Set<string>();
   for (const s of spec.sites) {
     if (ids.has(s.id)) out.push(`site "${s.id}" twice`); ids.add(s.id);
-    for (const w of s.words) if (!spec.lexicon[w]) out.push(`site "${s.id}" offers unknown word "${w}"`);
+    for (const w of [...s.words, ...(s.preload ?? [])]) if (!spec.lexicon[w]) out.push(`site "${s.id}" offers unknown word "${w}"`);
+    if (s.preload && s.preload.length > s.slots) out.push(`site "${s.id}" preloads more words than its engine holds`);
     if (s.slots < 1) out.push(`site "${s.id}" reads no words`);
     if (s.teaches && !spec.lexicon[s.teaches.word]) out.push(`site "${s.id}" teaches unknown word "${s.teaches.word}"`);
     if (s.teaches && !spec.lines[`taught-${s.teaches.word}`] && !spec.lines.taught) out.push(`site "${s.id}" teaches "${s.teaches.word}" but there is no "taught" line`);

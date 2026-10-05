@@ -261,5 +261,8 @@ html[data-input=desktop] .wr-chip kbd{display:inline-block}
 .wr-count{padding:3px 10px;border-radius:999px;background:#071a28d9;border:1.5px solid #6fe0c999;color:#bffcef;font:700 13px Trebuchet MS,Arial,sans-serif;pointer-events:none}
 .wr-count.full{border-color:#ffd36b;color:#ffd36b}
 .wr-count.bump{animation:wr-bump .45s}
+/* working memory: the word that goes next fades a little; a forgotten one falls away (kit/word-ring.ts) */
+.wr-slot.filled.fading{opacity:.55;border-style:dashed;box-shadow:0 0 8px #ffd36b44}
+.wr-forgot{position:absolute;left:0;top:0;padding:6px 12px;border-radius:14px;border:2px solid #9fb3c2;background:#1b2a36aa;color:#cfd8df;font:800 18px Trebuchet MS,Arial,sans-serif;text-decoration:line-through;pointer-events:none}
 @keyframes wr-bump{20%,60%{background:#ff7a8a;color:#fff;scale:1.25}40%{scale:1.1}}
 .wr-close{width:36px;height:36px;border-radius:50%;border:1.5px solid #6fe0c999;background:#071a28cc;color:#bffcef;font:700 20px system-ui;cursor:pointer}

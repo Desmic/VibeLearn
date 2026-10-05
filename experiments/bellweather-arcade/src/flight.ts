@@ -4,7 +4,7 @@ import { sfx } from './sfx';
 import { inputMode } from './kit/input-mode';
 
 // Steered skiff flight over a set distance: the reward between islands.
-// The skiff flies itself forward; you steer (left/right) and climb or dive
+// The skiff flies itself forward and keeps the rings' height; you steer (left/right) and speed up or slow down
 // (up/down). Wind rings mark the lane and give a speed burst; Warden drones
 // sweep searchlights you can dodge. Nothing here can be failed: with no input
 // the wind gently carries the skiff along the lane, and straying too far
@@ -60,7 +60,7 @@ export function buildFlight(scene: T.Scene, o: Opts) {
       skiff = boat; scene.add(boat); root.visible = true; active = true; onDone = done; landing.copy(land); landT = -1; next = 0;
       result = { rings: 0, total: LANE.length, spotted: 0 }; rings.forEach(r => { r.state = 'open'; r.m.material = ringMat; });
       pos.copy(boat.position); heading = Math.atan2(-(LANE[0].z - pos.z), LANE[0].x - pos.x); speed = 7; sfx.whoosh();
-      g.setBeacon(LANE[0].clone().setY(LANE[0].y - 1.2), true); g.toast(inputMode.touch ? 'Steer with the stick' : 'W A S D to steer and climb', 3200);
+      g.setBeacon(LANE[0].clone().setY(LANE[0].y - 1.2), true); g.toast(inputMode.touch ? 'Steer with the stick' : 'A and D to steer · W to speed up', 3200);
     },
     get shot() {
       if (!active) return null;
@@ -86,9 +86,12 @@ export function buildFlight(scene: T.Scene, o: Opts) {
       let dh = ((want - heading + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
       const off = Math.hypot(target.x - pos.x, target.z - pos.z) > 45 ? 1.2 : inp.x ? .15 : .55;
       heading += (-inp.x * 1.5 + T.MathUtils.clamp(dh, -1, 1) * off) * dt;
-      const climb = inp.y ? inp.y * 4.5 : T.MathUtils.clamp(target.y - pos.y, -2, 2) * .6;
+      // up on the stick is "go", not "climb": a blind tester held it forward and rose away from the
+      // rings, watching the distance grow (5 Oct). The skiff keeps the rings' height by itself;
+      // forward speeds up, back slows down
+      const climb = T.MathUtils.clamp(target.y - pos.y, -2, 2) * .9;
       boost = Math.max(0, boost - dt); spotCool = Math.max(0, spotCool - dt); shake = Math.max(0, shake - dt);
-      speed += ((boost > 0 ? 14 : spotCool > 1 ? 6 : 9.5) - speed) * Math.min(1, dt * 2);
+      speed += ((boost > 0 ? 14 : spotCool > 1 ? 6 : 9.5 + inp.y * 3.5) - speed) * Math.min(1, dt * 2);
       fwd.set(Math.cos(heading), 0, -Math.sin(heading));
       pos.addScaledVector(fwd, speed * dt); pos.y = T.MathUtils.clamp(pos.y + climb * dt, 3, 28);
       skiff.position.copy(pos); if (shake > 0) skiff.position.x += Math.sin(t * 60) * .08 * shake;

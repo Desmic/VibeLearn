@@ -129,6 +129,27 @@ appears with no loading screen (the hologram weave covers the wait).
    limits. It should be visually appealing and fun to touch, never a boring card. Other decisions
    wait until Desmic has played it.
 
+### Decisions (Desmic, 5 Oct 2026, before playing)
+
+5. **Core mechanic: mostly yes.** A few questions are still open (below).
+6. **Forced failure: not as a rule, yes as an expectation.** Not every place should force a miss.
+   But where the story introduces or shows off a part of the engine, the player is expected to
+   meet the failure that teaches it. Variant B's first gap is that kind of place.
+7. **Word order is very important.** The blind runs showed English grammar already puts describing
+   words first, so the current "too late" rule teaches nothing. Order has to matter in a way
+   grammar doesn't cover.
+8. **The 3-word limit should feel like working memory** for the speech engine, not an inventory
+   cap. The vision is to teach how real AI and language models work.
+9. **If it becomes the core mechanic, it's introduced early** in the game.
+10. **Parked for now:**
+    - **Typing.** When to bring it in depends on the whole game: story, levels, mechanics and the
+      learning track.
+    - **Live 3D generation.** Nail the core game first.
+11. **Play-tests: one blind run per version for now.** The games will be built in levels; more
+    later.
+12. **Camera and movement fixes don't wait for a review.** Fix what's measured as broken.
+13. **Still waiting on play:** whether to keep the engine's guess (a lone "long" makes a noodle).
+
 ## The word ring (built 4 Oct: `src/kit/word-ring.ts`)
 
 Speaking no longer opens a card. Zip projects his engine as a hologram in the world, with a beam
@@ -286,6 +307,73 @@ What all three blind runs agree on, so these are probably real:
    - hunting for the speak spot.
 6. **Every place needs one new idea.** In B the wide gap took the same phrase again ("didn't feel
    like a new puzzle").
+
+### Working memory and word order (B, round 3: 6 Oct, after Desmic's decisions 7 and 8)
+
+The ring is now the engine's **working memory**:
+
+- **A fourth word pushes the oldest one out.** The ring no longer refuses it. The pushed-out word
+  falls away struck through, and Zip says "“long” slipped out. My memory holds 3 words." This is
+  `SiteSpec.memory: 'recent'` in the kit and `open(..., { forget: true })` in the ring.
+- **The ring warns before it happens.** When full, the oldest slot dims and the counter says "the
+  next one pushes out “long”".
+- **The engine reads what's left.** Forgotten words come first in the hanging reading, dim, and
+  drop off. Zip says "I forgot “very”. Only three words fit in my head."
+
+This is how a language model's context window behaves: the oldest text drops out first. So
+order matters in a way grammar doesn't cover: **the words you say first are the first
+forgotten**. The wide gap now needs three words ("very long bridge"). "long bridge" again comes up
+short, so the place asks something new. A tempting fourth word ("very long stone bridge") makes
+it forget "very" and fall short. `uttercheck` proves each place has such a lesson, and kittest
+covers the kit rule. Zip's opening line is now "My engine holds three words at a time. For now."
+
+### Blind run 9: B with working memory (6 Oct)
+
+| | A (5) | B1 (6) | B2 (7) | B3 (9) |
+| --- | --- | --- | --- | --- |
+| make | ●●● unprompted | ●●● unprompted | ●●● unprompted | ●●● unprompted |
+| source | ●●● unprompted | ●●● unprompted | ●●● unprompted | ●●● unprompted |
+| room | ●●● unprompted | ●●● unprompted | ●●● unprompted | ●●● unprompted |
+| order | ●○○ when pointed at | ●●○ probed | ●●○ probed | ●●● unprompted |
+| guess | ✗ misread | ✗ misread | ✗ misread | ✗ misread |
+| vague | ●○○ when pointed at | ●○○ when pointed at | ●●○ probed | ●●○ probed |
+| why | ●○○ when pointed at | ✗ missed | ●●● unprompted | ●●● unprompted |
+| model | ✗ missed | ✗ missed | ●●○ probed | ✗ misread |
+| understood on their own (score) | 25 / 40 | 23 / 40 | 33 / 40 | 31 / 40 |
+| keep playing (0–10) | 6 | 6 | 7 | 7 |
+| next part | yes | yes | yes | yes |
+| steps, stopped by choice | 42, yes | 40, yes | 33, yes | 52, yes |
+| failures met | 0 of 6 | 0 of 6 | 1 of 6 | 1 of 6 |
+| build | b-95a50d842d0c | b-573eaeec9473 | b-7a341ac57f3d | b-793482d3a19f |
+
+What changed, and what didn't:
+
+- **Word order now comes out unprompted.** The ring reopened with "bridge" still in it, the
+  tester added "long" ("bridge long"), and it was too late. "That was the clever moment for me."
+  Its own model: "less like a reader and more like a builder following orders as they're called
+  out… It did exactly what I said, just not what I meant."
+- **Working memory never bit.** The tester never built a fourth word ("I never felt the
+  three-word limit"). A limit that's optional stays trivia.
+- **The engine's guess was misread for the fourth time out of four.** "I'd bet on a fizzle and a
+  joke, not a free bridge." The tester even considered the right answer and rejected it, because
+  "the game seemed to take me so literally".
+- **Learning order made the engine feel *less* like a language model.** A literal, word-by-word
+  builder is the opposite of "makes what's most likely". The language-model idea lives in the
+  guessing, and so far no one has met the guessing in play.
+- **The finale is a lap of honour:** "find the right noun and say it". Their suggestion: make
+  the last place need what the first two taught.
+- **Wayfinding is still the main friction.** Moving the lantern word away from the speak spot
+  (so Speak wouldn't cover Absorb) made it harder to find.
+
+Proposals, following decision 6 (forced failure where a mechanic is shown off):
+
+1. **A place that forces the guess.** For example, the only word in reach is "long", and the
+   engine has to finish it (a long… noodle). Then the player gets the thing word that fixes it.
+2. **A place that forces forgetting.** For example, the ring opens holding three words someone
+   else said, and the player has to choose what to push out.
+3. **Show likelihood, not just literal building.** For example, the reading hologram shows the
+   engine's top three guesses as it finishes a phrase.
+4. **Make the doorway need what was learned** (e.g. "bright lantern").
 
 Still open:
 

@@ -39,13 +39,17 @@ export interface LabVariant {
   firstFail?: string;
   /** the end summary waits for a tap instead of carrying on by itself */
   summaryStays?: boolean;
+  /** Zip's first lines on arrival (default: the variant-A pair) */
+  intro?: string[];
+  /** how close to a place Zip must be to speak there (default 2.2 m) */
+  speakReach?: number;
 }
 type Site = { s: UtterSpec['sites'][number]; at: T.Vector3; from: T.Vector3; solved: boolean; crossed?: boolean };
 
 export function buildUtterLab(scene: T.Scene, o: Opts) {
   const g = o.guide, spec = o.spec, root = new T.Group(); root.name = 'utter-lab'; scene.add(root);
   const V = o.variant ?? {}, R = V.radius ?? R0;
-  const lastSaid = new Map<string, string[]>();   // the last phrase that failed at each place (V.remember)
+  const lastSaid = new Map<string, string[]>(), preloaded = new Set<string>();   // the last phrase that failed at each place (V.remember)
   const fx = sparks(root, 48);
   const mat = (c: string, extra: Partial<T.MeshStandardMaterialParameters> = {}) => new T.MeshStandardMaterial({ color: c, roughness: .85, ...extra });
   let clock = 0; const queue: { t: number; fn: () => void }[] = [];
@@ -204,14 +208,17 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
     source: () => o.zip().clone().add(new T.Vector3(0, 1.0, 0)),
     cue: c => ({ load: () => sfx.place(), unload: () => sfx.tap(), full: () => sfx.boing(), speak: () => sfx.speak(3), open: () => sfx.whoosh(), close: () => {} })[c](),
     say: t => g.bark('Zip', t, 2.2),
-    onSpeak: words => { if (open) say(open, words); },
+    onSpeak: (words, forgotten) => { if (open) say(open, [...forgotten, ...words]); },   // the engine heard the forgotten ones first
     onClose: () => { o.host.classList.remove('puzzle-mode'); echo.showOrbit(true); if (!busy) { shot = null; open = null; } },
   });
   const openRing = (site: Site) => {
     open = site; o.host.classList.add('puzzle-mode'); echo.showOrbit(false);
     // frame Zip and the ring from the front-side, the gap behind them
     const z = o.zip(); shot = { pos: z.clone().add(new T.Vector3(1.4, 2.9, 3.9)), look: z.clone().add(new T.Vector3(.3, 1.45, 0)), rate: 3, cut: ++cuts };
-    ring.open(usable(), site.s.slots, V.remember ? lastSaid.get(site.s.id) ?? [] : []);
+    // first visit to a place whose engine already holds someone's words (SiteSpec.preload): they're in the ring
+    const pre = site.s.preload && !preloaded.has(site.s.id) ? (preloaded.add(site.s.id), site.s.preload) : null;
+    if (pre && spec.lines[`preload-${site.s.id}`]) later(.6, () => g.bark('Zip', spec.lines[`preload-${site.s.id}`], 3.4));
+    ring.open(usable(), site.s.slots, pre ?? (V.remember ? (lastSaid.get(site.s.id) ?? []).slice(-site.s.slots) : []), { forget: site.s.memory === 'recent', keepStart: !!pre });
   };
   const fill = (m: Made, t: string, word = '') => t.replace('{thing}', m.thing ?? 'nothing').replace('{word}', word).replace('{material}', m.material ?? '');
   // what the engine read, over the place: words that shaped the thing in gold, words said too late
@@ -220,7 +227,8 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
   const showReading = (site: Site, words: string[], m: Made) => {
     const grp = new T.Group(), late: T.Object3D[] = []; let x = 0;
     const put = (text: string, color: string, lateWord = false) => { const g2 = glyph(text, { height: .24, color, intensity: 1.8 }); const w = (g2.geometry as T.PlaneGeometry).parameters.width; g2.position.x = x + w / 2; x += w + .08; grp.add(g2); if (lateWord) late.push(g2); };
-    words.forEach((w, i) => i >= site.s.slots ? put(w + '?', HOLO.dim) : put(w, m.late.includes(w) ? HOLO.dim : HOLO.made, m.late.includes(w)));
+    // forgotten words (working memory) come first, dim, and drop off like late ones
+    words.forEach((w, i) => m.forgotten.includes(w) ? put(w, HOLO.dim, true) : site.s.memory !== 'recent' && i >= site.s.slots ? put(w + '?', HOLO.dim) : put(w, m.late.includes(w) ? HOLO.dim : HOLO.made, m.late.includes(w)));
     if (m.guessed && m.thing) put(`(${m.thing})`, HOLO.found);
     grp.children.forEach(c => (c.position.x -= x / 2));
     const span = site.s.need.archetype === 'span';
@@ -241,8 +249,9 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
     later(.6, () => {
       if (m.thing) conjure(m, site); else sfx.boing();
       // what the engine did with the phrase, then what happened, timed to the action
-      const notes = [m.guessed ? fill(m, spec.lines.guessed) : null, m.late.length ? fill(m, spec.lines.late, m.late[0]) : null, fill(m, lineFor(spec, m))].filter(Boolean) as string[];
-      let d = m.guessed || m.late.length ? .4 : 1.7; for (const n of notes) { later(d, () => g.bark('Zip', n, 3.4)); d += 3.4; }
+      const lost = m.forgotten.filter(w => echo.carried.includes(w));   // Zip's own words that slipped (not someone else's)
+      const notes = [lost.length && spec.lines.forgot ? fill(m, spec.lines.forgot, lost.join('” and “')) : null, m.guessed ? fill(m, spec.lines.guessed) : null, m.late.length ? fill(m, spec.lines.late, m.late[0]) : null, fill(m, lineFor(spec, m))].filter(Boolean) as string[];
+      let d = m.guessed || m.late.length || m.forgotten.length ? .4 : 1.7; for (const n of notes) { later(d, () => g.bark('Zip', n, 3.4)); d += 3.4; }
       if (m.works) lastSaid.delete(site.s.id); else lastSaid.set(site.s.id, words);
       // a miss that hands over the fix (SiteSpec.teaches): the word rises out of the failure and flies to Zip
       const tw = site.s.teaches;
@@ -268,8 +277,8 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
   };
   g.setThinker(o.zip);
   o.teleport(sites[0].from.x - 1.8, Z);   // a couple of steps from the first place to speak
-  later(1.2, () => g.bark('Zip', 'Words everywhere. If I say a thing, does it happen?', 3));
-  later(4.6, () => g.bark('Zip', 'My engine reads words in order. Three at a time, for now.', 3));
+  const intro = V.intro ?? ['Words everywhere. If I say a thing, does it happen?', 'My engine reads words in order. Three at a time, for now.'];
+  intro.forEach((line, i) => later(1.2 + i * 3.4, () => g.bark('Zip', line, 3)));
   let goalSite = -1; const aimV = new T.Vector3();
   const api = {
     sites, echo, ring, sources: o.sources, get open() { return ring.isOpen; }, get shot() { return shot; }, get busy() { return busy; },
@@ -337,7 +346,8 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
       if (open || busy) { g.setAction(null); return; }
       // a word in reach or the place to speak at: the one the player looks at wins (kit/target.ts)
       const z = o.zip(), a = echo.action(z), here = next >= 0 ? sites[next] : null;
-      const atSpot = !!here && usable().length > 0 && (Math.hypot(z.x - here.from.x, z.z - here.from.z) < 2.2 || Math.hypot(z.x - here.at.x, z.z - here.at.z) < 2.6);
+      const reach = V.speakReach ?? 2.2;   // how close to the place to speak (B: wider; testers hunted for the spot)
+      const atSpot = !!here && usable().length > 0 && (Math.hypot(z.x - here.from.x, z.z - here.from.z) < reach || Math.hypot(z.x - here.at.x, z.z - here.at.z) < reach + .4);
       o.camera.getWorldDirection(aimV);
       const onRing = !!here && Math.hypot(z.x - here.from.x, z.z - here.from.z) < .9;
       const pick = onRing && atSpot ? 'speak' : a && atSpot ? pickTarget([{ item: 'word', x: a.at.x, z: a.at.z, r: Infinity }, { item: 'speak', x: here!.at.x, z: here!.at.z, r: Infinity, priority: 1 }], z, aimV)?.item : a ? 'word' : atSpot ? 'speak' : null;

@@ -41,6 +41,11 @@ const U2 = { ...U, lexicon: { ...U.lexicon, rope: { kind: 'thing', thing: 'rope'
 t('utter: a thing word before another thing is its material ("rope bridge")', (m => m.thing === 'bridge' && m.material === 'rope')(speak(U2, ['rope', 'bridge'], gap)));
 t('utter: ...but after it, too late ("bridge rope")', (m => m.thing === 'bridge' && m.late[0] === 'rope')(speak(U2, ['bridge', 'rope'], gap)));
 t('utter: words past the context are not read', speak(U, ['long', 'bridge'], { ...gap, slots: 1 }).thing === 'noodle');
+// working memory: the newest words stay, the oldest are forgotten (a context window)
+const mem = { ...gap, slots: 2, memory: 'recent' };
+t('utter: with a working memory, the oldest word is forgotten', (m => m.forgotten[0] === 'long' && m.thing === 'bridge' && m.size === 4)(speak(U, ['long', 'paper', 'bridge'], mem)));
+t('utter: ...and what fits is read whole', (m => m.works && !m.forgotten.length)(speak(U, ['long', 'bridge'], mem)));
+t('utter: without one, the first words stay', (m => m.thing === 'noodle' && !m.forgotten.length)(speak(U, ['long', 'paper', 'bridge'], { ...gap, slots: 2 })));
 
 R.write(null);
 console.log(`\n${fails} failures`);

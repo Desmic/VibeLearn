@@ -15,7 +15,7 @@ Post **one** question (a short follow-up in the same text is fine), then end you
 
 Before the reveal, the server refuses a question that uses a word they haven't met (it wasn't on their screen and they haven't said it) or a word that suggests a judgement ("fun", "confusing", "lesson", "wrong"…). When refused, rephrase **in their own words**. Don't look for a synonym that carries the same idea: that is still a leak, and only you can catch it.
 
-## The phases, in order (open to specific)
+## The phases (open to specific; recall comes first and the reveal last, and you may go back to a moment in between)
 
 1. **recall**: "Tell me about what you just played, from the beginning, as if to a friend who hasn't seen it." Then "What else?" until they run dry. Don't steer.
 2. **probe**: follow their words. "You said 'X'. What do you mean by that?" "How did you work that out?" "What was going through your head when…?" Then two neutral incident questions: "Was there a moment you weren't sure what to do next? Walk me through it." and "Which moment do you remember most?"

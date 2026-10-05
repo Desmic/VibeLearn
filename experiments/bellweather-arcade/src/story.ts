@@ -238,8 +238,11 @@ export function buildStory(scene: T.Scene, o: Opts) {
   const focusPt = new T.Vector3(), tmpLabel = new T.Vector3(), tmp2 = new T.Vector3(), tmp3 = new T.Vector3();
   const sparkFrom = new T.Vector3(), shotPos = new T.Vector3(), shotLook = new T.Vector3(), tmp = new T.Vector3();
 
-  // The spark is playful: it hops away when Zip gets close, a few times, then
-  // tires and can be caught by touching it. Cornering it also works.
+  // The spark is playful: it hops away when Zip gets close, twice, then tires and
+  // can be caught by touching it. Cornering it also works. It hops somewhere the
+  // player can see (in front of the camera), so the chase is a game of tag, not a
+  // search: three blind testers lost it behind them and circled the arch (5 Oct).
+  const SPARK_HOPS = 2, CATCH_R = 1.3, camFwd = new T.Vector3();
   const sparkHome = new T.Vector3().copy(SPARK_AT), hopFrom = new T.Vector3(), hopTo = new T.Vector3();
   let hops = 0, hopT = -1, rest = 0;
   const toSpark = () => {
@@ -250,14 +253,17 @@ export function buildStory(scene: T.Scene, o: Opts) {
   const hop = (z: T.Vector3) => {
     // pick a spot 2.5-4 m away, walkable, inside the garden, away from Zip
     let best: T.Vector3 | null = null, bestD = -1;
+    o.camera.getWorldDirection(camFwd); camFwd.y = 0; camFwd.normalize();
     for (let i = 0; i < 24; i++) {
       const a = i / 24 * Math.PI * 2, r = 2.5 + (i % 3) * .75, x = sparkHome.x + Math.cos(a) * r, zz = sparkHome.z + Math.sin(a) * r;
       if (Math.hypot(x - SPARK_AT.x, zz - SPARK_AT.z) > 4.5 || !o.walkable(x, zz)) continue;
-      const d = Math.hypot(x - z.x, zz - z.z); if (d > bestD) { bestD = d; best = new T.Vector3(x, .13, zz); }
+      // in view: within about 45° of where the camera looks (spots behind it count for little)
+      const cx = x - o.camera.position.x, cz = zz - o.camera.position.z, inView = (cx * camFwd.x + cz * camFwd.z) / Math.hypot(cx, cz) > .7;
+      const d = Math.hypot(x - z.x, zz - z.z) * (inView ? 1 : .35); if (d > bestD) { bestD = d; best = new T.Vector3(x, .13, zz); }
     }
-    if (!best || bestD < Math.hypot(sparkHome.x - z.x, sparkHome.z - z.z) + .5) { story.toast('sparkCornered', 1000); hops = 99; return; } // nowhere better to go
+    if (!best || Math.hypot(best.x - z.x, best.z - z.z) < Math.hypot(sparkHome.x - z.x, sparkHome.z - z.z) + .5) { story.toast('sparkCornered', 1000); hops = 99; return; } // nowhere better to go
     hopFrom.copy(spark.position); hopTo.copy(best); hopT = 0; hops++; sfx.pop();
-    if (hops === 1) { story.toast('sparkFlees', 1200); story.thinkOnce('chase'); } else if (hops === 3) story.toast('sparkTiring', 1200);
+    if (hops === 1) { story.toast('sparkFlees', 1200); story.thinkOnce('chase'); } else if (hops === SPARK_HOPS) story.toast('sparkTiring', 1200);
   };
   const catchSpark = () => {
     // no card: the coil's discovery is Zip's own thought, and the first word shows how to take it
@@ -463,9 +469,9 @@ export function buildStory(scene: T.Scene, o: Opts) {
           if (k >= 1) { hopT = -1; sparkHome.copy(hopTo); rest = .35; g.setBeacon(sparkHome); }
         } else {
           rest = Math.max(0, rest - dt);
-          const tired = hops >= 4, d = Math.hypot(z.x - sparkHome.x, z.z - sparkHome.z);
+          const tired = hops >= SPARK_HOPS, d = Math.hypot(z.x - sparkHome.x, z.z - sparkHome.z);
           spark.position.set(sparkHome.x, .6 + Math.sin(t * (tired ? 1.2 : 3)) * (tired ? .05 : .15), sparkHome.z);
-          if (d < .9) catchSpark();
+          if (d < CATCH_R) catchSpark();
           else if (!tired && d < 2.1 && rest <= 0 && !g.cardOpen) hop(z);
         }
       }

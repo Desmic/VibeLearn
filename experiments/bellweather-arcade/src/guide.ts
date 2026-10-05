@@ -94,9 +94,15 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
   const labels = new Map<string, { el: HTMLDivElement; at: T.Vector3 }>();
 
   let actFn: (() => void) | null = null;
-  act.addEventListener('click', e => { e.stopPropagation(); sfx.tap(); actFn?.(); });
+  // A finger acts on lift-off: the prompt rides on a point in the world and the phone's own click
+  // comes later, after the world handlers have had the touch, and can land on the canvas behind it
+  // (a blind tester's "Speak" and "Shield Mira!" taps did nothing, 6 Oct). Mouse and keyboard use the click.
+  let actTouched = 0;
+  act.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') e.stopPropagation(); });
+  act.addEventListener('pointerup', e => { if (e.pointerType === 'mouse' || act.hidden) return; e.stopPropagation(); actTouched = performance.now(); sfx.tap(); actFn?.(); });
+  act.addEventListener('click', e => { e.stopPropagation(); if (performance.now() - actTouched < 600) return; sfx.tap(); actFn?.(); });
   brackets.addEventListener('pointerup', e => { e.stopPropagation(); if (brackets.hidden || cardOpen) return; sfx.tap(); actFn?.(); });
-  let cardOpen = false, beaconArrowOnly = false, advanceOff: (() => void) | null = null;
+  let cardOpen = false, beaconArrowOnly = false, advanceOff: (() => void) | null = null, edgeSide = 1;
   const chipRow = (o: ChipOpt, picked: Set<number>, onToggle?: () => void) => {
     const row = document.createElement('div'); row.className = 'rail-chips';
     o.words.forEach((w, i) => {
@@ -269,7 +275,12 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
           // direction in the camera's own space: steady even when the target swings behind
           // (behind = the arrow points down, toward "turn around", on the target's side)
           const tv = beacon.position.clone(); if (!beaconArrowOnly) tv.y = 1.2; tv.applyMatrix4(camera.matrixWorldInverse);
-          let x = tv.x, y = tv.y; if (tv.z > -.5) y = Math.min(y, 0) - (tv.z + .5) - Math.abs(x) * .2;
+          // behind and nearly straight back, the side would flip with every small turn ("the arrow keeps
+          // flipping on me", blind test 5 Oct): keep the side it last showed until the target is clearly
+          // on the other side
+          let x = tv.x, y = tv.y;
+          if (tv.z > -.5) { if (Math.abs(x) > .6 + .15 * Math.max(0, tv.z)) edgeSide = Math.sign(x); x = edgeSide * Math.max(Math.abs(x), .25); y = Math.min(y, 0) - (tv.z + .5) - Math.abs(x) * .2; }
+          else edgeSide = Math.sign(x) || edgeSide;
           const a = Math.atan2(y, x), r = .86, ex = Math.cos(a) * r, ey = Math.sin(a) * r;
           edge.style.left = `${(ex * .5 + .5) * 100}%`; edge.style.top = `${(-ey * .5 + .5) * 100}%`;
           edge.style.transform = `translate(-50%,-50%) rotate(${-a}rad)`;

@@ -23,8 +23,9 @@ export interface WordRingOpts {
   /** where the projection comes from (the speaker's chest) */
   source: () => T.Vector3;
   cue?: (c: RingCue) => void;
-  /** speaking: the words in the slots, in order */
-  onSpeak: (words: string[]) => void;
+  /** speaking: the words in the slots, in order, and (working memory) the words that were pushed
+   *  out by newer ones, oldest first: the engine heard them, then forgot them */
+  onSpeak: (words: string[], forgotten: string[]) => void;
   onClose?: () => void;
   /** a line the ring says about itself, e.g. when full ("Full. My engine holds 3 words.") */
   say?: (text: string) => void;
@@ -45,6 +46,9 @@ export function createWordRing(o: WordRingOpts) {
   const core = document.createElement('button'); core.className = 'wr-core'; core.dataset.action = 'speak'; core.setAttribute('aria-label', 'Speak'); core.innerHTML = '<span>✦</span><b>Speak</b>'; root.appendChild(core);
   const shut = document.createElement('button'); shut.className = 'wr-close'; shut.dataset.action = 'close-ring'; shut.setAttribute('aria-label', 'Step away'); shut.textContent = '×'; root.appendChild(shut);
   let N = 3, carried: string[] = [], slots: string[] = [], slotEls: HTMLButtonElement[] = [], chipEls = new Map<string, HTMLButtonElement>(), busy = false, t = 0, readT = -1, shake = 0;
+  // working memory (open(..., { forget: true })): a full ring takes a new word by letting the oldest go
+  let forget = false, forgotten: string[] = [], toldForget = false;
+  const drops: { el: HTMLElement; t: number; x: number; y: number }[] = [];
   const v = new T.Vector3(), right = new T.Vector3(), up = new T.Vector3(), fwd = new T.Vector3();
 
   const build = () => {
@@ -56,12 +60,22 @@ export function createWordRing(o: WordRingOpts) {
   const render = () => {
     slotEls.forEach((b, i) => { const w = slots[i]; b.textContent = w ?? ''; b.classList.toggle('filled', !!w); b.dataset.action = w ? 'unsay.' + i : ''; b.setAttribute('aria-label', w ? `Take “${w}” out` : `Empty slot ${i + 1}`); b.disabled = busy || !w; });
     for (const [w, b] of chipEls) { const used = slots.includes(w); b.classList.toggle('used', used); b.disabled = busy || used; }
-    count.textContent = slots.length >= N ? `${N} / ${N} words · full` : `${slots.length} / ${N} words`; count.classList.toggle('full', slots.length >= N);
+    const full = slots.length >= N;
+    count.textContent = full ? (forget ? `${N} / ${N} words · the next one pushes out “${slots[0]}”` : `${N} / ${N} words · full`) : `${slots.length} / ${N} words`; count.classList.toggle('full', full);
+    slotEls.forEach((b, i) => b.classList.toggle('fading', forget && full && i === 0));   // the word that goes next, dimmer
     core.disabled = busy || !slots.length; core.classList.toggle('ready', !!slots.length && !busy);
   };
   const load = (w: string) => {
     if (busy || slots.includes(w)) return;
-    if (slots.length >= N) { shake = .45; count.classList.remove('bump'); void count.offsetWidth; count.classList.add('bump'); o.cue?.('full'); o.say?.(`Full. My engine holds ${N} words.`); return; }
+    if (slots.length >= N && !forget) { shake = .45; count.classList.remove('bump'); void count.offsetWidth; count.classList.add('bump'); o.cue?.('full'); o.say?.(`Full. My engine holds ${N} words.`); return; }
+    if (slots.length >= N) {   // working memory: the oldest word slips out of the ring and falls away
+      const old = slots.shift()!, at = slotEls[0].getBoundingClientRect(), host = o.host.getBoundingClientRect();
+      const el = document.createElement('div'); el.className = 'wr-forgot'; el.textContent = old; root.appendChild(el);
+      drops.push({ el, t: 0, x: at.left - host.left + at.width / 2, y: at.top - host.top + at.height / 2 });
+      forgotten = [...forgotten.filter(x => x !== old), old]; o.cue?.('full');
+      if (!toldForget) { toldForget = true; o.say?.(`“${old}” slipped out. My memory holds ${N} words.`); }
+    }
+    forgotten = forgotten.filter(x => x !== w);   // said again: back in memory
     slots.push(w); o.cue?.('load'); render(); const b = slotEls[slots.length - 1]; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
   };
   const unload = (i: number) => { if (busy || !slots[i]) return; slots.splice(i, 1); o.cue?.('unload'); render(); };
@@ -105,18 +119,25 @@ export function createWordRing(o: WordRingOpts) {
     get slots() { return [...slots]; },
     /** open with the words carried and the size of the context; `start` puts a phrase back in the
      *  slots (e.g. the last one said here), so fixing a phrase means editing it, as in a chat box */
-    open(words: string[], n: number, start: string[] = []) {
-      carried = [...words]; N = n; slots = start.filter((w, i) => carried.includes(w) && start.indexOf(w) === i).slice(0, n); busy = false; readT = -1; build();
+    open(words: string[], n: number, start: string[] = [], opts: { forget?: boolean; keepStart?: boolean } = {}) {
+      // keepStart: the start words stay even if the speaker doesn't carry them (words someone else left in the engine)
+      carried = [...words]; N = n; slots = start.filter((w, i) => (opts.keepStart || carried.includes(w)) && start.indexOf(w) === i).slice(-n); busy = false; readT = -1;
+      forget = !!opts.forget; forgotten = []; build();
       root.hidden = false; holo.visible = true; cone.mesh.visible = true; t = 0; o.cue?.('open');
     },
     close() {
       if (root.hidden) return;
       root.hidden = true; holo.visible = false; cone.mesh.visible = false; for (const r of reads) o.scene.remove(r.mesh); reads = [];
+      for (const d of drops) d.el.remove(); drops.length = 0;
       o.cue?.('close'); o.onClose?.();
     },
     tick(dt: number) {
       if (root.hidden) return;
       t += dt; shake = Math.max(0, shake - dt);
+      for (const d of [...drops]) {   // a forgotten word falls away and fades
+        d.t += dt; d.el.style.transform = `translate(${(d.x - 14 * d.t).toFixed(1)}px, ${(d.y + 90 * d.t * d.t).toFixed(1)}px) translate(-50%, -50%) rotate(${(-20 * d.t).toFixed(1)}deg)`; d.el.style.opacity = String(Math.max(0, 1 - d.t / 1.2));
+        if (d.t > 1.2) { d.el.remove(); drops.splice(drops.indexOf(d), 1); }
+      }
       const C = o.anchor();
       o.camera.getWorldDirection(fwd); right.crossVectors(fwd, o.camera.up).normalize(); up.crossVectors(right, fwd).normalize();
       holo.position.copy(C).addScaledVector(fwd, .05); holo.quaternion.copy(o.camera.quaternion);
@@ -146,7 +167,7 @@ export function createWordRing(o: WordRingOpts) {
       if (readT >= 0) {
         readT += dt;
         slotEls.forEach((b, i) => b.classList.toggle('reading', readT * 2.2 > i && readT * 2.2 < i + 1.2));
-        if (readT > slots.length / 2.2 + .35) { const said = [...slots]; readT = -1; o.onSpeak(said); api.close(); }
+        if (readT > slots.length / 2.2 + .35) { const said = [...slots], lost = [...forgotten]; readT = -1; o.onSpeak(said, lost); api.close(); }
       }
     },
     dispose() { removeEventListener('keydown', onKey, true); api.close(); root.remove(); o.scene.remove(holo); o.scene.remove(cone.mesh); },

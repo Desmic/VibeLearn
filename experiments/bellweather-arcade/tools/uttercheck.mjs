@@ -39,12 +39,26 @@ for (const spec of specs) {
     const reasons = {}; for (const x of all) reasons[x.m.reason] = (reasons[x.m.reason] ?? 0) + 1;
     console.log(`  ${site.id} (“${site.asks}”, ${all.length} phrases): ${Object.entries(reasons).map(([k, n]) => `${k} ${n}`).join(', ')}`);
     ok.length ? say('✓', `${site.id}: solvable${site.teaches ? ' after the lesson' : ''}; e.g. ${ok.filter(x => x.p.length === shortest).slice(0, 4).map(x => '“' + x.p.join(' ') + '”').join(', ')}`) : say('✗', `${site.id}: NOT solvable from ${site.words.join(', ')}`);
+    if (ok.length && ok.every(x => x.m.guessed)) say('✓', `${site.id}: only the engine's own guess solves it (e.g. “${ok[0].p.join(' ')}” → ${ok[0].m.thing}): the player has to stop mid-phrase`);
     const distinctThings = new Set(ok.map(x => `${x.m.thing}|${x.m.material}|${x.m.size}`));
     if (ok.length && distinctThings.size < 2) say('!', `${site.id}: only one thing works (a quiz, not a toy)`);
     const wrongKinds = Object.keys(reasons).filter(k => k !== 'works');
     wrongKinds.length >= 2 ? say('✓', `${site.id}: ${wrongKinds.length} different ways to be wrong (${wrongKinds.join(', ')})`) : say('!', `${site.id}: fewer than two ways to be wrong`);
     const idle = [...site.words, ...(site.teaches ? [site.teaches.word] : [])].filter(w => !all.some(x => x.p.includes(w) && (x.m.works || x.p.length === 1)));
     if (idle.length) say('!', `${site.id}: words that never matter: ${idle.join(', ')}`);
+    // someone else's words in the engine: what happens if the player just speaks, and whether adding a word pushes one out
+    if (site.preload?.length) {
+      const m = speak(spec, site.preload, site);
+      say('✓', `${site.id}: arrives holding “${site.preload.join(' ')}” (said as is: ${m.reason})${site.memory === 'recent' && site.preload.length >= site.slots ? '; the first word the player adds pushes the oldest out' : ''}`);
+    }
+    // a working memory (memory 'recent'): one word too many must be able to push out a word that
+    // mattered, so the player can meet forgetting here (the phrase would work if all were read)
+    if (site.memory === 'recent' && new Set([...site.words, ...(site.teaches ? [site.teaches.word] : [])]).size > site.slots) {
+      const wide = { ...site, slots: site.slots + 1, memory: 'first' };
+      const lesson = phrases(site, site.teaches ? [site.teaches.word] : [], site.slots + 1).filter(p => p.length === site.slots + 1)
+        .find(p => speak(spec, p, wide).works && !speak(spec, p, site).works);
+      lesson ? say('✓', `${site.id}: one word too many can push out a word that mattered (“${lesson.join(' ')}” forgets “${lesson[0]}”)`) : say('!', `${site.id}: forgetting never costs anything here (no ${site.slots + 1}-word phrase works whole but fails once its first word drops)`);
+    }
   }
 }
 if (!specs.length) R.add('unresolved', 'utterance places proven', { detail: 'no vibelearn.utter.v1 spec in the build' });
