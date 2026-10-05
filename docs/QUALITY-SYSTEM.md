@@ -25,7 +25,8 @@ The docs are still in the repo (`CRITIC-POLICY.md`, `EXPERIENCE-QUALITY-SYSTEM.m
 
 | Lesson | Where it lives now |
 | --- | --- |
-| **Cold before intent.** A reviewer who knows the design fills in what the game failed to show. Record what a newcomer perceived *before* they read the intent. | `playserver.mjs` refuses `/intent` until the cold account and the first-look verdict are in. `intent.mjs` generates the intent from the game's data. |
+| **Cold before intent.** A reviewer who knows the design fills in what the game failed to show. Record what a newcomer perceived *before* they read the intent. | `playserver.mjs` keeps the intent away from the tester entirely; only the interviewer sees it, and only reveals it at the end. `intent.mjs` generates the intent and its items from the game's data. |
+| **Blind testers (added 5 Oct, Desmic).** Don't tell a tester what to test: a language model is steered by its context, so a primed tester finds what it was told to find. | The tester's brief and personas are fixed and linted (`blindcheck.mjs`); questions come after play, open first; the server refuses a pre-reveal question with a word the tester hasn't met; findings are graded by how they came out. |
 | **Lanes are never averaged.** A blocker in one lane blocks, whatever the others say. | `quality.mjs`: a fail in any lane means not ready. There are no scores. |
 | **Unresolved is not pass.** Missing evidence is "unknown", not "fine". | Every result is pass / fail / warn / unresolved. A lane with no evidence is unresolved and names the check that would resolve it. |
 | **Match evidence to the claim.** Motion needs motion, sound needs listening, feel needs a person. | Each lane says who can judge it (`checks.json`). `feel` stays unresolved until a person's verdict is recorded. |
@@ -70,7 +71,7 @@ The lanes are defined in `checks.json`:
 
 - `learning`, `flow`, `world`, `pacing`, `timing`, `robustness`, `performance`, `sound`,
   `content`, `system`;
-- `comprehension`: an AI player cold, then people;
+- `comprehension`: blind AI players and an interviewer, then people;
 - `feel`: a person on a real device only.
 
 ## The loop
@@ -88,8 +89,8 @@ The same loop serves a person, a co-creating agent, or a chat where a player mak
    - Every fail has its claim, its detail and how to reproduce it.
    - Unresolved lanes say what would resolve them.
 5. **AI play-test** when the change touches what a player sees:
-   - `tools/playserver.mjs` with a persona;
-   - cold account, then first-look verdict, then intent, then comparison;
+   - `tools/playserver.mjs`: a blind tester plays with only the fixed brief;
+   - a separate interviewer questions it (recall, probe, moments, predict, ratings, then the reveal);
    - see `tools/AI-PLAYTEST.md`.
 6. **Person.** When the tool lanes pass, the build is "ready for a person's review".
    - Desmic plays it on the F15 and the laptop.

@@ -151,7 +151,7 @@ from his chest:
   world but laid out in screen pixels, so they're big and tappable and always fit a phone. The
   skiff's engine can move onto it next, giving one engine UI for the whole game.
 
-## Is it working? Three cold AI play-tests of the test area (4 Oct)
+## Is it working? AI play-tests of the test area (runs 1–4 directed, 4 Oct; run 5 blind, 5 Oct)
 
 Each run used a fresh newcomer persona on a phone screen. It read the intent only after its own
 account (`tools/playserver.mjs --intent utter`). The test area was changed between runs.
@@ -198,6 +198,32 @@ a phone… the 3-word cap is explained clearly". After it:
 - Going back no longer shows "Walk across" again.
 - The end shows a summary that gives reasons to replay: every place on the first phrase, funny
   failures found (x of 6), words used (x of 10).
+
+**Run 5, blind (5 Oct).** Desmic pointed out that runs 1–4 were primed: my prompt told the
+tester to try wrong phrases and asked whether failures were funny. Told nothing (see
+`tools/AI-PLAYTEST.md`), a new tester typed the obvious phrase at every place, and all of them
+worked first time.
+
+- It saw **0 of 6 failures**, gave 6/10, and would play the next part.
+- Of the eight ideas, three came through on their own:
+  - saying makes things;
+  - words come from the world;
+  - only a few fit (shallow).
+- Order, vagueness and readable failures came out only as predictions when asked.
+- The engine's guess was **misread** ("long" alone → "a puzzled comment and nothing built").
+- The language-model link was **missed**.
+- It read the paper sign as a warning to avoid ("pleased with myself for not falling for it").
+
+What this means for the design (proposals; nothing changed yet):
+
+- **Failure has to be on the main path, not a side quest.** The obvious first phrase should come
+  out wrong in a way you can see, so the lesson is in what you do anyway. For example: the first
+  gap is wide, "bridge" comes up short and tips into the sky, and "long" is lying right there.
+- **A place where you hold only a describing word** ("long", before any thing word), so stopping
+  early happens naturally and the engine's guess (a long… noodle) is met in play.
+- **Say early that strange phrases are welcome**, and make the signs dares, not warnings.
+- **Shorter walks between a word and where it's used**, distinct-looking platforms, and a place
+  label that changes. Zip got stuck against a signpost twice.
 
 Still open:
 

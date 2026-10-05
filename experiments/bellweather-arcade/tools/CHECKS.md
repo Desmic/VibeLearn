@@ -16,6 +16,7 @@ person's verdict on a build. Why and how: `docs/QUALITY-SYSTEM.md`.
 | `kittest.mjs` | Unit tests for pure kit rules on made-up cases (targeting: aimed beats near, lined-up things defer to priority; earned progress). In `npm run check`. | <1 s |
 | `npm run check:fixture` | Runs the manifest, story, station, progress and rules checks and the intent generator on `fixtures/night-market`, a second, different game (data only): proof the checks aren't this game's. In `npm run check`. | ~2 s |
 | `uttercheck.mjs` | Proves every place that asks the player to say a thing into existence (`kit/utter.ts`) is solvable from the words it offers, with more than one working phrasing and at least two ways to be wrong. In `npm run check`. | <1 s |
+| `blindcheck.mjs` | The AI play-tester's brief and personas (`tools/playtest/`) say nothing about any game's design and nothing that primes a judgement; the interview leak guard (`tools/lib/leak.mjs`) refuses design and leading words on made-up cases. In `npm run check`. | <1 s |
 | `utterlab.mjs` | Plays the utterance test area (`lab=utter`): wrong phrases fail visibly, right ones work; walks across the bridges it made. | ~6 min |
 | `quality.mjs` | The gate: reads every report for this build (`quality/<build>/`) and gives each lane pass / fail / warn / unresolved, never averaged; lists what would resolve each open lane. Exit 1 on a fail. | <1 s |
 | `affected.mjs` | Changed files (git, or given) → the checks to run, with cost. | <1 s |
@@ -28,7 +29,7 @@ person's verdict on a build. Why and how: `docs/QUALITY-SYSTEM.md`.
 | `rules-parity.mjs` | Runs the same random action walks through the browser's rules engine and the server's (`app/game_rules.py`) and checks they agree. Needs Python. | ~10 s |
 | `camwalk.mjs` | Walks the opening routes with the real follow camera and scores every half second (Zip on screen, view blocked, lens inside something, too close). | ~5 min |
 | `replay.mjs` | Replays an AI play-test's actions in a fresh session and scores the camera after each step, so a reported moment can be reproduced. | a few minutes |
-| `playserver.mjs` | The body of the AI play-tester: a game session an agent drives step by step, seeing only screenshots, text and buttons. Writes a play log and a report. See `AI-PLAYTEST.md`. | as long as the play |
+| `playserver.mjs` | The body of the AI play-tester: a game session an agent drives step by step, seeing only screenshots, text and buttons. Blind by default: the tester gets only the fixed brief (`GET /brief`); afterwards an interviewer agent, the only one that sees the intent, questions it through `/interview`, which refuses leaking questions before the reveal. Writes a play log, a trace, the interview and a report. See `AI-PLAYTEST.md`. | as long as the play, plus the interview |
 | `flowcheck.mjs` | Plays the whole game the intended way: title → Mira → attack → spark → absorb words + hologram engine at the skiff → flight → gate → relay → Loom Isle (Stop 2) → save and Continue → fixed camera views. Checks checkpoints, first-try logging, stars, and that nothing errors. `--input touch` plays as a phone (taps on prompts, tap-anywhere to read on, the thumb stick); `--input keyboard` as a laptop (E, Space, number keys, WASD/Shift, 1024×640); default `mouse` clicks. Touch and keyboard add a `controls` segment (stick tilt/jog, Shift-walk, which controls show). | ~15 min |
 | `playthrough.mjs` | Runs `flowcheck` as a phone, then as a laptop, then `timing`, one after another, and writes `index.html` linking each run's **contact sheet** (`sheet.html`: every screenshot, failures on top) and the timing log. The before-publishing check for big changes. | ~35 min |
 | `breaker.mjs` | Plays like a mean tester and checks that the game's promises still hold (below). `--input touch` plays as a phone: rapid taps, thumb stick, the pause button. | ~15–20 min |
@@ -38,7 +39,7 @@ person's verdict on a build. Why and how: `docs/QUALITY-SYSTEM.md`.
 node tools/storycheck.mjs [--root out]
 node tools/assetcheck.mjs [--root public] [--json]
 node tools/rules-parity.mjs [--app ../../app] [--walks 300]
-node tools/playserver.mjs [--port 7788] [--out playtest]   # then GET /observe, POST /act
+node tools/playserver.mjs --input touch --persona commuter [--intent utter --start '&lab=utter']   # tester: GET /brief; interviewer: GET /interview/brief
 node tools/flowcheck.mjs [--input mouse|touch|keyboard] [--out flowcheck] [--only controls,title,meet,...] [--base URL] [--root out]
 node tools/playthrough.mjs [--out playthrough] [--only touch,keyboard,timing]
 node tools/breaker.mjs  [--input mouse|touch] [--out breaker] [--only oob,walls,mash,order,scum,pause,skip,resize,tamper,monkey] [--minutes 4] [--seed 1337]

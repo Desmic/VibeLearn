@@ -24,7 +24,11 @@ export function buildIntent(GAME) {
     '## Learning promises', ...j.promises.map(p => `- Stop ${p.stop} (${p.place}): ${p.promise}`), '',
     '## Stations and the decisions they ask', ...j.stations.map(s => `- **${s.name}** (${s.teaches.join(', ')}): ${s.asks.join(' / ')}`), '',
     '## What a player should be able to do after', ...j.outcomes.map(o => `- (${o.id}) ${o.player_can} — the misconception to catch: ${o.misconception}`), ''].join('\n');
-  return { json: j, md };
+  // the items a blind play-test interview must account for, one by one (tools/playtest/interviewer.md)
+  const items = [{ id: 'premise', text: `Who you are (${j.protagonist}), where you are and what you are trying to do: ${j.story[0]?.goals.map(g => g.goal).join(' → ') ?? ''}` },
+    { id: 'teaches', text: j.teaches },
+    ...j.outcomes.map(o => ({ id: o.id, text: `${o.player_can} (misconception: ${o.misconception})` }))];
+  return { json: { ...j, items }, md, items };
 }
 
 /** the intent of an utterance place set (kit/utter.ts), for play-testing a test area like lab=utter */
@@ -38,7 +42,17 @@ export function buildUtterIntent(spec) {
     '- vague phrases get the most likely thing, not the one you meant; every word matters.', '',
     'Wrong phrases are meant to fail in funny, readable ways (too short, too weak, the wrong way, the wrong kind of thing, too dim).', '',
     '## The places', ...spec.sites.map(s => `- **${s.asks}**: up to ${s.slots} words`), ''].join('\n');
-  return { md, json: { sites: spec.sites.map(s => ({ asks: s.asks, slots: s.slots })) } };
+  const items = [
+    { id: 'make', text: 'Saying a phrase makes a thing appear in the world, and the thing is what gets you through (across a gap, lighting a doorway).' },
+    { id: 'source', text: 'The words come from the world: you collect them from signs and things before you can say them.' },
+    { id: 'order', text: 'The phrase is read in order: describing words shape the thing named after them; words said after the thing come too late.' },
+    { id: 'guess', text: 'Stop before naming a thing and the engine finishes the phrase with its own likeliest guess.' },
+    { id: 'room', text: 'Only a few words fit: the engine reads a small, fixed number (its context is small).' },
+    { id: 'vague', text: 'A vague phrase gets the most likely thing, not the one you meant; every word (size, material) matters.' },
+    { id: 'why', text: 'When a phrase fails, you can see why (too short, too weak, the wrong way, the wrong kind, too dim) and fix the phrase.' },
+    { id: 'model', text: 'This is how a language model works: it makes what is most likely from the words in front of it, in order.' },
+  ];
+  return { md, items, json: { sites: spec.sites.map(s => ({ asks: s.asks, slots: s.slots })), items } };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

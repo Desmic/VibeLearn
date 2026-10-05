@@ -5,28 +5,62 @@ sees only what a player sees (a screenshot, the words and buttons on screen) and
 what to do next. It finds the things scripts can't: unclear lines, hidden goals, answers you
 can guess without learning, and moments where a new player gets stuck.
 
-## How it runs (cold first, then intent: 4 Oct)
+## How it runs: blind play, then an interview (5 Oct 2026)
 
-1. Start a session: `node tools/playserver.mjs --port 7788 --out playtest --persona newcomer [--start '&title=0&beat=to-loom']`
-2. Give an agent (a Claude subagent today; a model API later) the API below and a persona,
-   **and nothing about the design**: no docs, no story, no answers. It observes, looks at the
-   screenshot, acts, and writes notes (`confusion`, `bug`, `exploit`, `delight`, `idea`) as it goes.
-3. **Cold account** (`{"type":"understand","place":…,"who":…,"goal":…,"controls":…,"lesson":…,"unsure":…}`):
-   in its own words, what the game has communicated. Frozen once compared.
-4. **First-look test**, two separate questions (`{"type":"verdict","look":"yes|no|unsure","keepPlaying":"yes|no|unsure","why":"…"}`): would a new player stop and look? Would they understand it and want to keep playing? (Desmic's test, 17 Sep: a game can be pretty and still lose them. The audience is 18+.)
-5. **Only then** `GET /intent` (refused before 3 and 4): what the game means to communicate,
-   generated from its data (`tools/intent.mjs`). The agent compares:
-   `{"type":"compare","matches":[…],"gaps":[{"intended":…,"observed":…,"severity":"blocker|major|minor"}]}`.
-   This is the old critic system's best rule: the design must not fill in what the game didn't show.
-6. `{"type":"end"}` writes `report.md` and the standard report (lane `comprehension`; bugs →
-   `flow`, exploits → `learning`), read by `tools/quality.mjs`.
+Desmic's rule (5 Oct): **don't tell a tester what to test.** A language model is steered by
+whatever is in its context, so a tester told to "notice the funny failures" or "try more words
+than fit" finds exactly that. The runs before 5 Oct did this. My prompts said "try phrases you
+suspect are wrong", "was any failure funny?" and "how did the speaking interface feel?", so their
+verdicts were partly my own words coming back. The first blind run of the same test area showed
+how much (below).
+
+1. **Start a session:** `node tools/playserver.mjs --input touch --persona commuter|explorer|rarely
+   [--intent utter --start '&lab=utter'] [--max 80] [--out <a neutral folder>]`.
+2. **The tester** (a fresh agent) gets **only** `GET /brief`, verbatim, with nothing added.
+   That is `tools/playtest/tester.md` with a persona. It says this is a game they have never
+   seen, explains how to touch the phone, and says they can stop whenever they'd put the phone
+   down. It never mentions:
+   - the genre, goals, mechanics or lesson;
+   - "fun", "bugs" or "confusing";
+   - note categories.
+
+   Personas say who the tester is ("rarely plays video games"), never what to notice. The screen
+   comes back as unlabelled writing and buttons; calling one line "the goal" would already tell
+   them something. Saying things out loud is optional (`think`). Stopping early is data.
+
+   `tools/blindcheck.mjs` (in `npm run check`) fails if the brief or a persona carries a word
+   from any game's design or a word that primes a judgement.
+3. **The interviewer** (a second agent, the only one that sees the intent) gets `GET
+   /interview/brief` (`tools/playtest/interviewer.md` plus the intent and its items) and the play
+   log (`GET /trace`). It questions the **same** tester, who still remembers playing. I only relay
+   the messages. The interview goes from open to specific:
+   - **recall:** "tell me about what you just played";
+   - **probe:** follow their own words, plus two neutral incident questions;
+   - **moments:** "at step 34 you tapped the same thing three times; what were you expecting?";
+   - **predict:** small what-ifs using only words they met;
+   - **ratings:** last, so numbers don't anchor anything;
+   - **reveal:** the intent, then "where did you see this?".
+4. **Leak guard.** Before the reveal, `POST /interview` refuses a question that uses a word the
+   tester hasn't met (not on their screen, not in their own answers) or a judgement word
+   (`tools/lib/leak.mjs`). The interviewer has to rephrase in the tester's words.
+5. **Findings by evidence level.** Each intent item is marked by how it came out:
+   - **unprompted** or **probed**: pass;
+   - **only when pointed at a moment**: warn;
+   - **only after the reveal**, **missed** or **misread**: fail.
+
+   These go to the `comprehension` lane, tagged with the area tested. Bugs go to `flow`. Each
+   report is named by protocol and persona, so several testers of one build sit side by side.
+6. `{"type":"end"}` writes `report.md` (with the whole interview), `trace.md` and the standard
+   report.
+
+**Directed tests** (`--protocol directed`, e.g. the loophole hunter) still exist for testers who
+are *meant* to be told what to try. Their findings count for robustness and learning, never as
+evidence of what a newcomer understood.
 
 An AI player approximates a newcomer; it doesn't replace one. It can't feel motion or hear
 the music, and it acts seconds after each screenshot. A real beginner play-test is still owed.
 
-API: `GET /observe` (screenshot path, goal, card, buttons, toasts, thoughts) and `POST /act`
-with `tap`, `tapAt`, `move`, `look` (drag to turn the camera), `wait`, `key`, `reload`, `note`,
-`understand`, `verdict`, `compare`, `end` (see the top of `playserver.mjs`). With `--input touch`
+API: see the top of `playserver.mjs`. With `--input touch`
 every action is a phone's: taps that wait for a prompt to hold still, the thumb stick, a
 one-finger drag to look (fixed 4 Oct: the first cold run tapped with a mouse, so the game
 believed it was on a laptop and showed the keyboard hint, and it had no way to turn the camera).
@@ -36,6 +70,10 @@ quick reactions (catching a falling word) looks harder than it is for a person. 
 findings as "check with a person", not as facts.
 
 ## Personas used
+
+Blind personas live in `tools/playtest/personas.json` (commuter, explorer, rarely): who the
+tester is, nothing more. The two below were the directed personas used before 5 Oct; the first
+one's "notes every moment of doubt" is exactly the kind of priming the blind brief removes.
 
 - **Newcomer**: an adult (the audience is 18+, decided 3 Oct) who has never seen the game and
   plays games casually; tries the obvious thing first; notes every moment of doubt.
@@ -145,3 +183,41 @@ Keep playing went unsure → unsure → **yes**; fun went "mildly" → "laughed"
 for any mechanic: **a joke the player only reads is half a joke.** Every failure has to be seen
 happening (the short bridge tipping into the sky), with the camera holding on it until the line
 is said. Details and the changes between runs: `docs/UTTER-DESIGN.md`.
+
+## First blind run (5 Oct 2026; utterance test area; commuter persona; build b-95a50d842d0c)
+
+Told nothing, the tester played the obvious phrase at every place: "bridge", "long bridge",
+"lantern". Every one worked first time. It put the phone down after 42 steps ("Bus stop"). The
+interview took 13 questions; two were refused by the leak guard (a bug in the guard, fixed:
+"number" and "score" in the rating question). It scored the game 6/10 and would play the next
+part ("to see what 'sky' does and to finally try 'paper bridge'").
+
+| Idea | How it came out |
+| --- | --- |
+| saying makes a thing | unprompted: "one word and one tap, and it made something real in the world" |
+| words come from the world | unprompted |
+| only a few words fit | unprompted but shallow: "didn't wonder what a third slot was for" |
+| read in order; late words are too late | only when asked to predict ("bridge long" → "a normal short bridge… 'long' as leftover junk"), and "I'd have typed 'long bridge' anyway" |
+| a cut-short phrase gets the likeliest guess | **misread**: "a puzzled comment and nothing built" |
+| vague phrases get the likeliest thing | only when asked to predict |
+| failures show why | only when asked to predict; **0 of 6 failures seen** |
+| it's how a language model works | **missed**: "'My engine' read as a robot gimmick" |
+
+Compare run 4 (directed, the day before), which said: keep playing **yes**, "the 3-word cap is
+explained clearly", "gently fun". The blind tester never failed, so it never met five of the
+eight ideas. The difference was my prompt, not the game.
+
+What it found that the directed runs couldn't:
+
+- The joke sign "Paper is not a building material" read as a **warning, not a dare**: "pleased
+  with myself for not falling for it." Nothing says failing is welcome until the end card.
+- The obvious phrase always works, so the thinking is over quickly and the walking takes longer.
+- Getting lost (steps 6–26): look-alike islands, a camera that swings too far, Zip stuck against
+  a signpost (steps 9–11 and 22–24, confirmed in the screenshots), and a place label stuck on
+  "Inner courtyard".
+
+Play-server fixes from this run:
+- The screen text now includes everything written (speech bubbles were missing: Zip's "My engine
+  reads words in order" line).
+- A tap by label skips a greyed-out twin with the same label.
+- Failed actions are logged in the trace.

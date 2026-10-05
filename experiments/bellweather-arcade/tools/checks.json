@@ -12,7 +12,7 @@
     "sound": { "asks": "Is the mix right: voices clear, ambience and music under them, nothing clipping?", "judged_by": "tools (levels) + a person (taste)" },
     "content": { "asks": "Is the story and station data valid and in house style (short sentences, no broken jumps, content agrees with its rules)?", "judged_by": "tools" },
     "system": { "asks": "Is the game kept apart from the system (kit and system tools name nothing from the game), is its manifest valid, do the checkers catch what they should (self-tests)?", "judged_by": "tools" },
-    "comprehension": { "asks": "Cold, before reading the design: does a newcomer understand where they are, who they are, what to do, and what the lesson is? Would they stop and look? Would they keep playing?", "judged_by": "AI play-testers (playserver + a persona), then people" },
+    "comprehension": { "asks": "Blind: does a newcomer who was told nothing understand what the game means to show, and how did it come out (unprompted, when asked about their own words, only when pointed at a moment, only after being told)? Would they play the next part?", "judged_by": "blind AI play-testers and an interviewer (playserver), then people" },
     "feel": { "asks": "Does it look, move, sound and feel right on a real device: camera comfort, animation, art, music, control feel, humour landing?", "judged_by": "a person on a real device (Desmic: Galaxy F15 and laptop). No tool can pass this lane." }
   },
   "checks": [
@@ -61,9 +61,12 @@
     { "id": "playthrough", "scope": "system", "kind": "runner", "lanes": [], "run": "node tools/playthrough.mjs --only touch,keyboard,timing,speedrun,breaker", "cost": "~2.5 h", "needs": ["build", "browser"],
       "proves": "Runs the play checks one after another (never two games at once) and writes index.html with every contact sheet, pacing and timing.",
       "affects": [] },
-    { "id": "playserver", "scope": "system", "kind": "agent", "lanes": ["comprehension"], "run": "node tools/playserver.mjs --persona newcomer (then an agent drives /observe, /act; see tools/AI-PLAYTEST.md)", "cost": "~1 h of agent time", "needs": ["build", "browser", "an agent that can see screenshots"],
-      "proves": "What a newcomer understood, cold; the first-look test; then intent (tools/intent.mjs) vs perceived. An AI player approximates a person; it does not replace one.",
+    { "id": "playserver", "scope": "system", "kind": "agent", "lanes": ["comprehension"], "run": "node tools/playserver.mjs --input touch --persona commuter|explorer|rarely [--intent utter --start '&lab=utter'] (blind: a tester agent gets only GET /brief, plays, stops; an interviewer agent gets GET /interview/brief; see tools/AI-PLAYTEST.md)", "cost": "~1 h of agent time", "needs": ["build", "browser", "two agents that can see screenshots"],
+      "proves": "Blind: what a newcomer who was told nothing understood, graded by how it came out in the interview (unprompted, probed, only when pointed at, only after the reveal). Directed (--protocol directed): a tester told what to try (a loophole hunter); its findings are robustness and learning evidence, not comprehension. An AI player approximates a person; it does not replace one.",
       "affects": ["src/**"] },
+    { "id": "blindcheck", "scope": "system", "kind": "tool", "lanes": ["system"], "run": "node tools/blindcheck.mjs", "cost": "<1 s", "needs": ["build"],
+      "proves": "The play-tester's brief and personas carry no word from any game's design and nothing that primes a judgement; the interview leak guard refuses design words and leading words on made-up cases.",
+      "affects": ["tools/playtest/**", "tools/lib/leak.mjs", "tools/intent.mjs", "src/game.ts", "src/worlds/**"] },
     { "id": "verdict", "scope": "system", "kind": "person", "lanes": ["feel", "comprehension", "sound", "performance"], "run": "node tools/verdict.mjs --lane feel --status pass|fail --by Desmic --note \"…\"", "cost": "a person's time", "needs": ["build", "a real device"],
       "proves": "A person's verdict on this exact build. The final word on feel; overrides nothing else (a failing check still fails).",
       "affects": ["src/**", "public/**"] },
