@@ -26,9 +26,14 @@ export function buildIntent(GAME) {
     '## What a player should be able to do after', ...j.outcomes.map(o => `- (${o.id}) ${o.player_can} — the misconception to catch: ${o.misconception}`), ''].join('\n');
   // the items a blind play-test interview must account for, one by one (tools/playtest/interviewer.md)
   const items = [{ id: 'premise', text: `Who you are (${j.protagonist}), where you are and what you are trying to do: ${j.story[0]?.goals.map(g => g.goal).join(' → ') ?? ''}` },
+    ...(GAME.intent?.story ?? []).map(x => ({ id: x.id, text: x.text })),
     { id: 'teaches', text: j.teaches },
     ...j.outcomes.map(o => ({ id: o.id, text: `${o.player_can} (misconception: ${o.misconception})` }))];
-  return { json: { ...j, items }, md, items };
+  // what the player should feel: graded separately, never passed by an AI (the feel lane is people's)
+  const experience = (GAME.intent?.experience ?? []).map(x => ({ id: x.id, text: x.text, draft: !!x.draft }));
+  const md2 = md + (GAME.intent?.story?.length ? ['', '## The story a newcomer should be able to tell back', ...GAME.intent.story.map(x => `- ${x.text}`), ''].join('\n') : '')
+    + (experience.length ? ['', '## What the player should feel' + (experience.some(x => x.draft) ? ' (drafts)' : ''), ...experience.map(x => `- ${x.text}`), ''].join('\n') : '');
+  return { json: { ...j, items, experience }, md: md2, items, experience };
 }
 
 /** the intent of an utterance place set (kit/utter.ts), for play-testing a test area like lab=utter */
@@ -52,7 +57,34 @@ export function buildUtterIntent(spec) {
     { id: 'why', text: 'When a phrase fails, you can see why (too short, too weak, the wrong way, the wrong kind, too dim) and fix the phrase.' },
     { id: 'model', text: 'This is how a language model works: it makes what is most likely from the words in front of it, in order.' },
   ];
-  return { md, items, json: { sites: spec.sites.map(s => ({ asks: s.asks, slots: s.slots })), items } };
+  const experience = (spec.experience ?? []).map(x => ({ id: x.id, text: x.text, draft: !!x.draft }));
+  const md2 = md + (experience.length ? ['', '## What the player should feel' + (experience.some(x => x.draft) ? ' (drafts)' : ''), ...experience.map(x => `- ${x.text}`), ''].join('\n') : '');
+  return { md: md2, items, experience, json: { sites: spec.sites.map(s => ({ asks: s.asks, slots: s.slots })), items, experience } };
+}
+
+/** the intent of the next-word lab (kit/ngram.ts, lab=ngram) */
+export function buildNgramIntent(spec) {
+  const md = ['# What this area means to communicate', '',
+    'You are a small robot whose speech engine can say things into existence. It is a next-word engine, like a phone keyboard\'s suggestions or a tiny language model:', '',
+    '- everything you absorb from the world (signs, things) is read into the engine;',
+    '- you pick only the first word; after that the engine suggests what comes next, from what it has read, likeliest first, and shows how often it has read each;',
+    `- it will only say its ${spec.top} likeliest words; words it has read too rarely are shown but it won't say them;`,
+    '- reading more of a phrase makes the engine likelier to say it;',
+    '- its likeliest word is not always the one you need ("let it finish" picks its favourite every time); you steer.', '',
+    'A phrase then makes a thing (a bridge across a gap, a lantern for a dark doorway). Wrong phrases make something silly, or nothing, in a readable way.', '',
+    '## The places', ...spec.places.map((p, i) => `- **${spec.utter.sites[i].asks}**: ${p.lesson}`), ''].join('\n');
+  const items = [
+    { id: 'make', text: 'Saying a phrase makes a thing appear in the world, and the thing is what gets you through.' },
+    { id: 'reads', text: 'The engine learns from what you absorb: reading a sign changes what it suggests.' },
+    { id: 'next', text: 'You choose the first word; the engine offers the next words, the ones it has read after that word.' },
+    { id: 'frequency', text: 'How often it has read a pair decides how likely it is to say it; it only says its likeliest few.' },
+    { id: 'more', text: 'To get it to say something it rarely says, feed it more text where that phrase appears.' },
+    { id: 'steer', text: 'Its favourite next word is not always what you need: letting it finish gives its favourite; you can pick another.' },
+    { id: 'model', text: 'This is how a language model works at heart: it predicts the next word from counts of the text it has read.' },
+  ];
+  const experience = (spec.utter.experience ?? []).map(x => ({ id: x.id, text: x.text, draft: !!x.draft }));
+  const md2 = md + (experience.length ? ['', '## What the player should feel' + (experience.some(x => x.draft) ? ' (drafts)' : ''), ...experience.map(x => `- ${x.text}`), ''].join('\n') : '');
+  return { md: md2, items, experience, json: { places: spec.places, items, experience } };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

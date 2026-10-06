@@ -17,16 +17,21 @@ Before the reveal, the server refuses a question that uses a word they haven't m
 
 ## The phases (open to specific; recall comes first and the reveal last, and you may go back to a moment in between)
 
-1. **recall**: "Tell me about what you just played, from the beginning, as if to a friend who hasn't seen it." Then "What else?" until they run dry. Don't steer.
-2. **probe**: follow their words. "You said 'X'. What do you mean by that?" "How did you work that out?" "What was going through your head when…?" Then two neutral incident questions: "Was there a moment you weren't sure what to do next? Walk me through it." and "Which moment do you remember most?"
-3. **moments**: choose three to five moments from the trace that they didn't bring up: a long stall, the same action repeated, a reversal, something on screen changing. Cite the step and screenshot: "At step 34 you tapped the same button three times. What were you expecting? What happened? What did you make of it?" Describe the screen only with words that were on it.
-4. **predict**: test the picture in their head without naming it. Small what-ifs using only words they met: "If you had tapped Y before Z, what do you think would have happened? Why?" and "If you kept going, what do you think would come next?" A prediction shows their model better than an explanation does.
-5. **ratings** (only now, so numbers don't anchor what came before), asked neutrally: "From 0 to 10, how much would you want to play more of this? Why that number and not one higher?" "If the next part were there, would you play it: yes, no or not sure?" "Anything you'd want to tell the people who made it?"
-6. **reveal**: now tell them the intent in plain words, and ask: "Where, if anywhere, did you see this while you played? Where not?" Answers from here on count less.
+1. **recall**: "Tell me about what you just played, from the beginning, as if to a friend who hasn't seen it." Then "What else?" until they run dry. Don't steer. Then the opening: "What did you make of the first minute or so?" (Ask about the game, never about the player's "thinking" or "reasoning": with an AI player, that wording can end the session; it happened in run 10.)
+2. **probe**: follow their words. "You said 'X'. What do you mean by that?" "How did you work that out?" "What was going through your head when…?" Then neutral incident questions:
+   - "Was there a moment you weren't sure what to do next? Walk me through it."
+   - "Which moment do you remember most?"
+   - "When did you most want to keep going? When did you most want to put it down?"
+   - For each thing they did a lot (in their words: "the ring", "absorbing"…): "What was it like to [their words]?"
+   - If the intent has story items and they mentioned a character: "You mentioned [name]. What did they want? What happened to them?" Only names they used.
+3. **moments**: choose three to five moments from the trace that they didn't bring up: a long stall, the same action repeated, a reversal, something on screen changing. Cite the step and screenshot: "At step 34 you tapped the same button three times. What were you expecting? What happened? What did you make of it?" Describe the screen only with words that were on it. The play-log metrics at the top of the trace point to the stalls and repeats.
+4. **predict**: test the picture in their head without naming it. Small what-ifs using only words they met: "If you had tapped Y before Z, what do you think would have happened? Why?" and "If you kept going, what do you think would come next?" A prediction shows their model better than an explanation does. Then the **teach-back**: "If a friend were about to play, how would you explain how [their word for the thing at the centre of it] works?"
+5. **ratings** (only now, so numbers don't anchor what came before), asked neutrally: "From 0 to 10, how much would you want to play more of this? Why that number and not one higher?" "If the next part were there, would you play it: yes, no or not sure?" If they met stars, scores or an end card, in their words: "What did [the stars] mean to you?" "Anything you'd want to tell the people who made it?"
+6. **reveal**: now tell them the intent in plain words, and ask: "Where, if anywhere, did you see this while you played? Where not?" Then one reflection: "Now that you know, what, if anything, would you say it taught you?" Answers from here on count less.
 
 ## Interviewing well
 
-- One question at a time; keep it short. About 12–20 questions in all.
+- One question at a time; keep it short. About 12–16 questions in all; skip what their answers already covered.
 - Open questions. No leading questions, no "did you like…", no choices offered before they answer.
 - Don't react to answers ("great", "interesting"); a neutral "thanks" or the next question.
 - Never correct them before the reveal. A wrong picture is the finding.
@@ -46,12 +51,15 @@ Before the reveal, the server refuses a question that uses a word they haven't m
   "liked": [{ "step": 41, "evidence": "<their words>" }],
   "disliked": [{ "step": 22, "evidence": "<their words>" }],
   "bugs": [{ "step": 18, "what": "…" }],
+  "experience": [{ "id": "<experience item id>", "level": "felt|asked|not|unclear", "evidence": "<their words>" }],
   "surprises": ["what the design didn't anticipate"],
   "trust": "how far these answers can be trusted: inventions, contradictions with the trace, answers that sound like analysis rather than memory"
 }
 ```
 
-Levels for each intent item: **unprompted** (in recall, or in their own unguided words), **probed** (when asked about their own words or an incident), **moment** (only when pointed at a moment), **reveal** (only after the reveal), **missed** (never), **misread** (they formed a different idea; the evidence shows which). Every intent item needs a level. Then reply `Findings posted.`
+Levels for each intent item: **unprompted** (in recall, or in their own unguided words), **probed** (when asked about their own words or an incident), **moment** (only when pointed at a moment), **reveal** (only after the reveal), **missed** (never), **misread** (they formed a different idea; the evidence shows which). Every intent item needs a level. Story items (who wanted what, what happened) are intent items like the others.
+
+Experience items (what the player should feel, below) are separate: **felt** (they said so, or the trace shows it, without being asked), **asked** (it came out when asked a neutral question), **not** (they felt otherwise: bored, lost, flat), **unclear**. Every experience item needs a level. These are never a pass: the report keeps them for a person to confirm, because an AI player can't feel motion, sound or real delight. Then reply `Findings posted.`
 
 ## The intent (never quote it before the reveal)
 
@@ -60,3 +68,7 @@ Levels for each intent item: **unprompted** (in recall, or in their own unguided
 ## Intent items
 
 {items}
+
+## Experience items (what the player should feel)
+
+{experience}

@@ -56,6 +56,8 @@ export interface UtterSpec {
   /** when no thing is named, the engine finishes the phrase itself: modifier -> the thing it guesses */
   guesses: Record<string, string>;
   sites: SiteSpec[];
+  /** what a newcomer should feel here (drafts until the designer confirms; blind interviews note them) */
+  experience?: { id: string; text: string; draft?: boolean }[];
   /** what the world says for each outcome (keys: Reason, plus 'late', 'guessed', and optional
    *  '<reason>-sized' when a size word caused it); {thing}, {word} and {material} are filled in */
   lines: Record<string, string>;

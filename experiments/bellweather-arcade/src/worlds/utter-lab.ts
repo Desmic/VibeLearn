@@ -34,6 +34,13 @@ export const UTTER_LAB: UtterSpec = {
   },
   // stop mid-phrase and the engine finishes it with its likeliest next word
   guesses: { long: 'noodle', jelly: 'bean', paper: 'plane', tiny: 'bridge' },
+  // drafts (6 Oct) for Desmic to correct
+  experience: [
+    { id: 'feel-wonder', draft: true, text: 'Saying a thing and watching it appear feels like magic the first time.' },
+    { id: 'feel-funny', draft: true, text: 'A wrong phrase fails in a way that makes them laugh.' },
+    { id: 'feel-clever', draft: true, text: 'Fixing a phrase feels clever, like they worked out how the engine thinks.' },
+    { id: 'feel-play', draft: true, text: 'They want to try words just to see what happens.' },
+  ],
   sites: [
     // words carried by the time the player gets here (they come from the world: UTTER_LAB_SOURCES)
     { id: 'first-gap', asks: 'Cross the gap', need: { archetype: 'span', length: 3.9 }, words: ['bridge', 'plank', 'tiny', 'long', 'rope', 'away'], slots: 3 },
@@ -94,10 +101,8 @@ export const UTTER_LAB_SOURCES: WordSource[] = [
 // Variant A stays as Desmic reviews it; both are blind-tested the same way to compare.
 // B's first version had "long" on a sign by the first gap: the blind tester (run 6) collected
 // both words before speaking and said "long bridge" first time, so it never missed at all.
-// B, round 4 (6 Oct, from blind run 9): each place now makes the player meet one engine idea by
-// doing the obvious thing: the first gap, the likeliest (vague) thing and word order; the wide
-// gap, working memory (it arrives holding someone else's three words, so adding yours pushes
-// theirs out); the doorway, the engine's own guess (there is no word for a light, only "bright").
+// (A round 4 forced a memory miss and a guess here; it was pulled back the same day: forcing a
+// failure needs a reason from the story or from teaching how to play, decision 6.)
 // B, round 3 (Desmic, 5 Oct: word order is very important; the limit should feel like working
 // memory): the engine holds three words, and a fourth pushes the oldest out (memory 'recent'), as
 // a model's context window drops its oldest text. The wide gap needs three words ("very long
@@ -107,16 +112,14 @@ export const UTTER_LAB_SOURCES: WordSource[] = [
 export const UTTER_LAB_B: UtterSpec = {
   ...UTTER_LAB,
   id: 'first-words.utter-lab-b',
-  lexicon: { ...UTTER_LAB.lexicon, long: { kind: 'size', scale: 2.6 }, very: { kind: 'size', scale: 1.5 }, bright: { kind: 'size', scale: 1.5 } },
-  guesses: { ...UTTER_LAB.guesses, bright: 'lantern' },
+  lexicon: { ...UTTER_LAB.lexicon, long: { kind: 'size', scale: 2.6 }, very: { kind: 'size', scale: 1.5 } },
   things: { ...UTTER_LAB.things, bridge: { archetype: 'span', size: 2.5, look: 'bridge' } },
   sites: [
     // "long" isn't lying around: the obvious "bridge" comes up short, and the miss hands over "long"
     { id: 'first-gap', asks: 'Cross the gap', need: { archetype: 'span', length: 3.9 }, words: ['bridge', 'tiny'], slots: 3, memory: 'recent', teaches: { reason: 'too-short', word: 'long' } },
     // the engine arrives holding someone else's phrase: every word you add pushes one of theirs out
-    { id: 'wide-gap', asks: 'Cross the wide gap', need: { archetype: 'span', length: 7.5 }, words: ['long', 'bridge', 'tiny', 'very', 'rope', 'plank', 'paper', 'jelly', 'stone'], slots: 3, memory: 'recent', preload: ['paper', 'rope', 'bridge'] },
-    // no word for a light anywhere: "bright", said alone, and the engine finishes it with its likeliest thing
-    { id: 'dark-door', asks: 'Light the dark doorway', need: { archetype: 'light', brightness: 1 }, words: ['long', 'bridge', 'tiny', 'very', 'rope', 'plank', 'paper', 'jelly', 'stone', 'bright'], slots: 3, memory: 'recent' },
+    { id: 'wide-gap', asks: 'Cross the wide gap', need: { archetype: 'span', length: 7.5 }, words: ['long', 'bridge', 'tiny', 'very', 'rope', 'plank', 'paper', 'jelly', 'stone'], slots: 3, memory: 'recent' },
+    { id: 'dark-door', asks: 'Light the dark doorway', need: { archetype: 'light', brightness: 1 }, words: ['long', 'bridge', 'tiny', 'very', 'rope', 'plank', 'paper', 'jelly', 'stone', 'lantern'], slots: 3, memory: 'recent' },
   ],
   lines: {
     ...UTTER_LAB.lines,
@@ -126,8 +129,6 @@ export const UTTER_LAB_B: UtterSpec = {
     'taught-long': 'I never said how long. “Long.” That’s the word I was missing.',
     'hint-late': 'The bridge was made the moment I said it. Say how long first.',
     forgot: 'I forgot “{word}”. Only three words fit in my head.',
-    'preload-wide-gap': 'Someone left words in my engine: “paper rope bridge”. It only holds three.',
-    guessed: 'I stopped mid-phrase. The engine guessed the likeliest thing: {thing}.',
   },
 };
 /** platforms of radius 3.8 at x 60, 71 and 85.6 (src/utter-lab.ts lays them out from the radius) */
@@ -141,7 +142,7 @@ export const UTTER_LAB_B_SOURCES: WordSource[] = [
   { id: 'paper-note', word: 'paper', line: '“A paper bridge? Go on. We dare you.” Signed, the builders.', kind: 'sign', at: [70.6, -42.9], y: 1.7, reach: 2.6 },
   { id: 'jelly-jar', word: 'jelly', line: 'A jar of jelly. Wobbly. Pink. Suspicious.', kind: 'object', at: [70.6, -37.1], y: 1.1, reach: 2.6 },
   { id: 'stone', word: 'stone', line: 'A stone. Very stony.', kind: 'object', at: [71.6, -43.2], y: 1.3, reach: 2.6 },
-  { id: 'bright-sign', word: 'bright', line: '“BRIGHT IDEAS WANTED.” Signed, the dark.', kind: 'sign', at: [82.6, -42.6], y: 2.0, reach: 2.6 },
+  { id: 'lantern-hook', word: 'lantern', line: '“Lantern hook.” The lantern is missing.', kind: 'sign', at: [82.6, -42.6], y: 2.0, reach: 2.6 },
 ];
 export const UTTER_LAB_B_VARIANT: LabVariant = {
   radius: 3.8, remember: true, speakReach: 3,

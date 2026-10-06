@@ -72,7 +72,20 @@ The lanes are defined in `checks.json`:
 - `learning`, `flow`, `world`, `pacing`, `timing`, `robustness`, `performance`, `sound`,
   `content`, `system`;
 - `comprehension`: blind AI players and an interviewer, then people;
-- `feel`: a person on a real device only.
+- `feel`: a person on a real device only. A game's manifest (`intent.experience`) lists what a
+  newcomer should feel. The blind interviewer marks each item with the tester's words. Those
+  marks go to `feel` as evidence for a person to confirm, never as a pass. Only "felt the
+  opposite" warns.
+
+The play server also measures the play itself, from the log rather than from what the tester
+said:
+
+- steps, steps per goal, and when progress first came;
+- stalls and repeated taps;
+- camera turns the player didn't make.
+
+These are reported beside the interview, so "it was intuitive" can be checked against the
+numbers.
 
 ## The loop
 

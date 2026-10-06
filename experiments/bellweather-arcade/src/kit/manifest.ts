@@ -13,6 +13,7 @@ import type { StoryScript } from './story-script';
 import type { SoundscapeSpec } from './soundscape';
 import type { VoiceCast } from './voice';
 
+export interface IntentItem { id: string; text: string; /** a draft until the designer confirms it */ draft?: boolean }
 export interface GameManifest {
   schema: 'vibelearn.game.v1';
   /** stable id, used in reports and file names (e.g. "first-words") */
@@ -39,6 +40,11 @@ export interface GameManifest {
   voice?: { cast: VoiceCast; spoken?: Record<string, string>; direction?: Record<string, string> };
   /** learning-design files (design/*.json, vibelearn.learning-design.v1): the intent the AI play-tester compares against */
   learningDesign?: string[];
+  /** what else the game means a newcomer to take away and to feel, beyond the learning: the story they
+   *  should be able to tell back, and the experience (moments of feeling) the designer is aiming for.
+   *  Blind play-test interviews grade both (tools/playtest/interviewer.md); experience is never
+   *  passed by an AI, only noted for a person to confirm (the feel lane is people's). */
+  intent?: { story?: IntentItem[]; experience?: IntentItem[] };
   /** input modes the game supports; every one is play-tested */
   input: ('touch' | 'keyboard' | 'mouse')[];
   /** target devices; `low` is the frame-rate bar */

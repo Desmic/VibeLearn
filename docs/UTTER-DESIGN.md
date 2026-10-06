@@ -132,9 +132,11 @@ appears with no loading screen (the hologram weave covers the wait).
 ### Decisions (Desmic, 5 Oct 2026, before playing)
 
 5. **Core mechanic: mostly yes.** A few questions are still open (below).
-6. **Forced failure: not as a rule, yes as an expectation.** Not every place should force a miss.
-   But where the story introduces or shows off a part of the engine, the player is expected to
-   meet the failure that teaches it. Variant B's first gap is that kind of place.
+6. **Forced failure is not a rule; as a rule it's a bad idea.** A place may make the player fail
+   only when the story, the game's progression, or teaching the player how to play actually needs
+   it, and that has to be argued for that one place. Wanting a mechanic to be seen is not enough.
+   (Corrected 6 Oct: I first wrote this up as "expected wherever a mechanic is shown off" and
+   built lab B round 4 on it. That round has been pulled back.)
 7. **Word order is very important.** The blind runs showed English grammar already puts describing
    words first, so the current "too late" rule teaches nothing. Order has to matter in a way
    grammar doesn't cover.
@@ -365,7 +367,9 @@ What changed, and what didn't:
 - **Wayfinding is still the main friction.** Moving the lantern word away from the speak spot
   (so Speak wouldn't cover Absorb) made it harder to find.
 
-Proposals, following decision 6 (forced failure where a mechanic is shown off):
+Proposals after run 9. Items 1 and 2 were built as "round 4" on a misreading of decision 6 and
+pulled back the same day; the n-gram engine (below) is the better answer to the same problem,
+because there the failures come from the data, not from forcing:
 
 1. **A place that forces the guess.** For example, the only word in reach is "long", and the
    engine has to finish it (a long… noodle). Then the player gets the thing word that fixes it.
@@ -386,6 +390,85 @@ Still open:
   rare in English. Maybe a later place where order matters.
 - **Moving around** small platforms with the follow camera is the least fun part. This is a
   general camera task; the real mechanic will live in the full-size world.
+
+## The next-word engine (built 6 Oct: `lab=ngram`)
+
+**Why.** Desmic's direction (6 Oct): "we are essentially starting with a 2 or 3 gram model; teach
+the basics through levels, like how word frequency affects the words produced; then producing a
+useful word makes an object, to advance or gain a power". This also answers run 9's main
+finding: building word by word made the engine feel like a literal builder, which is the
+opposite of a language model. Here, likelihood is the mechanic itself: what Zip can say is
+whatever his engine predicts, and the prediction comes from what it has read.
+
+**How it plays.**
+
+- Every sign Zip absorbs is **read into his engine**. Zip says what it learned ("Read it. My
+  engine learned “long bridge” ×3").
+- At a place, Zip **picks only the first word**, from the words he has absorbed.
+- After that, the ring shows **what the engine suggests next**, as a ranked column:
+  - each suggestion has a bar and a count ("bridge ▮▮▮▮ ×4");
+  - a word whose count has grown since it was last shown says so ("+3");
+  - only the **top three** can be said. Rarer words are shown dimmed. Tap one and Zip explains:
+    "“bridge” after “long”? Read it once. “way”, 3 times. It says the likely ones."
+- **Let it finish** adds the engine's favourite word, one at a time, until a thing is named.
+  This is how a language model generates text.
+- The phrase then goes to `kit/utter.ts`, as before, and makes a thing (or nothing) in its own
+  funny way. The two kits stack: the engine decides what *can* be said, utter decides what it
+  *makes*.
+
+**The three places**, one idea each:
+
+| Place | What the engine does there | Wrong things it will happily say |
+| --- | --- | --- |
+| The first gap | offers what it read after a word ("stone" → bridge, steps) | "stone steps" (one stone, "steps sold separately"), "rope burns" |
+| The wide gap | "long bridge" was read once, "long way" three times: it won't say "long bridge". Reading the builders' song (three more) lifts "bridge" to the top | "long way", "long ago" (it made… the past), "long noodle" (flops) |
+| The dark doorway | after "paper" its favourite is "plane"; left to finish it says "paper plane". Its likeliest word isn't always the one you need: you steer | "paper plane", "paper cut" (in mid-air, somehow, ow) |
+
+The engine arrives with some reading already (a few phrasebook lines). That is why it leans
+toward "long way" and "paper plane", which makes this a small version of pre-training. The
+first place teaches by doing (it works first time); the second and third need their lesson.
+
+**Proofs.**
+
+- `tools/ngramcheck.mjs` (in `npm run check`) proves each place is solvable in **every** reading
+  order. Order matters because ties go to the pair read first. It also proves the wide gap and
+  the doorway **can't** be solved without their key reading, so neither lesson can be skipped,
+  and it lists the wrong things the engine will say.
+- `tools/ngramlab.mjs` plays the lab in a browser and checks 20 things.
+- `kittest` covers the engine itself: clauses, ranking, ties, frequency, finishing, and n = 3
+  with fallback.
+
+**The learning track this starts** (my proposal; Desmic will refine it after playing):
+
+1. **Pairs:** the next word comes from what it read. Built here.
+2. **Frequency:** more reading makes a phrase likelier. Built here.
+3. **Steering:** its favourite isn't always right. Built here.
+4. **Feeding back:** what Zip says is read back in, so a habit grows.
+5. **Two words back:** an engine upgrade to n = 3, which `kit/ngram.ts` already supports. "long
+   way" and "long bridge" stop competing once the engine can see "the long…" vs "build a long…".
+6. **Working memory:** the context window, from round 3.
+7. **Temperature:** let it pick a less likely word on purpose.
+8. **Word pieces.**
+
+Engine upgrades are the learning track. Things Zip makes that fit into him (a lantern for a
+headlamp) could be the world's power-ups. A story hook: the Warden poisons what the engine reads.
+
+**Blind run 10** (6 Oct, the first build):
+
+- **Unprompted:** make, reads, next, frequency, steer, and the model itself ("basically
+  autocomplete… it never says so outright, which I liked").
+- **Missed:** `more`, because a tap from across the gap read the song early, so no lesson was
+  needed.
+- **Felt it:** clever. **Unclear:** funny, because no failure happened.
+- **Fixed after the run:** tap reach, no tapping during the speak shot, and the reading line.
+  Details are in `tools/AI-PLAYTEST.md`.
+
+**Not yet tried:**
+
+- feeding back;
+- n = 3 in play;
+- a place where the player has to write or choose the text the engine reads, rather than just
+  absorb it.
 
 ## Open questions for Desmic
 

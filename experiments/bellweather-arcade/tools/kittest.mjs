@@ -47,6 +47,19 @@ t('utter: with a working memory, the oldest word is forgotten', (m => m.forgotte
 t('utter: ...and what fits is read whole', (m => m.works && !m.forgotten.length)(speak(U, ['long', 'bridge'], mem)));
 t('utter: without one, the first words stay', (m => m.thing === 'noodle' && !m.forgotten.length)(speak(U, ['long', 'paper', 'bridge'], { ...gap, slots: 2 })));
 
+// kit/ngram.ts: a next-word engine learns pairs by reading and says only its likeliest few
+const { createNgram, clauses } = await kit('ngram.js');
+const ng = createNgram(2); ['a long way.', 'a long way.', 'long ago.', 'long noodle.', 'long bridge.'].forEach(x => ng.read(x));
+t('ngram: no pair is counted across a full stop or comma', clauses('long. bridge, way')[0].length === 1 && ng.count('way', 'long') === 0);
+t('ngram: suggestions are what it read after the word, most often first', (s => s[0].word === 'way' && s[0].count === 2)(ng.suggest(['long'])));
+t('ngram: only the likeliest few are sayable; rarer ones are shown, not said', (s => s.length === 4 && s.filter(x => x.ok).length === 2)(ng.suggest(['long'], 2, 5)));
+t('ngram: ties go to the pair read first', ng.suggest(['long'])[1].word === 'ago');
+ng.read('long bridge, long bridge, long bridge.');
+t('ngram: reading more of a pair makes it likelier', ng.suggest(['long'])[0].word === 'bridge' && ng.count('long', 'bridge') === 4);
+t('ngram: let it finish takes its favourite each time and stops when told', ng.complete(['a'], 3).join(' ') === 'a long bridge' && ng.complete(['a'], 3, w => w.length === 2).join(' ') === 'a long');
+t('ngram: it suggests nothing after a word it never read anything after', ng.suggest(['zebra']).length === 0);
+const ng3 = createNgram(3); ng3.read('a long way. the long bridge.');
+t('ngram: a bigger n reads two words back, and falls back to one', ng3.suggest(['the', 'long'])[0].word === 'bridge' && ng3.suggest(['so', 'long'])[0].word === 'way');
 R.write(null);
 console.log(`\n${fails} failures`);
 process.exit(fails ? 1 : 0);

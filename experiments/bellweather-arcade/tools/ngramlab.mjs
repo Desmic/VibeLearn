@@ -1,0 +1,88 @@
+// The next-word lab (lab=ngram), played: absorbs each sign (which the engine reads), opens the
+// word ring, picks a first word and the engine's suggestions (data-action tags), and checks what
+// the kit decided is what the world shows: suggestions are what was read; a word read too rarely
+// is shown but not said; reading the builders' song lifts "long bridge" to the top; "let it
+// finish" says the engine's favourite; working things can be walked across; the doorway lights.
+//   bash tools/build.sh && node tools/ngramlab.mjs [--input touch] [--out /tmp/nglab]
+import { harness } from './harness.mjs';
+const h = await harness({ title: 'Next-word lab', outDefault: '/tmp/nglab', tool: 'ngramlab', lane: 'flow' });
+const { page } = h;
+const sim = s => page.evaluate(s => window.__arcade.simulate(s), s);
+await h.open('&lab=ngram'); await page.waitForTimeout(1500);
+await h.shot('start');
+const lab = () => page.evaluate(() => ({ sites: window.__vlUtterLab.sites.map(s => ({ id: s.s.id, from: [s.from.x, s.from.z], solved: s.solved })), sources: window.__vlUtterLab.sources, carried: window.__vlUtterLab.echo.carried }));
+const barks = () => page.evaluate(() => [...document.querySelectorAll('.speech.bark')].filter(e => !e.hidden).map(e => e.textContent).join(' | '));
+const chips = () => page.evaluate(() => [...document.querySelectorAll('.wr-chip')].map(e => (e.classList.contains('rare') ? '·' : '') + (e.dataset.w ?? 'finish') + (e.querySelector('small')?.textContent ?? '')));
+const absorb = async src => {
+  const r = await h.walkTo(src.at, { near: 1.3 });
+  for (const yaw of [0, .8, -.8, 1.6, -1.6, 2.4, -2.4, 3.14]) {
+    const p = await h.player(); await h.pose(p[0], p[2], Math.atan2(-(src.at[0] - p[0]), -(src.at[1] - p[2])) + yaw * .25);
+    await sim(.3); if (await page.locator('.context-act', { hasText: `“${src.word}”` }).isVisible()) break;
+  }
+  await h.act(`“${src.word}”`).catch(() => {}); await sim(1.5);
+  return (await lab()).carried.includes(src.word) || console.log('  (could not absorb', src.word, JSON.stringify(r), ')');
+};
+// the Speak prompt moves with the camera, so a test tap can land where it just was: tap again until the ring is up
+const openRing = async site => {
+  await h.walkTo(site.from, { near: .6 });
+  for (let i = 0; i < 4; i++) { await h.act('Speak', 20000); await page.waitForTimeout(300); if (await page.evaluate(() => window.__vlUtterLab.open)) return; await sim(.5); }
+};
+const tap = w => h.press(page.locator(`.wr-chip[data-w="${w}"]`));
+const speakNow = async name => {
+  await page.waitForTimeout(300); await h.shot(name + '-ring');
+  await h.press(page.locator('[data-action="speak"]'));
+  for (let i = 0; i < 8; i++) { await sim(.4); await page.waitForTimeout(250); }
+  await h.shot(name + '-made');
+  await h.until(() => page.evaluate(() => !window.__vlUtterLab.busy), 12);
+  await sim(3); await h.shot(name + '-after');
+  const m = (await page.evaluate(() => window.__vlUtterLog)).at(-1);
+  console.log(name, m.words.join(' '), '→', m.reason, m.thing); return m;
+};
+const say = async (site, words, name) => { await openRing(site); for (const w of words) await tap(w); return speakNow(name); };
+const by = id => L.sources.find(s => s.id === id);
+let L = await lab();
+const [A, B, C] = L.sites;
+
+// 1. the first gap: the engine offers what it has read after a word
+await absorb(by('stone-sign')); await absorb(by('rope-coil'));
+L = await lab(); h.check('reading signs gives first words: "stone" and "rope"', ['stone', 'rope'].every(w => L.carried.includes(w)), L.carried.join(', '));
+await openRing(A);
+h.check('the ring asks for a first word, offering only the words carried', (c => c.join() === 'stone,rope')(await chips()), (await chips()).join(' '));
+await tap('stone'); await page.waitForTimeout(200);
+const s1 = await chips(); await h.shot('a-suggest');
+h.check('after "stone", the engine suggests what it read after it, with counts', s1.some(c => c.startsWith('bridge×1')) && s1.some(c => c.startsWith('steps×1')), s1.join(' '));
+await tap('steps'); h.check('"stone steps" makes a stone (the wrong kind of thing)', (await speakNow('a-steps')).reason === 'wrong-kind');
+h.check('"stone bridge" crosses the first gap', (await say(A, ['stone', 'bridge'], 'a-bridge')).works);
+const w1 = await h.walkTo([71, -40], { near: 1 }); h.check('the stone bridge can be walked across', w1.ok, JSON.stringify(w1), 'fail', 'world');
+
+// 2. the wide gap: frequency decides what it will say
+await absorb(by('drop-sign'));
+await openRing(B); await tap('long'); await page.waitForTimeout(200);
+const s2 = await chips(); await h.shot('b-before-song');
+h.check('after "long", its favourites are what it read most ("way" first); "bridge" is shown but too rare to say', s2[0]?.startsWith('way×3') && s2.some(c => c.startsWith('·bridge×1')), s2.join(' '));
+await tap('bridge'); await page.waitForTimeout(300);
+h.check('tapping the rare word: it is not said, and Zip says why', (await page.evaluate(() => window.__vlUtterLab.ring.slots.length)) === 1 && /once/.test(await barks()), await barks());
+await tap('noodle'); h.check('"long noodle" gives way (the engine likes noodles)', (await speakNow('b-noodle')).reason === 'too-weak');
+await absorb(by('song-board'));
+h.check('reading the builders\' song: Zip says what it learned ("long bridge" ×3)', /long bridge” ×3/.test(await barks()), await barks());
+await openRing(B); await tap('long'); await page.waitForTimeout(200);
+const s3 = await chips(); await h.shot('b-after-song');
+h.check('now "bridge" is its favourite after "long", and shows how much it grew', s3[0]?.startsWith('bridge×4') && /\+3/.test(s3[0]), s3.join(' '));
+await h.press(page.locator('[data-action="finish"]')); for (let i = 0; i < 6; i++) { await sim(.2); await page.waitForTimeout(120); }
+h.check('"let it finish" adds its favourite: "long bridge"', (await page.evaluate(() => window.__vlUtterLab.ring.slots)).join(' ') === 'long bridge');
+h.check('"long bridge" crosses the wide gap', (await speakNow('b-finish')).works);
+const w2 = await h.walkTo([85.6, -40], { near: 1 }); h.check('the long bridge can be walked across', w2.ok, JSON.stringify(w2), 'fail', 'world');
+
+// 3. the doorway: its favourite isn't what you need
+await absorb(by('paper-note'));
+await openRing(C); await tap('paper'); await page.waitForTimeout(200);
+const s4 = await chips();
+h.check('after "paper": "plane" first, "lantern" sayable but not its favourite', s4[0]?.startsWith('plane') && s4.some(c => c.startsWith('lantern')), s4.join(' '));
+await h.press(page.locator('[data-action="finish"]')); for (let i = 0; i < 6; i++) { await sim(.2); await page.waitForTimeout(120); }
+h.check('left to finish, it says "paper plane" (a plane, the wrong kind)', (m => m.words.join(' ') === 'paper plane' && m.reason === 'wrong-kind')(await speakNow('c-plane')));
+h.check('"paper lantern" lights the doorway', (await say(C, ['paper', 'lantern'], 'c-lantern')).works);
+h.check('the lab says it is done', /lab is done/.test(await h.goal() ?? ''), await h.goal());
+await h.until(() => page.evaluate(() => !!document.querySelector('.star-row')), 12);
+h.check('a summary shows what was done', await page.evaluate(() => !!document.querySelector('.star-row')));
+await h.shot('end');
+await h.finish();

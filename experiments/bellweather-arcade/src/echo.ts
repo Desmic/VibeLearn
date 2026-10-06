@@ -20,6 +20,10 @@ interface Opts {
   follow?: Record<string, () => T.Vector3 | null>;
   /** ask the rules; true if the word was absorbed */
   absorb: (word: string) => boolean;
+  /** how far away a word can be tapped to absorb it (default 14 m); a small test area keeps it to the platform you're on */
+  reachTap?: number;
+  /** false while taps should not absorb (e.g. while a made thing is being shown) */
+  canTap?: () => boolean;
   onAbsorbed?: (word: string, source: WordSource) => void;
 }
 
@@ -59,11 +63,11 @@ export function buildEcho(scene: T.Scene, o: Opts) {
     return true;
   };
   const untap = g.onTap(ray => {
-    if (!enabled || flying) return false;
+    if (!enabled || flying || o.canTap?.() === false) return false;
     const hits = ray.intersectObjects(motes.filter(m => !m.taken).map(m => m.hit), false);
     const m = motes.find(x => x.hit === hits[0]?.object); if (!m) return false;
     const z = o.zip(), p = where(m);
-    if (Math.hypot(p.x - z.x, p.z - z.z) > REACH_TAP) { g.toast(`Too far to hear “${m.s.word}”. Walk closer!`, 1400); return true; }
+    if (Math.hypot(p.x - z.x, p.z - z.z) > (o.reachTap ?? REACH_TAP)) { g.toast(`Too far to hear “${m.s.word}”. Walk closer!`, 1400); return true; }
     return take(m);
   });
 

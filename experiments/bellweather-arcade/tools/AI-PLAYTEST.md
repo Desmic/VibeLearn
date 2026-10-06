@@ -53,6 +53,34 @@ how much (below).
 6. `{"type":"end"}` writes `report.md` (with the whole interview), `trace.md` and the standard
    report.
 
+**Story, feel and objective measures (added 6 Oct).** Desmic asked whether the interview covers
+the story, what was learned, and the fun (the opening, the feel, the rewards, intuitive play),
+and how sure we are that it came across as intended. Three things answer that:
+
+- **Experience items.** A game's manifest (`intent.story`, `intent.experience`) and an utterance
+  spec (`experience`) list what a newcomer should *feel* ("the first minute makes you curious",
+  "a failure makes you laugh"). They are drafts until the designer confirms them. The interviewer
+  marks each one `felt | asked | not | unclear` with the tester's words as evidence. Feelings are
+  where an AI tester is least trustworthy, so these go to the `feel` lane **as evidence for a
+  person to confirm**, never as a pass. Only `not` (the tester said the opposite) warns.
+- **More questions in the interview** (12–16 in all):
+  - "what were you thinking in the first minute?";
+  - would they keep going or put it down;
+  - "what was it like to [their words]?";
+  - characters, named only as the tester named them;
+  - a **teach-back** ("how would you explain [their word] to a friend about to play?"). This
+    catches a wrong mental model that a yes/no question would miss;
+  - after the ratings, "what did that number mean to you?";
+  - after the reveal, "what, if anything, would you say it taught you?".
+- **Play metrics**, measured from the log and not from what the tester said:
+  - steps;
+  - where they stopped, and whether they failed;
+  - steps per goal and the step of first progress;
+  - stalls (3+ unchanged screens) and repeated taps.
+
+  These head the trace the interviewer reads and the report ("The play, measured"). A tester
+  who says "it was intuitive" after 30 stalled steps is caught by the numbers.
+
 **Directed tests** (`--protocol directed`, e.g. the loophole hunter) still exist for testers who
 are *meant* to be told what to try. Their findings count for robustness and learning, never as
 evidence of what a newcomer understood.
@@ -289,3 +317,30 @@ fix put "long" after the bridge, and it was too late. The engine's guess was mis
 Testing-tool note: the 3D word labels in the scene (on signs and objects) aren't in the play log's
 text, because they're drawn in WebGL, not the page. The interviewer checks the screenshots before
 calling a quoted word invented.
+
+## Blind run 10: the next-word lab (6 Oct 2026; `--intent ngram --start '&lab=ngram'`; commuter)
+
+This was the first run with the new interview (experience items, metrics). The tester stopped
+after 31 steps ("Cute. Autocomplete as magic words. Wish there was more."). Without being asked,
+it named the idea as predictive text, and it called choosing "lantern ×1" over "plane ×4" "the
+most satisfying moment". It also found three real problems:
+
+- **A word from the next platform could be tapped from across the gap.** It absorbed the
+  builders' song before the first place. That skipped both lessons: "bridge" alone crossed the
+  first gap, and "long bridge" was already the favourite at the second. It never met the
+  frequency lesson (`more`: missed) or a funny failure. **Fixed:**
+  - tapping a word now reaches 5 m in this lab (`LabVariant.reachTap`);
+  - taps don't absorb while a made thing is being shown. A tap during the shot had looked like
+    the cause of the bridge.
+- **Zip's reading line contradicted the ring.** After the song he said "Now my engine knows
+  what comes after 'bridge'", but the ring said nothing comes after it. **Fixed:** the reading
+  line always names the pairs it learned.
+- **"Mira would laugh"** at the end means nothing in a lab. The lab now has its own end line.
+
+**Testing-tool lesson:** the interviewer's "What were you thinking in the first minute?"
+tripped a safety filter on the AI tester twice. That ended its session after two answers, so
+the interview was only recall. The question now reads "What did you make of the first
+minute?", and the brief says never to ask an AI player about its "thinking". Findings were
+graded from the two answers and the log, and the report says so.
+
+Metrics: 31 steps; first progress at step 7; one stall (steps 1–5); no repeated taps.

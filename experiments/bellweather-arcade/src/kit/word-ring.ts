@@ -29,6 +29,14 @@ export interface WordRingOpts {
   onClose?: () => void;
   /** a line the ring says about itself, e.g. when full ("Full. My engine holds 3 words.") */
   say?: (text: string) => void;
+  /** predictive mode (a next-word engine, kit/ngram.ts): the speaker picks only the first word;
+   *  after that the chips are what the engine suggests next, likeliest first, with how often it
+   *  has read each one (`ok`: it will say it; the rest it has read too rarely) */
+  suggest?: (said: string[]) => { word: string; count: number; ok: boolean; grew?: number }[];
+  /** predictive mode: "let it finish", the phrase the engine would make from these words */
+  finish?: (said: string[]) => string[];
+  /** predictive mode: a word was tapped that the engine won't say here */
+  onRare?: (word: string, said: string[]) => void;
 }
 
 export function createWordRing(o: WordRingOpts) {
@@ -51,22 +59,60 @@ export function createWordRing(o: WordRingOpts) {
   const drops: { el: HTMLElement; t: number; x: number; y: number }[] = [];
   const v = new T.Vector3(), right = new T.Vector3(), up = new T.Vector3(), fwd = new T.Vector3();
 
+  // the chips on offer: the words carried, or (predictive mode, after the first word) what the engine suggests next
+  type Chip = { w: string; count?: number; ok: boolean; grew?: number; finish?: boolean };
+  let offer: Chip[] = [], offerKey = '';
+  const predictive = () => !!o.suggest && slots.length > 0;
+  const offered = (): Chip[] => {
+    if (!predictive()) return carried.map(w => ({ w, ok: true }));
+    if (slots.length >= N) return [];
+    const next = o.suggest!(slots).filter(s => !slots.includes(s.word)).map(s => ({ w: s.word, count: s.count, ok: s.ok, grew: s.grew }));
+    return next.some(s => s.ok) && o.finish && o.finish([...slots]).length > slots.length ? [...next, { w: 'finish', ok: true, finish: true }] : next;   // offered only when it would add something
+  };
+  const chips = () => {
+    const list = offered(), key = list.map(c => `${c.w}:${c.count ?? ''}:${c.ok}`).join('|');
+    if (key === offerKey) return; offerKey = key; offer = list;
+    for (const e of chipEls.values()) e.remove(); chipEls.clear();
+    const max = Math.max(1, ...list.map(c => c.count ?? 0));
+    list.forEach((c, i) => {
+      const b = document.createElement('button'); b.className = 'wr-chip';
+      if (c.finish) { b.classList.add('wr-finish'); b.dataset.finish = '1'; b.dataset.action = 'finish'; b.innerHTML = `<kbd aria-hidden="true">${i + 1}</kbd>let it finish…`; }
+      else if (c.count !== undefined) {
+        b.classList.add('next'); b.classList.toggle('rare', !c.ok); b.dataset.w = c.w; b.dataset.action = 'say.' + c.w;
+        // the bar: what it came knowing, then (gold) what it has read since
+        const was = c.count - (c.grew ?? 0);
+        b.innerHTML = `<kbd aria-hidden="true">${i + 1}</kbd>${c.w}<span class="wr-bar" aria-hidden="true"><i style="width:${Math.round(100 * was / max)}%"></i><b style="width:${Math.round(100 * (c.grew ?? 0) / max)}%"></b></span><small>×${c.count}${c.grew ? ` <em>+${c.grew}</em>` : ''}</small>`;
+        if (!c.ok && list[i - 1]?.ok) b.classList.add('first-rare');
+        b.setAttribute('aria-label', `${c.w}, read ${c.count} time${c.count === 1 ? '' : 's'} after “${slots[slots.length - 1]}”${c.ok ? '' : ', too rarely to say'}`);
+      } else { b.dataset.w = c.w; b.dataset.action = 'say.' + c.w; b.innerHTML = `<kbd aria-hidden="true">${i + 1}</kbd>${c.w}`; }
+      root.appendChild(b); chipEls.set(c.finish ? '\u0000finish' : c.w, b);
+    });
+  };
   const build = () => {
-    for (const e of slotEls) e.remove(); for (const e of chipEls.values()) e.remove(); chipEls.clear();
+    for (const e of slotEls) e.remove(); for (const e of chipEls.values()) e.remove(); chipEls.clear(); offerKey = '\u0000';
     slotEls = Array.from({ length: N }, (_, i) => { const b = document.createElement('button'); b.className = 'wr-slot'; b.dataset.slot = String(i); root.appendChild(b); return b; });
-    carried.forEach((w, i) => { const b = document.createElement('button'); b.className = 'wr-chip'; b.dataset.w = w; b.dataset.action = 'say.' + w; b.innerHTML = `<kbd aria-hidden="true">${i + 1}</kbd>${w}`; root.appendChild(b); chipEls.set(w, b); });
     render();
   };
   const render = () => {
+    chips();
     slotEls.forEach((b, i) => { const w = slots[i]; b.textContent = w ?? ''; b.classList.toggle('filled', !!w); b.dataset.action = w ? 'unsay.' + i : ''; b.setAttribute('aria-label', w ? `Take “${w}” out` : `Empty slot ${i + 1}`); b.disabled = busy || !w; });
     for (const [w, b] of chipEls) { const used = slots.includes(w); b.classList.toggle('used', used); b.disabled = busy || used; }
-    const full = slots.length >= N;
-    count.textContent = full ? (forget ? `${N} / ${N} words · the next one pushes out “${slots[0]}”` : `${N} / ${N} words · full`) : `${slots.length} / ${N} words`; count.classList.toggle('full', full);
+    const full = slots.length >= N, last = slots[slots.length - 1];
+    count.textContent = full ? (forget ? `${N} / ${N} words · the next one pushes out “${slots[0]}”` : `${N} / ${N} words · full`)
+      : o.suggest && !slots.length ? `0 / ${N} words · pick a first word`
+      : predictive() && !offer.length ? `${slots.length} / ${N} words · nothing I’ve read comes after “${last}”`
+      : predictive() ? `${slots.length} / ${N} words · what comes after “${last}”` : `${slots.length} / ${N} words`;
+    count.classList.toggle('full', full);
     slotEls.forEach((b, i) => b.classList.toggle('fading', forget && full && i === 0));   // the word that goes next, dimmer
     core.disabled = busy || !slots.length; core.classList.toggle('ready', !!slots.length && !busy);
   };
   const load = (w: string) => {
     if (busy || slots.includes(w)) return;
+    if (predictive()) {   // the engine says only what it has read after the last word, and only its likeliest
+      const c = offer.find(x => x.w === w && !x.finish);
+      if (!c) return;
+      if (!c.ok) { shake = .3; o.cue?.('full'); o.onRare?.(w, [...slots]); return; }
+    }
     if (slots.length >= N && !forget) { shake = .45; count.classList.remove('bump'); void count.offsetWidth; count.classList.add('bump'); o.cue?.('full'); o.say?.(`Full. My engine holds ${N} words.`); return; }
     if (slots.length >= N) {   // working memory: the oldest word slips out of the ring and falls away
       const old = slots.shift()!, at = slotEls[0].getBoundingClientRect(), host = o.host.getBoundingClientRect();
@@ -78,12 +124,20 @@ export function createWordRing(o: WordRingOpts) {
     forgotten = forgotten.filter(x => x !== w);   // said again: back in memory
     slots.push(w); o.cue?.('load'); render(); const b = slotEls[slots.length - 1]; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
   };
-  const unload = (i: number) => { if (busy || !slots[i]) return; slots.splice(i, 1); o.cue?.('unload'); render(); };
+  // predictive mode: taking a word out takes out what the engine said after it too
+  const unload = (i: number) => { if (busy || !slots[i]) return; if (o.suggest) slots.length = i; else slots.splice(i, 1); o.cue?.('unload'); render(); };
+  // let it finish: the engine adds its likeliest words, one at a time, so it reads like it's thinking
+  let finishing: string[] = [], finishT = 0;
+  const finish = () => { if (busy || !o.finish || finishing.length) return; finishing = o.finish([...slots]).slice(slots.length); finishT = 0; if (!finishing.length) o.cue?.('full'); };
   const speak = () => { if (busy || !slots.length) return; busy = true; readT = 0; o.cue?.('speak'); render(); };
 
+  // the tap that opened the ring can arrive again as a click on whatever piece now sits under the
+  // finger (a phone's synthesized click): ignore presses in the first moment after opening
+  let openedAt = 0;
   const press = (b: HTMLButtonElement | null) => {
-    if (!b || b.disabled) return;
-    if (b.dataset.w) load(b.dataset.w);
+    if (!b || b.disabled || performance.now() - openedAt < 450) return;
+    if (b.dataset.finish) finish();
+    else if (b.dataset.w) load(b.dataset.w);
     else if (b.dataset.slot !== undefined) unload(+b.dataset.slot);
     else if (b === core) speak();
     else if (b === shut) api.close();
@@ -96,7 +150,7 @@ export function createWordRing(o: WordRingOpts) {
   root.addEventListener('click', e => { if (performance.now() - touched < 600) return; press((e.target as HTMLElement).closest('button')); });
   const onKey = (e: KeyboardEvent) => {
     if (root.hidden) return;
-    const k = +e.key; if (k >= 1 && k <= carried.length) { load(carried[k - 1]); e.preventDefault(); e.stopImmediatePropagation(); }
+    const k = +e.key; if (k >= 1 && k <= offer.length) { const c = offer[k - 1]; if (c.finish) finish(); else load(c.w); e.preventDefault(); e.stopImmediatePropagation(); }
     else if (e.key === 'Backspace') { unload(slots.length - 1); e.preventDefault(); }
     else if (e.key === 'Enter' || e.key === ' ' || e.key === 'e' || e.key === 'E') { speak(); e.preventDefault(); e.stopImmediatePropagation(); return; }
     else if (e.key === 'Escape') { api.close(); e.preventDefault(); e.stopImmediatePropagation(); }
@@ -122,8 +176,8 @@ export function createWordRing(o: WordRingOpts) {
     open(words: string[], n: number, start: string[] = [], opts: { forget?: boolean; keepStart?: boolean } = {}) {
       // keepStart: the start words stay even if the speaker doesn't carry them (words someone else left in the engine)
       carried = [...words]; N = n; slots = start.filter((w, i) => (opts.keepStart || carried.includes(w)) && start.indexOf(w) === i).slice(-n); busy = false; readT = -1;
-      forget = !!opts.forget; forgotten = []; build();
-      root.hidden = false; holo.visible = true; cone.mesh.visible = true; t = 0; o.cue?.('open');
+      forget = !!opts.forget; forgotten = []; finishing = []; build();
+      root.hidden = false; holo.visible = true; cone.mesh.visible = true; t = 0; openedAt = performance.now(); o.cue?.('open');
     },
     close() {
       if (root.hidden) return;
@@ -134,6 +188,7 @@ export function createWordRing(o: WordRingOpts) {
     tick(dt: number) {
       if (root.hidden) return;
       t += dt; shake = Math.max(0, shake - dt);
+      if (finishing.length) { finishT += dt; if (finishT > .38) { finishT = 0; const w = finishing.shift()!; if (slots.length < N && !slots.includes(w)) { slots.push(w); o.cue?.('load'); render(); const b = slotEls[slots.length - 1]; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); } } }
       for (const d of [...drops]) {   // a forgotten word falls away and fades
         d.t += dt; d.el.style.transform = `translate(${(d.x - 14 * d.t).toFixed(1)}px, ${(d.y + 90 * d.t * d.t).toFixed(1)}px) translate(-50%, -50%) rotate(${(-20 * d.t).toFixed(1)}deg)`; d.el.style.opacity = String(Math.max(0, 1 - d.t / 1.2));
         if (d.t > 1.2) { d.el.remove(); drops.splice(drops.indexOf(d), 1); }
@@ -153,7 +208,9 @@ export function createWordRing(o: WordRingOpts) {
       put(shut, cx + Math.min(W / 2 - 30, (N - 1) / 2 * SPX + 64), cy - 84);
       // the words carried: rows below the ring, four to a row
       const ws = [...chipEls.values()], perRow = W < 520 ? 4 : 6;
-      ws.forEach((b, i) => {
+      // predictive mode: the engine's suggestions in one column, likeliest at the top, like a ranking
+      if (predictive()) { let gap = 0; ws.forEach((b, i) => { if (b.classList.contains('first-rare')) gap = 18; put(b, cx, cy + 88 + (i * 46 + gap) * grow); }); }
+      else ws.forEach((b, i) => {
         const row = Math.floor(i / perRow), k = i % perRow, nRow = Math.min(perRow, ws.length - row * perRow);
         put(b, cx + (k - (nRow - 1) / 2) * Math.min(96, (W - 24) / nRow) * grow, cy + 96 + row * 54 + 8 * Math.abs(k - (nRow - 1) / 2));
       });

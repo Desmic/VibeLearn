@@ -5,7 +5,7 @@
 // are exposed except moving the stick, which uses the game's fast-forward hook.
 //
 //   node tools/playserver.mjs [--port 7788] [--root out] [--out playtest] [--input touch]
-//        [--persona commuter] [--protocol blind|directed] [--intent game|utter] [--start '&lab=utter']
+//        [--persona commuter] [--protocol blind|directed] [--intent game|utter|ngram] [--start '&lab=utter']
 //
 // Two protocols (tools/AI-PLAYTEST.md):
 //   blind (default): the tester gets only GET /brief (tools/playtest/tester.md + a persona: no
@@ -39,7 +39,7 @@ import http from 'node:http';
 import { writeFileSync, appendFileSync, readFileSync } from 'node:fs';
 import { designVocabulary, questionLeaks, metWords } from './lib/leak.mjs';
 import { harness, arg } from './harness.mjs';
-import { buildIntent, buildUtterIntent } from './intent.mjs';
+import { buildIntent, buildUtterIntent, buildNgramIntent } from './intent.mjs';
 import { resolve as resolvePath } from 'node:path';
 import { pathToFileURL as toUrl } from 'node:url';
 
@@ -53,11 +53,15 @@ const PERSONAS = JSON.parse(readFileSync('tools/playtest/personas.json', 'utf8')
 const PERSONA = arg('persona', PROTOCOL === 'blind' ? 'commuter' : 'newcomer');
 if (PROTOCOL === 'blind' && !PERSONAS[PERSONA]) throw Error(`--persona must be one of ${Object.keys(PERSONAS).join(', ')} for a blind test`);
 const MAX = +arg('max', 80);
-// --intent utter: the intent of the utterance test area (lab=utter) instead of the whole game's
+// --intent utter|ngram: the intent of a test area (lab=utter, lab=ngram) instead of the whole game's
 const INTENT = arg('intent', 'game');
 let intentCache = null;
 const intent = async () => {
   if (intentCache) return intentCache;
+  if (INTENT === 'ngram') {
+    const { NGRAM_LAB } = await import(toUrl(resolvePath(arg('root', 'out'), 'src/worlds/ngram-lab.js')).href);
+    return (intentCache = buildNgramIntent(NGRAM_LAB));
+  }
   if (INTENT !== 'utter') return (intentCache = buildIntent(GAME));
   const { UTTER_LAB } = await import(toUrl(resolvePath(arg('root', 'out'), 'src/worlds/utter-lab.js')).href);
   return (intentCache = buildUtterIntent(UTTER_LAB));
@@ -94,6 +98,8 @@ async function observe() {
       screen: [innerWidth, innerHeight],
       // where the player stands (for the play log and replays only; never sent to a blind tester)
       at: (() => { try { const p = window.__arcade?.snapshot?.().position; return p ? p.map(v => +v.toFixed(2)) : null; } catch { return null; } })(),
+      // which way the camera looks (degrees), to measure turns the player didn't make
+      cam: (() => { try { const q = window.__arcade?.snapshot?.(); return q?.camera && q.position ? Math.round(Math.atan2(q.camera[0] - q.position[0], q.camera[2] - q.position[2]) * 180 / Math.PI) : null; } catch { return null; } })(),
       // everything written on the screen, whatever the game calls it (speech bubbles, counters, signs):
       // visible text outside buttons, in page order. Game-agnostic: no class names needed.
       writing: (() => { const out = [], seen = new Set();
@@ -179,9 +185,40 @@ function met() {
 let designCache = null;
 const design = async () => designCache ??= designVocabulary({ nouns: GAME.nouns ?? [], intents: [(await intent()).md, ...(await intent()).items.map(i => i.text)] });
 
+/** objective numbers from the play log: where the time went, without asking anyone */
+function metrics() {
+  const log = playLog(), goals = [], stalls = [], repeats = [], turns = []; let cur = null, failed = 0, runFrom = null, prevSig = null, lastAct = '', run = 0, prevCam = null, looked = false;
+  for (const e of log) {
+    if (e.observe) {
+      const g = e.observe.goal ?? '(no goal shown)';
+      if (!cur || cur.goal !== g) { cur = { goal: g, from: e.step, to: e.step }; goals.push(cur); } else cur.to = e.step;
+      const sig = JSON.stringify([e.observe.goal, e.observe.writing, e.observe.buttons]);
+      if (sig === prevSig) { runFrom ??= e.step - 1; } else { if (runFrom !== null && e.step - 1 - runFrom >= 3) stalls.push([runFrom, e.step - 1]); runFrom = null; }
+      prevSig = sig;
+      // the camera turning by itself: between two looks at the screen, with no drag to look
+      const cam = e.observe.cam;
+      if (cam != null && prevCam != null && !looked) { const d = Math.abs(((cam - prevCam + 540) % 360) - 180); if (d >= 30) turns.push({ step: e.step, deg: d }); }
+      prevCam = cam ?? prevCam; looked = false;
+    } else if (e.act) {
+      if (e.act.type === 'look') looked = true;
+      if (e.failed) failed++;
+      const k = JSON.stringify(e.act); run = k === lastAct && e.act.type !== 'think' ? run + 1 : 0; lastAct = k; if (run === 2) repeats.push({ step: e.step, act: e.act.type + (e.act.label ? ' “' + e.act.label + '”' : '') });
+    }
+  }
+  const steps = log.filter(e => e.observe).length;
+  return { steps, stoppedAt, failed, goals: goals.map(g => ({ goal: g.goal, steps: g.to - g.from + 1, from: g.from })), firstProgress: goals[1]?.from ?? null, stalls, repeats, turns };
+}
+function metricsMd(m) {
+  return [`- ${m.steps} steps; ${m.stoppedAt ? `put the phone down at step ${m.stoppedAt}` : 'did not stop on their own'}; first progress (the goal changed) at step ${m.firstProgress ?? '—'}; ${m.failed} action(s) that didn't work`,
+    `- steps per goal: ${m.goals.map(g => `“${g.goal}” ${g.steps}`).join(' · ')}`,
+    `- stretches with nothing on screen changing (3+ steps): ${m.stalls.map(([a, b]) => `${a}–${b}`).join(', ') || 'none'}`,
+    `- the same action 3+ times in a row: ${m.repeats.map(r => `step ${r.step} (${r.act})`).join(', ') || 'none'}`,
+    `- the camera turned 30°+ without a drag to look: ${m.turns?.length ? m.turns.map(t => `step ${t.step} (${t.deg}°)`).join(', ') : 'never'}`].join('\n');
+}
+
 /** the play log as text, for the interviewer: what was on screen, what they did, what they said */
 function trace() {
-  const L = [`# Play log (${PERSONA}; ${PROTOCOL}; stopped ${stoppedAt ? 'at step ' + stoppedAt : 'by the step limit'})`, ''];
+  const L = [`# Play log (${PERSONA}; ${PROTOCOL}; stopped ${stoppedAt ? 'at step ' + stoppedAt : 'by the step limit'})`, '', '## Metrics', metricsMd(metrics()), '', '## Steps', ''];
   let last = '', repeat = 0, prevAct = '';
   for (const e of playLog()) {
     if (e.observe) {
@@ -201,7 +238,8 @@ function trace() {
 }
 async function interviewerBrief() {
   const it = await intent();
-  return readFileSync('tools/playtest/interviewer.md', 'utf8').replaceAll('{port}', String(PORT)).replace('{intent}', it.md).replace('{items}', it.items.map(i => `- **${i.id}**: ${i.text}`).join('\n'));
+  return readFileSync('tools/playtest/interviewer.md', 'utf8').replaceAll('{port}', String(PORT)).replace('{intent}', it.md).replace('{items}', it.items.map(i => `- **${i.id}**: ${i.text}`).join('\n'))
+    .replace('{experience}', (it.experience ?? []).map(i => `- **${i.id}**${i.draft ? ' (draft)' : ''}: ${i.text}`).join('\n') || '- none stated');
 }
 function testerBrief() {
   const vs = page.viewportSize();
@@ -232,6 +270,9 @@ async function takeFindings(f) {
   const ids = (await intent()).items.map(i => i.id), items = Array.isArray(f.items) ? f.items : [];
   const missing = ids.filter(id => !items.some(i => i.id === id)), bad = items.filter(i => !LEVELS.includes(i.level));
   if (missing.length || bad.length) return [400, { error: `every intent item needs a level (${LEVELS.join('|')})${missing.length ? '; missing: ' + missing.join(', ') : ''}${bad.length ? '; bad level on: ' + bad.map(i => i.id).join(', ') : ''}` }];
+  const exIds = ((await intent()).experience ?? []).map(i => i.id), ex = Array.isArray(f.experience) ? f.experience : [];
+  const exMissing = exIds.filter(id => !ex.some(e => e.id === id)), exBad = ex.filter(e => !['felt', 'asked', 'not', 'unclear'].includes(e.level));
+  if (exMissing.length || exBad.length) return [400, { error: `every experience item needs a level (felt|asked|not|unclear)${exMissing.length ? '; missing: ' + exMissing.join(', ') : ''}${exBad.length ? '; bad level on: ' + exBad.map(e => e.id).join(', ') : ''}` }];
   if (!revealed) return [409, { error: 'reveal the intent (phase "reveal") before posting findings' }];
   findings = f; writeFileSync(`${OUT}/findings.json`, JSON.stringify(f, null, 1)); return [200, { ok: true }];
 }
@@ -248,10 +289,12 @@ function report() {
     const list = (a, f) => (a ?? []).map(f).join('\n') || '- none';
     const ivMd = interview.map(m => `**${m.role === 'player' ? 'Player' : `Interviewer (${m.phase})`}:** ${m.text}`).join('\n\n') || '_no interview_';
     const thinks = notes.filter(n => n.kind === 'think').map(n => `- (step ${n.step}) “${n.text}”`).join('\n') || '- none';
-    const kp = findings?.keepPlaying;
+    const kp = findings?.keepPlaying, ex = intentCache?.experience ?? [], M = metrics();
+    const exWords = { felt: 'felt it, unasked', asked: 'when asked', not: 'felt otherwise', unclear: 'unclear' };
+    const exMd = findings && ex.length ? ex.map(i => { const f = (findings.experience ?? []).find(x => x.id === i.id); return `- **${i.id}**${i.draft ? ' (draft)' : ''} — ${f ? exWords[f.level] : 'not graded'}: ${q(f?.evidence)}\n  _${i.text}_`; }).join('\n') : '- none stated';
     const md = `# Blind play-test (${PERSONA})\n\n${step} steps; ${stoppedAt ? `put the phone down at step ${stoppedAt}` : 'did not stop on their own'}. The tester was told only that it was a game it had never seen (tools/playtest/tester.md). ` +
       `The interviewer alone saw the intent; ${refusals.length} question${refusals.length === 1 ? ' was' : 's were'} refused for leaking before the reveal.\n\n` +
-      `## What they understood, by how it came out\n${items}\n\n## Keep playing\n${kp ? `- ${kp.score}/10; next part: **${kp.next}**. ${q(kp.why)}` : '- not asked'}\n\n` +
+      `## What they understood, by how it came out\n${items}\n\n## What they felt (for a person to confirm; an AI player can't feel motion, sound or delight)\n${exMd}\n\n## The play, measured\n${metricsMd(M)}\n\n## Keep playing\n${kp ? `- ${kp.score}/10; next part: **${kp.next}**. ${q(kp.why)}` : '- not asked'}\n\n` +
       `## Where they got stuck\n${list(findings?.stuck, s => `- (step ${s.step}) ${s.what} — ${q(s.evidence)}`)}\n\n## What they liked\n${list(findings?.liked, s => `- ${s.step ? `(step ${s.step}) ` : ''}${q(s.evidence)}`)}\n\n` +
       `## What they disliked\n${list(findings?.disliked, s => `- ${s.step ? `(step ${s.step}) ` : ''}${q(s.evidence)}`)}\n\n## Bugs\n${list(findings?.bugs, s => `- (step ${s.step}) ${s.what}`)}\n\n` +
       `## Surprises\n${list(findings?.surprises, s => `- ${s}`)}\n\n## How far to trust this\n${findings?.trust ?? '-'}\n\n## Said aloud while playing\n${thinks}\n\n` +
@@ -260,11 +303,13 @@ function report() {
     if (findings) {
       for (const i of it) { const f = findings.items.find(x => x.id === i.id); R.add(lv[f.level], `a newcomer understands: ${i.text}`, { detail: `${lvWords[f.level]}: ${f.evidence ?? ''}`, segment: AREA }); }
       if (kp) R.add(yn(kp.next), 'a newcomer would play the next part', { detail: `${kp.score}/10. ${kp.why ?? ''}` });
+      // experience: evidence for the feel lane, never a pass (people judge feel)
+      for (const i of ex) { const f = (findings.experience ?? []).find(x => x.id === i.id); if (f) R.add(f.level === 'not' ? 'warn' : 'unresolved', `a newcomer feels: ${i.text}`, { lane: 'feel', detail: `AI tester: ${exWords[f.level]}. ${f.evidence ?? ''}`, segment: AREA }); }
       for (const s of findings.stuck ?? []) R.add('warn', `stuck: ${s.what}`, { detail: `step ${s.step}. ${s.evidence ?? ''}` });
       for (const b of findings.bugs ?? []) R.add('fail', b.what, { lane: 'flow', detail: `step ${b.step}` });
     } else R.add('unresolved', 'what a newcomer understood (blind play and interview)', { detail: 'no findings posted' });
     R.add(interview.length ? 'pass' : 'unresolved', 'the play-test stayed blind until the reveal', { lane: 'system', detail: `${refusals.length} leaking question(s) refused; ${interview.filter(m => m.role === 'interviewer').length} asked` });
-    R.write(OUT, { by: 'agent', protocol: 'blind', persona: PERSONA, steps: step, stoppedAt, findings, interview, refusals, thinks: notes.filter(n => n.kind === 'think') });
+    R.write(OUT, { by: 'agent', protocol: 'blind', persona: PERSONA, steps: step, stoppedAt, findings, interview, refusals, metrics: M, thinks: notes.filter(n => n.kind === 'think') });
     return md;
   }
   const by = k => notes.filter(n => n.kind === k).map(n => `- (step ${n.step}) ${n.text}`).join('\n') || '- none';

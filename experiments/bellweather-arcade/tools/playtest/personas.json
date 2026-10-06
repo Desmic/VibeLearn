@@ -2,7 +2,7 @@
   "_about": "Blind play-test personas: who the tester is, never what to look for (tools/blindcheck.mjs lints these). The audience is adults.",
   "personas": {
     "commuter": "You are in your late twenties. You play quick games on your phone on the bus, a few minutes at a time.",
-    "explorer": "You are in your thirties and play a lot of console adventure games. You like wandering off the path.",
+    "explorer": "You are in your thirties and play a lot of console adventure games. You like poking around off the beaten track.",
     "rarely": "You are in your forties and rarely play video games. A relative asked you to try this one."
   }
 }

@@ -5,6 +5,7 @@ import { HOLO, glyph, holoMaterial, sparks, faceCamera } from './kit/holo';
 import { speak, lineFor, type Made, type UtterSpec } from './kit/utter';
 import { pickTarget } from './kit/target';
 import { createWordRing } from './kit/word-ring';
+import { createNgram, type NgramLabSpec } from './kit/ngram';
 import { buildEcho } from './echo';
 import type { WordSource } from './worlds/first-words-echo';
 
@@ -24,6 +25,8 @@ interface Opts {
   teleport: (x: number, z: number) => void;
   /** turn the follow camera (radians, the game's yaw) */
   setYaw: (y: number) => void;
+  /** turn the follow camera there smoothly, over a second or so (default: setYaw) */
+  turnTo?: (y: number) => void;
   spec: UtterSpec; sources: WordSource[];
   /** a variant of the test area, to compare designs (lab=utter-b) */
   variant?: LabVariant;
@@ -43,6 +46,16 @@ export interface LabVariant {
   intro?: string[];
   /** how close to a place Zip must be to speak there (default 2.2 m) */
   speakReach?: number;
+  /** opening the ring cuts to a shot of Zip from the front (default true). Off, the follow camera
+   *  stays put: run 11's tester felt every cut as "the camera swinging around" */
+  ringShot?: boolean;
+  /** how far away a word can be tapped (default: Echo's 14 m). Keep it under the gap to the next
+   *  platform, so each place's words are read there (a tester took the next place's word from
+   *  across the gap, run 10) */
+  reachTap?: number;
+  /** a next-word engine (lab=ngram): Zip picks the first word, the engine suggests the rest from
+   *  what it has read, and every word source he absorbs is read into it (kit/ngram.ts) */
+  ngram?: NgramLabSpec;
 }
 type Site = { s: UtterSpec['sites'][number]; at: T.Vector3; from: T.Vector3; solved: boolean; crossed?: boolean };
 
@@ -86,8 +99,27 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
     else if (src.id === 'stone') { const s = new T.Mesh(new T.DodecahedronGeometry(.4), mat('#a9a39a', { flatShading: true })); s.position.y = .3; grp.add(s); }
   }
   let firstWord = true;
-  const echo = buildEcho(scene, { guide: g, camera: o.camera, zip: o.zip, sources: o.sources, absorb: () => true,
-    onAbsorbed: w => { if (spec.lexicon[w]) later(.6, () => g.bark('Zip', firstWord ? `“${w}.” A word I can use.` : `Got “${w}”.`, 1.8)); firstWord = false; } });
+  // the next-word engine (lab=ngram): it starts with its own reading, then reads every sign Zip absorbs
+  const NG = V.ngram, engine = NG ? createNgram(NG.n) : null, read = new Set<string>();
+  NG?.pretrain.forEach(t => engine!.read(t));
+  const starts = new Set(o.sources.map(x => x.word.toLowerCase()));
+  const quote = (pairs: { pair: string[]; count: number }[]) => pairs.map(p => `“${p.pair.join(' ')}”${p.count > 1 ? ` ×${p.count}` : ''}`).join(' and ');
+  const echo = buildEcho(scene, { guide: g, camera: o.camera, zip: o.zip, sources: o.sources, absorb: () => true, reachTap: V.reachTap,
+    canTap: () => !busy && !ring.isOpen,   // not while a made thing is being shown (a tap then read as its cause, run 10)
+    onAbsorbed: (w, src) => {
+      if (engine) {   // what it learned, said as the pairs that start with a word Zip can start from
+        const fav = (a: string) => engine.suggest([a], 1, 1)[0]?.word;
+        const before = new Map([...starts].map(a => [a, fav(a)]));
+        const learned = engine.read(src.line); read.add(src.id);
+        const mine = learned.filter(p => starts.has(p.pair[0])).slice(0, 2);
+        // when reading changes what it likes best after a word, say so: that is the lesson of frequency
+        const won = learned.find(p => starts.has(p.pair[0]) && before.get(p.pair[0]) !== p.pair[1] && fav(p.pair[0]) === p.pair[1]);
+        const line = (spec.lines.read ?? 'Read it.').replace('{pairs}', quote(mine.length ? mine : learned.slice(0, 1)))
+          + (won && before.get(won.pair[0]) && spec.lines.favourite ? ' ' + spec.lines.favourite.replace('{word}', won.pair[1]).replace('{after}', won.pair[0]).replace('{was}', before.get(won.pair[0])!) : '');
+        later(.6, () => g.bark('Zip', line, won ? 4.2 : 3)); firstWord = false; return;
+      }
+      if (spec.lexicon[w]) later(.6, () => g.bark('Zip', firstWord ? `“${w}.” A word I can use.` : `Got “${w}”.`, 1.8)); firstWord = false;
+    } });
   echo.enable(true);
 
   // where each place is spoken from (a step back from the edge), and where its thing appears
@@ -203,18 +235,32 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
   // ── speaking: the word ring, a hologram of the engine's context (kit/word-ring.ts) ──
   let open: Site | null = null, busy = false, shot: { pos: T.Vector3; look: T.Vector3; rate: number; cut: number } | null = null, cuts = 0;
   const usable = () => echo.carried.filter(w => spec.lexicon[w]);
-  const ring = createWordRing({ scene, host: o.host, camera: o.camera,
+  // predictive mode: how often each suggestion had been read when the ring last showed it, so a
+  // word that climbed since (the builders' song) shows "+3"
+  // the engine as it came (its phrasebook only): a suggestion's "+3" is what Zip's own reading added
+  const base = NG ? createNgram(NG.n) : null; NG?.pretrain.forEach(t => base!.read(t));
+  const times = (n: number) => n === 1 ? 'once' : n === 2 ? 'twice' : `${n} times`;
+  const predictive = engine && NG ? {
+    suggest: (said: string[]) => engine.suggest(said, NG.top, NG.show).map(x => ({ ...x, grew: x.count - base!.count(said[said.length - 1], x.word) })),
+    // let it finish: its likeliest word each time, until it has named a thing (or the ring is full)
+    finish: (said: string[]) => engine.complete(said, open?.s.slots ?? 3, w => w.length > 1 && spec.lexicon[w[w.length - 1]]?.kind === 'thing', NG.top),
+    onRare: (word: string, said: string[]) => {
+      const after = said[said.length - 1], best = engine.suggest(said, 1, 1)[0];
+      g.bark('Zip', (spec.lines.rare ?? '').replace('{word}', word).replace('{after}', after).replace('{n}', times(engine.count(after, word))).replace('{top}', best?.word ?? '').replace('{m}', times(best?.count ?? 0)), 3.6);
+    },
+  } : {};
+  const ring = createWordRing({ scene, host: o.host, camera: o.camera, ...predictive,
     anchor: () => o.zip().clone().add(new T.Vector3(.35, 1.75, .25)),
     source: () => o.zip().clone().add(new T.Vector3(0, 1.0, 0)),
     cue: c => ({ load: () => sfx.place(), unload: () => sfx.tap(), full: () => sfx.boing(), speak: () => sfx.speak(3), open: () => sfx.whoosh(), close: () => {} })[c](),
     say: t => g.bark('Zip', t, 2.2),
     onSpeak: (words, forgotten) => { if (open) say(open, [...forgotten, ...words]); },   // the engine heard the forgotten ones first
-    onClose: () => { o.host.classList.remove('puzzle-mode'); echo.showOrbit(true); if (!busy) { shot = null; open = null; } },
+    onClose: () => { o.host.classList.remove('puzzle-mode', 'ring-mode'); echo.showOrbit(true); if (!busy) { shot = null; open = null; } },
   });
   const openRing = (site: Site) => {
-    open = site; o.host.classList.add('puzzle-mode'); echo.showOrbit(false);
+    open = site; o.host.classList.add('puzzle-mode', 'ring-mode'); echo.showOrbit(false);
     // frame Zip and the ring from the front-side, the gap behind them
-    const z = o.zip(); shot = { pos: z.clone().add(new T.Vector3(1.4, 2.9, 3.9)), look: z.clone().add(new T.Vector3(.3, 1.45, 0)), rate: 3, cut: ++cuts };
+    const z = o.zip(); if (V.ringShot !== false) shot = { pos: z.clone().add(new T.Vector3(1.4, 2.9, 3.9)), look: z.clone().add(new T.Vector3(.3, 1.45, 0)), rate: 3, cut: ++cuts };
     // first visit to a place whose engine already holds someone's words (SiteSpec.preload): they're in the ring
     const pre = site.s.preload && !preloaded.has(site.s.id) ? (preloaded.add(site.s.id), site.s.preload) : null;
     if (pre && spec.lines[`preload-${site.s.id}`]) later(.6, () => g.bark('Zip', spec.lines[`preload-${site.s.id}`], 3.4));
@@ -250,7 +296,9 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
       if (m.thing) conjure(m, site); else sfx.boing();
       // what the engine did with the phrase, then what happened, timed to the action
       const lost = m.forgotten.filter(w => echo.carried.includes(w));   // Zip's own words that slipped (not someone else's)
-      const notes = [lost.length && spec.lines.forgot ? fill(m, spec.lines.forgot, lost.join('” and “')) : null, m.guessed ? fill(m, spec.lines.guessed) : null, m.late.length ? fill(m, spec.lines.late, m.late[0]) : null, fill(m, lineFor(spec, m))].filter(Boolean) as string[];
+      // a phrase can have its own line when it fails (longest first two-or-more words: 'say:long way')
+      const own = m.works ? null : words.map((_, i) => words.slice(0, words.length - i)).filter(p => p.length >= 2).map(p => spec.lines['say:' + p.join(' ')]).find(Boolean);
+      const notes = [lost.length && spec.lines.forgot ? fill(m, spec.lines.forgot, lost.join('” and “')) : null, m.guessed ? fill(m, spec.lines.guessed) : null, !own && m.late.length ? fill(m, spec.lines.late, m.late[0]) : null, own ?? fill(m, lineFor(spec, m), words.join(' '))].filter(Boolean) as string[];
       let d = m.guessed || m.late.length || m.forgotten.length ? .4 : 1.7; for (const n of notes) { later(d, () => g.bark('Zip', n, 3.4)); d += 3.4; }
       if (m.works) lastSaid.delete(site.s.id); else lastSaid.set(site.s.id, words);
       // a miss that hands over the fix (SiteSpec.teaches): the word rises out of the failure and flies to Zip
@@ -267,21 +315,27 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
         if (V.firstFail && !firstFailSaid) { firstFailSaid = true; later(d, () => g.bark('Zip', V.firstFail!, 3)); d += 3.2; }
         // after two misses, a nudge toward a rule they haven't met
         // (a game can say a word came too late in its own way: line 'hint-late')
-        const hint = m.late.length && spec.lines['hint-late'] ? spec.lines['hint-late'] : 'What if I stop mid-phrase? The engine might finish it.';
+        const hint = spec.lines[`hint-${site.s.id}`] ?? (m.late.length && spec.lines['hint-late'] ? spec.lines['hint-late'] : 'What if I stop mid-phrase? The engine might finish it.');
         if (n === 2 && !hinted) { hinted = true; later(d, () => g.bark('Zip', hint, 3)); d += 3.2; }
       }
       // the shot holds until the lines are said: what happened stays in view; then the camera
       // stands behind Zip facing the way on (so "forward" walks across, not off the edge)
-      later(Math.max(d, 3.2), () => { busy = false; shot = null; o.setYaw(-Math.PI / 2); });
+      // the camera comes back behind Zip facing what to do next: across a span that worked, back at
+      // the gap or doorway after a miss (testers lost their way after every speak shot, 5–6 Oct)
+      later(Math.max(d, 3.2), () => {
+        busy = false; shot = null;
+        const i = sites.indexOf(site), z = o.zip(), to = m.works && site.s.need.archetype === 'span' && i + 1 < centres.length ? new T.Vector3(centres[i + 1], 0, Z) : site.at;
+        const dx = to.x - z.x, dz = to.z - z.z; (o.turnTo ?? o.setYaw)(Math.hypot(dx, dz) > .5 ? Math.atan2(-dx, -dz) : -Math.PI / 2);
+      });
     });
   };
   g.setThinker(o.zip);
   o.teleport(sites[0].from.x - 1.8, Z);   // a couple of steps from the first place to speak
   const intro = V.intro ?? ['Words everywhere. If I say a thing, does it happen?', 'My engine reads words in order. Three at a time, for now.'];
   intro.forEach((line, i) => later(1.2 + i * 3.4, () => g.bark('Zip', line, 3)));
-  let goalSite = -1; const aimV = new T.Vector3();
+  let goalSite = -1, goalWordless = false; const aimV = new T.Vector3();
   const api = {
-    sites, echo, ring, sources: o.sources, get open() { return ring.isOpen; }, get shot() { return shot; }, get busy() { return busy; },
+    sites, echo, ring, sources: o.sources, engine, get open() { return ring.isOpen; }, get shot() { return shot; }, get busy() { return busy; },
     /** the place label: which platform Zip is on */
     get placeName() { if (!V.places) return null; const x = o.zip().x; let best = 0; centres.forEach((c, i) => { if (Math.abs(x - c) < Math.abs(x - centres[best])) best = i; }); return V.places[best] ?? null; },
     tick(dt: number) {
@@ -321,16 +375,25 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
       sites.forEach((x, i) => { if (x.solved && x.s.need.archetype === 'span' && z0.x >= centres[i + 1] - R + .6) x.crossed = true; });
       const crossing = sites.every(x => x.solved) ? undefined : sites.find(x => x.solved && x.s.need.archetype === 'span' && !x.crossed);
       const next = crossing ? -2 : sites.findIndex(x => !x.solved);
-      if (next !== goalSite) {
-        goalSite = next;
+      // the next-word lab: nothing to say yet, so the goal is a word first (run 11 stood at the
+      // first edge for twelve steps with no Speak and no clue why)
+      const wordless = !!NG && next >= 0 && usable().length === 0;
+      if (next !== goalSite || wordless !== goalWordless) {
+        goalSite = next; goalWordless = wordless;
         if (next === -2) { g.setGoal('Walk across'); g.setBeacon(new T.Vector3(centres[sites.indexOf(crossing!) + 1], 1.2, Z)); }
-        else if (next < 0) { g.setGoal('The lab is done. More words soon.'); g.setBeacon(null); fx.burst(o.zip().clone().setY(1.4), 30, 2.4, HOLO.made); sfx.chime(); later(1, () => g.bark('Zip', 'I talked my way across the sky. Mira would laugh.', 3));
+        else if (next < 0) { g.setGoal('The lab is done. More words soon.'); g.setBeacon(null); fx.burst(o.zip().clone().setY(1.4), 30, 2.4, HOLO.made); sfx.chime(); later(1, () => g.bark('Zip', spec.lines.done ?? 'I talked my way across the sky. Mira would laugh.', 3));
           // what you did here, with reasons to come back: the ways to fail you haven't seen, the words you haven't used
           later(4.6, () => {
             const log: (Made & { words: string[]; site: string })[] = (window as any).__vlUtterLog ?? [];
             const kinds = new Set(log.filter(m => !m.works).map(m => m.reason)), used = new Set(log.flatMap(m => m.words)), all = new Set([...o.sources.map(x => x.word), ...sites.flatMap(x => x.s.teaches ? [x.s.teaches.word] : [])]);
             const firstTry = sites.every(x => log.find(m => m.site === x.s.id)?.works);
-            g.stars('Said into being', [
+            const odd = new Set(log.filter(m => !m.works).map(m => m.words.join(' ')));
+            g.stars('Said into being', engine ? [
+              [true, 'Crossed two gaps and lit the dark'],
+              [firstTry, firstTry ? 'Every place on your first phrase' : 'Every place on the first phrase (try again?)'],
+              [odd.size >= 3, `Odd things your engine said: ${odd.size}`],
+              [read.size >= o.sources.length, `Signs your engine read: ${read.size} of ${o.sources.length}`],
+            ] : [
               [true, 'Crossed two gaps and lit the dark'],
               [firstTry, firstTry ? 'Every place on your first phrase' : 'Every place on the first phrase (try again?)'],
               [kinds.size >= 4, `Funny failures found: ${kinds.size} of 6`],
@@ -338,6 +401,7 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
             ], () => {}, { stay: !!V.summaryStays });
           });
         }
+        else if (wordless) { g.setGoal(spec.lines['goal-words'] ?? 'Find a word to say'); g.setBeacon(echo.nearest(z0)); }
         else { g.setGoal(sites[next].s.asks); g.setBeacon(sites[next].from.clone().setY(1.2)); }
         rings.forEach((r, i) => (r.visible = i === next));
       }

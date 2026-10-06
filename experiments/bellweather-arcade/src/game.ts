@@ -34,6 +34,21 @@ export const GAME: GameManifest = {
   sound: { spec: FIRST_WORDS_SOUND, beats: FIRST_WORDS_BEAT_SOUND },
   voice: { cast: FIRST_WORDS_CAST, spoken: FIRST_WORDS_SPOKEN, direction: FIRST_WORDS_DIRECTION },
   learningDesign: ['design/stop1-learning-design.json', 'design/stop2-loom-learning-design.json'],
+  // drafts (6 Oct) for Desmic to correct: what a newcomer should be able to tell back, and feel
+  intent: {
+    story: [
+      { id: 'story-mira', draft: true, text: 'Mira, a friend at the outlook, is taken by the Warden; Zip sets out to get her back.' },
+      { id: 'story-voice', draft: true, text: 'The Warden\'s attack knocks out Zip\'s voice; getting it back, coil by coil, is what lets him speak (and wake the skiff).' },
+      { id: 'story-journey', draft: true, text: 'The way to Mira is a journey isle to isle by skiff, and each isle mends a part of Zip\'s word engine.' },
+    ],
+    experience: [
+      { id: 'feel-opening', draft: true, text: 'The first minute makes them curious: a strange, lovely world and a robot who is a bit self-aware.' },
+      { id: 'feel-humour', draft: true, text: 'Zip\'s dry thoughts and the engine\'s mistakes make them smile or laugh.' },
+      { id: 'feel-agency', draft: true, text: 'Fixing the engine feels like working it out themselves, not following instructions.' },
+      { id: 'feel-flow', draft: true, text: 'They get from story to puzzle without long, lost wandering.' },
+      { id: 'feel-reward', draft: true, text: 'Rewards (stars, new words, a waking skiff) feel earned and make them want the next part.' },
+    ],
+  },
   input: ['touch', 'keyboard', 'mouse'],
   devices: { low: 'Galaxy F15 (phone, 720p, Mali-G57)', laptop: 'Desmic\'s laptop (Chrome)' },
   tests: 'tools/games/first-words.mjs',
