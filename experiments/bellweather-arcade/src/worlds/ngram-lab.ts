@@ -11,7 +11,9 @@
 //      won't say "long bridge". Reading the builders' song (three more "long bridge"s) lifts it to
 //      the top. More of a thing in what it reads, likelier it is said;
 //   3. the dark doorway: after "paper" its favourite is "plane". Left to finish on its own it says
-//      "paper plane". The likeliest word isn't always the one you need: you steer.
+//      "paper plane". The likeliest word isn't always the one you need: you steer. And "lantern"
+//      only becomes sayable once the lantern hook is read too, so the last place needs what the
+//      first two taught (run 9's tester asked for that; run 12's never met the top-three cutoff).
 // Every wrong phrase still makes something, or nothing, in its own funny way (kit/utter.ts).
 // tools/ngramcheck.mjs proves each place solvable in any reading order, and the wide gap not
 // solvable without the song.
@@ -33,6 +35,7 @@ export const NGRAM_LAB: NgramLabSpec = {
     'One long bridge.',
     'Throw the paper plane.', 'Fold a paper plane.', 'A paper plane.',
     'A paper cut.', 'Ow, a paper cut.',
+    'A paper hat.', 'Fold a paper hat.',
   ],
   utter: {
     ...UTTER_LAB,
@@ -71,6 +74,7 @@ export const NGRAM_LAB: NgramLabSpec = {
       'say:rope burns': 'Rope burns. Ow. And a rope. No bridge.',
       'say:paper cut': 'A paper cut. In mid-air. Somehow, ow.',
       'say:paper plane': 'A paper plane. Its favourite. Not a light, though.',
+      'say:paper hat': 'A paper hat. Very fetching. Very dark.',
       // tapping a word it has read too rarely to say
       rare: '“{word}” after “{after}”? Read it {n}. “{top}”, {m}. It says the likely ones.',
       // reading: what it learned
@@ -83,7 +87,7 @@ export const NGRAM_LAB: NgramLabSpec = {
   places: [
     { site: 'first-gap', reads: ['stone-sign', 'rope-coil'], lesson: 'after a word, the engine offers what it has read after it' },
     { site: 'wide-gap', reads: ['stone-sign', 'rope-coil', 'drop-sign', 'song-board'], key: 'song-board', lesson: 'the more often it has read a pair, the likelier it says it' },
-    { site: 'dark-door', reads: ['stone-sign', 'rope-coil', 'drop-sign', 'song-board', 'paper-note'], key: 'paper-note', lesson: 'its likeliest word isn’t always the one you need: you steer' },
+    { site: 'dark-door', reads: ['stone-sign', 'rope-coil', 'drop-sign', 'song-board', 'paper-note', 'hook-sign'], key: 'hook-sign', lesson: 'what the first two taught, together: read more to make the word you need sayable, then steer past its favourite' },
   ],
 };
 
@@ -94,7 +98,9 @@ export const NGRAM_LAB_SOURCES: WordSource[] = [
   { id: 'rope-coil', word: 'rope', line: 'Rope bridge closed. Rope burns, open.', kind: 'object', at: [58.0, -37.5], y: 1.0, reach: 2.6 },
   { id: 'drop-sign', word: 'long', line: 'Long drop. Do not look down.', kind: 'sign', at: [68.6, -42.7], y: 2.0, reach: 2.6 },
   { id: 'song-board', word: 'bridge', line: 'The builders’ song: long bridge, long bridge, build a long bridge!', kind: 'sign', at: [68.8, -37.3], y: 2.2, reach: 2.6 },
-  { id: 'paper-note', word: 'paper', line: 'Paper lantern, one coin. Paper plane, free.', kind: 'sign', at: [83.2, -42.7], y: 1.7, reach: 2.6 },
+  { id: 'paper-note', word: 'paper', line: 'Paper plane, free. Paper lantern, one coin.', kind: 'sign', at: [83.2, -42.7], y: 1.7, reach: 2.6 },
+  // read only the note, and "lantern" is too rare to say after "paper"; the hook makes it sayable
+  { id: 'hook-sign', word: 'paper', line: 'Lantern hook. Hang a paper lantern here. Paper lantern only!', kind: 'sign', at: [83.4, -37.2], y: 2.0, reach: 2.6 },
 ];
 
 export const NGRAM_LAB_VARIANT: LabVariant = {

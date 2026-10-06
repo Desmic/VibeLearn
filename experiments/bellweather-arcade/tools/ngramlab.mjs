@@ -76,8 +76,13 @@ const w2 = await h.walkTo([85.6, -40], { near: 1 }); h.check('the long bridge ca
 // 3. the doorway: its favourite isn't what you need
 await absorb(by('paper-note'));
 await openRing(C); await tap('paper'); await page.waitForTimeout(200);
+const s4a = await chips(); await h.shot('c-before-hook');
+h.check('after the note alone, "lantern" is too rare to say after "paper"', s4a.some(c => c.startsWith('·lantern')) && await page.locator('.wr-rare-line').isVisible(), s4a.join(' '));
+await h.press(page.locator('[data-action="close-ring"]')); await sim(.5);
+await absorb(by('hook-sign'));
+await openRing(C); await tap('paper'); await page.waitForTimeout(200);
 const s4 = await chips();
-h.check('after "paper": "plane" first, "lantern" sayable but not its favourite', s4[0]?.startsWith('plane') && s4.some(c => c.startsWith('lantern')), s4.join(' '));
+h.check('after the hook too: "plane" still first, "lantern" sayable (+2) but not its favourite', s4[0]?.startsWith('plane') && s4.some(c => /^lantern×3/.test(c)), s4.join(' '));
 await h.press(page.locator('[data-action="finish"]')); for (let i = 0; i < 6; i++) { await sim(.2); await page.waitForTimeout(120); }
 h.check('left to finish, it says "paper plane" (a plane, the wrong kind)', (m => m.words.join(' ') === 'paper plane' && m.reason === 'wrong-kind')(await speakNow('c-plane')));
 h.check('"paper lantern" lights the doorway', (await say(C, ['paper', 'lantern'], 'c-lantern')).works);

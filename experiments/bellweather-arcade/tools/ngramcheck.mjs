@@ -50,7 +50,8 @@ for (const { spec, sources } of labs) {
       const { said } = outcomes(site, order), ok = said.filter(x => x.m.works);
       if (!ok.length && !unsolvable) unsolvable = order;
       ok.forEach(x => works.add(x.w.join(' ')));
-      said.filter(x => !x.m.works).forEach(x => wrong.set(x.w.join(' '), lineOf(x.w, x.m)));
+      // wrong things it will say, part-way through reading too (a player can speak before reading everything)
+      for (let k = 1; k <= order.length; k++) outcomes(site, order.slice(0, k)).said.filter(x => !x.m.works).forEach(x => wrong.set(x.w.join(' '), lineOf(x.w, x.m)));
     }
     unsolvable ? say('✗', `${site.id}: not solvable when read in the order ${unsolvable.join(', ')}`) : say('✓', `${site.id}: solvable in all ${orders.length} reading orders (${[...works].slice(0, 4).map(w => `"${w}"`).join(', ')})`);
     if (p.key) {

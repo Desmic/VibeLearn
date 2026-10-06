@@ -463,6 +463,25 @@ headlamp) could be the world's power-ups. A story hook: the Warden poisons what 
 - **Fixed after the run:** tap reach, no tapping during the speak shot, and the reading line.
   Details are in `tools/AI-PLAYTEST.md`.
 
+**Blind runs 11 and 12** (later the same day; table in `tools/AI-PLAYTEST.md`): `more` went
+from missed, to weak, to **unprompted** once Zip said out loud when reading changed a favourite
+("Now 'bridge' beats 'way' after 'long'"). Both rated it 6/10 and would play on.
+
+What held them back:
+
+- the camera, which turned out to be the speak shots, not walking;
+- the puzzles were too easy;
+- wrong phrases that made nothing were invisible;
+- the top-three cutoff was never met, because both read every sign before speaking.
+
+What changed:
+
+- **The doorway now needs both of its signs.** With only the note read, "lantern" is too rare to
+  say. This makes the finale combine the first two lessons.
+- A phrase that makes nothing now shows itself and falls into the sky.
+- The ring has two-tone bars and a real "too rare to say" line.
+- There's a word-first goal, and calmer camera work.
+
 **Not yet tried:**
 
 - feeding back;

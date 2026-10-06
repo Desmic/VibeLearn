@@ -254,9 +254,10 @@ html[data-input=desktop] .wr-chip kbd{display:inline-block}
 .wr-chip .wr-bar{display:flex}
 .wr-chip .wr-bar i{display:block;height:100%;background:#6fe0c9;transition:width .5s}
 .wr-chip .wr-bar b{display:block;height:100%;background:#ffd36b;box-shadow:0 0 6px #ffd36b;transition:width .5s}
-.wr-chip.first-rare::before{content:'too rare to say';position:absolute;left:50%;top:-19px;transform:translateX(-50%);padding:1px 8px;border-radius:8px;background:#071a28e6;font:700 11px system-ui;color:#ffd36b;white-space:nowrap;letter-spacing:.04em}
 .wr-chip small{font:700 12px system-ui;color:#bffcef}
 .wr-chip small em{font-style:normal;color:#ffd36b}
+.wr-rare-line{padding:1px 9px;border-radius:8px;background:#071a28e6;border:1px solid #ffd36b66;font:700 11px system-ui;color:#ffd36b;white-space:nowrap;letter-spacing:.04em;pointer-events:none}
+.wr-rare-line[hidden]{display:none}
 .wr-chip.rare{border-style:dashed;border-color:#6fe0c966;background:#0b2a3aaa;color:#e6fff88c;animation:none;box-shadow:none;text-shadow:none}
 .wr-chip.rare .wr-bar,.wr-chip.rare small{opacity:.55}
 .wr-chip.wr-finish{border-color:#ffd36b;color:#fff3cf;background:radial-gradient(ellipse at 50% 30%,#ffd36b44,#3a2a0acc 70%);text-shadow:0 0 8px #ffd36b;font-size:14px}

@@ -124,7 +124,7 @@ export function buildEcho(scene: T.Scene, o: Opts) {
         if (flying.t >= 1) {
           root.remove(flying.m); reach.mesh.visible = false; fx.burst(chest, 16, 1.4, HOLO.found); sfx.catch(); sfx.chime();
           const done = flying; flying = null;
-          const m = glyph(done.word, { height: .14, color: HOLO.found }); root.add(m); orbit.push({ word: done.word, m, a: orbit.length * 1.3 });
+          if (!orbit.some(x => x.word === done.word)) { const m = glyph(done.word, { height: .14, color: HOLO.found }); root.add(m); orbit.push({ word: done.word, m, a: orbit.length * 1.3 }); }   // two sources can share a word
           o.onAbsorbed?.(done.word, done.src);
         }
       }

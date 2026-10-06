@@ -344,3 +344,64 @@ minute?", and the brief says never to ask an AI player about its "thinking". Fin
 graded from the two answers and the log, and the report says so.
 
 Metrics: 31 steps; first progress at step 7; one stall (steps 1–5); no repeated taps.
+
+## Blind runs 11 and 12: the next-word lab after fixes (6 Oct 2026; commuter)
+
+| | run 10 | run 11 | run 12 |
+| --- | --- | --- | --- |
+| make, reads, next, steer | unprompted | unprompted | unprompted |
+| frequency | unprompted | when pointed at | unprompted (the top-three cutoff still missed) |
+| more (read more to make it likelier) | missed | probed, weak | **unprompted**: "now 'bridge' beats 'way'… that's when it clicked" |
+| model | unprompted | unprompted | after the reveal ("I'd have said it's like predictive text") |
+| felt: reading / funny / clever | unclear / unclear / felt | felt / not / asked | felt / **not** / **not** |
+| keep playing | — | 6/10, yes | 6/10, yes |
+| steps; first progress | 31; 7 | 63; 17 | 53; 8 |
+
+**What run 11 found, and what changed:**
+
+- **Twelve steps lost at the first edge.** In this lab you need a word before you can speak,
+  and nothing said so. Now the goal reads "Absorb a word from a sign", and the beacon points at
+  the nearest one, until Zip carries a word. In run 12, first progress came at step 8, not 17.
+- **"The camera kept spinning", the top complaint.** I measured it. The play server now records
+  where the camera faces, and the metrics list every 30°+ turn the player didn't make (a replay
+  of run 11's moves showed walking never turns the camera). The turns all came from speaking:
+  - a cut to a front shot when the ring opened;
+  - a side-on shot of the made thing;
+  - an instant snap back.
+
+  Changes:
+  - the lab no longer cuts when the ring opens;
+  - the camera eases back after the shot (`turnTo`);
+  - after run 12 (two turns of 80–110° per speak), the shot now comes from behind Zip and about
+    35° to the side;
+  - the camera's way back is aimed from where Zip spoke. A player who walked on during the shot
+    had passed the next platform's centre, so the camera turned right round (174°).
+
+  Replaying run 12's own moves on the new build, the largest turn the player didn't make is 74°.
+  Before, turns of up to 174° came from the same moves.
+- **"Treated the numbers as decoration."** Changes:
+  - each bar now has two colours: what the engine came knowing, and (gold) what Zip has read;
+  - when reading changes a favourite, Zip says so ("Now 'bridge' beats 'way' after 'long'"). In
+    run 12, that line is the moment `more` came out unprompted.
+
+**What run 12 found, and what changed:**
+
+- **The three-word cutoff was never met.** The tester read every sign before speaking, so
+  nothing it needed was ever too rare. Even when pointed at it, the tester hadn't noticed the
+  dimmed words.
+  - Now the doorway needs both signs there: with only the note read, "lantern" is too rare to
+    say after "paper", and the lantern hook makes it sayable. The last place now needs what the
+    first two taught, as run 9's tester asked.
+  - This isn't forced failure. A player who reads both signs first just sees "lantern ×3 +3".
+  - The "too rare to say" line is now real text (it was a CSS pseudo-element, so the play log
+    couldn't see it and the leak guard refused it).
+- **"Wrong felt like nothing happens."** A phrase that makes nothing ("rope burns", "long ago")
+  now appears over the place as glowing words, hangs, and tumbles into the sky.
+- **The reading lines went by too fast.** They now stay on screen for as long as their length
+  needs.
+- **A shared word was carried twice** (two signs say "paper"). This left a stray chip in the
+  ring. Echo now never carries a word twice.
+- **Still open:**
+  - The puzzles feel easy ("find the sign, say the obvious pair"), and no tester has pressed
+    "let it finish…".
+  - The end card's stars weren't understood, and there's no replay.

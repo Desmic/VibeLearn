@@ -116,7 +116,7 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
         const won = learned.find(p => starts.has(p.pair[0]) && before.get(p.pair[0]) !== p.pair[1] && fav(p.pair[0]) === p.pair[1]);
         const line = (spec.lines.read ?? 'Read it.').replace('{pairs}', quote(mine.length ? mine : learned.slice(0, 1)))
           + (won && before.get(won.pair[0]) && spec.lines.favourite ? ' ' + spec.lines.favourite.replace('{word}', won.pair[1]).replace('{after}', won.pair[0]).replace('{was}', before.get(won.pair[0])!) : '');
-        later(.6, () => g.bark('Zip', line, won ? 4.2 : 3)); firstWord = false; return;
+        later(.6, () => g.bark('Zip', line)); firstWord = false; return;   // on screen as long as its length needs (run 12: too fast to read)
       }
       if (spec.lexicon[w]) later(.6, () => g.bark('Zip', firstWord ? `“${w}.” A word I can use.` : `Got “${w}”.`, 1.8)); firstWord = false;
     } });
@@ -282,18 +282,25 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
     readings.push({ grp, t: 0, late });
   };
   const fails = new Map<string, number>(); let hinted = false, firstFailSaid = false;
-  const flights: { m: T.Object3D; from: T.Vector3; t: number; done: () => void }[] = [];   // taught words flying to Zip
+  const flights: { m: T.Object3D; from: T.Vector3; t: number; done: () => void }[] = [];
+  const falls: { m: T.Object3D; t: number }[] = [];   // phrases that made nothing, dropping away   // taught words flying to Zip
   const say = (site: Site, words: string[]) => {
     const m = speak(spec, words, site.s); busy = true; open = null;
     g.bark('Zip', words.join(' ') + '!', 1.4); sfx.speak(words.length + 1);
     // a directed shot from the side, so the made thing is in view (the follow camera returns after)
     const L = Math.max(1.5, Math.min(8, m.size || 2)), span = site.s.need.archetype === 'span';
-    shot = span ? { pos: new T.Vector3(site.at.x - 1.2, 2.6, Z + 4.6 + L * .25), look: new T.Vector3(site.at.x + Math.min(L, 4) * .45, .4, Z), rate: 2.5, cut: ++cuts }
-      : { pos: new T.Vector3(site.at.x - 3.6, 2.2, Z + 3.4), look: new T.Vector3(site.at.x + .4, 1.1, Z), rate: 2.5, cut: ++cuts };
+    // from behind Zip and a little to the side (about 35°), so the follow camera's way back is a
+    // small turn: a side-on shot and back read as "the camera swinging around" (runs 10–12)
+    shot = span ? { pos: new T.Vector3(site.at.x - 3.4, 2.7, Z + 2.3 + L * .12), look: new T.Vector3(site.at.x + Math.min(L, 4.5) * .5, .2, Z), rate: 2.5, cut: ++cuts }
+      : { pos: new T.Vector3(site.at.x - 3.8, 2.3, Z + 2.4), look: new T.Vector3(site.at.x + .4, 1.1, Z), rate: 2.5, cut: ++cuts };
     (window as any).__vlUtterLog?.push({ site: site.s.id, words, ...m });
     later(.5, () => showReading(site, words, m));
     later(.6, () => {
-      if (m.thing) conjure(m, site); else sfx.boing();
+      if (m.thing) conjure(m, site);
+      else {   // nothing made: the phrase itself appears over the place, hangs, and drops into the sky (run 12: "wrong felt like nothing happens")
+        sfx.boing(); const gl = glyph(words.join(' '), { height: .55, color: HOLO.found, frame: true, intensity: 2.2 });
+        gl.position.copy(site.at).add(new T.Vector3(site.s.need.archetype === 'span' ? 1.6 : .2, 1.4, 0)); root.add(gl); fx.burst(gl.position, 18, 1.6, HOLO.found); falls.push({ m: gl, t: 0 });
+      }
       // what the engine did with the phrase, then what happened, timed to the action
       const lost = m.forgotten.filter(w => echo.carried.includes(w));   // Zip's own words that slipped (not someone else's)
       // a phrase can have its own line when it fails (longest first two-or-more words: 'say:long way')
@@ -325,7 +332,9 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
       later(Math.max(d, 3.2), () => {
         busy = false; shot = null;
         const i = sites.indexOf(site), z = o.zip(), to = m.works && site.s.need.archetype === 'span' && i + 1 < centres.length ? new T.Vector3(centres[i + 1], 0, Z) : site.at;
-        const dx = to.x - z.x, dz = to.z - z.z; (o.turnTo ?? o.setYaw)(Math.hypot(dx, dz) > .5 ? Math.atan2(-dx, -dz) : -Math.PI / 2);
+        // the direction from where Zip spoke, not from where he is now: a player who walks on during the shot
+        // can be past the next platform's centre, and aiming from there turned the camera right round (174°, run 12 replay)
+        const dx = to.x - site.from.x, dz = to.z - site.from.z; void z; (o.turnTo ?? o.setYaw)(Math.hypot(dx, dz) > .5 ? Math.atan2(-dx, -dz) : -Math.PI / 2);
       });
     });
   };
@@ -345,6 +354,12 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
         if (f.t < .9) f.m.position.copy(f.from).setY(f.from.y + f.t * 1.2);
         else { const k = Math.min(1, (f.t - .9) / .7); f.m.position.lerpVectors(f.from.clone().setY(f.from.y + 1.08), to, k * k); f.m.position.y += Math.sin(k * Math.PI) * .6; f.m.scale.setScalar(1 - k * .6); }
         if (f.t > 1.6) { flights.splice(flights.indexOf(f), 1); f.done(); }
+      }
+      for (const f of [...falls]) {   // hang a beat, wobble, then tumble into the sky
+        f.t += dt; faceCamera(f.m, o.camera);
+        if (f.t < 1.4) f.m.rotation.z = Math.sin(f.t * 9) * .06 * f.t;
+        else { const k = f.t - 1.4; f.m.position.y -= k * dt * 9; f.m.rotation.z += dt * 2.4; }
+        if (f.t > 3) { root.remove(f.m); falls.splice(falls.indexOf(f), 1); }
       }
       for (const q of queue.filter(q => q.t <= clock)) { queue.splice(queue.indexOf(q), 1); q.fn(); }
       for (const r of [...readings]) {

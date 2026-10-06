@@ -52,6 +52,8 @@ export function createWordRing(o: WordRingOpts) {
   const root = document.createElement('div'); root.className = 'word-ring'; root.hidden = true; o.host.appendChild(root);
   const count = document.createElement('div'); count.className = 'wr-count'; root.appendChild(count);
   const core = document.createElement('button'); core.className = 'wr-core'; core.dataset.action = 'speak'; core.setAttribute('aria-label', 'Speak'); core.innerHTML = '<span>✦</span><b>Speak</b>'; root.appendChild(core);
+  // predictive mode: a line between the words it will say and the ones it has read too rarely
+  const rareLine = document.createElement('div'); rareLine.className = 'wr-rare-line'; rareLine.textContent = 'too rare to say'; rareLine.hidden = true; root.appendChild(rareLine);
   const shut = document.createElement('button'); shut.className = 'wr-close'; shut.dataset.action = 'close-ring'; shut.setAttribute('aria-label', 'Step away'); shut.textContent = '×'; root.appendChild(shut);
   let N = 3, carried: string[] = [], slots: string[] = [], slotEls: HTMLButtonElement[] = [], chipEls = new Map<string, HTMLButtonElement>(), busy = false, t = 0, readT = -1, shake = 0;
   // working memory (open(..., { forget: true })): a full ring takes a new word by letting the oldest go
@@ -175,7 +177,7 @@ export function createWordRing(o: WordRingOpts) {
      *  slots (e.g. the last one said here), so fixing a phrase means editing it, as in a chat box */
     open(words: string[], n: number, start: string[] = [], opts: { forget?: boolean; keepStart?: boolean } = {}) {
       // keepStart: the start words stay even if the speaker doesn't carry them (words someone else left in the engine)
-      carried = [...words]; N = n; slots = start.filter((w, i) => (opts.keepStart || carried.includes(w)) && start.indexOf(w) === i).slice(-n); busy = false; readT = -1;
+      carried = [...new Set(words)]; N = n; slots = start.filter((w, i) => (opts.keepStart || carried.includes(w)) && start.indexOf(w) === i).slice(-n); busy = false; readT = -1;
       forget = !!opts.forget; forgotten = []; finishing = []; build();
       root.hidden = false; holo.visible = true; cone.mesh.visible = true; t = 0; openedAt = performance.now(); o.cue?.('open');
     },
@@ -209,7 +211,8 @@ export function createWordRing(o: WordRingOpts) {
       // the words carried: rows below the ring, four to a row
       const ws = [...chipEls.values()], perRow = W < 520 ? 4 : 6;
       // predictive mode: the engine's suggestions in one column, likeliest at the top, like a ranking
-      if (predictive()) { let gap = 0; ws.forEach((b, i) => { if (b.classList.contains('first-rare')) gap = 18; put(b, cx, cy + 88 + (i * 46 + gap) * grow); }); }
+      rareLine.hidden = true;
+      if (predictive()) { let gap = 0; ws.forEach((b, i) => { if (b.classList.contains('first-rare')) { gap = 22; rareLine.hidden = false; put(rareLine, cx, cy + 88 + (i * 46 + 1) * grow); } put(b, cx, cy + 88 + (i * 46 + gap) * grow); }); }
       else ws.forEach((b, i) => {
         const row = Math.floor(i / perRow), k = i % perRow, nRow = Math.min(perRow, ws.length - row * perRow);
         put(b, cx + (k - (nRow - 1) / 2) * Math.min(96, (W - 24) / nRow) * grow, cy + 96 + row * 54 + 8 * Math.abs(k - (nRow - 1) / 2));
