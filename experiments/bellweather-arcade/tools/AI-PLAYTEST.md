@@ -405,3 +405,29 @@ Metrics: 31 steps; first progress at step 7; one stall (steps 1–5); no repeate
   - The puzzles feel easy ("find the sign, say the obvious pair"), and no tester has pressed
     "let it finish…".
   - The end card's stars weren't understood, and there's no replay.
+
+## Blind run 13: the next-word lab, round 3 (8 Oct 2026; commuter; 6/10, yes)
+
+**What came out unprompted:** all seven intent items before the reveal ("basically a cute way
+of showing how a next-word predictor works"). The top-three cutoff still came out only when
+asked. The 6/10 has two causes:
+
+- a rough start. Steps 1–19 were spent at the far edge: the two signs were behind where Zip
+  starts, and the words across the gap were drawn bigger. "Might well have quit on a bus."
+- "Fairly easy once I understood the rule." No silly outcome ever happened, because the
+  tester picked every word and never let the engine finish ("felt more like a word picker with
+  stats").
+
+**Changed after run 13:**
+
+- **The start.** Zip now starts at the back of the first platform, with both signs ahead of
+  him. Words out of tap reach are drawn small and dim, so the ones here read as the ones to take.
+- **The goal arrow.** Testers kept tapping it. Tapping it now turns the camera to the goal (in
+  the main game too).
+- **Ties at the cutoff are sayable.** "noodle ×2 greyed while ago ×2 could be said" read as an
+  arbitrary minimum. The rule is now: its top three, plus anything tied with the third.
+- **"Let it finish" is offered.** The first time a first word goes in, Zip says: "Now pick what
+  comes next. Or let my engine finish. It has opinions."
+- **A short rope or stone bridge says what it was.** It used to say just "A bridge", which made
+  the tester doubt that "rope" did anything.
+- **The end card** explains the stars and has a **Play again** button.

@@ -33,7 +33,11 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
   beam.position.y = 3.5; beacon.add(beam);
   const gem = new T.Mesh(new T.OctahedronGeometry(.2), new T.MeshBasicMaterial({ color: '#ffd36b', fog: false })); gem.position.y = 2.4; beacon.add(gem);
   // drawn, so it points the same way in every font (it was never added to the page before 3 Oct: the comment swallowed the call)
-  const edge = document.createElement('div'); edge.className = 'beacon-edge'; edge.hidden = true; edge.innerHTML = '<svg viewBox="0 0 20 20" width="18" height="18" style="display:block;margin:8px"><path d="M5 3 L17 10 L5 17 L8 10 Z" fill="#1c4972"/></svg>'; host.appendChild(edge);
+  // the arrow to an off-screen goal; tapping it turns the camera there (testers kept tapping it, runs 12-13)
+  const edge = document.createElement('button'); edge.className = 'beacon-edge'; edge.hidden = true; edge.dataset.action = 'face-goal'; edge.setAttribute('aria-label', 'Turn toward the goal');
+  let onPoint: (() => void) | null = null;
+  edge.addEventListener('pointerdown', e => e.stopPropagation());
+  edge.addEventListener('click', e => { e.stopPropagation(); onPoint?.(); }); edge.innerHTML = '<svg viewBox="0 0 20 20" width="18" height="18" style="display:block;margin:8px"><path d="M5 3 L17 10 L5 17 L8 10 Z" fill="#1c4972"/></svg>'; host.appendChild(edge);
   // control hints
   const hint = document.createElement('div'); hint.className = 'control-hint'; hint.hidden = true; host.appendChild(hint);
   // context button
@@ -157,6 +161,8 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
     /** where the goal beacon is (null when none): the camera can glance at a new goal */
     get goalText() { return goal.hidden ? '' : goal.textContent ?? ''; },
     get beaconAt(): T.Vector3 | null { return beacon.visible ? beacon.position : null; },
+    /** what tapping the goal arrow does (the game turns its camera toward the goal) */
+    onPoint(fn: () => void) { onPoint = fn; },
     startControlHints() { hintStage = 'on'; hintT = 0; },
     /** move the target brackets with a moving thing */
     setActionAt(at: T.Vector3) { if (bracketAt) bracketAt.copy(at); },
@@ -225,7 +231,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { toastEl.hidden = true; }, ms);
     },
     // 1-3 stars with the reason for each one earned or missed
-    stars(title: string, rows: [boolean, string][], then?: () => void, opts: { stay?: boolean } = {}) {
+    stars(title: string, rows: [boolean, string][], then?: () => void, opts: { stay?: boolean; note?: string; again?: { label: string; fn: () => void } } = {}) {
       const n = rows.filter(r => r[0]).length;
       // a banner across the top of the view (the world stays in sight), carrying on by itself
       cardOpen = true; host.classList.add('card-open'); act.hidden = true; card.hidden = false; card.innerHTML = '';
@@ -236,9 +242,12 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       const ul = document.createElement('ul'); ul.className = 'star-list';
       for (const [ok, why] of rows) { const li = document.createElement('li'); li.textContent = (ok ? '★ ' : '☆ ') + why; li.className = ok ? 'on' : ''; ul.appendChild(li); }
       card.appendChild(ul);
+      // what the stars are for, when it isn't obvious (a lab tester didn't understand them, run 12)
+      if (opts.note) { const q = document.createElement('p'); q.className = 'star-note'; q.textContent = opts.note; card.appendChild(q); }
       const row = document.createElement('div'); row.className = 'story-choices'; card.appendChild(row);
       let gone = false; const go = () => { if (gone) return; gone = true; clearTimeout(auto); card.classList.remove('ribbon'); api.close(); then?.(); };
-      const b = document.createElement('button'); b.className = 'primary'; b.textContent = n === 3 ? 'Brilliant!' : 'Continue'; b.addEventListener('click', e => { e.stopPropagation(); sfx.tap(); go(); }); row.appendChild(b);
+      const b = document.createElement('button'); b.className = 'primary'; b.textContent = n === rows.length && n >= 3 ? 'Brilliant!' : 'Continue'; b.addEventListener('click', e => { e.stopPropagation(); sfx.tap(); go(); }); row.appendChild(b);
+      if (opts.again) { const a = document.createElement('button'); a.textContent = opts.again.label; a.addEventListener('click', e => { e.stopPropagation(); sfx.tap(); gone = true; clearTimeout(auto); opts.again!.fn(); }); row.appendChild(a); }
       const auto = opts.stay ? 0 : window.setTimeout(go, 3800 + rows.length * 500);   // `stay`: waits for the tap
     },
     label(id: string, text: string | null, at?: T.Vector3) {

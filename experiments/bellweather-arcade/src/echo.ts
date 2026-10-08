@@ -109,11 +109,14 @@ export function buildEcho(scene: T.Scene, o: Opts) {
         const d = Math.hypot(p.x - z.x, p.z - z.z), near = d < m.s.reach;
         // the first time Zip comes within earshot, the word calls out: a soft chime and a glint
         if (!m.called && d < CALL_OUT) { m.called = true; sfx.bell(motes.indexOf(m) + 2, .35); fx.burst(p, 10, 1.1, HOLO.found); }
-        setHolo(m.word.material as T.Material, { intensity: near ? 2.4 : 1.8 });
+        // with a short tap reach (a small test area), words out of reach stay small and dim, so the
+        // ones here read as the ones to take (run 13 walked toward the bigger words across the gap)
+        const beyond = !!o.reachTap && d > o.reachTap + 1.5;
+        setHolo(m.word.material as T.Material, { intensity: near ? 2.4 : beyond ? 1.1 : 1.8 });
         // far words grow so they stay readable; near ones pulse to say "take me"
         // ...and step aside when the camera swings right up to them (a word filling the lens reads as a glitch)
         const lens = T.MathUtils.smoothstep(m.grp.position.distanceTo(o.camera.position), .9, 2.4);
-        m.grp.scale.setScalar(Math.max(1, Math.min(2.2, d / 5)) * (near ? 1 + .06 * Math.sin(t * 6) : 1) * Math.max(.001, lens)); m.grp.visible = lens > .02;
+        m.grp.scale.setScalar((beyond ? .8 : Math.max(1, Math.min(2.2, d / 5))) * (near ? 1 + .06 * Math.sin(t * 6) : 1) * Math.max(.001, lens)); m.grp.visible = lens > .02;
         m.pillar.set(tmp.set(p.x, p.y + .3, p.z), new T.Vector3(p.x, p.y + 9, p.z), .03);
         m.shaft.set(tmp.set(p.x, p.y - .4, p.z), new T.Vector3(p.x, m.s.on ? p.y - 1.4 : p.y - 2.0, p.z), .01);
       }

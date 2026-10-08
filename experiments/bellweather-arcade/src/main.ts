@@ -305,6 +305,8 @@ const lifeTick=paintedStudy&&paintedParams.get('life')!=='0'?buildPaintedLife(sc
 const storyOn=paintedStudy&&paintedParams.get('puzzle')!=='0'&&paintedParams.get('story')!=='0';
 const appHost=worldElement.parentElement!;
 const guide=storyOn?buildGuide(scene,appHost,camera,renderer.domElement):null;lifeOverlay=guide?.overlay??null;
+// tapping the goal arrow turns the camera to the goal
+guide?.onPoint(()=>{const b=guide?.beaconAt;if(!b)return;const dx=b.x-zip.position.x,dz=b.z-zip.position.z;if(Math.hypot(dx,dz)<.5)return;glanceYaw=Math.atan2(-dx,-dz);glanceT=1.4});
 // phones move with a floating thumb stick (lower left); keyboards with WASD; both look by dragging
 stick=createJoystick(appHost,{onUse:()=>get('hint').style.opacity='0'});
 // voiced lines: clips made ahead of time (tools/voice.mjs); a line without one stays a silent bubble

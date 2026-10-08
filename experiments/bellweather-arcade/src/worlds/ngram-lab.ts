@@ -67,6 +67,8 @@ export const NGRAM_LAB: NgramLabSpec = {
       ...UTTER_LAB.lines,
       nothing: 'Just “{word}”. The engine waited for a thing to make.',
       'too-short': 'A {thing}. Shorter than this gap. I never said how long.',
+      'too-short-rope': 'A rope bridge. Swaying, and short of the far side.',
+      'too-short-stone': 'A stone bridge. Solid, and short of the far side.',
       // phrases the engine likes that make nothing useful (the first two words or more decide)
       'say:long way': 'A long way. Down. Thank you, engine.',
       'say:long ago': 'It made… the past. Long ago. No use to anyone now.',
@@ -81,6 +83,9 @@ export const NGRAM_LAB: NgramLabSpec = {
       read: 'Read it. My engine learned {pairs}.',
       favourite: 'Now “{word}” beats “{was}” after “{after}”.',
       'goal-words': 'Absorb a word from a sign',
+      'first-pick': 'Now pick what comes next. Or let my engine finish. It has opinions.',
+      'stars-note': 'Gold stars are done. Grey ones are still out there: play again to find them.',
+      'play-again': 'Play again',
       done: 'Across the sky on a phrasebook, a song and a paper note.',
     },
   },
@@ -94,8 +99,8 @@ export const NGRAM_LAB: NgramLabSpec = {
 /** platforms of radius 3.8 at x 60, 71 and 85.6 (src/utter-lab.ts); words sit well away from where Zip speaks.
  *  Each source's line is what the engine reads when Zip absorbs it; its word is one he can start with. */
 export const NGRAM_LAB_SOURCES: WordSource[] = [
-  { id: 'stone-sign', word: 'stone', line: 'Stone bridge ahead. Mind the stone steps.', kind: 'sign', at: [58.2, -42.6], y: 2.0, reach: 2.6 },
-  { id: 'rope-coil', word: 'rope', line: 'Rope bridge closed. Rope burns, open.', kind: 'object', at: [58.0, -37.5], y: 1.0, reach: 2.6 },
+  { id: 'stone-sign', word: 'stone', line: 'Stone bridge ahead. Mind the stone steps.', kind: 'sign', at: [59.3, -42.8], y: 2.0, reach: 2.6 },
+  { id: 'rope-coil', word: 'rope', line: 'Rope bridge closed. Rope burns, open.', kind: 'object', at: [59.3, -37.2], y: 1.0, reach: 2.6 },
   { id: 'drop-sign', word: 'long', line: 'Long drop. Do not look down.', kind: 'sign', at: [68.6, -42.7], y: 2.0, reach: 2.6 },
   { id: 'song-board', word: 'bridge', line: 'The builders’ song: long bridge, long bridge, build a long bridge!', kind: 'sign', at: [68.8, -37.3], y: 2.2, reach: 2.6 },
   { id: 'paper-note', word: 'paper', line: 'Paper plane, free. Paper lantern, one coin.', kind: 'sign', at: [83.2, -42.7], y: 1.7, reach: 2.6 },
@@ -105,6 +110,9 @@ export const NGRAM_LAB_SOURCES: WordSource[] = [
 
 export const NGRAM_LAB_VARIANT: LabVariant = {
   radius: 3.8, speakReach: 3, reachTap: 5, ringShot: false,
+  // start at the back of the first platform, its two signs ahead on either side (run 13 faced the gap,
+  // the signs behind, and spent 19 steps at the edge)
+  spawnBack: 4.6,
   places: ['The first gap', 'The wide gap', 'The dark doorway'],
   firstFail: 'Not what I meant. But it’s what my engine likes. Wrong is free here.',
   summaryStays: true,

@@ -50,14 +50,18 @@ export function createNgram(n = 2) {
     /** how often `next` was read right after `ctx` (one word back) */
     count(ctx: string, next: string) { return table.get(ctx.toLowerCase())?.get(next.toLowerCase()) ?? 0; },
     /** what may come after these words: the longest context it has read, likeliest first; the
-     *  first `top` are ones it will say, the rest (up to `show`) it has read but too rarely */
+     *  first `top` (and any tied with the last of them) are ones it will say, the rest (up to
+     *  `show`) it has read but too rarely */
     suggest(said: string[], top = 3, show = 5): Suggestion[] {
       const w = said.map(x => x.toLowerCase());
       for (let back = Math.min(n - 1, w.length); back >= 1; back--) {
         const ctx = w.slice(-back).join(' '), row = table.get(ctx);
         if (!row?.size) continue;
-        return [...row].sort((a, b) => b[1] - a[1] || first.get(ctx + '\u0000' + a[0])! - first.get(ctx + '\u0000' + b[0])!)
-          .slice(0, show).map(([word, count], i) => ({ word, count, ok: i < top }));
+        const ranked = [...row].sort((a, b) => b[1] - a[1] || first.get(ctx + '\u0000' + a[0])! - first.get(ctx + '\u0000' + b[0])!);
+        // its likeliest few, and any word tied with the last of them (a tied word left out read as an
+        // arbitrary cut, run 13: "noodle ×2 greyed while ago ×2 could be said")
+        const cut = ranked[Math.min(top, ranked.length) - 1]?.[1] ?? 0;
+        return ranked.slice(0, Math.max(show, ranked.filter(r => r[1] >= cut).length)).map(([word, count]) => ({ word, count, ok: count >= cut }));
       }
       return [];
     },

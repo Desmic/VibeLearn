@@ -44,6 +44,8 @@ export interface LabVariant {
   summaryStays?: boolean;
   /** Zip's first lines on arrival (default: the variant-A pair) */
   intro?: string[];
+  /** how far behind the first place to speak Zip starts (default 1.8 m) */
+  spawnBack?: number;
   /** how close to a place Zip must be to speak there (default 2.2 m) */
   speakReach?: number;
   /** opening the ring cuts to a shot of Zip from the front (default true). Off, the follow camera
@@ -235,6 +237,7 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
   // ── speaking: the word ring, a hologram of the engine's context (kit/word-ring.ts) ──
   let open: Site | null = null, busy = false, shot: { pos: T.Vector3; look: T.Vector3; rate: number; cut: number } | null = null, cuts = 0;
   const usable = () => echo.carried.filter(w => spec.lexicon[w]);
+  let toldPick = false;
   // predictive mode: how often each suggestion had been read when the ring last showed it, so a
   // word that climbed since (the builders' song) shows "+3"
   // the engine as it came (its phrasebook only): a suggestion's "+3" is what Zip's own reading added
@@ -252,7 +255,11 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
   const ring = createWordRing({ scene, host: o.host, camera: o.camera, ...predictive,
     anchor: () => o.zip().clone().add(new T.Vector3(.35, 1.75, .25)),
     source: () => o.zip().clone().add(new T.Vector3(0, 1.0, 0)),
-    cue: c => ({ load: () => sfx.place(), unload: () => sfx.tap(), full: () => sfx.boing(), speak: () => sfx.speak(3), open: () => sfx.whoosh(), close: () => {} })[c](),
+    cue: c => {
+      ({ load: () => sfx.place(), unload: () => sfx.tap(), full: () => sfx.boing(), speak: () => sfx.speak(3), open: () => sfx.whoosh(), close: () => {} })[c]();
+      // the first time a first word goes in, Zip says what happens next, once (no tester had tried "let it finish", runs 10-13)
+      if (c === 'load' && engine && !toldPick && ring.slots.length === 1 && spec.lines['first-pick']) { toldPick = true; g.bark('Zip', spec.lines['first-pick']); }
+    },
     say: t => g.bark('Zip', t, 2.2),
     onSpeak: (words, forgotten) => { if (open) say(open, [...forgotten, ...words]); },   // the engine heard the forgotten ones first
     onClose: () => { o.host.classList.remove('puzzle-mode', 'ring-mode'); echo.showOrbit(true); if (!busy) { shot = null; open = null; } },
@@ -339,7 +346,7 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
     });
   };
   g.setThinker(o.zip);
-  o.teleport(sites[0].from.x - 1.8, Z);   // a couple of steps from the first place to speak
+  o.teleport(sites[0].from.x - (V.spawnBack ?? 1.8), Z);   // a couple of steps from the first place to speak
   const intro = V.intro ?? ['Words everywhere. If I say a thing, does it happen?', 'My engine reads words in order. Three at a time, for now.'];
   intro.forEach((line, i) => later(1.2 + i * 3.4, () => g.bark('Zip', line, 3)));
   let goalSite = -1, goalWordless = false; const aimV = new T.Vector3();
@@ -413,7 +420,7 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
               [firstTry, firstTry ? 'Every place on your first phrase' : 'Every place on the first phrase (try again?)'],
               [kinds.size >= 4, `Funny failures found: ${kinds.size} of 6`],
               [[...all].every(w => used.has(w)), `Words you used: ${[...all].filter(w => used.has(w)).length} of ${all.size}`],
-            ], () => {}, { stay: !!V.summaryStays });
+            ], () => {}, { stay: !!V.summaryStays, note: spec.lines['stars-note'], again: spec.lines['play-again'] ? { label: spec.lines['play-again'], fn: () => location.reload() } : undefined });
           });
         }
         else if (wordless) { g.setGoal(spec.lines['goal-words'] ?? 'Find a word to say'); g.setBeacon(echo.nearest(z0)); }
