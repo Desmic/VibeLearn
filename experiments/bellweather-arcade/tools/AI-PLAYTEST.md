@@ -473,7 +473,17 @@ Run 8 (6 Oct, the baseline) never got past Stop 1. Run 14 went from the title th
 - **The play server** now records why the camera turned (shot, dialogue, goal arrow, glance,
   whisker, walk) and lists the cause beside each turn in the metrics.
 
-**Still open, for Desmic:**
-- the word hunt in Stop 1 (28 steps);
-- making the guess visibly change with the ring's words (the tester's own ask: "add 'sink' and
-  show the guess change").
+**Then (9 Oct, Desmic: "proceed with suggestions"):**
+
+- **The word hunt.** The tester had tapped the "TAP" label under a far word three times with no
+  result: the label sits below the word, outside its small hit sphere.
+  - Now a tap within about 4° of a word takes it.
+  - Zip's first thought on seeing words now ends "Could I just… tap one and pull it in?", so
+    the far tap is learned instead of walking to every word.
+- **The guess changes visibly with the ring.** While the ring is being edited, the hologram
+  shows, dimmed, what the engine would say for the words in it now, before casting:
+  - "um / the / …" for a partial ring;
+  - "Blossom? 72%" for the full command;
+  - in the loop, "petals?" for "Blossom" alone against "Isle? 86%" for the whole sentence.
+- **Depth in the test area.** The lab has a fourth place, the lighthouse (see
+  `docs/UTTER-DESIGN.md`).

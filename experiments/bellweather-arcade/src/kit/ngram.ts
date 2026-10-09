@@ -104,7 +104,11 @@ export interface NgramLabSpec {
   utter: UtterSpec;
   /** per place, in order: the word sources reachable by then (ids), and the one whose reading
    *  the place's lesson depends on (ngramcheck proves the place can't be solved without it) */
-  places: { site: string; reads: string[]; key?: string; lesson: string }[];
+  places: { site: string; reads: string[]; key?: string; lesson: string;
+    /** only a phrase the engine finished by itself counts here; one picked by hand is just an echo */
+    finishOnly?: boolean;
+    /** an echo stone: what the player says here by hand is read back into the engine, this many times over */
+    echo?: number }[];
 }
 
 export function validateNgram(spec: NgramLabSpec, sourceIds: string[]): string[] {

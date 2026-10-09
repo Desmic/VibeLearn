@@ -25,7 +25,7 @@ export interface WordRingOpts {
   cue?: (c: RingCue) => void;
   /** speaking: the words in the slots, in order, and (working memory) the words that were pushed
    *  out by newer ones, oldest first: the engine heard them, then forgot them */
-  onSpeak: (words: string[], forgotten: string[]) => void;
+  onSpeak: (words: string[], forgotten: string[], how: { byEngine: boolean }) => void;
   onClose?: () => void;
   /** a line the ring says about itself, e.g. when full ("Full. My engine holds 3 words.") */
   say?: (text: string) => void;
@@ -124,12 +124,14 @@ export function createWordRing(o: WordRingOpts) {
       if (!toldForget) { toldForget = true; o.say?.(`“${old}” slipped out. My memory holds ${N} words.`); }
     }
     forgotten = forgotten.filter(x => x !== w);   // said again: back in memory
-    slots.push(w); o.cue?.('load'); render(); const b = slotEls[slots.length - 1]; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+    slots.push(w); if (slots.length > 1) picked = true; o.cue?.('load'); render(); const b = slotEls[slots.length - 1]; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
   };
   // predictive mode: taking a word out takes out what the engine said after it too
-  const unload = (i: number) => { if (busy || !slots[i]) return; if (o.suggest) slots.length = i; else slots.splice(i, 1); o.cue?.('unload'); render(); };
+  const unload = (i: number) => { if (busy || !slots[i]) return; if (o.suggest) slots.length = i; else slots.splice(i, 1); if (slots.length <= 1) picked = false; o.cue?.('unload'); render(); };
   // let it finish: the engine adds its likeliest words, one at a time, so it reads like it's thinking
   let finishing: string[] = [], finishT = 0;
+  // whether any word after the first was picked by hand (predictive mode: else the engine finished it)
+  let picked = false;
   const finish = () => { if (busy || !o.finish || finishing.length) return; finishing = o.finish([...slots]).slice(slots.length); finishT = 0; if (!finishing.length) o.cue?.('full'); };
   const speak = () => { if (busy || !slots.length) return; busy = true; readT = 0; o.cue?.('speak'); render(); };
 
@@ -178,7 +180,7 @@ export function createWordRing(o: WordRingOpts) {
     open(words: string[], n: number, start: string[] = [], opts: { forget?: boolean; keepStart?: boolean } = {}) {
       // keepStart: the start words stay even if the speaker doesn't carry them (words someone else left in the engine)
       carried = [...new Set(words)]; N = n; slots = start.filter((w, i) => (opts.keepStart || carried.includes(w)) && start.indexOf(w) === i).slice(-n); busy = false; readT = -1;
-      forget = !!opts.forget; forgotten = []; finishing = []; build();
+      forget = !!opts.forget; forgotten = []; finishing = []; picked = false; build();
       root.hidden = false; holo.visible = true; cone.mesh.visible = true; t = 0; openedAt = performance.now(); o.cue?.('open');
     },
     close() {
@@ -227,7 +229,7 @@ export function createWordRing(o: WordRingOpts) {
       if (readT >= 0) {
         readT += dt;
         slotEls.forEach((b, i) => b.classList.toggle('reading', readT * 2.2 > i && readT * 2.2 < i + 1.2));
-        if (readT > slots.length / 2.2 + .35) { const said = [...slots], lost = [...forgotten]; readT = -1; o.onSpeak(said, lost); api.close(); }
+        if (readT > slots.length / 2.2 + .35) { const said = [...slots], lost = [...forgotten]; readT = -1; o.onSpeak(said, lost, { byEngine: !!o.suggest && said.length > 1 && !picked }); api.close(); }
       }
     },
     dispose() { removeEventListener('keydown', onKey, true); api.close(); root.remove(); o.scene.remove(holo); o.scene.remove(cone.mesh); },

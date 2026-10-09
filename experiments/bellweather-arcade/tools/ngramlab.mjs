@@ -86,6 +86,16 @@ h.check('after the hook too: "plane" still first, "lantern" sayable (+2) but not
 await h.press(page.locator('[data-action="finish"]')); for (let i = 0; i < 6; i++) { await sim(.2); await page.waitForTimeout(120); }
 h.check('left to finish, it says "paper plane" (a plane, the wrong kind)', (m => m.words.join(' ') === 'paper plane' && m.reason === 'wrong-kind')(await speakNow('c-plane')));
 h.check('"paper lantern" lights the doorway', (await say(C, ['paper', 'lantern'], 'c-lantern')).works);
+
+// 4. the lighthouse: only the engine's own finish counts; the echo stone reads what's said there back in
+const D = (await lab()).sites[3];
+const finishAt = async name => { await openRing(D); await tap('paper'); await h.press(page.locator('[data-action="finish"]')); for (let i = 0; i < 6; i++) { await sim(.2); await page.waitForTimeout(120); } return speakNow(name); };
+h.check('at the lighthouse, letting it finish says its favourite: "paper plane" (no light)', (m => m.words.join(' ') === 'paper plane' && !m.works)(await finishAt('d-plane')));
+const echoed = await say(D, ['paper', 'lantern'], 'd-echo');
+h.check('"paper lantern" picked by hand is only an echo there (no light)', !echoed.works && echoed.thing === null);
+h.check('...but the echo stone read it back in: "lantern" climbs after "paper"', await page.evaluate(() => window.__vlUtterLab.engine.count('paper', 'lantern')) >= 5, String(await page.evaluate(() => window.__vlUtterLab.engine.count('paper', 'lantern'))));
+let lit = null; for (let i = 0; i < 4 && !lit?.works; i++) { lit = await finishAt('d-finish' + i); if (!lit.works) await say(D, ['paper', 'lantern'], 'd-echo' + i); }
+h.check('once "lantern" is its favourite, letting it finish lights the lighthouse', !!lit?.works && lit.words.join(' ') === 'paper lantern', lit?.words.join(' '));
 h.check('the lab says it is done', /lab is done/.test(await h.goal() ?? ''), await h.goal());
 await h.until(() => page.evaluate(() => !!document.querySelector('.star-row')), 12);
 h.check('a summary shows what was done', await page.evaluate(() => !!document.querySelector('.star-row')));

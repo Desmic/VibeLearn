@@ -66,7 +66,8 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     chase: { text: 'Chasing my own voice through a flower bed. Normal day.' },
     beep: { text: ['Beep boop! …I mean, hello!', 'Words out loud again.'] },   // ?mech=classic
     'coil-new': { text: ['Not my whole voice. Just one coil of it.', 'And it\'s… hungry? For words?'] },
-    'words-seen': { text: 'Words. Hanging in the air. That\'s new.' },
+    // run 14 walked up to every word (28 steps): say that a word can be tapped from where you stand
+    'words-seen': { text: ['Words. Hanging in the air. That\'s new.', 'Could I just… tap one and pull it in?'] },
     seatbelt: { text: 'No seatbelts. Classic tutorial vehicle.' },
     'echo-first': { text: ['Ooh. Words have a taste. That one\'s crunchy.', 'The skiff runs on spoken words. Let\'s collect some.'] },
     'echo-decoy': { text: '“Sink.” Probably not one for the skiff. Probably.' },

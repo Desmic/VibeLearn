@@ -482,6 +482,26 @@ What changed:
 - The ring has two-tone bars and a real "too rare to say" line.
 - There's a word-first goal, and calmer camera work.
 
+**The fourth place: the lighthouse (9 Oct, step 4 of the learning track, "feeding back").**
+Testers kept calling the lab "find the sign, say the obvious pair", and none had ever let the
+engine finish. The lighthouse fixes both:
+
+- **It lights only for a phrase the engine finishes by itself.** A phrase Zip picks by hand
+  there is only an echo ("Only an echo. The lighthouse answers my engine, not me").
+- **Left to itself after "paper", the engine says "paper plane".**
+- **An echo stone at the speaking spot reads what Zip says by hand back into the engine, twice.**
+  So the player says "paper lantern" by hand ("The echo stone heard me, though: 'paper lantern':
+  5 now"), and then lets the engine finish.
+- **The idea it teaches:** what a model hears shapes what it says; a habit is made by repetition.
+- **This is a place's rule, not a forced failure.** It teaches a control ("let it finish") that
+  no tester had found on their own.
+- **Only hand-said phrases echo.** The first build echoed the engine's own phrases too. Then
+  every finish pushed its favourite further ahead, so a player alternating the two could never
+  catch up.
+- **Proof:** `ngramcheck` proves that letting it finish fails at first, and works after at most
+  one phrase said by hand, in every reading order. `ngramlab` (25 checks) plays the whole
+  sequence.
+
 **Not yet tried:**
 
 - feeding back;

@@ -62,6 +62,7 @@ export const NGRAM_LAB: NgramLabSpec = {
       { id: 'first-gap', asks: 'Cross the gap', need: { archetype: 'span', length: 3.9 }, words: [], slots: 3 },
       { id: 'wide-gap', asks: 'Cross the wide gap', need: { archetype: 'span', length: 7.5 }, words: [], slots: 3 },
       { id: 'dark-door', asks: 'Light the dark doorway', need: { archetype: 'light', brightness: 1 }, words: [], slots: 3 },
+      { id: 'lighthouse', asks: 'Let your engine light the lighthouse', need: { archetype: 'light', brightness: 1 }, words: [], slots: 3 },
     ],
     lines: {
       ...UTTER_LAB.lines,
@@ -86,6 +87,10 @@ export const NGRAM_LAB: NgramLabSpec = {
       'first-pick': 'Now pick what comes next. Or let my engine finish. It has opinions.',
       'stars-note': 'Gold stars are done. Grey ones are still out there: play again to find them.',
       'play-again': 'Play again',
+      echo: '“{phrase}.” Only an echo. The lighthouse answers my engine, not me.',
+      heard: 'The echo stone heard me, though. “{pair}”: {n} now.',
+      'works@lighthouse': 'My engine said it all by itself. And the lighthouse believed it.',
+      'hint-lighthouse': 'It keeps saying its favourite. What if it heard me say mine?',
       done: 'Across the sky on a phrasebook, a song and a paper note.',
     },
   },
@@ -93,6 +98,11 @@ export const NGRAM_LAB: NgramLabSpec = {
     { site: 'first-gap', reads: ['stone-sign', 'rope-coil'], lesson: 'after a word, the engine offers what it has read after it' },
     { site: 'wide-gap', reads: ['stone-sign', 'rope-coil', 'drop-sign', 'song-board'], key: 'song-board', lesson: 'the more often it has read a pair, the likelier it says it' },
     { site: 'dark-door', reads: ['stone-sign', 'rope-coil', 'drop-sign', 'song-board', 'paper-note', 'hook-sign'], key: 'hook-sign', lesson: 'what the first two taught, together: read more to make the word you need sayable, then steer past its favourite' },
+    // 4. the lighthouse (9 Oct, the learning track's "feeding back"): it only lights for a phrase the
+    //    engine finishes by itself, and the echo stone beside it reads whatever is said there back
+    //    into the engine, twice. Left to itself after "paper" it says "plane"; say "paper lantern"
+    //    yourself (only an echo, but the engine hears it) until lantern is its favourite, then let it finish.
+    { site: 'lighthouse', reads: ['stone-sign', 'rope-coil', 'drop-sign', 'song-board', 'paper-note', 'hook-sign'], finishOnly: true, echo: 2, lesson: 'it learns from what it hears you say too: say it until it is its favourite, then let it finish by itself' },
   ],
 };
 
@@ -113,6 +123,8 @@ export const NGRAM_LAB_VARIANT: LabVariant = {
   // start at the back of the first platform, its two signs ahead on either side (run 13 faced the gap,
   // the signs behind, and spent 19 steps at the edge)
   spawnBack: 4.6,
+  // the lighthouse, on the last platform's north side, its echo stone at the speaking spot
+  extraSites: [{ at: [87.2, -37.0], from: [85.8, -38.3] }],
   places: ['The first gap', 'The wide gap', 'The dark doorway'],
   firstFail: 'Not what I meant. But it’s what my engine likes. Wrong is free here.',
   summaryStays: true,

@@ -65,7 +65,11 @@ export function buildEcho(scene: T.Scene, o: Opts) {
   const untap = g.onTap(ray => {
     if (!enabled || flying || o.canTap?.() === false) return false;
     const hits = ray.intersectObjects(motes.filter(m => !m.taken).map(m => m.hit), false);
-    const m = motes.find(x => x.hit === hits[0]?.object); if (!m) return false;
+    // a finger is wide: a tap near a word (within ~4° of it, e.g. on its "Tap" label) takes it too
+    // (run 14 tapped the label under a far word three times and nothing happened)
+    let m = motes.find(x => x.hit === hits[0]?.object);
+    if (!m) { let best = .07; for (const x of motes) { if (x.taken) continue; const p = where(x), d = ray.ray.origin.distanceTo(p); if (d < 1) continue; const a = ray.ray.distanceToPoint(p) / d; if (a < best) { best = a; m = x; } } }
+    if (!m) return false;
     const z = o.zip(), p = where(m);
     if (Math.hypot(p.x - z.x, p.z - z.z) > (o.reachTap ?? REACH_TAP)) { g.toast(`Too far to hear “${m.s.word}”. Walk closer!`, 1400); return true; }
     return take(m);

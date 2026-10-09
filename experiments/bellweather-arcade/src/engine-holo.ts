@@ -102,7 +102,10 @@ export function buildEngine(scene: T.Scene, o: Opts) {
     tray.innerHTML = `<div class="engine-words">${words.length ? words.map(w => `<button class="holo-chip${MADE.has(w) ? ' made' : ''}" data-w="${w}" data-action="load.${w}" ${busy ? 'disabled' : ''}>${w}</button>`).join('') : '<span class="holo-none">No more words. Absorb some from the world!</span>'}</div>
       <div class="engine-buttons"><button class="holo-cast" data-act="cast" data-action="cast" ${ring().length && !busy ? '' : 'disabled'}>Cast ✦</button>${ring().length ? `<button class="holo-quiet" data-act="clear" ${busy ? 'disabled' : ''} aria-label="Clear the ring">↺ Clear</button>` : ''}<button class="holo-quiet" data-act="close" ${busy ? 'disabled' : ''}>Step away</button></div>`;
   };
-  const refresh = (pop = -1) => { renderRing(pop); renderTray(); };
+  // while the ring is being edited, the engine's guess for what's in it now, dim, so a word in or
+  // out visibly changes what it would say (run 14: "make the guess change when the ring changes")
+  const preview = () => { if (!open || busy) return; const key = ring().join(' '); if (!key) { clearFan(); return; } showFan(key, null); };
+  const refresh = (pop = -1) => { renderRing(pop); renderTray(); preview(); };
 
   const load = (w: string) => { if (busy) return; const r = st.act('load.' + w); if (!r.ok) { sfx.boing(); g.toast('The ring is full. Tap a word in it to take it out.', 1500); return; } sfx.place(); refresh(ring().length - 1); };
   const unload = (i: number) => { if (busy) return; const r = st.act('unload.' + i); if (r.ok) { sfx.tap(); fx.burst(toWorld(slotAt(i)), 6, .8); refresh(); } };
@@ -128,18 +131,18 @@ export function buildEngine(scene: T.Scene, o: Opts) {
       speak(said, then);
     });
   };
-  const showFan = (key: string, said: string) => {
-    clearFan();
+  const showFan = (key: string, said: string | null) => {
+    clearFan(); const dim = said === null;   // a preview: what it would say, before casting
     const k = c.knowledge, gs = [...(k.known[key] ?? k.unsure)].sort((a, b) => b[1] - a[1]).slice(0, 3);
     const xs = gs.length === 1 ? [0] : gs.length === 2 ? [-.48, .48] : [0, -.78, .78];
     gs.forEach(([w, p], i) => {
-      const top = w === said, at = new T.Vector3(xs[i], 1.36 + (i === 0 ? .16 : 0), 0);
-      const m = glyph(w === '.' ? 'END' : w, { height: .16 + .2 * p, color: top ? HOLO.made : HOLO.found, intensity: .6 + 2.2 * p }); m.position.copy(at); holo.add(m);
+      const top = dim ? false : w === said, at = new T.Vector3(xs[i], 1.36 + (i === 0 ? .16 : 0), 0);
+      const m = glyph(w === '.' ? 'END' : dim && i === 0 ? w + '?' : w, { height: .16 + .2 * p, color: top ? HOLO.made : HOLO.found, intensity: (.6 + 2.2 * p) * (dim ? .6 : 1) }); m.position.copy(at); holo.add(m);
       const pct = glyph(`${Math.round(p * 100)}%`, { height: .11, color: top ? HOLO.made : HOLO.found, intensity: 1.2 }); pct.position.copy(at).add(new T.Vector3(0, -.2 - .08 * p, 0)); holo.add(pct);
       const b = beam({ color: top ? HOLO.made : HOLO.found, radius: .006 + .03 * p, flow: true }); b.set(CORE, at.clone().add(new T.Vector3(0, -.12, 0))); holo.add(b.mesh);
       m.scale.setScalar(.1); fan.push({ m, pct, b, w: p, word: w, at });
     });
-    sfx.speak(2);
+    if (!dim) sfx.speak(2);
   };
   let spin = 0, flyer: { m: T.Mesh; from: T.Vector3; to: () => T.Vector3; t: number; dur: number; done: () => void; arc: number } | null = null;
   const speak = (said: string, then: () => void) => {
@@ -149,7 +152,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
     clearFan(); spin = 0; sfx.speak(4); sfx.whoosh();
     flyer = { m, from: m.position.clone(), to: o.target, t: 0, dur: .8, arc: 1.2, done: () => { world.remove(m); fx.burst(o.target(), 14, 2, HOLO.made); then(); } };
   };
-  const back = (html: string, wait = 2.8) => { say(html); promptEl.classList.remove('quiet'); later(wait, () => { busy = false; renderTray(); }); };
+  const back = (html: string, wait = 2.8) => { say(html); promptEl.classList.remove('quiet'); later(wait, () => { busy = false; renderTray(); preview(); }); };
   const react = (events: string[], said: string) => {
     if (events.includes('skiff-hears:sink')) { o.hear('sink'); wrongLoads++; back(L.sink, 3.2); o.onThought?.('engine-sink'); return; }
     if (events.includes('loop-breaks')) { o.hear('lift'); breakLoop(); return; }

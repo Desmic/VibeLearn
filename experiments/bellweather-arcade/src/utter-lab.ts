@@ -44,6 +44,8 @@ export interface LabVariant {
   summaryStays?: boolean;
   /** Zip's first lines on arrival (default: the variant-A pair) */
   intro?: string[];
+  /** places after the third, where they are (the thing appears at `at`; Zip speaks from `from`) */
+  extraSites?: { at: [number, number]; from: [number, number] }[];
   /** how far behind the first place to speak Zip starts (default 1.8 m) */
   spawnBack?: number;
   /** how close to a place Zip must be to speak there (default 2.2 m) */
@@ -126,14 +128,33 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
 
   // where each place is spoken from (a step back from the edge), and where its thing appears
   const edge = (i: number) => new T.Vector3(centres[i] + R - .4, 0, Z);
-  const sites: Site[] = spec.sites.map((s, i) => { const at = i < 2 ? edge(i) : new T.Vector3(centres[2] + 1.35, 0, Z); return { s, at, from: at.clone().add(new T.Vector3(-1.8, 0, 0)), solved: false }; });
+  const sites: Site[] = spec.sites.map((s, i) => {
+    const x = i >= 3 ? V.extraSites?.[i - 3] : undefined;
+    if (x) return { s, at: new T.Vector3(x.at[0], 0, x.at[1]), from: new T.Vector3(x.from[0], 0, x.from[1]), solved: false };
+    const at = i < 2 ? edge(i) : new T.Vector3(centres[2] + 1.35, 0, Z); return { s, at, from: at.clone().add(new T.Vector3(-1.8, 0, 0)), solved: false };
+  });
+  // a lamp post at each extra light place (the lighthouse): an empty glass on a pole, lit by a made lantern
+  const lamps = new Map<Site, { light: T.PointLight; beam: T.Mesh }>();
+  const echoStones: T.Object3D[] = [];
+  for (const x of sites.slice(3)) if (x.s.need.archetype === 'light') {
+    const post = new T.Group(); post.position.copy(x.at).add(new T.Vector3(.5, 0, -.5)); root.add(post);
+    const pole = new T.Mesh(new T.CylinderGeometry(.09, .12, 3.4, 8), mat('#cbb89a')); pole.position.y = 1.7; post.add(pole);
+    const cage = new T.Mesh(new T.CylinderGeometry(.34, .34, .6, 8, 1, true), mat('#8aa0b4', { transparent: true, opacity: .35, side: T.DoubleSide })); cage.position.y = 3.6; post.add(cage);
+    const cap = new T.Mesh(new T.ConeGeometry(.45, .4, 8), mat('#cbb89a')); cap.position.y = 4.1; post.add(cap);
+    const light = new T.PointLight('#ffcf7a', 0, 14); light.position.y = 3.6; post.add(light);
+    const beam = new T.Mesh(new T.CylinderGeometry(.25, 1.6, 9, 16, 1, true), new T.MeshBasicMaterial({ color: '#ffe3a0', transparent: true, opacity: 0, depthWrite: false, side: T.DoubleSide })); beam.position.y = 8.2; post.add(beam);
+    lamps.set(x, { light, beam });
+    // the echo stone where Zip speaks: what's said here, the engine hears again
+    if (V.ngram?.places[sites.indexOf(x)]?.echo) { const st = new T.Mesh(new T.DodecahedronGeometry(.32), holoMaterial({ color: HOLO.found, opacity: .8, intensity: 1.4, scan: .4 })); st.position.copy(x.from).add(new T.Vector3(-.6, .35, .7)); root.add(st);
+      const lbl = glyph('echo stone', { height: .18, color: HOLO.found, intensity: 1.4 }); lbl.position.copy(st.position).setY(.95); root.add(lbl); echoStones.push(lbl); }
+  }
   // how far the place needs a thing to reach: a faint dotted line, so a short bridge is seen to fall short
   for (const x of sites) if (x.s.need.archetype === 'span') for (let d = 0; d <= x.s.need.length; d += .35) {
     const dot = new T.Mesh(new T.SphereGeometry(.035, 6, 4), holoMaterial({ color: HOLO.found, opacity: .55, intensity: 1.6, scan: 0 })); dot.position.set(x.at.x + d, .05, Z); root.add(dot);
   }
   // where to stand to speak: a soft gold ring on the ground (the current place's only)
   const rings = sites.map(x => { const r = new T.Mesh(new T.TorusGeometry(.7, .03, 6, 40), holoMaterial({ color: HOLO.made, opacity: .7, intensity: 1.8, scan: 0 })); r.rotation.x = Math.PI / 2; r.position.copy(x.from).setY(.06); r.visible = false; root.add(r); return r; });
-  const signs = sites.map(x => { const m = glyph(x.s.asks, { height: .26, color: HOLO.found, frame: true, intensity: 1.6 }); m.position.copy(x.at).add(new T.Vector3(0, 2.1, 0)); root.add(m); return m; });
+  const signs = sites.map(x => { const m = glyph(x.s.asks, { height: .26, color: HOLO.found, frame: true, intensity: 1.6 }); m.position.copy(x.at).add(new T.Vector3(0, x.s.need.archetype === 'light' && sites.indexOf(x) >= 3 ? 5 : 2.1, 0)); root.add(m); return m; });
 
   // ── the thing: a placeholder shape per look; spans are built in segments so they can bend ──
   const build = (m: Made): { grp: T.Group; segs: T.Object3D[] } => {
@@ -178,7 +199,10 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
         once(1, () => { sfx.chime(); fx.burst(site.at.clone().setY(.3), 20, 1.8, HOLO.made); });
         if (span) { const k = Math.min(1, t / .5); grp.position.y = site.at.y + (1 - k) * .25 - Math.sin(k * Math.PI) * .06; if (m.material === 'jelly') sag(.12 * Math.exp(-t * 1.5) * Math.sin(t * 10)); }
         else {
-          const lt = grp.getObjectByName('light') as T.PointLight; lt.intensity = Math.min(3 * L, t * 4 * L); doorLight.intensity = Math.min(3.5, t * 5); (shadow.material as T.MeshBasicMaterial).opacity = Math.max(.15, .92 - t);
+          const lt = grp.getObjectByName('light') as T.PointLight; lt.intensity = Math.min(3 * L, t * 4 * L);
+          const lamp = lamps.get(site);
+          if (lamp) { lamp.light.intensity = Math.min(6, t * 6); (lamp.beam.material as T.MeshBasicMaterial).opacity = Math.min(.28, t * .3); if (t > .4) once(2, () => { fx.burst(lamp.light.getWorldPosition(new T.Vector3()), 30, 2.6, HOLO.made); sfx.star(3); }); return t > 1.2; }
+          doorLight.intensity = Math.min(3.5, t * 5); (shadow.material as T.MeshBasicMaterial).opacity = Math.max(.15, .92 - t);
           if (t > .6) once(2, () => { secret.visible = true; fx.burst(door.localToWorld(new T.Vector3(.9, 1.4, 0)), 24, 2, HOLO.made); sfx.star(2); later(3.6, () => g.bark('Zip', 'A new word in the dark: “sky”. Saving that one.', 3.4)); });
         }
         return t > 1.2;
@@ -261,7 +285,7 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
       if (c === 'load' && engine && !toldPick && ring.slots.length === 1 && spec.lines['first-pick']) { toldPick = true; g.bark('Zip', spec.lines['first-pick']); }
     },
     say: t => g.bark('Zip', t, 2.2),
-    onSpeak: (words, forgotten) => { if (open) say(open, [...forgotten, ...words]); },   // the engine heard the forgotten ones first
+    onSpeak: (words, forgotten, how) => { if (open) say(open, [...forgotten, ...words], how.byEngine); },   // the engine heard the forgotten ones first
     onClose: () => { o.host.classList.remove('puzzle-mode', 'ring-mode'); echo.showOrbit(true); if (!busy) { shot = null; open = null; } },
   });
   const openRing = (site: Site) => {
@@ -291,15 +315,20 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
   const fails = new Map<string, number>(); let hinted = false, firstFailSaid = false;
   const flights: { m: T.Object3D; from: T.Vector3; t: number; done: () => void }[] = [];
   const falls: { m: T.Object3D; t: number }[] = [];   // phrases that made nothing, dropping away   // taught words flying to Zip
-  const say = (site: Site, words: string[]) => {
-    const m = speak(spec, words, site.s); busy = true; open = null;
+  const say = (site: Site, words: string[], byEngine = false) => {
+    // a place that only answers the engine (NgramLabSpec place.finishOnly): a phrase Zip picked by hand
+    // there is only an echo; and an echo stone (place.echo) reads what Zip says there by hand back into
+    // the engine (not what the engine says itself: then its favourite would only ever pull further ahead)
+    const place = NG?.places[sites.indexOf(site)], echoOnly = !!place?.finishOnly && !byEngine;
+    const made = speak(spec, words, site.s), m = echoOnly ? { ...made, works: false, reason: 'nothing' as const, thing: null } : made; busy = true; open = null;
+    const heard = engine && place?.echo && !byEngine ? engine.read(words.join(' '), place.echo).filter(p => starts.has(p.pair[0])) : [];
     g.bark('Zip', words.join(' ') + '!', 1.4); sfx.speak(words.length + 1);
     // a directed shot from the side, so the made thing is in view (the follow camera returns after)
     const L = Math.max(1.5, Math.min(8, m.size || 2)), span = site.s.need.archetype === 'span';
     // from behind Zip and a little to the side (about 35°), so the follow camera's way back is a
     // small turn: a side-on shot and back read as "the camera swinging around" (runs 10–12)
     shot = span ? { pos: new T.Vector3(site.at.x - 3.4, 2.7, Z + 2.3 + L * .12), look: new T.Vector3(site.at.x + Math.min(L, 4.5) * .5, .2, Z), rate: 2.5, cut: ++cuts }
-      : { pos: new T.Vector3(site.at.x - 3.8, 2.3, Z + 2.4), look: new T.Vector3(site.at.x + .4, 1.1, Z), rate: 2.5, cut: ++cuts };
+      : { pos: lamps.has(site) ? new T.Vector3(site.at.x - 5.2, 3.6, site.at.z + 3.6) : new T.Vector3(site.at.x - 3.8, 2.3, site.at.z + 2.4), look: new T.Vector3(site.at.x + .4, lamps.has(site) ? 2.4 : 1.1, site.at.z), rate: 2.5, cut: ++cuts };
     (window as any).__vlUtterLog?.push({ site: site.s.id, words, ...m });
     later(.5, () => showReading(site, words, m));
     later(.6, () => {
@@ -312,7 +341,10 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
       const lost = m.forgotten.filter(w => echo.carried.includes(w));   // Zip's own words that slipped (not someone else's)
       // a phrase can have its own line when it fails (longest first two-or-more words: 'say:long way')
       const own = m.works ? null : words.map((_, i) => words.slice(0, words.length - i)).filter(p => p.length >= 2).map(p => spec.lines['say:' + p.join(' ')]).find(Boolean);
-      const notes = [lost.length && spec.lines.forgot ? fill(m, spec.lines.forgot, lost.join('” and “')) : null, m.guessed ? fill(m, spec.lines.guessed) : null, !own && m.late.length ? fill(m, spec.lines.late, m.late[0]) : null, own ?? fill(m, lineFor(spec, m), words.join(' '))].filter(Boolean) as string[];
+      // the echo place: say what it was, and what the engine took from hearing it
+      const echoNotes = [echoOnly && spec.lines.echo ? spec.lines.echo.replace('{phrase}', words.join(' ')) : null,
+        heard.length && spec.lines.heard ? spec.lines.heard.replace('{pair}', heard[0].pair.join(' ')).replace('{n}', String(engine!.count(heard[0].pair[0], heard[0].pair[1]))) : null].filter(Boolean) as string[];
+      const notes = echoOnly ? echoNotes : [...echoNotes.slice(1), lost.length && spec.lines.forgot ? fill(m, spec.lines.forgot, lost.join('” and “')) : null, m.guessed ? fill(m, spec.lines.guessed) : null, !own && m.late.length ? fill(m, spec.lines.late, m.late[0]) : null, own ?? fill(m, spec.lines[`${m.reason}@${site.s.id}`] ?? lineFor(spec, m), words.join(' '))   /* a place can have its own line: 'works@lighthouse' */].filter(Boolean) as string[];
       let d = m.guessed || m.late.length || m.forgotten.length ? .4 : 1.7; for (const n of notes) { later(d, () => g.bark('Zip', n, 3.4)); d += 3.4; }
       if (m.works) lastSaid.delete(site.s.id); else lastSaid.set(site.s.id, words);
       // a miss that hands over the fix (SiteSpec.teaches): the word rises out of the failure and flies to Zip
@@ -411,7 +443,7 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
             const firstTry = sites.every(x => log.find(m => m.site === x.s.id)?.works);
             const odd = new Set(log.filter(m => !m.works).map(m => m.words.join(' ')));
             g.stars('Said into being', engine ? [
-              [true, 'Crossed two gaps and lit the dark'],
+              [true, sites.length > 3 ? 'Crossed two gaps, lit the door and the lighthouse' : 'Crossed two gaps and lit the dark'],
               [firstTry, firstTry ? 'Every place on your first phrase' : 'Every place on the first phrase (try again?)'],
               [odd.size >= 3, `Odd things your engine said: ${odd.size}`],
               [read.size >= o.sources.length, `Signs your engine read: ${read.size} of ${o.sources.length}`],
@@ -428,6 +460,7 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
         rings.forEach((r, i) => (r.visible = i === next));
       }
       rings.forEach(r => { if (r.visible) r.scale.setScalar(1 + .06 * Math.sin(clock * 3)); });
+      for (const e of echoStones) { faceCamera(e, o.camera); e.rotation.y += 0; }
       if (secret.visible) { secret.position.y = 1.4 + Math.sin(clock * 1.6) * .08; faceCamera(secret, o.camera); }
       if (open || busy) { g.setAction(null); return; }
       // a word in reach or the place to speak at: the one the player looks at wins (kit/target.ts)

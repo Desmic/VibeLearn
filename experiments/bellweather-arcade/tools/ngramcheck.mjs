@@ -53,6 +53,23 @@ for (const { spec, sources } of labs) {
       // wrong things it will say, part-way through reading too (a player can speak before reading everything)
       for (let k = 1; k <= order.length; k++) outcomes(site, order.slice(0, k)).said.filter(x => !x.m.works).forEach(x => wrong.set(x.w.join(' '), lineOf(x.w, x.m)));
     }
+    if (p.finishOnly) {
+      // only the engine's own finish counts here; saying a working phrase by hand at the echo stone
+      // reads it back in (p.echo times). Prove: letting it finish fails at first (the lesson is
+      // needed), and repeating a working phrase by hand makes its finish work within 3 repeats.
+      const stop = w => w.length > 1 && spec.utter.lexicon[w[w.length - 1]]?.kind === 'thing';
+      let worst = 0, skippable = null, stuck = null;
+      for (const order of orders) {
+        const { e, said } = outcomes(site, order), starts = [...new Set(order.map(id => byId[id].word))];
+        const finishWorks = () => starts.some(st => speak(spec.utter, e.complete([st], site.slots, stop, spec.top), site).works);
+        if (finishWorks()) { skippable ??= order; continue; }
+        const manual = said.find(x => x.m.works); if (!manual) { stuck ??= order; continue; }
+        let k = 0; while (!finishWorks() && k < 6) { e.read(manual.w.join(' '), p.echo ?? 1); k++; }
+        if (!finishWorks()) stuck ??= order; else worst = Math.max(worst, k);
+      }
+      stuck ? say('✗', `${site.id}: can't be made to finish by itself (order ${stuck.join(', ')})`) : say(worst <= 3 ? '✓' : '!', `${site.id}: its own finish works after at most ${worst} phrase(s) said by hand at the echo stone`);
+      skippable ? say('!', `${site.id}: letting it finish works straight away (order ${skippable.join(', ')}), so the lesson can be skipped`) : say('✓', `${site.id}: letting it finish fails at first (its favourite is wrong), so the lesson is needed`);
+    } else
     unsolvable ? say('✗', `${site.id}: not solvable when read in the order ${unsolvable.join(', ')}`) : say('✓', `${site.id}: solvable in all ${orders.length} reading orders (${[...works].slice(0, 4).map(w => `"${w}"`).join(', ')})`);
     if (p.key) {
       const without = p.reads.filter(r => r !== p.key), solved = perms(without).find(o => outcomes(site, o).said.some(x => x.m.works));

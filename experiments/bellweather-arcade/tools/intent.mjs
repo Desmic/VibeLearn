@@ -70,7 +70,8 @@ export function buildNgramIntent(spec) {
     '- you pick only the first word; after that the engine suggests what comes next, from what it has read, likeliest first, and shows how often it has read each;',
     `- it will only say its ${spec.top} likeliest words; words it has read too rarely are shown but it won't say them;`,
     '- reading more of a phrase makes the engine likelier to say it;',
-    '- its likeliest word is not always the one you need ("let it finish" picks its favourite every time); you steer.', '',
+    '- its likeliest word is not always the one you need ("let it finish" picks its favourite every time); you steer;',
+    '- it learns from what it hears you say too: at the last place only its own finish counts, so you say the phrase yourself until it becomes its favourite.', '',
     'A phrase then makes a thing (a bridge across a gap, a lantern for a dark doorway). Wrong phrases make something silly, or nothing, in a readable way.', '',
     '## The places', ...spec.places.map((p, i) => `- **${spec.utter.sites[i].asks}**: ${p.lesson}`), ''].join('\n');
   const items = [
@@ -80,6 +81,7 @@ export function buildNgramIntent(spec) {
     { id: 'frequency', text: 'How often it has read a pair decides how likely it is to say it; it only says its likeliest few.' },
     { id: 'more', text: 'To get it to say something it rarely says, feed it more text where that phrase appears.' },
     { id: 'steer', text: 'Its favourite next word is not always what you need: letting it finish gives its favourite; you can pick another.' },
+    { id: 'habit', text: 'It also learns from what it hears you say: saying a phrase makes it likelier, until the engine says it by itself.' },
     { id: 'model', text: 'This is how a language model works at heart: it predicts the next word from counts of the text it has read.' },
   ];
   const experience = (spec.utter.experience ?? []).map(x => ({ id: x.id, text: x.text, draft: !!x.draft }));
