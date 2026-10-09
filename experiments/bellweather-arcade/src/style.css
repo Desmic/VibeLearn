@@ -255,6 +255,11 @@ html[data-input=desktop] .wr-chip kbd{display:inline-block}
 .wr-chip.next,.wr-chip.wr-finish{display:flex;align-items:center;gap:8px;width:210px;min-height:40px;justify-content:space-between}
 .wr-chip.wr-finish{justify-content:center}
 .wr-chip.next .wr-bar{flex:1}
+/* words read equally often, side by side on one row (a tie, seen) */
+.wr-chip.next.tied{width:120px;gap:4px;padding:6px 7px 6px 8px;font-size:14px;white-space:nowrap}
+.wr-chip.next.tied .wr-bar{min-width:12px}
+.wr-chip.next.tied small{font-size:10.5px}
+html[data-input=desktop] .wr-chip.next.tied{width:142px}
 .ring-mode .speech.bark{left:50%!important;top:54px!important;transform:translateX(-50%)!important;max-width:min(86vw,340px)}
 .ring-mode .speech.bark::after{display:none}
 .wr-chip .wr-bar{display:block;min-width:30px;height:6px;border-radius:3px;background:#6fe0c933;overflow:hidden}

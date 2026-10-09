@@ -1,7 +1,7 @@
 // The next-word lab (lab=ngram), played: absorbs each sign (which the engine reads), opens the
 // word ring, picks a first word and the engine's suggestions (data-action tags), and checks what
 // the kit decided is what the world shows: suggestions are what was read; a word read too rarely
-// is shown but not said; reading the builders' song lifts "long bridge" to the top; "let it
+// is shown but not said; no sign says "long rope bridge" but the engine joins pairs; "let it
 // finish" says the engine's favourite; working things can be walked across; the doorway lights.
 //   bash tools/build.sh && node tools/ngramlab.mjs [--input touch] [--out /tmp/nglab]
 import { harness } from './harness.mjs';
@@ -61,7 +61,7 @@ await tap('steps'); h.check('"stone steps" makes a stone (the wrong kind of thin
 h.check('"stone bridge" crosses the first gap', (await say(A, ['stone', 'bridge'], 'a-bridge')).works);
 const w1 = await h.walkTo([71, -40], { near: 1 }); h.check('the stone bridge can be walked across', w1.ok, JSON.stringify(w1), 'fail', 'world');
 
-// 2. the wide gap: frequency decides what it will say
+// 2. the wide gap: no sign says what it needs; the engine joins pairs read in different places
 await absorb(by('drop-sign'));
 await openRing(B); await tap('long'); await page.waitForTimeout(200);
 const s2 = await chips(); await h.shot('b-before-song');
@@ -70,14 +70,20 @@ await tap('bridge'); await page.waitForTimeout(300);
 h.check('tapping the rare word: it is not said, and Zip says why', (await page.evaluate(() => window.__vlUtterLab.ring.slots.length)) === 1 && /once/.test(await barks()), await barks());
 await tap('noodle'); h.check('"long noodle" gives way (the engine likes noodles)', (await speakNow('b-noodle')).reason === 'too-weak');
 await absorb(by('song-board'));
-h.check('reading the builders\' song: Zip says what it learned ("long bridge" ×3)', /long bridge” ×3/.test(await barks()), await barks());
+h.check('reading the builders\' song: Zip says what it learned ("long rope" ×2)', /long rope” ×2/.test(await barks()), await barks());
 await openRing(B); await tap('long'); await page.waitForTimeout(200);
 const s3 = await chips(); await h.shot('b-after-song');
-h.check('now "bridge" is its favourite after "long", and shows how much it grew', s3[0]?.startsWith('bridge×4') && /\+3/.test(s3[0]), s3.join(' '));
-await h.press(page.locator('[data-action="finish"]')); for (let i = 0; i < 6; i++) { await sim(.2); await page.waitForTimeout(120); }
-h.check('"let it finish" adds its favourite: "long bridge"', (await page.evaluate(() => window.__vlUtterLab.ring.slots)).join(' ') === 'long bridge');
-h.check('"long bridge" crosses the wide gap', (await speakNow('b-finish')).works);
-const w2 = await h.walkTo([85.6, -40], { near: 1 }); h.check('the long bridge can be walked across', w2.ok, JSON.stringify(w2), 'fail', 'world');
+h.check('now "rope" is sayable after "long" (×2, grown +2); "bridge" still too rare', s3.some(c => /^rope×2/.test(c) && /\+2/.test(c)) && s3.some(c => c.startsWith('·bridge')), s3.join(' '));
+// a tie is seen, not explained: words read equally often share a row
+const box = w => page.evaluate(w => { const e = document.querySelector(`.wr-chip[data-w="${w}"]`); if (!e) return null; const r = e.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.right), Math.round(r.top)]; }, w);
+const bs = (await Promise.all(['ago', 'noodle', 'rope'].map(box))).filter(Boolean).sort((a, b) => a[0] - b[0]);
+h.check('words read equally often (×2) sit on one row, side by side without overlapping', bs.length === 3 && bs.every(b => Math.abs(b[2] - bs[0][2]) < 3) && bs[0][1] <= bs[1][0] + 1 && bs[1][1] <= bs[2][0] + 1, JSON.stringify(bs), 'fail', 'learning');
+await tap('rope'); await page.waitForTimeout(200);
+const s3b = await chips();
+h.check('after "long rope" it offers what it read after "rope" on another sign: "bridge"', s3b.some(c => /^bridge×/.test(c)), s3b.join(' '));
+await tap('bridge');
+h.check('"long rope bridge" (no sign says it) crosses the wide gap', (await speakNow('b-chain')).works);
+const w2 = await h.walkTo([85.6, -40], { near: 1 }); h.check('the long rope bridge can be walked across', w2.ok, JSON.stringify(w2), 'fail', 'world');
 
 // 3. the doorway: its favourite isn't what you need
 await absorb(by('paper-note'));

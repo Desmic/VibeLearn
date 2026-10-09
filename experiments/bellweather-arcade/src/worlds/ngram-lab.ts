@@ -73,6 +73,8 @@ export const NGRAM_LAB: NgramLabSpec = {
       // phrases the engine likes that make nothing useful (the first two words or more decide)
       'say:long way': 'A long way. Down. Thank you, engine.',
       'say:long ago': 'It made… the past. Long ago. No use to anyone now.',
+      'say:long rope': 'A long rope. Lovely. Tied to nothing, though.',
+      'hint-wide-gap': 'No sign says the whole thing. Two of them might, together.',
       'say:stone steps': 'Stone steps? I got one stone. Steps sold separately.',
       'say:rope burns': 'Rope burns. Ow. And a rope. No bridge.',
       'say:paper cut': 'A paper cut. In mid-air. Somehow, ow.',
@@ -99,7 +101,9 @@ export const NGRAM_LAB: NgramLabSpec = {
   },
   places: [
     { site: 'first-gap', reads: ['stone-sign', 'rope-coil'], lesson: 'after a word, the engine offers what it has read after it' },
-    { site: 'wide-gap', reads: ['stone-sign', 'rope-coil', 'drop-sign', 'song-board'], key: 'song-board', lesson: 'the more often it has read a pair, the likelier it says it' },
+    // 2. no sign says it (9 Oct): "long rope" is in the song, "rope bridge" on the coil; the engine
+    //    joins pairs it read in different places, so "long rope bridge" is sayable though never written
+    { site: 'wide-gap', reads: ['stone-sign', 'rope-coil', 'drop-sign', 'song-board'], key: 'song-board', lesson: 'it joins pairs it read in different places: it can say a phrase no sign says' },
     { site: 'dark-door', reads: ['stone-sign', 'rope-coil', 'drop-sign', 'song-board', 'paper-note', 'hook-sign'], key: 'hook-sign', lesson: 'what the first two taught, together: read more to make the word you need sayable, then steer past its favourite' },
     // 4. the lighthouse (9 Oct, the learning track's "feeding back"): it only lights for a phrase the
     //    engine finishes by itself, and the echo stone beside it reads whatever is said there back
@@ -115,7 +119,9 @@ export const NGRAM_LAB_SOURCES: WordSource[] = [
   { id: 'stone-sign', word: 'stone', line: 'Stone bridge ahead. Mind the stone steps.', kind: 'sign', at: [59.3, -42.8], y: 2.0, reach: 2.6 },
   { id: 'rope-coil', word: 'rope', line: 'Rope bridge closed. Rope burns, open.', kind: 'object', at: [59.3, -37.2], y: 1.0, reach: 2.6 },
   { id: 'drop-sign', word: 'long', line: 'Long drop. Do not look down.', kind: 'sign', at: [68.6, -42.7], y: 2.0, reach: 2.6 },
-  { id: 'song-board', word: 'bridge', line: 'The builders’ song: long bridge, long bridge, build a long bridge!', kind: 'sign', at: [68.8, -37.3], y: 2.2, reach: 2.6 },
+  // no sign says the phrase the wide gap needs: the song has "long rope", the coil "rope bridge";
+  // the engine joins pairs from anywhere (9 Oct, Desmic: puzzles that test, not confirm)
+  { id: 'song-board', word: 'bridge', line: 'The builders’ song: long rope, long rope, then knots!', kind: 'sign', at: [68.8, -37.3], y: 2.2, reach: 2.6 },
   { id: 'paper-note', word: 'paper', line: 'Paper plane, free. Paper lantern, one coin.', kind: 'sign', at: [83.2, -42.7], y: 1.7, reach: 2.6 },
   // read only the note, and "lantern" is too rare to say after "paper"; the hook makes it sayable
   { id: 'hook-sign', word: 'paper', line: 'Lantern hook. Hang a paper lantern here. Paper lantern only!', kind: 'sign', at: [83.4, -37.2], y: 2.0, reach: 2.6 },

@@ -421,7 +421,7 @@ whatever his engine predicts, and the prediction comes from what it has read.
 | Place | What the engine does there | Wrong things it will happily say |
 | --- | --- | --- |
 | The first gap | offers what it read after a word ("stone" → bridge, steps) | "stone steps" (one stone, "steps sold separately"), "rope burns" |
-| The wide gap | "long bridge" was read once, "long way" three times: it won't say "long bridge". Reading the builders' song (three more) lifts "bridge" to the top | "long way", "long ago" (it made… the past), "long noodle" (flops) |
+| The wide gap | no sign says what it needs (since 9 Oct). The builders' song says "long rope", the coil "rope bridge"; the engine joins pairs from anywhere, so "long rope bridge" is sayable though nobody wrote it. A test, not a copy (Desmic: puzzles that test, not confirm) | "long way", "long ago" (it made… the past), "long noodle" (flops), "long rope" (tied to nothing) |
 | The dark doorway | after "paper" its favourite is "plane"; left to finish it says "paper plane". Its likeliest word isn't always the one you need: you steer | "paper plane", "paper cut" (in mid-air, somehow, ow) |
 
 The engine arrives with some reading already (a few phrasebook lines). That is why it leans
@@ -507,6 +507,8 @@ engine finish. The lighthouse fixes both:
 - The speak shot pulls back along the player's own view (up, a little to one side, until Zip and
   what he made are both in view), instead of cutting to a fixed side shot. The turn back is made only
   when the view is far off the way on. Measured per phrase in `ngramlab`: 50–97° before, 7–25° after.
+- Ties are shown, not explained (Desmic: "for a game the rule is show not tell"): words read equally
+  often sit side by side on one row of the ranking.
 - The ring's status reads "Ready to speak · or add what comes after “paper”": a part-filled ring can
   be spoken ("2 / 3 words" read as not ready).
 - The ring's buttons hold still once it is open ("tapped paper, got long").

@@ -595,3 +595,21 @@ computer use (checked, and Anthropic's docs agree), so the game was opened in it
 It works, but it is a desktop keyboard (one key held at a time, no diagonals), a few seconds per
 action, it takes over the PC, and the game's metrics aren't read. Verdict: keep the cloud play
 server as the blind tester; use computer use now and then as a short real-PC check.
+
+**Desmic's calls on the rest (9 Oct), and what changed:**
+
+5. *"For a game the rule is show not tell."* The tie rule is now shown: in the word ring, words read
+   equally often share a row (`ngramlab` checks it). No explaining line added.
+6. *Satchel as context: "yes if it makes sense."* Shown, not told: when the Gate reads, each note
+   leaves the satchel as the same hologram Zip's words are made of and flies along a beam into the
+   Gate, the way Zip's engine reads its ring.
+7. *"Chase Mira is the bigger picture; once the speech engine repairs are complete we can move to
+   other challenges."* No per-isle repair display. The game's intent item `story-journey` now says
+   getting Mira back is what the journey is about, and mending the engine is its first part.
+8. *Puzzles that test: yes.* The lab's wide gap no longer has its answer on a sign. The song says
+   "long rope", the coil says "rope bridge", and the gap needs "long rope bridge": the engine joins
+   pairs it read in different places, so the player has to work out a phrase nobody wrote.
+   `ngramcheck` proves it solvable in all 24 reading orders and unsolvable without the song.
+9. *Pim's title line:* not a gap. The game isn't finished, and the title screen's jokes are about the
+   real world (the AI race, tech, humanity), not a setup to pay off. Interviewers shouldn't count
+   it as one.

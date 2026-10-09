@@ -42,7 +42,8 @@ export const GAME: GameManifest = {
     story: [
       { id: 'story-mira', draft: true, text: 'Mira, a friend at the outlook, is taken by the Warden; Zip sets out to get her back.' },
       { id: 'story-voice', draft: true, text: 'The Warden\'s attack knocks out Zip\'s voice; getting it back, coil by coil, is what lets him speak (and wake the skiff).' },
-      { id: 'story-journey', draft: true, text: 'The way to Mira is a journey isle to isle by skiff, and each isle mends a part of Zip\'s word engine.' },
+      // Desmic, 9 Oct: chasing Mira is the big picture; mending the speech engine is the first arc, then other challenges
+            { id: 'story-journey', draft: false, text: 'Getting Mira back is what the journey is about, isle to isle by skiff; mending Zip\'s speech engine along the way is its first part.' },
     ],
     experience: [
       { id: 'feel-opening', draft: true, text: 'The first minute makes them curious: a strange, lovely world and a robot who is a bit self-aware.' },

@@ -220,7 +220,22 @@ export function createWordRing(o: WordRingOpts) {
       const ws = [...chipEls.values()], perRow = W < 520 ? 4 : 6;
       // predictive mode: the engine's suggestions in one column, likeliest at the top, like a ranking
       rareLine.hidden = true;
-      if (predictive()) { let gap = 0; ws.forEach((b, i) => { if (b.classList.contains('first-rare')) { gap = 22; rareLine.hidden = false; put(rareLine, cx, cy + 88 + (i * 46 + 1) * grow); } put(b, cx, cy + 88 + (i * 46 + gap) * grow); }); }
+      // Words read equally often share a row: a tie is seen, not explained (run 16 read four words
+      // above the line as "seen once means locked"; run 13 read a tie left out as an arbitrary cut)
+      if (predictive()) {
+        const rows: HTMLElement[][] = [];
+        ws.forEach((b, i) => { const c = offer[i], p = offer[i - 1], last = rows[rows.length - 1];
+          if (last && c && p && c.count !== undefined && c.count === p.count && c.ok === p.ok && last.length < 3) last.push(b); else rows.push([b]); });
+        let gap = 0;
+        rows.forEach((row, r) => {
+          if (row[0].classList.contains('first-rare')) { gap = 22; rareLine.hidden = false; put(rareLine, cx, cy + 88 + (r * 46 + 1) * grow); }
+          for (const b of row) b.classList.toggle('tied', row.length > 1);   // compact, side by side
+          // the row stays whole on screen: shifted in from the edge as one, never squeezed into overlap
+          const span = Math.min(row[0].offsetWidth + 6, (W - 24) / row.length), total = span * (row.length - 1) * grow;
+          const x0 = Math.max(12 + row[0].offsetWidth / 2, Math.min(W - 12 - row[0].offsetWidth / 2 - total, cx - total / 2));
+          row.forEach((b, k) => put(b, x0 + k * span * grow, cy + 88 + (r * 46 + gap) * grow));
+        });
+      }
       else ws.forEach((b, i) => {
         const row = Math.floor(i / perRow), k = i % perRow, nRow = Math.min(perRow, ws.length - row * perRow);
         put(b, cx + (k - (nRow - 1) / 2) * Math.min(96, (W - 24) / nRow) * grow, cy + 96 + row * 54 + 8 * Math.abs(k - (nRow - 1) / 2));

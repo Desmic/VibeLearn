@@ -2,6 +2,7 @@ import * as T from 'three';
 import type { Guide } from './guide';
 import type { LearningEvent } from './speech-puzzle';
 import { pickTarget } from './kit/target';
+import { HOLO, glyph, beam, faceCamera } from './kit/holo';
 import { createStation } from './kit/station';
 import { station, rulesFor } from './worlds/first-words-stations';
 import { sfx } from './sfx';
@@ -39,6 +40,8 @@ interface Opts {
   /** the game's look for loaded art (painted shading, faders, camera solids) */
   adopt?: (root: T.Object3D, cameraBlockers: T.Object3D[]) => void;
   density?: number;
+  /** to turn the notes' hologram toward the view as the Gate reads them */
+  camera?: T.Camera;
 }
 
 export function buildIsland(scene: T.Scene, opts: Opts) {
@@ -174,10 +177,12 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       const r = gateSt.act('speak'); if (!r.ok) return;
       if (r.events.includes('gate-needs-notes')) { gateSays('An empty satchel? I need notes, pal. Rules are rules!', [{ label: 'OK', act: () => { mood = 'idle'; g.close(); } }], 'smug'); return; }
       const read = bag().map(b => NOTES.find(n => n.id === b)!.text.replace(/ \(.*\)$/, '')).join(' … ');
-      gateSays(`Let me read your notes: ${read} Now guess: where will I open?`, [
+      // the notes fly in first, then the Gate speaks (seen, before it is said)
+      readIn(); mood = 'talk'; sfx.speak(2);
+      setTimeout(() => gateSays(`Let me read your notes: ${read} Now guess: where will I open?`, [
         { label: 'Lotus Terraces', action: 'predict.lotus', act: () => gate.predict('lotus') }, { label: 'East Falls', action: 'predict.east', act: () => gate.predict('east') },
         { label: 'Old Bridge', action: 'predict.bridge', act: () => gate.predict('bridge') }, { label: 'Can\'t tell', action: 'predict.unclear', act: () => gate.predict('unclear') },
-      ]);
+      ]), 1100);
     },
     predict(p: string) {
       const r = gateSt.act('predict.' + p); if (!r.ok) return;
@@ -209,6 +214,26 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
     },
   };
 
+  // Shown, not told: the satchel is what the Gate reads, the way Zip's engine reads its ring. When
+  // the Gate reads, each note leaves the satchel as the same hologram Zip's words are made of and
+  // flies along a beam into the Gate (run 16 took the lesson as "trust your sources"; the satchel
+  // wasn't seen as the reader's input until the reveal).
+  const readFx: { m: T.Object3D; t: number; from: T.Vector3 }[] = [], readBeam = beam({ color: HOLO.found, radius: .03, flow: true });
+  readBeam.mesh.visible = false; scene.add(readBeam.mesh); let beamT = 0, zipNow = LANDING.clone();
+  const gateFace = () => GATE.clone().setY(GATE.y + 2.6);
+  const readIn = () => {
+    bag().forEach((id, i) => { const n = NOTES.find(x => x.id === id)!, m = glyph(n.short, { height: .26, color: HOLO.found, frame: true, intensity: 2 }); m.visible = false; scene.add(m); readFx.push({ m, t: -i * .45, from: zipNow.clone().setY(zipNow.y + 1.3) }); });
+    beamT = 1.4 + bag().length * .45; sfx.place();
+  };
+  const tickRead = (dt: number, cam: T.Camera | null) => {
+    readBeam.mesh.visible = beamT > 0; if (beamT > 0) { beamT -= dt; readBeam.set(zipNow.clone().setY(zipNow.y + 1.2), gateFace(), .03); }
+    for (const r of [...readFx]) {
+      r.t += dt; const k = Math.min(1, Math.max(0, r.t / 1.1)); r.m.visible = r.t >= 0;
+      r.m.position.lerpVectors(r.from, gateFace(), k * k * (3 - 2 * k)).y += Math.sin(k * Math.PI) * .5; r.m.scale.setScalar(1 - .6 * k); if (cam) faceCamera(r.m, cam);
+      if (k >= 1) { scene.remove(r.m); readFx.splice(readFx.indexOf(r), 1); }
+    }
+  };
+
   // relay: new purpose (reach Mira), new cards, less help (see relay.ts)
   const relay = buildRelay({ guide: g, host: opts.host, station: relaySt, ping: () => { ping = 3; }, onDone: () => {
     phase = 'done'; renderBag(); goalNow(); g.thinkOnce('loom', 'Plot twist: there\'s a Loom Isle. Of course there is.'); g.thinkOnce('warden-loom', 'Loom Isle, then. Come find me, awake one.', 'warden'); opts.onDone?.();
@@ -238,7 +263,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
         if (shedAt !== budget.level) { shedAt = budget.level; const keep = budget.level ? .5 : 1.01; detail.children.forEach(c => { c.visible = (c.userData.rank ?? 0) < keep; }); }
       }
       if (phase === 'off') return null;
-      t += dt;
+      t += dt; zipNow.copy(zip); tickRead(dt, opts.camera ?? null);
       // what the prompt is about (kit/target.ts): of the things and notes in reach, the one the
       // player is looking at, then the nearest. A note in reach shows its text the same way.
       type Pick = { th: typeof things[number] | null; n: Note | null };
