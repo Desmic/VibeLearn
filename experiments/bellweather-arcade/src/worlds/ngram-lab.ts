@@ -92,6 +92,9 @@ export const NGRAM_LAB: NgramLabSpec = {
       'works@lighthouse': 'My engine said it all by itself. And the lighthouse believed it.',
       'hint-lighthouse': 'It keeps saying its favourite. What if it heard me say mine?',
       done: 'Across the sky on a phrasebook, a song and a paper note.',
+      // the link to the real thing, after the last place (run 16: never said out loud)
+      link: 'That’s how chat AIs write, by the way. One likely next word at a time.',
+      link2: 'Same trick as my engine. Mine read six signs. Theirs read half the internet.',
     },
   },
   places: [

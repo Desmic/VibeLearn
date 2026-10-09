@@ -28,13 +28,19 @@ const openRing = async site => {
   for (let i = 0; i < 4; i++) { await h.act('Speak', 20000); await page.waitForTimeout(300); if (await page.evaluate(() => window.__vlUtterLab.open)) return; await sim(.5); }
 };
 const tap = w => h.press(page.locator(`.wr-chip[data-w="${w}"]`));
+// where the camera looks (flat, radians), to measure the turns a speak makes (runs 15–16: "two big
+// turns per phrase", into the speak shot and back)
+const viewYaw = () => page.evaluate(() => { const s = window.__arcade.snapshot(); return Math.atan2(s.position[0] - s.camera[0], s.position[2] - s.camera[2]); });
+const turn = (a, b) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b))) * 180 / Math.PI;
+const turns = [];
 const speakNow = async name => {
   await page.waitForTimeout(300); await h.shot(name + '-ring');
+  const v0 = await viewYaw(); let most = 0;
   await h.press(page.locator('[data-action="speak"]'));
-  for (let i = 0; i < 8; i++) { await sim(.4); await page.waitForTimeout(250); }
+  for (let i = 0; i < 8; i++) { await sim(.4); await page.waitForTimeout(250); most = Math.max(most, turn(await viewYaw(), v0)); }
   await h.shot(name + '-made');
-  await h.until(() => page.evaluate(() => !window.__vlUtterLab.busy), 12);
-  await sim(3); await h.shot(name + '-after');
+  await h.until(async () => { most = Math.max(most, turn(await viewYaw(), v0)); return page.evaluate(() => !window.__vlUtterLab.busy); }, 12);
+  await sim(3); await h.shot(name + '-after'); turns.push({ name, into: Math.round(most), back: Math.round(turn(await viewYaw(), v0)) });
   const m = (await page.evaluate(() => window.__vlUtterLog)).at(-1);
   console.log(name, m.words.join(' '), '→', m.reason, m.thing); return m;
 };
@@ -96,8 +102,11 @@ h.check('"paper lantern" picked by hand is only an echo there (no light)', !echo
 h.check('...but the echo stone read it back in: "lantern" climbs after "paper"', await page.evaluate(() => window.__vlUtterLab.engine.count('paper', 'lantern')) >= 5, String(await page.evaluate(() => window.__vlUtterLab.engine.count('paper', 'lantern'))));
 let lit = null; for (let i = 0; i < 4 && !lit?.works; i++) { lit = await finishAt('d-finish' + i); if (!lit.works) await say(D, ['paper', 'lantern'], 'd-echo' + i); }
 h.check('once "lantern" is its favourite, letting it finish lights the lighthouse', !!lit?.works && lit.words.join(' ') === 'paper lantern', lit?.words.join(' '));
+console.log('speak turns (degrees from the view before speaking):', turns.map(t => `${t.name} ${t.into}/${t.back}`).join(', '));
+h.check('a speak shot pulls back rather than swinging round (under 50° from the player\'s view)', turns.every(t => t.into < 50), turns.filter(t => t.into >= 50).map(t => `${t.name} ${t.into}°`).join(', '), 'fail', 'feel');
 h.check('the lab says it is done', /lab is done/.test(await h.goal() ?? ''), await h.goal());
-await h.until(() => page.evaluate(() => !!document.querySelector('.star-row')), 12);
+h.check('...and Zip says the link to language models out loud', await h.until(async () => /chat AIs/.test(await barks()), 12), await barks());
+await h.until(() => page.evaluate(() => !!document.querySelector('.star-row')), 20);
 h.check('a summary shows what was done', await page.evaluate(() => !!document.querySelector('.star-row')));
 await h.shot('end');
 await h.finish();

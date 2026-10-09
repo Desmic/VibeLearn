@@ -259,7 +259,7 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
   };
 
   // ── speaking: the word ring, a hologram of the engine's context (kit/word-ring.ts) ──
-  let open: Site | null = null, busy = false, shot: { pos: T.Vector3; look: T.Vector3; rate: number; cut: number } | null = null, cuts = 0;
+  let open: Site | null = null, busy = false, shot: { pos: T.Vector3; look: T.Vector3; rate: number; cut?: number } | null = null, cuts = 0, shotYaw = 0;
   const usable = () => echo.carried.filter(w => spec.lexicon[w]);
   let toldPick = false;
   // predictive mode: how often each suggestion had been read when the ring last showed it, so a
@@ -325,10 +325,17 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
     g.bark('Zip', words.join(' ') + '!', 1.4); sfx.speak(words.length + 1);
     // a directed shot from the side, so the made thing is in view (the follow camera returns after)
     const L = Math.max(1.5, Math.min(8, m.size || 2)), span = site.s.need.archetype === 'span';
-    // from behind Zip and a little to the side (about 35°), so the follow camera's way back is a
-    // small turn: a side-on shot and back read as "the camera swinging around" (runs 10–12)
-    shot = span ? { pos: new T.Vector3(site.at.x - 3.4, 2.7, Z + 2.3 + L * .12), look: new T.Vector3(site.at.x + Math.min(L, 4.5) * .5, .2, Z), rate: 2.5, cut: ++cuts }
-      : { pos: lamps.has(site) ? new T.Vector3(site.at.x - 5.2, 3.6, site.at.z + 3.6) : new T.Vector3(site.at.x - 3.8, 2.3, site.at.z + 2.4), look: new T.Vector3(site.at.x + .4, lamps.has(site) ? 2.4 : 1.1, site.at.z), rate: 2.5, cut: ++cuts };
+    // The shot pulls back from where the player is already looking, up and away along the same line,
+    // until Zip and the made thing are both in view: no cut and no swing. A fixed side shot and the
+    // turn back measured 50–97° per phrase (runs 15–16: "two big turns per phrase"; tools/ngramlab).
+    const focus = span ? new T.Vector3(site.at.x + Math.min(L, 4.5) * .5, .2, Z) : site.at.clone().setY(lamps.has(site) ? 2.4 : 1.1);
+    const zp = o.zip(), back = new T.Vector3(o.camera.position.x - zp.x, 0, o.camera.position.z - zp.z);
+    if (back.lengthSq() < .01) back.set(0, 0, 1); back.normalize(); shotYaw = Math.atan2(back.x, back.z);
+    // a little to one side (about 20°) and higher, so Zip doesn't stand in front of what he made
+    const side = new T.Vector3(back.z, 0, -back.x), lean = Math.sign(side.dot(new T.Vector3(focus.x - zp.x, 0, focus.z - zp.z))) || 1;
+    back.applyAxisAngle(new T.Vector3(0, 1, 0), -.35 * lean);
+    const mid = zp.clone().setY(1.2).lerp(focus, .6), reach = Math.max(6, Math.hypot(focus.x - zp.x, focus.z - zp.z) * 1.2 + 3.8);
+    shot = { pos: mid.clone().addScaledVector(back, reach).setY(mid.y + 3.4 + (lamps.has(site) ? 1 : 0)), look: mid, rate: 2.2 };
     (window as any).__vlUtterLog?.push({ site: site.s.id, words, ...m });
     later(.5, () => showReading(site, words, m));
     later(.6, () => {
@@ -373,7 +380,10 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
         const i = sites.indexOf(site), z = o.zip(), to = m.works && site.s.need.archetype === 'span' && i + 1 < centres.length ? new T.Vector3(centres[i + 1], 0, Z) : site.at;
         // the direction from where Zip spoke, not from where he is now: a player who walks on during the shot
         // can be past the next platform's centre, and aiming from there turned the camera right round (174°, run 12 replay)
-        const dx = to.x - site.from.x, dz = to.z - site.from.z; void z; (o.turnTo ?? o.setYaw)(Math.hypot(dx, dz) > .5 ? Math.atan2(-dx, -dz) : -Math.PI / 2);
+        // ...but only turn when the view the player had is far off that way (over ~50°); otherwise the
+        // camera just comes back in along the line it pulled out on
+        const dx = to.x - site.from.x, dz = to.z - site.from.z; void z; const want = Math.hypot(dx, dz) > .5 ? Math.atan2(-dx, -dz) : -Math.PI / 2;
+        if (Math.abs(Math.atan2(Math.sin(want - shotYaw), Math.cos(want - shotYaw))) > .9) (o.turnTo ?? o.setYaw)(want);
       });
     });
   };
@@ -436,8 +446,11 @@ export function buildUtterLab(scene: T.Scene, o: Opts) {
         goalSite = next; goalWordless = wordless;
         if (next === -2) { g.setGoal('Walk across'); g.setBeacon(new T.Vector3(centres[sites.indexOf(crossing!) + 1], 1.2, Z)); }
         else if (next < 0) { g.setGoal('The lab is done. More words soon.'); g.setBeacon(null); fx.burst(o.zip().clone().setY(1.4), 30, 2.4, HOLO.made); sfx.chime(); later(1, () => g.bark('Zip', spec.lines.done ?? 'I talked my way across the sky. Mira would laugh.', 3));
+          // the link to the real thing, said out loud (run 16: the lab never named it), before the summary
+          const link = [spec.lines.link, spec.lines.link2].filter(Boolean) as string[];
+          link.forEach((l, i) => later(4.2 + i * 3.6, () => g.bark('Zip', l, 3.4)));
           // what you did here, with reasons to come back: the ways to fail you haven't seen, the words you haven't used
-          later(4.6, () => {
+          later(4.6 + link.length * 3.6, () => {
             const log: (Made & { words: string[]; site: string })[] = (window as any).__vlUtterLog ?? [];
             const kinds = new Set(log.filter(m => !m.works).map(m => m.reason)), used = new Set(log.flatMap(m => m.words)), all = new Set([...o.sources.map(x => x.word), ...sites.flatMap(x => x.s.teaches ? [x.s.teaches.word] : [])]);
             const firstTry = sites.every(x => log.find(m => m.site === x.s.id)?.works);

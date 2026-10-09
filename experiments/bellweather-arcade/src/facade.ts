@@ -120,7 +120,11 @@ export async function buildWorld(scene:T.Scene){
 
   // A substantial asymmetric building, not separate ornamental pillars.
   // The left volume contains two deep, glazed bays and an upper gallery.
-  if(atelier){blockers.push(...await loadAtelier(root,cameraSolids));}
+  if(atelier){blockers.push(...await loadAtelier(root,cameraSolids));
+    // the dead-end strip between the conservatory's east wall and the town edge, by Mira's tree: a
+    // body-wide alley with one way in, where the camera pins against the wall and every push turns
+    // the view (Desmic watched Claude play by computer use, 9 Oct: stuck there about four minutes)
+    blockers.push({minX:7.6,maxX:9.4,minZ:-12.2,maxZ:-8.45});}
   else {
   box(-5.65,4.15,-3.95,7.2,8.1,4.3,cream,true,.48);
   box(-5.65,.35,-1.74,7.1,.46,.4,navy,true,.08);

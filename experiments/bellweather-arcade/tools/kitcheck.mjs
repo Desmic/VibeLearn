@@ -84,6 +84,18 @@ const sample = stripComments(`const who = '${GAME.nouns[0]}'; // ${GAME.nouns[1]
 const got = [...sample.matchAll(re)].map(m => m[1]);
 got.length === 1 && got[0] === GAME.nouns[0] ? R.add('pass', 'self-test: catches a game name in code, ignores one in a comment') : fail('self-test: catches a game name in code, ignores one in a comment', JSON.stringify(got));
 
+// tests play what players get: the test entry carries every setting of the hosted default (until
+// 9 Oct it left out the atelier and the crafted portal, so tests and blind testers saw another town)
+{
+  const { readFileSync, existsSync } = await import('node:fs');
+  const f = 'tools/hosted/index.html';
+  if (existsSync(f)) {
+    const html = readFileSync(f, 'utf8'), base = html.match(/var base='([^']+)'/)?.[1] ?? '', extra = html.match(/painted:'([^']*)'/)?.[1] ?? '';
+    const want = (base + extra).split('&').filter(Boolean), have = new Set(GAME.testEntry.split('&'));
+    const missing = want.filter(p => !have.has(p));
+    missing.length ? fail('the test entry plays the hosted game', `missing: ${missing.join(', ')}`) : R.add('pass', 'the test entry plays the hosted game (every hosted setting is in it)');
+  }
+}
 R.write(null);
 console.log(`\n${fails} failures`);
 process.exit(fails ? 1 : 0);

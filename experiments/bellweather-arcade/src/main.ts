@@ -202,13 +202,16 @@ function camClearAt(a:number){camOrigin.copy(zip.position).y+=1.5;cameraDelta.se
 // can always take over by dragging), so "where do I go?" is answered by the view itself.
 let glanceFrom=new T.Vector3(1e9,0,0),glanceT=0,glanceYaw=0,glanceGoal='';
 // how far the camera has turned by itself, by cause, in radians (play-tests attribute turns the player didn't make)
-const camTurn={glance:0,whisker:0,walk:0};
+const camTurn={glance:0,whisker:0,walk:0,resume:0};
 // the whiskers may turn the camera this far (radians) per squeeze, then it stops and just pulls in close; it recovers slowly
 const WHISKER_MAX=.6;let whiskerSpent=0;
+// a goal already in view needs no glance (runs 15–16: the camera turned to each new goal even
+// when it was on screen, and both testers named the camera as why they stopped)
+const onScreenV=new T.Vector3();function onScreen(b:T.Vector3){onScreenV.copy(b);onScreenV.y+=1.2;onScreenV.project(camera);return onScreenV.z<1&&Math.abs(onScreenV.x)<.8&&Math.abs(onScreenV.y)<.9}
 function glanceAtGoal(dt:number){
   const b=guide?.beaconAt;if(!b||story?.frozen||title?.active||ridePos){glanceT=0;return}
   // only for a new goal (not a beacon that follows a moving target); counts like "(1 of 3)" don't make it new
-  const gt=(guide?.goalText??'').replace(/\(.*\)/,'');if(gt!==glanceGoal&&b.distanceToSquared(glanceFrom)>4){glanceGoal=gt;glanceFrom.copy(b);const dx=b.x-zip.position.x,dz=b.z-zip.position.z;if(Math.hypot(dx,dz)>4){glanceYaw=Math.atan2(-dx,-dz);glanceT=1.4}}
+  const gt=(guide?.goalText??'').replace(/\(.*\)/,'');if(gt!==glanceGoal&&b.distanceToSquared(glanceFrom)>4){glanceGoal=gt;glanceFrom.copy(b);const dx=b.x-zip.position.x,dz=b.z-zip.position.z;if(Math.hypot(dx,dz)>4&&!onScreen(b)){glanceYaw=Math.atan2(-dx,-dz);glanceT=1.4}}
   if(glanceT>0){if(dragging){glanceT=0;return}glanceT-=dt;let d=((glanceYaw-yaw+Math.PI*3)%(Math.PI*2))-Math.PI;yaw+=d*Math.min(1,dt*2.2);camTurn.glance+=Math.abs(d*Math.min(1,dt*2.2));facadeMoveYaw=yaw}
 }
 // test hook: a fixed camera for look-dev shots (__arcade.frame)
@@ -227,11 +230,24 @@ const tmpHead=new T.Vector3();
 // the fade on Zip follows the camera whatever moved it: a directed shot or override used to leave
 // him as a dithered ghost from the last close follow-camera frame (run 14, the lantern dialogue)
 function cameraUpdate(dt:number){cameraUpdateInner(dt);fadeZipNear()}
+// Back from a dialogue or directed shot (already a cut): if the follow camera would come back pressed
+// into a wall or planter behind Zip, come back on the nearest clear side instead. After Mira's first
+// line it came back 0.9 m from Zip with him faded to a ghost (9 Oct, measured: tools/camprobe).
+let wasShot=false;
+// the room behind Zip along a yaw, as the follow camera measures it (three rays a shoulder apart)
+const rcO=new T.Vector3(),rcD=new T.Vector3(),rcS=new T.Vector3();
+function roomAt(a:number){const full=zoom;rcD.set(Math.sin(a)*Math.cos(pitch),(1.3+Math.sin(pitch)*zoom-1.5)/zoom,Math.cos(a)*Math.cos(pitch)).normalize();rcS.set(rcD.z,0,-rcD.x).normalize().multiplyScalar(.3);let c=full;
+  for(const o of [-1,0,1]){rcO.copy(zip.position).addScaledVector(rcS,o);rcO.y+=1.5;const hit=firstCameraHit(rcO,rcD.clone().multiplyScalar(full),.15);if(hit)c=Math.min(c,hit.distance-.3)}return c}
+function resumeClear(){if(!facadeStudy||roomAt(yaw)>=2.6)return;let best=yaw,bc=roomAt(yaw);
+  for(const d of [.4,-.4,.8,-.8,1.2,-1.2,1.6,-1.6,2.2,-2.2,Math.PI]){const c=roomAt(yaw+d)-Math.abs(d)*.3;if(c>bc+.5){bc=c;best=yaw+d}}
+  if(best!==yaw){camTurn.resume+=Math.abs(best-yaw);yaw=best;facadeMoveYaw=yaw;camDist=0}}
 function cameraUpdateInner(dt:number){if(camOverride){camera.position.copy(camOverride.p);camera.lookAt(camOverride.t);return}
   const started=performance.now();
   if(dt<.5)glanceAtGoal(dt);
   // Puzzle shot: a fixed, readable view of the speech rail while it is in use.
-  const shot=(story?.shot??utterLab?.shot);SIGHT_SHOT.value=shot||guide?.cardOpen?1:0;if(shot){const sc=(shot as {cut?:number}).cut,r=(shot as {rate?:number}).rate??4;if(sc!==undefined&&sc!==lastCut){camera.position.copy(shot.pos);look.copy(shot.look)}lastCut=sc;camera.position.lerp(shot.pos,Math.min(1,dt*r));look.lerp(shot.look,Math.min(1,dt*Math.max(r,3)));const k=reduced?0:((shot as {shake?:number}).shake??0);if(k>.01)camera.position.add(shakeV.set((Math.random()-.5)*k*.5,(Math.random()-.5)*k*.35,(Math.random()-.5)*k*.5));camera.lookAt(look);return;}
+  const shot=(story?.shot??utterLab?.shot);SIGHT_SHOT.value=shot||guide?.cardOpen?1:0;
+  if(!shot&&wasShot){wasShot=false;resumeClear()}
+  if(shot){wasShot=true;const sc=(shot as {cut?:number}).cut,r=(shot as {rate?:number}).rate??4;if(sc!==undefined&&sc!==lastCut){camera.position.copy(shot.pos);look.copy(shot.look)}lastCut=sc;camera.position.lerp(shot.pos,Math.min(1,dt*r));look.lerp(shot.look,Math.min(1,dt*Math.max(r,3)));const k=reduced?0:((shot as {shake?:number}).shake??0);if(k>.01)camera.position.add(shakeV.set((Math.random()-.5)*k*.5,(Math.random()-.5)*k*.35,(Math.random()-.5)*k*.5));camera.lookAt(look);return;}
   if(cameraQueryBounds.length!==cameraSolids.length)invalidateCameraGeometry();
   if(facadeStudy){
     const pivot=zip.position.clone().add(new T.Vector3(0,1.5,0));

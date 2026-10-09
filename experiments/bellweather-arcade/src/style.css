@@ -209,6 +209,11 @@
 .story-card.ribbon .star-row span{font-size:30px}
 .story-card.ribbon .star-title{font-size:16px!important;margin:0 0 2px!important}
 .story-card.ribbon .star-list{font-size:12.5px;margin:0 0 6px}
+/* the banner's button shows the time left before it carries on by itself */
+.story-card.ribbon button.timed{position:relative;overflow:hidden}
+.story-card.ribbon button.timed::after{content:'';position:absolute;left:0;bottom:0;height:3px;width:100%;background:currentColor;opacity:.45;transform-origin:left;animation:vl-drain var(--wait,8s) linear forwards}
+@keyframes vl-drain{to{transform:scaleX(0)}}
+@media (prefers-reduced-motion:reduce){.story-card.ribbon button.timed::after{animation:none;opacity:0}}
 .story-card.ribbon .story-choices{justify-content:center}.story-card.ribbon .story-choices button{flex:0 0 auto;min-height:36px;padding:6px 18px}
 @media(max-width:600px){.story-card.ribbon{top:100px}}
 /* cutscenes are framed like film: bars slide in, the HUD steps away */

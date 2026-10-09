@@ -26,9 +26,11 @@ if (existsSync(utter)) { const { UTTER_LAB } = await import(pathToFileURL(utter)
 if (existsSync('fixtures/night-market/game.mjs')) { const { GAME: G2 } = await loadGame(ROOT, 'fixtures/night-market/game.mjs'); intents.push(buildIntent(G2)); nouns.push(...(G2.nouns ?? [])); }
 const design = designVocabulary({ nouns, intents: intents.flatMap(i => [i.md, ...(i.items ?? []).map(x => x.text)]) });
 
-const brief = readFileSync('tools/playtest/tester.md', 'utf8').replace(/`[^`]*`/g, ' ');   // API syntax in backticks is the phone, not the game
-const leaks = briefLeaks(brief, design);
-ok('the tester brief says nothing about any game or what to notice', !leaks.length, leaks.join(', '));
+for (const f of ['tester.md', 'tester-pixels.md']) {   // the brief, and its pixels-only twin (playserver --pixels 1)
+  const brief = readFileSync('tools/playtest/' + f, 'utf8').replace(/`[^`]*`/g, ' ');   // API syntax in backticks is the phone, not the game
+  const leaks = briefLeaks(brief, design);
+  ok(`the tester brief (${f}) says nothing about any game or what to notice`, !leaks.length, leaks.join(', '));
+}
 const { personas } = JSON.parse(readFileSync('tools/playtest/personas.json', 'utf8'));
 for (const [id, text] of Object.entries(personas)) { const l = briefLeaks(text, design); ok(`persona "${id}" is who they are, not what to look for`, !l.length, l.join(', ')); }
 

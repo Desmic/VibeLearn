@@ -192,7 +192,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
 
   // ── Stop 2: Loom Isle. Its story, station and rules are data (worlds/stop2-loom.ts) ──
   const toXZ = (id: string) => { const [x, z] = entityAt(LOOM_ISLE, id); return new T.Vector3(x, (LOOM_ISLE.elevation ?? 0) + .13, z); };
-  const MOOR = isle.landing.clone().add(new T.Vector3(-3.2, 0, .8)), LOOM_TALK = toXZ('loom-talk'), LOOM_LAND = toXZ('loom-landing'), LOOM_AT = toXZ('word-loom');
+  const MOOR = isle.landing.clone().add(new T.Vector3(-3.2, 0, .8)), LOOM_LAND = toXZ('loom-landing'), LOOM_AT = toXZ('word-loom');
   const stop2 = createScriptRunner(STOP2_STORY, g, {
     anchors: { skiffMoor: () => MOOR, 'word-loom': () => LOOM_AT },
     onBeat: b => { if (b.checkpoint) save.set(b.checkpoint as Checkpoint); if (b.place) placeName = b.place; },
@@ -562,8 +562,8 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (beat.startsWith('loom')) {
         if (taviFree >= 0 && taviFree < 1) { taviFree = Math.min(1, taviFree + dt / 1.2); cloth.position.y = LOOM_AT.y + .95 - taviFree * 1.2; (cloth.material as T.MeshLambertMaterial).opacity = .92 * (1 - taviFree); tavi.position.z = LOOM_AT.z - .75 + taviFree * 1.9; if (taviFree >= 1) cloth.visible = false; }
         taviHead.position.y = 1.2 + Math.sin(t * 2) * .02;
-        if (beat === 'loom' && !g.cardOpen && !loom.active && Math.hypot(z.x - LOOM_TALK.x, z.z - LOOM_TALK.z) < LOOM_STATION.place.r) action(LOOM_STATION.action, talkLoom, over(LOOM_AT, 1.2));
-        else if (beat === 'loom-puzzle' && !g.cardOpen && !loom.active && Math.hypot(z.x - LOOM_TALK.x, z.z - LOOM_TALK.z) < LOOM_STATION.place.r) action(LOOM_STATION.action, talkLoom);
+        if (beat === 'loom' && !g.cardOpen && !loom.active && Math.hypot(z.x - LOOM_AT.x, z.z - LOOM_AT.z) < LOOM_STATION.place.r) action(LOOM_STATION.action, talkLoom, over(LOOM_AT, 1.2));
+        else if (beat === 'loom-puzzle' && !g.cardOpen && !loom.active && Math.hypot(z.x - LOOM_AT.x, z.z - LOOM_AT.z) < LOOM_STATION.place.r) action(LOOM_STATION.action, talkLoom);
         else action(null);
         return;
       }

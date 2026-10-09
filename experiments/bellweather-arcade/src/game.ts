@@ -20,7 +20,10 @@ export const GAME: GameManifest = {
   teaches: 'How a language model works: it makes text one word (then one piece) at a time, from everything in front of it.',
   audience: '18+',
   protagonist: 'Zip',
-  testEntry: 'study=facade&finish=daylight&render=painted&quality=low&auto=0',
+  // the game players get (tools/hosted/index.html, #painted) at low quality. Until 9 Oct tests and
+  // blind testers ran without the atelier, the crafted portal and the rest, so a dead-end alley by
+  // Mira's tree, only in the shipped town, went unseen (found by Claude playing on Desmic's PC)
+  testEntry: 'study=facade&portal=crafted&architecture=atelier&finish=daylight&palette=ceramic&form=swept-clean&character=courier&look=sunlit&setting=city&districts=terraces&surface=illustrated&render=painted&quality=low&auto=0',
   storage: {
     save: 'bellweather.save.v1', learning: 'bellweather.learning.v1', decided: 'bellweather.decided.v1',
     prefs: ['bellweather.mute', 'bellweather.graphics', 'bellweather.stats', 'vibelearn.music'],

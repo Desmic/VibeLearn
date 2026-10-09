@@ -85,7 +85,20 @@ said:
 - camera turns the player didn't make.
 
 These are reported beside the interview, so "it was intuitive" can be checked against the
-numbers.
+numbers. Each camera turn carries its cause (a directed shot, dialogue, the goal arrow, a goal
+glance, the whiskers, walking, or `resume`: coming back from a shot on a clear side).
+
+Two probes turn the commonest complaints into numbers before and after a fix:
+
+- `reachprobe`: walking at a station's goal marker from eight sides ends where its button shows;
+- `camprobe`: the camera's own turns around goals, and its distance back from a dialogue.
+
+**Tests play the shipped game.** The test entry (`GAME.testEntry`) carries every setting of the
+hosted default, and `kitcheck` fails if it drifts. Until 9 Oct it didn't, and a dead-end alley that
+only exists in the shipped town went unseen by every tool and blind tester.
+
+**Pixels-only blind testers.** `playserver --pixels 1` gives the tester only the screenshot and
+taps by position, like a person. The default also hands it the page's text and button list.
 
 ## The loop
 

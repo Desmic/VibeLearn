@@ -145,9 +145,13 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   const anchors: Record<string, T.Vector3> = { 'gate-stone': GATE_STONE, relay: RELAY };
 
   let phase: 'off' | 'arrived' | 'bag' | 'open' | 'done' = 'off';
+  // "Read the notes" had no marker (run 16: ~35 steps to find them). The arrow points at the
+  // nearest note not read yet, and moves on as each one is read; once all are read it goes.
+  const seen = new Set<string>(), zipAt = LANDING.clone();
+  const nextNote = () => { let best: Note | null = null, d = 1e9; for (const n of NOTES) { if (seen.has(n.id)) continue; const k = Math.hypot(n.at.x - zipAt.x, n.at.z - zipAt.z); if (k < d) { d = k; best = n; } } return best ? best.at : null; };
   const goalNow = () => {
     if (phase === 'arrived') opts.setGoal('Take the satchel by the landing', CLASP);
-    else if (phase === 'bag') { const failed = gateSt.state.failed as boolean; opts.setGoal(failed ? 'Change your notes, then speak again' : bag().length ? 'Take your notes to the gate' : 'Read the notes. Take up to two.', bag().length && !failed ? GATE_STONE : null, true); }
+    else if (phase === 'bag') { const failed = gateSt.state.failed as boolean; opts.setGoal(failed ? 'Change your notes, then speak again' : bag().length ? 'Take your notes to the gate' : 'Read the notes. Take up to two.', bag().length && !failed ? GATE_STONE : bag().length ? null : nextNote(), true); }
     else if (phase === 'open') opts.setGoal('Call Mira from the relay', RELAY);
     else if (phase === 'done') opts.setGoal('Back to the skiff. Mira needs you!', null);
   };
@@ -239,12 +243,14 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       // player is looking at, then the nearest. A note in reach shows its text the same way.
       type Pick = { th: typeof things[number] | null; n: Note | null };
       const thingC = things.filter(th => th.when()).map(th => ({ item: { th, n: null } as Pick, x: th.at.x, z: th.at.z, r: th.r }));
-      const noteC = phase === 'arrived' || phase === 'bag' ? NOTES.map(n => ({ item: { th: null, n } as Pick, x: n.at.x, z: n.at.z, r: 1.8 })) : [];
+      const noteC = phase === 'arrived' || phase === 'bag' ? NOTES.map(n => ({ item: { th: null, n } as Pick, x: n.at.x, z: n.at.z, r: 2.2 })) : [];
       const pick = pickTarget([...thingC, ...noteC], zip, aim), nearNote = pickTarget(noteC, zip, aim)?.item.n ?? null;
       for (const n of NOTES) g.label('note-' + n.id, n === nearNote && !g.cardOpen ? `${n.short}: ${n.text}` : null, n.at.clone().setY(1.75));
+      zipAt.copy(zip);
+      if (nearNote && !g.cardOpen && !seen.has(nearNote.id)) { seen.add(nearNote.id); if (phase === 'bag' && !bag().length) goalNow(); }
       let best: { label: string; use: () => void; action?: string } | null = pick?.item.th ?? null;
       if (pick?.item.n) best = noteAction(pick.item.n) ?? pickTarget(thingC, zip, aim)?.item.th ?? null;
-      g.label('relay-notes', phase === 'open' && !relay.active && !g.cardOpen && Math.hypot(zip.x - RELAY.x, zip.z - RELAY.z) < 3.2 ? 'Notes pinned to the relay: ' + relay.pinned : null, RELAY.clone().setY(2.3));
+      g.label('relay-notes', phase === 'open' && !relay.active && !g.cardOpen && Math.hypot(zip.x - RELAY.x, zip.z - RELAY.z) < relaySt.spec.place.r ? 'Notes pinned to the relay: ' + relay.pinned : null, RELAY.clone().setY(2.3));
       // the Gate's face: eyes follow Zip, blinks, and moods
       talkT = Math.max(0, talkT - dt); blink -= dt; if (blink < -.12) blink = 2 + Math.random() * 3;
       look.set(zip.x - GATE.x, 1.4 - 3.05, zip.z - GATE.z).normalize();

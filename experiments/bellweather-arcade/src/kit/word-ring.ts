@@ -102,8 +102,10 @@ export function createWordRing(o: WordRingOpts) {
     const full = slots.length >= N, last = slots[slots.length - 1];
     count.textContent = full ? (forget ? `${N} / ${N} words · the next one pushes out “${slots[0]}”` : `${N} / ${N} words · full`)
       : o.suggest && !slots.length ? `0 / ${N} words · pick a first word`
-      : predictive() && !offer.length ? `${slots.length} / ${N} words · nothing I’ve read comes after “${last}”`
-      : predictive() ? `${slots.length} / ${N} words · what comes after “${last}”` : `${slots.length} / ${N} words`;
+      // a part-filled ring can be spoken: say so, rather than "2 / 3 words", which read as "not ready"
+      // (run 16: "Speak looks disabled with fewer than three words")
+      : predictive() && !offer.length ? `Ready to speak · nothing I’ve read comes after “${last}”`
+      : predictive() ? `Ready to speak · or add what comes after “${last}”` : slots.length ? `${slots.length} of ${N} words · ready to speak` : `0 / ${N} words`;
     count.classList.toggle('full', full);
     slotEls.forEach((b, i) => b.classList.toggle('fading', forget && full && i === 0));   // the word that goes next, dimmer
     core.disabled = busy || !slots.length; core.classList.toggle('ready', !!slots.length && !busy);
@@ -137,7 +139,7 @@ export function createWordRing(o: WordRingOpts) {
 
   // the tap that opened the ring can arrive again as a click on whatever piece now sits under the
   // finger (a phone's synthesized click): ignore presses in the first moment after opening
-  let openedAt = 0;
+  let openedAt = 0, locked = false, lockW = 0, lockH = 0;
   const press = (b: HTMLButtonElement | null) => {
     if (!b || b.disabled || performance.now() - openedAt < 450) return;
     if (b.dataset.finish) finish();
@@ -181,7 +183,7 @@ export function createWordRing(o: WordRingOpts) {
       // keepStart: the start words stay even if the speaker doesn't carry them (words someone else left in the engine)
       carried = [...new Set(words)]; N = n; slots = start.filter((w, i) => (opts.keepStart || carried.includes(w)) && start.indexOf(w) === i).slice(-n); busy = false; readT = -1;
       forget = !!opts.forget; forgotten = []; finishing = []; picked = false; build();
-      root.hidden = false; holo.visible = true; cone.mesh.visible = true; t = 0; openedAt = performance.now(); o.cue?.('open');
+      root.hidden = false; holo.visible = true; cone.mesh.visible = true; t = 0; openedAt = performance.now(); locked = false; o.cue?.('open');
     },
     close() {
       if (root.hidden) return;
@@ -203,8 +205,12 @@ export function createWordRing(o: WordRingOpts) {
       const open = Math.min(1, t / .25); holo.scale.setScalar(open);
       halo.rotation.z = t * .4;
       const r = o.host.getBoundingClientRect(); W = r.width; H = r.height;
-      v.copy(C).project(o.camera); cz = v.z; cx = (v.x * .5 + .5) * W; cy = (-v.y * .5 + .5) * H;
-      cy = Math.max(170, Math.min(H * .5, cy));   // room for the speak orb above and the words below
+      v.copy(C).project(o.camera); cz = v.z;
+      // the buttons hold still once the ring is open: following the anchor while the camera settled
+      // slid the words under a finger ("tapped paper, got long", run 16). It re-anchors only if the
+      // view moves a lot (over 80 px) or the screen changes size.
+      const ax = (v.x * .5 + .5) * W, ay = Math.max(170, Math.min(H * .5, (-v.y * .5 + .5) * H));   // room for the speak orb above and the words below
+      if (!locked || Math.hypot(ax - cx, ay - cy) > 80 || W !== lockW || H !== lockH) { cx = ax; cy = ay; locked = true; lockW = W; lockH = H; }
       const SPX = Math.min(104, (W - 40) / N), sx = Math.sin(shake * 40) * 8 * (shake > 0 ? 1 : 0), grow = open;
       const slotXY = slotEls.map((b, i) => put(b, cx + (i - (N - 1) / 2) * SPX * grow + sx, cy + 6 * ((i - (N - 1) / 2) ** 2)));
       put(count, cx, cy + 40);

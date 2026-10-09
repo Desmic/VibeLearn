@@ -54,7 +54,7 @@ export interface LoomContent {
 
 export const LOOM_STATION: StationSpec & { content: LoomContent } = {
   kind: 'station', id: 'loom-fit', name: 'The Word Loom', teaches: ['pieces', 'room'],
-  place: { anchor: 'loom-talk', r: 2.0 }, action: 'Use the Word Loom', rules: 'loom.word-loom',
+  place: { anchor: 'word-loom', r: 3.8 }, action: 'Use the Word Loom', rules: 'loom.word-loom',
   decisions: [
     { id: 'predict-pieces', asks: 'How many slots will this message need?' },
     { id: 'choose-message', asks: 'Which call fits the six slots and still names who to free?' },
@@ -138,7 +138,7 @@ export const STOP2_STORY: StoryScript & { needs: { handlers: string[]; anchors: 
   },
   thoughts: {
     'loom-next': { text: 'Loom Isle. Mira said they went past it.' },
-    'loom-arrive': { text: ['A loom that counts pieces. Like me, but with more thread.', 'Hm. Somebody\'s humming behind that cloth.'] },
+    'loom-arrive': { text: ['A loom that counts pieces. Like me, but with more thread.', 'Hm. Somebody\'s humming inside it. Only one way to find out.'] },
     'loom-warden': { who: 'warden', text: 'Six slots, little courier. Spend them wisely.' },
     'loom-pieces': { text: 'Pieces, not letters. Short isn\'t the same as small.' },
   },

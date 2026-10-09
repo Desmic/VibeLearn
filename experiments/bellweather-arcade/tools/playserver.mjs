@@ -5,7 +5,7 @@
 // are exposed except moving the stick, which uses the game's fast-forward hook.
 //
 //   node tools/playserver.mjs [--port 7788] [--root out] [--out playtest] [--input touch]
-//        [--persona commuter] [--protocol blind|directed] [--intent game|utter|ngram] [--start '&lab=utter']
+//        [--persona commuter] [--protocol blind|directed] [--intent game|utter|ngram] [--start '&lab=utter'] [--pixels 1]
 //
 // Two protocols (tools/AI-PLAYTEST.md):
 //   blind (default): the tester gets only GET /brief (tools/playtest/tester.md + a persona: no
@@ -49,6 +49,9 @@ const LAB = (arg('start', '').match(/lab=([a-z0-9-]+)/) ?? [])[1];   // a test a
 const h = await harness({ title: 'AI play-test', outDefault: 'playtest', tool: `playserver-${arg('protocol', 'blind')}-${arg('persona', arg('protocol', 'blind') === 'blind' ? 'commuter' : 'newcomer')}${LAB ? '-' + LAB : ''}`, lane: 'comprehension' });
 const { page, OUT, GAME } = h;
 const PROTOCOL = arg('protocol', 'blind');
+// --pixels 1: the blind tester gets only the screenshot (no page text, no button list) and taps by
+// position, as a real player does. Text-and-buttons observation sees more than a player would.
+const PIXELS = arg('pixels', '0') === '1';
 const PERSONAS = JSON.parse(readFileSync('tools/playtest/personas.json', 'utf8')).personas;
 const PERSONA = arg('persona', PROTOCOL === 'blind' ? 'commuter' : 'newcomer');
 if (PROTOCOL === 'blind' && !PERSONAS[PERSONA]) throw Error(`--persona must be one of ${Object.keys(PERSONAS).join(', ')} for a blind test`);
@@ -119,6 +122,7 @@ async function observe() {
   log({ observe: seen, shot });
   if (PROTOCOL !== 'blind') return { step, shot, ...seen };
   // blind: what is written on the screen, unlabelled (calling one line "the goal" would already tell the tester something)
+  if (PIXELS) return { step, shot, ...(step >= MAX ? { note: 'this is your last look' } : {}) };
   return { step, shot, writing: seen.writing, buttons: seen.buttons, ...(step >= MAX ? { note: 'this is your last look' } : {}) };
 }
 
@@ -126,6 +130,7 @@ async function act(a) {
   const t0 = Date.now();
   switch (a.type) {
     case 'tap': {
+      if (PIXELS) return { ok: false, why: 'tap a point on the screen with tapAt' };
       // a finger lands on what can be pressed: a greyed-out twin with the same label (a word already placed) is skipped
       // labels are matched as a person reads them: line breaks and spacing don't matter ("✦ Speak" is "✦\nSpeak")
       const norm = x => String(x).replace(/\s+/g, ' ').trim().toLowerCase(), want = norm(a.label);
@@ -203,7 +208,7 @@ function metrics() {
       const why = e.observe.camWhy;
       if (cam != null && prevCam != null && !looked) { const d = Math.abs(((cam - prevCam + 540) % 360) - 180); if (d >= 30) {
         let cause = why?.shot ? 'shot' : e.observe.card ? 'dialogue' : goalTap ? 'goal arrow' : '';
-        if (!cause && why && prevWhy) { const g = ['glance', 'whisker', 'walk'].map(k => [k, (why[k] ?? 0) - (prevWhy[k] ?? 0)]).sort((a, b) => b[1] - a[1])[0]; cause = g[1] > .3 ? g[0] : 'other'; }
+        if (!cause && why && prevWhy) { const g = ['glance', 'whisker', 'walk', 'resume'].map(k => [k, (why[k] ?? 0) - (prevWhy[k] ?? 0)]).sort((a, b) => b[1] - a[1])[0]; cause = g[1] > .3 ? g[0] : 'other'; }
         turns.push({ step: e.step, deg: d, cause: cause || 'other' }); } }
       prevCam = cam ?? prevCam; prevWhy = why ?? prevWhy; looked = false;
     } else if (e.act) {
@@ -251,7 +256,7 @@ async function interviewerBrief() {
 }
 function testerBrief() {
   const vs = page.viewportSize();
-  return readFileSync('tools/playtest/tester.md', 'utf8').replace('{persona}', PERSONAS[PERSONA]).replaceAll('{port}', String(PORT)).replace('{max}', String(MAX)).replace('{width}', vs.width).replace('{height}', vs.height);
+  return readFileSync(PIXELS ? 'tools/playtest/tester-pixels.md' : 'tools/playtest/tester.md', 'utf8').replace('{persona}', PERSONAS[PERSONA]).replaceAll('{port}', String(PORT)).replace('{max}', String(MAX)).replace('{width}', vs.width).replace('{height}', vs.height);
 }
 async function ask(m) {
   const role = m.role === 'player' ? 'player' : 'interviewer', text = String(m.text ?? '').trim();

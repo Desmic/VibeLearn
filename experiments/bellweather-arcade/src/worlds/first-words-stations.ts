@@ -24,7 +24,7 @@ export const FIRST_WORDS_L1_STATIONS: StationSpec[] = [
   },
   {
     kind: 'station', id: 'blossom-gate', name: 'The Gate reads your notes', teaches: ['context'],
-    place: { anchor: 'gate-stone', r: 1.9 }, action: 'Talk to the Gate', rules: 'first-words.blossom-gate',
+    place: { anchor: 'gate-stone', r: 2.8 }, action: 'Talk to the Gate', rules: 'first-words.blossom-gate',
     decisions: [
       { id: 'destination-prediction', asks: 'Where will the Gate open, given these notes?' },
       { id: 'context-selection', asks: 'Which notes go in the satchel?', choice: { fields: ['slotA', 'slotB'] } },
@@ -50,7 +50,7 @@ export const FIRST_WORDS_L1_STATIONS: StationSpec[] = [
   },
   {
     kind: 'station', id: 'relay-contact', name: 'Call Mira from the relay', teaches: ['context', 'sequence'],
-    place: { anchor: 'relay', r: 2.2 }, action: 'Use the relay', rules: 'first-words.relay-contact',
+    place: { anchor: 'relay', r: 3.0 }, action: 'Use the relay', rules: 'first-words.relay-contact',
     decisions: [
       { id: 'context-selection', asks: 'Which channel is Mira\'s?', choice: { fields: ['channel'] } },
       { id: 'next-input', asks: 'Which words should the relay read to make the next one?' },

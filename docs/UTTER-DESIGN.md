@@ -502,6 +502,18 @@ engine finish. The lighthouse fixes both:
   one phrase said by hand, in every reading order. `ngramlab` (25 checks) plays the whole
   sequence.
 
+**After runs 15 and 16 (9 Oct):**
+
+- The speak shot pulls back along the player's own view (up, a little to one side, until Zip and
+  what he made are both in view), instead of cutting to a fixed side shot. The turn back is made only
+  when the view is far off the way on. Measured per phrase in `ngramlab`: 50–97° before, 7–25° after.
+- The ring's status reads "Ready to speak · or add what comes after “paper”": a part-filled ring can
+  be spoken ("2 / 3 words" read as not ready).
+- The ring's buttons hold still once it is open ("tapped paper, got long").
+- Zip says the link at the end: "That's how chat AIs write, by the way. One likely next word at a
+  time." / "Same trick as my engine. Mine read six signs. Theirs read half the internet."
+  (`lines.link`, `lines.link2`; any lab can have them.)
+
 **Not yet tried:**
 
 - feeding back;

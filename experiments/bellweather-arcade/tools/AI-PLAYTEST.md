@@ -487,3 +487,111 @@ Run 8 (6 Oct, the baseline) never got past Stop 1. Run 14 went from the title th
   - in the loop, "petals?" for "Blossom" alone against "Isle? 86%" for the whole sentence.
 - **Depth in the test area.** The lab has a fourth place, the lighthouse (see
   `docs/UTTER-DESIGN.md`).
+
+## Blind runs 15 and 16: everything, end to end (9 Oct 2026, build v84)
+
+| Run | What | Persona | Steps | Reached | Score |
+| --- | --- | --- | --- | --- | --- |
+| 15 | main game | explorer | 191 of 200 | Loom Isle (Stop 2), first time ever | 6/10, "I'd go straight back to the loom" |
+| 16 | next-word lab | commuter | 71 | all four places, lighthouse lit | 6/10, yes |
+
+**Caveat for run 15:** the tester's screenshots failed to load (an image limit in its own
+session) until about step 114. It played the opening, the engine and the flight from on-screen
+text only. Visual findings from that stretch are discounted. Very long runs should be split into
+parts.
+
+**What landed:**
+- **Main game:**
+  - the premise, Mira and the voice;
+  - the loop, unprompted and firm ("autocomplete that feeds on its own output"); the broken loop
+    was "the click".
+- **Lab:** seven of eight lesson points came out unprompted. That includes the new one, `habit`,
+  at the lighthouse: "it loves paper plane. I need to feed it more lantern so lantern wins".
+  Noodle and paper plane made the player laugh, and the lighthouse "made me think".
+
+**What held both at 6, in order:**
+
+1. **Spots you must stand on exactly.** "Use the Word Loom", "Use the relay" and "Take the note"
+   only show on a small spot:
+   - The Loom's spot is 2.9 m from the goal marker, but its button radius is 2.0 m. Standing at
+     the marker shows no button.
+   - Zip's line "Somebody's humming behind that cloth" fires at the same moment the button first
+     shows, and drew the player away. They never found the spot again and put the phone down.
+     Stop 2 taught nothing.
+   - The relay had no button for 12 steps while the player was "right at the relay".
+   - The notes took about 35 steps.
+2. **The camera.** Both named it as the reason they stopped, or the reason the score wasn't
+   higher. By cause:
+   - **goal glances:** the camera turns to each new goal even when it's already on screen;
+   - **speak shots and the cut back:** two big turns per phrase in the lab;
+   - **the goal arrow:** its turn doesn't stay put once you move.
+3. **"Only says its likeliest few" doesn't read on screen.** With ties sayable, four words show
+   above the "too rare" line, and it read as "seen once means locked". Run 13 read the opposite
+   rule (an arbitrary cut). The tie rule needs showing, not just a line.
+4. **No arrow during "Read the notes. Take up to two."** The goal has no marker.
+5. **Context is read as "trust your sources".** The satchel isn't seen as the engine's input
+   until the reveal. Pieces and room were never met (the Loom was unreached).
+6. **The journey reads as "chase Mira", not "repair Zip's engine".** The player asked to see the
+   engine mended after each isle.
+7. **Puzzles that confirm rather than test:**
+   - the relay's "tap the words it should read" was answered "by reflex";
+   - three of the four lab places were "say what the sign said".
+8. **Small things:**
+   - the star banner's button vanished before the tap twice;
+   - Speak looks disabled with fewer than three words;
+   - a word tap landed on another chip while the ring was still opening ("tapped paper, got
+     long");
+   - the lab never says the link to language models out loud;
+   - the title-screen hook (Pim's line) is never paid off.
+
+**Changed after runs 15 and 16 (9 Oct, Desmic: "move ahead with 1–4"):** each measured first, then
+fixed, then measured again.
+
+1. **Buttons where the marker is.** New probe `tools/reachprobe.mjs` walks at each station's goal
+   marker from eight sides. Before: the Word Loom showed its button from 2 of 8 sides (the walk stops
+   at the loom, 1.7 m from the marker, but the button sat on a spot 2.9 m away); the Gate from 5 of 8.
+   - The Loom's button now belongs to the loom itself (3.8 m round it, covering the talk spot).
+   - The Gate's reach is 2.8 m, the relay's 3.0 m (its "notes pinned" label used to show at 3.2 m
+     while the button needed 2.2), the notes' 2.2 m.
+   - Zip's loom line now points at the loom: "Somebody's humming inside it. Only one way to find out."
+   - After: 8 of 8, 4 of 4 (all walkable sides), 8 of 8.
+2. **The camera.** New probe `tools/camprobe.mjs`.
+   - A new goal already on screen turned the camera 14°; now 0°. A goal behind still gets one glance.
+   - The goal arrow's turn holds while walking at it (4° off after 1.5 s): measured, no change needed.
+   - Back from Mira's first line, the camera came back 0.9 m from Zip, pressed into the planter
+     behind him, with Zip faded to 45%. It now comes back on the nearest clear side (5.9 m, Zip
+     drawn). The play server counts this turn as `resume`.
+   - Lab speak shots now pull back along the player's own view instead of cutting to a fixed side
+     shot. Measured per phrase in `tools/ngramlab.mjs`: 50–97° into the shot before, 7–25° after;
+     the turn back is now made only when the view is far off the way on (one 89° turn, after the long
+     bridge, toward the far side).
+3. **"Read the notes" has an arrow:** it points at the nearest note not read yet, and moves on as each
+   is read.
+4. **Small things.**
+   - The star banner waits 8 s plus 1 s a row (was 3.8 s plus 0.5 s), shows the time left draining on
+     its button, and holds while touched.
+   - The ring says "Ready to speak · or add what comes after “paper”" instead of "1 / 3 words".
+   - The ring's buttons hold still once it is open (they followed the camera while it settled).
+   - At the end of the lab Zip says it out loud: "That's how chat AIs write, by the way. One likely
+     next word at a time." / "Same trick as my engine. Mine read six signs. Theirs read half the
+     internet."
+
+**Found on the way: tests weren't playing the shipped town.** The test entry (`GAME.testEntry`) left
+out the hosted game's settings (the atelier conservatory, the crafted portal and others), so every
+harness tool and every blind tester played a different town from the one players get. Claude,
+playing the shipped game on Desmic's PC by computer use, got stuck for about four minutes in a
+dead-end alley between the conservatory's east wall and the town edge, by Mira's tree; it only exists
+in the shipped town. The alley is now closed, the test entry carries every hosted setting, and
+`kitcheck` fails if it ever drifts again.
+
+**Pixels-only testers.** `playserver --pixels 1` gives a blind tester only the screenshot (no page
+text, no button list) and taps by position (`tapAt`), with its own brief
+(`tools/playtest/tester-pixels.md`, guarded by `blindcheck`). Text-and-buttons observation sees more
+than a player does.
+
+**Native computer use as a tester (tried 9 Oct).** On Desmic's PC, browsers are view-only to
+computer use (checked, and Anthropic's docs agree), so the game was opened in its own window
+(`tools/desktop/play.cmd`, an Electron wrapper) and played for about 7 minutes while Desmic watched.
+It works, but it is a desktop keyboard (one key held at a time, no diagonals), a few seconds per
+action, it takes over the PC, and the game's metrics aren't read. Verdict: keep the cloud play
+server as the blind tester; use computer use now and then as a short real-PC check.

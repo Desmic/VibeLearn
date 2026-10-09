@@ -248,7 +248,12 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       let gone = false; const go = () => { if (gone) return; gone = true; clearTimeout(auto); card.classList.remove('ribbon'); api.close(); then?.(); };
       const b = document.createElement('button'); b.className = 'primary'; b.textContent = n === rows.length && n >= 3 ? 'Brilliant!' : 'Continue'; b.addEventListener('click', e => { e.stopPropagation(); sfx.tap(); go(); }); row.appendChild(b);
       if (opts.again) { const a = document.createElement('button'); a.textContent = opts.again.label; a.addEventListener('click', e => { e.stopPropagation(); sfx.tap(); gone = true; clearTimeout(auto); opts.again!.fn(); }); row.appendChild(a); }
-      const auto = opts.stay ? 0 : window.setTimeout(go, 3800 + rows.length * 500);   // `stay`: waits for the tap
+      // it carries on by itself, but slowly enough to read and tap (runs 15–16: the button went before
+      // the tap, twice), with the time left shown draining on the button; touching the banner holds it
+      const wait = 8000 + rows.length * 1000;
+      if (!opts.stay) { b.classList.add('timed'); b.style.setProperty('--wait', `${wait}ms`); }
+      const auto = opts.stay ? 0 : window.setTimeout(go, wait);   // `stay`: waits for the tap
+      card.addEventListener('pointerdown', () => { clearTimeout(auto); b.classList.remove('timed'); }, { once: true });
     },
     label(id: string, text: string | null, at?: T.Vector3) {
       let l = labels.get(id);
