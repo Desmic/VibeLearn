@@ -431,3 +431,49 @@ asked. The 6/10 has two causes:
 - **A short rope or stone bridge says what it was.** It used to say just "A bridge", which made
   the tester doubt that "rope" did anything.
 - **The end card** explains the stars and has a **Play again** button.
+
+## Blind run 14: the main game, after the v79 camera and movement fixes (8 Oct 2026; commuter; 6/10, yes)
+
+Run 8 (6 Oct, the baseline) never got past Stop 1. Run 14 went from the title through Stop 1
+(it woke the skiff and flew it) to the Blossom Isle satchel in 79 steps.
+
+**What landed:**
+- the story and setup, unprompted (Zip, Mira, the Warden, the lost voice, the skiff);
+- the subject, unprompted ("teaching you how AI predicts the next word");
+- the loop, unprompted and solid ("the guess gets dropped back into the ring, so the next guess
+  can see it too");
+- the humour ("is this Mario?").
+
+**What didn't:**
+- **The middle was a slog:** "fighting navigation for about one minute of the actual clever
+  bit". Hunting the three words took 28 steps; the tester never noticed that words float over
+  people.
+- **The Gate lesson came out backwards.** Zip's line "No Stream in there. Just rules. That's
+  what I'd be, without it" made the Gate the dumb one and the engine the clever one.
+- **The guess never visibly changed** when the ring's words changed, so "it uses everything in
+  the ring" was assumed, not seen.
+- **Camera:** about 30 big turns the player didn't make. I added attribution, measured by
+  cause:
+  - many were the new goal-arrow taps (wanted) and dialogue or flight shots (expected);
+  - but plain walks in town turned the camera 54–62°: the "whiskers" that swing the camera
+    away from walls. Since the stick follows the camera, the walk bent with it ("walking
+    forward sometimes put the goal behind me").
+- **Zip as a dithered ghost.** During the lantern dialogue Zip stayed a ghost: his near-camera
+  fade only updated in the follow camera, not in directed shots.
+
+**Changed after run 14:**
+- **Whiskers:** they now act only when the camera is really pinned (under 1.8 m), and turn at
+  most about 34° per squeeze, then just pull in close. The same walks now turn 34° at most,
+  down from 62° (`tools/_camwhy` replay, kept in `/tmp`).
+- **Zip's fade** follows the camera whatever moves it.
+- **The Gate line** is now "A talking gate. It only knows what you hand it." / "Same as my
+  engine, really. Better notes, better answers."
+- **The goal arrow** levels the view as well as turning it (it could leave the camera looking
+  at the floor).
+- **The play server** now records why the camera turned (shot, dialogue, goal arrow, glance,
+  whisker, walk) and lists the cause beside each turn in the metrics.
+
+**Still open, for Desmic:**
+- the word hunt in Stop 1 (28 steps);
+- making the guess visibly change with the ring's words (the tester's own ask: "add 'sink' and
+  show the guess change").

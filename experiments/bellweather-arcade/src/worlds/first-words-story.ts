@@ -80,7 +80,9 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     'ring-miss': { text: 'Missed one. Very authentic Sups experience.' },
     'ring-all': { text: 'Every ring! Take that, Sups.' },
     'ring-reply': { text: 'Did the villain just bond with me over a bad game?' },
-    gate: { text: ['A talking gate. It reads, but does it think?', 'No Stream in there. Just rules. That\'s what I\'d be, without it.'] },
+    // run 14: "Just rules. That's what I'd be, without it" made the Gate the dumb one and the engine the clever
+    // one, the opposite of the lesson (both only know what they're handed)
+    gate: { text: ['A talking gate. It only knows what you hand it.', 'Same as my engine, really. Better notes, better answers.'] },
     idle1: { text: 'Hello? Player? The goal\'s right up there.' },
     idle2: { text: 'I\'ll just stand here, then. Like a good NPC.' },
     npc: { text: 'Are those… NPCs?' },

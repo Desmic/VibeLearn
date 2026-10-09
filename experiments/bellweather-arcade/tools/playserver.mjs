@@ -99,6 +99,8 @@ async function observe() {
       // where the player stands (for the play log and replays only; never sent to a blind tester)
       at: (() => { try { const p = window.__arcade?.snapshot?.().position; return p ? p.map(v => +v.toFixed(2)) : null; } catch { return null; } })(),
       // which way the camera looks (degrees), to measure turns the player didn't make
+      // what turned it by itself (cumulative radians by cause, and whether a directed shot is on)
+      camWhy: (() => { try { const q = window.__arcade?.snapshot?.(); return q?.camTurn ? { ...q.camTurn, shot: !!q.shot } : null; } catch { return null; } })(),
       cam: (() => { try { const q = window.__arcade?.snapshot?.(); return q?.camera && q.position ? Math.round(Math.atan2(q.camera[0] - q.position[0], q.camera[2] - q.position[2]) * 180 / Math.PI) : null; } catch { return null; } })(),
       // everything written on the screen, whatever the game calls it (speech bubbles, counters, signs):
       // visible text outside buttons, in page order. Game-agnostic: no class names needed.
@@ -187,7 +189,7 @@ const design = async () => designCache ??= designVocabulary({ nouns: GAME.nouns 
 
 /** objective numbers from the play log: where the time went, without asking anyone */
 function metrics() {
-  const log = playLog(), goals = [], stalls = [], repeats = [], turns = []; let cur = null, failed = 0, runFrom = null, prevSig = null, lastAct = '', run = 0, prevCam = null, looked = false;
+  const log = playLog(), goals = [], stalls = [], repeats = [], turns = []; let cur = null, failed = 0, runFrom = null, prevSig = null, lastAct = '', run = 0, prevCam = null, prevWhy = null, looked = false, goalTap = false;
   for (const e of log) {
     if (e.observe) {
       const g = e.observe.goal ?? '(no goal shown)';
@@ -197,10 +199,16 @@ function metrics() {
       prevSig = sig;
       // the camera turning by itself: between two looks at the screen, with no drag to look
       const cam = e.observe.cam;
-      if (cam != null && prevCam != null && !looked) { const d = Math.abs(((cam - prevCam + 540) % 360) - 180); if (d >= 30) turns.push({ step: e.step, deg: d }); }
-      prevCam = cam ?? prevCam; looked = false;
+      // the cause: a directed shot, a dialogue card, or the largest growth in the game's own turn counters
+      const why = e.observe.camWhy;
+      if (cam != null && prevCam != null && !looked) { const d = Math.abs(((cam - prevCam + 540) % 360) - 180); if (d >= 30) {
+        let cause = why?.shot ? 'shot' : e.observe.card ? 'dialogue' : goalTap ? 'goal arrow' : '';
+        if (!cause && why && prevWhy) { const g = ['glance', 'whisker', 'walk'].map(k => [k, (why[k] ?? 0) - (prevWhy[k] ?? 0)]).sort((a, b) => b[1] - a[1])[0]; cause = g[1] > .3 ? g[0] : 'other'; }
+        turns.push({ step: e.step, deg: d, cause: cause || 'other' }); } }
+      prevCam = cam ?? prevCam; prevWhy = why ?? prevWhy; looked = false;
     } else if (e.act) {
       if (e.act.type === 'look') looked = true;
+      goalTap = e.act.type === 'tap' && /toward the goal/i.test(e.act.label ?? '');
       if (e.failed) failed++;
       const k = JSON.stringify(e.act); run = k === lastAct && e.act.type !== 'think' ? run + 1 : 0; lastAct = k; if (run === 2) repeats.push({ step: e.step, act: e.act.type + (e.act.label ? ' “' + e.act.label + '”' : '') });
     }
@@ -213,7 +221,7 @@ function metricsMd(m) {
     `- steps per goal: ${m.goals.map(g => `“${g.goal}” ${g.steps}`).join(' · ')}`,
     `- stretches with nothing on screen changing (3+ steps): ${m.stalls.map(([a, b]) => `${a}–${b}`).join(', ') || 'none'}`,
     `- the same action 3+ times in a row: ${m.repeats.map(r => `step ${r.step} (${r.act})`).join(', ') || 'none'}`,
-    `- the camera turned 30°+ without a drag to look: ${m.turns?.length ? m.turns.map(t => `step ${t.step} (${t.deg}°)`).join(', ') : 'never'}`].join('\n');
+    `- the camera turned 30°+ without a drag to look: ${m.turns?.length ? m.turns.map(t => `step ${t.step} (${t.deg}°${t.cause ? ', ' + t.cause : ''})`).join(', ') : 'never'}`].join('\n');
 }
 
 /** the play log as text, for the interviewer: what was on screen, what they did, what they said */
