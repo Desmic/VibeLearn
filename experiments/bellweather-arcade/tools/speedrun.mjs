@@ -53,13 +53,13 @@ const until = async (fn, max = 30) => { for (let s = 0; s < max; s += .5) { if (
 /** skip whatever cutscene is up */
 const skipCutscene = async () => { if (await visible('.story-skip')) { await h.press(page.locator('.story-skip')); await page.waitForTimeout(300); } };
 /** walk toward the goal marker until an action matching `re` is offered, then take it */
-const follow = async (re, { maxSecs = 120, quiet = false } = {}) => {   // (no marker: it explores)
+const follow = async (re, { maxSecs = 120, quiet = false, explore = false } = {}) => {   // (no marker, or explore: it explores)
   const want0 = typeof re === 'function' ? re : async () => re.test((await actLabel()) ?? '');
   const want = async () => { await seeWorld(); return want0(); };
   const start = await clock(); let explored = false;
   while ((await clock()) - start < maxSecs) {
     if (await want()) { const label = await actLabel(); await h.act(label.slice(0, 18)); await sim(1.2); await note('act ' + label); return label; }   // let it land before the next action
-    const b = await beacon();
+    const b = explore ? null : await beacon();
     if (!b) {
       // no marker (e.g. "Read the notes"): explore like a player: walkable spots in widening rings, nearest first
       if (!explored) {
@@ -156,6 +156,9 @@ const playStation = async (id) => {
     }
     // the game may be doing the move itself (an animation finishing): give it a moment
     if (await until(async () => goodMoves(g, dist, await live()).left < left, 2)) continue;
+    // a card on a real-time timer (the Gate reads the notes in, then speaks): wait a moment in real time
+    { const ready = async () => (await cardOpen()) || !!(await page.locator(moves.map(a => `[data-action="${a}"]:visible`).join(',')).count());
+      let r = await ready(); for (let k = 0; k < 8 && !r; k++) { await page.waitForTimeout(400); r = await ready(); } if (r) continue; }
     // 3) the station's own prompt is up and the goal marker is right here: open it (a player follows the goal)
     // Open it when its own move is a good one, or when no good move is of a kind seen out in the world
     // (learned while walking: "absorb…", "take…" are prompts in the world; "load…", "lift…" are inside)
@@ -165,6 +168,9 @@ const playStation = async (id) => {
     const inWorld = async () => { const a = await page.evaluate(() => document.querySelector('.context-act:not([hidden])')?.dataset.action ?? null); return !!a && goodMoves(g, dist, await live()).moves.includes(a); };
     // one walk that stops at whichever comes first: a good move's prompt, or the station's opener (when opening is right)
     if (await follow(async () => (await inWorld()) || (await openerOK()), { maxSecs: 60, quiet: true }) !== null) continue;
+    // 4b) the goal points elsewhere (it shouldn't give the answer away: e.g. to the Gate once every note
+    // is read): a player who knows what they still need goes looking for it
+    if (moves.some(x => worldKinds.has(kind(x))) && await follow(async () => await inWorld(), { maxSecs: 90, quiet: true, explore: true }) !== null) { findings.add(`station "${id}": a needed move (${moves.join(' / ')}) was found by looking round, not where the goal pointed ("${await goal()}")`); continue; }
     // 5) not in the world: open the station with its own prompt
     if (await follow(async () => { const m = await page.evaluate(() => document.querySelector('.context-act:not([hidden])')?.dataset.action ?? null); return (await actLabel()) === label && (!m || goodMoves(g, dist, await live()).moves.includes(m)); }, { maxSecs: 45, quiet: true }) !== null) continue;
     check(`station "${id}": found a control for one of ${moves.join(', ')}`, false, `goal "${await goal()}", action "${await actLabel()}"`, 'fail', 'learning'); return;

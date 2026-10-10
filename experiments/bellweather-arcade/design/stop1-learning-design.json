@@ -27,55 +27,127 @@
   ],
   "sequence": [
     {
-      "id": "skiff-gather", "role": "introduce", "station": "wake-skiff",
+      "id": "skiff-gather",
+      "role": "introduce",
+      "station": "wake-skiff",
       "player_goal": "Find the skiff's words around the outlook (Skiff, rise, toward; a decoy, sink).",
       "decision": "None assessed. Loading 'sink' makes the skiff dip (a safe, funny failure).",
       "feedback": "The engine's guesses fan out with real weights; the right three words make it say 'Blossom'.",
-      "outcomes": ["sequence"]
+      "outcomes": [
+        "sequence"
+      ]
     },
     {
-      "id": "skiff-broken-loop", "role": "assess", "station": "wake-skiff", "decision_id": "next-input",
+      "id": "skiff-broken-loop",
+      "role": "assess",
+      "station": "wake-skiff",
+      "decision_id": "next-input",
       "player_goal": "The Warden broke the loop that feeds guesses back. Choose what the engine reads next.",
-      "options": { "right": "Skiff rise toward Blossom (whole-sentence)", "wrong": ["Blossom only (newest-only: babbles about petals)", "Skiff rise toward (original-only: says Blossom again, forever)", "anything else (partial)"] },
+      "options": {
+        "right": "Skiff rise toward Blossom (whole-sentence)",
+        "wrong": [
+          "Blossom only (newest-only: babbles about petals)",
+          "Skiff rise toward (original-only: says Blossom again, forever)",
+          "anything else (partial)"
+        ]
+      },
       "commit_before_feedback": true,
-      "outcomes": ["sequence"]
+      "outcomes": [
+        "sequence"
+      ]
     },
     {
-      "id": "gate-predict", "role": "assess", "station": "blossom-gate", "decision_id": "destination-prediction",
+      "id": "gate-predict",
+      "role": "assess",
+      "station": "blossom-gate",
+      "decision_id": "destination-prediction",
       "player_goal": "Put up to two notes in the satchel, then predict where the Gate will open before it reads them.",
-      "notes": ["Mira's map page (true, current)", "Old festival poster (stale: the bridge fell)", "Warden's sign (a lie)", "Scribbled note (vague)"],
-      "outcomes": ["context"]
+      "notes": [
+        "Mira's torn page (true, current: where she is going, not the way)",
+        "Keeper's notice (true, current: the way, not where)",
+        "Old festival poster (stale: the Old Bridge fell; agrees with Mira about where, which makes Mira's page + poster the tempting wrong pair)",
+        "Warden's sign (a planted order)"
+      ],
+      "outcomes": [
+        "context"
+      ],
+      "feedback": "Every pair plays out where the notes point: the poster opens the Gate onto empty sky where the bridge was; Mira's page alone climbs stairs into fog; the keeper's notice alone climbs to an empty landing; the Warden's sign drops a cage; disagreeing notes make the Gate dizzy."
     },
     {
-      "id": "gate-select", "role": "assess", "station": "blossom-gate", "decision_id": "context-selection",
-      "player_goal": "Open the Gate toward Mira: only her page in the satchel does it.",
-      "outcomes": ["context"]
+      "id": "gate-select",
+      "role": "assess",
+      "station": "blossom-gate",
+      "decision_id": "context-selection",
+      "player_goal": "Open the Gate toward Mira: her page (where) and the keeper's notice (the way) together. No single note does it.",
+      "outcomes": [
+        "context"
+      ]
     },
     {
-      "id": "gate-source", "role": "check", "station": "blossom-gate", "decision_id": "source-support",
-      "player_goal": "Say what Mira's page actually tells you (her route; not that she is safe, not where she is held).",
-      "outcomes": ["context"]
+      "id": "gate-source",
+      "role": "check",
+      "station": "blossom-gate",
+      "decision_id": "source-support",
+      "player_goal": "Say what Mira's page actually tells you (where she is going; not that she is safe, not where she is held).",
+      "outcomes": [
+        "context"
+      ]
     },
     {
-      "id": "relay", "role": "transfer", "station": "relay-contact", "decision_ids": ["context-selection", "next-input"],
-      "player_goal": "Tune the relay to Mira's channel (7, not the Warden's 3 or the festival's 5), then send the whole message.",
-      "outcomes": ["context", "sequence"]
+      "id": "relay",
+      "role": "transfer",
+      "station": "relay-contact",
+      "decision_ids": [
+        "context-selection",
+        "next-input"
+      ],
+      "player_goal": "Tune the relay to Mira's channel (7, not the Warden's 3 or the festival's 5), then send Zip's whole message so far, leaving out the word the Warden slipped into the jammed line.",
+      "outcomes": [
+        "context",
+        "sequence"
+      ],
+      "options": {
+        "right": "Channel 7. Mira, it's (the message so far, newest word included)",
+        "wrong": [
+          "every word heard, the Warden's 'Surrender.' included (jammed: it babbles 'surrender' back)",
+          "it's only (newest: 'it's it's it's')",
+          "no channel card (goes to the Warden)",
+          "anything else (partial)"
+        ]
+      }
     }
   ],
   "evidence": {
-    "activities": ["wake-skiff", "blossom-gate", "relay-contact"],
+    "activities": [
+      "wake-skiff",
+      "blossom-gate",
+      "relay-contact"
+    ],
     "event_shape": "{activity, decision, choice, correct, first, assisted, t, rules}",
     "first_try": "A decision's first judgement on this device counts; reloads and replays never make a later answer first (save.decidedBefore).",
     "assisted": "Stations can mark help given toward a decision (station.helpedWith). No Stop 1 decision has a hint today."
   },
   "known_gaps": [
+    "Changed 11 Oct after run 17 ('the Gate gave three stars with one note'; the relay 'felt more like confirming'): no single note opens the Gate, and the relay's line carries a word the player never said. Not yet blind-tested.",
     "Relay transfer is weak: the pinned card spells out 'Lantern channel 7. M.', so choosing 7 is close to copying. A stronger transfer makes the player infer the channel (for example from Mira's lantern colour or a clue learned on the island).",
-    "No case where the newest note is irrelevant, so 'pick the most recent note' is never tested as a misconception.",
     "The only step outside the fiction is the optional 'How real AI differs' card; there is no out-of-fiction transfer question.",
-    "Gate and relay are still panel puzzles; the Echo & Engine redesign plans them as the ring (context) and the loop (sequence) in the world."
+    "Gate and relay are still panel puzzles; the Echo & Engine redesign plans them as the ring (context) and the loop (sequence) in the world.",
+    "No case where the newest note is irrelevant, so 'pick the most recent note' is never tested as a misconception."
   ],
   "sources": [
-    { "id": "slp3", "title": "Jurafsky & Martin, Speech and Language Processing (3rd ed. draft), chapters on language models and LLMs", "url": "https://web.stanford.edu/~jurafsky/slp3/", "used_for": "autoregressive generation: each word conditioned on the words before it", "verify": "chapter numbers change between drafts; cite the chapter when this design is approved" },
-    { "id": "hf-llm-course", "title": "Hugging Face LLM Course, chapter 1 (how transformer language models work)", "url": "https://huggingface.co/learn/llm-course/chapter1/1", "used_for": "plain-language description of next-token prediction and context", "verify": "check the exact page before approval" }
+    {
+      "id": "slp3",
+      "title": "Jurafsky & Martin, Speech and Language Processing (3rd ed. draft), chapters on language models and LLMs",
+      "url": "https://web.stanford.edu/~jurafsky/slp3/",
+      "used_for": "autoregressive generation: each word conditioned on the words before it",
+      "verify": "chapter numbers change between drafts; cite the chapter when this design is approved"
+    },
+    {
+      "id": "hf-llm-course",
+      "title": "Hugging Face LLM Course, chapter 1 (how transformer language models work)",
+      "url": "https://huggingface.co/learn/llm-course/chapter1/1",
+      "used_for": "plain-language description of next-token prediction and context",
+      "verify": "check the exact page before approval"
+    }
   ]
 }

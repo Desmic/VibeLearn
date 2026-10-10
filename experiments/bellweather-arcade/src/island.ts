@@ -12,6 +12,7 @@ import { dressIsland, entityAt } from './kit/dress';
 import { budget } from './kit/budget';
 import { BLOSSOM_ISLE } from './worlds/blossom-isle';
 import { mergeStatic } from './kit/merge';
+import { gateView } from './gate-view';
 import { authored, gateArch, landingPad, lanternPost, noticeBoard, relayTower, satchelPedestal, stone } from './worlds/bellweather-props';
 
 // Greybox Blossom Isle (Level 1, outcome `context`): its own small island,
@@ -24,7 +25,7 @@ import { authored, gateArch, landingPad, lanternPost, noticeBoard, relayTower, s
 // new cards, less help). First choices are kept apart from later attempts.
 
 export const ISLE = new T.Vector3(BLOSSOM_ISLE.center[0], 0, BLOSSOM_ISLE.center[1]);
-type NoteId = 'mira' | 'poster' | 'warden' | 'rumour';
+type NoteId = 'mira' | 'poster' | 'warden' | 'keeper';
 interface Note { id: NoteId; short: string; text: string; at: T.Vector3 }
 // where things stand comes from the island spec's entities; what the notes say
 // comes from the Gate station's content
@@ -113,6 +114,9 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
     // thin poles (mast, posts, trunks, pillars) would make the camera pop in; let it pass them
     const b = new T.Box3().setFromObject(m), sz = b.getSize(new T.Vector3()); if (Math.max(sz.x, sz.z) < .5) return;
     cameraBlockers.push(m); });
+  // what a wrong pair of notes opens onto, painted in the arch (gate-view.ts); added after the
+  // camera blockers so the camera never treats it as a wall
+  const view = gateView(); view.mesh.position.set(GATE.x, view.mesh.geometry.parameters.height / 2, GATE.z + .04); root.add(view.mesh);
   // walking: the disc, minus trees, pedestal, stone, posts, tower
   opts.addWalk(ISLE.x, ISLE.z, 9.4);
   for (const n of NOTES) opts.solid(n.at.x, n.at.z, .25);
@@ -157,7 +161,15 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   const nextNote = () => { let best: Note | null = null, d = 1e9; for (const n of NOTES) { if (seen.has(n.id)) continue; const k = Math.hypot(n.at.x - zipAt.x, n.at.z - zipAt.z); if (k < d) { d = k; best = n; } } return best ? best.at : null; };
   const goalNow = () => {
     if (phase === 'arrived') opts.setGoal('Take the satchel by the landing', CLASP);
-    else if (phase === 'bag') { const failed = gateSt.state.failed as boolean; opts.setGoal(failed ? 'Change your notes, then speak again' : bag().length ? 'Take your notes to the gate' : 'Read the notes. Take up to two.', bag().length && !failed ? GATE_STONE : bag().length ? null : nextNote(), true); }
+    else if (phase === 'bag') {
+      // the arrow leads round every note before it leads to the Gate: with one note taken it used
+      // to point at the Gate at once, walking the player away from the rest (the speedrun's
+      // rules-led player found it, 11 Oct, once no single note opened the Gate)
+      const failed = gateSt.state.failed as boolean, unread = nextNote();
+      if (failed) opts.setGoal('Change your notes, then speak again', null, true);
+      else if (unread) opts.setGoal('Read the notes. Take up to two.', unread, true);
+      else opts.setGoal(bag().length ? 'Take your notes to the gate' : 'Take up to two notes', bag().length ? GATE_STONE : null, true);
+    }
     else if (phase === 'open') opts.setGoal('Call Mira from the relay', RELAY);
     else if (phase === 'done') opts.setGoal('Back to the skiff. Mira needs you!', null);
   };
@@ -173,7 +185,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   };
   const changed = () => { renderBag(); goalNow(); };
 
-  const retry = () => { mood = 'idle'; g.close(); goalNow(); };
+  const retry = () => { mood = 'idle'; g.close(); view.hide(); goalNow(); };
   // gate: the command follows exactly what the satchel holds
   const gate = {
     speak() {
@@ -183,7 +195,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       // the notes fly in first, then the Gate speaks (seen, before it is said)
       readIn(); mood = 'talk'; sfx.speak(2);
       setTimeout(() => gateSays(`Let me read your notes: ${read} Now guess: where will I open?`, [
-        { label: 'Lotus Terraces', action: 'predict.lotus', act: () => gate.predict('lotus') }, { label: 'East Falls', action: 'predict.east', act: () => gate.predict('east') },
+        { label: 'Lotus Terraces stairs', action: 'predict.lotus', act: () => gate.predict('lotus') }, { label: 'East Falls', action: 'predict.east', act: () => gate.predict('east') },
         { label: 'Old Bridge', action: 'predict.bridge', act: () => gate.predict('bridge') }, { label: 'Can\'t tell', action: 'predict.unclear', act: () => gate.predict('unclear') },
       ]), 1100);
     },
@@ -192,7 +204,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       const right = r.judged.find(j => j.decision === 'destination-prediction')?.correct;
       g.toast(right ? 'Good call!' : 'Let\'s see…', 900);
       if (r.events.includes('ask-support')) { g.say('What does Mira\'s page tell you?', [
-        { label: 'Her route: Lotus Terraces, then bell gardens', action: 'support.route', act: () => { gateSt.act('support.route'); gate.run(); } },
+        { label: 'Where she\'s going: up to the bell gardens', action: 'support.route', act: () => { gateSt.act('support.route'); gate.run(); } },
         { label: 'That she is safe', action: 'support.safe', act: () => { gateSt.act('support.safe'); gate.run(); } },
         { label: 'Where she is held', action: 'support.held', act: () => { gateSt.act('support.held'); gate.run(); } },
       ]); }
@@ -201,18 +213,28 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
     run() {
       const r = gateSt.act('run'); if (!r.ok) return;
       const o = r.events.find(e => e.startsWith('gate-'))?.slice(5);
+      const swap = (then?: () => void) => [{ label: 'Swap my notes', kind: 'primary' as const, act: () => { retry(); then?.(); } }];
       if (o === 'open') {
         opts.onOpen?.(); melt = 1.2; if (sealBox) opts.removeBox(sealBox); sealBox = null; path.forEach(d => (d.visible = true)); phase = 'open'; sfx.chime();
-        gateSays('Past the Lotus Terraces it is! Mind the step.', [{ label: 'Yes!', kind: 'primary', act: () => gateSt.finish(() => { mood = 'idle'; goalNow(); }) }], 'happy');
+        gateSays('Past the Lotus Terraces and up the stairs to the bell gardens! Mind the step.', [{ label: 'Yes!', kind: 'primary', act: () => gateSt.finish(() => { mood = 'idle'; goalNow(); }) }], 'happy');
       } else if (o === 'decoy') {
         g.close(); gateSays('East Falls! The sign said so. Rules are rules!', [], 'smug');
         setTimeout(() => { trap = 3.2; sfx.zap(); g.close(); }, 1600);
-        setTimeout(() => gateSays('Oops. I can\'t tell a real clue from a planted order. I just do what notes say.', [{ label: 'Swap my notes', kind: 'primary', act: () => { retry(); g.thinkOnce('warden-sign', 'In hindsight, a sign signed ‘Warden’ was a clue.'); } }], 'oops'), 4600);
+        setTimeout(() => gateSays('Oops. I can\'t tell a real clue from a planted order. I just do what notes say.', swap(() => g.thinkOnce('warden-sign', 'In hindsight, a sign signed ‘Warden’ was a clue.')), 'oops'), 4600);
       } else if (o === 'stale') {
-        gateSays('Old Bridge, coming right up!', [], 'smug'); crumble = 2.4; sfx.whoosh();
-        setTimeout(() => { sfx.boing(); gateSays('Huh. Nobody told me the bridge fell. That poster is old news!', [{ label: 'Swap my notes', kind: 'primary', act: () => { retry(); g.thinkOnce('old-news', 'Old news is bad news. Write that down.'); } }], 'oops'); }, 2600);
+        // the Gate opens where the poster says: onto the sky where the bridge was
+        gateSays('Old Bridge, coming right up!', [], 'smug'); sfx.whoosh(); setTimeout(() => view.show('bridge'), 700);
+        setTimeout(() => { sfx.boing(); gateSays('Huh. There\'s… no bridge. That poster is old news! Nobody tells me anything.', swap(() => g.thinkOnce('old-news', 'Old news is bad news. Write that down.')), 'oops'); }, 3400);
+      } else if (o === 'partial') {
+        gateSays('Up the stairs to the bell gardens! Which stairs, though…', [], 'smug'); sfx.whoosh(); setTimeout(() => view.show('fog'), 700);
+        setTimeout(() => { sfx.boing(); gateSays('Stairs from where? Half a page, half a route, pal.', swap(() => g.thinkOnce('torn-page', 'The page says where she went. Not how.')), 'oops'); }, 3200);
+      } else if (o === 'aimless') {
+        gateSays('The Lotus Terraces stairs! Up we go, to…', [], 'smug'); sfx.whoosh(); setTimeout(() => view.show('nowhere'), 700);
+        setTimeout(() => { sfx.boing(); gateSays('…to where, exactly? A way is lovely. A place would be nicer.', swap(() => g.thinkOnce('no-where', 'Directions to nowhere. Very scenic.')), 'oops'); }, 3200);
       } else if (o === 'blend') {
-        flicker = 2; sfx.boing(); gateSays('Lotus? East? Falls? Two notes that disagree! My hinges hurt.', [{ label: 'Carry only one', kind: 'primary', act: () => { retry(); g.thinkOnce('dizzy-door', 'I made a door dizzy. New personal best.'); } }], 'dizzy');
+        flicker = 2; sfx.boing(); gateSays('Bell gardens? East Falls? Two notes that disagree! My hinges hurt.', [{ label: 'Swap my notes', kind: 'primary', act: () => { retry(); g.thinkOnce('dizzy-door', 'I made a door dizzy. New personal best.'); } }], 'dizzy');
+      } else if (o === 'clash') {
+        flicker = 2; sfx.boing(); gateSays('Cross the Old Bridge… which is closed… so cross the closed bridge? My hinges hurt.', [{ label: 'Swap my notes', kind: 'primary', act: () => { retry(); g.thinkOnce('dizzy-door', 'I made a door dizzy. New personal best.'); } }], 'dizzy');
       } else { flicker = 1.2; sfx.boing(); gateSays('Open to… somewhere? I need a place, pal.', [{ label: 'Find a better note', kind: 'primary', act: retry }], 'dizzy'); }
     },
   };
@@ -248,7 +270,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
     relaySt.zone(anchors[relaySt.spec.place.anchor], () => phase === 'open' && !relay.active, () => relay.open()),
   ];
 
-  let trap = 0, crumble = 0, flicker = 0, ping = 0, melt = 0, t = 0; const trapAt = new T.Vector3(), look = new T.Vector3();
+  let trap = 0, flicker = 0, ping = 0, melt = 0, t = 0; const trapAt = new T.Vector3(), look = new T.Vector3();
   return {
     landing: LANDING, cameraBlockers,
     get busy() { return relay.active; },
@@ -257,7 +279,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
     leave() { phase = 'done'; renderBag(); for (const n of NOTES) g.label('note-' + n.id, null, n.at); g.label('relay-notes', null, RELAY); },
     arrive() { phase = 'arrived'; sealBox = opts.addBox(GATE.x - 1.7, GATE.x + 1.7, GATE.z - .3, GATE.z + .3); goalNow(); },
     // resume past the gate (from a save): satchel taken, Mira's page carried, seal gone
-    restoreOpen() { gateSt.restore(['take-satchel', 'take.mira', 'speak', 'predict.lotus', 'support.route', 'run']); phase = 'open'; satchelObj.visible = false; seal.visible = sealLow.visible = false; path.forEach(d => (d.visible = true)); renderBag(); goalNow(); },
+    restoreOpen() { gateSt.restore(['take-satchel', 'take.mira', 'take.keeper', 'speak', 'predict.lotus', 'support.route', 'run']); phase = 'open'; satchelObj.visible = false; seal.visible = sealLow.visible = false; path.forEach(d => (d.visible = true)); renderBag(); goalNow(); },
     greet(then: () => void) { gateSays('Halt! I\'m the Gate. I open only where notes tell me. Rules are rules!', [{ label: 'OK', kind: 'primary', act: () => { mood = 'idle'; g.close(); then(); } }], 'smug'); },
     /** `aim`: the camera's look direction on the ground, so the prompt follows where the player looks */
     tick(dt: number, zip: T.Vector3, aim: { x: number; z: number } | null = null) {
@@ -275,7 +297,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       const pick = pickTarget([...thingC, ...noteC], zip, aim), nearNote = pickTarget(noteC, zip, aim)?.item.n ?? null;
       for (const n of NOTES) g.label('note-' + n.id, n === nearNote && !g.cardOpen ? `${n.short}: ${n.text}` : null, n.at.clone().setY(1.75));
       zipAt.copy(zip);
-      if (nearNote && !g.cardOpen && !seen.has(nearNote.id)) { seen.add(nearNote.id); if (phase === 'bag' && !bag().length) goalNow(); }
+      if (nearNote && !g.cardOpen && !seen.has(nearNote.id)) { seen.add(nearNote.id); if (phase === 'bag') goalNow(); }
       let best: { label: string; use: () => void; action?: string } | null = pick?.item.th ?? null;
       if (pick?.item.n) best = noteAction(pick.item.n) ?? pickTarget(thingC, zip, aim)?.item.th ?? null;
       g.label('relay-notes', phase === 'open' && !relay.active && !g.cardOpen && Math.hypot(zip.x - RELAY.x, zip.z - RELAY.z) < relaySt.spec.place.r ? 'Notes pinned to the relay: ' + relay.pinned : null, RELAY.clone().setY(2.3));
@@ -293,14 +315,13 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       face.rotation.z = mood === 'dizzy' ? Math.sin(t * 5) * .06 : 0;
       if (melt > 0) { melt = Math.max(0, melt - dt); seal.scale.setScalar(melt / 1.2 + .001); sealLow.scale.y = melt / 1.2 + .001; if (melt === 0) seal.visible = sealLow.visible = false; }
       satchelObj.rotation.y += dt; boards.forEach(b => { b.board.rotation.y = Math.sin(t + b.n.at.x) * .05; });
-      sealMat.opacity = .55 + .08 * Math.sin(t * 2) + (flicker > 0 ? .3 * Math.abs(Math.sin(t * 25)) : 0); flicker = Math.max(0, flicker - dt);
+      view.tick(dt); sealMat.opacity = (.55 + .08 * Math.sin(t * 2) + (flicker > 0 ? .3 * Math.abs(Math.sin(t * 25)) : 0)) * (1 - view.shown); flicker = Math.max(0, flicker - dt);
       if (trap > 0) {
         if (trap === 3.2) trapAt.copy(zip);
         trap = Math.max(0, trap - dt); const k = trap > 2.6 ? (3.2 - trap) / .6 : trap < .6 ? trap / .6 : 1;
         cage.visible = trap > 0; cage.position.set(trapAt.x, 1.1 + (1 - k) * 3, trapAt.z);
         drones.forEach((d, i) => { d.visible = trap > 0; const a = t * 2 + i * 2.1; d.position.set(trapAt.x + Math.cos(a) * 1.4, 2.4, trapAt.z + Math.sin(a) * 1.4); });
       }
-      if (crumble > 0) { crumble = Math.max(0, crumble - dt); const s = crumble > 0 ? Math.max(.05, Math.abs(Math.cos((2.4 - crumble) / 2.4 * Math.PI))) : 1; seal.scale.x = sealLow.scale.x = s; }
       if (ping > 0) { ping = Math.max(0, ping - dt); dishMat.emissiveIntensity = .1 + 1.2 * Math.abs(Math.sin(t * 6)) * (ping / 3); }
       path.forEach((d, i) => (d.material as T.MeshBasicMaterial).color.setHSL(.47, .5, .7 + .1 * Math.sin(t * 3 - i * .6)));
       return best ? { label: best.label, use: best.use, action: best.action } : null;

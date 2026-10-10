@@ -1,13 +1,15 @@
 import type { Guide } from './guide';
 import { sfx } from './sfx';
 import type { Station } from './kit/station';
+import { RELAY_WORDS, RELAY_JAM } from './worlds/first-words-rules';
 
 // Speech 2b: call Mira from the relay (the changed case: new purpose, new
 // cards, less help). Two hands-on steps on the relay's own console:
 //  1. Tune the dial to a channel and call. The pinned notes say which channel
 //     is Mira's; the others are funny dead ends (the Warden picks up on 3).
-//  2. The relay has spoken three words; tap the words it should read to make
-//     the next one, then Send. Only the whole message reaches Mira.
+//  2. The relay has heard four words, one of them the Warden's, slipped into the
+//     jammed line; tap the words it should read to make the next one, then Send.
+//     Only Zip's whole message (not the Warden's word) reaches Mira.
 // First choices are logged apart from retries (same rules as the skiff).
 
 interface Opts { guide: Guide; host: HTMLElement; station: Station; onDone: () => void; ping: () => void }
@@ -19,7 +21,7 @@ export function buildRelay(o: Opts) {
   const RELAY_NOTES = String(st.spec.content?.pinned ?? '');
   // what the console shows comes from the rules' state
   const ch = () => st.state.channel as number;
-  const pickedNow = () => new Set([0, 1, 2].filter(i => st.state['word' + i]));
+  const pickedNow = () => new Set(RELAY_WORDS.map((_, i) => i).filter(i => st.state['word' + i]));
 
   const dialSvg = () => {
     const ticks = Array.from({ length: 9 }, (_, i) => {
@@ -33,9 +35,8 @@ export function buildRelay(o: Opts) {
     active = true; g.close(); el.hidden = false; o.host.classList.add('puzzle-mode');
     el.innerHTML = `<div class="relay-head">RELAY · CH <b>${ch()}</b></div><p class="relay-notes">Pinned notes: ${RELAY_NOTES}</p>${dialSvg()}<p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="call" data-action="call">Call on channel ${ch()}</button><button class="quiet" data-act="close">Step away</button></div>`;
   };
-  const words = (msg = 'The relay has said three words. <b>Tap the words it should read</b> to make the next one, then Send.') => {
-    const ws = ['Channel 7.', 'Mira,', 'it\'s'];
-    el.innerHTML = `<div class="relay-head">RELAY · CH <b>7</b> · <span class="live">LIVE</span></div><div class="rail-chips">${ws.map((w, i) => `<button class="chip${pickedNow().has(i) ? ' picked' : ''}" data-w="${i}" data-action="word.${i}">${w}</button>`).join('')}<span class="chip empty">…</span></div><p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="send" data-action="send">Send</button></div>`;
+  const words = (msg = 'The line crackles. The relay heard four words. <b>Tap the words it should read</b> to make the next one, then Send.') => {
+    el.innerHTML = `<div class="relay-head">RELAY · CH <b>7</b> · <span class="live">LIVE</span></div><div class="rail-chips">${RELAY_WORDS.map((w, i) => `<button class="chip${i === RELAY_JAM ? ' jam' : ''}${pickedNow().has(i) ? ' picked' : ''}" data-w="${i}" data-action="word.${i}">${w}</button>`).join('')}<span class="chip empty">…</span></div><p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="send" data-action="send">Send</button></div>`;
     el.onclick = e => {
       const b = (e.target as HTMLElement).closest('button'); if (!b) return; e.stopPropagation(); sfx.tap();
       if (b.dataset.w) { st.act('word.' + b.dataset.w); words(); return; }
@@ -58,10 +59,11 @@ export function buildRelay(o: Opts) {
     if (r.events.includes('mira-hears')) { finish(); return; }
     const kind = r.judged[0]?.choice;
     sfx.boing();
-    const msg = kind === 'newest' ? 'It only read “it\'s”… so it sent <b>“it\'s it\'s it\'s it\'s”</b>. Mira: “…Zip, are you stuck?”'
+    const msg = kind === 'jammed' ? 'It read the Warden\'s word too, so it sent <b>“Channel 7. Surrender. Mira, surrender, surrender…”</b> Mira: “Zip?! Never!”'
+      : kind === 'newest' ? 'It only read “it\'s”… so it sent <b>“it\'s it\'s it\'s it\'s”</b>. Mira: “…Zip, are you stuck?”'
       : kind === 'no-card' ? 'No channel card, so it sent the call to channel 3. <b>Warden:</b> “Hello again.”'
         : 'Words missing, so it sent <b>“Mira… um… it\'s”</b>. Static swallows the rest.';
-    if (kind === 'no-card') sfx.whisper();
+    if (kind === 'no-card' || kind === 'jammed') sfx.whisper();
     words(msg + ' Try again.');
   };
   const finish = () => {

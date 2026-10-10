@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1",
   "id": "first-words.relay-contact",
-  "version": "1",
+  "version": "2",
   "state": {
     "phase": {
       "type": "enum",
@@ -27,6 +27,10 @@
       "initial": false
     },
     "word2": {
+      "type": "boolean",
+      "initial": false
+    },
+    "word3": {
       "type": "boolean",
       "initial": false
     }
@@ -305,6 +309,27 @@
         }
       ]
     },
+    "word.3": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "words"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "word3",
+          "value": {
+            "op": "not",
+            "arg": {
+              "field": "word3"
+            }
+          }
+        }
+      ]
+    },
     "send": {
       "when": {
         "op": "eq",
@@ -335,6 +360,12 @@
                 "arg": {
                   "field": "word2"
                 }
+              },
+              {
+                "op": "not",
+                "arg": {
+                  "field": "word3"
+                }
               }
             ]
           },
@@ -351,10 +382,16 @@
                 "field": "word0"
               },
               {
-                "field": "word1"
+                "op": "not",
+                "arg": {
+                  "field": "word1"
+                }
               },
               {
                 "field": "word2"
+              },
+              {
+                "field": "word3"
               }
             ]
           },
@@ -366,8 +403,38 @@
             }
           ],
           "emits": [
-            "decide:next-input:right:all",
+            "decide:next-input:right:message",
             "mira-hears"
+          ]
+        },
+        {
+          "when": {
+            "field": "word1"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "word0",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "word1",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "word2",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "word3",
+              "value": false
+            }
+          ],
+          "emits": [
+            "decide:next-input:wrong:jammed"
           ]
         },
         {
@@ -383,11 +450,11 @@
               {
                 "op": "not",
                 "arg": {
-                  "field": "word1"
+                  "field": "word2"
                 }
               },
               {
-                "field": "word2"
+                "field": "word3"
               }
             ]
           },
@@ -405,6 +472,11 @@
             {
               "op": "set",
               "field": "word2",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "word3",
               "value": false
             }
           ],
@@ -434,6 +506,11 @@
               "op": "set",
               "field": "word2",
               "value": false
+            },
+            {
+              "op": "set",
+              "field": "word3",
+              "value": false
             }
           ],
           "emits": [
@@ -455,6 +532,11 @@
             {
               "op": "set",
               "field": "word2",
+              "value": false
+            },
+            {
+              "op": "set",
+              "field": "word3",
               "value": false
             }
           ],

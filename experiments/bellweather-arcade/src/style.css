@@ -30,6 +30,7 @@
 .card-open .story-card{cursor:pointer}
 .story-choices button:focus-visible{outline:2px solid #1c4972;outline-offset:2px}
 .rail-chips button.chip{cursor:pointer;min-height:38px;padding:6px 12px}
+.rail-chips .chip.jam{border:1.5px dashed #7b4fd6;color:#4a2f7a}
 .rail-chips .chip.picked{background:#9fe0d0;box-shadow:0 0 0 3px #2f9c86 inset}
 .story-mode #route,.story-mode #hint{display:none}
 .card-open #controls{visibility:hidden}

@@ -58,15 +58,22 @@ export const SKIFF_RULES: GameRulesSpec = {
 };
 
 // ── The Gate: it opens exactly where the notes in the satchel point ──
-export const NOTE_IDS = ['mira', 'poster', 'warden', 'rumour'] as const;
+// No note is enough alone (10 Oct, run 17: "the Gate gave three stars with one note"). Mira's page
+// is torn: it names where she's going but not the way. The keeper's notice gives the way but not
+// where. The old poster agrees with Mira about where and gives a way that no longer exists, so
+// Mira's page + the poster is the tempting wrong pair: the Gate opens onto empty sky.
+export const NOTE_IDS = ['mira', 'poster', 'warden', 'keeper'] as const;
 const slotVals = ['none', ...NOTE_IDS];
 const has = (n: string) => or(eq(f('slotA'), n), eq(f('slotB'), n));
 // what the gate will do with these notes (first match wins, as in the story)
 const OUTCOMES: { id: string; when: Expr; expect: string }[] = [
-  { id: 'blend', when: and(has('mira'), has('warden')), expect: 'unclear' },
-  { id: 'decoy', when: has('warden'), expect: 'east' },
-  { id: 'stale', when: has('poster'), expect: 'bridge' },
-  { id: 'open', when: has('mira'), expect: 'lotus' },
+  { id: 'blend', when: and(has('mira'), has('warden')), expect: 'unclear' },      // two destinations
+  { id: 'decoy', when: has('warden'), expect: 'east' },                           // a planted order
+  { id: 'clash', when: and(has('poster'), has('keeper')), expect: 'unclear' },    // cross a closed bridge
+  { id: 'stale', when: has('poster'), expect: 'bridge' },                         // old news: no bridge
+  { id: 'open', when: and(has('mira'), has('keeper')), expect: 'lotus' },         // where + the way
+  { id: 'partial', when: has('mira'), expect: 'unclear' },                        // where, no way
+  { id: 'aimless', when: has('keeper'), expect: 'lotus' },                        // a way, to nowhere
   { id: 'vague', when: true, expect: 'unclear' },
 ];
 const PREDICTIONS = ['lotus', 'east', 'bridge', 'unclear'];
@@ -131,15 +138,20 @@ export const GATE_RULES: GameRulesSpec = {
 };
 
 // ── The relay: pick Mira's channel, then send the whole message ──
+// The line is jammed: between Zip's words the relay also heard the Warden's "Surrender." Tapping
+// every word (run 17: "by reflex") now feeds it the Warden's word too, and it babbles it back.
+// The message so far is the channel card and Zip's own words, newest included.
 const CHANNELS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+export const RELAY_WORDS = ['Channel 7.', 'Surrender.', 'Mira,', 'it\'s'];
+export const RELAY_JAM = 1;   // the word the Warden slipped in
 const word = (i: number) => f('word' + i);
-const clearWords = [0, 1, 2].map(i => set('word' + i, false));
+const clearWords = RELAY_WORDS.map((_, i) => set('word' + i, false));
 export const RELAY_RULES: GameRulesSpec = {
-  schemaVersion: '1', id: 'first-words.relay-contact', version: '1',
+  schemaVersion: '1', id: 'first-words.relay-contact', version: '2',
   state: {
     phase: oneOf(['tune', 'words', 'done']),
     channel: { type: 'integer', initial: 1, min: 1, max: 9 },
-    word0: bool(), word1: bool(), word2: bool(),
+    word0: bool(), word1: bool(), word2: bool(), word3: bool(),
   },
   actions: {
     ...Object.fromEntries(CHANNELS.map(c => ['tune.' + c, { when: eq(f('phase'), 'tune'), effects: [set('channel', c)] }])),
@@ -152,13 +164,14 @@ export const RELAY_RULES: GameRulesSpec = {
         { effects: [], emits: ['decide:context-selection:wrong', 'static'] },
       ],
     },
-    ...Object.fromEntries([0, 1, 2].map(i => ['word.' + i, { when: eq(f('phase'), 'words'), effects: [set('word' + i, not(word(i)))] }])),
+    ...Object.fromEntries(RELAY_WORDS.map((_, i) => ['word.' + i, { when: eq(f('phase'), 'words'), effects: [set('word' + i, not(word(i)))] }])),
     send: {
       when: eq(f('phase'), 'words'),
       branches: [
-        { when: and(not(word(0)), not(word(1)), not(word(2))), effects: [], emits: ['nothing-picked'] },
-        { when: and(word(0), word(1), word(2)), effects: [set('phase', 'done')], emits: ['decide:next-input:right:all', 'mira-hears'] },
-        { when: and(not(word(0)), not(word(1)), word(2)), effects: clearWords, emits: ['decide:next-input:wrong:newest'] },
+        { when: and(...RELAY_WORDS.map((_, i) => not(word(i)))), effects: [], emits: ['nothing-picked'] },
+        { when: and(word(0), not(word(1)), word(2), word(3)), effects: [set('phase', 'done')], emits: ['decide:next-input:right:message', 'mira-hears'] },
+        { when: word(1), effects: clearWords, emits: ['decide:next-input:wrong:jammed'] },
+        { when: and(not(word(0)), not(word(2)), word(3)), effects: clearWords, emits: ['decide:next-input:wrong:newest'] },
         { when: not(word(0)), effects: clearWords, emits: ['decide:next-input:wrong:no-card'] },
         { effects: clearWords, emits: ['decide:next-input:wrong:partial'] },
       ],

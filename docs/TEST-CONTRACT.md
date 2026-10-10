@@ -79,7 +79,7 @@ game; `tools/checks.json` marks every tool's scope.
 
 - **Done (4 Oct): the answer key comes from the rules.** `tools/rulecheck.mjs` solves every
   puzzle from its rules data and prints the fewest-moves perfect run (semantic actions, e.g.
-  `take-satchel → take.mira → speak → predict.lotus → support.route → run`).
+  `take-satchel → take.mira → take.keeper → speak → predict.lotus → support.route → run`).
 - **Done (4 Oct): stations play from their rules.** Every control that sends a rules action
   is tagged `data-action`. The speedrun's `playStation(id)` re-plans from the live rules
   state at every step: it takes any move on a shortest no-mistake path, so moves that can come

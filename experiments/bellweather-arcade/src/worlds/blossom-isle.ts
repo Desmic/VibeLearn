@@ -26,7 +26,7 @@ export const BLOSSOM_ISLE: IslandSpec = {
     { id: 'note-mira', kind: 'note-board', at: [-4.5, 3], r: .6, station: 'blossom-gate', params: { note: 'mira' } },
     { id: 'note-poster', kind: 'note-board', at: [-2.4, 1.2], r: .6, station: 'blossom-gate', params: { note: 'poster' } },
     { id: 'note-warden', kind: 'note-board', at: [4.6, 1.6], r: .6, station: 'blossom-gate', params: { note: 'warden' } },
-    { id: 'note-rumour', kind: 'note-board', at: [5.4, 4.2], r: .6, station: 'blossom-gate', params: { note: 'rumour' } },
+    { id: 'note-keeper', kind: 'note-board', at: [5.4, 4.2], r: .6, station: 'blossom-gate', params: { note: 'keeper' } },
     { id: 'gate', kind: 'gate-arch', at: [0, -2], r: 1.9, station: 'blossom-gate' },
     { id: 'gate-stone', kind: 'talk-spot', at: [0, -.3], r: 1.1, station: 'blossom-gate' },
     { id: 'relay', kind: 'relay-tower', at: [0, -6.6], r: 1.4, station: 'relay-contact' },

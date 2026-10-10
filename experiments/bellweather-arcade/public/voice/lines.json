@@ -552,12 +552,39 @@
    "from": "town:after"
   },
   {
+   "key": "17924076",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "…to where, exactly? A way is lovely. A place would be nicer.",
+   "shown": "…to where, exactly? A way is lovely. A place would be nicer.",
+   "from": "island.ts"
+  },
+  {
    "key": "a6d39ed8",
    "speaker": "Gate",
    "voice": "Fenrir",
    "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
    "text": "An empty satchel? I need notes, pal. Rules are rules!",
    "shown": "An empty satchel? I need notes, pal. Rules are rules!",
+   "from": "island.ts"
+  },
+  {
+   "key": "82b9fd3d",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Bell gardens? East Falls? Two notes that disagree! My hinges hurt.",
+   "shown": "Bell gardens? East Falls? Two notes that disagree! My hinges hurt.",
+   "from": "island.ts"
+  },
+  {
+   "key": "f063d8f7",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Cross the Old Bridge… which is closed… so cross the closed bridge? My hinges hurt.",
+   "shown": "Cross the Old Bridge… which is closed… so cross the closed bridge? My hinges hurt.",
    "from": "island.ts"
   },
   {
@@ -579,21 +606,12 @@
    "from": "island.ts"
   },
   {
-   "key": "9e8c5044",
+   "key": "7e6f47be",
    "speaker": "Gate",
    "voice": "Fenrir",
    "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
-   "text": "Huh. Nobody told me the bridge fell. That poster is old news!",
-   "shown": "Huh. Nobody told me the bridge fell. That poster is old news!",
-   "from": "island.ts"
-  },
-  {
-   "key": "5a242946",
-   "speaker": "Gate",
-   "voice": "Fenrir",
-   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
-   "text": "Lotus? East? Falls? Two notes that disagree! My hinges hurt.",
-   "shown": "Lotus? East? Falls? Two notes that disagree! My hinges hurt.",
+   "text": "Huh. There's… no bridge. That poster is old news! Nobody tells me anything.",
+   "shown": "Huh. There's… no bridge. That poster is old news! Nobody tells me anything.",
    "from": "island.ts"
   },
   {
@@ -624,12 +642,39 @@
    "from": "island.ts"
   },
   {
-   "key": "70462ca9",
+   "key": "301a3d82",
    "speaker": "Gate",
    "voice": "Fenrir",
    "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
-   "text": "Past the Lotus Terraces it is! Mind the step.",
-   "shown": "Past the Lotus Terraces it is! Mind the step.",
+   "text": "Past the Lotus Terraces and up the stairs to the bell gardens! Mind the step.",
+   "shown": "Past the Lotus Terraces and up the stairs to the bell gardens! Mind the step.",
+   "from": "island.ts"
+  },
+  {
+   "key": "d8a3908c",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Stairs from where? Half a page, half a route, pal.",
+   "shown": "Stairs from where? Half a page, half a route, pal.",
+   "from": "island.ts"
+  },
+  {
+   "key": "d69c55d7",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "The Lotus Terraces stairs! Up we go, to…",
+   "shown": "The Lotus Terraces stairs! Up we go, to…",
+   "from": "island.ts"
+  },
+  {
+   "key": "1a05e7a9",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Up the stairs to the bell gardens! Which stairs, though…",
+   "shown": "Up the stairs to the bell gardens! Which stairs, though…",
    "from": "island.ts"
   },
   {

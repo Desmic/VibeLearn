@@ -39,12 +39,13 @@ export const FIRST_WORDS_L1_STATIONS: StationSpec[] = [
       ],
     },
     content: {
-      // one note per note board on the island (entities with params.note)
+      // one note per note board on the island (entities with params.note). No one note opens the
+      // Gate toward Mira: her page says where, the keeper's notice says the way (rules: OUTCOMES)
       notes: [
-        { id: 'mira', short: 'Mira\'s map page', text: '“Past the Lotus Terraces, then up to the bell gardens. M.”' },
-        { id: 'poster', short: 'Old festival poster', text: '“Cross the Old Bridge to the bell gardens!” (The bridge fell in the storm.)' },
+        { id: 'mira', short: 'Mira\'s torn page', text: '“…then up the stairs to the bell gardens. M.”' },
+        { id: 'poster', short: 'Old festival poster', text: '“Spring Festival, last year: cross the Old Bridge to the bell gardens!”' },
         { id: 'warden', short: 'Warden\'s sign', text: '“Your friends are held at the East Falls.”' },
-        { id: 'rumour', short: 'Scribbled note', text: '“Someone rushed off somewhere this morning.”' },
+        { id: 'keeper', short: 'Keeper\'s notice', text: '“Old Bridge closed since the storm. Take the Lotus Terraces stairs.”' },
       ],
     },
   },

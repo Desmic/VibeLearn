@@ -152,13 +152,22 @@ await segment('isle', async () => {
     await act('Take'); await page.evaluate(() => window.__arcade.simulate(.5));
     if ((await notes()) === n) { check(`a press on "Take the note" at ${x},${z} took the note`, false, `prompt was: ${before}; retrying`, 'warn'); await act('Take'); }
   };
-  await take(-4.5, 52.2); await take(4.6, 50.8);
+  // Mira's torn page + the old poster (the tempting pair: both say bell gardens): the Gate opens
+  // onto the sky where the bridge was, then the seal comes back
+  await take(-4.5, 52.2); await take(-2.4, 50.4);
   check('satchel holds two notes', (await page.locator('.satchel-bar .chip.rail').count()) === 2);
   await pose(0, 49.2); await act('Gate');
-  await card('East'); await card('route'); await page.waitForTimeout(800); await card('Carry');
-  await pose(4.6, 50.8); await act('Put it back');
+  await card('Old Bridge'); await card('going'); await page.waitForTimeout(1500);
+  check('a stale note opens the Gate onto empty sky (the view shows in the arch)', await waitFor(() => page.evaluate(() => { const v = window.__vlDebug.scene.getObjectByName('gate-view'); return !!v?.visible && v.material.opacity > .8; }), 15000));
+  await shot('gate-stale');
+  await card('Swap'); await page.waitForTimeout(1200);
+  check('the view goes and the seal comes back after a swap', await waitFor(() => page.evaluate(() => !window.__vlDebug.scene.getObjectByName('gate-view')?.visible), 15000));
+  // the way (keeper's notice) with the where (Mira's page) opens it
+  await pose(-2.4, 50.4); await act('Put it back'); await take(5.4, 53.4);
   await pose(0, 49.2); await act('Gate'); await card('Lotus');
   await card('Yes'); await page.waitForTimeout(1200);
+  const gateEv = (await learning()).filter(e => e.activity === 'blossom-gate');
+  check('gate: first tries kept apart (wrong pair first, right prediction first)', gateEv.some(e => e.decision === 'context-selection' && e.first && !e.correct) && gateEv.some(e => e.decision === 'destination-prediction' && e.first && e.correct), JSON.stringify(gateEv.map(e => [e.decision, e.first, e.correct])));
   check('gate stars', await page.locator('.star-row').isVisible());
   await shot('gate-open');
   await h.stars();
@@ -176,6 +185,10 @@ await segment('relay', async () => {
   check('channel 3 is the Warden', /Warden/.test(await page.locator('.relay-read').textContent()));
   await press(page.locator('.relay-tick[data-ch="7"]')); await press(page.locator('.relay-console button', { hasText: 'Call' }));
   await page.locator('.relay-console .chip', { hasText: 'Channel' }).waitFor({ timeout: 20000 });
+  // every word, by reflex: the Warden's "Surrender." goes in too and comes back out
+  for (const w of ['Channel', 'Surrender', 'Mira', "it's"]) await press(page.locator('.relay-console .chip', { hasText: w }));
+  await press(page.locator('.relay-console button', { hasText: 'Send' })); await page.waitForTimeout(600);
+  check('reading the Warden\'s word too sends it back out (the jam plays out)', /surrender/i.test(await page.locator('.relay-read').textContent()), await page.locator('.relay-read').textContent());
   for (const w of ['Channel', 'Mira', "it's"]) await press(page.locator('.relay-console .chip', { hasText: w }));
   await press(page.locator('.relay-console button', { hasText: 'Send' })); await page.waitForTimeout(600);
   await card('coming'); await page.waitForTimeout(1200);

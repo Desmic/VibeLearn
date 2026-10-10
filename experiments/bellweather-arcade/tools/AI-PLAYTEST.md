@@ -688,3 +688,36 @@ measured again (`tools/camprobe.mjs` cases E–G, `tools/reachprobe.mjs` strip s
 - **Wedged.** A scan for body-wide strips found three more along the town's east edge (behind the
   building blocks) and three gaps between Blossom Isle's edge trees and its rim. All closed; the
   scan is now a check.
+
+**Idle flicker (11 Oct, Desmic on his PC):** characters popped to their rest pose for one frame
+about once a second while standing still. Found with a per-frame log on his GPU
+(`tools/desktop/flicktest.cmd`), fixed in `kit/pose-hold.ts`; escape `qe-rest-pose-pop`.
+
+**Puzzles that test, not confirm (11 Oct, after run 17):** run 17 held the game at 7 because "most
+of the puzzles were over in a tap or two, with one obvious right answer" (the Gate gave three stars
+with one note; the relay "felt more like confirming") and asked for failures that play out.
+
+- **The Gate.** No single note opens it toward Mira any more. Her page is torn: it says where she's
+  going ("…then up the stairs to the bell gardens") but not the way. A new keeper's notice (in
+  place of the scribbled note) gives the way ("Old Bridge closed since the storm. Take the Lotus
+  Terraces stairs") but not where. The old poster agrees with Mira about where and gives a way that
+  no longer exists, so Mira's page + the poster is the tempting wrong pair.
+- **Every wrong pair plays out where its notes point**, painted in the arch (`src/gate-view.ts`):
+  the poster opens the Gate onto empty sky where the bridge was, a last plank falling; Mira's page
+  alone climbs stairs into fog; the keeper's notice alone climbs to an empty landing. The Warden's
+  sign still drops a cage; the poster with the keeper's notice ("cross the closed bridge?") and
+  Mira with the Warden still make the Gate dizzy.
+- **The relay.** The line is jammed: between Zip's words the relay also heard the Warden's
+  "Surrender." Tapping every word (the reflex) feeds it the Warden's word, and it babbles it back
+  ("Mira, surrender, surrender…" / Mira: "Zip?! Never!"). The right answer is Zip's message so
+  far, newest word included, without the Warden's.
+- **The notes arrow** now leads round every unread note before it points at the Gate (with one note
+  taken it used to point at the Gate at once). The speedrun's rules-led player found it, and now
+  looks round for a needed note when the goal points elsewhere, since a goal mustn't give the
+  answer away.
+- **Voiced:** 11 of the Gate's 12 lines (the Gate had none; the free daily quota stopped the last).
+- **Checked:** rulecheck (solvable, a perfect run exists), rules parity with the server's engine,
+  flowcheck's isle and relay (now played the wrong way first: the tempting pair, then every word),
+  reachprobe, speedrun, timing. Not yet blind-tested.
+- **Still open** (`design/stop1-learning-design.json` known gaps): the relay's channel is still
+  spelled out on its pinned note ("Lantern channel 7"), so choosing it is close to copying.
