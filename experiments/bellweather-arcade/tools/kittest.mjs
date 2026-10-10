@@ -61,6 +61,27 @@ t('ngram: let it finish takes its favourite each time and stops when told', ng.c
 t('ngram: it suggests nothing after a word it never read anything after', ng.suggest(['zebra']).length === 0);
 const ng3 = createNgram(3); ng3.read('a long way. the long bridge.');
 t('ngram: a bigger n reads two words back, and falls back to one', ng3.suggest(['the', 'long'])[0].word === 'bridge' && ng3.suggest(['so', 'long'])[0].word === 'way');
+// kit/pose-hold.ts: layered motion on clips. The mixer skips writing a bone whose value didn't
+// change, so a rig that resets to rest before it popped to rest whenever a clip held still
+// (11 Oct, idle flicker on PC). Proven on the real Idle clip, which holds still in places.
+{
+  const T = await import('three'); const { poseBase } = await kit('pose-hold.js');
+  const { readFileSync } = await import('node:fs');
+  const data = JSON.parse(readFileSync('public/characters/zip-ual-clips.json', 'utf8')), c = data.clips.find(c => c.name === 'Idle');
+  const n = c.hips.length / 3, times = new Float32Array(n); for (let i = 0; i < n; i++) times[i] = Math.min(c.duration, i / c.fps);
+  const clip = new T.AnimationClip('Idle', c.duration, Object.entries(c.tracks).map(([b, q]) => new T.QuaternionKeyframeTrack(`${b}.quaternion`, times, q)));
+  const worst = hold => { const root = new T.Object3D(), bones = Object.keys(c.tracks).map(k => { const b = new T.Bone(); b.name = k; root.add(b); return b; });
+    const rest = bones.map(b => b.quaternion.clone()), base = poseBase(bones), mixer = new T.AnimationMixer(root); mixer.clipAction(clip).play();
+    let prev = null, max = 0;
+    for (let f = 0; f < 45 * 6; f++) { if (hold) base.restore(); else bones.forEach((b, i) => b.quaternion.copy(rest[i]));
+      mixer.update(1 / 45); if (hold) base.keep();
+      const now = bones.map(b => b.quaternion.clone()); if (prev) now.forEach((q, i) => { max = Math.max(max, q.angleTo(prev[i]) * 180 / Math.PI); }); prev = now; }
+    return max; };
+  const popped = worst(false), held = worst(true);
+  t('pose-hold: resetting to rest before the mixer pops a bone when the clip holds still (the bug, reproduced)', popped > 10, popped.toFixed(1) + '°');
+  t('pose-hold: starting from the last clip pose, idle never jumps more than 3° a frame', held < 3, held.toFixed(1) + '°');
+}
+
 // kit/nav.ts: a way on foot round walls; the arrow faces the way, not the goal through a wall
 const { findPath, wayPoint, clearLine } = await kit('nav.js');
 // a room 10 m square with a wall across the middle (z 0) open only at its east end (x > 3)

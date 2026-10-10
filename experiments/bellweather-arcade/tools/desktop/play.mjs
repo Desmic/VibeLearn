@@ -4,7 +4,7 @@
 // (the same thing as npm run dev), then the window, and stops the server when the window closes.
 //   npm install             (once, in experiments/bellweather-arcade)
 //   node tools/desktop/play.mjs     (or double-click tools\desktop\play.cmd on Windows)
-//   [--size 540x960] [--extra "&lab=ngram"]
+//   [--size 540x960] [--extra "&lab=ngram"] [--shots 60  (a burst of frames every 60 s, into tools/desktop/shots)]
 import { createServer } from 'vite';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -22,5 +22,5 @@ console.log('game at', url);
 const [w, h] = arg('size', '540x960').split('x').map(Number);
 // tools/desktop is the window's app folder (package.json names window.cjs). electron is fetched by npx on first run (about 100 MB, once)
 // (the address goes by environment: on Windows the shell would split it at each &)
-const app = spawn('npx', ['--yes', 'electron@33.2.1', `"${here}"`], { stdio: 'inherit', shell: true, env: { ...process.env, VL_URL: url, VL_SIZE: `${w}x${h}` } });
+const app = spawn('npx', ['--yes', 'electron@33.2.1', `"${here}"`], { stdio: 'inherit', shell: true, env: { ...process.env, VL_URL: url, VL_SIZE: `${w}x${h}`, VL_SHOTS: arg('shots', '') } });
 app.on('exit', async code => { await server.close(); process.exit(code ?? 0); });

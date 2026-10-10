@@ -3,6 +3,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { mulberry32 } from './vendor/rng';
 import { proceduralClips } from './zip-rig';
 import { assembleLook, townsfolkLook, type BodyKit, type Look } from './kit/body-kit';
+import { poseBase } from './kit/pose-hold';
 
 // Townsfolk on the same humanoid skeleton (bone names) as Zip, so one library
 // of baked clips animates every inhabitant. Long coats are skinned to the hips
@@ -114,7 +115,8 @@ export function buildTownsperson(seed: number, library: T.AnimationClip[], kit?:
   // The head look is added on top of the animated pose. Clips without head/neck tracks leave
   // those bones alone, so the look must start from the rest pose each frame or it piles up
   // (3 Oct F15 play-test: heads spun like tops while people stared at the sky).
-  const headRest = bones.Head.quaternion.clone(), neckRest = bones.Neck.quaternion.clone();
+  // (from the clips' last pose, not rest: kit/pose-hold.ts, the 11 Oct idle flicker)
+  const look0 = poseBase([bones.Head, bones.Neck]);
   return {
     root, head: bones.Head, headTop,
     setBase(n) { base = n; },
@@ -128,8 +130,8 @@ export function buildTownsperson(seed: number, library: T.AnimationClip[], kit?:
       }
       if (actions.Stroll) actions.Stroll.timeScale = T.MathUtils.clamp(moving / .9, .4, 1.3);
       if (waving && !waving.isRunning()) waving = null;
-      bones.Head.quaternion.copy(headRest); bones.Neck.quaternion.copy(neckRest);
-      mixer.update(reduced ? 0 : dt);
+      look0.restore();
+      mixer.update(reduced ? 0 : dt); look0.keep();
       if (looking && !reduced) {
         root.updateMatrixWorld(true); bones.Neck.getWorldPosition(tmp);
         root.worldToLocal(lp.copy(look)); root.worldToLocal(np.copy(tmp));

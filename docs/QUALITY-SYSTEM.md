@@ -64,6 +64,7 @@ The old system checked *who was allowed to review*. This one checks *what the ga
 | **Intent** | `tools/intent.mjs` | What the game means to communicate, from its data. |
 | **Escapes** | `quality/escapes.json` | What people found that the checks missed, and what catches it now. |
 | **Second game (fixture)** | `fixtures/night-market/game.mjs` | A different game as data only. Manifest, story, station, progress and rules proofs and intent run on it (`npm run check:fixture`, part of `npm run check`). A new system check must pass here too. |
+| **Real-GPU watch** | `tools/desktop/flicktest.cmd`, `&flicklog=1` | The cloud renders a few frames a second, so a one-frame fault falls between its pictures. On a real PC this opens the game in its own window with a per-frame log (pose jumps, resolution steps, fades, shader compiles, hitches) into `tools/desktop/flick.log` and a burst of 30 frames every 45 s into `tools/desktop/shots`. Found the idle pose pop (`qe-rest-pose-pop`, 11 Oct). |
 
 ### The lanes
 

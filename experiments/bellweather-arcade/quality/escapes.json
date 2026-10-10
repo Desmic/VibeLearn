@@ -223,6 +223,39 @@
         "robustness"
       ],
       "status": "prevented"
+    },
+    {
+      "id": "qe-rest-pose-pop",
+      "found": {
+        "date": "2026-10-11",
+        "by": "Desmic, leaving the game on screen on his PC; measured by Claude with a frame-by-frame pose log and frame bursts on his GPU",
+        "where": "every idle character: the player and the townsfolk"
+      },
+      "symptom": "Characters flickered while standing idle: about once a second a body part snapped to its rest pose for one frame (14-48 degrees) and back.",
+      "why_missed": "The cloud harness renders at a few frames a second, so a one-frame pop falls between captured frames; nothing compared a character's pose from one frame to the next; testers move, and the pop only shows while standing still.",
+      "generalized_failure": "A rig reset its bones to rest before the animation mixer ran, but the mixer skips writing a bone whose value did not change since its last write, so whenever a clip held still the bone was left at rest for a frame.",
+      "invariant": "Layered motion starts each frame from the pose the mixer last left, never from rest; standing idle, no bone moves more than a few degrees between frames.",
+      "prevention": [
+        {
+          "layer": "kit",
+          "what": "kit/pose-hold.ts: restore the mixer's last pose before mixer.update, keep it right after, then layer motion on; used by both rigs"
+        },
+        {
+          "layer": "check",
+          "what": "kittest plays the real idle clip through a mixer both ways: resetting to rest pops (the bug reproduced), holding the last pose never moves a bone more than 3 degrees a frame"
+        },
+        {
+          "layer": "runtime",
+          "what": "&flicklog=1 logs pose jumps, resolution steps, fades, shader compiles and hitches; tools/desktop/flicktest.cmd runs it on a real GPU with frame bursts"
+        }
+      ],
+      "caught_by": [
+        "kittest"
+      ],
+      "lanes": [
+        "robustness"
+      ],
+      "status": "prevented"
     }
   ]
 }

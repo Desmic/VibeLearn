@@ -1,6 +1,7 @@
 import * as T from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { poseBase } from './kit/pose-hold';
 
 // Zip, rigged. A reusable pattern for every generated character:
 //   1. a small humanoid skeleton with canonical bone names (retarget-friendly),
@@ -217,11 +218,12 @@ export function buildZipRig(): ZipRig {
   let lookTarget: T.Vector3 | null = null; const headLook = new T.Euler();
   const earVel = [0, 0], earAng = [0, 0], scarfLag = new T.Vector3(); let lastYaw = 0, smoothSpeed = 0;
   const q = new T.Quaternion(), e = new T.Euler(), tmp = new T.Vector3();
-  // secondary motion is layered on the clips' pose; bones a clip doesn't animate start from rest each frame
-  const rest = ORDER.map(n => [bones[n], bones[n].quaternion.clone()] as const);
+  // secondary motion is layered on the clips' pose: each frame starts from the clips' last pose
+  // (bones a clip doesn't animate: from rest), never from rest itself (kit/pose-hold.ts)
+  const base = poseBase(ORDER.map(n => bones[n]));
 
   function update(dt: number, speed: number, reduced: boolean) {
-    for (const [b, r] of rest) b.quaternion.copy(r);
+    base.restore();
     t += dt;
     smoothSpeed += (speed - smoothSpeed) * Math.min(1, dt * 8);
     // locomotion blend: idle -> walk (<=1.6 m/s) -> jog (3.15 m/s)
@@ -237,7 +239,7 @@ export function buildZipRig(): ZipRig {
     if (actions.Jog) actions.Jog.timeScale = Math.max(.7, s / 2.9);
     if (gesture && !gesture.isRunning()) gesture = null;
     if (gesture) { actions.Idle?.setEffectiveWeight(wIdle * .3); }
-    mixer.update(reduced ? 0 : dt);
+    mixer.update(reduced ? 0 : dt); base.keep();
 
     // secondary motion after the clips: head look-at (yaw/pitch limited)
     if (lookTarget && !reduced) {

@@ -401,8 +401,29 @@ function render(){
   camera.updateMatrixWorld();{const f=story?.focus;if(f)CANOPY_FOCUS.value.copy(f);else CANOPY_FOCUS.value.set(zip.position.x,zip.position.y+.9,zip.position.z);CANOPY_FOCUS.value.applyMatrix4(camera.matrixWorldInverse)}
   if(faders){const t=performance.now();fadeOccluders(faders,camera,zip.position,Math.min(.1,(t-lastFade)/1000));lastFade=t;}
   promenade?.beforeRender();
-  if(post)post.render();else renderer.render(scene,camera);frames++;adaptRes?.();governor?.();
+  if(post)post.render();else renderer.render(scene,camera);frames++;adaptRes?.();governor?.();flickLog?.();
 }
+// diagnostics for "characters flicker after idling" (11 Oct, PC): &flicklog=1 logs every change
+// in what could make a figure flicker (resolution steps, the dither fades, shader recompiles,
+// hitches) plus a summary every 10 s, to the console (tools/desktop forwards it to play.log)
+var flickLog=new URLSearchParams(location.search).get('flicklog')==='1'?(()=>{
+  const poseWas=new Map<string,T.Quaternion>();let folkBones:T.Bone[]|null=null;const folkWas:T.Quaternion[]=[];let pr=-1,zf=-1,nf=-1,prog=-1,lastT=performance.now(),sum=performance.now();const dts:number[]=[];
+  const out=(...a:unknown[])=>console.log('[flick]',(performance.now()/1000).toFixed(1),...a);
+  return()=>{const now=performance.now(),dt=now-lastT;lastT=now;dts.push(dt);
+    const r=renderer.getPixelRatio();if(r!==pr){out('ratio',pr,'->',r);pr=r}
+    const z=Math.round(zipFade*100);if(z!==zf){if(zf<0||Math.abs(z-zf)>=5||z===100||z===0)out('zipFade',z,'cam-head',camera.position.distanceTo(tmpHead.copy(zip.position).setY(zip.position.y+1.5)).toFixed(2));zf=z}
+    const f=faders?faders.filter(x=>x.o<.985).length:0;if(f!==nf){out('fading',f,faders?faders.filter(x=>x.o<.985).map(x=>x.root.name||x.root.type).join(','):'');nf=f}
+    const pg=(renderer.info.programs??[]).length;if(pg!==prog){out('programs',prog,'->',pg);prog=pg}
+    if(dt>60)out('hitch',dt.toFixed(0));
+    // a pose that jumps between two frames (the 11 Oct capture: Zip's torso twisted for one frame)
+    if(zipRig){let said=false;const zq=zip.getWorldQuaternion(new T.Quaternion());const zw=poseWas.get('_zip');poseWas.set('_zip',zq);const zipTurn=zw?T.MathUtils.radToDeg(zw.angleTo(zq)):0;
+      for(const [n,b] of Object.entries(zipRig.bones)){const q=b.quaternion.clone(),p=poseWas.get(n);poseWas.set(n,q);if(!p||said)continue;const a=T.MathUtils.radToDeg(p.angleTo(q));if(a>14){said=true;out('pose',n,'local',a.toFixed(0)+'°','zipTurn',zipTurn.toFixed(1),'rotY',zip.rotation.y.toFixed(3),'dt',dt.toFixed(0),'acts',Object.entries(zipRig.actions).filter(([,x])=>x.isRunning()).map(([k,x])=>k+':'+x.getEffectiveWeight().toFixed(2)+'@'+x.time.toFixed(2)).join(' '))}}
+      if(zipTurn>5&&!said)out('zipTurn',zipTurn.toFixed(1),'rotY',zip.rotation.y.toFixed(3),'dt',dt.toFixed(0))}
+    // the townsfolk's heads and necks (their rig layers a look on the clips the same way)
+    if(!folkBones){folkBones=[];scene.traverse(o=>{const m=o as T.SkinnedMesh;if(m.isSkinnedMesh&&!zipRig?.root.getObjectById(m.id))for(const b of m.skeleton.bones)if(b.name==='Head'||b.name==='Neck')folkBones!.push(b)})}
+    folkBones.forEach((b,i)=>{const p=folkWas[i],q=b.quaternion.clone();folkWas[i]=q;if(p&&T.MathUtils.radToDeg(p.angleTo(q))>14)out('folk',b.name,i,T.MathUtils.radToDeg(p.angleTo(q)).toFixed(0)+'°','dt',dt.toFixed(0))});
+    if(now-sum>10000){sum=now;folkBones=null;folkWas.length=0;const s=dts.splice(0).sort((a,b)=>a-b);out('sum fps',(1000/s[s.length>>1]).toFixed(0),'p90',s[Math.floor(s.length*.9)].toFixed(1),'ratio',r,'calls',renderer.info.render.calls,'size',renderer.domElement.width+'x'+renderer.domElement.height,'cam',camera.position.toArray().map(v=>v.toFixed(2)).join(','),'zip',zip.position.toArray().map(v=>v.toFixed(2)).join(','))}};
+})():null;
 
 // Graphics settings and optional frame readout (painted study only).
 let statsEl:HTMLElement|null=null;const statFrames:number[]=[];let statLast=performance.now(),statShown=0;
