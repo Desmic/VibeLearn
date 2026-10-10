@@ -117,6 +117,9 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   opts.addWalk(ISLE.x, ISLE.z, 9.4);
   for (const n of NOTES) opts.solid(n.at.x, n.at.z, .25);
   opts.solid(CLASP.x, CLASP.z, .35); opts.solid(RELAY.x, RELAY.z, .35);
+  // fill the body-wide gaps between the edge trees and the island's rim (a narrow-strip scan, 10 Oct:
+  // somewhere to get wedged, nowhere to go)
+  for (const [x, z, r] of [[-8.0, -4.0, .7], [7.6, -4.6, .5], [-7.4, -2.9, .45]]) opts.solid(ISLE.x + x, ISLE.z + z, r);
 
   // Art: the island is dressed from its world spec with the meadow kit. The
   // greybox stays until the kit arrives (and remains the fallback). Hedge

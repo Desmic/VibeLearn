@@ -61,6 +61,19 @@ t('ngram: let it finish takes its favourite each time and stops when told', ng.c
 t('ngram: it suggests nothing after a word it never read anything after', ng.suggest(['zebra']).length === 0);
 const ng3 = createNgram(3); ng3.read('a long way. the long bridge.');
 t('ngram: a bigger n reads two words back, and falls back to one', ng3.suggest(['the', 'long'])[0].word === 'bridge' && ng3.suggest(['so', 'long'])[0].word === 'way');
+// kit/nav.ts: a way on foot round walls; the arrow faces the way, not the goal through a wall
+const { findPath, wayPoint, clearLine } = await kit('nav.js');
+// a room 10 m square with a wall across the middle (z 0) open only at its east end (x > 3)
+const room = (x, z) => Math.abs(x) < 5 && Math.abs(z) < 5 && !(Math.abs(z) < .3 && x < 3);
+const way = findPath(room, [-3, -3], [-3, 3]);
+t('nav: a clear line is walked straight', (p => p.length === 1 && p[0][0] === 2 && p[0][1] === -2)(findPath(room, [-3, -2], [2, -2])));
+t('nav: a wall in the way is walked round, through the gap', !!way && way.some(p => p[0] > 2.8 && Math.abs(p[1]) < 1) && way.at(-1)[0] === -3 && way.at(-1)[1] === 3, JSON.stringify(way));
+t('nav: every leg of the way is clear', !!way && [[-3, -3], ...way].every((p, i, a) => i === 0 || clearLine(room, a[i - 1], p)));
+const wp = wayPoint(room, [-3, -3], [-3, 3]);
+t('nav: the way to face points at the gap, not at the goal through the wall', wp[0] > 2, JSON.stringify(wp));
+const shut = (x, z) => Math.abs(x) < 5 && Math.abs(z) < 5 && Math.abs(z) > .3;
+t('nav: an unreachable goal gives the nearest reachable spot', (p => !!p && Math.abs(p.at(-1)[1]) < 1.2 && p.at(-1)[1] < 0)(findPath(shut, [0, -3], [0, 3])));
+t('nav: standing nowhere gives no way', findPath(room, [20, 20], [0, 0]) === null);
 R.write(null);
 console.log(`\n${fails} failures`);
 process.exit(fails ? 1 : 0);

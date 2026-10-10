@@ -667,3 +667,24 @@ they need attributing before the next fix (the word hunt and the isle are the li
 who want real depth and fun, a place to grow, not 30-somethings. Runs 1–18 used testers in their
 late twenties to forties. The personas are now 19–22 (a new one, `student`, added). Scores from
 runs 17–18 on are not strictly comparable with what comes next.
+
+**Movement and camera, after runs 17–18 (10 Oct, Desmic: "start on 1"):** measured first, fixed,
+measured again (`tools/camprobe.mjs` cases E–G, `tools/reachprobe.mjs` strip scan, `kittest` nav).
+
+- **Where the self-turns came from.** The game now logs why the camera starts each turn of its own
+  (`__vlCamLog`: a new goal off screen, or the goal arrow), and the play server records it per step.
+  Replaying run 17 showed the glances were one per new goal plus the arrow taps: run 17 simply went
+  further (more goals) than run 15.
+- **"Turn toward the goal pointed at a glass wall".** The arrow, and the glance at a new goal, now
+  face the way to go on foot (a path round walls, `kit/nav.ts`), not the goal through a wall. With
+  Mira behind the conservatory: 6.2 m closer after the tap and 2.5 s of stick, against 4.7 m
+  sliding along the wall before.
+- **Tap-to-walk "sent me to odd places".** Two causes. A tap now walks a path round walls instead of
+  a straight line into them. And on the raised Loom Isle the tap met a ground plane five metres below
+  the isle: a tap 3 m ahead sent Zip 10 m off; now 0.3 m.
+- **"A dithered mess".** Pressed against a wall, the camera now rises 1.3 m over Zip (was 0.55)
+  and looks down. Across town (every walkable spot on a 1.5 m grid, eight headings) Zip was faded
+  in 10.8% of views; now 5.4%.
+- **Wedged.** A scan for body-wide strips found three more along the town's east edge (behind the
+  building blocks) and three gaps between Blossom Isle's edge trees and its rim. All closed; the
+  scan is now a check.

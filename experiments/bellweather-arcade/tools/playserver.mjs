@@ -103,6 +103,8 @@ async function observe() {
       at: (() => { try { const p = window.__arcade?.snapshot?.().position; return p ? p.map(v => +v.toFixed(2)) : null; } catch { return null; } })(),
       // which way the camera looks (degrees), to measure turns the player didn't make
       // what turned it by itself (cumulative radians by cause, and whether a directed shot is on)
+      // why the camera began each turn of its own since the last look (the game's __vlCamLog, if it keeps one)
+      camLog: (() => { try { const l = window.__vlCamLog ?? [], n = window.__ptCamSeen ?? 0; window.__ptCamSeen = l.length; return l.slice(n); } catch { return []; } })(),
       camWhy: (() => { try { const q = window.__arcade?.snapshot?.(); return q?.camTurn ? { ...q.camTurn, shot: !!q.shot } : null; } catch { return null; } })(),
       cam: (() => { try { const q = window.__arcade?.snapshot?.(); return q?.camera && q.position ? Math.round(Math.atan2(q.camera[0] - q.position[0], q.camera[2] - q.position[2]) * 180 / Math.PI) : null; } catch { return null; } })(),
       // everything written on the screen, whatever the game calls it (speech bubbles, counters, signs):

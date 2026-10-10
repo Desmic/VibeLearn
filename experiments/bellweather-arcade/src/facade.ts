@@ -124,7 +124,10 @@ export async function buildWorld(scene:T.Scene){
     // the dead-end strip between the conservatory's east wall and the town edge, by Mira's tree: a
     // body-wide alley with one way in, where the camera pins against the wall and every push turns
     // the view (Desmic watched Claude play by computer use, 9 Oct: stuck there about four minutes)
-    blockers.push({minX:7.6,maxX:9.4,minZ:-12.2,maxZ:-8.45});}
+    blockers.push({minX:7.6,maxX:9.4,minZ:-12.2,maxZ:-8.45});
+    // two more body-wide strips along the same edge, behind the building blocks to the south (found by a
+    // narrow-passage scan, 10 Oct): through-ways no path needs, where the camera pins and a push wedges
+    blockers.push({minX:7.9,maxX:9.4,minZ:-6.5,maxZ:-1.8},{minX:7.9,maxX:9.4,minZ:2.6,maxZ:4.6},{minX:5.2,maxX:9.4,minZ:4.4,maxZ:6.2});}
   else {
   box(-5.65,4.15,-3.95,7.2,8.1,4.3,cream,true,.48);
   box(-5.65,.35,-1.74,7.1,.46,.4,navy,true,.08);

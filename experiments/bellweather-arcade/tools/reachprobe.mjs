@@ -43,4 +43,24 @@ await probe('relay', 'relay');
 await h.open('&title=0&beat=to-loom'); await page.waitForTimeout(2500);
 await h.pose(-3.6, 55.2); await h.act('Board'); await card('Onward'); await page.waitForTimeout(2500);
 await probe('loom', 'Word Loom');
+
+// body-wide strips (one step across, longer than 1.2 m): the camera pins in them and a push wedges
+// (run 17, and Claude stuck four minutes in one by Mira's tree). Scanned on a 0.2 m grid.
+const strips = async (name, extra, box) => {
+  await h.open(extra); await page.waitForTimeout(2000);
+  const r = await page.evaluate(([x0, x1, z0, z1]) => {
+    const c = .2, W = Math.round((x1 - x0) / c), H = Math.round((z1 - z0) / c), ok = new Uint8Array(W * H);
+    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) ok[i + j * W] = window.__arcade.walkable(x0 + i * c, z0 + j * c) ? 1 : 0;
+    const run = (i, j, di, dj) => { let n = 0; for (let k = 1; k < 40; k++) { const a = i + di * k, b = j + dj * k; if (a < 0 || b < 0 || a >= W || b >= H || !ok[a + b * W]) break; n++; } return n; };
+    const nar = new Uint8Array(W * H);
+    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) if (ok[i + j * W]) { const wx = (1 + run(i, j, 1, 0) + run(i, j, -1, 0)) * c, wz = (1 + run(i, j, 0, 1) + run(i, j, 0, -1)) * c; if (Math.min(wx, wz) <= .6 && Math.max(wx, wz) > .6) nar[i + j * W] = 1; }
+    const seen = new Uint8Array(W * H), out = [];
+    for (let s0 = 0; s0 < W * H; s0++) if (nar[s0] && !seen[s0]) { const st = [s0], cells = []; seen[s0] = 1; while (st.length) { const q = st.pop(); cells.push(q); const i = q % W, j = Math.floor(q / W); for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const ii = i + a, jj = j + b; if (ii < 0 || jj < 0 || ii >= W || jj >= H) continue; const n = ii + jj * W; if (nar[n] && !seen[n]) { seen[n] = 1; st.push(n); } } }
+      if (cells.length > 6) out.push(`${cells.length * c * 1}m near (${(x0 + (cells[0] % W) * c).toFixed(1)}, ${(z0 + Math.floor(cells[0] / W) * c).toFixed(1)})`); }
+    return out;
+  }, box);
+  h.check(`${name}: no body-wide strips to get wedged in`, !r.length, r.join('; '), 'fail', 'world');
+};
+await strips('town', '&title=0&beat=skiff', [-9, 9, -12, 10]);
+await strips('Blossom Isle', '&title=0&beat=gate-open', [-10, 10, 38, 58]);
 await h.finish();

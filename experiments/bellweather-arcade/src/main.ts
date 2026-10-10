@@ -21,6 +21,7 @@ import { buildStory } from './story';
 import { runBench } from './kit/bench';
 const BENCH_BUILD='current';
 import { createJoystick, type Joystick } from './kit/joystick';
+import { findPath, wayPoint } from './kit/nav';
 import './kit/input-mode';
 import { createVoice } from './kit/voice';
 import { FIRST_WORDS_CAST, FIRST_WORDS_SPOKEN, FIRST_WORDS_DIRECTION } from './worlds/first-words-voice';
@@ -153,7 +154,9 @@ let yaw=0,pitch=arrivalPitch,zoom=arrivalZoom,facadeMoveYaw=0,last=performance.n
 const keys=new Set<string>();const held=new Set<string>();let stick:Joystick|null=null,stickSpeed=1;const desired=new T.Vector3(),look=new T.Vector3(),cameraDelta=new T.Vector3(),ray=new T.Raycaster();
 const cameraBoxHit=new T.Vector3(),cameraCandidates:T.Object3D[]=[];
 const cameraMetrics={updates:0,updateMs:0,queries:0,queryMs:0,searches:0,alternatives:0};
-let camDist=0,camOver=0;const CAM_OVER=.95;const camDir=new T.Vector3(),camSide=new T.Vector3(),camOrigin=new T.Vector3(),camLift=new T.Vector3();
+let camDist=0,camOver=0;const CAM_OVER=.95;// squeezed against a wall, the camera rises this far over Zip and looks down (was .55: Zip filled the screen as a
+// dither, "a dithered mess", run 17; tools/camprobe F: Zip faded in 10.8% of town spots and views, 5.4% at 1.3)
+const SQUEEZE_LIFT=1.3;const camDir=new T.Vector3(),camSide=new T.Vector3(),camOrigin=new T.Vector3(),camLift=new T.Vector3();
 const cacheOrbit=new URLSearchParams(location.search).get('cameraCache')!=='off';
 const orbitCache={valid:false,position:new T.Vector3(),yaw:NaN,pitch:NaN,zoom:NaN,geometryRevision:-1,selected:new T.Vector3(),available:0};
 // The current study's camera solids are static. Any future runtime geometry
@@ -203,6 +206,9 @@ function camClearAt(a:number){camOrigin.copy(zip.position).y+=1.5;cameraDelta.se
 let glanceFrom=new T.Vector3(1e9,0,0),glanceT=0,glanceYaw=0,glanceGoal='';
 // how far the camera has turned by itself, by cause, in radians (play-tests attribute turns the player didn't make)
 const camTurn={glance:0,whisker:0,walk:0,resume:0};
+// why the camera started a turn of its own (a test hook: the play server and probes read it)
+const camLogA:{t:number,why:string,[k:string]:unknown}[]=[];(window as any).__vlCamLog=camLogA;
+function camLog(why:string,o:Record<string,unknown>={}){camLogA.push({t:+elapsed.toFixed(2),why,yaw:+yaw.toFixed(2),...o});if(camLogA.length>400)camLogA.shift()}
 // the whiskers may turn the camera this far (radians) per squeeze, then it stops and just pulls in close; it recovers slowly
 const WHISKER_MAX=.6;let whiskerSpent=0;
 // a goal already in view needs no glance (runs 15–16: the camera turned to each new goal even
@@ -211,7 +217,7 @@ const onScreenV=new T.Vector3();function onScreen(b:T.Vector3){onScreenV.copy(b)
 function glanceAtGoal(dt:number){
   const b=guide?.beaconAt;if(!b||story?.frozen||title?.active||ridePos){glanceT=0;return}
   // only for a new goal (not a beacon that follows a moving target); counts like "(1 of 3)" don't make it new
-  const gt=(guide?.goalText??'').replace(/\(.*\)/,'');if(gt!==glanceGoal&&b.distanceToSquared(glanceFrom)>4){glanceGoal=gt;glanceFrom.copy(b);const dx=b.x-zip.position.x,dz=b.z-zip.position.z;if(Math.hypot(dx,dz)>4&&!onScreen(b)){glanceYaw=Math.atan2(-dx,-dz);glanceT=1.4}}
+  const gt=(guide?.goalText??'').replace(/\(.*\)/,'');if(gt!==glanceGoal&&b.distanceToSquared(glanceFrom)>4){camLog('goal',{goal:gt,was:glanceGoal,on:onScreen(b)});glanceGoal=gt;glanceFrom.copy(b);if(Math.hypot(b.x-zip.position.x,b.z-zip.position.z)>4&&!onScreen(b)){const w=facadeStudy?wayPoint(walkXZ,[zip.position.x,zip.position.z],[b.x,b.z]):[b.x,b.z];glanceYaw=Math.atan2(-(w[0]-zip.position.x),-(w[1]-zip.position.z));glanceT=1.4}}
   if(glanceT>0){if(dragging){glanceT=0;return}glanceT-=dt;let d=((glanceYaw-yaw+Math.PI*3)%(Math.PI*2))-Math.PI;yaw+=d*Math.min(1,dt*2.2);camTurn.glance+=Math.abs(d*Math.min(1,dt*2.2));facadeMoveYaw=yaw}
 }
 // test hook: a fixed camera for look-dev shots (__arcade.frame)
@@ -285,7 +291,7 @@ function cameraUpdateInner(dt:number){if(camOverride){camera.position.copy(camOv
     if(tight>.35&&camDist<1.8&&!dragging&&moveAmount>0&&!(story?.shot??utterLab?.shot)){const pinned=true;let best=yaw,bestClear=camClearAt(yaw)+.6;for(const d of [-.45,.45,-.9,.9]){const c=camClearAt(yaw+d)-Math.abs(d)*.25;if(c>bestClear){bestClear=c;best=yaw+d}}if(best!==yaw){let dw=(best-yaw)*Math.min(1,dt*(pinned?3.2:1.6));dw=Math.sign(dw)*Math.min(Math.abs(dw),Math.max(0,WHISKER_MAX-whiskerSpent));whiskerSpent+=Math.abs(dw);yaw+=dw;camTurn.whisker+=Math.abs(dw);facadeMoveYaw=yaw}}else whiskerSpent=Math.max(0,whiskerSpent-dt*.25)
     // pressed right up against Zip: rise over him and look down, rather than fill the screen with him
     const squeeze=1-T.MathUtils.smoothstep(camDist,.9,1.8);
-    if(tight>0){camLift.set(0,tight*.55,0).add(desired);cameraDelta.subVectors(camLift,pivot);const up=firstCameraHit(pivot,cameraDelta,.15);if(!up||up.distance>cameraDelta.length())desired.copy(camLift)}
+    if(tight>0){camLift.set(0,tight*SQUEEZE_LIFT,0).add(desired);cameraDelta.subVectors(camLift,pivot);const up=firstCameraHit(pivot,cameraDelta,.15);if(!up||up.distance>cameraDelta.length())desired.copy(camLift)}
     camera.position.lerp(desired,dt>=.5?1:Math.min(1,dt*12));
     const horizontalX=camera.position.x-zip.position.x,horizontalZ=camera.position.z-zip.position.z;
     if(Math.hypot(horizontalX,horizontalZ)>.5)facadeMoveYaw=Math.atan2(horizontalX,horizontalZ);
@@ -314,7 +320,7 @@ function cameraUpdateInner(dt:number){if(camOverride){camera.position.copy(camOv
 let slideSide=1;const SLIDE=[.3,.6,.9,1.2,1.45];
 function slideStep(dx:number,dz:number,step:number){const p=new T.Vector3();for(const a of SLIDE)for(const sgn of [slideSide,-slideSide]){const r=a*sgn,c=Math.cos(r),s=Math.sin(r),k=step*c;p.copy(zip.position);p.x+=(dx*c-dz*s)*k;p.z+=(dx*s+dz*c)*k;if(walkable(p)){zip.position.copy(p);slideSide=sgn;return}}
   p.copy(zip.position);p.x+=dx*step;if(walkable(p)){zip.position.copy(p);return}p.copy(zip.position);p.z+=dz*step;if(walkable(p))zip.position.copy(p)}
-function move(dt:number){if(ridePos){zip.position.copy(ridePos);zip.rotation.y=rideYaw;contact.visible=false;moveAmount=0;return}contact.visible=true;if(story?.frozen||title?.active){walkTarget=null;walkMark.visible=false;keys.clear();held.clear();guideTargetT=null;}let dx=Number(keys.has('KeyD')||keys.has('ArrowRight')||held.has('right'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')||held.has('left')),dz=Number(keys.has('KeyS')||keys.has('ArrowDown')||held.has('back'))-Number(keys.has('KeyW')||keys.has('ArrowUp')||held.has('forward'));stickSpeed=keys.has('Shift')?.45:1;/* keyboard: Zip jogs; hold Shift to walk */const sv=stick?.vector;if(sv&&!story?.frozen&&!title?.active&&!dx&&!dz&&(sv.x||sv.y)){dx=sv.x;dz=-sv.y;{const m=Math.hypot(sv.x,sv.y);stickSpeed=m>=.55?1:Math.max(.4,m/.55*.6)}/* past half-way the stick is full speed (Zip's usual jog); a gentle push walks */walkTarget=null;walkMark.visible=false;guideTargetT=null}if(guideTargetT!==null){const targetT=guideTargetT,n=nearestRoute(zip.position);const delta=route.getPoint(T.MathUtils.clamp(n.t+Math.sign(targetT-n.t)*.028,0,1)).sub(zip.position);dx=delta.x;dz=delta.z;if(zip.position.distanceTo(route.getPoint(targetT))<.38){guideTargetT=null;dx=dz=0;announce(facadeStudy?(targetT===0?'Returned to the conservatory entrance.':'Reached the inner courtyard.'):(targetT===0?'Returned to the garden arcade.':'Reached the overlook pavilion.'))}}else if(walkTarget&&!dx&&!dz){const v=walkTarget.clone().sub(zip.position);if(Math.hypot(v.x,v.z)<.3){walkTarget=null;walkMark.visible=false}else{dx=v.x;dz=v.z;if(!dragging){const want=Math.atan2(-dx,-dz),dY=((want-yaw+Math.PI*3)%(Math.PI*2))-Math.PI,next=yaw+dY*Math.min(1,dt*1.1);if(!facadeStudy||camClearAt(next)>=Math.min(2.6,camClearAt(yaw)-.02)){camTurn.walk+=Math.abs(next-yaw);yaw=next}}if(walkDetour){const c=Math.cos(walkDetour),s=Math.sin(walkDetour),x=dx*c-dz*s;dz=dx*s+dz*c;dx=x}}}else{if(walkTarget){walkTarget=null;walkMark.visible=false}const bearing=facadeStudy?facadeMoveYaw:yaw,x=dx*Math.cos(bearing)+dz*Math.sin(bearing);dz=-dx*Math.sin(bearing)+dz*Math.cos(bearing);dx=x}const length=Math.hypot(dx,dz);moveAmount=0;if(length>.05){dx/=length;dz/=length;const old=zip.position.clone(),dist=3.15*dt*stickSpeed,n=Math.max(1,Math.ceil(dist/.08));for(let i=0;i<n;i++){const p=zip.position.clone().add(new T.Vector3(dx*dist/n,0,dz*dist/n));if(walkable(p))zip.position.copy(p);else slideStep(dx,dz,dist/n)}const ang=Math.atan2(-dx,-dz);let a=(ang-zip.rotation.y+Math.PI*3)%(Math.PI*2)-Math.PI;zip.rotation.y+=a*Math.min(1,dt*10);moveAmount=zip.position.distanceTo(old);if(!walkTarget&&guideTargetT===null)bump.push(dt,zip.position,dx,dz,moveAmount/dist);if(walkTarget){const slow=moveAmount<dist*.35;walkStuck=slow?walkStuck+dt:Math.max(0,walkStuck-dt*.5);walkDetourT-=dt;if(slow&&walkDetourT<=0){walkDetour=walkDetour>0?-1.1:walkDetour<0?0:1.1;walkDetourT=.45}else if(!slow&&walkDetourT<=0)walkDetour=0;if(walkStuck>1.5){walkTarget=null;walkMark.visible=false;walkStuck=0;walkDetour=0}}if(moveAmount>0){get('hint').style.opacity='0';updateLocation()}}bump.tick(dt);contact.position.set(zip.position.x,(contactY0+groundLift),zip.position.z);if(!reduced&&!facadeStudy)zip.position.y=(standingY0+groundLift)+Math.sin(elapsed*12)*Math.min(.035,moveAmount*.3);else zip.position.y=(standingY0+groundLift)}
+function move(dt:number){if(ridePos){zip.position.copy(ridePos);zip.rotation.y=rideYaw;contact.visible=false;moveAmount=0;return}contact.visible=true;if(story?.frozen||title?.active){walkTarget=null;walkMark.visible=false;keys.clear();held.clear();guideTargetT=null;}let dx=Number(keys.has('KeyD')||keys.has('ArrowRight')||held.has('right'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')||held.has('left')),dz=Number(keys.has('KeyS')||keys.has('ArrowDown')||held.has('back'))-Number(keys.has('KeyW')||keys.has('ArrowUp')||held.has('forward'));stickSpeed=keys.has('Shift')?.45:1;/* keyboard: Zip jogs; hold Shift to walk */const sv=stick?.vector;if(sv&&!story?.frozen&&!title?.active&&!dx&&!dz&&(sv.x||sv.y)){dx=sv.x;dz=-sv.y;{const m=Math.hypot(sv.x,sv.y);stickSpeed=m>=.55?1:Math.max(.4,m/.55*.6)}/* past half-way the stick is full speed (Zip's usual jog); a gentle push walks */walkTarget=null;walkMark.visible=false;guideTargetT=null}if(guideTargetT!==null){const targetT=guideTargetT,n=nearestRoute(zip.position);const delta=route.getPoint(T.MathUtils.clamp(n.t+Math.sign(targetT-n.t)*.028,0,1)).sub(zip.position);dx=delta.x;dz=delta.z;if(zip.position.distanceTo(route.getPoint(targetT))<.38){guideTargetT=null;dx=dz=0;announce(facadeStudy?(targetT===0?'Returned to the conservatory entrance.':'Reached the inner courtyard.'):(targetT===0?'Returned to the garden arcade.':'Reached the overlook pavilion.'))}}else if(walkTarget&&!dx&&!dz){const v=walkTarget.clone().sub(zip.position);if(Math.hypot(v.x,v.z)<.3&&walkPath.length){walkTarget=walkPath.shift()!;v.copy(walkTarget).sub(zip.position)}if(Math.hypot(v.x,v.z)<.3){walkTarget=null;walkPath=[];walkMark.visible=false}else{dx=v.x;dz=v.z;if(!dragging){const want=Math.atan2(-dx,-dz),dY=((want-yaw+Math.PI*3)%(Math.PI*2))-Math.PI,next=yaw+dY*Math.min(1,dt*1.1);if(!facadeStudy||camClearAt(next)>=Math.min(2.6,camClearAt(yaw)-.02)){camTurn.walk+=Math.abs(next-yaw);yaw=next}}if(walkDetour){const c=Math.cos(walkDetour),s=Math.sin(walkDetour),x=dx*c-dz*s;dz=dx*s+dz*c;dx=x}}}else{if(walkTarget){walkTarget=null;walkMark.visible=false}const bearing=facadeStudy?facadeMoveYaw:yaw,x=dx*Math.cos(bearing)+dz*Math.sin(bearing);dz=-dx*Math.sin(bearing)+dz*Math.cos(bearing);dx=x}const length=Math.hypot(dx,dz);moveAmount=0;if(length>.05){dx/=length;dz/=length;const old=zip.position.clone(),dist=3.15*dt*stickSpeed,n=Math.max(1,Math.ceil(dist/.08));for(let i=0;i<n;i++){const p=zip.position.clone().add(new T.Vector3(dx*dist/n,0,dz*dist/n));if(walkable(p))zip.position.copy(p);else slideStep(dx,dz,dist/n)}const ang=Math.atan2(-dx,-dz);let a=(ang-zip.rotation.y+Math.PI*3)%(Math.PI*2)-Math.PI;zip.rotation.y+=a*Math.min(1,dt*10);moveAmount=zip.position.distanceTo(old);if(!walkTarget&&guideTargetT===null)bump.push(dt,zip.position,dx,dz,moveAmount/dist);if(walkTarget){const slow=moveAmount<dist*.35;walkStuck=slow?walkStuck+dt:Math.max(0,walkStuck-dt*.5);walkDetourT-=dt;if(slow&&walkDetourT<=0){walkDetour=walkDetour>0?-1.1:walkDetour<0?0:1.1;walkDetourT=.45}else if(!slow&&walkDetourT<=0)walkDetour=0;if(walkStuck>1.5){walkTarget=null;walkMark.visible=false;walkStuck=0;walkDetour=0}}if(moveAmount>0){get('hint').style.opacity='0';updateLocation()}}bump.tick(dt);contact.position.set(zip.position.x,(contactY0+groundLift),zip.position.z);if(!reduced&&!facadeStudy)zip.position.y=(standingY0+groundLift)+Math.sin(elapsed*12)*Math.min(.035,moveAmount*.3);else zip.position.y=(standingY0+groundLift)}
 
 const lastShadowTransform=new T.Vector4(Infinity,Infinity,Infinity,Infinity);
 if(paintedStudy){
@@ -331,7 +337,7 @@ const storyOn=paintedStudy&&paintedParams.get('puzzle')!=='0'&&paintedParams.get
 const appHost=worldElement.parentElement!;
 const guide=storyOn?buildGuide(scene,appHost,camera,renderer.domElement):null;lifeOverlay=guide?.overlay??null;
 // tapping the goal arrow turns the camera to the goal
-guide?.onPoint(()=>{const b=guide?.beaconAt;if(!b)return;const dx=b.x-zip.position.x,dz=b.z-zip.position.z;if(Math.hypot(dx,dz)<.5)return;glanceYaw=Math.atan2(-dx,-dz);glanceT=1.4;pitch=arrivalPitch});   // and level the view (run 14: it could leave the camera looking at the floor)
+guide?.onPoint(()=>{const b=guide?.beaconAt;if(!b)return;const w=facadeStudy?wayPoint(walkXZ,[zip.position.x,zip.position.z],[b.x,b.z]):[b.x,b.z];camLog('arrow',{way:w});const dx=w[0]-zip.position.x,dz=w[1]-zip.position.z;if(Math.hypot(dx,dz)<.5)return;glanceYaw=Math.atan2(-dx,-dz);glanceT=1.4;pitch=arrivalPitch});   // and level the view (run 14: it could leave the camera looking at the floor)
 // phones move with a floating thumb stick (lower left); keyboards with WASD; both look by dragging
 stick=createJoystick(appHost,{onUse:()=>get('hint').style.opacity='0'});
 // voiced lines: clips made ahead of time (tools/voice.mjs); a line without one stays a silent bubble
@@ -342,9 +348,14 @@ if(guide&&paintedParams.get('voices')!=='0'){const voice=createVoice(FIRST_WORDS
   const play=voice.play;voice.play=(sp,tx,o)=>{scape?.duck(voice.duration(sp,tx)+.4);return play(sp,tx,o)}}
 // Tap to walk: tap the ground and Zip walks there (phones, and anyone who
 // prefers pointing to arrows). Lowest priority: puzzle taps are checked first.
-let walkTarget:T.Vector3|null=null,walkStuck=0,walkDetour=0,walkDetourT=0;
+let walkTarget:T.Vector3|null=null,walkPath:T.Vector3[]=[],walkStuck=0,walkDetour=0,walkDetourT=0;
+const walkV=new T.Vector3(),walkXZ=(x:number,z:number)=>walkable(walkV.set(x,zip.position.y,z));
 const walkMark=new T.Mesh(new T.RingGeometry(.2,.3,28).rotateX(-Math.PI/2),new T.MeshBasicMaterial({color:'#ffd36b',transparent:true,opacity:.9,depthWrite:false}));walkMark.visible=false;walkMark.renderOrder=3;scene.add(walkMark);
-guide?.onTap(r=>{if(story?.frozen||title?.active||ridePos||paused)return false;const d=r.ray.direction,o=r.ray.origin;if(d.y>-.02)return false;const p=o.clone().addScaledVector(d,(.13-o.y)/d.y);if(p.distanceTo(zip.position)>30)return false;walkTarget=p;walkStuck=0;walkDetour=0;walkDetourT=0;walkMark.position.set(p.x,.16,p.z);walkMark.visible=true;return true});
+guide?.onTap(r=>{if(story?.frozen||title?.active||ridePos||paused)return false;const d=r.ray.direction,o=r.ray.origin;if(d.y>-.02)return false;const gy=.13+groundLift,p=o.clone().addScaledVector(d,(gy-o.y)/d.y);if(p.distanceTo(zip.position)>30)return false;
+  // the way there round walls, not a straight line into them (runs 15-17: "sent me to odd places"); the tap
+  // met the ground at its real height (on a raised isle it used to meet a plane five metres below)
+  const way=findPath(walkXZ,[zip.position.x,zip.position.z],[p.x,p.z]);if(way){walkPath=way.map(q=>new T.Vector3(q[0],gy,q[1]));p.copy(walkPath[walkPath.length-1])}else walkPath=[p.clone()];
+  walkTarget=walkPath.shift()!;walkStuck=0;walkDetour=0;walkDetourT=0;walkMark.position.set(p.x,gy+.03,p.z);walkMark.visible=true;return true});
 const sunBase=sun.intensity,ambBase=ambient.intensity;
 let ridePos:T.Vector3|null=null,rideYaw=0,townHidden=false;let title:ReturnType<typeof buildTitle>|null=null;
 const labId=paintedParams.get('lab');   // a test area off the story path (lab=utter)
@@ -469,7 +480,7 @@ Object.defineProperty(window,'__arcade',{value:{
   simulate:(seconds:number,input:{keys?:string[],walkTo?:[number,number]}={})=>{
     if(paused)return {paused:true};
     for(const k of input.keys??[])keys.add(k);
-    if(input.walkTo){walkTarget=new T.Vector3(input.walkTo[0],.13,input.walkTo[1]);walkStuck=0;walkDetour=0;walkDetourT=0}
+    if(input.walkTo){walkPath=[];walkTarget=new T.Vector3(input.walkTo[0],.13,input.walkTo[1]);walkStuck=0;walkDetour=0;walkDetourT=0}
     const n=Math.max(1,Math.round(seconds/.05));
     for(let i=0;i<n&&!paused;i++){const dt=.05;elapsed+=dt;move(dt);const sp=moveAmount/dt;zipRig?.update(dt,sp,reduced);story?.tick(dt);utterLab?.tick(dt);guide?.tick(dt,sp,elapsed);cameraUpdate(dt)}
     for(const k of input.keys??[])keys.delete(k);

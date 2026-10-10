@@ -14,7 +14,7 @@ import { harness, arg } from './harness.mjs';
 
 const h = await harness({ title: 'Move probe', outDefault: '/tmp/moveprobe', tool: 'moveprobe', lane: 'world' });
 const { page, check } = h;
-await h.fresh(arg('start', ''));
+await h.fresh(arg('start', '&title=0'));   // past the title screen by default (with none, nothing moved: the stick was on the title)
 const snap = () => page.evaluate(() => { const s = window.__arcade.snapshot(); return { p: s.position, c: s.camera, fade: s.zipFade ?? null }; });
 const camYaw = s => Math.atan2(s.c[0] - s.p[0], s.c[2] - s.p[2]);
 const deg = r => Math.round(r * 180 / Math.PI);
