@@ -613,3 +613,52 @@ server as the blind tester; use computer use now and then as a short real-PC che
 9. *Pim's title line:* not a gap. The game isn't finished, and the title screen's jokes are about the
    real world (the AI race, tech, humanity), not a setup to pay off. Interviewers shouldn't count
    it as one.
+
+## Blind runs 17 and 18: after the fixes (10 Oct 2026, build v86)
+
+Same setup as runs 15 and 16 (text-and-buttons observation, same personas), so the scores compare.
+
+| Run | What | Persona | Steps | Reached | Score |
+| --- | --- | --- | --- | --- | --- |
+| 17 | main game | explorer | 161 of 200 | Loom Isle done ("That's Stop 2 for now") | **7/10** (was 6), yes: "I genuinely want to know where Mira is" |
+| 18 | next-word lab | commuter | 83 of 120 | all four places, lab done | 6/10 (same), yes, "probably one more session" |
+
+**Camera turns the player didn't make (30°+), by cause:**
+
+| Run | shot | glance | goal arrow | dialogue | whisker | walk | resume | other |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 15 (v84) | 9 | 7 | 7 | 1 | 1 | 1 | – | 3 |
+| 17 (v86) | 15 | 19 | 1 | 1 | 1 | 2 | 1 | 2 |
+| 16 (v84, lab) | 5 | 5 | 4 | – | – | – | – | – |
+| 18 (v86, lab) | 0 | 4 | 6 | – | – | 1 | – | – |
+
+The lab's speak shots are gone (5 to 0). In the main game the glances rose (7 to 19) on a longer run;
+they need attributing before the next fix (the word hunt and the isle are the likely sources).
+
+**Run 17 (main game):**
+- **Landed unprompted:** every learning item and every story item. The Loom ("short isn't the same
+  as small"), the relay's conflicting notes ("made me actually decide who to trust"), the engine loop
+  ("watching the guess turn into input… land[ed] better than an explanation would have"). The
+  station-reach fixes held: no stall at the Gate, relay or Loom.
+- **Held it at 7:** "most of the puzzles were over in a tap or two, with one obvious right answer"
+  (the relay "felt more like confirming"; the Gate gave three stars with one note), and "a lot of my
+  time went to fighting the camera". "If the puzzles had one real 'hmm' moment each, and moving around
+  felt smooth, it'd be an 8 or 9."
+- **Stuck:** the word hunt (steps 45–62: "couldn't tell when tapping a floating word works and when
+  you need to be close"); the notes (steps 108–131: a board gave no prompt, the arrow went once all
+  were read, "lost track of which boards I'd already read").
+- **Asked for:** failures that play out (the poster opening the Gate onto nothing, missing words at
+  the relay giving gibberish); the flight's rings and drones explained before the flight; the
+  engine's percentages readable on a phone.
+- **Small:** the stars banner and "Brilliant!" not tappable at steps 97, 135 and 144; speech bubbles
+  stacking; "(The bridge fell in the storm.)" read as Zip's aside, not part of the note.
+
+**Run 18 (lab):**
+- **Landed unprompted:** make, reads, next, frequency, more, steer, and the whole idea in their own
+  words ("basically… how a predictive-text / language model picks the next word").
+- **Missed:** the top-3 rule (read as "seen once", then "relative to the top", even with ties on one
+  row); the wide gap's join ("it went right past me": they took "long rope" because it was what the
+  song gave); habit (reached "half a shrug, half a test", and credited the stone, not the engine).
+- **Held it at 6:** the camera, signs out of reach ignoring taps silently, and the lighthouse wander
+  (steps 62–75: "that's where I'd have locked the phone"). Zip's "What if it heard me say mine?" came
+  after they had already said it.
