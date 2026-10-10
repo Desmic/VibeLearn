@@ -14,7 +14,7 @@ suspect are wrong", "was any failure funny?" and "how did the speaking interface
 verdicts were partly my own words coming back. The first blind run of the same test area showed
 how much (below).
 
-1. **Start a session:** `node tools/playserver.mjs --input touch --persona commuter|explorer|rarely
+1. **Start a session:** `node tools/playserver.mjs --input touch --persona commuter|explorer|rarely|student
    [--intent utter --start '&lab=utter'] [--max 80] [--out <a neutral folder>]`.
 2. **The tester** (a fresh agent) gets **only** `GET /brief`, verbatim, with nothing added.
    That is `tools/playtest/tester.md` with a persona. It says this is a game they have never
@@ -99,7 +99,7 @@ findings as "check with a person", not as facts.
 
 ## Personas used
 
-Blind personas live in `tools/playtest/personas.json` (commuter, explorer, rarely): who the
+Blind personas live in `tools/playtest/personas.json` (commuter, explorer, rarely, student, all aged 19–22 since 10 Oct: the target audience is early twenties): who the
 tester is, nothing more. The two below were the directed personas used before 5 Oct; the first
 one's "notes every moment of doubt" is exactly the kind of priming the blind brief removes.
 
@@ -662,3 +662,8 @@ they need attributing before the next fix (the word hunt and the isle are the li
 - **Held it at 6:** the camera, signs out of reach ignoring taps silently, and the lighthouse wander
   (steps 62–75: "that's where I'd have locked the phone"). Zip's "What if it heard me say mine?" came
   after they had already said it.
+
+**Personas corrected (10 Oct, Desmic):** the audience is 18+, mainly people in their early twenties
+who want real depth and fun, a place to grow, not 30-somethings. Runs 1–18 used testers in their
+late twenties to forties. The personas are now 19–22 (a new one, `student`, added). Scores from
+runs 17–18 on are not strictly comparable with what comes next.
