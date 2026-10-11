@@ -115,6 +115,20 @@
 .title-chat::after{content:'';position:absolute;top:100%;border:7px solid transparent;border-top-color:#2cff88}
 .title-chat.from-gus::after{left:30%}.title-chat.from-pim::after{right:30%}
 .menu{z-index:30}
+.menu-card{max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain}
+.menu-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:4px 0 10px;padding:3px;background:#e6d6b8;border-radius:11px}
+.menu .menu-tab{margin:0;padding:7px 2px;border:0;border-radius:8px;background:transparent;font-size:14px;color:#3e3326}
+.menu .menu-tab[aria-selected="true"]{background:#1c4972;color:#fff6e6}
+.menu .menu-tab:focus-visible{outline:2px solid #1c4972;outline-offset:2px}
+.menu-panel[hidden]{display:none}
+.menu-panel .gfx{margin-top:0;padding-top:0;border-top:0}
+.menu .menu-group{margin:12px 0 2px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6a5236}
+.menu .menu-group:first-child{margin-top:0}
+.menu .menu-mode{margin:5px 0;padding:7px 10px;text-align:left;background:#efe3cc;line-height:1.25}
+.menu .menu-mode b{display:block;font-size:14px}
+.menu .menu-mode small{display:block;font-size:12px;color:#5d5140}
+.menu .menu-mode[aria-current="true"]{background:#1c4972;border-color:#1c4972;color:#fff6e6}
+.menu .menu-mode[aria-current="true"] small{color:#d8e4ee}
 /* relay console: the relay's own dial and word slots */
 .relay-console,.loom-console{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:min(94vw,420px);padding:12px 16px 14px;border-radius:18px;background:#10263df2;border:2px solid #6fe0c9;color:#e6fff8;box-shadow:0 10px 30px #071c3688,0 0 24px #6fe0c944;z-index:6;animation:vl-pop .2s ease-out}
 .relay-console[hidden],.loom-console[hidden]{display:none}

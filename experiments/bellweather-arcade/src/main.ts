@@ -43,6 +43,8 @@ import { frameGovernor, budget } from './kit/budget';
 import { buildCameraGrid, type CameraGrid } from './camera-grid';
 import { buildPromenade } from './painted-promenade';
 import { quality, saveChoice, autoBenchmark, autoWasMeasured, type Choice } from './quality';
+import { menuTabs, goTo } from './kit/menu-tabs';
+import { PLAY_MODES } from './worlds/play-modes';
 const gfx=quality();
 
 
@@ -452,6 +454,17 @@ if(paintedStudy){
   statsBox.checked=on;statsEl.hidden=!on;
   statsBox.addEventListener('change',()=>{statsEl!.hidden=!statsBox.checked;try{localStorage.setItem('bellweather.stats',statsBox.checked?'1':'0')}catch{}});
 }
+// The menu in tabs (Desmic, 11 Oct): Game (continue, back to the title), Play (jump between the
+// story's chapters and the experiments: worlds/play-modes.ts), Settings (graphics, sound, motion)
+var menu:ReturnType<typeof menuTabs>|null=null;   // (var: pause() may run before this line)
+if(paintedStudy){
+  const card=get('menu').querySelector('.menu-card') as HTMLElement;
+  const toTitle=document.createElement('button');toTitle.id='to-title';toTitle.type='button';toTitle.textContent=story?'Return to title':'Back to the story';
+  toTitle.addEventListener('click',()=>goTo({}));get('resume').after(toTitle);
+  const game=[get('resume'),toTitle,get('recenter'),get('restart')];
+  const settings=[card.querySelector('.gfx'),...[...card.querySelectorAll(':scope > label')]].filter(Boolean) as Element[];
+  menu=menuTabs(card,{game,settings,groups:PLAY_MODES,params:paintedParams});
+}
 function updateStats(now:number){
   if(!statsEl||statsEl.hidden)return;
   statFrames.push(now-statLast);statLast=now;
@@ -470,7 +483,7 @@ let greetUntil=-1,waveBackAt=-1;
 const captureMode=new URLSearchParams(location.search).get('capture')==='1';
 function schedule(){if(captureMode)return;if(!raf&&!paused&&!document.hidden)raf=requestAnimationFrame(tick)}
 
-function pause(v:boolean){paused=v;keys.clear();held.clear();guideTargetT=null;get('controls').inert=v;get('menu').hidden=!v;get('pause').textContent=v?'▶':'Ⅱ';if(v){if(raf)cancelAnimationFrame(raf);raf=0;get('resume').focus()}else{last=performance.now();schedule()}}
+function pause(v:boolean){paused=v;keys.clear();held.clear();guideTargetT=null;get('controls').inert=v;get('menu').hidden=!v;get('pause').textContent=v?'▶':'Ⅱ';if(v){menu?.show('game');if(raf)cancelAnimationFrame(raf);raf=0;get('resume').focus()}else{last=performance.now();schedule()}}
 
 get('pause').addEventListener('click',()=>pause(!paused));get('resume').addEventListener('click',()=>pause(false));get('restart').addEventListener('click',()=>{story?.interrupt();const spot=story?.safeSpot();if(spot==='stay'){pause(false);return}if(spot){zip.position.set(spot[0],(standingY0+groundLift),spot[1]);walkTarget=null;zip.rotation.y=spot[2];yaw=spot[2];pitch=arrivalPitch;zoom=startZoom();pause(false);updateLocation();cameraUpdate(1);render();announce('Returned to the landing.');return}zip.position.copy(arrival).setY((standingY0+groundLift));zip.rotation.y=0;yaw=0;pitch=arrivalPitch;zoom=startZoom();pause(false);updateLocation();cameraUpdate(1);render();announce(facadeStudy?'Returned to the conservatory entrance.':'Returned to the garden arcade.')});get('recenter').addEventListener('click',()=>{yaw=0;pitch=arrivalPitch;zoom=startZoom();cameraUpdate(1);if(!document.hidden)render()});get('reduced').addEventListener('change',e=>{reduced=(e.target as HTMLInputElement).checked})
 // the phone's own reduce-motion setting is the default; the checkbox in the pause menu overrides it
@@ -554,7 +567,7 @@ if(paintedStudy&&gfx.choice==='auto'&&!autoWasMeasured()&&!paintedParams.get('ca
   if(bench.tier!==gfx.tier){const hv=(window as any).__vlVariant;if(hv)location.hash=`${hv}&auto=${bench.tier}`;else{const u=new URL(location.href);u.searchParams.set('auto',bench.tier);location.replace(u.toString())}await new Promise(()=>{});}
 }
 render();get('loading').hidden=true;
-if(story&&!paintedParams.get('beat')&&paintedParams.get('title')!=='0'&&!paintedParams.get('capture')){const saved=save.loadVerified();title=buildTitle({host:appHost,resume:saved?PLACE[saved.at]:null,onContinue:()=>saved&&story.start(saved.at),onStart:()=>{save.clear();story.start()},onGraphics:()=>pause(true),reduced:()=>reduced})}else story?.start();
+if(story&&!paintedParams.get('beat')&&paintedParams.get('title')!=='0'&&!paintedParams.get('capture')){const saved=save.loadVerified();title=buildTitle({host:appHost,resume:saved?PLACE[saved.at]:null,onContinue:()=>saved&&story.start(saved.at),onStart:()=>{save.clear();story.start()},onGraphics:()=>{pause(true);menu?.show('settings')},reduced:()=>reduced})}else story?.start();
 schedule();
 
 // Frame-rate benchmark (kit/bench.ts): `bench=1` visits fixed views and reports fps and frame cost.

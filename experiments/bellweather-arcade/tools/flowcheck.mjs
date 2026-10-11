@@ -9,7 +9,7 @@
 //
 // Writes <out>/report.json, <out>/report.md and screenshots. Exit code 1 when a
 // check fails. Segments: title, meet (Mira + attack), spark, skiff (catch game),
-// flight, isle (satchel, notes, gate), relay, loom (Stop 2), resume (save + Continue), views.
+// flight, isle (satchel, notes, gate), relay, loom (Stop 2), resume (save + Continue), menu (tabs, jumping between ways in), views.
 import { harness } from './harness.mjs';
 
 const h = await harness({ title: 'Flow check', outDefault: 'flowcheck', tool: 'flowcheck', lane: 'flow' });
@@ -241,6 +241,25 @@ await segment('resume', async () => {
   check('title offers a new run', await page.locator('.title-menu button', { hasText: 'Start a new training run' }).isVisible());
   await press(page.locator('.title-menu .primary')); await page.waitForTimeout(3500);
   check('continues on Loom Isle', /Loom Isle/.test(await page.locator('#place').textContent()), await page.locator('#place').textContent());
+});
+
+// the menu: Game · Play · Settings; Play jumps between the story's chapters and the experiments
+await segment('menu', async () => {
+  const loaded = async () => { await page.waitForLoadState('load'); await page.waitForFunction(() => document.getElementById('loading')?.hidden, null, { timeout: 240000 }); await page.waitForTimeout(1500); };
+  await open('&beat=land'); await page.waitForTimeout(1500);
+  await press(page.locator('#pause'));
+  check('the menu opens on its Game tab', await page.locator('#menu-tab-game[aria-selected="true"]').isVisible() && await page.locator('#to-title').isVisible());
+  await press(page.locator('#menu-tab-play'));
+  check('Play lists the story chapters and the experiments', (await page.locator('.menu-mode').count()) >= 10, String(await page.locator('.menu-mode').count()));
+  check('the chapter being played is marked', await page.locator('.menu-mode[data-mode="ch-gate"][aria-current="true"]').isVisible());
+  await shot('menu-play');
+  await press(page.locator('.menu-mode[data-mode="lab-ngram"]')); await loaded();
+  check('a Play entry jumps to that experiment', /lab=ngram/.test(page.url()) && await page.evaluate(() => !!window.__vlUtterLab), page.url());
+  await press(page.locator('#pause')); await press(page.locator('#to-title')); await loaded();
+  check('"Back to the story" reaches the title screen', await page.locator('.title-screen').isVisible() && !/lab=|beat=/.test(page.url()), page.url());
+  await press(page.locator('.title-menu button', { hasText: 'Graphics' }));
+  check('the title\'s Graphics opens the menu on Settings', await page.locator('#menu-tab-settings[aria-selected="true"]').isVisible() && await page.locator('.menu .gfx').isVisible());
+  await shot('menu-settings');
 });
 
 await segment('views', async () => {

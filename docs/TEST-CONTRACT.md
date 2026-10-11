@@ -37,6 +37,7 @@ gate reads (section 7, and `docs/QUALITY-SYSTEM.md`).
 | `.star-row`, `.story-card.ribbon` | stars for a finished station |
 | `.title-menu .primary` | Start / Continue |
 | `#pause`, `#resume`, `#restart` | pause menu |
+| `#menu-tab-game` / `-play` / `-settings`, `#to-title`, `.menu-mode[data-mode=…]` | the menu's tabs; back to the title; a way in from the Play tab (ids in the game's play modes, `kit/menu-tabs.ts`) |
 | `.stick-zone` / `.stick-base` | the floating thumb stick (phones) |
 | `html[data-input=touch|desktop]` | which kind of player the game thinks it has |
 | **`[data-action="<rules action>"]`** on every control that sends a rules action | dialogue choices (`Choice.action`), in-world prompts (`setAction(…, action)`), puzzle chips and buttons. A bot plays any station from its rules by pressing these; nothing else about the puzzle needs to be known |

@@ -82,6 +82,16 @@ t('ngram: a bigger n reads two words back, and falls back to one', ng3.suggest([
   t('pose-hold: starting from the last clip pose, idle never jumps more than 3° a frame', held < 3, held.toFixed(1) + '°');
 }
 
+// kit/menu-tabs.ts: the Play tab marks the way in being played (the most specific match)
+{
+  const { currentMode } = await kit('menu-tabs.js');
+  const G = [{ title: 'a', modes: [{ id: 'main', label: '', set: {} }, { id: 'ch', label: '', set: { beat: 'b' } }, { id: 'old', label: '', set: { beat: 'b', mech: 'm' } }] }, { title: 'x', modes: [{ id: 'lab', label: '', set: { lab: 'l' } }] }];
+  const at = q => currentMode(G, new URLSearchParams(q));
+  t('menu: plain address is the main way in, even with title=0', at('') === 'main' && at('title=0') === 'main');
+  t('menu: a chapter and a variant of it are told apart', at('beat=b') === 'ch' && at('beat=b&mech=m') === 'old');
+  t('menu: an address no way in matches marks none', at('lab=zzz') === null);
+}
+
 // kit/nav.ts: a way on foot round walls; the arrow faces the way, not the goal through a wall
 const { findPath, wayPoint, clearLine } = await kit('nav.js');
 // a room 10 m square with a wall across the middle (z 0) open only at its east end (x > 3)
