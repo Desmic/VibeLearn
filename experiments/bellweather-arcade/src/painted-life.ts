@@ -61,9 +61,11 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
     greeters.push({ who: p, pos: () => p.root.position, lines, voice: TOWN_VOICES[key] ?? 'folk0', cool: 0, timer: -1, spoken: 0, wave: true,
       turn: (target, dt) => { const want = Math.atan2(-(target.x - p.root.position.x), -(target.z - p.root.position.z)); rotateToward(p.root, want, dt * 2.5, home, 1.3); } });
   };
-  // two neighbours talking by the outlook; one taking in the view
-  place(3, -5.4, -11.1, -Math.PI / 2 + .3, 'Talk', 'chatA');
-  place(8, -4.3, -11.0, Math.PI / 2 - .2, 'Talk', 'chatB');
+  // two neighbours talking by the outlook; one taking in the view. (They stood in the one gap of the
+  // walkway along the west rail until 11 Oct, turning it into a dead end: run 19 got out only with
+  // "Return to arrival". Now on the open terrace; reachprobe checks townsfolk never close a way.)
+  place(3, -1.7, -10.9, -Math.PI / 2 + .3, 'Talk', 'chatA');
+  place(8, -0.6, -10.8, Math.PI / 2 - .2, 'Talk', 'chatB');
   place(14, 6.6, -11.0, 0, 'Idle', 'view');
   // someone waiting under the arrival canopy, and a figure reading near the bench
   place(21, -6.8, 6.4, .9, 'Idle', 'canopy');

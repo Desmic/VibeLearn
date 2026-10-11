@@ -83,7 +83,9 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     'ring-reply': { text: 'Did the villain just bond with me over a bad game?' },
     // run 14: "Just rules. That's what I'd be, without it" made the Gate the dumb one and the engine the clever
     // one, the opposite of the lesson (both only know what they're handed)
-    gate: { text: ['A talking gate. It only knows what you hand it.', 'Same as my engine, really. Better notes, better answers.'] },
+    gate: { text: 'A talking gate. It only knows what you hand it.' },
+    // run 19: on arrival this landed on top of the Warden's sign and was missed; it means most after a miss
+    'gate-engine': { text: 'Same as my engine, really. Better notes, better answers.' },
     idle1: { text: 'Hello? Player? The goal\'s right up there.' },
     idle2: { text: 'I\'ll just stand here, then. Like a good NPC.' },
     npc: { text: 'Are those… NPCs?' },

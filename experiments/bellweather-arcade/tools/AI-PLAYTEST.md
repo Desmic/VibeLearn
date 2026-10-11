@@ -721,3 +721,49 @@ with one note; the relay "felt more like confirming") and asked for failures tha
   reachprobe, speedrun, timing. Not yet blind-tested.
 - **Still open** (`design/stop1-learning-design.json` known gaps): the relay's channel is still
   spelled out on its pinned note ("Lantern channel 7"), so choosing it is close to copying.
+
+## Blind run 19: the main game after "puzzles that test" (11 Oct 2026, build v90; explorer, now 21)
+
+Same setup as runs 15–18. **6/10** (run 17: 7), not sure / leaning yes ("I want to see the Word
+Loom and what happens with Mira"); "with the camera fixed and clearer Gate feedback, an 8". Put the
+phone down at step 188, at the Gate, never having opened it.
+
+- **Landed unprompted:** the engine and the loop, the strongest result yet: "each output word gets
+  added to the end of the input, and the whole thing is used to guess the next one"; asked what
+  "Blossom" alone would give: "it uses everything in the ring, not just the last word". Mira taken,
+  the voice knocked out. Liked: the engine ("the moment I actually leaned in"), Zip's lines, the
+  Warden in Zip's head, the world, the skiff's stars.
+- **The Gate failed, and the trace shows why:** they **never read Mira's torn page** (its board, far
+  left, never appears in the trace), so they never had the "where". They tried the keeper's notice
+  alone ("a place would be nicer") and then the keeper's notice with the poster (the clash), and said
+  "there has to be another note somewhere that names an actual place". The arrow had already stopped
+  leading to notes (it counts a note as read when Zip passes in reach, not when its text was on
+  screen), and after a failure the goal has no arrow at all.
+- **The guess teaches nothing on its own:** "my picks all got the same reply". A right guess shows
+  "Good call!" and then the Gate fails anyway; they read the Gate as a quiz about the route.
+- **Context came only when pointed at** Zip's "Better notes, better answers" (step 134), which had
+  appeared on top of the Warden's sign label: then the poster-only and Warden-only predictions were right.
+- **Stuck:** finding Mira (steps 4–41, camera into planters, forward walking at the camera); two
+  townsfolk blocking a walkway (101–109, escaped with "Return to arrival"); the satchel hidden under
+  the thumb-stick circle (136–148); hunting the notes (150–164); the Gate (170–188).
+- **New:** the menu's chapter list spoiled the story ("The Warden takes Mira" read at step 38).
+  The flight's one star read as "you didn't know these were the goals" (drones never seen, rings
+  hard to see against the clouds).
+
+**Changed after run 19 (11 Oct, Desmic: "makes sense, continue"):**
+
+- **A note counts as read once its text has been on screen for a moment** (1.2 s), or when it's
+  taken; passing in reach no longer counts. The arrow leads to unread notes again after a miss.
+- **The guess sits with the notes:** "You said: Old Bridge" in the satchel strip, marked ✓ or ✗ the
+  moment the Gate goes where the notes say. A right guess followed by a miss brings Zip's "Called
+  where it would go. So the guess was fine. It's the notes." The old "Good call!" toast is gone.
+- **Zip's "Same as my engine, really. Better notes, better answers."** now comes after the first
+  miss, not on arrival on top of the Warden's sign. "A talking gate. It only knows what you hand
+  it." stays on arrival.
+- **The Play tab gives nothing away:** chapters are places ("The outlook", "Blossom Isle"), and the
+  labs are named by where they are, with no line on what they teach.
+- **The blocked walkway:** the chatting pair now stands on the open terrace, and the rail strip and
+  dead-end alley behind the west planters are closed. New in `reachprobe`: with and without the
+  townsfolk, nothing is cut off, and no townsperson lengthens the way past them by more than 4 m
+  (shown to fail on the old placement: 7.2 m became 14.4 m). Escape `qe-npc-blocks-way`.
+- **Not changed yet:** the flight's rings and drones, the camera.

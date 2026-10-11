@@ -37,7 +37,7 @@ interface Opts {
   guide: Guide; host: HTMLElement;
   addBox: (a: number, b: number, c: number, d: number) => object; removeBox: (b: object) => void;
   solid: (x: number, z: number, r: number) => void; addWalk: (x: number, z: number, r: number) => void;
-  onEvent?: (e: LearningEvent) => void; onOpen?: () => void; onDone?: () => void; setGoal: (goal: string | null, beacon: T.Vector3 | null, arrowOnly?: boolean) => void;
+  onEvent?: (e: LearningEvent) => void; onOpen?: () => void; onDone?: () => void; /** the first time the Gate opens somewhere wrong (after its own line) */ onMiss?: () => void; setGoal: (goal: string | null, beacon: T.Vector3 | null, arrowOnly?: boolean) => void;
   /** the game's look for loaded art (painted shading, faders, camera solids) */
   adopt?: (root: T.Object3D, cameraBlockers: T.Object3D[]) => void;
   density?: number;
@@ -147,7 +147,16 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   // what the satchel holds is the Gate's rules state (slotA, slotB)
   const bag = () => [gateSt.state.slotA, gateSt.state.slotB].filter(x => x !== 'none') as NoteId[];
   const hasBag = () => phase !== 'off' && gateSt.state.phase !== 'arrived';
-  const renderBag = () => { strip.hidden = !hasBag() || phase === 'done'; strip.innerHTML = '<b>Satchel</b>'; for (let i = 0; i < 2; i++) { const s = document.createElement('span'); const id = bag()[i]; s.className = 'chip ' + (id ? 'rail' : 'empty'); s.textContent = id ? NOTES.find(n => n.id === id)!.short : 'empty'; strip.appendChild(s); } };
+  // the player's guess of where the Gate opens (run 19: "my picks all got the same reply")
+  const GUESS: Record<string, string> = { lotus: 'Lotus Terraces stairs', east: 'East Falls', bridge: 'Old Bridge', unclear: 'Can\'t tell' };
+  let guess: { label: string; right: boolean; marked: boolean } | null = null;
+  const showGuess = (p: string, right: boolean) => { guess = { label: GUESS[p] ?? p, right, marked: false }; renderBag(); };
+  const markGuess = (missed = true) => { if (!guess || guess.marked) return; guess.marked = true; renderBag(); if (guess.right) sfx.catch();
+    if (guess.right && missed) g.thinkOnce('called-it', 'Called where it would go. So the guess was fine. It\'s the notes.'); };
+  const clearGuess = () => { guess = null; renderBag(); };
+  const renderBag = () => { strip.hidden = !hasBag() || phase === 'done'; strip.innerHTML = '<b>Satchel</b>'; for (let i = 0; i < 2; i++) { const s = document.createElement('span'); const id = bag()[i]; s.className = 'chip ' + (id ? 'rail' : 'empty'); s.textContent = id ? NOTES.find(n => n.id === id)!.short : 'empty'; strip.appendChild(s); }
+    // the guess sits with the notes it was made from; marked once the Gate has gone where they say
+    if (guess) { const e = document.createElement('span'); e.className = 'guess' + (guess.marked ? (guess.right ? ' right' : ' wrong') : ''); e.textContent = `You said: ${guess.label}` + (guess.marked ? (guess.right ? ' ✓' : ' ✗') : ''); strip.appendChild(e); } };
   // the island's two stations (data in worlds/first-words-stations.ts)
   const stationHost = { onEvent: opts.onEvent, stars: (title: string, rows: [boolean, string][], then: () => void) => g.stars(title, rows, then) };
   const gateSpec = station('blossom-gate'), relaySpec = station('relay-contact');
@@ -157,7 +166,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   let phase: 'off' | 'arrived' | 'bag' | 'open' | 'done' = 'off';
   // "Read the notes" had no marker (run 16: ~35 steps to find them). The arrow points at the
   // nearest note not read yet, and moves on as each one is read; once all are read it goes.
-  const seen = new Set<string>(), zipAt = LANDING.clone();
+  const seen = new Set<string>(), zipAt = LANDING.clone(); let readId: string | null = null, readT = 0;
   const nextNote = () => { let best: Note | null = null, d = 1e9; for (const n of NOTES) { if (seen.has(n.id)) continue; const k = Math.hypot(n.at.x - zipAt.x, n.at.z - zipAt.z); if (k < d) { d = k; best = n; } } return best ? best.at : null; };
   const goalNow = () => {
     if (phase === 'arrived') opts.setGoal('Take the satchel by the landing', CLASP);
@@ -166,7 +175,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       // to point at the Gate at once, walking the player away from the rest (the speedrun's
       // rules-led player found it, 11 Oct, once no single note opened the Gate)
       const failed = gateSt.state.failed as boolean, unread = nextNote();
-      if (failed) opts.setGoal('Change your notes, then speak again', null, true);
+      if (failed) opts.setGoal('Change your notes, then speak again', unread, true);
       else if (unread) opts.setGoal('Read the notes. Take up to two.', unread, true);
       else opts.setGoal(bag().length ? 'Take your notes to the gate' : 'Take up to two notes', bag().length ? GATE_STONE : null, true);
     }
@@ -179,13 +188,13 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
     if (!hasBag()) return null;
     const b = bag();
     if (b.includes(n.id)) return { label: 'Put it back', action: 'put.' + n.id, use: () => { if (gateSt.act('put.' + n.id).ok) { sfx.place(); changed(); } } };
-    if (b.length < 2) return { label: 'Take the note', action: 'take.' + n.id, use: () => { if (gateSt.act('take.' + n.id).ok) { sfx.catch(); g.toast(n.short + ' in the satchel', 1000); changed(); } } };
+    if (b.length < 2) return { label: 'Take the note', action: 'take.' + n.id, use: () => { if (gateSt.act('take.' + n.id).ok) { seen.add(n.id); sfx.catch(); g.toast(n.short + ' in the satchel', 1000); changed(); } } };
     const old = NOTES.find(x => x.id === b[0])!;
-    return { label: `Swap for ${old.short}`, action: 'take.' + n.id, use: () => { if (gateSt.act('take.' + n.id).ok) { sfx.catch(); changed(); } } };
+    return { label: `Swap for ${old.short}`, action: 'take.' + n.id, use: () => { if (gateSt.act('take.' + n.id).ok) { seen.add(n.id); sfx.catch(); changed(); } } };
   };
   const changed = () => { renderBag(); goalNow(); };
 
-  const retry = () => { mood = 'idle'; g.close(); view.hide(); goalNow(); };
+  const retry = () => { mood = 'idle'; g.close(); view.hide(); clearGuess(); goalNow(); opts.onMiss?.(); };
   // gate: the command follows exactly what the satchel holds
   const gate = {
     speak() {
@@ -202,7 +211,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
     predict(p: string) {
       const r = gateSt.act('predict.' + p); if (!r.ok) return;
       const right = r.judged.find(j => j.decision === 'destination-prediction')?.correct;
-      g.toast(right ? 'Good call!' : 'Let\'s see…', 900);
+      showGuess(p, !!right);
       if (r.events.includes('ask-support')) { g.say('What does Mira\'s page tell you?', [
         { label: 'Where she\'s going: up to the bell gardens', action: 'support.route', act: () => { gateSt.act('support.route'); gate.run(); } },
         { label: 'That she is safe', action: 'support.safe', act: () => { gateSt.act('support.safe'); gate.run(); } },
@@ -215,27 +224,27 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       const o = r.events.find(e => e.startsWith('gate-'))?.slice(5);
       const swap = (then?: () => void) => [{ label: 'Swap my notes', kind: 'primary' as const, act: () => { retry(); then?.(); } }];
       if (o === 'open') {
-        opts.onOpen?.(); melt = 1.2; if (sealBox) opts.removeBox(sealBox); sealBox = null; path.forEach(d => (d.visible = true)); phase = 'open'; sfx.chime();
+        markGuess(false); opts.onOpen?.(); melt = 1.2; if (sealBox) opts.removeBox(sealBox); sealBox = null; path.forEach(d => (d.visible = true)); phase = 'open'; sfx.chime();
         gateSays('Past the Lotus Terraces and up the stairs to the bell gardens! Mind the step.', [{ label: 'Yes!', kind: 'primary', act: () => gateSt.finish(() => { mood = 'idle'; goalNow(); }) }], 'happy');
       } else if (o === 'decoy') {
         g.close(); gateSays('East Falls! The sign said so. Rules are rules!', [], 'smug');
-        setTimeout(() => { trap = 3.2; sfx.zap(); g.close(); }, 1600);
+        setTimeout(() => { trap = 3.2; sfx.zap(); g.close(); markGuess(); }, 1600);
         setTimeout(() => gateSays('Oops. I can\'t tell a real clue from a planted order. I just do what notes say.', swap(() => g.thinkOnce('warden-sign', 'In hindsight, a sign signed ‘Warden’ was a clue.')), 'oops'), 4600);
       } else if (o === 'stale') {
         // the Gate opens where the poster says: onto the sky where the bridge was
-        gateSays('Old Bridge, coming right up!', [], 'smug'); sfx.whoosh(); setTimeout(() => view.show('bridge'), 700);
+        gateSays('Old Bridge, coming right up!', [], 'smug'); sfx.whoosh(); setTimeout(() => { view.show('bridge'); markGuess(); }, 700);
         setTimeout(() => { sfx.boing(); gateSays('Huh. There\'s… no bridge. That poster is old news! Nobody tells me anything.', swap(() => g.thinkOnce('old-news', 'Old news is bad news. Write that down.')), 'oops'); }, 3400);
       } else if (o === 'partial') {
-        gateSays('Up the stairs to the bell gardens! Which stairs, though…', [], 'smug'); sfx.whoosh(); setTimeout(() => view.show('fog'), 700);
+        gateSays('Up the stairs to the bell gardens! Which stairs, though…', [], 'smug'); sfx.whoosh(); setTimeout(() => { view.show('fog'); markGuess(); }, 700);
         setTimeout(() => { sfx.boing(); gateSays('Stairs from where? Half a page, half a route, pal.', swap(() => g.thinkOnce('torn-page', 'The page says where she went. Not how.')), 'oops'); }, 3200);
       } else if (o === 'aimless') {
-        gateSays('The Lotus Terraces stairs! Up we go, to…', [], 'smug'); sfx.whoosh(); setTimeout(() => view.show('nowhere'), 700);
+        gateSays('The Lotus Terraces stairs! Up we go, to…', [], 'smug'); sfx.whoosh(); setTimeout(() => { view.show('nowhere'); markGuess(); }, 700);
         setTimeout(() => { sfx.boing(); gateSays('…to where, exactly? A way is lovely. A place would be nicer.', swap(() => g.thinkOnce('no-where', 'Directions to nowhere. Very scenic.')), 'oops'); }, 3200);
       } else if (o === 'blend') {
-        flicker = 2; sfx.boing(); gateSays('Bell gardens? East Falls? Two notes that disagree! My hinges hurt.', [{ label: 'Swap my notes', kind: 'primary', act: () => { retry(); g.thinkOnce('dizzy-door', 'I made a door dizzy. New personal best.'); } }], 'dizzy');
+        markGuess(); flicker = 2; sfx.boing(); gateSays('Bell gardens? East Falls? Two notes that disagree! My hinges hurt.', [{ label: 'Swap my notes', kind: 'primary', act: () => { retry(); g.thinkOnce('dizzy-door', 'I made a door dizzy. New personal best.'); } }], 'dizzy');
       } else if (o === 'clash') {
-        flicker = 2; sfx.boing(); gateSays('Cross the Old Bridge… which is closed… so cross the closed bridge? My hinges hurt.', [{ label: 'Swap my notes', kind: 'primary', act: () => { retry(); g.thinkOnce('dizzy-door', 'I made a door dizzy. New personal best.'); } }], 'dizzy');
-      } else { flicker = 1.2; sfx.boing(); gateSays('Open to… somewhere? I need a place, pal.', [{ label: 'Find a better note', kind: 'primary', act: retry }], 'dizzy'); }
+        markGuess(); flicker = 2; sfx.boing(); gateSays('Cross the Old Bridge… which is closed… so cross the closed bridge? My hinges hurt.', [{ label: 'Swap my notes', kind: 'primary', act: () => { retry(); g.thinkOnce('dizzy-door', 'I made a door dizzy. New personal best.'); } }], 'dizzy');
+      } else { markGuess(); flicker = 1.2; sfx.boing(); gateSays('Open to… somewhere? I need a place, pal.', [{ label: 'Find a better note', kind: 'primary', act: retry }], 'dizzy'); }
     },
   };
 
@@ -297,7 +306,10 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       const pick = pickTarget([...thingC, ...noteC], zip, aim), nearNote = pickTarget(noteC, zip, aim)?.item.n ?? null;
       for (const n of NOTES) g.label('note-' + n.id, n === nearNote && !g.cardOpen ? `${n.short}: ${n.text}` : null, n.at.clone().setY(1.75));
       zipAt.copy(zip);
-      if (nearNote && !g.cardOpen && !seen.has(nearNote.id)) { seen.add(nearNote.id); if (phase === 'bag') goalNow(); }
+      // a note counts as read once its text has been on screen a moment (run 19: passing in reach
+      // marked Mira's page read, the arrow moved on, and the player never saw it)
+      if (nearNote && !g.cardOpen && !seen.has(nearNote.id)) { readT = readId === nearNote.id ? readT + dt : dt; readId = nearNote.id; if (readT >= 1.2) { seen.add(nearNote.id); if (phase === 'bag') goalNow(); } }
+      else if (!nearNote) readId = null;
       let best: { label: string; use: () => void; action?: string } | null = pick?.item.th ?? null;
       if (pick?.item.n) best = noteAction(pick.item.n) ?? pickTarget(thingC, zip, aim)?.item.th ?? null;
       g.label('relay-notes', phase === 'open' && !relay.active && !g.cardOpen && Math.hypot(zip.x - RELAY.x, zip.z - RELAY.z) < relaySt.spec.place.r ? 'Notes pinned to the relay: ' + relay.pinned : null, RELAY.clone().setY(2.3));

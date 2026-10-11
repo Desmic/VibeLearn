@@ -159,6 +159,7 @@ await segment('isle', async () => {
   await pose(0, 49.2); await act('Gate');
   await card('Old Bridge'); await card('going'); await page.waitForTimeout(1500);
   check('a stale note opens the Gate onto empty sky (the view shows in the arch)', await waitFor(() => page.evaluate(() => { const v = window.__vlDebug.scene.getObjectByName('gate-view'); return !!v?.visible && v.material.opacity > .8; }), 15000));
+  check('the guess shows with the notes, marked once the Gate has gone where they say (run 19: "my picks all got the same reply")', await page.locator('.satchel-bar .guess.right', { hasText: 'Old Bridge' }).isVisible(), await page.locator('.satchel-bar').textContent());
   await shot('gate-stale');
   await card('Swap'); await page.waitForTimeout(1200);
   check('the view goes and the seal comes back after a swap', await waitFor(() => page.evaluate(() => !window.__vlDebug.scene.getObjectByName('gate-view')?.visible), 15000));

@@ -64,7 +64,7 @@ const BELL_FRAME = new T.Vector3(1.25, .13, -2.1);
 export function buildStory(scene: T.Scene, o: Opts) {
   const g = o.guide;
   const skiff = buildSkiffPuzzle(scene, { guide: g, host: o.host, solid: o.solid, onEvent: o.onEvent, aspect: o.aspect });
-  const isle = buildIsland(scene, { guide: g, host: o.host, camera: o.camera, addBox: o.addBox, removeBox: o.removeBox, solid: o.solid, addWalk: o.addWalk, onEvent: o.onEvent, onOpen: () => save.set('gate-open'), onDone: () => toLoom(), setGoal: (t, b, a) => goal(t, b, a), adopt: o.adopt, density: o.density });
+  const isle = buildIsland(scene, { guide: g, host: o.host, camera: o.camera, addBox: o.addBox, removeBox: o.removeBox, solid: o.solid, addWalk: o.addWalk, onEvent: o.onEvent, onOpen: () => save.set('gate-open'), onMiss: () => story.thinkOnce('gate-engine'), onDone: () => toLoom(), setGoal: (t, b, a) => goal(t, b, a), adopt: o.adopt, density: o.density });
   // the next island on the route, dressed from its own world spec (seen from Blossom Isle)
   // the sky beyond Bellweather: the next island and generated scenery islands
   // along the flight, shown only once Zip is in the air or on the islands

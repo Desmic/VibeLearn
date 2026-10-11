@@ -256,6 +256,35 @@
         "robustness"
       ],
       "status": "prevented"
+    },
+    {
+      "id": "qe-npc-blocks-way",
+      "found": {
+        "date": "2026-10-11",
+        "by": "blind run 19 (explorer), steps 101-109",
+        "where": "the town's west rail, behind the planters"
+      },
+      "symptom": "Two standing townsfolk filled the one gap of a walkway, turning it into a dead end; the player only got out with \"Return to arrival\".",
+      "why_missed": "The narrow-strip scan saw two short pieces either side of the townsfolk (each under its length limit), and nothing compared walking with and without the people standing about.",
+      "generalized_failure": "Characters placed as solid obstacles can close a way through, or cut a narrow passage into short pieces that pass a strip check, without any map check noticing.",
+      "invariant": "With every character standing where it stands, the walk between the two sides of each one is no more than a few metres longer than with nobody about, and no part of the map is cut off.",
+      "prevention": [
+        {
+          "layer": "check",
+          "what": "reachprobe floods the walkable grid with and without the townsfolk: nothing cut off, and no townsperson lengthens the way past them by more than 4 m (proven to fail on the old placement)"
+        },
+        {
+          "layer": "data",
+          "what": "the chatting pair moved onto the open terrace; the rail strip and the dead-end alley behind the planters closed"
+        }
+      ],
+      "caught_by": [
+        "reachprobe"
+      ],
+      "lanes": [
+        "world"
+      ],
+      "status": "prevented"
     }
   ]
 }
