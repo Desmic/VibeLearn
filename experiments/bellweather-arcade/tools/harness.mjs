@@ -50,8 +50,8 @@ export async function harness({ title, outDefault, tool, lane = 'flow' }) {
   const desk = INPUT === 'keyboard';
   const ctx = await browser.newContext({ viewport: desk ? { width: 1024, height: 640 } : { width: 393, height: 760 }, deviceScaleFactor: 1, hasTouch: !desk, isMobile: INPUT === 'touch' });
   const page = await ctx.newPage(); page.setDefaultTimeout(60000);
-  page.on('pageerror', e => errors.push({ segment: state.current, msg: e.message }));
-  page.on('console', m => { const t = m.text(); if (m.type() === 'error') errors.push({ segment: state.current, msg: t }); if (/^\[(kit|learning|prop|budget)\]/.test(t)) logs.push(t); });
+  page.on('pageerror', e => errors.push({ segment: state.current, msg: e.message, t: Date.now() }));
+  page.on('console', m => { const t = m.text(); if (m.type() === 'error') errors.push({ segment: state.current, msg: t, t: Date.now(), at: page.url().split('?')[1]?.slice(-40) }); if (/^\[(kit|learning|prop|budget)\]/.test(t)) logs.push(t); });
 
   const Q = GAME.testEntry;
   let cdp = null;
@@ -102,7 +102,9 @@ export async function harness({ title, outDefault, tool, lane = 'flow' }) {
     // the first load only exists to clear the save; loads it started are cut off by the
     // second navigation ("Failed to fetch"), which is the test's doing, not the game's
     fresh: async (extra = '') => { const n = errors.length; await page.goto(`${BASE}/?${Q}`, { timeout: 180000 }); await page.evaluate(() => localStorage.clear()); await h.open(extra);
-      for (let i = errors.length - 1; i >= n; i--) if (/Failed to fetch|ERR_ABORTED/.test(errors[i].msg)) errors.splice(i, 1); },
+      // (a texture still decoding from a cut-off load reports its blob as unloadable: same cause, and
+      // only errors raised inside this double load are dropped; one later in the run still fails)
+      for (let i = errors.length - 1; i >= n; i--) if (/Failed to fetch|ERR_ABORTED|Couldn't load texture blob:/.test(errors[i].msg)) errors.splice(i, 1); },
     shot: async name => { const f = `${OUT}/${String(shots.length).padStart(2, '0')}-${state.current}-${name}.png`; await page.screenshot({ path: f, timeout: 120000 }); shots.push(f); return f; },
     INPUT,
     /** press a button the way this test's player would (a tap on a phone, a click otherwise) */

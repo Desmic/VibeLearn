@@ -767,3 +767,24 @@ phone down at step 188, at the Gate, never having opened it.
   townsfolk, nothing is cut off, and no townsperson lengthens the way past them by more than 4 m
   (shown to fail on the old placement: 7.2 m became 14.4 m). Escape `qe-npc-blocks-way`.
 - **Not changed yet:** the flight's rings and drones, the camera.
+
+## Blind run 21: the main game on v91 (11 Oct 2026; student, 19)
+
+Put the phone down at step 178, at the Gate ("no idea where another note is, im just walking off
+cliffs now. done for today"). **No interview:** the session's machine restarted before it began
+and the play server's state went with it, so there is no score; this entry is from the play log.
+
+- **The engine landed again, unprompted:** "oh its guessing the next word, like autocomplete. Blossom!"
+- **They reasoned about the notes well:** "thats last years poster, out of date. I want the keepers
+  notice instead"; "the warden sign and old poster would send me the wrong way". With the keeper's
+  notice alone the Gate asked for a place; "the warden sign is the only one that names a place. sus
+  but ok" → the cage (a fair failure that played out).
+- **Same cause as run 19: they never read Mira's torn page.** The arrow had counted it read: it
+  showed while they walked past between two observations (the 1.2 s rule counted time walking).
+  Two players in a row missed the one note that names Mira's place.
+- Also: "the gate is literally right there and I cant reach it" (pushing into the hedge beside the
+  arch, 3.2 m from the talk spot); the camera; flying away from the isle.
+
+**Changed after run 21:** a note counts as read only while Zip stands still with its text on
+screen (1.2 s); Mira's board has her festival lantern hanging on it, the same paper lantern Zip hung
+on the skiff for her, so the board that matters is marked without a word.

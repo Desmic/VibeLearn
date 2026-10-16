@@ -7,7 +7,7 @@ import { createStation } from './kit/station';
 import { station, rulesFor } from './worlds/first-words-stations';
 import { sfx } from './sfx';
 import { buildRelay } from './relay';
-import { loadKit } from './kit/kit';
+import { loadKit, loadProp } from './kit/kit';
 import { dressIsland, entityAt } from './kit/dress';
 import { budget } from './kit/budget';
 import { BLOSSOM_ISLE } from './worlds/blossom-isle';
@@ -92,10 +92,17 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   const ped = satchelPedestal(); mergeStatic(ped.group, [ped.satchel]); ped.group.position.copy(CLASP).setY(.1); root.add(ped.group);
   const satchelObj = ped.satchel;
   // note boards: bright paper, except the Warden's dark sign
+  let miraLantern: T.Object3D | null = null;
   const boards = NOTES.map(n => {
     const grp = new T.Group(); grp.position.copy(n.at); grp.userData.fade = { halfW: .5, y0: 0, y1: 1.7 }; grp.userData.noCameraBlock = true; root.add(grp);
     const nb = noticeBoard(n.id === 'warden' ? 'warden' : 'paper', n.at.x * 7 + n.at.z); mergeStatic(nb.group, [nb.board]); grp.add(nb.group);
     grp.rotation.y = Math.atan2(ISLE.x - n.at.x, ISLE.z + 3 - n.at.z) * .6; // turn toward the path
+    // Mira's page has her festival lantern hung on its board, glowing (runs 19 and 21: neither player
+    // ever went to the far board; the lantern Zip hung for her says she was here without a word)
+    if (n.id === 'mira') { const hook = new T.Group(); hook.position.set(.5, 1.66, .08); grp.add(hook); miraLantern = hook;
+      const ball = new T.Mesh(new T.SphereGeometry(.13, 12, 10), std('#ffcf7a', '#ffb347', 1.1)); ball.position.y = -.14; hook.add(ball);
+      // the same paper festival lantern as on the skiff, when the prop loads
+      loadProp('festival-lantern').then(model => { model.traverse(o => { const m = o as T.Mesh; if (m.isMesh && /^Paper/.test(m.name)) m.material = std('#ffcf7a', '#ffb347', 1.0); }); ball.visible = false; model.scale.setScalar(1.1); hook.add(model); }).catch(() => {}); }
     return { n, grp, board: nb.board };
   });
   // relay terrace beyond the gate
@@ -305,10 +312,10 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       const noteC = phase === 'arrived' || phase === 'bag' ? NOTES.map(n => ({ item: { th: null, n } as Pick, x: n.at.x, z: n.at.z, r: 2.2 })) : [];
       const pick = pickTarget([...thingC, ...noteC], zip, aim), nearNote = pickTarget(noteC, zip, aim)?.item.n ?? null;
       for (const n of NOTES) g.label('note-' + n.id, n === nearNote && !g.cardOpen ? `${n.short}: ${n.text}` : null, n.at.clone().setY(1.75));
-      zipAt.copy(zip);
-      // a note counts as read once its text has been on screen a moment (run 19: passing in reach
-      // marked Mira's page read, the arrow moved on, and the player never saw it)
-      if (nearNote && !g.cardOpen && !seen.has(nearNote.id)) { readT = readId === nearNote.id ? readT + dt : dt; readId = nearNote.id; if (readT >= 1.2) { seen.add(nearNote.id); if (phase === 'bag') goalNow(); } }
+      const still = dt > 0 && Math.hypot(zip.x - zipAt.x, zip.z - zipAt.z) / dt < .4; zipAt.copy(zip);
+      // a note counts as read once Zip has stood with its text on screen a moment (runs 19 and 21:
+      // walking past in reach marked Mira's page read, the arrow moved on, and neither player saw it)
+      if (nearNote && !g.cardOpen && !seen.has(nearNote.id)) { readT = readId === nearNote.id ? readT + (still ? dt : 0) : 0; readId = nearNote.id; if (readT >= 1.2) { seen.add(nearNote.id); if (phase === 'bag') goalNow(); } }
       else if (!nearNote) readId = null;
       let best: { label: string; use: () => void; action?: string } | null = pick?.item.th ?? null;
       if (pick?.item.n) best = noteAction(pick.item.n) ?? pickTarget(thingC, zip, aim)?.item.th ?? null;
@@ -326,7 +333,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       mouth.scale.set(1, talkT > 0 ? .5 + Math.abs(Math.sin(t * 16)) * 1.2 : mood === 'oops' ? -.6 : mood === 'happy' ? 1.3 : .8, 1);
       face.rotation.z = mood === 'dizzy' ? Math.sin(t * 5) * .06 : 0;
       if (melt > 0) { melt = Math.max(0, melt - dt); seal.scale.setScalar(melt / 1.2 + .001); sealLow.scale.y = melt / 1.2 + .001; if (melt === 0) seal.visible = sealLow.visible = false; }
-      satchelObj.rotation.y += dt; boards.forEach(b => { b.board.rotation.y = Math.sin(t + b.n.at.x) * .05; });
+      satchelObj.rotation.y += dt; boards.forEach(b => { b.board.rotation.y = Math.sin(t + b.n.at.x) * .05; }); if (miraLantern) miraLantern.rotation.z = Math.sin(t * 1.3) * .12;
       view.tick(dt); sealMat.opacity = (.55 + .08 * Math.sin(t * 2) + (flicker > 0 ? .3 * Math.abs(Math.sin(t * 25)) : 0)) * (1 - view.shown); flicker = Math.max(0, flicker - dt);
       if (trap > 0) {
         if (trap === 3.2) trapAt.copy(zip);
