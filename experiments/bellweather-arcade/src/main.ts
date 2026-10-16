@@ -339,7 +339,7 @@ const storyOn=paintedStudy&&paintedParams.get('puzzle')!=='0'&&paintedParams.get
 const appHost=worldElement.parentElement!;
 const guide=storyOn?buildGuide(scene,appHost,camera,renderer.domElement):null;lifeOverlay=guide?.overlay??null;
 // tapping the goal arrow turns the camera to the goal
-guide?.onPoint(()=>{const b=guide?.beaconAt;if(!b)return;const w=facadeStudy?wayPoint(walkXZ,[zip.position.x,zip.position.z],[b.x,b.z]):[b.x,b.z];camLog('arrow',{way:w});const dx=w[0]-zip.position.x,dz=w[1]-zip.position.z;if(Math.hypot(dx,dz)<.5)return;glanceYaw=Math.atan2(-dx,-dz);glanceT=1.4;pitch=arrivalPitch});   // and level the view (run 14: it could leave the camera looking at the floor)
+guide?.onPoint(()=>{const b=guide?.beaconAt;if(!b)return;const w=facadeStudy?wayPoint(walkXZ,[zip.position.x,zip.position.z],[b.x,b.z]):[b.x,b.z];camLog('arrow',{way:w});showTrail(b.x,b.z);const dx=w[0]-zip.position.x,dz=w[1]-zip.position.z;if(Math.hypot(dx,dz)<.5)return;glanceYaw=Math.atan2(-dx,-dz);glanceT=1.4;pitch=arrivalPitch});   // and level the view (run 14: it could leave the camera looking at the floor)
 // phones move with a floating thumb stick (lower left); keyboards with WASD; both look by dragging
 stick=createJoystick(appHost,{onUse:()=>get('hint').style.opacity='0'});
 // voiced lines: clips made ahead of time (tools/voice.mjs); a line without one stays a silent bubble
@@ -352,6 +352,16 @@ if(guide&&paintedParams.get('voices')!=='0'){const voice=createVoice(FIRST_WORDS
 // prefers pointing to arrows). Lowest priority: puzzle taps are checked first.
 let walkTarget:T.Vector3|null=null,walkPath:T.Vector3[]=[],walkStuck=0,walkDetour=0,walkDetourT=0;
 const walkV=new T.Vector3(),walkXZ=(x:number,z:number)=>walkable(walkV.set(x,zip.position.y,z));
+// The goal arrow turns the camera to the way round walls, not at the goal through them, so on its own
+// it read as "only turns partway" (runs 19 and 22). A trail of light along the way, a few metres
+// out, shows why: it runs from Zip's feet round the corner, then fades.
+const trailDots=Array.from({length:12},()=>{const m=new T.Mesh(new T.RingGeometry(.1,.2,18).rotateX(-Math.PI/2),new T.MeshBasicMaterial({color:'#3fd6b8',transparent:true,opacity:0,depthWrite:false,toneMapped:false}));m.visible=false;m.renderOrder=3;scene.add(m);return m});
+let trailT=-1;
+function showTrail(gx:number,gz:number){if(!facadeStudy)return;const way=findPath(walkXZ,[zip.position.x,zip.position.z],[gx,gz]);if(!way)return;const pts:[number,number][]=[[zip.position.x,zip.position.z],...way];
+  // a dot every 0.9 m along the way, up to 11 m
+  let k=0,carry=.9;for(let i=1;i<pts.length&&k<trailDots.length;i++){const [ax,az]=pts[i-1],[bx,bz]=pts[i],L=Math.hypot(bx-ax,bz-az);let d=carry;while(d<=L&&k<trailDots.length){const m=trailDots[k++];m.position.set(ax+(bx-ax)*d/L,zip.position.y+.04,az+(bz-az)*d/L);m.userData.k=k;m.visible=true;d+=.9}carry=d-L}
+  for(let i=k;i<trailDots.length;i++)trailDots[i].visible=false;trailT=0}
+function tickTrail(dt:number){if(trailT<0)return;trailT+=dt;let any=false;for(const m of trailDots){if(!m.visible)continue;const k=m.userData.k as number,a=T.MathUtils.clamp((trailT-k*.06)*4,0,1)*T.MathUtils.clamp((3.6-trailT)/.8,0,1);(m.material as T.MeshBasicMaterial).opacity=a;if(trailT>3.6)m.visible=false;else any=true}if(!any)trailT=-1}
 const walkMark=new T.Mesh(new T.RingGeometry(.2,.3,28).rotateX(-Math.PI/2),new T.MeshBasicMaterial({color:'#ffd36b',transparent:true,opacity:.9,depthWrite:false}));walkMark.visible=false;walkMark.renderOrder=3;scene.add(walkMark);
 guide?.onTap(r=>{if(story?.frozen||title?.active||ridePos||paused)return false;const d=r.ray.direction,o=r.ray.origin;if(d.y>-.02)return false;const gy=.13+groundLift,p=o.clone().addScaledVector(d,(gy-o.y)/d.y);if(p.distanceTo(zip.position)>30)return false;
   // the way there round walls, not a straight line into them (runs 15-17: "sent me to odd places"); the tap
@@ -477,7 +487,7 @@ function tick(now:number){raf=0;if(paused||document.hidden)return;const dt=Math.
   if(zipRig){if(waveBackAt>0&&elapsed>=waveBackAt){waveBackAt=-1;if(zipSpeed<.4)zipRig.wave()}if(greetUntil>0&&elapsed>greetUntil){greetUntil=-1;zipRig.lookAt(null)}}
   zipRig?.update(dt,zipSpeed,reduced);if(!townHidden)lifeTick?.(dt,reduced,{pos:zip.position,speed:zipSpeed});story?.tick(dt);utterLab?.tick(dt);guide?.tick(dt,zipSpeed,elapsed);
   if(scape){const bs=story?FIRST_WORDS_BEAT_SOUND[story.beat]:null;scape.setMood(title?.active||story?.inCutscene?null:story?bs?.mood??null:'town');scape.setPlace(title?.active?null:bs?.place??'town');scape.tick(dt)}
-  if(!reduced){if(!townHidden)promenade?.tick(dt);if(paintedStudy)tickLandmarks(dt);}cameraUpdate(dt);render();updateStats(now);schedule()}
+  if(!reduced){if(!townHidden)promenade?.tick(dt);if(paintedStudy)tickLandmarks(dt);}tickTrail(dt);cameraUpdate(dt);render();updateStats(now);schedule()}
 
 let greetUntil=-1,waveBackAt=-1;
 const captureMode=new URLSearchParams(location.search).get('capture')==='1';
@@ -516,7 +526,7 @@ Object.defineProperty(window,'__arcade',{value:{
     for(const k of input.keys??[])keys.add(k);
     if(input.walkTo){walkPath=[];walkTarget=new T.Vector3(input.walkTo[0],.13,input.walkTo[1]);walkStuck=0;walkDetour=0;walkDetourT=0}
     const n=Math.max(1,Math.round(seconds/.05));
-    for(let i=0;i<n&&!paused;i++){const dt=.05;elapsed+=dt;move(dt);const sp=moveAmount/dt;zipRig?.update(dt,sp,reduced);story?.tick(dt);utterLab?.tick(dt);guide?.tick(dt,sp,elapsed);cameraUpdate(dt)}
+    for(let i=0;i<n&&!paused;i++){const dt=.05;elapsed+=dt;move(dt);const sp=moveAmount/dt;zipRig?.update(dt,sp,reduced);story?.tick(dt);utterLab?.tick(dt);guide?.tick(dt,sp,elapsed);tickTrail(dt);cameraUpdate(dt)}
     for(const k of input.keys??[])keys.delete(k);
     if(input.walkTo){walkTarget=null;walkMark.visible=false}
     render();return {position:zip.position.toArray()};

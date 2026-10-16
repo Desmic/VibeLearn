@@ -788,3 +788,35 @@ and the play server's state went with it, so there is no score; this entry is fr
 **Changed after run 21:** a note counts as read only while Zip stands still with its text on
 screen (1.2 s); Mira's board has her festival lantern hanging on it, the same paper lantern Zip hung
 on the skiff for her, so the board that matters is marked without a word.
+
+## Blind run 22: the main game on v92 (16 Oct 2026; commuter, 22)
+
+**6/10**, not sure / leaning yes ("I'd give it one more bus ride for the story and the puzzles, and
+I'd drop it if the walking around is still that fiddly"). Put the phone down at step 112, just after
+landing on Blossom Isle ("Loved the word-engine bit, but I keep losing things behind me and getting
+stuck on scenery"). The interview stopped after the teach-back when the machine restarted again;
+the rating was asked of the same tester afterwards, with no reveal.
+
+- **Landed unprompted:** the story hook (Mira taken, the voice gone, "a villain who's oddly fine
+  with you thinking"), the humour, and the engine: "it guesses one word at a time from what's
+  already there, then feeds its own guess back in to guess the next one"; asked about "toward"
+  alone: "it reads the whole sentence so far, and more words means a sharper guess".
+- **Context, probed (never reached the Gate's decision):** expected it to "take whatever notes I
+  carried at face value… no checking whether they were true"; "maybe that an AI only works from
+  what's put in front of it".
+- **Weak:** the voice coming back coil by coil ("a cute robot word for a chunk of voice"); the
+  villager's "That ship took Mira!" went past them; "toward" tapped from afar didn't count (steps 44–52).
+- **The getting about, a third run in a row:** "about half my time went on the camera diving into
+  the ground, walking past things so they ended up behind me, a 'turn toward the goal' button that
+  only turns you partway, and getting stuck on scenery". Step 13: wedged in the V between the
+  chatting pair (1.1 m apart after the 11 Oct move), the camera squeezed over Zip's head looking
+  straight down. Small: the "Brilliant!" button gone before the tap; "spotted by drones" with no
+  drone seen.
+
+**Changed after run 22:** the chatting pair stand close (no V to walk into); tapping the goal arrow
+lays a trail of light along the way round walls, from Zip's feet, so a turn toward the way rather
+than the goal reads as a route, not a half-turn.
+
+**Where the three runs since 11 Oct agree:** the engine lands every time, unprompted; the Gate's
+lesson comes out when asked, but no player has yet opened it (two never read Mira's page, one never
+got there); and getting about, the camera above all, is what each one would put the phone down for.

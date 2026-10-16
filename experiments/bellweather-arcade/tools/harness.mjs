@@ -138,6 +138,9 @@ export async function harness({ title, outDefault, tool, lane = 'flow' }) {
     /** drag the thumb stick (touch) for `sec` seconds of game time; dir in screen terms, e.g. [0, -1] = up */
     stick: async (dir, sec = 1.5, reach = 60) => {
       cdp ??= await page.context().newCDPSession(page);
+      // the stick shows only in touch mode; a key press since the last touch (skipOpening's) leaves the
+      // page in desktop mode, where this first touch would land on the canvas and only switch modes
+      await page.evaluate(() => { document.documentElement.dataset.input = 'touch'; });
       const vs = page.viewportSize(), x0 = 92, y0 = vs.height - 118, pt = (x, y) => [{ x, y, id: 7, radiusX: 8, radiusY: 8, force: 1 }];
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: pt(x0, y0) });
       for (let i = 1; i <= 4; i++) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: pt(x0 + dir[0] * reach / 4 * i, y0 + dir[1] * reach / 4 * i) });
