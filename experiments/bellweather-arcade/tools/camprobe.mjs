@@ -6,7 +6,8 @@
 //      view should stay on it ("its turn doesn't stay put once you move");
 //   D. back from a dialogue (Mira's first line), the camera is clear of walls behind Zip;
 //   E. with the goal behind a wall, the arrow faces the way round it;
-//   F. how often the camera is pressed into Zip anywhere in town.
+//   F. how often the camera is pressed into Zip anywhere in town;
+//   H. how often it looks straight down at him from above.
 //   bash tools/build.sh && node tools/camprobe.mjs --input touch [--out /tmp/camprobe]
 import { harness } from './harness.mjs';
 const h = await harness({ title: 'Camera probe', outDefault: '/tmp/camprobe', tool: 'camprobe', lane: 'feel' });
@@ -90,4 +91,14 @@ const fade = await page.evaluate(() => { const A = window.__arcade; let n = 0, f
   return { n, f }; });
 const pct = 100 * fade.f / fade.n;
 h.check('F. the camera seldom ends up pressed into Zip in town (under 7% of spots and views; was 10.8%)', pct < 7, `${fade.f} of ${fade.n} (${pct.toFixed(1)}%)`, 'fail', 'feel');
+// H: the camera looking straight down at the ground ("the camera diving into the ground", "a
+// top-down view of my own head", runs 19 and 22): every spot in town on a 2 m grid, eight headings,
+// the camera tilted as far down as a drag allows. A view more than 60° above Zip's head counts.
+// Was 10.1% (squeezed against something, the camera rose 1.3 m over his head and looked down).
+const top = await page.evaluate(() => { const A = window.__arcade; let n = 0, t = 0;
+  for (let x = -8.5; x <= 8.5; x += 2) for (let z = -11.5; z <= 9.5; z += 2) { if (!A.walkable(x, z)) continue;
+    for (let k = 0; k < 8; k++) { const y = k / 8 * Math.PI * 2; A.pose(x, z, y, .75, 6, y); A.simulate(.6); const s = A.snapshot(), P = s.position, C = s.camera; n++;
+      if (Math.atan2(C[1] - P[1] - 1.5, Math.hypot(C[0] - P[0], C[2] - P[2])) > Math.PI / 3) t++; } }
+  return { n, t }; });
+h.check('H. the camera never looks straight down at Zip from above (no view over 60° in town, tilted fully down; was 10.1%)', top.t === 0, `${top.t} of ${top.n}`, 'fail', 'feel');
 await h.finish();

@@ -820,3 +820,17 @@ than the goal reads as a route, not a half-turn.
 **Where the three runs since 11 Oct agree:** the engine lands every time, unprompted; the Gate's
 lesson comes out when asked, but no player has yet opened it (two never read Mira's page, one never
 got there); and getting about, the camera above all, is what each one would put the phone down for.
+
+**Camera, measured after runs 19–22 (17 Oct, Desmic: "go ahead with the fixes"):**
+
+- **"The camera diving into the ground" / "a top-down view of my own head".** Not the camera going
+  low (no view in town or on Blossom Isle ever had the lens under 0.45 m), but looking straight down:
+  with the camera tilted fully down (a drag), 10.1% of town views sat more than 60° above Zip's head,
+  because when pressed against something it rose 1.3 m over him. It now rises only as far as a 55°
+  look-down allows, and a drag tilts down to 0.75 rad (was 0.9). Now 0 of 376 (new `camprobe` H).
+  The price: when pressed in close, Zip fades a little more often with the camera tilted fully
+  down (at the usual tilt, unchanged at 5.6%).
+- **"Stuck on scenery".** A push at 45° into every edge in town and on Blossom Isle slides along it
+  (1 of 184 pushes stuck in town, 0 of 199 on the isle): the sticking players felt was the view and
+  the wedge between the chatting pair, both fixed.
+- **"Only turns partway".** The trail of light after the arrow (above).
