@@ -41,18 +41,36 @@ export function lanternPost(h = 1.7, glow = '#ffd48a') {
 /** Notice board: two posts, a frame with a little gable roof, the note pinned
  *  on it. `board` is the note itself (it sways). The Warden's sign is a dark
  *  plaque with a violet glow instead of paper. */
-export function noticeBoard(kind: 'paper' | 'warden', seed = 1) {
+// Each kind of note looks like what it is from across the island (run 23: "I keep losing track of
+// which sign is which. They're all the same little signboard"): last year's festival poster in
+// faded pinks under bunting; the keeper's official notice, framed and sealed, with the bridge drawn
+// crossed out; Mira's torn page; the Warden's dark sign. Pictures only: the words are read close up.
+export type NoticeKind = 'paper' | 'warden' | 'poster' | 'keeper' | 'torn';
+export function noticeBoard(kind: NoticeKind, seed = 1) {
   const r = mulberry32(seed), g = new T.Group();
   const w = .9, top = 1.72;
   for (const s of [-1, 1]) { const p = new T.Mesh(new T.BoxGeometry(.07, top, .07), flat(WOOD)); p.position.set(s * w / 2, top / 2, 0); p.rotation.z = (r() - .5) * .04; g.add(p); }
   const back = new T.Mesh(new T.BoxGeometry(w + .04, .66, .04), flat(WOOD_DARK)); back.position.set(0, 1.25, -.03); g.add(back);
-  for (const s of [-1, 1]) { const roof = new T.Mesh(new T.BoxGeometry(.62, .04, .22), flat('#8a4f4a')); roof.position.set(s * .27, top + .08, 0); roof.rotation.z = -s * .32; g.add(roof); }
+  const roofC = kind === 'poster' ? '#d0607e' : kind === 'keeper' ? '#3f6a5a' : kind === 'warden' ? '#3b2766' : '#8a4f4a';
+  for (const s of [-1, 1]) { const roof = new T.Mesh(new T.BoxGeometry(.62, .04, .22), flat(roofC)); roof.position.set(s * .27, top + .08, 0); roof.rotation.z = -s * .32; g.add(roof); }
   let board: T.Mesh;
-  if (kind === 'warden') {
+  if (kind === 'poster' || kind === 'keeper') {
+    const tall = kind === 'poster';
+    board = new T.Mesh(new T.PlaneGeometry(tall ? .56 : .7, tall ? .62 : .48), new T.MeshLambertMaterial({ map: noticeArt(kind, seed) }));
+    if (kind === 'keeper') {   // a dark frame and a wax seal: official
+      for (const [w2, h2, x, y] of [[.78, .05, 0, .265], [.78, .05, 0, -.265], [.05, .58, -.375, 0], [.05, .58, .375, 0]]) { const f = new T.Mesh(new T.BoxGeometry(w2, h2, .03), flat('#4a3324')); f.position.set(x, y, .01); board.add(f); }
+      const seal = new T.Mesh(new T.CylinderGeometry(.055, .055, .02, 14), flat('#b8322f', '#ff5a40', .15)); seal.rotation.x = Math.PI / 2; seal.position.set(.25, -.16, .02); board.add(seal);
+    } else {   // bunting along the roof line, and one corner peeling
+      for (let i = 0; i < 7; i++) { const flag = new T.Mesh(new T.ConeGeometry(.045, .1, 3), flat(['#f6a9c0', '#ffe08a', '#9fd3c7', '#cdb8ff'][i % 4])); flag.rotation.z = Math.PI; flag.position.set(-.42 + i * .14, top - .06 - Math.sin(i / 6 * Math.PI) * .05, .05); g.add(flag); }
+      const curl = new T.Mesh(new T.PlaneGeometry(.12, .12), flat('#f3d9c8')); curl.position.set(.24, -.27, .03); curl.rotation.set(-.6, .5, .4); board.add(curl);
+    }
+  } else if (kind === 'warden') {
     board = new T.Mesh(new RoundedBoxGeometry(.74, .5, .04, 2, .03), flat('#3b2766', '#7b4fd6', .35));
     const edge = new T.Mesh(new T.TorusGeometry(.33, .012, 4, 24), new T.MeshBasicMaterial({ color: '#b07bff' })); edge.scale.y = .66; edge.position.z = .025; board.add(edge);
   } else {
     board = new T.Mesh(new T.PlaneGeometry(.66, .48, 4, 3), flat('#fbf2dc', '#fff2c8', .12));
+    // a torn page: the bottom edge ripped, the page a little skew
+    if (kind === 'torn') { const pos = board.geometry.attributes.position; for (let i = 0; i < pos.count; i++) if (pos.getY(i) < -.2) pos.setY(i, pos.getY(i) + (r() * .1)); board.scale.set(.85, .9, 1); }
     const pos = board.geometry.attributes.position; for (let i = 0; i < pos.count; i++) pos.setZ(i, (r() - .5) * .012 + Math.abs(pos.getX(i)) * .02);
     board.geometry.computeVertexNormals(); board.rotation.z = (r() - .5) * .08;
     for (const [x, y] of [[-.28, .19], [.28, .19]]) { const pin = new T.Mesh(new T.SphereGeometry(.022, 6, 4), flat('#d24a4a')); pin.position.set(x, y, .02); board.add(pin); }
@@ -61,6 +79,30 @@ export function noticeBoard(kind: 'paper' | 'warden', seed = 1) {
   }
   board.position.set(0, 1.25, .01); g.add(board);
   return { group: g, board };
+}
+
+/** the picture on a poster or a notice (no words: those are read close up) */
+function noticeArt(kind: 'poster' | 'keeper', seed: number) {
+  const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128; const c = cv.getContext('2d')!, r = mulberry32(seed + 3);
+  if (kind === 'poster') {
+    // last spring's festival, faded: pink sky, a sun, the Old Bridge to the bell gardens
+    const g = c.createLinearGradient(0, 0, 0, 128); g.addColorStop(0, '#f4b6c8'); g.addColorStop(1, '#fbe3c6'); c.fillStyle = g; c.fillRect(0, 0, 128, 128);
+    c.fillStyle = '#ffd36b'; c.beginPath(); c.arc(96, 30, 14, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#a0735a'; c.lineWidth = 6; c.beginPath(); c.moveTo(8, 96); c.quadraticCurveTo(64, 50, 120, 96); c.stroke();
+    c.lineWidth = 3; for (let x = 20; x < 112; x += 16) { const y = 96 - Math.sin((x - 8) / 112 * Math.PI) * 23; c.beginPath(); c.moveTo(x, y); c.lineTo(x, 104); c.stroke(); }
+    c.fillStyle = '#d9a43a'; for (const x of [96, 106, 116]) { c.beginPath(); c.arc(x, 62, 4, 0, Math.PI * 2); c.fill(); }
+    c.fillStyle = '#c4576f'; c.fillRect(10, 110, 108, 10);
+    c.fillStyle = 'rgba(255,255,255,.28)'; c.fillRect(0, 0, 128, 128);   // a year in the sun
+  } else {
+    // the keeper's notice: the bridge, crossed out; an arrow to the stairs
+    c.fillStyle = '#f3ead2'; c.fillRect(0, 0, 128, 128);
+    c.strokeStyle = '#6b5a48'; c.lineWidth = 5; c.beginPath(); c.moveTo(10, 70); c.quadraticCurveTo(48, 40, 86, 70); c.stroke();
+    c.strokeStyle = '#c0392b'; c.lineWidth = 7; c.beginPath(); c.moveTo(18, 34); c.lineTo(80, 92); c.moveTo(80, 34); c.lineTo(18, 92); c.stroke();
+    c.fillStyle = '#3f6a5a'; for (let i = 0; i < 4; i++) c.fillRect(92 + i * 7, 92 - i * 12, 12, 12 + i * 12);
+    c.strokeStyle = '#3f6a5a'; c.lineWidth = 4; c.beginPath(); c.moveTo(70, 112); c.lineTo(100, 112); c.lineTo(94, 106); c.moveTo(100, 112); c.lineTo(94, 118); c.stroke();
+  }
+  for (let i = 0; i < 30; i++) { c.fillStyle = `rgba(90,60,40,${r() * .06})`; c.fillRect(r() * 128, r() * 128, 3, 3); }
+  const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; return t;
 }
 
 function scribble(seed: number) {

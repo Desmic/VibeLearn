@@ -285,6 +285,94 @@
         "world"
       ],
       "status": "prevented"
+    },
+    {
+      "id": "qe-pocket-wedge",
+      "found": {
+        "date": "2026-10-23",
+        "by": "blind run 23 (explorer), steps 178-180 and 148-149",
+        "where": "Blossom Isle: between the twisted tree and the boulder by the edge; between a blossom tree and the rim"
+      },
+      "symptom": "Walking toward the relay, the player stopped dead in a V between a tree, a rock and the island's edge (\"Stuck on this tree… walking isn't moving me\") and only got out by walking sideways.",
+      "why_missed": "moveprobe pushed at 45° along edges (slides fine) and the strip scan looked for body-wide corridors; neither pushed into the V between two round things, or one round thing and the rim, a little wider than Zip.",
+      "generalized_failure": "Round obstacles placed a little more than a body apart, or that close to a boundary, look passable and hold a push that isn't dead-on; the slide has no way out of a V.",
+      "invariant": "From every walkable spot, a push in any direction slides somewhere unless the push is within about 20° of head-on into one surface; walls' own corners excepted.",
+      "prevention": [
+        {
+          "layer": "check",
+          "what": "reachprobe pockets: the game's own push (__vlDebug.tryPush) from every walkable spot on a 0.25 m grid, 16 ways; a spot stuck across a 45° cone fails (found the run 23 spot before the fix)"
+        },
+        {
+          "layer": "engine",
+          "what": "facade.ts seals pockets on islands: round solids closer than Zip's width plus 0.55 m are joined as one, and one near the rim gets a low mound sloping off along the edge"
+        }
+      ],
+      "caught_by": [
+        "reachprobe"
+      ],
+      "lanes": [
+        "world"
+      ],
+      "status": "prevented",
+      "open": "the town still has three such spots against walls (reachprobe warns)"
+    },
+    {
+      "id": "qe-lens-in-crown",
+      "found": {
+        "date": "2026-10-23",
+        "by": "blind run 23 (explorer), step 165",
+        "where": "Blossom Isle, after tapping the goal arrow"
+      },
+      "symptom": "The screen filled with blossom: the camera swung into a tree crown and the crown stayed drawn.",
+      "why_missed": "The fade judged things by distance to their trunk; a wide crown can hold the lens while its trunk is metres off. No probe looked for the lens inside a fading thing.",
+      "generalized_failure": "An occluder test that measures from an object's origin misses a camera inside the object's wide part.",
+      "invariant": "The lens is never inside (within 0.7 m of) anything that can fade while it stays more than half drawn.",
+      "prevention": [
+        {
+          "layer": "check",
+          "what": "camprobe I: every walkable spot on Blossom Isle, four headings: views with the lens in a crown left drawn (1 of 304 settled views before, 0 after; run 23's was mid-swing)"
+        },
+        {
+          "layer": "engine",
+          "what": "occluders.ts fades anything whose volume the lens is in or within 0.8 m of"
+        }
+      ],
+      "caught_by": [
+        "camprobe"
+      ],
+      "lanes": [
+        "feel"
+      ],
+      "status": "prevented"
+    },
+    {
+      "id": "qe-answer-styled",
+      "found": {
+        "date": "2026-10-23",
+        "by": "blind run 23 (explorer), step 185",
+        "where": "the relay's word chips"
+      },
+      "symptom": "The player left the Warden's word out because it \"looks dodgy, different colour\", not by what the relay should read: the puzzle confirmed instead of testing.",
+      "why_missed": "The jammed word was styled (purple, dashed) as a hint, and nothing checked that a puzzle's choices look alike.",
+      "generalized_failure": "Styling a wrong (or right) choice differently gives the answer away.",
+      "invariant": "A puzzle's choices look alike until the player has chosen.",
+      "prevention": [
+        {
+          "layer": "check",
+          "what": "flowcheck relay: the four word chips share one style"
+        },
+        {
+          "layer": "data",
+          "what": "the .jam style removed"
+        }
+      ],
+      "caught_by": [
+        "flowcheck"
+      ],
+      "lanes": [
+        "learning"
+      ],
+      "status": "prevented"
     }
   ]
 }

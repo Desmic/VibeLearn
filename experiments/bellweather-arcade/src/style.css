@@ -12,6 +12,7 @@
 .goal-line[hidden],.beacon-edge[hidden],.control-hint[hidden],.context-act[hidden],.story-card[hidden]{display:none}
 .beacon-edge{position:absolute;z-index:4;width:34px;height:34px;padding:0;border:0;line-height:34px;text-align:center;border-radius:50%;background:#ffd36bee;color:#1c4972;font-size:18px;box-shadow:0 2px 10px #08213b66;pointer-events:auto;cursor:pointer}
 .beacon-edge::before{content:'';position:absolute;inset:-10px}
+.beacon-edge.nudge{animation:vl-nudge .65s ease-in-out 4}@keyframes vl-nudge{50%{box-shadow:0 0 0 9px #ffd36b66,0 2px 10px #08213b66;scale:1.18}}@media (prefers-reduced-motion:reduce){.beacon-edge.nudge{animation:none;outline:3px solid #fff}}
 .control-hint{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);padding:12px 20px;border-radius:24px;background:#143a5dcc;color:#fff9e9;font:600 16px Trebuchet MS,Arial,sans-serif;pointer-events:none;z-index:4;animation:vl-breathe 2.2s ease-in-out infinite;white-space:nowrap}
 @keyframes vl-breathe{50%{opacity:.7}}
 .context-act{position:absolute;right:20px;bottom:78px;z-index:5;min-width:150px;padding:14px 20px;border-radius:26px;border:2px solid #fff0b3;background:#e89b3c;color:#fff;font:700 16px Trebuchet MS,Arial,sans-serif;box-shadow:0 6px 20px #08213b77;animation:vl-pop .25s ease-out}
@@ -30,7 +31,7 @@
 .card-open .story-card{cursor:pointer}
 .story-choices button:focus-visible{outline:2px solid #1c4972;outline-offset:2px}
 .rail-chips button.chip{cursor:pointer;min-height:38px;padding:6px 12px}
-.rail-chips .chip.jam{border:1.5px dashed #7b4fd6;color:#4a2f7a}
+.rail-chips .chip.made{border-style:solid;background:#fff6d8;color:#1c4972;font-weight:700;animation:vl-made .6s ease-out}@keyframes vl-made{from{transform:scale(.6);opacity:0}}@media (prefers-reduced-motion:reduce){.rail-chips .chip.made{animation:none}}
 .rail-chips .chip.picked{background:#9fe0d0;box-shadow:0 0 0 3px #2f9c86 inset}
 .story-mode #route,.story-mode #hint{display:none}
 .card-open #controls{visibility:hidden}

@@ -143,7 +143,7 @@ await segment('isle', async () => {
   await card('OK');
   check('island art dressed (kit loaded)', await waitFor(() => page.evaluate(() => !!window.__vlDebug.scene.getObjectByName('island-dressing:blossom-isle')), 60000));
   await shot('arrive');
-  await pose(2.0, 54.6); await act('satchel'); await card('Got it');
+  await pose(2.3, 52.6); await act('satchel'); await card('Got it');
   // take a note; if the press didn't take (seen once in ~5 laptop runs at software frame rates),
   // say what the prompt was (a real dropped press would be a bug) and press again
   const notes = () => page.locator('.satchel-bar .chip.rail').count();
@@ -186,12 +186,15 @@ await segment('relay', async () => {
   check('channel 3 is the Warden', /Warden/.test(await page.locator('.relay-read').textContent()));
   await press(page.locator('.relay-tick[data-ch="7"]')); await press(page.locator('.relay-console button', { hasText: 'Call' }));
   await page.locator('.relay-console .chip', { hasText: 'Channel' }).waitFor({ timeout: 20000 });
+  check('the Warden\'s word is styled like the others (the player judges it by what it says)', await page.evaluate(() => { const c = [...document.querySelectorAll('.relay-console .rail-chips button.chip')]; return c.length === 4 && new Set(c.map(b => b.className + getComputedStyle(b).borderStyle + getComputedStyle(b).color)).size === 1; }));
   // every word, by reflex: the Warden's "Surrender." goes in too and comes back out
   for (const w of ['Channel', 'Surrender', 'Mira', "it's"]) await press(page.locator('.relay-console .chip', { hasText: w }));
   await press(page.locator('.relay-console button', { hasText: 'Send' })); await page.waitForTimeout(600);
   check('reading the Warden\'s word too sends it back out (the jam plays out)', /surrender/i.test(await page.locator('.relay-read').textContent()), await page.locator('.relay-read').textContent());
   for (const w of ['Channel', 'Mira', "it's"]) await press(page.locator('.relay-console .chip', { hasText: w }));
   await press(page.locator('.relay-console button', { hasText: 'Send' })); await page.waitForTimeout(600);
+  // run 23: "I never saw what word the relay put in the … slot"; and the Warden's word looks like the others
+  check('the relay makes its next word into the gap before Mira answers', await page.locator('.relay-console .chip.made', { hasText: 'Zip' }).isVisible().catch(() => false), await page.locator('.relay-read').textContent().catch(() => ''));
   await card('coming'); await page.waitForTimeout(1200);
   check('relay stars', await page.locator('.star-row').isVisible());
   await shot('relay-stars');

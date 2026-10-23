@@ -16,6 +16,9 @@ how much (below).
 
 1. **Start a session:** `node tools/playserver.mjs --input touch --persona commuter|explorer|rarely|student
    [--intent utter --start '&lab=utter'] [--max 80] [--out <a neutral folder>]`.
+   If the machine restarts after play and before the interview ends, start it again on the same
+   folder with `--resume 1`: it reads the play log and the interview so far and serves only the
+   interview (no game opens).
 2. **The tester** (a fresh agent) gets **only** `GET /brief`, verbatim, with nothing added.
    That is `tools/playtest/tester.md` with a persona. It says this is a game they have never
    seen, explains how to touch the phone, and says they can stop whenever they'd put the phone
@@ -834,3 +837,66 @@ got there); and getting about, the camera above all, is what each one would put 
   (1 of 184 pushes stuck in town, 0 of 199 on the isle): the sticking players felt was the view and
   the wedge between the chatting pair, both fixed.
 - **"Only turns partway".** The trail of light after the arrow (above).
+
+## Blind run 23: the main game on v94 (16 Oct 2026, interviewed 23 Oct; explorer, 21)
+
+**7/10, yes** ("If moving around felt as smooth as the puzzles, I'd say 8 or 9"). Played all 199
+steps to the Word Loom, the first player to open the Gate: first try, by reasoning ("Mira says up
+the stairs; that matches the keeper… the Warden is lying about East Falls"), and to call Mira first
+try. The container restarted between play and interview for the third run running; the play server
+now picks a finished run back up from its folder (`--resume 1`), so the interview went ahead.
+
+**How far to trust it.** In the interview the tester said the screenshots reached it only from
+about step 99 (earlier ones came back "media removed: request limit") and withdrew its early visual
+remarks. The play log says otherwise: what it said at the time matches the screenshots (step 23,
+"camera keeps diving into my own head": the shot shows the lens pressed into Zip against a lamp post
+at the outlook, just after the arrow turned it; step 64, the percentages). Its context keeps only
+the latest hundred or so images, so by the interview the early ones were gone and it concluded it
+had never had them. The early complaints stand; its memory of the first half is thin. Open: keep a
+tester's screenshots within that limit (fewer, or smaller).
+
+- **Landed unprompted:** premise, Mira taken, the journey, what it teaches, the loop ("you do the
+  feedback loop by hand once before it runs on its own"), the Gate ("It only opens where the notes
+  you hand it say to go"; "an AI that can only work from what you put in front of it"), the relay
+  ("the next word depends on what you let it read").
+- **Partial:** whether the whole ring or only the newest word shapes the guess ("If it only looks at
+  the last word… If it uses the whole ring…": couldn't say). After the reveal, on the Gate: "I framed
+  it as 'pick the trustworthy notes'… not the Gate being blind to the truth"; they never saw a wrong
+  opening. "The first-try stars steered me away from the instructive wrong answers."
+- **Missed:** the voice coming back coil by coil, and that it wakes the skiff ("the voice thread had
+  gone quiet"). Pieces and room: never played; guessed from what they knew of tokens.
+- **The getting about, a fourth run:** "the thinking parts pulled me in, and the moving-around parts
+  nearly pushed me out." On the isle: 36 steps on the notes ("they're all the same little
+  signboard"), "turn-toward-goal just shoved my camera into a tree" (step 165, the screen all
+  blossom), "Camera spins every time I strafe" (step 151; the play log shows no turn while strafing:
+  the turns were a 119° glance when a note set a new goal, step 154, and the arrow), and "Stuck on
+  this tree… walking isn't moving me" (steps 178–180; also 148–149).
+- **Relay:** left "Surrender." out because it "looks dodgy, different colour", by its style, not by
+  what the relay should read; never saw the word the relay made ("it cut to Mira").
+
+**Changed after run 23 (23 Oct), each measured:**
+
+- **Pockets.** New reachprobe check: the game's own push from every walkable spot on Blossom Isle
+  (0.25 m grid, 16 ways); a spot stuck across a 45° cone fails. It found five, the run 23 spot among
+  them ((-4.5, 40.3): a tree and a rock 1.16 m apart by the rim). Round solids on an island closer
+  than Zip's width plus 0.55 m are now one solid, and one that near the rim gets a low mound sloping
+  off along the edge: **0 pockets on the isle**. The town has three against walls (a warning).
+- **The lens in a crown.** The fade judged a tree by its trunk; a crown is wide. It now fades
+  anything the lens is in or within 0.8 m of. New camprobe I (every isle spot, four headings):
+  1 of 304 settled views left the lens in a drawn crown, now 0; the
+  run 23 case was mid-swing, which a settled view samples only by chance.
+- **No swing to a goal behind.** A new goal more than 90° round no longer turns the camera; the
+  goal arrow pulses, and a tap turns (camprobe B: 0° and a pulse; a goal 60° off still gets one
+  glance).
+- **Four boards, four looks:** last year's poster in faded pinks under bunting, with the Old Bridge
+  drawn; the keeper's notice framed and sealed, the bridge crossed out and an arrow to the stairs;
+  Mira's page torn (and her lantern); the Warden's dark sign. Pictures, no words.
+- **Relay:** the Warden's word looks like the others; on the right send the relay makes its next
+  word into the gap ("Zip.") before Mira answers; the star reads "Sent just your own words".
+
+**Open after run 23:** the arrow's turn at Mira's outlook can still end with the lens pressed into
+Zip by the lamp post (step 23); a first try at a probe for it measured the game's own goal rather
+than the probe's, so no change was kept. The flight (steering, the wind rings and drones found only
+on the results card) is unchanged. And a design question for Desmic: the first-try stars reward
+never seeing the Gate or the relay go wrong, which is where the lesson shows (this player's "pick
+the trustworthy notes" rather than "the machine can't tell what's true").

@@ -1,7 +1,7 @@
 import type { Guide } from './guide';
 import { sfx } from './sfx';
 import type { Station } from './kit/station';
-import { RELAY_WORDS, RELAY_JAM } from './worlds/first-words-rules';
+import { RELAY_WORDS } from './worlds/first-words-rules';
 
 // Speech 2b: call Mira from the relay (the changed case: new purpose, new
 // cards, less help). Two hands-on steps on the relay's own console:
@@ -36,7 +36,7 @@ export function buildRelay(o: Opts) {
     el.innerHTML = `<div class="relay-head">RELAY · CH <b>${ch()}</b></div><p class="relay-notes">Pinned notes: ${RELAY_NOTES}</p>${dialSvg()}<p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="call" data-action="call">Call on channel ${ch()}</button><button class="quiet" data-act="close">Step away</button></div>`;
   };
   const words = (msg = 'The line crackles. The relay heard four words. <b>Tap the words it should read</b> to make the next one, then Send.') => {
-    el.innerHTML = `<div class="relay-head">RELAY · CH <b>7</b> · <span class="live">LIVE</span></div><div class="rail-chips">${RELAY_WORDS.map((w, i) => `<button class="chip${i === RELAY_JAM ? ' jam' : ''}${pickedNow().has(i) ? ' picked' : ''}" data-w="${i}" data-action="word.${i}">${w}</button>`).join('')}<span class="chip empty">…</span></div><p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="send" data-action="send">Send</button></div>`;
+    el.innerHTML = `<div class="relay-head">RELAY · CH <b>7</b> · <span class="live">LIVE</span></div><div class="rail-chips">${RELAY_WORDS.map((w, i) => `<button class="chip${pickedNow().has(i) ? ' picked' : ''}" data-w="${i}" data-action="word.${i}">${w}</button>`).join('')}<span class="chip empty">…</span></div><p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="send" data-action="send">Send</button></div>`;
     el.onclick = e => {
       const b = (e.target as HTMLElement).closest('button'); if (!b) return; e.stopPropagation(); sfx.tap();
       if (b.dataset.w) { st.act('word.' + b.dataset.w); words(); return; }
@@ -56,7 +56,14 @@ export function buildRelay(o: Opts) {
   const send = () => {
     const r = st.act('send'); if (!r.ok) return;
     if (r.events.includes('nothing-picked')) { g.toast('Tap a word first', 1100); sfx.boing(); return; }
-    if (r.events.includes('mira-hears')) { finish(); return; }
+    // the payoff, seen: the relay reads the words it was given and makes the next one into the gap
+    // (run 23: "I never saw what word the relay put in the … slot; it cut to Mira")
+    if (r.events.includes('mira-hears')) {
+      el.onclick = null; for (const b of el.querySelectorAll('button')) (b as HTMLButtonElement).disabled = true;
+      const gap = el.querySelector('.chip.empty'); if (gap) { gap.textContent = 'Zip.'; gap.classList.add('made'); }
+      el.querySelector('.relay-read')!.innerHTML = 'It read <b>“Channel 7. Mira, it\'s”</b> and made the next word: <b>“Zip.”</b>';
+      sfx.hum(1); setTimeout(finish, 1900); return;
+    }
     const kind = r.judged[0]?.choice;
     sfx.boing();
     const msg = kind === 'jammed' ? 'It read the Warden\'s word too, so it sent <b>“Channel 7. Surrender. Mira, surrender, surrender…”</b> Mira: “Zip?! Never!”'

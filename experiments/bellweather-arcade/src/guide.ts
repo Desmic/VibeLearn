@@ -163,6 +163,8 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
     get beaconAt(): T.Vector3 | null { return beacon.visible ? beacon.position : null; },
     /** what tapping the goal arrow does (the game turns its camera toward the goal) */
     onPoint(fn: () => void) { onPoint = fn; },
+    /** pulse the goal arrow a moment (a new goal behind the player: the arrow shows it, the camera stays put) */
+    nudge() { edge.classList.remove('nudge'); void edge.offsetWidth; edge.classList.add('nudge'); setTimeout(() => edge.classList.remove('nudge'), 2600); },
     startControlHints() { hintStage = 'on'; hintT = 0; },
     /** move the target brackets with a moving thing */
     setActionAt(at: T.Vector3) { if (bracketAt) bracketAt.copy(at); },

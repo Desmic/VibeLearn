@@ -95,7 +95,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   let miraLantern: T.Object3D | null = null;
   const boards = NOTES.map(n => {
     const grp = new T.Group(); grp.position.copy(n.at); grp.userData.fade = { halfW: .5, y0: 0, y1: 1.7 }; grp.userData.noCameraBlock = true; root.add(grp);
-    const nb = noticeBoard(n.id === 'warden' ? 'warden' : 'paper', n.at.x * 7 + n.at.z); mergeStatic(nb.group, [nb.board]); grp.add(nb.group);
+    const nb = noticeBoard(({ warden: 'warden', poster: 'poster', keeper: 'keeper', mira: 'torn' } as const)[n.id as 'warden'] ?? 'paper', n.at.x * 7 + n.at.z); mergeStatic(nb.group, [nb.board]); grp.add(nb.group);
     grp.rotation.y = Math.atan2(ISLE.x - n.at.x, ISLE.z + 3 - n.at.z) * .6; // turn toward the path
     // Mira's page has her festival lantern hung on its board, glowing (runs 19 and 21: neither player
     // ever went to the far board; the lantern Zip hung for her says she was here without a word)

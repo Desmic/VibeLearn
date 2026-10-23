@@ -100,6 +100,8 @@ const follow = async (re, { maxSecs = 120, quiet = false, explore = false } = {}
 const answer = async (prefs = [], max = 8) => {
   const picked = [];
   await until(cardOpen, 4);   // a line often opens a moment after the action that starts it
+  // ...and some open on a real-time timer (the relay shows the word it made, then Mira answers)
+  for (let k = 0; k < 8 && !(await cardOpen()); k++) await page.waitForTimeout(400);
   for (let i = 0; i < max && await cardOpen(); i++) {
     const labels = await page.locator('.story-card:not([hidden]) button').evaluateAll(bs => bs.map(b => (b.getAttribute('aria-label') || b.textContent).trim()));
     const hit = prefs.find(p => labels.some(l => p.test(l)));

@@ -1,13 +1,14 @@
 // Camera probe: the turns the camera makes by itself around goals, measured (runs 15 and 16 named
 // the camera as the reason they stopped). Three cases, each from a fixed spot on the Blossom Isle:
 //   A. a new goal that is already on screen: the camera should not turn (it did: "glances");
-//   B. a new goal behind the player: one glance toward it (wanted);
+//   B. a new goal behind the player: no swing, the arrow pulses (run 23); off to the side: one glance;
 //   C. tap the goal arrow, then walk with the stick: the walk should head at the goal and the
 //      view should stay on it ("its turn doesn't stay put once you move");
 //   D. back from a dialogue (Mira's first line), the camera is clear of walls behind Zip;
 //   E. with the goal behind a wall, the arrow faces the way round it;
 //   F. how often the camera is pressed into Zip anywhere in town;
-//   H. how often it looks straight down at him from above.
+//   H. how often it looks straight down at him from above;
+//   I. the lens sitting inside a tree crown that stays drawn (Blossom Isle).
 //   bash tools/build.sh && node tools/camprobe.mjs --input touch [--out /tmp/camprobe]
 import { harness } from './harness.mjs';
 const h = await harness({ title: 'Camera probe', outDefault: '/tmp/camprobe', tool: 'camprobe', lane: 'feel' });
@@ -25,6 +26,30 @@ await h.open('&title=0&beat=gate-open'); await page.waitForTimeout(2500); await 
 const P = [0, 50.5];
 const at = (yaw, d, side = 0) => [P[0] - Math.sin(yaw + side) * d, P[1] - Math.cos(yaw + side) * d];
 
+// I (run first, on the isle already open: a reload after the town scans can hang): the lens inside a crown (run 23: after "Turn toward the goal" the whole screen was blossom,
+// "shoved my camera into a tree"). Blossom Isle, every walkable spot on a 1.5 m grid, four headings,
+// settled: a view with the camera in (or within 0.7 m of; the game fades from 0.8 m) something that can fade, left more than
+// half drawn, counts.
+{
+  let n = 0, inIt = 0, drawn = 0; const where = [];
+  for (let z = 39; z <= 57; z += 1.5) for (let x = -9; x <= 9; x += 1.5) {
+    if (!(await page.evaluate(([x, z]) => window.__arcade.walkable(x, z), [x, z]))) continue;
+    for (let k = 0; k < 4; k++) {
+      const yaw = (k + .5) / 4 * Math.PI * 2;
+      await page.evaluate(([x, z, y]) => window.__arcade.pose(x, z, y, .2, 6, y), [x, z, yaw]); await sim(.7); await page.waitForTimeout(600);
+      const look = () => page.evaluate(() => { const D = window.__vlDebug, c = D.camera.position, P = c.clone(); let hit = null;
+        D.scene.traverse(o => { const f = o.userData.fade; if (!f || hit || !o.visible) return; o.getWorldPosition(P);
+          const dh = Math.max(0, Math.hypot(c.x - P.x, c.z - P.z) - f.halfW), dv = Math.max(0, P.y + f.y0 - c.y, c.y - (P.y + f.y1));
+          // the game's own decision for it (where its fade is heading), not the eased look: frames are slow without a GPU
+          if (Math.hypot(dh, dv) < .7) { const fd = (D.faders ?? []).find(x => x.root === o); hit = { name: o.name || o.type, op: fd ? (fd.want ?? fd.o) : 1 }; } });
+        return hit; });
+      // the fade eases in over a few drawn frames (slow without a GPU): give it up to 3 s
+      let r = await look(); for (let t = 0; t < 6 && r && r.op > .5; t++) { await page.waitForTimeout(500); r = await look(); }
+      n++; if (r) { inIt++; if (r.op > .5) { drawn++; if (where.length < 5) where.push(`(${x}, ${z}) ${Math.round(yaw * 180 / Math.PI)}° ${r.name}`); } }
+    }
+  }
+  h.check('I. the lens never sits in a tree crown left drawn (Blossom Isle, every spot, four headings)', drawn === 0, `${drawn} of ${n} views (${inIt} with the lens in something that fades)${where.length ? ': ' + where.join('; ') : ''}`, 'fail', 'feel');
+}
 // A: on screen, 9 m ahead, a little off centre
 await h.pose(P[0], P[1], 0); await sim(1); await goal(null, null); await sim(.5);
 let g0 = await glance(); await goal('Probe goal A', at(0, 7, .25)); await sim(2.5);
@@ -32,12 +57,21 @@ const a = await glance() - g0;
 h.check('A. a new goal already on screen: the camera holds still', a < .1, `turned ${deg(a)}°`, 'fail', 'feel');
 // B: behind
 await h.pose(P[0], P[1], 0); await sim(1); await goal(null, null); await sim(.5);
-g0 = await glance(); await goal('Probe goal B', at(0, 6, Math.PI)); await sim(2.5);
+g0 = await glance(); await goal('Probe goal B', at(0, 6, Math.PI)); await sim(.3);
+const pulsed = await page.evaluate(() => !!document.querySelector('.beacon-edge.nudge')); await sim(2.2);
 const b = await glance() - g0;
-h.check('B. a new goal behind the player: one glance toward it', b > 1.5, `turned ${deg(b)}°`, 'fail', 'feel');
+// run 23: a 119° swing on taking a note ("the camera spins… getting dizzy"); a goal behind no longer
+// swings the view: the arrow pulses, and a tap turns
+h.check('B. a new goal behind the player: the camera stays put and the goal arrow pulses', b < .1 && pulsed, `turned ${deg(b)}°, arrow ${pulsed ? 'pulsed' : 'did not pulse'}`, 'fail', 'feel');
+// B2: a new goal off to the side (60°): one glance toward it
+await h.pose(P[0], P[1], 0); await sim(1); await goal(null, null); await sim(.5);
+g0 = await glance(); await goal('Probe goal B2', at(0, 6, -Math.PI / 3)); await sim(2.5);
+const b2 = await glance() - g0;
+h.check('B. a new goal off to the side: one glance toward it', b2 > .6, `turned ${deg(b2)}°`, 'fail', 'feel');
 // C: arrow, then walk forward for 3 s
 await h.pose(P[0], P[1], 0); await sim(1); await goal(null, null); await sim(.5);
-const B = at(0, 7, -Math.PI / 2); await goal('Probe goal C', B); await sim(.2);
+// 4.5 m to the side with a clear line (the note boards and shrubs past it are one solid now)
+const B = at(0, 4.5, -Math.PI / 2); await goal('Probe goal C', B); await sim(.2);
 // let any glance finish, then turn away again so the arrow has work to do
 await sim(2.5); await h.pose(P[0], P[1], 0); await sim(1);
 await page.waitForTimeout(800); const before = await offAim(B);

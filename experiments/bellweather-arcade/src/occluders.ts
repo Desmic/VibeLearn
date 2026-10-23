@@ -5,7 +5,7 @@ import * as T from 'three';
 // screen space: a fader nearer the camera than Zip whose projected outline
 // overlaps Zip's fades out. Each fader owns its material, and a fully visible
 // fader goes back to opaque so it costs nothing extra.
-interface Fader { root: T.Object3D; mats: (T.Material & { opacity: number })[]; halfW: number; y0: number; y1: number; o: number; dither?: boolean }
+interface Fader { root: T.Object3D; mats: (T.Material & { opacity: number })[]; halfW: number; y0: number; y1: number; o: number; dither?: boolean; /** where o is heading (for probes) */ want?: number }
 
 // Anything tagged with userData.fade = { halfW, y0, y1 } (its outline around the
 // object's origin, in metres) can fade. Materials are cloned per fader so one
@@ -67,13 +67,18 @@ export function fadeOccluders(list: Fader[], camera: T.Camera, zipFeet: T.Vector
       if (ox > 0 && oy > 0) want = 1 - .84 * T.MathUtils.smoothstep((ox * oy) / zipArea, .05, .35);
     }
     if (fr.depth < 1.4) want = Math.min(want, .16);
+    // the lens in (or brushing) the thing itself: a crown is wide, so its trunk can be metres off
+    // while the camera sits in its leaves (run 23: "turn-toward-goal just shoved my camera into a tree",
+    // the whole screen pink)
+    const dh = Math.max(0, Math.hypot(camPos.x - P.x, camPos.z - P.z) - f.halfW), dv = Math.max(0, P.y + f.y0 - camPos.y, camPos.y - (P.y + f.y1));
+    if (Math.hypot(dh, dv) < .8) want = Math.min(want, .16);
     // something big between the camera and Zip that fills a lot of the screen
     // (a tree crown right by the lens) fades too, even if it misses Zip's outline
     if (fr.depth < zr.depth) {
       const cw = Math.max(0, Math.min(fr.x1, 1) - Math.max(fr.x0, -1)), ch = Math.max(0, Math.min(fr.y1, 1) - Math.max(fr.y0, -1));
       const cover = cw * ch / 4; if (cover > .12) want = Math.min(want, 1 - .75 * T.MathUtils.smoothstep(cover, .12, .3));
     }
-    f.o += (want - f.o) * Math.min(1, dt * 8);
+    f.want = want; f.o += (want - f.o) * Math.min(1, dt * 8);
     const fading = f.o < .985;
     for (const m of f.mats) {
       // dither: hashed see-through that keeps depth (one-mesh characters would otherwise draw

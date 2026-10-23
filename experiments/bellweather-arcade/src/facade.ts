@@ -30,12 +30,34 @@ export function removeSolidBox(b:{minX:number,maxX:number,minZ:number,maxZ:numbe
 // Extra walkable discs (e.g. a separate island reached by skiff).
 const regions:{x:number,z:number,r:number}[]=[];
 export function addWalkRegion(x:number,z:number,r:number){regions.push({x,z,r})}
+// Pockets sealed (run 23: "Stuck on this tree… walking isn't moving me", twice on Blossom Isle).
+// Two round things (trees, rocks, posts) a little wider apart than Zip, or one that close to the
+// island's edge, look like they have a way between them; there isn't one, and the V between them holds a
+// push dead. Filled as if one solid (the round thing drawn out to the other), so the push slides off
+// the outside like any other edge. Walls and their corners are left alone: a corner reads as one.
+// Recomputed when the solids change; no solid moves at runtime.
+const ZIP_R=.34,fill:{x:number,z:number,r:number}[]=[];let fillKey='';
+function sealPockets(){
+  fill.length=0;const W=ZIP_R*2,NEEDLE=W+.55/* a way half a metre wider than Zip still holds a push that isn't dead-on (run 23: 1.16 m between a tree and a rock) */,lay=(ax:number,az:number,ar:number,bx:number,bz:number,br:number)=>{const d=Math.hypot(bx-ax,bz-az),n=Math.max(1,Math.ceil(d/(Math.min(ar,br)*.5)));for(let i=1;i<n;i++){const t=i/n;fill.push({x:ax+(bx-ax)*t,z:az+(bz-az)*t,r:ar+(br-ar)*t})}};
+  // islands only for now: the town's solids sit against walls and townsfolk, tuned by their own checks
+  const inIsle=(c:{x:number,z:number})=>regions.some(g=>Math.hypot(c.x-g.x,c.z-g.z)<g.r);
+  for(let i=0;i<circles.length;i++){const a=circles[i];if(!inIsle(a))continue;
+    for(let j=i+1;j<circles.length;j++){const b=circles[j];if(!inIsle(b))continue;const g=Math.hypot(a.x-b.x,a.z-b.z)-a.r-b.r;if(g<NEEDLE&&g>-Math.min(a.r,b.r))lay(a.x,a.z,a.r,b.x,b.z,b.r)}
+    const home=regions.find(g=>Math.hypot(a.x-g.x,a.z-g.z)<g.r);
+    // near the island's edge: a low mound along the edge up to it, sloping off to either side, so
+    // neither side is a corner to wedge in
+    if(home){const d=Math.hypot(a.x-home.x,a.z-home.z),g=home.r-d-a.r;if(g<NEEDLE&&d>.01){const ux=(a.x-home.x)/d,uz=(a.z-home.z)/d,e=a.r+Math.max(0,g)+.05;lay(a.x,a.z,a.r,a.x+ux*e,a.z+uz*e,a.r);
+      const phi=Math.atan2(ux,uz),top=home.r-d+a.r/* from the edge to its inner side */,L=top*3+W;for(let s=-L;s<=L+1e-6;s+=.08){const q=phi+s/home.r,rho=top*(1-Math.abs(s)/L);if(rho>.03)fill.push({x:home.x+Math.sin(q)*home.r,z:home.z+Math.cos(q)*home.r,r:rho})}}}
+  }
+}
+/** for probes: the solids near a spot (circles, pocket fillers, boxes) */
+export function solidsNear(x:number,z:number,R:number){const n=(c:{x:number,z:number,r:number})=>Math.hypot(c.x-x,c.z-z)<R+c.r;return {circles:circles.filter(n),fill:fill.filter(n),boxes:blockers.filter(b=>x>b.minX-R&&x<b.maxX+R&&z>b.minZ-R&&z<b.maxZ+R),regions}}
 export function walkable(p:T.Vector3){
-  const r=.34;
+  const r=ZIP_R,key=circles.length+','+blockers.length+','+regions.length;if(key!==fillKey){fillKey=key;sealPockets()}
   const inRegion=regions.some(g=>Math.hypot(p.x-g.x,p.z-g.z)<g.r-r);
   if(!inRegion&&(p.x<-9+r||p.x>9-r||p.z<-12+r||p.z>10-r))return false;
   for(const b of blockers)if(p.x>b.minX-r&&p.x<b.maxX+r&&p.z>b.minZ-r&&p.z<b.maxZ+r)return false;
-  return circles.every(c=>Math.hypot(p.x-c.x,p.z-c.z)>c.r+r);
+  return circles.every(c=>Math.hypot(p.x-c.x,p.z-c.z)>c.r+r)&&fill.every(c=>Math.hypot(p.x-c.x,p.z-c.z)>c.r+r);
 }
 
 function roundShape(w:number,h:number,r:number){

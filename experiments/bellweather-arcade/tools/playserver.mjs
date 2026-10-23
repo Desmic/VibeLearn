@@ -30,13 +30,14 @@
 //   directed only: reload, note {text, kind}, understand, verdict, GET /intent, compare
 //   {type:'end'}                   finish: writes report.md and the standard report
 // Interview (blind, after stop):
+//   (machine restarted mid-interview? start again with the same --out and --resume 1: interview only)
 //   GET /trace                     the play log as text, step by step (for the interviewer)
 //   GET /interview/brief           the interviewer's guide with the intent and its items
 //   GET /interview                 the transcript;  GET /interview/pending: the question waiting for an answer
 //   POST /interview {role:'interviewer'|'player', phase, text}
 //   POST /findings {...}           the interviewer's conclusions (tools/playtest/interviewer.md)
 import http from 'node:http';
-import { writeFileSync, appendFileSync, readFileSync } from 'node:fs';
+import { writeFileSync, appendFileSync, readFileSync, existsSync } from 'node:fs';
 import { designVocabulary, questionLeaks, metWords } from './lib/leak.mjs';
 import { harness, arg } from './harness.mjs';
 import { buildIntent, buildUtterIntent, buildNgramIntent } from './intent.mjs';
@@ -72,13 +73,17 @@ const intent = async () => {
 const intentMd = async () => (await intent()).md;
 /** what was tested: the whole game, or a test area (results carry it as their segment) */
 const AREA = INTENT === 'game' ? 'game' : INTENT;
-const LOG = `${OUT}/playlog.jsonl`; writeFileSync(LOG, '');
+const LOG = `${OUT}/playlog.jsonl`;
+// --resume 1: pick a finished run back up from its folder (the play log and the interview so far),
+// for the interview only; no game is opened. A container restart used to lose runs 21-23's interviews.
+const RESUME = arg('resume', '0') === '1';
+if (!RESUME) writeFileSync(LOG, '');
 let step = 0; const notes = [];
 const log = o => appendFileSync(LOG, JSON.stringify({ step, t: Date.now(), ...o }) + '\n');
 
 // --start adds URL params, e.g. '&title=0&beat=to-loom' to begin at Stop 2
 const START = arg('start', '');
-if (arg('fresh', '1') === '1') await h.fresh(START); else await h.open(START);
+if (RESUME) {} else if (arg('fresh', '1') === '1') await h.fresh(START); else await h.open(START);
 
 async function observe() {
   step++;
@@ -182,6 +187,16 @@ const LEVELS = ['unprompted', 'probed', 'moment', 'reveal', 'missed', 'misread']
 let stopped = false, stoppedAt = null, revealed = false, phaseAt = 0, refusals = [], findings = null;
 const interview = [];   // {n, role, phase, text, t}
 const IVLOG = `${OUT}/interview.jsonl`;
+if (RESUME) {
+  for (const l of readFileSync(LOG, 'utf8').split('\n').filter(Boolean)) { const e = JSON.parse(l);
+    if (e.observe) step = Math.max(step, e.step);
+    if (e.act?.type === 'think') notes.push({ step: e.step, kind: 'think', text: String(e.act.text ?? '').slice(0, 600) });
+    if (e.act?.type === 'stop') { stopped = true; stoppedAt = e.step; } }
+  if (!stopped && step < MAX) { stopped = true; stoppedAt = step; }
+  if (existsSync(IVLOG)) for (const l of readFileSync(IVLOG, 'utf8').split('\n').filter(Boolean)) { const e = JSON.parse(l);
+    if (e.refused) { refusals.push({ phase: e.phase, text: e.text, leaks: e.leaks }); continue; }
+    interview.push(e); if (e.role === 'interviewer') { phaseAt = Math.max(phaseAt, PHASES.indexOf(e.phase)); if (e.phase === 'reveal') revealed = true; } }
+}
 const playLog = () => readFileSync(LOG, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
 /** every word the tester has met: on screen while playing, said aloud, said in the interview */
 function met() {

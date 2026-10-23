@@ -33,7 +33,7 @@ const probe = async (name, label, ring = 5.5) => {
 
 // the Gate: satchel taken, one note in it, goal "Take your notes to the gate"
 await h.fresh('&title=0&beat=land'); await card('OK');
-await h.pose(2.0, 54.6); await h.act('satchel'); await card('Got it');
+await h.pose(2.3, 52.6); await h.act('satchel'); await card('Got it');
 await h.pose(-4.5, 52.2); await h.act('Take'); await sim(.5);
 // the arrow leads round the notes until each has been read (on screen a moment), then to the Gate
 for (const [x, z] of [[-2.4, 50.4], [4.6, 50.8], [5.4, 53.4]]) { await h.pose(x, z); await sim(1.6); }
@@ -104,6 +104,32 @@ const reach = async (extra, box) => {
   }
   h.check('town: no townsperson stands in the way', !blocked.length, blocked.join('; ') || `${all.folk.length} checked`, 'fail', 'world');
 }
+// pockets: places a push sticks fast whichever way within 45° you lean (run 23, twice on Blossom
+// Isle: "Stuck on this tree… walking isn't moving me", in the V between a tree and a rock, and
+// between a tree and the island's edge). A push straight at one round thing still slides off to a
+// side when the thumb leans a little; in a pocket it doesn't. Pushed by the game's own steps
+// (__vlDebug.tryPush) from every walkable spot on a 0.25 m grid, 16 ways.
+const pockets = async (name, extra, box, sev = 'fail') => {
+  await h.open(extra); await page.waitForTimeout(2000);
+  const r = await page.evaluate(([x0, x1, z0, z1]) => {
+    const D = window.__vlDebug, c = .25, out = [], N = 16;
+    for (let z = z0; z <= z1; z += c) for (let x = x0; x <= x1; x += c) {
+      if (!window.__arcade.walkable(x, z)) continue;
+      const moved = []; for (let k = 0; k < N; k++) { const a = k / N * Math.PI * 2, [qx, qz] = D.tryPush(x, z, Math.sin(a), Math.cos(a), .35); moved.push(Math.hypot(qx - x, qz - z)); }
+      // a wall's corner (a hedge meeting the island's edge) reads as a corner, and isn't counted
+      if (D.solidsNear(x, z, .9).boxes.length) continue;
+      for (let k = 0; k < N; k++) if ([-1, 0, 1].every(o => moved[(k + o + N) % N] < .12)) { out.push([x, z, k]); break; }
+    }
+    // group neighbouring spots into places
+    const places = []; for (const [x, z] of out) { const p = places.find(q => Math.hypot(q[0] - x, q[1] - z) < 1); if (p) p[2]++; else places.push([x, z, 1]); }
+    return places;
+  }, box);
+  h.check(`${name}: no pockets a push gets stuck in`, !r.length, r.map(([x, z, n]) => `(${x.toFixed(1)}, ${z.toFixed(1)}) ×${n}`).join('; ') || 'none', sev, 'world');
+};
+await pockets('Blossom Isle', '&title=0&beat=gate-open', [-10, 10, 38, 58]);
+// the town: walls and their corners, not yet sealed (no tester has been stuck in one since the
+// strips were fixed); a warning until it is
+await pockets('town', '&title=0&beat=skiff', [-9, 9, -12, 10], 'warn');
 await strips('town', '&title=0&beat=skiff', [-9, 9, -12, 10]);
 await strips('Blossom Isle', '&title=0&beat=gate-open', [-10, 10, 38, 58]);
 await h.finish();

@@ -85,7 +85,7 @@ await segment('oob', async () => {
 await segment('walls', async () => {
   // the hedge and the closed gate must hold; no slipping through at the joins
   await startIsle();
-  const tries = [[0, 47.0, 'gate (closed)'], [1.85, 47.0, 'gate pillar join'], [-1.85, 47.0, 'gate pillar join (left)'], [5, 47.2, 'hedge'], [9.0, 47.2, 'hedge end at the rim']];
+  const tries = [[0, 47.0, 'gate (closed)'], [1.85, 47.0, 'gate pillar join'], [-1.85, 47.0, 'gate pillar join (left)'], [5, 47.2, 'hedge'], [8.0, 47.2, 'hedge end at the rim (as far out as one can stand since the rim was sealed, 23 Oct)']];
   for (const [x, z, what] of tries) {
     await pose(x, z, 0);
     await hold('ArrowUp', 4000);
@@ -98,12 +98,12 @@ await segment('walls', async () => {
 await segment('mash', async () => {
   // mash primary buttons, the context action and the satchel
   await startIsle();
-  await pose(2.0, 54.6);
+  await pose(2.3, 52.6);
   const actBtn = page.locator('.context-act').first(); await actBtn.waitFor({ timeout: 20000 });
   await hit(actBtn, 6, 20000);
   await page.waitForTimeout(800); await invariants('mash satchel');
   await card('Got it', 10000).catch(() => {});   // the satchel's card (waits until it holds still: a tap on a moving button lands nowhere)
-  for (const [x, z] of [[-4.5, 52.2], [4.6, 50.8], [5.4, 51.6]]) {
+  for (const [x, z] of [[-4.5, 52.2], [4.6, 50.8], [4.6, 52.0]]) {
     await pose(x, z); await page.locator('.context-act').first().waitFor({ timeout: 10000 }).catch(() => {}); await page.waitForTimeout(500);
     await hit(page.locator('.context-act'), 5, 20000); await page.waitForTimeout(700);
   }
@@ -141,14 +141,14 @@ await segment('order', async () => {
 await segment('scum', async () => {
   // reload-scumming: answer wrong, reload, answer right → must not count as first try
   await startIsle();
-  await pose(2.0, 54.6); await act('satchel'); await card('Got it');
+  await pose(2.3, 52.6); await act('satchel'); await card('Got it');
   await pose(-4.5, 52.2); await act('Take');
   await pose(4.6, 50.8); await act('Take');
   await pose(0, 49.2); await act('Gate'); await card('East');
   const before = (await learning()).length;
   await page.reload(); await page.waitForFunction(() => document.getElementById('loading')?.hidden, null, { timeout: 240000 }); await page.waitForTimeout(1500);
   await card('OK').catch(() => {});
-  await pose(2.0, 54.6); await act('satchel'); await card('Got it');
+  await pose(2.3, 52.6); await act('satchel'); await card('Got it');
   await pose(-4.5, 52.2); await act('Take');
   await pose(0, 49.2); await act('Gate'); await card('Lotus');
   const ev = await learning(), gateEv = ev.filter(e => e.decision === 'predict-open' || /gate/.test(e.activity));
