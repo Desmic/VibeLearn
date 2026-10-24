@@ -399,7 +399,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
     get focus(): T.Vector3 | null { return cut >= 0 ? focusPt.copy(miraAt).lerp(ship.position, .5) : engine.active ? focusPt.set(PILOT_STONE.x - .4, 2.6, PILOT_STONE.z) : null; },
     get frozen() { return g.cardOpen || cut >= 0 || opening >= 0 || skiff.active || isle.busy || loom.active || engine.active; },
     get shot() {
-      const s = engine.shot ?? skiff.shot ?? flight.shot; if (s) return s;
+      const s = engine.shot ?? skiff.shot ?? flight.shot ?? isle.shot; if (s) return s;
       if ((cut >= 0 || opening >= 0) && shot) return shot;
       if (cut < 0 && !talking) return null;
       // Frame Zip and Mira together on any screen: aim between them and step back until

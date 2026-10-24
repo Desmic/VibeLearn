@@ -957,3 +957,40 @@ views.** Likely behind much of runs 22–24's "the arrow points behind me", "the
 - A note in the satchel strip is a button: tapped, it goes back to its board, from anywhere.
 - The guess reads "Your guess: Lotus Terraces stairs · guessed right ✓" (or "· guessed wrong ✗"),
   not a bare tick beside a shut Gate.
+
+## Blind run 25: the main game on v97 (24 Oct 2026; rarely plays games, 20)
+
+**6/10, yes**, and the first player to finish both stops: Mira's page read, the Gate open, the new
+orders, Mira called, Tavi freed at the Word Loom ("that was actually kind of fun once I stopped
+getting lost. the walking around part was the annoying bit"). 222 steps.
+
+- **Landed unprompted:** premise, Mira taken, what it teaches ("sneakily teaching you how AI chatbots
+  work: guessing the next word, only knowing what you feed it, word pieces"), the Gate, pieces.
+- **The new orders worked as a test.** At the planted sign they said aloud "the gate just does
+  whatever the last note says… so East Falls, even though it is a trap", picked East Falls, and
+  later: "these AI things only know what you hand them, and someone sneaky can hide orders in what
+  they read." The clearest of the lessons, in their words. But they never saw the drone plant it:
+  "the Warden's sign came back… the game didn't really show me".
+- **Room, at the moment:** "doesn't count words, it counts pieces… short isn't the same as small",
+  and that a cut-off end would lose "Tavi". Guessed 8 pieces for the call (it was 9).
+- **Sequence, probed:** strong at the engine ("each guess goes on the end and it reads everything
+  again"), misread at the relay: they left the "Channel 7." card out because the console already
+  said "CH 7 · LIVE" ("felt like the dial didn't count"), and couldn't tell what the star "Sent
+  just your own words" wanted, since the card isn't their words.
+- **Missed, again (five runs now):** the voice coming back coil by coil, and that it is what wakes
+  the skiff ("in my head collecting words was for the boat, not for fixing my voice"; "the story
+  and the lessons felt like two separate things"). Left for Desmic: how the voice's return should
+  show (see the report).
+- **Getting about:** 29 steps to reach Mira; "the camera keeps swinging every time I move" (the
+  play log shows the swings were their own taps on the goal arrow, which they used constantly);
+  "am I stuck on this bush?"; and tapping the stars card's button after it had already gone on by
+  itself (steps 180, 193: an AI tester is slower than the card's 11 s).
+
+**Changed after run 25:**
+
+- The new orders are a directed shot: from the landing's side, the camera follows the drone from
+  the Warden's board to the arch (and Zip stands still meanwhile); the drone and the carried sign
+  are bigger.
+- The relay's word console no longer says "CH 7" (the channel card is where the channel is); the
+  star reads "Sent the right words, first try".
+- The satchel's notes stop being tappable once the Gate is open.

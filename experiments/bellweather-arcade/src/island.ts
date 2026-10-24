@@ -239,7 +239,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       const o = r.events.find(e => e.startsWith('gate-'))?.slice(5);
       const swap = (then?: () => void) => [{ label: 'Swap my notes', kind: 'primary' as const, act: () => { retry(); then?.(); } }];
       if (o === 'open') {
-        markGuess(false); opts.onOpen?.(); melt = 1.2; if (sealBox) opts.removeBox(sealBox); sealBox = null; path.forEach(d => (d.visible = true)); phase = 'open'; sfx.chime();
+        markGuess(false); opts.onOpen?.(); melt = 1.2; if (sealBox) opts.removeBox(sealBox); sealBox = null; path.forEach(d => (d.visible = true)); phase = 'open'; renderBag(); sfx.chime();
         gateSays('Past the Lotus Terraces and up the stairs to the bell gardens! Mind the step.', [{ label: 'Yes!', kind: 'primary', act: () => gateSt.finish(() => { mood = 'idle'; newOrders.start(); }) }], 'happy');
       } else if (o === 'decoy') {
         g.close(); gateSays('East Falls! The sign said so. Rules are rules!', [], 'smug');
@@ -270,27 +270,35 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   // notes", not "the machine can't tell what's true"). A test, not a forced failure: the player
   // only predicts, and Zip pulls the sign out after.
   const ordDrone = new T.Group(); ordDrone.visible = false; root.add(ordDrone);
-  ordDrone.add(new T.Mesh(new T.SphereGeometry(.34, 14, 10), std('#2a1f40', '#4a2f7a', .6)));
-  { const eye = new T.Mesh(new T.SphereGeometry(.13, 10, 8), new T.MeshBasicMaterial({ color: '#e2c6ff' })); eye.position.z = .28; ordDrone.add(eye);
-    for (const s2 of [-1, 1]) { const fin = new T.Mesh(new T.BoxGeometry(.34, .04, .2), std('#3b2766', '#7b4fd6', .4)); fin.position.set(s2 * .4, .05, 0); fin.rotation.z = s2 * .3; ordDrone.add(fin); } }
+  ordDrone.add(new T.Mesh(new T.SphereGeometry(.5, 16, 12), std('#2a1f40', '#4a2f7a', .6))); ordDrone.scale.setScalar(1);
+  { const eye = new T.Mesh(new T.SphereGeometry(.19, 10, 8), new T.MeshBasicMaterial({ color: '#e2c6ff' })); eye.position.z = .42; ordDrone.add(eye);
+    for (const s2 of [-1, 1]) { const fin = new T.Mesh(new T.BoxGeometry(.5, .05, .3), std('#3b2766', '#7b4fd6', .4)); fin.position.set(s2 * .6, .05, 0); fin.rotation.z = s2 * .3; ordDrone.add(fin); } }
   const newOrders = {
     t: -1, busy: false, carried: null as T.Object3D | null, from: new T.Vector3(), board: new T.Vector3(), arch: new T.Vector3(GATE.x, 2.3, GATE.z + .5),
+    // a directed shot while the drone fetches the sign and plants it (run 25: "the Warden's sign came
+    // back… the game didn't really show me"): from the landing's side, the board and the arch both in view
+    shotPos: new T.Vector3(), shotLook: new T.Vector3(),
+    get shot() { return newOrders.t >= 0 && newOrders.t < 3.7 ? { pos: newOrders.shotPos, look: newOrders.shotLook } : null; },
     start() {
       const w = boards.find(b => b.n.id === 'warden'); if (!w) { goalNow(); return; }
       newOrders.busy = true; newOrders.t = 0; opts.setGoal(null, null);
       w.board.getWorldPosition(newOrders.board); newOrders.from.copy(newOrders.board).add(new T.Vector3(3, 7, 4));
       ordDrone.position.copy(newOrders.from); ordDrone.visible = true; sfx.whisper();
+      { const mx = (newOrders.board.x + GATE.x) / 2, mz = (newOrders.board.z + GATE.z) / 2, dx = GATE.x - newOrders.board.x, dz = GATE.z - newOrders.board.z, l = Math.hypot(dx, dz) || 1;
+        let px = -dz / l, pz = dx / l; if (pz < 0) { px = -px; pz = -pz; }   // the side toward the landing
+        newOrders.shotPos.set(mx + px * 6, 3.2, mz + pz * 6); newOrders.shotLook.copy(newOrders.board).setY(1.6); }
       g.thinkOnce('orders-drone', 'Uh oh. That drone has a very "Warden" look about it.');
     },
     tick(dt: number) {
       if (newOrders.t < 0) return;
       const t0 = newOrders.t; newOrders.t += dt; const k = (a: number, b: number) => T.MathUtils.smoothstep(newOrders.t, a, b);
       ordDrone.rotation.y += dt * 2; ordDrone.position.y += Math.sin(newOrders.t * 6) * .004;
+      newOrders.shotLook.lerp(ordDrone.position, Math.min(1, dt * 2.5));
       if (newOrders.t < 1.6) ordDrone.position.lerpVectors(newOrders.from, tmpV.copy(newOrders.board).setY(newOrders.board.y + .55), k(0, 1.6));
       else if (newOrders.t < 3.2) ordDrone.position.lerpVectors(tmpV.copy(newOrders.board).setY(newOrders.board.y + .55), newOrders.arch, k(1.6, 3.2));
       if (t0 < 1.6 && newOrders.t >= 1.6) {   // it plucks the sign off the board
         const w = boards.find(b => b.n.id === 'warden')!; w.board.visible = false;
-        const c = w.board.clone(); c.position.set(0, -.42, 0); c.rotation.set(0, 0, 0); c.scale.setScalar(.7); ordDrone.add(c); newOrders.carried = c; sfx.catch();
+        const c = w.board.clone(); c.position.set(0, -.7, 0); c.rotation.set(0, 0, 0); c.scale.setScalar(1.1); ordDrone.add(c); newOrders.carried = c; sfx.catch();
       }
       if (t0 < 3.2 && newOrders.t >= 3.2) {   // and plants it in the arch: the Gate reads it
         if (newOrders.carried) { ordDrone.remove(newOrders.carried); newOrders.carried = null; }
@@ -362,7 +370,8 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   let trap = 0, flicker = 0, ping = 0, melt = 0, t = 0; const trapAt = new T.Vector3(), look = new T.Vector3();
   return {
     landing: LANDING, cameraBlockers,
-    get busy() { return relay.active; },
+    get busy() { return relay.active || (newOrders.t >= 0 && newOrders.t < 3.4); },
+    get shot() { return newOrders.shot; },
     get onIsland() { return phase !== 'off'; },
     /** Zip has left for the next island: the satchel strip and labels go */
     leave() { phase = 'done'; renderBag(); for (const n of NOTES) g.label('note-' + n.id, null, n.at); g.label('relay-notes', null, RELAY); },

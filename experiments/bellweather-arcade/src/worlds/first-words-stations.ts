@@ -62,7 +62,7 @@ export const FIRST_WORDS_L1_STATIONS: StationSpec[] = [
       rows: [
         { done: 'Reached Mira' },
         { firstTry: 'context-selection', text: 'Picked Mira\'s channel first try' },
-        { firstTry: 'next-input', text: 'Sent just your own words, first try' },
+        { firstTry: 'next-input', text: 'Sent the right words, first try' },
       ],
     },
     content: { pinned: '“Lantern channel 7. M.” · “Warden: every channel jammed but 3.” · “Festival news on channel 5.”' },

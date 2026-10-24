@@ -36,7 +36,7 @@ export function buildRelay(o: Opts) {
     el.innerHTML = `<div class="relay-head">RELAY · CH <b>${ch()}</b></div><p class="relay-notes">Pinned notes: ${RELAY_NOTES}</p>${dialSvg()}<p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="call" data-action="call">Call on channel ${ch()}</button><button class="quiet" data-act="close">Step away</button></div>`;
   };
   const words = (msg = 'The line crackles. The relay heard four words. <b>Tap the words it should read</b> to make the next one, then Send.') => {
-    el.innerHTML = `<div class="relay-head">RELAY · CH <b>7</b> · <span class="live">LIVE</span></div><div class="rail-chips">${RELAY_WORDS.map((w, i) => `<button class="chip${pickedNow().has(i) ? ' picked' : ''}" data-w="${i}" data-action="word.${i}">${w}</button>`).join('')}<span class="chip empty">…</span></div><p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="send" data-action="send">Send</button></div>`;
+    el.innerHTML = `<div class="relay-head">RELAY · <span class="live">LIVE</span></div><div class="rail-chips">${RELAY_WORDS.map((w, i) => `<button class="chip${pickedNow().has(i) ? ' picked' : ''}" data-w="${i}" data-action="word.${i}">${w}</button>`).join('')}<span class="chip empty">…</span></div><p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="send" data-action="send">Send</button></div>`;
     el.onclick = e => {
       const b = (e.target as HTMLElement).closest('button'); if (!b) return; e.stopPropagation(); sfx.tap();
       if (b.dataset.w) { st.act('word.' + b.dataset.w); words(); return; }
