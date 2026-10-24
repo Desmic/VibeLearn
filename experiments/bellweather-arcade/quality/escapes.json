@@ -373,6 +373,36 @@
         "learning"
       ],
       "status": "prevented"
+    },
+    {
+      "id": "qe-right-first-sees-no-contrast",
+      "found": {
+        "date": "2026-10-23",
+        "by": "blind run 23 (explorer), interview after the reveal",
+        "where": "the Gate on Blossom Isle"
+      },
+      "symptom": "The first player to open the Gate first try took it as \"pick the trustworthy notes\" (about being careful), not \"the machine can't tell what's true\": they never saw it take a false note literally.",
+      "why_missed": "Every judged decision put the misconception's contrast on the wrong-answer path; a player who reasons right first never meets it, and the stars reward exactly that.",
+      "generalized_failure": "A lesson shown only through wrong answers is never seen by the players who get it right, so their understanding is never tested against the misconception.",
+      "invariant": "Each outcome's misconception is met by a judged decision that a player who has been right so far also faces.",
+      "prevention": [
+        {
+          "layer": "data",
+          "what": "the Gate's new orders (rules v2, decision literal-prediction): with the Gate open, the Warden plants his sign; every player predicts where it opens, and sees it open onto the East Falls"
+        },
+        {
+          "layer": "check",
+          "what": "flowcheck isle: the planted sign is asked about, the arch shows the East Falls, the prediction is logged"
+        }
+      ],
+      "caught_by": [
+        "flowcheck"
+      ],
+      "lanes": [
+        "learning"
+      ],
+      "status": "prevented",
+      "open": "the engine's own contrast (the whole ring vs the newest word) is still only on wrong paths"
     }
   ]
 }

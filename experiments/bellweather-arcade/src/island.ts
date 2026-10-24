@@ -186,7 +186,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       else if (unread) opts.setGoal('Read the notes. Take up to two.', unread, true);
       else opts.setGoal(bag().length ? 'Take your notes to the gate' : 'Take up to two notes', bag().length ? GATE_STONE : null, true);
     }
-    else if (phase === 'open') opts.setGoal('Call Mira from the relay', RELAY);
+    else if (phase === 'open') { if (!newOrders.busy) opts.setGoal('Call Mira from the relay', RELAY); }
     else if (phase === 'done') opts.setGoal('Back to the skiff. Mira needs you!', null);
   };
 
@@ -232,7 +232,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       const swap = (then?: () => void) => [{ label: 'Swap my notes', kind: 'primary' as const, act: () => { retry(); then?.(); } }];
       if (o === 'open') {
         markGuess(false); opts.onOpen?.(); melt = 1.2; if (sealBox) opts.removeBox(sealBox); sealBox = null; path.forEach(d => (d.visible = true)); phase = 'open'; sfx.chime();
-        gateSays('Past the Lotus Terraces and up the stairs to the bell gardens! Mind the step.', [{ label: 'Yes!', kind: 'primary', act: () => gateSt.finish(() => { mood = 'idle'; goalNow(); }) }], 'happy');
+        gateSays('Past the Lotus Terraces and up the stairs to the bell gardens! Mind the step.', [{ label: 'Yes!', kind: 'primary', act: () => gateSt.finish(() => { mood = 'idle'; newOrders.start(); }) }], 'happy');
       } else if (o === 'decoy') {
         g.close(); gateSays('East Falls! The sign said so. Rules are rules!', [], 'smug');
         setTimeout(() => { trap = 3.2; sfx.zap(); g.close(); markGuess(); }, 1600);
@@ -254,6 +254,71 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       } else { markGuess(); flicker = 1.2; sfx.boing(); gateSays('Open to… somewhere? I need a place, pal.', [{ label: 'Find a better note', kind: 'primary', act: retry }], 'dizzy'); }
     },
   };
+
+  // New orders: the Gate stands open toward Mira, and the Warden's drone plucks his sign off its board
+  // and plants it in the arch. The player predicts where the Gate opens now; it opens where the note
+  // says, onto the East Falls and an empty cage. The machine can't tell a planted order from the
+  // truth: run 23's player opened the Gate first try and never saw that ("pick the trustworthy
+  // notes", not "the machine can't tell what's true"). A test, not a forced failure: the player
+  // only predicts, and Zip pulls the sign out after.
+  const ordDrone = new T.Group(); ordDrone.visible = false; root.add(ordDrone);
+  ordDrone.add(new T.Mesh(new T.SphereGeometry(.34, 14, 10), std('#2a1f40', '#4a2f7a', .6)));
+  { const eye = new T.Mesh(new T.SphereGeometry(.13, 10, 8), new T.MeshBasicMaterial({ color: '#e2c6ff' })); eye.position.z = .28; ordDrone.add(eye);
+    for (const s2 of [-1, 1]) { const fin = new T.Mesh(new T.BoxGeometry(.34, .04, .2), std('#3b2766', '#7b4fd6', .4)); fin.position.set(s2 * .4, .05, 0); fin.rotation.z = s2 * .3; ordDrone.add(fin); } }
+  const newOrders = {
+    t: -1, busy: false, carried: null as T.Object3D | null, from: new T.Vector3(), board: new T.Vector3(), arch: new T.Vector3(GATE.x, 2.3, GATE.z + .5),
+    start() {
+      const w = boards.find(b => b.n.id === 'warden'); if (!w) { goalNow(); return; }
+      newOrders.busy = true; newOrders.t = 0; opts.setGoal(null, null);
+      w.board.getWorldPosition(newOrders.board); newOrders.from.copy(newOrders.board).add(new T.Vector3(3, 7, 4));
+      ordDrone.position.copy(newOrders.from); ordDrone.visible = true; sfx.whisper();
+      g.thinkOnce('orders-drone', 'Uh oh. That drone has a very "Warden" look about it.');
+    },
+    tick(dt: number) {
+      if (newOrders.t < 0) return;
+      const t0 = newOrders.t; newOrders.t += dt; const k = (a: number, b: number) => T.MathUtils.smoothstep(newOrders.t, a, b);
+      ordDrone.rotation.y += dt * 2; ordDrone.position.y += Math.sin(newOrders.t * 6) * .004;
+      if (newOrders.t < 1.6) ordDrone.position.lerpVectors(newOrders.from, tmpV.copy(newOrders.board).setY(newOrders.board.y + .55), k(0, 1.6));
+      else if (newOrders.t < 3.2) ordDrone.position.lerpVectors(tmpV.copy(newOrders.board).setY(newOrders.board.y + .55), newOrders.arch, k(1.6, 3.2));
+      if (t0 < 1.6 && newOrders.t >= 1.6) {   // it plucks the sign off the board
+        const w = boards.find(b => b.n.id === 'warden')!; w.board.visible = false;
+        const c = w.board.clone(); c.position.set(0, -.42, 0); c.rotation.set(0, 0, 0); c.scale.setScalar(.7); ordDrone.add(c); newOrders.carried = c; sfx.catch();
+      }
+      if (t0 < 3.2 && newOrders.t >= 3.2) {   // and plants it in the arch: the Gate reads it
+        if (newOrders.carried) { ordDrone.remove(newOrders.carried); newOrders.carried = null; }
+        path.forEach(d => (d.visible = false)); flicker = 1; sfx.speak(2); mood = 'talk';
+        gateSays('New orders, pal! This note says: “Your friends are held at the East Falls.” So where will I open now?', [
+          { label: 'East Falls', action: 'orders.east', act: () => newOrders.predict('east') },
+          { label: 'The bell gardens, where Mira is', action: 'orders.gardens', act: () => newOrders.predict('gardens') },
+          { label: 'Nowhere. It\'s a lie', action: 'orders.nowhere', act: () => newOrders.predict('nowhere') },
+          { label: 'Can\'t tell', action: 'orders.unclear', act: () => newOrders.predict('unclear') },
+        ]);
+      }
+      if (newOrders.t >= 3.2 && newOrders.t < 6) { ordDrone.position.y += dt * 4; ordDrone.position.x += dt * 3; }
+      else if (newOrders.t >= 6 && ordDrone.visible) ordDrone.visible = false;
+    },
+    predict(c: string) {
+      if (!gateSt.act('orders.' + c).ok) return;
+      g.close(); view.show('falls'); sfx.whoosh(); gateSays('East Falls! Orders are orders.', [], 'smug');
+      setTimeout(() => g.thinkOnce('orders-warden', 'See, little courier? It goes where it\'s told. Not where she is.', 'warden'), 1800);
+      // (each line written out in full, so tools/voice-lines.mjs finds it to voice)
+      const pull = [{ label: 'Pull the Warden\'s sign out', kind: 'primary' as const, action: 'orders.pull', act: () => newOrders.pull() }];
+      setTimeout(() => {
+        if (c === 'east') gateSays('You knew I would! I don\'t know where Mira is. I know what my note says.', pull, 'oops');
+        else if (c === 'gardens') gateSays('The bell gardens? That\'s where she IS. I don\'t know where she is. I know what my note says.', pull, 'oops');
+        else if (c === 'nowhere') gateSays('A lie? I can\'t tell a lie from a lettuce, pal. I read, I open.', pull, 'oops');
+        else gateSays('Oh, it was very clear. The note said East Falls, so: East Falls.', pull, 'oops');
+      }, 4200);
+    },
+    pull() {
+      view.hide(); path.forEach(d => (d.visible = true)); sfx.place();
+      gateSays('Ahh. Bell gardens again. Thanks, pal. Nobody ever hands me true things.', [{ label: 'OK', kind: 'primary', act: () => {
+        mood = 'idle'; g.close(); newOrders.busy = false; newOrders.t = -1; goalNow();
+        g.thinkOnce('orders-zip', 'Note to self: whoever writes the notes runs the Gate.');
+      } }], 'happy');
+    },
+  };
+  const tmpV = new T.Vector3();
 
   // Shown, not told: the satchel is what the Gate reads, the way Zip's engine reads its ring. When
   // the Gate reads, each note leaves the satchel as the same hologram Zip's words are made of and
@@ -283,7 +348,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   const things = [
     { at: CLASP, r: 1.7, label: 'Take the satchel', action: 'take-satchel', when: () => !hasBag() && phase !== 'off', use: () => { if (!gateSt.act('take-satchel').ok) return; satchelObj.visible = false; phase = 'bag'; renderBag(); sfx.catch(); g.say('A satchel for notes. The Gate reads only what\'s inside.', [{ label: 'Got it', kind: 'primary', act: () => { g.close(); goalNow(); } }]); } },
     gateSt.zone(anchors[gateSt.spec.place.anchor], () => phase === 'bag', () => gate.speak(), 'speak'),
-    relaySt.zone(anchors[relaySt.spec.place.anchor], () => phase === 'open' && !relay.active, () => relay.open()),
+    relaySt.zone(anchors[relaySt.spec.place.anchor], () => phase === 'open' && !relay.active && !newOrders.busy, () => relay.open()),
   ];
 
   let trap = 0, flicker = 0, ping = 0, melt = 0, t = 0; const trapAt = new T.Vector3(), look = new T.Vector3();
@@ -334,7 +399,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       face.rotation.z = mood === 'dizzy' ? Math.sin(t * 5) * .06 : 0;
       if (melt > 0) { melt = Math.max(0, melt - dt); seal.scale.setScalar(melt / 1.2 + .001); sealLow.scale.y = melt / 1.2 + .001; if (melt === 0) seal.visible = sealLow.visible = false; }
       satchelObj.rotation.y += dt; boards.forEach(b => { b.board.rotation.y = Math.sin(t + b.n.at.x) * .05; }); if (miraLantern) miraLantern.rotation.z = Math.sin(t * 1.3) * .12;
-      view.tick(dt); sealMat.opacity = (.55 + .08 * Math.sin(t * 2) + (flicker > 0 ? .3 * Math.abs(Math.sin(t * 25)) : 0)) * (1 - view.shown); flicker = Math.max(0, flicker - dt);
+      newOrders.tick(dt); view.tick(dt); sealMat.opacity = (.55 + .08 * Math.sin(t * 2) + (flicker > 0 ? .3 * Math.abs(Math.sin(t * 25)) : 0)) * (1 - view.shown); flicker = Math.max(0, flicker - dt);
       if (trap > 0) {
         if (trap === 3.2) trapAt.copy(zip);
         trap = Math.max(0, trap - dt); const k = trap > 2.6 ? (3.2 - trap) / .6 : trap < .6 ? trap / .6 : 1;

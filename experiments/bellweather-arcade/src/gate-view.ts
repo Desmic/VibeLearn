@@ -6,7 +6,7 @@ import * as T from 'three';
 // climbing into fog, stairs to an empty landing. Shown, then the seal comes back.
 // A small canvas painted a few seconds at a time: nothing for a phone to carry.
 
-export type GateViewKind = 'bridge' | 'fog' | 'nowhere';
+export type GateViewKind = 'bridge' | 'fog' | 'nowhere' | 'falls';
 
 const W = 256, H = 240;   // the arch's shape: 3.24 m wide, 3.02 m tall (a half circle on a box)
 export const ARCH = { w: 3.24, h: 3.02, spring: 1.4 };
@@ -55,6 +55,21 @@ export function gateView() {
       const fog = c.createLinearGradient(0, 0, 0, H * .62); fog.addColorStop(0, 'rgba(250,250,252,1)'); fog.addColorStop(.75, 'rgba(250,250,252,.85)'); fog.addColorStop(1, 'rgba(250,250,252,0)');
       c.fillStyle = fog; c.fillRect(0, 0, W, H * .62);
       cloud(70 - drift * .5, 60, 1.4, .9); cloud(180 + drift * .3, 80, 1.5, .9);
+    } else if (kind === 'falls') {
+      // the East Falls, as the Warden's sign orders: a cliff, a waterfall, and an empty cage swinging
+      // over it. Nobody is held here (the sign was a planted order; the Gate can't tell)
+      c.fillStyle = '#8f8aa8'; c.beginPath(); c.moveTo(0, 70); c.lineTo(78, 62); c.lineTo(96, H); c.lineTo(0, H); c.closePath(); c.fill();
+      c.fillStyle = '#a7a2bf'; c.beginPath(); c.moveTo(W, 84); c.lineTo(170, 74); c.lineTo(150, H); c.lineTo(W, H); c.closePath(); c.fill();
+      const fall = c.createLinearGradient(0, 60, 0, H); fall.addColorStop(0, 'rgba(225,244,255,.95)'); fall.addColorStop(1, 'rgba(255,255,255,.6)');
+      c.fillStyle = fall; c.fillRect(92, 64, 64, H - 64);
+      c.strokeStyle = 'rgba(160,205,235,.8)'; c.lineWidth = 2; for (let x = 96; x < 154; x += 7) { c.beginPath(); const o = (t * 60 + x * 3) % 24; for (let y = 64 - o; y < H; y += 24) { c.moveTo(x, y); c.lineTo(x, y + 12); } c.stroke(); }
+      cloud(124, H - 8, 1.6, .9);
+      // the empty cage on a chain, swinging
+      const sw = Math.sin(t * 2.2) * .18; c.save(); c.translate(176, 18); c.rotate(sw);
+      c.strokeStyle = '#4a2f7a'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 44); c.stroke();
+      c.strokeStyle = '#6b4fa0'; c.lineWidth = 2.5; c.beginPath(); c.ellipse(0, 46, 16, 5, 0, 0, Math.PI * 2); c.stroke();
+      for (const dx of [-14, -7, 0, 7, 14]) { c.beginPath(); c.moveTo(dx, 46); c.lineTo(dx * .9, 82); c.stroke(); }
+      c.beginPath(); c.ellipse(0, 82, 15, 4, 0, 0, Math.PI * 2); c.stroke(); c.restore();
     } else {
       // the Lotus Terraces stairs, climbing to a landing with nothing on it
       steps(W / 2, H, 7, 110, 16, .06, () => 1);
@@ -79,7 +94,7 @@ export function gateView() {
       if (!mesh.visible) return;
       shown += (want - shown) * Math.min(1, dt * 4); if (Math.abs(want - shown) < .01) shown = want;
       mat.opacity = shown;
-      if (want && kind && t < 4) { t += dt; paint(kind, t); }   // still after the plank has gone
+      if (want && kind && (t < 4 || kind === 'falls')) { t += dt; paint(kind, t); }   // still after the plank has gone (the falls keep falling)
       if (!want && shown === 0) { mesh.visible = false; kind = null; }
     },
   };

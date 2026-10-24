@@ -104,6 +104,7 @@ const answer = async (prefs = [], max = 8) => {
   for (let k = 0; k < 8 && !(await cardOpen()); k++) await page.waitForTimeout(400);
   for (let i = 0; i < max && await cardOpen(); i++) {
     const labels = await page.locator('.story-card:not([hidden]) button').evaluateAll(bs => bs.map(b => (b.getAttribute('aria-label') || b.textContent).trim()));
+    if (!labels.length) { await page.waitForTimeout(500); await sim(.2); continue; }   // a line with nothing to press yet (the next one is on its way)
     const hit = prefs.find(p => labels.some(l => p.test(l)));
     const label = hit ? labels.find(l => hit.test(l)) : labels[0];
     picked.push(label); await h.card(label.slice(0, 24)); await note('card ' + label);

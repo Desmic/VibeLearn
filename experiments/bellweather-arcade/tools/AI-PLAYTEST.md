@@ -894,6 +894,31 @@ tester's screenshots within that limit (fewer, or smaller).
 - **Relay:** the Warden's word looks like the others; on the right send the relay makes its next
   word into the gap ("Zip.") before Mira answers; the star reads "Sent just your own words".
 
+**Changed after run 23, part two (24 Oct, Desmic: "keep making improvements… surprise me"):**
+
+- **New orders at the Gate.** With the Gate open toward Mira, a Warden drone plucks his sign off its
+  board and plants it in the arch. The Gate: "New orders, pal! … So where will I open now?" East
+  Falls / the bell gardens, where Mira is / nowhere, it's a lie / can't tell. Whatever the player
+  says, the arch opens onto the East Falls and an empty cage swinging over the water, and the Gate
+  answers the guess ("The bell gardens? That's where she IS. I don't know where she is. I know what
+  my note says."; "I can't tell a lie from a lettuce, pal. I read, I open."). Zip pulls the sign
+  out; "Note to self: whoever writes the notes runs the Gate." A new judged decision
+  (`literal-prediction`, Gate rules v2) that tests the misconception run 23 kept after the reveal,
+  after success and without forcing a failure. Voiced (8 Gate lines, the one left over included).
+- **The flight, measured first** (new `flightprobe`: four kinds of pilot, rings of 7):
+  | pilot | before | after |
+  |---|---|---|
+  | hands off | 4, landed 19 s | 5, 19 s |
+  | full speed held | 3, 17 s | 4, 17 s |
+  | in long pushes (as testers fly) | 1, **never landed in 120 s** | 2, landed 73 s |
+  | taps the goal arrow | 3 | 5 |
+  Steering eases in and turns at most ~55°/s (was 86°/s at once: a two-second push swung the
+  skiff right round); the wind keeps helping while a push agrees with it; near a ring the wind
+  draws the skiff in; in the air the goal arrow turns the skiff onto the lane (it turned a camera
+  that the flight doesn't use); the camera leans toward the next ring; a drifting ribbon of light
+  runs ring to ring; rings are bigger with a halo on the next one; drones are twice the size with
+  a blinking eye and a brighter beam.
+
 **Open after run 23:** the arrow's turn at Mira's outlook can still end with the lens pressed into
 Zip by the lamp post (step 23); a first try at a probe for it measured the game's own goal rather
 than the probe's, so no change was kept. The flight (steering, the wind rings and drones found only

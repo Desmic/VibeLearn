@@ -35,9 +35,9 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
   // drawn, so it points the same way in every font (it was never added to the page before 3 Oct: the comment swallowed the call)
   // the arrow to an off-screen goal; tapping it turns the camera there (testers kept tapping it, runs 12-13)
   const edge = document.createElement('button'); edge.className = 'beacon-edge'; edge.hidden = true; edge.dataset.action = 'face-goal'; edge.setAttribute('aria-label', 'Turn toward the goal');
-  let onPoint: (() => void) | null = null;
+  let onPoint: (() => void) | null = null, pointOverride: (() => void) | null = null;
   edge.addEventListener('pointerdown', e => e.stopPropagation());
-  edge.addEventListener('click', e => { e.stopPropagation(); onPoint?.(); }); edge.innerHTML = '<svg viewBox="0 0 20 20" width="18" height="18" style="display:block;margin:8px"><path d="M5 3 L17 10 L5 17 L8 10 Z" fill="#1c4972"/></svg>'; host.appendChild(edge);
+  edge.addEventListener('click', e => { e.stopPropagation(); (pointOverride ?? onPoint)?.(); }); edge.innerHTML = '<svg viewBox="0 0 20 20" width="18" height="18" style="display:block;margin:8px"><path d="M5 3 L17 10 L5 17 L8 10 Z" fill="#1c4972"/></svg>'; host.appendChild(edge);
   // control hints
   const hint = document.createElement('div'); hint.className = 'control-hint'; hint.hidden = true; host.appendChild(hint);
   // context button
@@ -163,6 +163,8 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
     get beaconAt(): T.Vector3 | null { return beacon.visible ? beacon.position : null; },
     /** what tapping the goal arrow does (the game turns its camera toward the goal) */
     onPoint(fn: () => void) { onPoint = fn; },
+    /** while set, the goal arrow does this instead (in the skiff's flight it turns the skiff, not the camera) */
+    setPointOverride(fn: (() => void) | null) { pointOverride = fn; },
     /** pulse the goal arrow a moment (a new goal behind the player: the arrow shows it, the camera stays put) */
     nudge() { edge.classList.remove('nudge'); void edge.offsetWidth; edge.classList.add('nudge'); setTimeout(() => edge.classList.remove('nudge'), 2600); },
     startControlHints() { hintStage = 'on'; hintT = 0; },

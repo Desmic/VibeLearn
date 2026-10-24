@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1",
   "id": "first-words.blossom-gate",
-  "version": "1",
+  "version": "2",
   "state": {
     "phase": {
       "type": "enum",
@@ -42,6 +42,10 @@
       "initial": false
     },
     "failed": {
+      "type": "boolean",
+      "initial": false
+    },
+    "ordered": {
       "type": "boolean",
       "initial": false
     }
@@ -14123,6 +14127,130 @@
             "gate-vague"
           ]
         }
+      ]
+    },
+    "orders.east": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "open"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "field": "ordered"
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "ordered",
+          "value": true
+        }
+      ],
+      "emits": [
+        "decide:literal-prediction:right:east",
+        "gate-east"
+      ]
+    },
+    "orders.gardens": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "open"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "field": "ordered"
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "ordered",
+          "value": true
+        }
+      ],
+      "emits": [
+        "decide:literal-prediction:wrong:gardens",
+        "gate-east"
+      ]
+    },
+    "orders.nowhere": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "open"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "field": "ordered"
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "ordered",
+          "value": true
+        }
+      ],
+      "emits": [
+        "decide:literal-prediction:wrong:nowhere",
+        "gate-east"
+      ]
+    },
+    "orders.unclear": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "open"
+          },
+          {
+            "op": "not",
+            "arg": {
+              "field": "ordered"
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "ordered",
+          "value": true
+        }
+      ],
+      "emits": [
+        "decide:literal-prediction:wrong:unclear",
+        "gate-east"
       ]
     }
   },

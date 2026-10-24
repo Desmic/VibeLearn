@@ -36,6 +36,10 @@ export const helpers = h => {
       await answer([/OK/]);
       await playStation('blossom-gate');
       await until(() => visible('.star-row'), 10); await note(); await h.stars();
+      // new orders: the Warden plants his sign; it opens where the note says (East Falls); pull it out
+      await until(() => visible('.story-card button[data-action="orders.east"]'), 15); await answer([/East Falls/], 1);
+      for (let k = 0; k < 60 && !(await visible('.story-card button[data-action="orders.pull"]')); k++) await page.waitForTimeout(500);
+      await answer([/Pull/], 1); await answer([/OK/], 1); await note();
       // The relay: Mira's channel first time
       await playStation('relay-contact');
       await answer([/coming/]); await until(() => visible('.star-row'), 10); await note(); await h.stars();

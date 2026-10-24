@@ -89,11 +89,11 @@ const predictBranches = (p: string): Branch[] => OUTCOMES.flatMap((o, i) => {
   ];
 });
 export const GATE_RULES: GameRulesSpec = {
-  schemaVersion: '1', id: 'first-words.blossom-gate', version: '1',
+  schemaVersion: '1', id: 'first-words.blossom-gate', version: '2',
   state: {
     phase: oneOf(['arrived', 'bag', 'predict', 'support', 'run', 'open']),
     slotA: oneOf(slotVals, 'none'), slotB: oneOf(slotVals, 'none'),
-    askedSupport: bool(), failed: bool(),
+    askedSupport: bool(), failed: bool(), ordered: bool(),
   },
   invariants: [{ id: 'no-duplicate-note', expression: or(eq(f('slotB'), 'none'), ne(f('slotA'), f('slotB'))) }],
   actions: {
@@ -133,6 +133,14 @@ export const GATE_RULES: GameRulesSpec = {
         emits: ['gate-' + o.id],
       })),
     },
+    // New orders (v2): with the Gate open, the Warden's drone plants his sign in it. Where will it
+    // open now? Exactly where the note says: it can't tell a planted order from the truth (the
+    // misconception: the machine knows what is true, or what you meant). Run 23's player opened it
+    // first try and never saw it take a note literally ("pick the trustworthy notes", not "the
+    // machine can't tell what's true"). One prediction, judged; the story goes on whatever it is.
+    ...Object.fromEntries([['east', 'right'], ['gardens', 'wrong'], ['nowhere', 'wrong'], ['unclear', 'wrong']].map(([c, r]) => ['orders.' + c, {
+      when: and(eq(f('phase'), 'open'), not(f('ordered'))), effects: [set('ordered', true)], emits: [`decide:literal-prediction:${r}:${c}`, 'gate-east'],
+    }])),
   },
   objectives: { open: { when: eq(f('phase'), 'open') } },
 };

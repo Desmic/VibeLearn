@@ -94,6 +94,18 @@
       ]
     },
     {
+      "id": "gate-orders",
+      "role": "transfer",
+      "station": "blossom-gate",
+      "decision_id": "literal-prediction",
+      "player_goal": "With the Gate open toward Mira, the Warden's drone plants his sign in it: predict where it opens now (East Falls, where the note says; not the bell gardens, where she really is).",
+      "feedback": "Shown either way: the arch opens onto the East Falls and an empty cage; the Gate: 'I don't know where Mira is. I know what my note says.' Zip pulls the sign out.",
+      "why": "Run 23 (23 Oct): the first player to open the Gate first try took it as 'pick the trustworthy notes', not 'the machine can't tell what's true', having never seen it take a false note literally. This tests the misconception head-on, after success, without forcing a failure.",
+      "outcomes": [
+        "context"
+      ]
+    },
+    {
       "id": "relay",
       "role": "transfer",
       "station": "relay-contact",

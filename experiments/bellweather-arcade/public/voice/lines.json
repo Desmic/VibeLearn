@@ -561,6 +561,24 @@
    "from": "island.ts"
   },
   {
+   "key": "194f3169",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "A lie? I can't tell a lie from a lettuce, pal. I read, I open.",
+   "shown": "A lie? I can't tell a lie from a lettuce, pal. I read, I open.",
+   "from": "island.ts"
+  },
+  {
+   "key": "930a4717",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Ahh. Bell gardens again. Thanks, pal. Nobody ever hands me true things.",
+   "shown": "Ahh. Bell gardens again. Thanks, pal. Nobody ever hands me true things.",
+   "from": "island.ts"
+  },
+  {
    "key": "a6d39ed8",
    "speaker": "Gate",
    "voice": "Fenrir",
@@ -588,6 +606,15 @@
    "from": "island.ts"
   },
   {
+   "key": "1eebb6c1",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "East Falls! Orders are orders.",
+   "shown": "East Falls! Orders are orders.",
+   "from": "island.ts"
+  },
+  {
    "key": "132a18a9",
    "speaker": "Gate",
    "voice": "Fenrir",
@@ -612,6 +639,24 @@
    "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
    "text": "Huh. There's… no bridge. That poster is old news! Nobody tells me anything.",
    "shown": "Huh. There's… no bridge. That poster is old news! Nobody tells me anything.",
+   "from": "island.ts"
+  },
+  {
+   "key": "729e385a",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "New orders, pal! This note says: “Your friends are held at the East Falls.” So where will I open now?",
+   "shown": "New orders, pal! This note says: “Your friends are held at the East Falls.” So where will I open now?",
+   "from": "island.ts"
+  },
+  {
+   "key": "587da623",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "Oh, it was very clear. The note said East Falls, so: East Falls.",
+   "shown": "Oh, it was very clear. The note said East Falls, so: East Falls.",
    "from": "island.ts"
   },
   {
@@ -660,6 +705,15 @@
    "from": "island.ts"
   },
   {
+   "key": "ead92a23",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "The bell gardens? That's where she IS. I don't know where she is. I know what my note says.",
+   "shown": "The bell gardens? That's where she IS. I don't know where she is. I know what my note says.",
+   "from": "island.ts"
+  },
+  {
    "key": "d69c55d7",
    "speaker": "Gate",
    "voice": "Fenrir",
@@ -675,6 +729,15 @@
    "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
    "text": "Up the stairs to the bell gardens! Which stairs, though…",
    "shown": "Up the stairs to the bell gardens! Which stairs, though…",
+   "from": "island.ts"
+  },
+  {
+   "key": "fa40807a",
+   "speaker": "Gate",
+   "voice": "Fenrir",
+   "style": "a pompous talking stone gate who loves rules: theatrical, smug, posh British accent",
+   "text": "You knew I would! I don't know where Mira is. I know what my note says.",
+   "shown": "You knew I would! I don't know where Mira is. I know what my note says.",
    "from": "island.ts"
   },
   {

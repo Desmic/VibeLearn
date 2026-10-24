@@ -1,7 +1,7 @@
 {
  "_about": "Voiced lines (tools/voice.mjs). key → clip file and seconds.",
  "model": "gemini-3.8-flash-tts",
- "made": "2026-10-10T22:57:34.691Z",
+ "made": "2026-10-24T08:03:44.121Z",
  "clips": {
   "14631539": {
    "file": "14631539.mp3",
@@ -53,6 +53,16 @@
    "dur": 3.22,
    "speaker": "Gardener"
   },
+  "194f3169": {
+   "file": "194f3169.mp3",
+   "dur": 6.91,
+   "speaker": "Gate"
+  },
+  "930a4717": {
+   "file": "930a4717.mp3",
+   "dur": 6.34,
+   "speaker": "Gate"
+  },
   "a6d39ed8": {
    "file": "a6d39ed8.mp3",
    "dur": 5.21,
@@ -68,6 +78,11 @@
    "dur": 7.51,
    "speaker": "Gate"
   },
+  "1eebb6c1": {
+   "file": "1eebb6c1.mp3",
+   "dur": 3.41,
+   "speaker": "Gate"
+  },
   "132a18a9": {
    "file": "132a18a9.mp3",
    "dur": 4.82,
@@ -81,6 +96,16 @@
   "7e6f47be": {
    "file": "7e6f47be.mp3",
    "dur": 6.58,
+   "speaker": "Gate"
+  },
+  "729e385a": {
+   "file": "729e385a.mp3",
+   "dur": 9.22,
+   "speaker": "Gate"
+  },
+  "587da623": {
+   "file": "587da623.mp3",
+   "dur": 5.86,
    "speaker": "Gate"
   },
   "a78af2f6": {
@@ -108,9 +133,24 @@
    "dur": 4.58,
    "speaker": "Gate"
   },
+  "ead92a23": {
+   "file": "ead92a23.mp3",
+   "dur": 8.23,
+   "speaker": "Gate"
+  },
   "d69c55d7": {
    "file": "d69c55d7.mp3",
    "dur": 4.42,
+   "speaker": "Gate"
+  },
+  "1a05e7a9": {
+   "file": "1a05e7a9.mp3",
+   "dur": 4.51,
+   "speaker": "Gate"
+  },
+  "fa40807a": {
+   "file": "fa40807a.mp3",
+   "dur": 6.77,
    "speaker": "Gate"
   },
   "485f5a7f": {

@@ -172,6 +172,19 @@ await segment('isle', async () => {
   check('gate stars', await page.locator('.star-row').isVisible());
   await shot('gate-open');
   await h.stars();
+  // new orders: the Warden's drone plants his sign in the open Gate; predicted the misconception's
+  // way (where Mira really is), the Gate still opens where the note says
+  await page.evaluate(() => window.__arcade.simulate(4));   // the drone's flight is in game time (slow frames without a GPU)
+  const ordersAsk = await waitFor(() => page.locator('.story-card button[data-action="orders.gardens"]').isVisible(), 20000, 400);
+  check('new orders: the Warden plants his sign and the Gate asks where it opens now', ordersAsk);
+  if (ordersAsk) {
+    await press(page.locator('.story-card button[data-action="orders.gardens"]'));
+    check('…it opens onto the East Falls, as the planted note says (the view shows in the arch)', await waitFor(() => page.evaluate(() => { const v = window.__vlDebug.scene.getObjectByName('gate-view'); return !!v?.visible && v.material.opacity > .8; }), 15000));
+    await shot('gate-orders');
+    await press(page.locator('.story-card button[data-action="orders.pull"]'), { timeout: 20000 }); await card('OK'); await page.waitForTimeout(800);
+    const ord = (await learning()).filter(e => e.activity === 'blossom-gate' && e.decision === 'literal-prediction');
+    check('the prediction is logged (wrong: "where Mira is")', ord.length === 1 && !ord[0].correct && ord[0].choice === 'gardens', JSON.stringify(ord));
+  }
   check('saved at checkpoint "gate-open"', await save() === 'gate-open', await save());
   check('goal: call Mira', /Call Mira/.test(await goal() ?? ''), await goal());
 });

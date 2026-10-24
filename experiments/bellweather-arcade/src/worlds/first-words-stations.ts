@@ -29,6 +29,7 @@ export const FIRST_WORDS_L1_STATIONS: StationSpec[] = [
       { id: 'destination-prediction', asks: 'Where will the Gate open, given these notes?' },
       { id: 'context-selection', asks: 'Which notes go in the satchel?', choice: { fields: ['slotA', 'slotB'] } },
       { id: 'source-support', asks: 'What does Mira\'s page tell you?' },
+      { id: 'literal-prediction', asks: 'The Warden plants his sign in the open Gate: where will it open now?' },
     ],
     stars: {
       title: 'The gate is open!',
