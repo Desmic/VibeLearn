@@ -50,6 +50,22 @@ const at = (yaw, d, side = 0) => [P[0] - Math.sin(yaw + side) * d, P[1] - Math.c
   }
   h.check('I. the lens never sits in a tree crown left drawn (Blossom Isle, every spot, four headings)', drawn === 0, `${drawn} of ${n} views (${inIt} with the lens in something that fades)${where.length ? ': ' + where.join('; ') : ''}`, 'fail', 'feel');
 }
+// K: the goal arrow never sits on the thumb stick's zone or the action button (run 24: with the goal
+// behind, the arrow sat on the stick and took the thumb, so pushes turned the camera instead of
+// walking: 30 of 61 arrow views over the stick zone before, on Blossom Isle, three spots, 24 headings)
+{
+await page.evaluate(() => { window.__vlGuide.setGoal('Probe goal K'); window.__vlGuide.setBeacon({ x: 6, y: 0, z: 41 }); });
+let n = 0, over = 0, onAct = 0;
+for (const [x, z] of [[0, 50.5], [-3, 53], [3, 47]]) for (let k = 0; k < 24; k++) {
+  const y = k / 24 * Math.PI * 2; await page.evaluate(([x, z, y]) => window.__arcade.pose(x, z, y, .2, 6, y), [x, z, y]); await sim(.4);
+  const r = await page.evaluate(() => { const e = document.querySelector('.beacon-edge'); if (!e || e.hidden) return null; const a = e.getBoundingClientRect(), pad = 10;
+    const hit = sel => { const z = document.querySelector(sel); if (!z) return false; const b = z.getBoundingClientRect(); if (!b.width) return false; return a.right + pad > b.left && a.left - pad < b.right && a.bottom + pad > b.top && a.top - pad < b.bottom; };
+    return { stick: hit('.stick-zone'), act: hit('.context-act:not([hidden])') }; });
+  if (!r) continue; n++; if (r.stick) over++; if (r.act) onAct++;
+}
+  h.check('K. the goal arrow never sits on the thumb stick or the action button (10 px clear)', n > 0 && over === 0 && onAct === 0, `${n} views with the arrow: ${over} over the stick zone, ${onAct} over the action button (was 30 of 61 over the stick)`, 'fail', 'feel');
+  await page.evaluate(() => { window.__vlGuide.setGoal(null); window.__vlGuide.setBeacon(null); });
+}
 // A: on screen, 9 m ahead, a little off centre
 await h.pose(P[0], P[1], 0); await sim(1); await goal(null, null); await sim(.5);
 let g0 = await glance(); await goal('Probe goal A', at(0, 7, .25)); await sim(2.5);

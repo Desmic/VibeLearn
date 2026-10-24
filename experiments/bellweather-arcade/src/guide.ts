@@ -300,7 +300,13 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
           if (tv.z > -.5) { if (Math.abs(x) > .6 + .15 * Math.max(0, tv.z)) edgeSide = Math.sign(x); x = edgeSide * Math.max(Math.abs(x), .25); y = Math.min(y, 0) - (tv.z + .5) - Math.abs(x) * .2; }
           else edgeSide = Math.sign(x) || edgeSide;
           const a = Math.atan2(y, x), r = .86, ex = Math.cos(a) * r, ey = Math.sin(a) * r;
-          edge.style.left = `${(ex * .5 + .5) * 100}%`; edge.style.top = `${(-ey * .5 + .5) * 100}%`;
+          // never over the thumb stick or the place name at the bottom (run 24: with the goal behind,
+          // the arrow sat on the stick and took the thumb: pushes turned the camera instead of walking,
+          // "I keep tapping turn toward goal and it points behind me")
+          let L = (ex * .5 + .5) * 100, Tp = (-ey * .5 + .5) * 100;
+          if (L < 56 && Tp > 51) Tp = 51;   // the stick's zone is the lower-left 46% × 44% (style.css .stick-zone)
+          if (Tp > 78) Tp = 78;              // and the action button sits low on the right
+          edge.style.left = `${L}%`; edge.style.top = `${Tp}%`;
           edge.style.transform = `translate(-50%,-50%) rotate(${-a}rad)`;
         }
       } else if (!edge.hidden) edge.hidden = true;

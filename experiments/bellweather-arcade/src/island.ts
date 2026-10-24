@@ -161,9 +161,17 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   const markGuess = (missed = true) => { if (!guess || guess.marked) return; guess.marked = true; renderBag(); if (guess.right) sfx.catch();
     if (guess.right && missed) g.thinkOnce('called-it', 'Called where it would go. So the guess was fine. It\'s the notes.'); };
   const clearGuess = () => { guess = null; renderBag(); };
-  const renderBag = () => { strip.hidden = !hasBag() || phase === 'done'; strip.innerHTML = '<b>Satchel</b>'; for (let i = 0; i < 2; i++) { const s = document.createElement('span'); const id = bag()[i]; s.className = 'chip ' + (id ? 'rail' : 'empty'); s.textContent = id ? NOTES.find(n => n.id === id)!.short : 'empty'; strip.appendChild(s); }
-    // the guess sits with the notes it was made from; marked once the Gate has gone where they say
-    if (guess) { const e = document.createElement('span'); e.className = 'guess' + (guess.marked ? (guess.right ? ' right' : ' wrong') : ''); e.textContent = `You said: ${guess.label}` + (guess.marked ? (guess.right ? ' ✓' : ' ✗') : ''); strip.appendChild(e); } };
+  // a note in the satchel can be put back from the satchel itself: tapped, it goes back to its board
+  // (run 24 tapped the chip to drop the poster, nothing happened, and walking back to swap was why
+  // they put the phone down: "walking around this island to swap notes is killing me")
+  const putBack = (id: NoteId) => { if (phase !== 'bag' || g.cardOpen || !gateSt.act('put.' + id).ok) return; const n = NOTES.find(x => x.id === id)!; sfx.place(); g.toast(`${n.short}: back on its board`, 1100); changed(); };
+  const renderBag = () => { strip.hidden = !hasBag() || phase === 'done'; strip.innerHTML = '<b>Satchel</b>'; for (let i = 0; i < 2; i++) { const id = bag()[i]; const canPut = !!id && phase === 'bag';
+      const s = document.createElement(canPut ? 'button' : 'span'); s.className = 'chip ' + (id ? 'rail' : 'empty') + (canPut ? ' put' : ''); s.textContent = id ? NOTES.find(n => n.id === id)!.short : 'empty';
+      if (canPut) { (s as HTMLButtonElement).type = 'button'; s.dataset.action = 'put.' + id; s.setAttribute('aria-label', `Put back: ${s.textContent}`); s.addEventListener('click', e => { e.stopPropagation(); putBack(id); }); }
+      strip.appendChild(s); }
+    // the guess sits with the notes it was made from; marked once the Gate has gone where they say,
+    // in words (run 24: a bare ✓ beside a shut Gate read as "I won")
+    if (guess) { const e = document.createElement('span'); e.className = 'guess' + (guess.marked ? (guess.right ? ' right' : ' wrong') : ''); e.textContent = `Your guess: ${guess.label}` + (guess.marked ? (guess.right ? ' · guessed right ✓' : ' · guessed wrong ✗') : ''); strip.appendChild(e); } };
   // the island's two stations (data in worlds/first-words-stations.ts)
   const stationHost = { onEvent: opts.onEvent, stars: (title: string, rows: [boolean, string][], then: () => void) => g.stars(title, rows, then) };
   const gateSpec = station('blossom-gate'), relaySpec = station('relay-contact');

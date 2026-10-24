@@ -925,3 +925,35 @@ than the probe's, so no change was kept. The flight (steering, the wind rings an
 on the results card) is unchanged. And a design question for Desmic: the first-try stars reward
 never seeing the Gate or the relay go wrong, which is where the lesson shows (this player's "pick
 the trustworthy notes" rather than "the machine can't tell what's true").
+
+## Blind run 24: the main game on v96 (24 Oct 2026; commuter, 22)
+
+**6/10, yes, probably** ("if the next area is mostly more wandering, I'd drop it pretty quickly").
+Put the phone down at step 161 at the Gate, after two wrong pairs: "Liked the word engine bit and
+the gate puzzle, but walking around this island to swap notes is killing me." The same screenshot
+caveat as run 23 (the tester says the first ~70 never loaded; its notes at the time match them).
+
+- **Landed unprompted:** premise, Mira taken, the voice knocked out, what it teaches, the engine
+  ("give it a good start, then feed its own guesses back in"; "too few words and it just says
+  'um'"), humour. **Probed:** the Gate ("it doesn't judge whether a note is true; it just follows
+  whatever you give it"), though in play they picked notes by which was true and skipped the
+  Warden's sign as a trap; the journey. **Missed:** Loom Isle (never reached); coil by coil.
+- **Never read Mira's page** (the fourth player to miss it), so never reached the new orders.
+- **Complaints:** swapping meant walking back to a board, and "Put it back" never showed (step
+  154 they tapped the poster in the satchel strip: nothing happened); "Turn toward the goal… points
+  behind me" (steps 9–21); "camera is stuck inside the robot" (step 63); the green ✓ beside a Gate
+  that didn't open read as "I won" (step 133).
+
+**What the play log showed that the tester couldn't:** at steps 59–62 and 157–160 stick pushes of
+up to 2 s moved Zip not at all. The goal arrow, sitting at the lower-left edge whenever the goal was
+behind, was on top of the thumb-stick zone and took the thumb: the push turned the camera instead.
+Measured on Blossom Isle (three spots, 24 headings): **the arrow covered the stick zone in 30 of 61
+views.** Likely behind much of runs 22–24's "the arrow points behind me", "the camera spins" and
+"stuck" (the pulse added in v95 made it bigger still).
+
+**Changed after run 24:**
+
+- The goal arrow stays above the stick zone and the action button: 30 of 61 → 0 (camprobe K).
+- A note in the satchel strip is a button: tapped, it goes back to its board, from anywhere.
+- The guess reads "Your guess: Lotus Terraces stairs · guessed right ✓" (or "· guessed wrong ✗"),
+  not a bare tick beside a shut Gate.

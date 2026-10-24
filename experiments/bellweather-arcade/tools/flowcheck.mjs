@@ -164,7 +164,10 @@ await segment('isle', async () => {
   await card('Swap'); await page.waitForTimeout(1200);
   check('the view goes and the seal comes back after a swap', await waitFor(() => page.evaluate(() => !window.__vlDebug.scene.getObjectByName('gate-view')?.visible), 15000));
   // the way (keeper's notice) with the where (Mira's page) opens it
-  await pose(-2.4, 50.4); await act('Put it back'); await take(5.4, 53.4);
+  // put the poster back from the satchel itself, wherever Zip stands (run 24 quit walking back to swap)
+  await press(page.locator('.satchel-bar button[data-action="put.poster"]')); await page.waitForTimeout(400);
+  check('a note in the satchel goes back to its board with a tap on it, from anywhere', (await notes()) === 1, `${await notes()} notes in the satchel`);
+  await take(5.4, 53.4);
   await pose(0, 49.2); await act('Gate'); await card('Lotus');
   await card('Yes'); await page.waitForTimeout(1200);
   const gateEv = (await learning()).filter(e => e.activity === 'blossom-gate');

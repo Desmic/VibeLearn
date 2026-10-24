@@ -403,6 +403,35 @@
       ],
       "status": "prevented",
       "open": "the engine's own contrast (the whole ring vs the newest word) is still only on wrong paths"
+    },
+    {
+      "id": "qe-arrow-over-stick",
+      "found": {
+        "date": "2026-10-24",
+        "by": "blind run 24 (commuter), steps 9-21 and 57-63; Claude reading the play log",
+        "where": "every place with a goal behind or below the player: the goal arrow on the screen edge"
+      },
+      "symptom": "Stick pushes did nothing (Zip stood still for 2 s pushes) and the camera turned instead: the goal arrow, at the screen's lower-left edge when the goal was behind, sat on the thumb-stick zone and took the thumb. Players across runs 22-24 said the arrow \"points behind me\", the camera \"spins\" and they were \"stuck\".",
+      "why_missed": "Probes press the stick and the arrow through the harness, never both on a phone layout at once; nothing checked that two controls never overlap.",
+      "generalized_failure": "A control that moves round the screen edge can land on top of a fixed control and steal its touches.",
+      "invariant": "The goal arrow never overlaps the thumb-stick zone or the action button.",
+      "prevention": [
+        {
+          "layer": "engine",
+          "what": "guide.ts keeps the arrow above the stick zone (lower-left 46% × 44%) and above the action button"
+        },
+        {
+          "layer": "check",
+          "what": "camprobe K: three spots, 24 headings, the arrow's box against the stick zone and the action button (30 of 61 arrow views over the stick before, 0 after)"
+        }
+      ],
+      "caught_by": [
+        "camprobe"
+      ],
+      "lanes": [
+        "feel"
+      ],
+      "status": "prevented"
     }
   ]
 }
