@@ -80,10 +80,16 @@ const reach = async (extra, box) => {
 {
   const box = [-9, 9, -12, 10], none = await reach('&title=0&beat=skiff&life=0', box), all = await reach('&title=0&beat=skiff', box);
   const lost = [];
+  // a spot lost is one still walkable but no longer reachable (cut off), or floor taken more than the
+  // fillet that seals a townsperson against a wall (facade.ts: up to 2.6 m along the wall) can take
   for (let k = 0; k < none.got.length; k++) if (none.got[k] && !all.got[k]) {
-    const x = box[0] + (k % none.W) * .2, z = box[2] + Math.floor(k / none.W) * .2;
-    if (all.folk.every(([fx, fz]) => Math.hypot(fx - x, fz - z) > 1.0)) lost.push([x, z]);
+    const x = box[0] + (k % none.W) * .2, z = box[2] + Math.floor(k / none.W) * .2, far = Math.min(...all.folk.map(([fx, fz]) => Math.hypot(fx - x, fz - z)));
+    if (all.ok[k] ? far > 1.0 : far > 2.8) lost.push([x, z]);
   }
+  // slivers under a quarter of a square metre (a few cells in a corner the fillers didn't quite reach)
+  // are not places a player could be cut off from
+  { const groups = []; for (const p of lost) { const g = groups.find(q => q.some(r => Math.hypot(r[0] - p[0], r[1] - p[1]) < .25)); if (g) g.push(p); else groups.push([p]); }
+    lost.length = 0; for (const g of groups) if (g.length * .04 >= .25) lost.push(...g); }
   const at = lost.length ? `${lost.length} spots, e.g. (${lost[0][0].toFixed(1)}, ${lost[0][1].toFixed(1)}); townsfolk at ${all.folk.map(f => f.map(v => v.toFixed(1)).join(',')).join(' · ')}` : `${all.folk.length} townsfolk`;
   h.check('town: the townsfolk never cut off a part of the map', !lost.length, at, 'fail', 'world');
   // and nobody stands in the way: for each townsperson, the walk between the two sides of where they
@@ -127,9 +133,9 @@ const pockets = async (name, extra, box, sev = 'fail') => {
   h.check(`${name}: no pockets a push gets stuck in`, !r.length, r.map(([x, z, n]) => `(${x.toFixed(1)}, ${z.toFixed(1)}) ×${n}`).join('; ') || 'none', sev, 'world');
 };
 await pockets('Blossom Isle', '&title=0&beat=gate-open', [-10, 10, 38, 58]);
-// the town: walls and their corners, not yet sealed (no tester has been stuck in one since the
-// strips were fixed); a warning until it is
-await pockets('town', '&title=0&beat=skiff', [-9, 9, -12, 10], 'warn');
+// the town: sealed too since run 26 (stuck 8 s between the pilot stone and the outlook's wall, in
+// sight of Mira; the player put the phone down)
+await pockets('town', '&title=0&beat=skiff', [-9, 9, -12, 10]);
 await strips('town', '&title=0&beat=skiff', [-9, 9, -12, 10]);
 await strips('Blossom Isle', '&title=0&beat=gate-open', [-10, 10, 38, 58]);
 await h.finish();

@@ -68,7 +68,10 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
   // over his head, looking straight down: run 22, step 13)
   place(3, -1.55, -10.9, -Math.PI / 2 + .3, 'Talk', 'chatA');
   place(8, -0.8, -10.85, Math.PI / 2 - .2, 'Talk', 'chatB');
-  place(14, 6.6, -11.0, 0, 'Idle', 'view');
+  // taking in the view from the alcove by the east wall, out of every way through (until run 26 in the
+  // nook between Mira, the big tree and the wall: sealed as one when the town's pockets were, her
+  // word could only be heard from 2.3 m)
+  place(14, 7.3, -7.0, 0, 'Idle', 'view');
   // someone waiting under the arrival canopy, and a figure reading near the bench
   place(21, -6.8, 6.4, .9, 'Idle', 'canopy');
   place(27, 6.9, 1.2, -1.9, 'Idle', 'reader');

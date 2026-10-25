@@ -64,7 +64,11 @@ export function fadeOccluders(list: Fader[], camera: T.Camera, zipFeet: T.Vector
     let want = 1;
     if (fr.depth < zr.depth - .3) {
       const ox = Math.min(fr.x1, zr.x1) - Math.max(fr.x0, zr.x0), oy = Math.min(fr.y1, zr.y1) - Math.max(fr.y0, zr.y0);
-      if (ox > 0 && oy > 0) want = 1 - .84 * T.MathUtils.smoothstep((ox * oy) / zipArea, .05, .35);
+      // (Zip's outline reaching behind the lens makes both areas infinite: ∞/∞ is NaN, and a NaN
+      // opacity stuck for good. Run 26: the banner by the east wall never faded again, the lens sat
+      // in its cloth: "ugh, camera is stuck in the flag thing")
+      const share = (ox * oy) / zipArea;
+      if (ox > 0 && oy > 0 && Number.isFinite(share)) want = 1 - .84 * T.MathUtils.smoothstep(share, .05, .35);
     }
     if (fr.depth < 1.4) want = Math.min(want, .16);
     // the lens in (or brushing) the thing itself: a crown is wide, so its trunk can be metres off
@@ -78,7 +82,8 @@ export function fadeOccluders(list: Fader[], camera: T.Camera, zipFeet: T.Vector
       const cw = Math.max(0, Math.min(fr.x1, 1) - Math.max(fr.x0, -1)), ch = Math.max(0, Math.min(fr.y1, 1) - Math.max(fr.y0, -1));
       const cover = cw * ch / 4; if (cover > .12) want = Math.min(want, 1 - .75 * T.MathUtils.smoothstep(cover, .12, .3));
     }
-    f.want = want; f.o += (want - f.o) * Math.min(1, dt * 8);
+    if (!Number.isFinite(want)) want = 1;
+    f.want = want; f.o += (want - f.o) * Math.min(1, dt * 8); if (!Number.isFinite(f.o)) f.o = want;
     const fading = f.o < .985;
     for (const m of f.mats) {
       // dither: hashed see-through that keeps depth (one-mesh characters would otherwise draw

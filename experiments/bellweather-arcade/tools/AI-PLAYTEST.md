@@ -994,3 +994,39 @@ getting lost. the walking around part was the annoying bit"). 222 steps.
 - The relay's word console no longer says "CH 7" (the channel card is where the channel is); the
   star reads "Sent the right words, first try".
 - The satchel's notes stop being tappable once the Gate is open.
+
+## Blind run 26: the main game on v99 (25 Oct 2026; student, 19)
+
+**Put the phone down at step 49, before reaching Mira**, so no interview. Their words: "ugh,
+camera is stuck in the flag thing", "where did my robot go… camera is lost", "this camera keeps
+flipping around on me", "I keep ending up back at the entrance", and last: "I can literally see her
+in the light beam and I can not get there. Pretty game but I am done." The first run to quit in the
+opening since run 14. The play log showed three causes:
+
+- **A wedge by the pilot stone** (steps 33-36): pushing along the outlook's wall toward Mira, Zip
+  stopped dead for 8 s in the V between the pilot stone and the wall, 3.7 m from Mira. Reachprobe
+  had found the town's pockets but only warned (sealing covered the islands only).
+- **A banner that never faded** (steps 13-14): the lens sat in the east banner's cloth, solid
+  blue. Its fade opacity had gone NaN in the cold open (Zip's outline behind the lens: ∞/∞), so it
+  never faded again.
+- **Walking past the turn** (steps 39-45): "Turn toward the goal" faces the next corner of the way
+  round the big tree, 2.5 m off; the player then held forward for 3-4 s (10 m) and ended up by the
+  entrance.
+
+The neural-net engine (v99) was never reached.
+
+**Changed after run 26:**
+
+- Round solids against any wall or the town's edge are sealed like the islands' (the gap filled, a
+  low mound along the wall on both sides); reachprobe finds no town pockets now, and fails on any.
+- Faders ignore a non-finite overlap and reset a non-finite opacity; flowcheck checks every fader
+  is finite after the cold open.
+- After a tap on the goal arrow, holding forward follows the way round to the goal for up to 12 s,
+  the camera coming round behind; at the goal Zip waits while the push is held. Sideways or back
+  for a quarter second, or dragging the view, hands it back. New probe `arrowwalk` (tap, then 4 s
+  pushes, from five spots): all five reach Mira either way, but in 6 pushes and 45 m instead of 13
+  pushes and 134 m (from the east side: 1 push and 4 m, was 4 pushes and 43 m).
+- The fillers are kept in a 1 m grid: about 2,400 of them cost about 4 µs a walkable test.
+- The neighbour who says "toward" moved from the nook between Mira, the big tree and the wall (sealed
+  with them, so her word could only be heard from 2.3 m; the speedrun stalled on the skiff's words) to the
+  alcove by the east wall, out of every way through.

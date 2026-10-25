@@ -432,6 +432,94 @@
         "feel"
       ],
       "status": "prevented"
+    },
+    {
+      "id": "qe-wall-wedge",
+      "found": {
+        "date": "2026-10-25",
+        "by": "blind run 26 (student), steps 33-36; Claude reading the play log and a walk map",
+        "where": "the outlook: the pilot stone against the outlook's wall, 4 m from Mira"
+      },
+      "symptom": "Pushing along the wall toward Mira, Zip stopped dead for 8 s of pushing in the V between the pilot stone and the wall; with Mira in sight the player put the phone down at step 49 (\"I can literally see her … and I can not get there\").",
+      "why_missed": "Pocket sealing (qe-pocket-wedge) covered round things on the islands only; reachprobe found the town's pockets but only warned, since no tester had been stuck in one.",
+      "generalized_failure": "A round solid touching a straight wall makes a V that holds a push dead, anywhere, not only on islands.",
+      "invariant": "No walkable spot in the town or on an island holds a push dead within 45° of its direction.",
+      "prevention": [
+        {
+          "layer": "engine",
+          "what": "facade.ts seals a round solid against any wall or the town's edge: the gap filled, and a low mound along the wall on both sides (up to 2.6 m)"
+        },
+        {
+          "layer": "check",
+          "what": "reachprobe: town pockets now fail (0 after; the pilot stone's V was one); the townsfolk check counts cut-off floor, not the fillets"
+        }
+      ],
+      "caught_by": [
+        "reachprobe"
+      ],
+      "lanes": [
+        "feel",
+        "world"
+      ],
+      "status": "prevented"
+    },
+    {
+      "id": "qe-fader-nan",
+      "found": {
+        "date": "2026-10-25",
+        "by": "blind run 26 (student), steps 13-14 (\"ugh, camera is stuck in the flag thing\"); Claude probing the faders",
+        "where": "the banner by the east wall (and any fader)"
+      },
+      "symptom": "The lens sat inside a banner's cloth, solid blue: the banner's fade opacity was NaN from the cold open on, so it never faded again.",
+      "why_missed": "The probes read each fader's target (want), never its current opacity; NaN never compares false in a way any check looked at.",
+      "generalized_failure": "A screen-space overlap of two outlines, one reaching behind the camera, divides infinity by infinity; the NaN, eased into a value, stays NaN for good.",
+      "invariant": "Every fader's opacity is a finite number.",
+      "prevention": [
+        {
+          "layer": "engine",
+          "what": "occluders.ts ignores a non-finite overlap share and resets a non-finite opacity"
+        },
+        {
+          "layer": "check",
+          "what": "flowcheck meet: every fader's opacity is finite after the cold open"
+        }
+      ],
+      "caught_by": [
+        "flowcheck"
+      ],
+      "lanes": [
+        "feel"
+      ],
+      "status": "prevented"
+    },
+    {
+      "id": "qe-walk-past-turn",
+      "found": {
+        "date": "2026-10-25",
+        "by": "blind run 26 (student), steps 39-45; Claude reading the play log",
+        "where": "the town, on the way round the big tree to Mira"
+      },
+      "symptom": "The goal arrow turned the view to the first corner of the way, 2.5 m off; the player held forward for 3-4 s, walked 10 m past it and back to the entrance (\"I keep ending up back at the entrance\").",
+      "why_missed": "The probes tapped the arrow and checked where the view turned, never what a long push afterwards does.",
+      "generalized_failure": "A guide that only turns the view to the next corner of a winding way leaves a player who walks in long pushes overshooting every corner.",
+      "invariant": "After a tap on the goal arrow, pushes held forward reach the goal from anywhere, without walking far past a turn.",
+      "prevention": [
+        {
+          "layer": "engine",
+          "what": "main.ts steerAssist: after an arrow tap, a forward push follows the found way to the goal (12 s), the camera behind it; it waits at the goal while the push is held; sideways, back or a drag hands it back"
+        },
+        {
+          "layer": "check",
+          "what": "arrowwalk: five spots, tap then 4 s pushes: 6 pushes and 45 m to Mira (13 and 134 with the assist off)"
+        }
+      ],
+      "caught_by": [
+        "arrowwalk"
+      ],
+      "lanes": [
+        "feel"
+      ],
+      "status": "prevented"
     }
   ]
 }

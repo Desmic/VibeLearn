@@ -37,27 +37,53 @@ export function addWalkRegion(x:number,z:number,r:number){regions.push({x,z,r})}
 // the outside like any other edge. Walls and their corners are left alone: a corner reads as one.
 // Recomputed when the solids change; no solid moves at runtime.
 const ZIP_R=.34,fill:{x:number,z:number,r:number}[]=[];let fillKey='';
+// the fillers by 1 m cell (each listed in every cell its reach touches): walkable() is asked
+// thousands of times by a path search, and the fillers number in the thousands
+const fillGrid=new Map<number,{x:number,z:number,r:number}[]>();
+function gridFill(){fillGrid.clear();for(const c of fill){const R=c.r+ZIP_R;for(let ix=Math.floor(c.x-R);ix<=Math.floor(c.x+R);ix++)for(let iz=Math.floor(c.z-R);iz<=Math.floor(c.z+R);iz++){const k=ix*4096+iz;let l=fillGrid.get(k);if(!l)fillGrid.set(k,l=[]);l.push(c)}}}
 function sealPockets(){
   fill.length=0;const W=ZIP_R*2,NEEDLE=W+.55/* a way half a metre wider than Zip still holds a push that isn't dead-on (run 23: 1.16 m between a tree and a rock) */,lay=(ax:number,az:number,ar:number,bx:number,bz:number,br:number)=>{const d=Math.hypot(bx-ax,bz-az),n=Math.max(1,Math.ceil(d/(Math.min(ar,br)*.5)));for(let i=1;i<n;i++){const t=i/n;fill.push({x:ax+(bx-ax)*t,z:az+(bz-az)*t,r:ar+(br-ar)*t})}};
-  // islands only for now: the town's solids sit against walls and townsfolk, tuned by their own checks
+  // an island's edge only counts on the islands; walls and the town's edge are sealed further down
   const inIsle=(c:{x:number,z:number})=>regions.some(g=>Math.hypot(c.x-g.x,c.z-g.z)<g.r);
-  for(let i=0;i<circles.length;i++){const a=circles[i];if(!inIsle(a))continue;
-    for(let j=i+1;j<circles.length;j++){const b=circles[j];if(!inIsle(b))continue;const g=Math.hypot(a.x-b.x,a.z-b.z)-a.r-b.r;if(g<NEEDLE&&g>-Math.min(a.r,b.r))lay(a.x,a.z,a.r,b.x,b.z,b.r)}
+  for(let i=0;i<circles.length;i++){const a=circles[i];
+    // two round things: on the islands any way under NEEDLE; in the town only a way Zip can't get
+    // through at all (run 26: two neighbours by the outlook's wall), so its narrow ways stay
+    for(let j=i+1;j<circles.length;j++){const b=circles[j],isle=inIsle(a)&&inIsle(b),g=Math.hypot(a.x-b.x,a.z-b.z)-a.r-b.r;if(g<(isle?NEEDLE:W+.1)&&g>-Math.min(a.r,b.r))lay(a.x,a.z,a.r,b.x,b.z,b.r)}
+    if(!inIsle(a))continue;
     const home=regions.find(g=>Math.hypot(a.x-g.x,a.z-g.z)<g.r);
     // near the island's edge: a low mound along the edge up to it, sloping off to either side, so
     // neither side is a corner to wedge in
     if(home){const d=Math.hypot(a.x-home.x,a.z-home.z),g=home.r-d-a.r;if(g<NEEDLE&&d>.01){const ux=(a.x-home.x)/d,uz=(a.z-home.z)/d,e=a.r+Math.max(0,g)+.05;lay(a.x,a.z,a.r,a.x+ux*e,a.z+uz*e,a.r);
       const phi=Math.atan2(ux,uz),top=home.r-d+a.r/* from the edge to its inner side */,L=top*3+W;for(let s=-L;s<=L+1e-6;s+=.08){const q=phi+s/home.r,rho=top*(1-Math.abs(s)/L);if(rho>.03)fill.push({x:home.x+Math.sin(q)*home.r,z:home.z+Math.cos(q)*home.r,r:rho})}}}
   }
+  // a round thing against a wall, anywhere (run 26, 25 Oct: a planter against the outlook's wall held
+  // a push dead for 8 s within sight of Mira, and the player put the phone down): fill the gap, and a
+  // low mound along the wall on both sides, so a push along the wall rides up and round it
+  const bounds=[{minX:-40,maxX:-9,minZ:-40,maxZ:40},{minX:9,maxX:40,minZ:-40,maxZ:40},{minX:-40,maxX:40,minZ:-40,maxZ:-12},{minX:-40,maxX:40,minZ:10,maxZ:40}];   // the town's own edges
+  // a round thing by a wall's end: the corner and the round thing make the same V (a crown by the
+  // corner of a building, by the east wall), so the gap to the corner is filled as a cone
+  for(const a of circles)for(const b of blockers)for(const [cx,cz] of [[b.minX,b.minZ],[b.minX,b.maxZ],[b.maxX,b.minZ],[b.maxX,b.maxZ]]){const g=Math.hypot(a.x-cx,a.z-cz)-a.r;if(g>0&&g<W+.1)lay(a.x,a.z,a.r,cx,cz,.06)}
+  for(const a of circles)for(const b of inIsle(a)?blockers:[...blockers,...bounds]){
+    const nx=Math.max(b.minX,Math.min(a.x,b.maxX)),nz=Math.max(b.minZ,Math.min(a.z,b.maxZ)),d=Math.hypot(a.x-nx,a.z-nz),g=d-a.r;
+    if(g>=W+.1||d<.01)continue;   // a way Zip fits through is a way, not a pocket
+    const ux=(a.x-nx)/d,uz=(a.z-nz)/d,tx=-uz,tz=ux;if(Math.abs(ux)>.05&&Math.abs(uz)>.05)continue;   // a box's corner reads as a corner
+    if(g>0)lay(a.x,a.z,a.r,nx+ux*a.r,nz+uz*a.r,a.r);   // drawn out until it touches the wall, no further
+    const top=Math.min(d+a.r,W+.45)/* a big crown only needs its V filled, not its whole depth */,L=Math.min(2.6,top*2+W*.5);
+    // tapering to nothing at the wall's end, so the mound never stops in a bump that makes the same V
+    // with the next wall (the first try left one by the east wall, between a crown's mound and it)
+    for(let s=-L;s<=L+1e-6;s+=.08){const x=nx+tx*s,z=nz+tz*s;if(x<b.minX-.01||x>b.maxX+.01||z<b.minZ-.01||z>b.maxZ+.01)continue;const e=Math.abs(tx)>.5?Math.min(x-b.minX,b.maxX-x):Math.min(z-b.minZ,b.maxZ-z),rho=Math.min(top*(1-Math.abs(s)/L),e);if(rho>.03)fill.push({x,z,r:rho})}
+  }
 }
 /** for probes: the solids near a spot (circles, pocket fillers, boxes) */
 export function solidsNear(x:number,z:number,R:number){const n=(c:{x:number,z:number,r:number})=>Math.hypot(c.x-x,c.z-z)<R+c.r;return {circles:circles.filter(n),fill:fill.filter(n),boxes:blockers.filter(b=>x>b.minX-R&&x<b.maxX+R&&z>b.minZ-R&&z<b.maxZ+R),regions}}
 export function walkable(p:T.Vector3){
-  const r=ZIP_R,key=circles.length+','+blockers.length+','+regions.length;if(key!==fillKey){fillKey=key;sealPockets()}
+  const r=ZIP_R,key=circles.length+','+blockers.length+','+regions.length;if(key!==fillKey){fillKey=key;sealPockets();gridFill()}
   const inRegion=regions.some(g=>Math.hypot(p.x-g.x,p.z-g.z)<g.r-r);
   if(!inRegion&&(p.x<-9+r||p.x>9-r||p.z<-12+r||p.z>10-r))return false;
   for(const b of blockers)if(p.x>b.minX-r&&p.x<b.maxX+r&&p.z>b.minZ-r&&p.z<b.maxZ+r)return false;
-  return circles.every(c=>Math.hypot(p.x-c.x,p.z-c.z)>c.r+r)&&fill.every(c=>Math.hypot(p.x-c.x,p.z-c.z)>c.r+r);
+  if(!circles.every(c=>Math.hypot(p.x-c.x,p.z-c.z)>c.r+r))return false;
+  const cell=fillGrid.get(Math.floor(p.x)*4096+Math.floor(p.z));
+  return !cell||cell.every(c=>Math.hypot(p.x-c.x,p.z-c.z)>c.r+r);
 }
 
 function roundShape(w:number,h:number,r:number){

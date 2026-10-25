@@ -61,6 +61,8 @@ await segment('meet', async () => {
   if ((await beat()) !== 'meet') { await page.evaluate(() => localStorage.clear()); await open('&title=0'); }
   await shot('cold-open'); await h.skipOpening();
   check('goal: meet Mira', /Meet Mira/.test(await goal() ?? ''), await goal());
+  // run 26: a fader's opacity went NaN in the cold open and that banner never faded again
+  { const bad = await page.evaluate(() => (window.__vlDebug.faders ?? []).filter(f => !Number.isFinite(f.o)).map(f => f.root.name || f.root.type)); check('every fader can still fade after the cold open (no NaN opacity)', !bad.length, bad.join(', ') || 'all finite'); }
   check('no card at the bottom in the cold open', !(await page.locator('.story-card:not([hidden])').count()));
   await pose(4.4, -9.4); await act('Talk');
   check('Mira talks in a bubble over her head', await waitFor(() => page.locator('.story-card.bubble').isVisible(), 15000, 300));
@@ -94,11 +96,11 @@ await segment('skiff', async () => {
   const sim = s => page.evaluate(s => window.__arcade.simulate(s), s);
   const carried = () => page.evaluate(() => window.__vlStory.debug.carried);
   check('goal asks for the skiff\'s words', /skiff's words \(0 of 3\)/.test(await goal() ?? ''), await goal());
-  await pose(-7.4, -10.4, 0); await page.waitForTimeout(800);
+  await pose(-4.0, -10.1, 0); await page.waitForTimeout(800);
   check('the first word wears a "Tap" prompt (tutorial in the world)', await waitFor(() => page.evaluate(() => !!document.querySelector('.tap-prompt') && window.__vlGuide.overlay.has('prompt-absorb')), 15000, 300));
   await shot('tap-prompt');
   // spots a player can stand on, within reach of each word
-  for (const [x, z, w] of [[-7.4, -10.4, 'rise'], [-3.6, -9.6, 'sink'], [4.8, -10.3, 'toward'], [2.4, -10.3, 'Skiff']]) {
+  for (const [x, z, w] of [[-4.0, -10.1, 'rise'], [-3.6, -9.6, 'sink'], [5.4, -6.9, 'toward'], [2.4, -10.3, 'Skiff']]) {
     // turn the camera until the word is the one on offer (the prompt picks what you aim at)
     for (const yaw of [0, .8, -.8, 1.6, -1.6, 2.4, -2.4, 3.14]) { await pose(x, z, yaw); await sim(.3); if (await page.locator('.context-act', { hasText: `“${w}”` }).isVisible()) break; }
     await act(`“${w}”`); await sim(1.2);
@@ -291,7 +293,7 @@ await segment('menu', async () => {
 
 await segment('views', async () => {
   // fixed judgment views for art review (before/after comparisons)
-  const views = [['', 'hero-vista', [.3, -11.2, 0]], ['', 'looking-back', [1, -8.5, Math.PI]], ['&beat=land', 'isle-gate', [0, 52.5, 0]], ['&beat=land', 'isle-relay', [0, 44, Math.PI]]];
+  const views = [['', 'hero-vista', [.4, -10.65, 0]], ['', 'looking-back', [1, -8.5, Math.PI]], ['&beat=land', 'isle-gate', [0, 52.5, 0]], ['&beat=land', 'isle-relay', [0, 44, Math.PI]]];
   let at = null;
   for (const [extra, name, p] of views) {
     if (extra !== at) { await open('&title=0' + extra); at = extra; if (!extra) await h.skipOpening(); await page.evaluate(() => document.querySelectorAll('.story-card').forEach(e => e.style.visibility = 'hidden')); await page.waitForTimeout(4000); }
