@@ -9,7 +9,7 @@ import { harness, arg } from './harness.mjs';
 const h = await harness({ title: 'Arrow walk', outDefault: '/tmp/arrowwalk', tool: 'arrowwalk', lane: 'feel' });
 const { page, check } = h;
 const MIRA = [5.3, -10.95], REACH = 2.6;
-const spots = [['arrival', 1, 7, 0], ['east side', 7.5, -6.8, 1.6], ['west court', -5, -6, -1.2], ['south lawn', 6, 2, 3.1], ['the tree', 6.2, -6.6, 2.4]];
+const spots = [['arrival', 1, 7, 0], ['east side', 6.0, -6.8, 1.6], ['west court', -5, -6, -1.2], ['south lawn', 6, 2, 3.1], ['the tree', 6.2, -6.6, 2.4]];
 const play = async extra => {
   const out = {};
   for (const [name, x, z, yaw] of spots) {

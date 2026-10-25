@@ -16,7 +16,9 @@ export interface WordSource {
 }
 export const ECHO_SOURCES: WordSource[] = [
   { id: 'plaque', word: 'Skiff', line: 'A brass plaque on the hull: “SKIFF”.', kind: 'object', at: [2.6, -15.2], y: 4.5, reach: 5.4, on: 'skiff' },
-  { id: 'kites', word: 'rise', line: '“Look at those kites rise over the falls!”', kind: 'npc', at: [-5.4, -11.1], y: 2.75, reach: 2.8 },
+  // out from behind the big tree (25 Oct): once the town's pockets were sealed it could only be taken by
+  // aiming past the decoy, "sink", which was nearer from every spot a player could stand on
+  { id: 'kites', word: 'rise', line: '“Look at those kites rise over the falls!”', kind: 'npc', at: [-5.6, -7.0], y: 2.75, reach: 2.8 },
   { id: 'wind', word: 'toward', line: '“The wind blows toward Blossom Isle today.”', kind: 'npc', at: [7.3, -7.0], y: 2.45, reach: 2.8 },
   { id: 'crosswind', word: 'sink', line: '“Careful. Boats sink in a crosswind.”', kind: 'npc', at: [-4.3, -11.0], y: 2.2, reach: 2.8 },
 ];

@@ -520,6 +520,36 @@
         "feel"
       ],
       "status": "prevented"
+    },
+    {
+      "id": "qe-thought-out-of-place",
+      "found": {
+        "date": "2026-10-25",
+        "by": "blind run 27 (explorer), steps 76-79; Claude reading the play log",
+        "where": "the engine hologram at the skiff, then the flight"
+      },
+      "symptom": "Zip's thoughts on seeing his net (\"One coil lit. The rest of me is still dark.\") and on its waking were held while the engine was open and played mid-flight, with nothing lit on screen; the player heard the voice was coming back but never tied it to the net.",
+      "why_missed": "Nothing checked when a thought shows against the moment that raised it; the engine hid thoughts by CSS as well as by the queue.",
+      "generalized_failure": "A line queued while its scene is on screen, but held back by a rule for that scene, plays later in another scene where it means nothing.",
+      "invariant": "A thought raised while a scene is open shows during that scene or not at all.",
+      "prevention": [
+        {
+          "layer": "engine",
+          "what": "guide.ts marks thoughts raised in the engine: they show there, any left are dropped when it closes, and a thought from before stops as it opens"
+        },
+        {
+          "layer": "check",
+          "what": "flowcheck skiff: Zip's thought on seeing his engine shows while it is open"
+        }
+      ],
+      "caught_by": [
+        "flowcheck"
+      ],
+      "lanes": [
+        "feel",
+        "content"
+      ],
+      "status": "prevented"
     }
   ]
 }

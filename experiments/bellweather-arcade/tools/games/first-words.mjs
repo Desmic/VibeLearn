@@ -44,7 +44,7 @@ export const helpers = h => {
       await playStation('relay-contact');
       await answer([/coming/]); await until(() => visible('.star-row'), 10); await note(); await h.stars();
       // Stop 2: board, fly over, free Tavi with the right call first time
-      await follow(/Board/); await answer([/Onward/]); await until(async () => /Loom Isle/.test(await page.locator('#place').textContent()), 30); await note();
+      await follow(/Board/); await answer([/Onward/]); await until(async () => /Loom Isle/.test(await page.locator('#place').textContent()), 120); await note();
       await playStation('loom-fit');
       await until(() => visible('.star-row'), 20); await note(); await h.stars();
       await answer([/What is it/, /Thanks/]); await until(async () => /Stop 2 for now/.test(await goal() ?? ''), 10); await note();

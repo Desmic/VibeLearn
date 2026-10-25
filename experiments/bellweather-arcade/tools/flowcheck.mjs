@@ -100,7 +100,7 @@ await segment('skiff', async () => {
   check('the first word wears a "Tap" prompt (tutorial in the world)', await waitFor(() => page.evaluate(() => !!document.querySelector('.tap-prompt') && window.__vlGuide.overlay.has('prompt-absorb')), 15000, 300));
   await shot('tap-prompt');
   // spots a player can stand on, within reach of each word
-  for (const [x, z, w] of [[-4.0, -10.1, 'rise'], [-3.6, -9.6, 'sink'], [5.4, -6.9, 'toward'], [2.4, -10.3, 'Skiff']]) {
+  for (const [x, z, w] of [[-5.4, -6.9, 'rise'], [-3.6, -9.6, 'sink'], [5.4, -6.9, 'toward'], [2.4, -10.3, 'Skiff']]) {
     // turn the camera until the word is the one on offer (the prompt picks what you aim at)
     for (const yaw of [0, .8, -.8, 1.6, -1.6, 2.4, -2.4, 3.14]) { await pose(x, z, yaw); await sim(.3); if (await page.locator('.context-act', { hasText: `“${w}”` }).isVisible()) break; }
     await act(`“${w}”`); await sim(1.2);
@@ -114,6 +114,9 @@ await segment('skiff', async () => {
   // the engine is drawn as a neural net (25 Oct): what a ring lights should depend on the whole ring
   const lit = () => page.evaluate(() => window.__vlNet.nodes.map(n => +n.want.toFixed(2)));
   await press(chip('sink')); await sim(.5); const sinkLit = await lit();
+  // run 27: Zip's thoughts on seeing his net played later, mid-flight, with nothing lit on screen
+  await sim(3.2); await shot('engine-thought');
+  check('Zip\'s thought on seeing his engine shows while it is open', await waitFor(() => page.evaluate(() => { const t = document.querySelector('.thought'); return !!t && !t.hidden && /hologram|coil/.test(t.textContent ?? ''); }), 8000, 300));
   check('the net shows some of itself dark (the rest of Zip\'s voice) when it opens', await page.evaluate(() => { const n = window.__vlNet; return n.awake > 0 && n.awake < .3 && n.nodes.some(x => !x.lit); }), await page.evaluate(() => window.__vlNet.awake));
   await press(page.locator('.holo-cast')); await sim(3);
   check('casting "sink" sinks the skiff', await page.locator('.engine-prompt', { hasText: 'sank' }).isVisible());
@@ -216,7 +219,9 @@ await segment('relay', async () => {
   for (const w of ['Channel', 'Surrender', 'Mira', "it's"]) await press(page.locator('.relay-console .chip', { hasText: w }));
   await press(page.locator('.relay-console button', { hasText: 'Send' })); await page.waitForTimeout(600);
   check('reading the Warden\'s word too sends it back out (the jam plays out)', /surrender/i.test(await page.locator('.relay-read').textContent()), await page.locator('.relay-read').textContent());
-  for (const w of ['Channel', 'Mira', "it's"]) await press(page.locator('.relay-console .chip', { hasText: w }));
+  // run 27: a wrong send cleared every pick; now they stay, so taking out the Warden's word is one tap
+  check('a wrong send keeps the words picked', await page.locator('.relay-console .chip.picked').count() === 4, String(await page.locator('.relay-console .chip.picked').count()));
+  await press(page.locator('.relay-console .chip', { hasText: 'Surrender' }));
   await press(page.locator('.relay-console button', { hasText: 'Send' })); await page.waitForTimeout(600);
   // run 23: "I never saw what word the relay put in the … slot"; and the Warden's word looks like the others
   check('the relay makes its next word into the gap before Mira answers', await page.locator('.relay-console .chip.made', { hasText: 'Zip' }).isVisible().catch(() => false), await page.locator('.relay-read').textContent().catch(() => ''));
@@ -233,7 +238,13 @@ await segment('loom', async () => {
   // Stop 2, built from data: board the skiff, land on Loom Isle, free Tavi at the Word Loom
   if (!/Board the skiff/.test(await goal() ?? '')) { await open('&title=0&beat=to-loom'); await page.waitForTimeout(2500); }
   await pose(-3.6, 55.2); await act('Board');   // walkable ground beside the mooring
-  await card('Onward'); await page.waitForTimeout(2500);
+  await card('Onward'); await page.waitForTimeout(1500);
+  // run 27: the hop was a cut; now it is flown (a short lane, no drones), hands off it still lands
+  check('the hop to Loom Isle is flown', await page.evaluate(() => !!window.__vlFlight?.active), '');
+  await page.evaluate(() => window.__arcade.simulate(4)); await shot('loom-hop');
+  for (let i = 0; i < 90 && await page.evaluate(() => !!window.__vlFlight?.active); i++) await page.evaluate(() => window.__arcade.simulate(1));
+  check('the hop ends on Loom Isle, its rings counted', await page.evaluate(() => { const s = window.__vlFlight?.state; return !window.__vlFlight?.active && s?.total === 4; }), JSON.stringify(await page.evaluate(() => window.__vlFlight?.state)));
+  await page.waitForTimeout(1000);
   check('lands on Loom Isle', /Loom Isle/.test(await page.locator('#place').textContent()), await page.locator('#place').textContent());
   check('saved at checkpoint "loom"', (await save()) === 'loom', await save());
   const p = await zip(); check('stands on the raised island (ground lifted)', p[1] > 4.9 && p[1] < 5.5, p[1]);

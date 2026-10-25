@@ -180,7 +180,7 @@
 .engine-mode .speech{display:none}
 
 .engine-mode .brand{visibility:hidden}
-.engine-mode .thought:not(.warden){opacity:0}
+/* Zip's thoughts in the engine are only the ones had looking at it (guide.ts) */
 .holo-chip:disabled{opacity:.45;box-shadow:none}
 .cutscene .control-hint{display:none}
 

@@ -114,7 +114,7 @@ await h.shot('d-after-dialogue');
 // stick forward after the tap makes real progress instead of pressing into the wall.
 await h.open('&title=0'); await h.skipOpening(); await sim(1);
 const M = await page.evaluate(() => { const b = window.__vlGuide.beaconAt; return [b.x, b.z]; });
-await h.pose(-8.0, -1.3, Math.PI / 2); await sim(1); await page.waitForTimeout(600);
+await h.pose(-7.8, -1.3, Math.PI / 2); await sim(1); await page.waitForTimeout(600);
 const e0 = (await snap()).position;
 await h.press(page.locator('.beacon-edge')); await sim(1.6);
 await h.stick([0, -1], 2.5);

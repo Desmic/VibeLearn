@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1",
   "id": "first-words.relay-contact",
-  "version": "2",
+  "version": "3",
   "state": {
     "phase": {
       "type": "enum",
@@ -411,28 +411,7 @@
           "when": {
             "field": "word1"
           },
-          "effects": [
-            {
-              "op": "set",
-              "field": "word0",
-              "value": false
-            },
-            {
-              "op": "set",
-              "field": "word1",
-              "value": false
-            },
-            {
-              "op": "set",
-              "field": "word2",
-              "value": false
-            },
-            {
-              "op": "set",
-              "field": "word3",
-              "value": false
-            }
-          ],
+          "effects": [],
           "emits": [
             "decide:next-input:wrong:jammed"
           ]
@@ -458,28 +437,7 @@
               }
             ]
           },
-          "effects": [
-            {
-              "op": "set",
-              "field": "word0",
-              "value": false
-            },
-            {
-              "op": "set",
-              "field": "word1",
-              "value": false
-            },
-            {
-              "op": "set",
-              "field": "word2",
-              "value": false
-            },
-            {
-              "op": "set",
-              "field": "word3",
-              "value": false
-            }
-          ],
+          "effects": [],
           "emits": [
             "decide:next-input:wrong:newest"
           ]
@@ -491,55 +449,13 @@
               "field": "word0"
             }
           },
-          "effects": [
-            {
-              "op": "set",
-              "field": "word0",
-              "value": false
-            },
-            {
-              "op": "set",
-              "field": "word1",
-              "value": false
-            },
-            {
-              "op": "set",
-              "field": "word2",
-              "value": false
-            },
-            {
-              "op": "set",
-              "field": "word3",
-              "value": false
-            }
-          ],
+          "effects": [],
           "emits": [
             "decide:next-input:wrong:no-card"
           ]
         },
         {
-          "effects": [
-            {
-              "op": "set",
-              "field": "word0",
-              "value": false
-            },
-            {
-              "op": "set",
-              "field": "word1",
-              "value": false
-            },
-            {
-              "op": "set",
-              "field": "word2",
-              "value": false
-            },
-            {
-              "op": "set",
-              "field": "word3",
-              "value": false
-            }
-          ],
+          "effects": [],
           "emits": [
             "decide:next-input:wrong:partial"
           ]

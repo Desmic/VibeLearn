@@ -33,13 +33,18 @@ export function buildFlight(scene: T.Scene, o: Opts) {
   const missMat = new T.MeshBasicMaterial({ color: '#b9b0c8', transparent: true, opacity: .25, fog: false });
   // the rings read from far off: a bright band with a soft halo (run 23: "Didn't even know there were wind rings")
   const haloMat = new T.MeshBasicMaterial({ color: '#fff1c2', transparent: true, opacity: .22, fog: false, depthWrite: false, blending: T.AdditiveBlending });
-  const rings = LANE.map((p, i) => {
-    const m = new T.Mesh(new T.TorusGeometry(2.7, .2, 8, 40), ringMat); m.position.copy(p);
-    const halo = new T.Mesh(new T.TorusGeometry(2.7, .55, 6, 40), haloMat); m.add(halo);
-    const next = LANE[i + 1] ?? new T.Vector3(0, 4, 55), prev = LANE[i - 1] ?? new T.Vector3(2.6, 4, -15);
+  // the lane being flown: Blossom Isle's by default; a later hop passes its own (run 27: the hop to Loom
+  // Isle was a cut, "a little disappointing after the first one")
+  let LN = LANE;
+  const ringGeo = new T.TorusGeometry(2.7, .2, 8, 40), haloGeo = new T.TorusGeometry(2.7, .55, 6, 40);
+  const makeRings = (pts: T.Vector3[], from: T.Vector3, to: T.Vector3) => pts.map((p, i) => {
+    const m = new T.Mesh(ringGeo, ringMat); m.position.copy(p);
+    const halo = new T.Mesh(haloGeo, haloMat); m.add(halo);
+    const next = pts[i + 1] ?? to, prev = pts[i - 1] ?? from;
     const dir = next.clone().sub(prev).normalize(); m.lookAt(p.clone().add(dir)); root.add(m);
     return { m, halo, p, dir, state: 'open' as 'open' | 'hit' | 'miss' };
   });
+  let rings = makeRings(LANE, new T.Vector3(2.6, 4, -15), new T.Vector3(0, 4, 55)), dronesOn = true, landName = 'Blossom Isle!', goalText = 'Fly to the Blossom Isle';
   // the wind's lane: a ribbon of motes drifting from ring to ring, so the way reads before the first
   // ring is reached (and a skiff that strays sees where the lane went)
   const MOTES = 240, motePos = new Float32Array(MOTES * 3), moteGeo = new T.BufferGeometry(); moteGeo.setAttribute('position', new T.BufferAttribute(motePos, 3));
@@ -64,19 +69,21 @@ export function buildFlight(scene: T.Scene, o: Opts) {
   let skiff: T.Object3D | null = null, active = false, heading = 0, speed = 9, boost = 0, spotCool = 0, shake = 0, t = 0, next = 0, aimT = 0, turnV = 0;
   let result: FlightResult = { rings: 0, total: LANE.length, spotted: 0 }, onDone: ((r: FlightResult) => void) | null = null, landing = new T.Vector3(), landT = -1;
   const leadV = new T.Vector3(), pos = new T.Vector3(), fwd = new T.Vector3(), camPos = new T.Vector3(), camLook = new T.Vector3(), tmp = new T.Vector3(), seat = new T.Vector3();
-  const lengthLeft = () => { let d = pos.distanceTo(LANE[Math.min(next, LANE.length - 1)]); for (let i = next; i < LANE.length - 1; i++) d += LANE[i].distanceTo(LANE[i + 1]); return d + LANE[LANE.length - 1].distanceTo(landing); };
+  const lengthLeft = () => { let d = pos.distanceTo(LN[Math.min(next, LN.length - 1)]); for (let i = next; i < LN.length - 1; i++) d += LN[i].distanceTo(LN[i + 1]); return d + LN[LN.length - 1].distanceTo(landing); };
 
   const api = {
     get active() { return active; },
     /** for probes: rings so far, the next ring, spotted count */
     get state() { return { ...result, next, landing: landT >= 0 }; },
-    start(boat: T.Object3D, land: T.Vector3, done: (r: FlightResult) => void) {
+    start(boat: T.Object3D, land: T.Vector3, done: (r: FlightResult) => void, opts: { lane?: T.Vector3[]; drones?: boolean; arrive?: string; goal?: string } = {}) {
       skiff = boat; scene.add(boat); root.visible = true; active = true; onDone = done; landing.copy(land); landT = -1; next = 0;
-      result = { rings: 0, total: LANE.length, spotted: 0 }; rings.forEach(r => { r.state = 'open'; r.m.material = ringMat; });
-      pos.copy(boat.position); heading = Math.atan2(-(LANE[0].z - pos.z), LANE[0].x - pos.x); speed = 7; aimT = 0; turnV = 0; laneU = 0; leadV.set(Math.cos(heading), 0, -Math.sin(heading)); sfx.whoosh();
-      lane = new T.CatmullRomCurve3([pos.clone(), ...LANE, land.clone().setY(land.y + 3)]); const L = lane.getLength();
-      laneT = LANE.map(p => { let best = 0, bd = 1e9; for (let i = 0; i <= 200; i++) { const d = lane!.getPoint(i / 200).distanceTo(p); if (d < bd) { bd = d; best = i / 200; } } return best; }); void L;
-      g.setBeacon(LANE[0].clone().setY(LANE[0].y - 1.2), true); g.toast(inputMode.touch ? 'Steer with the stick' : 'A and D to steer · W to speed up', 3200);
+      if ((opts.lane ?? LANE) !== LN) { for (const r of rings) root.remove(r.m); LN = opts.lane ?? LANE; rings = makeRings(LN, boat.position.clone(), land.clone().setY(land.y + 3)); }
+      dronesOn = opts.drones ?? true; landName = opts.arrive ?? 'Blossom Isle!'; goalText = opts.goal ?? 'Fly to the Blossom Isle'; drones.forEach(d => (d.grp.visible = dronesOn));
+      result = { rings: 0, total: LN.length, spotted: 0 }; rings.forEach(r => { r.state = 'open'; r.m.material = ringMat; });
+      pos.copy(boat.position); heading = Math.atan2(-(LN[0].z - pos.z), LN[0].x - pos.x); speed = 7; aimT = 0; turnV = 0; laneU = 0; leadV.set(Math.cos(heading), 0, -Math.sin(heading)); sfx.whoosh();
+      lane = new T.CatmullRomCurve3([pos.clone(), ...LN, land.clone().setY(land.y + 3)]); const L = lane.getLength();
+      laneT = LN.map(p => { let best = 0, bd = 1e9; for (let i = 0; i <= 200; i++) { const d = lane!.getPoint(i / 200).distanceTo(p); if (d < bd) { bd = d; best = i / 200; } } return best; }); void L;
+      g.setBeacon(LN[0].clone().setY(LN[0].y - 1.2), true); g.toast(inputMode.touch ? 'Steer with the stick' : 'A and D to steer · W to speed up', 3200);
       // the goal arrow in the air turns the skiff onto the lane, not the camera (run 23: "the
       // turn-to-goal button never actually points me at the goal")
       g.setPointOverride(() => { aimT = 1.3; sfx.whoosh(); });
@@ -105,7 +112,7 @@ export function buildFlight(scene: T.Scene, o: Opts) {
       }
       const inp = o.input();
       // assist: with no steering input, the wind turns the skiff toward the next ring
-      const target = next < LANE.length ? LANE[next] : landing.clone().setY(6);
+      const target = next < LN.length ? LN[next] : landing.clone().setY(landing.y + 6);
       const want = Math.atan2(-(target.z - pos.z), target.x - pos.x);
       let dh = ((want - heading + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
       // steering eases in and turns at most ~55°/s (it was 86°/s at once: a two-second push swung the
@@ -134,15 +141,15 @@ export function buildFlight(scene: T.Scene, o: Opts) {
         if (ahead < 0 && d < 7) { const side = tmp.copy(pos).sub(r.p).addScaledVector(r.dir, -tmp.dot(r.dir)); if (side.length() < 5) pos.addScaledVector(side, -Math.min(1, dt * 1.6)); }
         if (d < 3.1) { r.state = 'hit'; r.m.material = doneMat; result.rings++; boost = 1.6; sfx.catch(); g.toast(`Ring ${result.rings}!`, 900); o.onRing?.(result.rings); next++; }
         else if (ahead > 0 && d < 16) { r.state = 'miss'; r.m.material = missMat; next++; o.onMiss?.(next - result.rings); }
-        if (next < rings.length) g.setBeacon(LANE[next].clone().setY(LANE[next].y - 1.2), true); else g.setBeacon(landing, true);
-      } else if (Math.hypot(pos.x - landing.x, pos.z - landing.z) < 14) { landT = 0; sfx.chime(); g.toast('Blossom Isle!', 1400); }
+        if (next < rings.length) g.setBeacon(LN[next].clone().setY(LN[next].y - 1.2), true); else g.setBeacon(landing, true);
+      } else if (Math.hypot(pos.x - landing.x, pos.z - landing.z) < 14) { landT = 0; sfx.chime(); g.toast(landName, 1400); }
       // drones: flying through a searchlight gets you spotted (a jolt, not a fail)
-      for (const d of drones) {
+      for (const d of dronesOn ? drones : []) {
         d.axis.set(0, -1, 0).applyQuaternion(d.pivot.getWorldQuaternion(new T.Quaternion()));
         tmp.copy(pos).sub(d.grp.position); const dist = tmp.length();
         if (spotCool <= 0 && dist < 12.5 && tmp.normalize().dot(d.axis) > Math.cos(.36)) { spotCool = 2; shake = .8; result.spotted++; sfx.zap(); g.toast('Spotted! Dodge the lights!', 1100); g.thinkOnce('rude', 'Rude.'); g.thinkOnce('warden-flight', 'I can hear you thinking up there, courier.', 'warden'); }
       }
-      g.setGoal(`Fly to the Blossom Isle · ${Math.round(lengthLeft())} m`);
+      g.setGoal(`${goalText} · ${Math.round(lengthLeft())} m`);
       // chase camera, a little wider when fast
       const back = 6.2 + (speed - 9) * .12;
       // and leaning toward the next ring, so the way on is in view before the skiff turns to it

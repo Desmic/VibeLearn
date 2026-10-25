@@ -207,9 +207,9 @@ export function buildStory(scene: T.Scene, o: Opts) {
   const loom = buildLoom({ guide: g, host: o.host, station: loomSt, onShake: () => later(.4, () => stop2.thinkOnce('loom-warden')), onDone: () => loomSt.finish(() => {
     freeTavi(); stop2.dialogue('thanks', { endStop: () => {
       // another piece of his voice is back: his net shows above him and more of it lights
-      enter2('loom-done'); later(.4, () => voiceMoment.play(ZIP_AWAKE.skiff, ZIP_AWAKE.loom, () => {
-        later(.3, () => story.thinkOnce('voice-back')); later(5, () => stop2.thinkOnce('loom-pieces'));
-      }));
+      // (his thought while it lights, not after: run 27 heard "Another coil lit" with nothing lit on screen)
+      enter2('loom-done'); later(.4, () => voiceMoment.play(ZIP_AWAKE.skiff, ZIP_AWAKE.loom, () => later(4, () => stop2.thinkOnce('loom-pieces'))));
+      later(2.2, () => story.thinkOnce('voice-back'));
     } });
   }) });
   // Tavi, the weaver, is stuck behind the loom's cloth: a voice and a shadow until freed
@@ -241,7 +241,16 @@ export function buildStory(scene: T.Scene, o: Opts) {
     isle.leave(); o.setGround?.((LOOM_ISLE.elevation ?? 0)); enter2('loom'); o.teleport(LOOM_LAND.x, LOOM_LAND.z - 1.2, 0);
   };
   const toLoom = () => { enter2('to-loom'); };
-  const board = () => { action(null); stop2.dialogue('hop', { board: () => readyLoom(landOnLoom) }); };
+  // the hop to Loom Isle is flown too, a short lane of four rings and no drones (run 27: it was a cut,
+  // "a little disappointing after the first one")
+  const flyLoom = () => {
+    const boat = boatRef ?? (() => { const b = skiff.release(); b.position.set(MOOR.x, b.position.y, MOOR.z); return b; })(); boatRef = boat;
+    enter('fly'); isle.leave(); o.teleport(o.zip().x, o.zip().z, 0);
+    const a = boat.position.clone(), b = LOOM_LAND.clone(), side = new T.Vector3(-(b.z - a.z), 0, b.x - a.x).normalize(), up = LOOM_ISLE.elevation ?? 0;
+    const lane = [.2, .4, .6, .8].map(k => a.clone().lerp(b, k).addScaledVector(side, Math.sin(k * Math.PI * 2) * 7).setY(8 + up * k + Math.sin(k * Math.PI) * 3));
+    flight.start(boat, LOOM_LAND, () => { boat.position.set(LOOM_LAND.x - 3, boat.position.y, LOOM_LAND.z + 1); landOnLoom(); }, { lane, drones: false, arrive: 'Loom Isle!', goal: 'Fly to Loom Isle' });
+  };
+  const board = () => { action(null); stop2.dialogue('hop', { board: () => readyLoom(flyLoom) }); };
   const talkLoom = () => { action(null); enter2('loom-puzzle'); loomSt.state.phase === 'guided' ? stop2.dialogue('tavi', { openLoom: () => loom.open() }) : loom.open(); };
   const focusPt = new T.Vector3(), tmpLabel = new T.Vector3(), tmp2 = new T.Vector3(), tmp3 = new T.Vector3();
   const sparkFrom = new T.Vector3(), shotPos = new T.Vector3(), shotLook = new T.Vector3(), tmp = new T.Vector3();
@@ -283,9 +292,10 @@ export function buildStory(scene: T.Scene, o: Opts) {
     if (ECHO) later(.7, toSkiff); else later(.7, () => story.dialogue('coil', { afterCoil: toSkiff }));
   };
   const toSkiff = () => { afterAttack(); spark.visible = false; o.host.classList.remove('cutscene'); skiff.showLantern(); enter('skiff'); if (ECHO) { echo.enable(); gatherGoal(); } };
+  let boatRef: T.Object3D | null = null;
   const fly = () => {
     enter('fly'); echo.enable(false); o.teleport(o.zip().x, o.zip().z, 0);
-    const boat = skiff.release();
+    const boat = skiff.release(); boatRef = boat;
     flight.start(boat, isle.landing, r => {
       if (r.rings === r.total) story.thinkOnce('ring-all');
       enter('isle'); o.enterIsland(isle.cameraBlockers); o.teleport(isle.landing.x - 1.2, isle.landing.z - 1.4, 0); boat.position.set(isle.landing.x - 3.2, boat.position.y, isle.landing.z + .8); dimTo = 0;

@@ -1030,3 +1030,44 @@ The neural-net engine (v99) was never reached.
 - The neighbour who says "toward" moved from the nook between Mira, the big tree and the wall (sealed
   with them, so her word could only be heard from 2.3 m; the speedrun stalled on the skiff's words) to the
   alcove by the east wall, out of every way through.
+
+## Blind run 27: the main game on v100 (25 Oct 2026; explorer, 21)
+
+**7/10, yes**, and both stops finished in 164 steps; Mira reached at step 14 (run 26 never got
+there in 49). "Cute. The gate and relay bits were clever." What lifted it: "the writing is genuinely
+funny", the loom "caught me out with 'enchanted'", "puzzles aren't just click-the-obvious-answer".
+Why not an 8: "a pretty corridor" with nothing found off the path, fiddly controls and camera, the
+second flight skipped, "most of the actual play is tapping choice buttons in panels".
+
+- **Landed unprompted:** premise, Mira, the journey, what it teaches ("secretly teaching you how AI
+  language models work… like autocomplete"), sequence ("the loop that feeds each guess back in is
+  broken, so you feed it back yourself"), context (the Gate "just follows whatever it's handed"; at
+  the relay "only knows what's in front of it, the same lesson as the Gate"). Probed: pieces and
+  room (guessed 8 for the call, it was 9: "of all the puzzles that one taught me the most, because I
+  was confidently wrong about 'enchanted'"; chose the six-piece call by counting).
+- **The voice coming back, for the first time in six runs:** "every puzzle you solve lights up
+  another part of Zip and brings his voice back", unprompted. But from Zip's lines, not the net:
+  they quoted "One coil lit. The rest of me is still dark." and "Another coil lit. Mira, I'm coming."
+  and called the engine a "hologram"; after the reveal, "I saw the engine and the voice as two
+  related things, not as the same thing". The play log showed why: the engine's thoughts were held
+  while it was open and played mid-flight, "One coil lit" with nothing lit on screen.
+- **Sequence, a gap:** asked what a ring of only "Blossom" would make, they said "Isle, less
+  confidently" (it makes "petals"), though their rule was right: keep the words, add the new one.
+- **Friction:** "Turn toward the goal" unclear for "go read the notes"; the camera "smashing into my
+  face" once; the lantern hung from across the courtyard; the relay cleared every pick after a
+  wrong send ("confused me for a second"); the flight to Loom Isle skipped ("a little
+  disappointing"); stars "more like a report card than a goal".
+
+**Changed after run 27:**
+
+- Thoughts had while the engine is open show while it is open (Zip's thoughts were hidden there and
+  queued); one from before stops as it opens, and any left when it closes are dropped. Flowcheck
+  checks the thought shows in the engine.
+- At the end of Loom Isle, "My voice… it's clearer. Another coil lit." plays while his net lights
+  above him, not after.
+- The relay keeps the picked words after a wrong send (rules v3); flowcheck checks it.
+- The "rise" word moved out from behind the big tree: once the pockets were sealed, the decoy
+  "sink" was nearer from every spot a player could stand on.
+- The hop to Loom Isle is flown: a short lane of four rings, no drones, "Fly to Loom Isle"; hands
+  off it still lands (flowcheck checks it).
+

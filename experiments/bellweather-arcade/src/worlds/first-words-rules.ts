@@ -153,9 +153,10 @@ const CHANNELS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 export const RELAY_WORDS = ['Channel 7.', 'Surrender.', 'Mira,', 'it\'s'];
 export const RELAY_JAM = 1;   // the word the Warden slipped in
 const word = (i: number) => f('word' + i);
-const clearWords = RELAY_WORDS.map((_, i) => set('word' + i, false));
+// a wrong send keeps the words picked, to change one (run 27: "my earlier picks had been cleared,
+// which confused me for a second")
 export const RELAY_RULES: GameRulesSpec = {
-  schemaVersion: '1', id: 'first-words.relay-contact', version: '2',
+  schemaVersion: '1', id: 'first-words.relay-contact', version: '3',
   state: {
     phase: oneOf(['tune', 'words', 'done']),
     channel: { type: 'integer', initial: 1, min: 1, max: 9 },
@@ -178,10 +179,10 @@ export const RELAY_RULES: GameRulesSpec = {
       branches: [
         { when: and(...RELAY_WORDS.map((_, i) => not(word(i)))), effects: [], emits: ['nothing-picked'] },
         { when: and(word(0), not(word(1)), word(2), word(3)), effects: [set('phase', 'done')], emits: ['decide:next-input:right:message', 'mira-hears'] },
-        { when: word(1), effects: clearWords, emits: ['decide:next-input:wrong:jammed'] },
-        { when: and(not(word(0)), not(word(2)), word(3)), effects: clearWords, emits: ['decide:next-input:wrong:newest'] },
-        { when: not(word(0)), effects: clearWords, emits: ['decide:next-input:wrong:no-card'] },
-        { effects: clearWords, emits: ['decide:next-input:wrong:partial'] },
+        { when: word(1), effects: [], emits: ['decide:next-input:wrong:jammed'] },
+        { when: and(not(word(0)), not(word(2)), word(3)), effects: [], emits: ['decide:next-input:wrong:newest'] },
+        { when: not(word(0)), effects: [], emits: ['decide:next-input:wrong:no-card'] },
+        { effects: [], emits: ['decide:next-input:wrong:partial'] },
       ],
     },
   },

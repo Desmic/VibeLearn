@@ -90,7 +90,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
   // a thought that waited too long (a card, the engine, a flight) has lost its moment: Zip's
   // "Words have a taste" belongs to the first word, not to landing on the next island
   const THOUGHT_STALE = 40; let thoughtClock = 0;
-  const thoughts: { text: string; who: 'zip' | 'warden'; at: number }[] = [], thoughtSeen = new Set<string>(); let thoughtWho: 'zip' | 'warden' = 'zip', thoughtT = 0, thoughtGap = 0, thinker: (() => T.Vector3) | null = null;
+  const thoughts: { text: string; who: 'zip' | 'warden'; at: number; engine?: boolean }[] = [], thoughtSeen = new Set<string>(); let thoughtEngine = false, thoughtWho: 'zip' | 'warden' = 'zip', thoughtT = 0, thoughtGap = 0, thinker: (() => T.Vector3) | null = null;
   // toasts and star results
   const toastEl = document.createElement('div'); toastEl.className = 'toast'; toastEl.hidden = true; host.appendChild(toastEl);
   let toastTimer = 0;
@@ -221,7 +221,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       if (choices[0] && !inputMode.touch) (row.firstChild as HTMLButtonElement).focus({ preventScroll: true });
     },
     setThinker(fn: () => T.Vector3) { thinker = fn; },
-    think(text: string | string[], who: 'zip' | 'warden' = 'zip') { for (const x of Array.isArray(text) ? text : [text]) thoughts.push({ text: x, who, at: thoughtClock }); },
+    think(text: string | string[], who: 'zip' | 'warden' = 'zip') { const engine = host.matches('.engine-mode'); for (const x of Array.isArray(text) ? text : [text]) thoughts.push({ text: x, who, at: thoughtClock, engine }); },
     thinkOnce(id: string, text: string | string[], who: 'zip' | 'warden' = 'zip') { if (thoughtSeen.has(id)) return false; thoughtSeen.add(id); api.think(text, who); return true; },
     get thinking() { return thoughtT > 0 || thoughts.length > 0; },
     /** drop queued thoughts and hide the current one (a cutscene starts); `skip` ids will never play */
@@ -313,8 +313,13 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       // thought bubble
       thoughtClock += dt;
       while (thoughts.length && thoughts[0].who === 'zip' && thoughtClock - thoughts[0].at > THOUGHT_STALE) thoughts.shift();
+      // a thought had looking at the engine belongs there: it shows while the engine is open, and is
+      // dropped once it closes (run 27: "One coil lit. The rest of me is still dark." played mid-flight)
+      const inEngine = host.matches('.engine-mode');
+      for (let i = thoughts.length - 1; i >= 0; i--) if (thoughts[i].engine && !inEngine) thoughts.splice(i, 1);
+      if (inEngine && thoughtT > 0 && !thoughtEngine) { thoughtT = 0; thought.hidden = true; }   // one from before stops as the engine opens
       if (thoughtT > 0) { if (!cardOpen) thoughtT -= dt; if (thoughtT <= 0) { thought.hidden = true; thoughtGap = .35; } }
-      else { thoughtGap -= dt; if (thoughts.length && !cardOpen && thoughtGap <= 0 && thinker && (thoughts[0].who === 'warden' || !host.matches('.engine-mode'))) { const s = thoughts.shift()!; thoughtWho = s.who; thought.className = 'thought' + (s.who === 'warden' ? ' warden' : ''); thought.textContent = s.text; thoughtT = 2.4 + s.text.length * .05; if (s.who === 'warden') { if (voice?.has('Warden', s.text)) { void voice.play('Warden', s.text, { channel: 'bark', fx: 'villain-inner' }); thoughtT = Math.max(thoughtT, voice.duration('Warden', s.text) + .6); } else sfx.whisper(); } else sfx.hmm(); } }
+      else { thoughtGap -= dt; const ti = inEngine ? thoughts.findIndex(x => x.engine) : 0; if (thoughts.length && ti >= 0 && !cardOpen && thoughtGap <= 0 && thinker) { const s = thoughts.splice(ti, 1)[0]; thoughtWho = s.who; thoughtEngine = !!s.engine; thought.className = 'thought' + (s.who === 'warden' ? ' warden' : ''); thought.textContent = s.text; thoughtT = 2.4 + s.text.length * .05; if (s.who === 'warden') { if (voice?.has('Warden', s.text)) { void voice.play('Warden', s.text, { channel: 'bark', fx: 'villain-inner' }); thoughtT = Math.max(thoughtT, voice.duration('Warden', s.text) + .6); } else sfx.whisper(); } else sfx.hmm(); } }
       if (thoughtT > 0 && thinker) {
         if (thought.hidden !== cardOpen) thought.hidden = cardOpen;
         // Zip thinks over his head (and from the screen edge when off screen); the Warden is a voice at the top
