@@ -72,7 +72,10 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     'echo-first': { text: ['Ooh. Words have a taste. That one\'s crunchy.', 'The skiff runs on spoken words. Let\'s collect some.'] },
     'echo-decoy': { text: '“Sink.” Probably not one for the skiff. Probably.' },
     'echo-ready': { text: 'Three words. Time to talk to a boat.' },
-    'engine-open': { text: 'My engine… as a hologram? I\'m basically a sci-fi movie.' },
+    // the net (25 Oct): the voice "coil by coil" went unseen in five runs; now the dark web shows it
+    'engine-open': { text: ['My engine… as a hologram? I\'m basically a sci-fi movie.', 'One coil lit. The rest of me is still dark.'] },
+    'engine-wake': { text: 'More of me just lit up. I felt that.' },
+    'voice-back': { text: ['My voice… it\'s clearer.', 'Another coil lit. Mira, I\'m coming.'] },
     'loop-broken': { who: 'warden', text: 'Your loop is cracked, little courier. Think around it.' },
     'engine-sink': { text: 'In my defense, it did say “sink”.' },
     // the wind rings: Zip has played a certain old superhero game, and so has the Warden

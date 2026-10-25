@@ -109,10 +109,16 @@ await segment('skiff', async () => {
   check('hologram engine opens', await page.locator('.engine-tray').isVisible());
   const chip = w => page.locator('.holo-chip', { hasText: new RegExp('^' + w + '$') });
   // the decoy first: the skiff hears "sink"
-  await press(chip('sink')); await press(page.locator('.holo-cast')); await sim(3);
+  // the engine is drawn as a neural net (25 Oct): what a ring lights should depend on the whole ring
+  const lit = () => page.evaluate(() => window.__vlNet.nodes.map(n => +n.want.toFixed(2)));
+  await press(chip('sink')); await sim(.5); const sinkLit = await lit();
+  check('the net shows some of itself dark (the rest of Zip\'s voice) when it opens', await page.evaluate(() => { const n = window.__vlNet; return n.awake > 0 && n.awake < .3 && n.nodes.some(x => !x.lit); }), await page.evaluate(() => window.__vlNet.awake));
+  await press(page.locator('.holo-cast')); await sim(3);
   check('casting "sink" sinks the skiff', await page.locator('.engine-prompt', { hasText: 'sank' }).isVisible());
   await sim(3.5); await press(page.locator('button[data-act="clear"]'));
   for (const w of ['Skiff', 'rise', 'toward']) await press(chip(w));
+  await sim(.5); const ringLit = await lit(), moved = ringLit.filter((v, i) => Math.abs(v - sinkLit[i]) > .1).length;
+  check('a different ring lights a different pattern in the net', moved >= 6, `${moved} nodes changed`);
   await press(page.locator('.holo-cast')); await sim(4.5);
   check('the engine says "Blossom" and the loop breaks', await page.locator('.engine-prompt', { hasText: 'is broken' }).isVisible());
   await shot('loop-broken');
@@ -121,6 +127,7 @@ await segment('skiff', async () => {
   check('same words in, same guess out', await page.locator('.engine-prompt', { hasText: 'again' }).isVisible());
   await sim(3.5); await press(chip('Blossom')); await press(page.locator('.holo-cast')); await sim(14);
   check('stars after waking the skiff', await waitFor(() => page.locator('.star-row').isVisible(), 60000));
+  check('waking the skiff wakes more of the net', await page.evaluate(() => window.__vlNet.awake >= .45), await page.evaluate(() => window.__vlNet.awake));
   await shot('stars');
   await h.stars();
   const ev = (await learning()).filter(e => e.activity === 'wake-skiff');

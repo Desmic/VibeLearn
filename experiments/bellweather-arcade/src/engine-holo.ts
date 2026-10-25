@@ -2,12 +2,15 @@ import * as T from 'three';
 import type { Guide } from './guide';
 import type { Station } from './kit/station';
 import { sfx } from './sfx';
-import { HOLO, beam, glyph, holoMaterial, setHolo, sparks } from './kit/holo';
+import { HOLO, glyph, holoMaterial, setHolo, sparks } from './kit/holo';
+import { buildNeuralNet } from './kit/neural-net';
 import type { EchoContent } from './worlds/first-words-echo';
 
 // Zip's speech engine, projected as a hologram from his chest coil.
 //   ring  = the context: the words the engine reads, in order
-//   beams = the engine reading every word in the ring
+//   net   = the engine itself, a small neural network: each word in the ring sends light up
+//           through its layers, and the streams meet in the guesses (kit/neural-net). Around it
+//           the dormant web, mostly dark: the rest of Zip's voice, lit coil by coil
 //   fan   = its guesses for the next word, brighter = more confident
 //   loop  = the spoken word flowing back into the ring
 // The station's rules decide what the engine says; the hologram shows it and
@@ -36,28 +39,30 @@ export function buildEngine(scene: T.Scene, o: Opts) {
   const fx = sparks(world, 48);
 
   // ── layout (local: x right, y up, the group faces the camera) ──
-  const SP = .53, slotAt = (i: number) => new T.Vector3((i - (N - 1) / 2) * SP, -.07 * (i - (N - 1) / 2) ** 2, -.08 * (i - (N - 1) / 2) ** 2);
+  const slotAt = (i: number) => slotAtN(N, i);
   const CORE = new T.Vector3(0, .78, 0);
   const frames = Array.from({ length: N }, (_, i) => { const m = glyph('', { height: .34, color: HOLO.dim, frame: true, intensity: 1.1 }); m.scale.x = .5 / (m.geometry as T.PlaneGeometry).parameters.width; m.position.copy(slotAt(i)); holo.add(m); return m; });
   const slotWords: (T.Mesh | null)[] = Array(N).fill(null);
   // a field of dark glass behind the hologram: light reads against it even under a bright sky
   const fieldTex = (() => { const cv = document.createElement('canvas'); cv.width = cv.height = 256; const x = cv.getContext('2d')!; const gr = x.createRadialGradient(128, 128, 10, 128, 128, 128);
-    gr.addColorStop(0, 'rgba(4,20,32,.72)'); gr.addColorStop(.72, 'rgba(6,30,46,.55)'); gr.addColorStop(.93, 'rgba(111,224,201,.35)'); gr.addColorStop(1, 'rgba(111,224,201,0)');
+    gr.addColorStop(0, 'rgba(3,14,26,.86)'); gr.addColorStop(.72, 'rgba(5,24,40,.7)'); gr.addColorStop(.93, 'rgba(111,224,201,.35)'); gr.addColorStop(1, 'rgba(111,224,201,0)');
     x.fillStyle = gr; x.fillRect(0, 0, 256, 256); const tx = new T.CanvasTexture(cv); tx.colorSpace = T.SRGBColorSpace; return tx; })();
   const field = new T.Mesh(new T.CircleGeometry(1, 48), new T.MeshBasicMaterial({ map: fieldTex, transparent: true, depthWrite: false, toneMapped: false }));
-  field.scale.set(1.66, 1.3, 1); field.position.set(0, .55, -.4); field.renderOrder = 8; holo.add(field);
+  field.scale.set(1.86, 1.42, 1); field.position.set(0, .6, -.4); field.renderOrder = 8; holo.add(field);
   const halo = new T.Mesh(new T.TorusGeometry(1.62, .009, 6, 96), holoMaterial({ color: HOLO.found, opacity: .45, scan: 0 })); halo.scale.set(1, .32, 1); halo.position.set(0, -.12, -.12); holo.add(halo);
   const halo2 = halo.clone(); halo2.scale.set(1.08, .36, 1); halo2.position.y = -.2; holo.add(halo2);
-  // the prism core
+  // the engine: a neural net from the ring (inputs) to the guess fan (outputs). Desmic, 25 Oct: the
+  // voice coming back "coil by coil" went unseen in five runs as words; asked for "an actual
+  // representation of neural net, showing some activations … a sense of beauty and awe"
+  const net = zipNet(N);
+  holo.add(net.group);
+  (window as unknown as { __vlNet?: typeof net }).__vlNet = net;   // tests: which nodes a ring lights, how much is awake
+  let woken = false;   // the dormant web wakes a little at a time, and stays woken
   const coreGrp = new T.Group(); coreGrp.position.copy(CORE); holo.add(coreGrp);
-  const prism = new T.LineSegments(new T.EdgesGeometry(new T.OctahedronGeometry(.24)), new T.LineBasicMaterial({ color: '#bffcef', transparent: true, opacity: .9, blending: T.AdditiveBlending, depthWrite: false }));
-  coreGrp.add(prism);
-  const heart = new T.Mesh(new T.IcosahedronGeometry(.1, 1), holoMaterial({ color: '#dffcf6', opacity: 1, intensity: 2.6, scan: 0 })); coreGrp.add(heart);
   const coreHit = new T.Mesh(new T.SphereGeometry(.32, 8, 6), new T.MeshBasicMaterial({ visible: false })); coreGrp.add(coreHit);
   // the projection cone from Zip's chest to the ring
   const coneGeo = new T.CylinderGeometry(1, .05, 1, 28, 1, true); coneGeo.translate(0, .5, 0);
   const cone = new T.Mesh(coneGeo, holoMaterial({ color: HOLO.found, opacity: .1, edge: 1.4, intensity: 1.2 })); cone.frustumCulled = false; world.add(cone);
-  const reads = Array.from({ length: N }, () => { const b = beam({ color: HOLO.found, radius: .012, flow: true }); b.mesh.visible = false; holo.add(b.mesh); return b; });
   // the loop conduit: from the core around to the next empty slot
   const loopMat = holoMaterial({ color: HOLO.found, opacity: .9, intensity: 2.2, scan: 0, flow: 1 });
   let loopMesh: T.Mesh | null = null, loopCurve: T.CatmullRomCurve3 | null = null;
@@ -70,8 +75,11 @@ export function buildEngine(scene: T.Scene, o: Opts) {
     return loopCurve;
   };
   // guesses
-  let fan: { m: T.Mesh; pct: T.Mesh; b: ReturnType<typeof beam>; w: number; word: string; at: T.Vector3 }[] = [];
-  const clearFan = () => { for (const f of fan) { holo.remove(f.m, f.pct, f.b.mesh); } fan = []; };
+  let fan: { m: T.Mesh; pct: T.Mesh; w: number; word: string; at: T.Vector3 }[] = [];
+  const clearFan = () => { for (const f of fan) { holo.remove(f.m, f.pct); } fan = []; };
+  const guesses = (key: string) => { const k = c.knowledge; return [...(k.known[key] ?? k.unsure)].sort((a, b) => b[1] - a[1]).slice(0, 3); };
+  /** what each input of the net carries: the word in that slot, or nothing */
+  const inputs = () => Array.from({ length: N }, (_, i) => { const w = st.state['s' + i] as string; return w && w !== 'none' ? w : null; });
 
   // ── HUD: a prompt and a tray of carried words (easy to tap on a phone) ──
   const tray = document.createElement('div'); tray.className = 'engine-tray'; tray.hidden = true; o.host.appendChild(tray);
@@ -104,7 +112,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
   };
   // while the ring is being edited, the engine's guess for what's in it now, dim, so a word in or
   // out visibly changes what it would say (run 14: "make the guess change when the ring changes")
-  const preview = () => { if (!open || busy) return; const key = ring().join(' '); if (!key) { clearFan(); return; } showFan(key, null); };
+  const preview = () => { if (!open || busy) return; const key = ring().join(' '); if (!key) { clearFan(); net.rest(); return; } showFan(key, null); net.preview(inputs(), guesses(key).map(g => g[1])); };
   const refresh = (pop = -1) => { renderRing(pop); renderTray(); preview(); };
 
   const load = (w: string) => { if (busy) return; const r = st.act('load.' + w); if (!r.ok) { sfx.boing(); g.toast('The ring is full. Tap a word in it to take it out.', 1500); return; } sfx.place(); refresh(ring().length - 1); };
@@ -122,34 +130,32 @@ export function buildEngine(scene: T.Scene, o: Opts) {
   };
   /** the reading animation, the guess fan, and the spoken word flying to the machine */
   const think = (words: string[], said: string, then: () => void) => {
-    words.forEach((_, i) => later(i * .16, () => { reads[i].mesh.visible = true; sfx.tick(); const sw = slotWords[i]; if (sw) sw.scale.set((sw.userData.sx ?? 1) * 1.18, 1.18, 1); }));
-    const t1 = words.length * .16 + .2;
-    later(t1, () => { spin = 1; sfx.hum(1.2); });
-    later(t1 + .55, () => showFan(words.join(' '), said));
-    later(t1 + 1.5, () => {
-      for (const r of reads) r.mesh.visible = false;
-      speak(said, then);
-    });
+    // every word in the ring sends its light up through the net at once (it reads them all), and the
+    // streams meet in the guesses; a different ring lights a different pattern
+    clearFan();
+    words.forEach((_, i) => later(i * .05, () => { sfx.tick(); const sw = slotWords[i]; if (sw) sw.scale.set((sw.userData.sx ?? 1) * 1.18, 1.18, 1); }));
+    const gs = guesses(words.join(' ')), up = net.fire(inputs(), gs.map(g => g[1]), gs.findIndex(g => g[0] === said), .26);
+    sfx.hum(1.2);
+    later(up, () => showFan(words.join(' '), said));
+    later(up + .9, () => speak(said, then));
   };
   const showFan = (key: string, said: string | null) => {
     clearFan(); const dim = said === null;   // a preview: what it would say, before casting
-    const k = c.knowledge, gs = [...(k.known[key] ?? k.unsure)].sort((a, b) => b[1] - a[1]).slice(0, 3);
-    const xs = gs.length === 1 ? [0] : gs.length === 2 ? [-.48, .48] : [0, -.78, .78];
+    const gs = guesses(key);
     gs.forEach(([w, p], i) => {
-      const top = dim ? false : w === said, at = new T.Vector3(xs[i], 1.36 + (i === 0 ? .16 : 0), 0);
+      const top = dim ? false : w === said, at = FAN[i].clone();
       const m = glyph(w === '.' ? 'END' : dim && i === 0 ? w + '?' : w, { height: .16 + .2 * p, color: top ? HOLO.made : HOLO.found, intensity: (.6 + 2.2 * p) * (dim ? .6 : 1) }); m.position.copy(at); holo.add(m);
       const pct = glyph(`${Math.round(p * 100)}%`, { height: .11, color: top ? HOLO.made : HOLO.found, intensity: 1.2 }); pct.position.copy(at).add(new T.Vector3(0, -.2 - .08 * p, 0)); holo.add(pct);
-      const b = beam({ color: top ? HOLO.made : HOLO.found, radius: .006 + .03 * p, flow: true }); b.set(CORE, at.clone().add(new T.Vector3(0, -.12, 0))); holo.add(b.mesh);
-      m.scale.setScalar(.1); fan.push({ m, pct, b, w: p, word: w, at });
+      m.scale.setScalar(.1); fan.push({ m, pct, w: p, word: w, at });
     });
     if (!dim) sfx.speak(2);
   };
-  let spin = 0, flyer: { m: T.Mesh; from: T.Vector3; to: () => T.Vector3; t: number; dur: number; done: () => void; arc: number } | null = null;
+  let flyer: { m: T.Mesh; from: T.Vector3; to: () => T.Vector3; t: number; dur: number; done: () => void; arc: number } | null = null;
   const speak = (said: string, then: () => void) => {
     const f = fan.find(x => x.word === said);
     const m = glyph(said === '.' ? '·' : said, { height: .32, color: HOLO.made, intensity: 2.6 });
     m.position.copy(toWorld(f ? f.at : CORE)); world.add(m);
-    clearFan(); spin = 0; sfx.speak(4); sfx.whoosh();
+    clearFan(); net.rest(); sfx.speak(4); sfx.whoosh();
     flyer = { m, from: m.position.clone(), to: o.target, t: 0, dur: .8, arc: 1.2, done: () => { world.remove(m); fx.burst(o.target(), 14, 2, HOLO.made); then(); } };
   };
   const back = (html: string, wait = 2.8) => { say(html); promptEl.classList.remove('quiet'); later(wait, () => { busy = false; renderTray(); preview(); }); };
@@ -172,7 +178,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
     later(.5, step);
   };
   const repairLoop = () => {
-    say(L.repaired); sfx.chime();
+    say(L.repaired); sfx.chime(); net.wakeTo(ZIP_AWAKE.loop, 1.2);
     const curve = buildLoop(ring().length, 1); setHolo(loopMat, { color: HOLO.found, intensity: 2 });
     fx.burst(toWorld(curve.getPointAt(.58)), 26, 2.4, HOLO.found);
     const m = glyph('Isle', { height: .27, color: HOLO.made, intensity: 2.4 }); holo.add(m);
@@ -185,6 +191,8 @@ export function buildEngine(scene: T.Scene, o: Opts) {
   };
   const finale = () => {
     say(L.done);
+    // the sentence is whole: the net blooms and a little more of the dark web wakes (his voice, coming back)
+    net.bloom(); net.wakeTo(ZIP_AWAKE.skiff, 2.6); sfx.chime(); o.onThought?.('engine-wake');
     const words = ring(); let i = 0;
     const next = () => {
       if (i >= words.length) {
@@ -241,6 +249,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
       if (st.state.phase === 'loop') say(L.loopBroken); else say(L.open);
       promptEl.classList.remove('quiet');
       if (st.state.phase === 'loop') buildLoop(ring().length, .58);
+      if (!woken) { woken = true; net.setAwake(ZIP_AWAKE.start); later(2.6, () => o.onThought?.('engine-open')); }
       refresh(); sfx.hum(1.5); fx.burst(toWorld(CORE), 20, 1.6);
       holo.scale.setScalar(.05);
     },
@@ -249,6 +258,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
       t += dt;
       for (let i = timers.length - 1; i >= 0; i--) if (timers[i].at <= t) { const f = timers[i].fn; timers.splice(i, 1); f(); }
       fx.tick(dt);
+      if (holo.visible) { net.tick(dt); net.group.rotation.y = Math.sin(t * .35) * .06; }   // a slow sway: the sheets part in depth
       if (flyer) {
         flyer.t = Math.min(1, flyer.t + dt / flyer.dur); const k = flyer.t * flyer.t * (3 - 2 * flyer.t), to = flyer.to();
         flyer.m.position.lerpVectors(flyer.from, to, k); flyer.m.position.y += Math.sin(k * Math.PI) * flyer.arc;
@@ -257,12 +267,9 @@ export function buildEngine(scene: T.Scene, o: Opts) {
       }
       if (!open) return;
       holo.scale.setScalar(Math.min(1, holo.scale.x + dt * 3.5));
-      coreGrp.rotation.y += dt * (spin ? 6 : .8); coreGrp.rotation.x = Math.sin(t * .7) * .3;
-      heart.scale.setScalar(1 + .15 * Math.sin(t * (spin ? 18 : 3)));
       halo.rotation.z = t * .15; halo2.rotation.z = -t * .1;
       for (const sw of slotWords) if (sw) { sw.scale.lerp(tmp.set(sw.userData.sx ?? 1, 1, 1), Math.min(1, dt * 8)); }
       for (const f of fan) f.m.scale.lerp(tmp.setScalar(1), Math.min(1, dt * 9));
-      for (let i = 0; i < N; i++) if (reads[i].mesh.visible) reads[i].set(slotAt(i).add(new T.Vector3(0, .12, 0)), CORE, .012);
       // the projection cone from Zip's chest to the bottom of the ring
       const z = o.zip(); tmp.copy(z).setY(z.y + 1.0); tmp2.copy(holo.position).setY(holo.position.y - .45);
       cone.position.copy(tmp); const dir = tmp2.clone().sub(tmp), len = dir.length();
@@ -272,3 +279,17 @@ export function buildEngine(scene: T.Scene, o: Opts) {
   };
 }
 const MADE = new Set(['Blossom', 'Isle']);
+const SP = .53, slotAtN = (N: number, i: number) => new T.Vector3((i - (N - 1) / 2) * SP, -.07 * (i - (N - 1) / 2) ** 2, -.08 * (i - (N - 1) / 2) ** 2);
+const FAN = [new T.Vector3(0, 1.52, 0), new T.Vector3(-.78, 1.36, 0), new T.Vector3(.78, 1.36, 0)];
+/** Zip's speech engine as a neural net: the ring is its input, the guess fan its output, and behind
+ *  it the dormant rest of his voice. The same net shows wherever his voice comes back (voice-moment). */
+export const zipNet = (N = 5) => buildNeuralNet({
+  inputs: Array.from({ length: N }, (_, i) => slotAtN(N, i).add(new T.Vector3(0, .24, -.02))),
+  outputs: FAN.map(p => p.clone().add(new T.Vector3(0, -.42, -.02))),
+  hidden: [6, 8, 6], width: 2.3, bow: .12, seed: 11,
+  dormant: { rows: [6, 9, 11, 12, 11, 9, 6], width: 3.3, z: -.5, y: [-.3, 1.7] },
+  colors: { lit: HOLO.found, hot: HOLO.made, crack: HOLO.foe },
+  onWake: i => { if (i % 2 === 0) sfx.bell(i / 2, .5); },   // a rising bell scale as his voice lights
+});
+/** how much of Zip's voice is awake after each stop: the net wakes coil by coil */
+export const ZIP_AWAKE = { start: .14, loop: .24, skiff: .5, loom: .7 } as const;

@@ -19,7 +19,8 @@ import { createStation } from './kit/station';
 import { entityAt } from './kit/dress';
 import { buildLoom } from './loom';
 import { buildEcho } from './echo';
-import { buildEngine } from './engine-holo';
+import { buildEngine, ZIP_AWAKE } from './engine-holo';
+import { buildVoiceMoment } from './voice-moment';
 import { createSwingers } from './kit/swing';
 import { loadBodyKit, assembleLook } from './kit/body-kit';
 import { clearSight } from './canopy';
@@ -179,6 +180,8 @@ export function buildStory(scene: T.Scene, o: Opts) {
       gatherGoal();
     },
   });
+  const voiceMoment = buildVoiceMoment(scene, o.camera, o.zip);
+  (window as unknown as { __vlVoice?: typeof voiceMoment }).__vlVoice = voiceMoment;   // tests
   const engine = buildEngine(scene, {
     guide: g, host: o.host, camera: o.camera, station: echoSt, zip: o.zip,
     carried: () => echo.carried, carry: w => echo.carry(w), target: () => skiff.at(), hear: k => skiff.hear(k),
@@ -202,7 +205,12 @@ export function buildStory(scene: T.Scene, o: Opts) {
   const enter2 = (b: Beat) => { beat = b; stop2.enter(b); };
   const loomSt = createStation(LOOM_STATION, { onEvent: o.onEvent, stars: (title, rows, then) => g.stars(title, rows, then) }, LOOM_RULES);
   const loom = buildLoom({ guide: g, host: o.host, station: loomSt, onShake: () => later(.4, () => stop2.thinkOnce('loom-warden')), onDone: () => loomSt.finish(() => {
-    freeTavi(); stop2.dialogue('thanks', { endStop: () => { enter2('loom-done'); later(.8, () => stop2.thinkOnce('loom-pieces')); } });
+    freeTavi(); stop2.dialogue('thanks', { endStop: () => {
+      // another piece of his voice is back: his net shows above him and more of it lights
+      enter2('loom-done'); later(.4, () => voiceMoment.play(ZIP_AWAKE.skiff, ZIP_AWAKE.loom, () => {
+        later(.3, () => story.thinkOnce('voice-back')); later(5, () => stop2.thinkOnce('loom-pieces'));
+      }));
+    } });
   }) });
   // Tavi, the weaver, is stuck behind the loom's cloth: a voice and a shadow until freed
   const tavi = new T.Group(); tavi.position.copy(LOOM_AT).add(new T.Vector3(0, -.13, -.75)); tavi.visible = false; scene.add(tavi);
@@ -397,9 +405,9 @@ export function buildStory(scene: T.Scene, o: Opts) {
     get debug() { return { script: S.id, beat, cut, opening, mech: ECHO ? 'echo' : 'classic', echo: echoSt.state, carried: echo.carried, engine: engine.active, loom: loomSt.state, hops, spark: sparkHome.toArray(), stones: skiff.debugStones(), core: skiff.debugCore() }; },
     /** what the camera should keep clear sight of (foliage on the way steps aside); null = Zip */
     get focus(): T.Vector3 | null { return cut >= 0 ? focusPt.copy(miraAt).lerp(ship.position, .5) : engine.active ? focusPt.set(PILOT_STONE.x - .4, 2.6, PILOT_STONE.z) : null; },
-    get frozen() { return g.cardOpen || cut >= 0 || opening >= 0 || skiff.active || isle.busy || loom.active || engine.active; },
+    get frozen() { return g.cardOpen || cut >= 0 || opening >= 0 || skiff.active || isle.busy || loom.active || engine.active || voiceMoment.active; },
     get shot() {
-      const s = engine.shot ?? skiff.shot ?? flight.shot ?? isle.shot; if (s) return s;
+      const s = voiceMoment.shot ?? engine.shot ?? skiff.shot ?? flight.shot ?? isle.shot; if (s) return s;
       if ((cut >= 0 || opening >= 0) && shot) return shot;
       if (cut < 0 && !talking) return null;
       // Frame Zip and Mira together on any screen: aim between them and step back until
@@ -445,7 +453,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (sky !== skyShown) { skyShown = sky; world.show('next', sky); world.show('route', sky); }
       if (sky) world.tick(z);
       for (let i = timers.length - 1; i >= 0; i--) if (timers[i].at <= t) { const f = timers[i].fn; timers.splice(i, 1); f(); }
-      skiff.tick(dt); flight.tick(dt); engine.tick(dt); bells?.tick(dt, beat === 'fly' ? null : o.zip(), t); if (echo.enabled) echo.tick(dt);
+      skiff.tick(dt); flight.tick(dt); engine.tick(dt); voiceMoment.tick(dt); bells?.tick(dt, beat === 'fly' ? null : o.zip(), t); if (echo.enabled) echo.tick(dt);
       if (beat === 'fly') { shown = '#'; return; }
       // Zip's commentary: suspicious townsfolk, and a nudge when the player idles
       const free = !g.cardOpen && cut < 0 && !skiff.active && !isle.busy && (beat === 'meet' || beat === 'spark' || beat === 'skiff' || beat === 'isle');
