@@ -116,7 +116,7 @@ await segment('skiff', async () => {
   await press(chip('sink')); await sim(.5); const sinkLit = await lit();
   // run 27: Zip's thoughts on seeing his net played later, mid-flight, with nothing lit on screen
   await sim(3.2); await shot('engine-thought');
-  check('Zip\'s thought on seeing his engine shows while it is open', await waitFor(() => page.evaluate(() => { const t = document.querySelector('.thought'); return !!t && !t.hidden && /hologram|coil/.test(t.textContent ?? ''); }), 8000, 300));
+  check('Zip\'s thought on seeing his engine shows while it is open', await waitFor(() => page.evaluate(() => { const t = document.querySelector('.thought'); return !!t && !t.hidden && /inside|coil/.test(t.textContent ?? ''); }), 8000, 300));
   check('the net shows some of itself dark (the rest of Zip\'s voice) when it opens', await page.evaluate(() => { const n = window.__vlNet; return n.awake > 0 && n.awake < .3 && n.nodes.some(x => !x.lit); }), await page.evaluate(() => window.__vlNet.awake));
   await press(page.locator('.holo-cast')); await sim(3);
   check('casting "sink" sinks the skiff', await page.locator('.engine-prompt', { hasText: 'sank' }).isVisible());

@@ -73,7 +73,8 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     'echo-decoy': { text: '“Sink.” Probably not one for the skiff. Probably.' },
     'echo-ready': { text: 'Three words. Time to talk to a boat.' },
     // the net (25 Oct): the voice "coil by coil" went unseen in five runs; now the dark web shows it
-    'engine-open': { text: ['My engine… as a hologram? I\'m basically a sci-fi movie.', 'One coil lit. The rest of me is still dark.'] },
+    // run 27 took the engine and his voice for "two related things, not the same thing": say it's his voice
+    'engine-open': { text: ['My voice… from the inside? I\'m basically a sci-fi movie.', 'One coil lit. The rest of me is still dark.'] },
     'engine-wake': { text: 'More of me just lit up. I felt that.' },
     'voice-back': { text: ['My voice… it\'s clearer.', 'Another coil lit. Mira, I\'m coming.'] },
     'loop-broken': { who: 'warden', text: 'Your loop is cracked, little courier. Think around it.' },

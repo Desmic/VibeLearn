@@ -43,7 +43,10 @@ await h.seedSave('gate-open', ['wake-skiff', 'blossom-gate']); await h.open('');
 await probe('relay', 'relay');
 // the Word Loom: landed, goal "Find out why the loom is jammed"
 await h.open('&title=0&beat=to-loom'); await page.waitForTimeout(2500);
-await h.pose(-3.6, 55.2); await h.act('Board'); await card('Onward'); await page.waitForTimeout(2500);
+await h.pose(-3.6, 55.2); await h.act('Board'); await card('Onward'); await page.waitForTimeout(1500);
+// the hop is flown (run 27): let it fly itself in
+for (let i = 0; i < 90 && await page.evaluate(() => !!window.__vlFlight?.active); i++) await sim(1);
+await page.waitForTimeout(1000);
 await probe('loom', 'Word Loom');
 
 // body-wide strips (one step across, longer than 1.2 m): the camera pins in them and a push wedges

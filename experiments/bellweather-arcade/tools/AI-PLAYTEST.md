@@ -1024,8 +1024,9 @@ The neural-net engine (v99) was never reached.
 - After a tap on the goal arrow, holding forward follows the way round to the goal for up to 12 s,
   the camera coming round behind; at the goal Zip waits while the push is held. Sideways or back
   for a quarter second, or dragging the view, hands it back. New probe `arrowwalk` (tap, then 4 s
-  pushes, from five spots): all five reach Mira either way, but in 6 pushes and 45 m instead of 13
-  pushes and 134 m (from the east side: 1 push and 4 m, was 4 pushes and 43 m).
+  pushes, from five spots): all five reach Mira either way, but in 6 pushes and 43 m instead of 10
+  pushes and 92 m (measured again after the moves below; the first measure, before them, was 6 and
+  45 m against 13 and 134 m).
 - The fillers are kept in a 1 m grid: about 2,400 of them cost about 4 µs a walkable test.
 - The neighbour who says "toward" moved from the nook between Mira, the big tree and the wall (sealed
   with them, so her word could only be heard from 2.3 m; the speedrun stalled on the skiff's words) to the
@@ -1070,4 +1071,6 @@ second flight skipped, "most of the actual play is tapping choice buttons in pan
   "sink" was nearer from every spot a player could stand on.
 - The hop to Loom Isle is flown: a short lane of four rings, no drones, "Fly to Loom Isle"; hands
   off it still lands (flowcheck checks it).
+- Zip's first thought at the engine names it as his voice: "My voice… from the inside? I'm
+  basically a sci-fi movie." then "One coil lit. The rest of me is still dark."
 
