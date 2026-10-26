@@ -1081,3 +1081,39 @@ second flight skipped, "most of the actual play is tapping choice buttons in pan
 - The "How real AI differs" card ties his net to the real thing: "Real models are nets like mine,
   with billions of links." (re-voiced).
 
+## Blind run 28: the main game on v103 (26 Oct 2026; explorer, 21)
+
+**7/10, yes**, both stops finished in 173 steps; Mira reached at step 29. "Fix the camera… it's an
+8 or 9."
+
+- **The net, recognised at last:** at the engine, unprompted, "oh it is a little neural net.
+  guessing the next word with percentages". Then "oh so I have to feed its own guess back in. that
+  is how it writes a sentence."
+- **Landed unprompted:** premise, Mira, the journey, what it teaches, context (strongest: "it only
+  knows what you hand it, and whoever writes the notes controls it"), pieces and room (exact split
+  recalled; the three-word call "about 7 pieces… words that look short can cost more"). Sequence at
+  probed level: unsure whether "Blossom" was added or replaced the ring until asked; and, like run
+  27, guessed a ring of only "Blossom" would still say "Isle" (it says "petals").
+- **Still missed: his voice is the engine.** "I treated the voice and the engine as two separate
+  things"; the coil lines and the glowing net read as flavour.
+- **Stray sparks:** found the first at step 9 ("collectibles. I am getting all of them"), took a
+  second at step 19 without knowing (the count toast lasts 2.2 s; an AI tester is slower), then
+  "nothing reminded me". Wedged in the corner the first spark drew them into, the camera in Zip's
+  head.
+- **Other friction:** 27 steps to Mira; "Turn toward the goal" unclear; "did forward just send me
+  back the way I came?"; the flight "over fast, barely got to steer"; each puzzle "one-and-done",
+  wanting a stage that combines them. The early screenshots were stripped from the tester's context
+  later, and it first claimed it never saw them (trust noted; its early mutters match the pictures).
+
+**Changed after run 28:**
+
+- After the skiff wakes, as it lifts off, Zip says it outright: "My first words out loud since the
+  attack. That net was my voice. Every light in it is a bit more of me."
+- Sparks: the count stays up 4.5 s; a faint chime the first time one is near (found by ear); on
+  landing on an isle with sparks left, "Stray sparks of me out here too. I can feel them."; the first
+  one says "There must be more. Off the paths, out at the edges."; the plaza one moved out of the
+  corner it drew the player into.
+- When the loop is repaired, unless the player already tried it: "Just “Blossom” on its own? I'd
+  have said “petals”. It needs the whole line, not the last word." (runs 27 and 28 both guessed
+  "Isle").
+

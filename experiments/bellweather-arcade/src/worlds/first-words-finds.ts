@@ -4,7 +4,7 @@ import type { FindSpec } from '../kit/finds';
 // town's corners, on the far sides of the isles. Each one found lights a little more of his net.
 // (Blind run 27, an explorer: "a pretty corridor… nothing found off the path".)
 export const FIRST_WORDS_FINDS: FindSpec[] = [
-  { id: 'west-plaza', at: [-7.6, -0.6] },          // the west end of the plaza
+  { id: 'west-plaza', at: [-6.9, -0.3] },          // the west end of the plaza (out of the corner: run 28 wedged there)
   { id: 'east-nook', at: [8.0, 1.3] },             // the slot behind the east buildings
   { id: 'canopy-corner', at: [-7.9, 7.1] },        // past the arrival canopy
   { id: 'blossom-west', at: [-7.5, 48.0] },        // Blossom Isle's far west edge

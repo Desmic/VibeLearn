@@ -191,16 +191,18 @@ export function buildStory(scene: T.Scene, o: Opts) {
   const finds = buildFinds(scene, { specs: FIRST_WORDS_FINDS, key: GAME.storage.finds ?? 'vibelearn.finds', color: HOLO.made, camera: o.camera, onFind: (_s, n, total) => {
     const b = awakeBase() + (n - 1) * ZIP_AWAKE.find; voiceMoment.play(b, b + ZIP_AWAKE.find, undefined, true); sfx.chime();
     // the count first, over the glimpse of his net; his thought once it has gone
-    g.toast(`✦ Stray spark ${n} of ${total}`, 2200);
+    g.toast(`✦ Stray spark ${n} of ${total}`, 4500);   // (run 28 took one and never knew)
     later(3.3, () => { if (n === 1) story.thinkOnce('stray-first'); else if (n === total) story.thinkOnce('stray-all'); });
-  } });
+  }, onNear: () => sfx.bell(4, .35) });   // a faint chime the first time one is near: findable by ear
   (window as unknown as { __vlFinds?: typeof finds }).__vlFinds = finds;   // tests
+  // arriving on an isle with sparks still out there, Zip feels them (run 28: "nothing reminded me")
+  const strayHint = (isle: 'blossom' | 'loom') => { if (finds.open.some(f => f.id.startsWith(isle))) story.thinkOnce('strays-' + isle); };
   const bonus = () => finds.count * ZIP_AWAKE.find;
   const engine = buildEngine(scene, {
     guide: g, host: o.host, camera: o.camera, station: echoSt, zip: o.zip,
     carried: () => echo.carried, carry: w => echo.carry(w), target: () => skiff.at(), hear: k => skiff.hear(k),
     onThought: id => story.thinkOnce(id), bonus,
-    onComplete: () => { echo.showOrbit(true); later(.3, () => echoSt.finish(() => story.dialogue('awake-echo', { board: fly }))); },
+    onComplete: () => { echo.showOrbit(true); later(.3, () => echoSt.finish(() => story.dialogue('awake-echo', { board: () => { fly(); later(1.5, () => story.thinkOnce('voice-is-engine')); } }))); },
   });
   const openEngine = () => {
     action(null); enter('puzzle'); o.teleport(PILOT_STONE.x, PILOT_STONE.z + 1.2, 0); echo.showOrbit(false);
@@ -253,6 +255,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
   };
   const landOnLoom = () => {
     isle.leave(); o.setGround?.((LOOM_ISLE.elevation ?? 0)); enter2('loom'); o.teleport(LOOM_LAND.x, LOOM_LAND.z - 1.2, 0);
+    later(9, () => strayHint('loom'));
   };
   const toLoom = () => { enter2('to-loom'); };
   // the hop to Loom Isle is flown too, a short lane of four rings and no drones (run 27: it was a cut,
@@ -314,7 +317,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (r.rings === r.total) story.thinkOnce('ring-all');
       enter('isle'); o.enterIsland(isle.cameraBlockers); o.teleport(isle.landing.x - 1.2, isle.landing.z - 1.4, 0); boat.position.set(isle.landing.x - 3.2, boat.position.y, isle.landing.z + .8); dimTo = 0;
       story.stars('flight', [true, r.rings >= r.total - 1, r.spotted === 0], { ...r }, () => {
-        isle.greet(() => { isle.arrive(); later(.6, () => story.thinkOnce('gate')); });
+        isle.greet(() => { isle.arrive(); later(.6, () => story.thinkOnce('gate')); later(10, () => strayHint('blossom')); });
       });
     });
   };

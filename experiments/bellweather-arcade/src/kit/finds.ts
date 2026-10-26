@@ -15,6 +15,8 @@ interface Opts {
   /** how close counts as touching it (metres, on the ground plane) */
   reach?: number;
   onFind: (spec: FindSpec, count: number, total: number) => void;
+  /** first time within `nearBy` metres of one not yet found (a sound, so it can be found by ear) */
+  onNear?: (spec: FindSpec) => void; nearBy?: number;
   /** the view, so a beam keeps a steady width on screen: a thread far off, never a wall up close */
   camera: T.Camera;
 }
@@ -51,7 +53,7 @@ export function buildFinds(scene: T.Scene, o: Opts) {
     // a few motes circling it
     const motes = Array.from({ length: 3 }, () => { const m = new T.Sprite(coreMat); m.scale.setScalar(.09); g.add(m); return m; });
     g.visible = !found.has(s.id);
-    return { s, g, core, halo, motes, beam, ph: i * 1.7, burst: -1 };
+    return { s, g, core, halo, motes, beam, ph: i * 1.7, burst: -1, heard: false };
   });
   let t = 0; const cam = new T.Vector3();
   return {
@@ -78,7 +80,9 @@ export function buildFinds(scene: T.Scene, o: Opts) {
         }
         const b = Math.sin(t * 2 + it.ph); it.core.position.y = 1 + b * .12; it.halo.position.y = it.core.position.y; it.halo.scale.setScalar(1.15 + .2 * Math.sin(t * 3.1 + it.ph));
         it.motes.forEach((m, j) => { const a = t * 1.4 + j * 2.1 + it.ph; m.position.set(Math.cos(a) * .45, 1 + Math.sin(t * 2.3 + j) * .3, Math.sin(a) * .45); });
-        if (canTake && player && Math.hypot(player.x - it.s.at[0], player.z - it.s.at[1]) < reach && Math.abs(player.y - (it.s.y ?? .13)) < 2) {
+        const pd = player ? Math.hypot(player.x - it.s.at[0], player.z - it.s.at[1]) : 1e9, level = !!player && Math.abs(player.y - (it.s.y ?? .13)) < 2;
+        if (!it.heard && level && pd < (o.nearBy ?? 9)) { it.heard = true; o.onNear?.(it.s); }
+        if (canTake && level && pd < reach) {
           found.add(it.s.id); write([...found]); it.burst = 0;
           o.onFind(it.s, found.size, o.specs.length);
         }

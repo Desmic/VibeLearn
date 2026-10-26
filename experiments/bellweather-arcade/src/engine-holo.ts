@@ -88,7 +88,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
   const promptEl = document.createElement('div'); promptEl.className = 'engine-prompt'; promptEl.hidden = true; o.host.appendChild(promptEl);
   const say = (html: string) => { promptEl.innerHTML = html; promptEl.hidden = false; };
 
-  let open = false, busy = false, t = 0, wrongLoads = 0;
+  let open = false, busy = false, t = 0, wrongLoads = 0, triedNewest = false;
   const timers: { at: number; fn: () => void }[] = [];
   const later = (s: number, fn: () => void) => timers.push({ at: t + s, fn });
   const ring = () => Array.from({ length: N }, (_, i) => st.state['s' + i] as string).filter(w => w !== 'none');
@@ -167,7 +167,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
     if (events.includes('loop-repaired')) { o.hear('lift'); repairLoop(); return; }
     const kind = events.find(e => e.startsWith('decide:'))?.split(':')[3];
     if (kind === 'original-only') { o.hear('stall'); back(L.again, 3); return; }
-    if (kind === 'newest-only') { o.hear('petals'); back(L.petals, 3); return; }
+    if (kind === 'newest-only') { triedNewest = true; o.hear('petals'); back(L.petals, 3); return; }
     if (kind === 'partial') { o.hear('wobble'); back(L.partial, 2.6); return; }
     o.hear('wobble'); wrongLoads++; back(wrongLoads >= 2 ? `${L.um} ${L.umHint}` : L.um, 3);
     void said;
@@ -180,6 +180,9 @@ export function buildEngine(scene: T.Scene, o: Opts) {
     later(.5, step);
   };
   const repairLoop = () => {
+    // the road not taken, said once it is behind him (runs 27 and 28 both guessed a ring of only
+    // "Blossom" would still make "Isle"; it makes "petals")
+    if (!triedNewest) o.onThought?.('engine-petals');
     say(L.repaired); sfx.chime(); net.wakeTo(ZIP_AWAKE.loop + (o.bonus?.() ?? 0), 1.2);
     const curve = buildLoop(ring().length, 1); setHolo(loopMat, { color: HOLO.found, intensity: 2 });
     fx.burst(toWorld(curve.getPointAt(.58)), 26, 2.4, HOLO.found);

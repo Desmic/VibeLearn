@@ -75,8 +75,13 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     // the net (25 Oct): the voice "coil by coil" went unseen in five runs; now the dark web shows it
     // run 27 took the engine and his voice for "two related things, not the same thing": say it's his voice
     'engine-open': { text: ['My voice… from the inside? I\'m basically a sci-fi movie.', 'One coil lit. The rest of me is still dark.'] },
+    'engine-petals': { text: ['Just “Blossom” on its own? I\'d have said “petals”.', 'It needs the whole line, not the last word.'] },
     'engine-wake': { text: 'More of me just lit up. I felt that.' },
-    'stray-first': { text: ['A stray spark of my voice. Way out here?', 'Straight into my net. A little more of me is lit.'] },
+    'stray-first': { text: ['A stray spark of my voice. Straight into my net.', 'There must be more. Off the paths, out at the edges.'] },
+    'strays-blossom': { text: 'Stray sparks of me out here too. I can feel them.' },
+    'strays-loom': { text: 'More stray sparks on this isle. Somewhere off the path.' },
+    // run 28 read his voice and the engine as "two separate things": say it at the payoff
+    'voice-is-engine': { text: ['My first words out loud since the attack.', 'That net was my voice. Every light in it is a bit more of me.'] },
     'stray-all': { text: ['That\'s every stray spark.', 'Hear that, Warden? I\'m louder now.'] },
     'voice-back': { text: ['My voice… it\'s clearer.', 'Another coil lit. Mira, I\'m coming.'] },
     'loop-broken': { who: 'warden', text: 'Your loop is cracked, little courier. Think around it.' },
