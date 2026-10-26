@@ -28,7 +28,7 @@ export interface GameManifest {
   /** URL query the tools open the game with (e.g. lowest quality, no auto-tuning, so software rendering keeps up) */
   testEntry: string;
   /** browser storage keys the game owns; tools seed, read and tamper with these */
-  storage: { save: string; learning: string; decided: string; /** settings only (mute, graphics…) */ prefs?: string[] };
+  storage: { save: string; learning: string; decided: string; /** things found off the path (kit/finds) */ finds?: string; /** settings only (mute, graphics…) */ prefs?: string[] };
   /** learning stations that are live in the game, and the rules that judge them */
   stations: StationSpec[];
   rules: GameRulesSpec[];
@@ -62,7 +62,7 @@ export function validateManifest(m: GameManifest): string[] {
   if (m.schema !== 'vibelearn.game.v1') out.push(`schema is "${m.schema}", expected vibelearn.game.v1`);
   if (!/^[a-z0-9-]+$/.test(m.id ?? '')) out.push('id must be lowercase letters, digits and dashes');
   for (const k of ['save', 'learning', 'decided'] as const) if (!m.storage?.[k]) out.push(`storage.${k} missing`);
-  const keys = [m.storage.save, m.storage.learning, m.storage.decided, ...(m.storage.prefs ?? [])];
+  const keys = [m.storage.save, m.storage.learning, m.storage.decided, ...(m.storage.finds ? [m.storage.finds] : []), ...(m.storage.prefs ?? [])];
   if (new Set(keys).size !== keys.length) out.push('storage keys must differ');
   const ruleIds = new Set(m.rules.map(r => r.id)), stIds = new Set<string>();
   for (const s of m.stations) {

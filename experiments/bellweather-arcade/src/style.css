@@ -310,3 +310,4 @@ html[data-input=desktop] .wr-chip.next.tied{width:142px}
 .wr-forgot{position:absolute;left:0;top:0;padding:6px 12px;border-radius:14px;border:2px solid #9fb3c2;background:#1b2a36aa;color:#cfd8df;font:800 18px Trebuchet MS,Arial,sans-serif;text-decoration:line-through;pointer-events:none}
 @keyframes wr-bump{20%,60%{background:#ff7a8a;color:#fff;scale:1.25}40%{scale:1.1}}
 .wr-close{width:36px;height:36px;border-radius:50%;border:1.5px solid #6fe0c999;background:#071a28cc;color:#bffcef;font:700 20px system-ui;cursor:pointer}
+.menu-finds{margin:10px 0 0;font:600 14px Trebuchet MS,Arial,sans-serif;color:#b8862b}

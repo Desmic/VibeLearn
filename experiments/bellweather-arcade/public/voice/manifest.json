@@ -1,7 +1,7 @@
 {
  "_about": "Voiced lines (tools/voice.mjs). key → clip file and seconds.",
  "model": "gemini-3.8-flash-tts",
- "made": "2026-10-24T08:03:44.121Z",
+ "made": "2026-10-26T14:51:08.904Z",
  "clips": {
   "14631539": {
    "file": "14631539.mp3",
@@ -298,9 +298,9 @@
    "dur": 1.27,
    "speaker": "Zip"
   },
-  "b846e35e": {
-   "file": "b846e35e.mp3",
-   "dur": 8.26,
+  "fac72c7c": {
+   "file": "fac72c7c.mp3",
+   "dur": 11.3,
    "speaker": "Zip"
   }
  }

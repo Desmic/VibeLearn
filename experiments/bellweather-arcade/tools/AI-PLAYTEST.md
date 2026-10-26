@@ -1073,4 +1073,11 @@ second flight skipped, "most of the actual play is tapping choice buttons in pan
   off it still lands (flowcheck checks it).
 - Zip's first thought at the engine names it as his voice: "My voice… from the inside? I'm
   basically a sci-fi movie." then "One coil lit. The rest of me is still dark."
+- **Stray sparks** (the explorer's "nothing found off the path"): eight sparks of Zip's voice left
+  in corners of the town and on the far sides of both isles, each a gold mote with a thin beam over
+  it, seen from afar. Walking into one takes it: a glimpse of his net over his head, one more node
+  lit, "✦ Stray spark 3 of 8". Every net shown after (the engine, the end of Loom Isle) has those
+  nodes lit. The menu counts them; a new run puts them back. Flowcheck walks to all eight.
+- The "How real AI differs" card ties his net to the real thing: "Real models are nets like mine,
+  with billions of links." (re-voiced).
 

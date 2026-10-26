@@ -50,7 +50,7 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     static: { start: { speaker: 'Zip', text: 'MIR— kkzzht… krrsh…' } },
     'awake-echo': {
       start: { speaker: 'Zip', text: '“Skiff, rise toward Blossom Isle.”', choices: [{ label: 'Board the skiff', kind: 'primary', on: 'board' }, { label: 'How real AI differs', kind: 'quiet', next: 'real' }] },
-      real: { speaker: 'Zip', text: 'Real models guess pieces of words, learned from huge amounts of text. The loop is the same: each new piece joins the input.', choices: [{ label: 'Board the skiff', kind: 'primary', on: 'board' }] },
+      real: { speaker: 'Zip', text: 'Real models are nets like mine, with billions of links. They guess pieces of words, learned from huge amounts of text. The loop is the same: each new piece joins the input.', choices: [{ label: 'Board the skiff', kind: 'primary', on: 'board' }] },
     },
     coil: {
       start: { text: 'Your Echo Coil, one piece of your speech engine! Simple words are back.', choices: [{ label: 'Beep boop!', kind: 'primary', on: 'afterCoil' }] },
@@ -76,6 +76,8 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     // run 27 took the engine and his voice for "two related things, not the same thing": say it's his voice
     'engine-open': { text: ['My voice… from the inside? I\'m basically a sci-fi movie.', 'One coil lit. The rest of me is still dark.'] },
     'engine-wake': { text: 'More of me just lit up. I felt that.' },
+    'stray-first': { text: ['A stray spark of my voice. Way out here?', 'Straight into my net. A little more of me is lit.'] },
+    'stray-all': { text: ['That\'s every stray spark.', 'Hear that, Warden? I\'m louder now.'] },
     'voice-back': { text: ['My voice… it\'s clearer.', 'Another coil lit. Mira, I\'m coming.'] },
     'loop-broken': { who: 'warden', text: 'Your loop is cracked, little courier. Think around it.' },
     'engine-sink': { text: 'In my defense, it did say “sink”.' },

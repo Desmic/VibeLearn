@@ -25,7 +25,7 @@ export const GAME: GameManifest = {
   // Mira's tree, only in the shipped town, went unseen (found by Claude playing on Desmic's PC)
   testEntry: 'study=facade&portal=crafted&architecture=atelier&finish=daylight&palette=ceramic&form=swept-clean&character=courier&look=sunlit&setting=city&districts=terraces&surface=illustrated&render=painted&quality=low&auto=0',
   storage: {
-    save: 'bellweather.save.v1', learning: 'bellweather.learning.v1', decided: 'bellweather.decided.v1',
+    save: 'bellweather.save.v1', learning: 'bellweather.learning.v1', decided: 'bellweather.decided.v1', finds: 'bellweather.finds.v1',
     prefs: ['bellweather.mute', 'bellweather.graphics', 'bellweather.stats', 'vibelearn.music'],
   },
   // Stop 1 wakes the skiff with Echo (the in-world version; the older panel version in

@@ -9,7 +9,7 @@
 //
 // Writes <out>/report.json, <out>/report.md and screenshots. Exit code 1 when a
 // check fails. Segments: title, meet (Mira + attack), spark, skiff (catch game),
-// flight, isle (satchel, notes, gate), relay, loom (Stop 2), resume (save + Continue), menu (tabs, jumping between ways in), views.
+// flight, isle (satchel, notes, gate), relay, loom (Stop 2), resume (save + Continue), menu (tabs, jumping between ways in), finds (stray sparks off the path), views.
 import { harness } from './harness.mjs';
 
 const h = await harness({ title: 'Flow check', outDefault: 'flowcheck', tool: 'flowcheck', lane: 'flow' });
@@ -300,6 +300,26 @@ await segment('menu', async () => {
   await press(page.locator('.title-menu button', { hasText: 'Graphics' }));
   check('the title\'s Graphics opens the menu on Settings', await page.locator('#menu-tab-settings[aria-selected="true"]').isVisible() && await page.locator('.menu .gfx').isVisible());
   await shot('menu-settings');
+});
+
+// Stray sparks off the beaten path (25 Oct): each one can be walked to from where a player is, and
+// walking into it takes it (the count goes up and stays); a new run puts them back.
+await segment('finds', async () => {
+  for (const [extra, ids] of [['&title=0', ['west-plaza', 'east-nook', 'canopy-corner']], ['&title=0&beat=gate-open', ['blossom-west', 'blossom-south']], ['&title=0&beat=loom', ['loom-east', 'loom-south', 'loom-west']]]) {
+    await open(extra); if (extra === '&title=0') await h.skipOpening(); await page.waitForTimeout(2500);
+    for (const id of ids) {
+      const f = (await page.evaluate(() => window.__vlFinds.open)).find(x => x.id === id);
+      if (!check(`stray spark "${id}" is out there`, !!f)) continue;
+      const before = await page.evaluate(() => window.__vlFinds.count);
+      // (the test's own planner doesn't find the way through the Gate's arch from the relay side: go through it first)
+      if (id === 'blossom-west') await h.walkTo([0, 47.6], { near: .6, maxSecs: 20 });
+      const r = await h.walkTo([f.at[0], f.at[1]], { near: .4, maxSecs: 45, until: async () => (await page.evaluate(() => window.__vlFinds.count)) > before });
+      await page.evaluate(() => window.__arcade.simulate(1));
+      check(`stray spark "${id}" can be walked to and taken`, (await page.evaluate(() => window.__vlFinds.count)) > before, `${r.reason}, ${r.secs?.toFixed?.(1)} s`);
+    }
+  }
+  check('all eight found, and the count stays', await page.evaluate(() => window.__vlFinds.count === window.__vlFinds.total), String(await page.evaluate(() => window.__vlFinds.count)));
+  await shot('all-found');
 });
 
 await segment('views', async () => {

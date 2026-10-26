@@ -1066,12 +1066,12 @@
    "from": "first-words.l1:static.start"
   },
   {
-   "key": "b846e35e",
+   "key": "fac72c7c",
    "speaker": "Zip",
    "voice": "Puck",
    "style": "a small, brave courier robot: eager, bright, clipped",
-   "text": "Real models guess pieces of words, learned from huge amounts of text. The loop is the same: each new piece joins the input.",
-   "shown": "Real models guess pieces of words, learned from huge amounts of text. The loop is the same: each new piece joins the input.",
+   "text": "Real models are nets like mine, with billions of links. They guess pieces of words, learned from huge amounts of text. The loop is the same: each new piece joins the input.",
+   "shown": "Real models are nets like mine, with billions of links. They guess pieces of words, learned from huge amounts of text. The loop is the same: each new piece joins the input.",
    "from": "first-words.l1:awake-echo.real"
   }
  ]

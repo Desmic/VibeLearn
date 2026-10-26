@@ -28,6 +28,8 @@ interface Opts {
   /** the machine reacts to what it heard */
   hear: (kind: Hear) => void;
   onThought?: (id: string) => void;
+  /** extra awake share from finds out in the world (stray sparks of his voice) */
+  bonus?: () => number;
   onComplete: () => void;
 }
 
@@ -178,7 +180,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
     later(.5, step);
   };
   const repairLoop = () => {
-    say(L.repaired); sfx.chime(); net.wakeTo(ZIP_AWAKE.loop, 1.2);
+    say(L.repaired); sfx.chime(); net.wakeTo(ZIP_AWAKE.loop + (o.bonus?.() ?? 0), 1.2);
     const curve = buildLoop(ring().length, 1); setHolo(loopMat, { color: HOLO.found, intensity: 2 });
     fx.burst(toWorld(curve.getPointAt(.58)), 26, 2.4, HOLO.found);
     const m = glyph('Isle', { height: .27, color: HOLO.made, intensity: 2.4 }); holo.add(m);
@@ -192,7 +194,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
   const finale = () => {
     say(L.done);
     // the sentence is whole: the net blooms and a little more of the dark web wakes (his voice, coming back)
-    net.bloom(); net.wakeTo(ZIP_AWAKE.skiff, 2.6); sfx.chime(); o.onThought?.('engine-wake');
+    net.bloom(); net.wakeTo(ZIP_AWAKE.skiff + (o.bonus?.() ?? 0), 2.6); sfx.chime(); o.onThought?.('engine-wake');
     const words = ring(); let i = 0;
     const next = () => {
       if (i >= words.length) {
@@ -249,7 +251,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
       if (st.state.phase === 'loop') say(L.loopBroken); else say(L.open);
       promptEl.classList.remove('quiet');
       if (st.state.phase === 'loop') buildLoop(ring().length, .58);
-      if (!woken) { woken = true; net.setAwake(ZIP_AWAKE.start); later(2.6, () => o.onThought?.('engine-open')); }
+      if (!woken) { woken = true; net.setAwake(ZIP_AWAKE.start + (o.bonus?.() ?? 0)); later(2.6, () => o.onThought?.('engine-open')); }
       refresh(); sfx.hum(1.5); fx.burst(toWorld(CORE), 20, 1.6);
       holo.scale.setScalar(.05);
     },
@@ -292,4 +294,4 @@ export const zipNet = (N = 5) => buildNeuralNet({
   onWake: i => { if (i % 2 === 0) sfx.bell(i / 2, .5); },   // a rising bell scale as his voice lights
 });
 /** how much of Zip's voice is awake after each stop: the net wakes coil by coil */
-export const ZIP_AWAKE = { start: .14, loop: .24, skiff: .5, loom: .7 } as const;
+export const ZIP_AWAKE = { start: .14, loop: .24, skiff: .5, loom: .7, /** each stray spark found */ find: .025 } as const;

@@ -21,6 +21,9 @@ import { buildLoom } from './loom';
 import { buildEcho } from './echo';
 import { buildEngine, ZIP_AWAKE } from './engine-holo';
 import { buildVoiceMoment } from './voice-moment';
+import { buildFinds } from './kit/finds';
+import { FIRST_WORDS_FINDS } from './worlds/first-words-finds';
+import { GAME } from './game';
 import { createSwingers } from './kit/swing';
 import { loadBodyKit, assembleLook } from './kit/body-kit';
 import { clearSight } from './canopy';
@@ -182,10 +185,21 @@ export function buildStory(scene: T.Scene, o: Opts) {
   });
   const voiceMoment = buildVoiceMoment(scene, o.camera, o.zip);
   (window as unknown as { __vlVoice?: typeof voiceMoment }).__vlVoice = voiceMoment;   // tests
+  // stray sparks of his voice, off the beaten path: each found lights a little more of his net, and a
+  // glimpse of it shows over his head as it does
+  const awakeBase = () => beat === 'loom-done' ? ZIP_AWAKE.loom : (['meet', 'attack', 'spark', 'skiff', 'puzzle'] as Beat[]).includes(beat) ? ZIP_AWAKE.start : ZIP_AWAKE.skiff;
+  const finds = buildFinds(scene, { specs: FIRST_WORDS_FINDS, key: GAME.storage.finds ?? 'vibelearn.finds', color: HOLO.made, camera: o.camera, onFind: (_s, n, total) => {
+    const b = awakeBase() + (n - 1) * ZIP_AWAKE.find; voiceMoment.play(b, b + ZIP_AWAKE.find, undefined, true); sfx.chime();
+    // the count first, over the glimpse of his net; his thought once it has gone
+    g.toast(`✦ Stray spark ${n} of ${total}`, 2200);
+    later(3.3, () => { if (n === 1) story.thinkOnce('stray-first'); else if (n === total) story.thinkOnce('stray-all'); });
+  } });
+  (window as unknown as { __vlFinds?: typeof finds }).__vlFinds = finds;   // tests
+  const bonus = () => finds.count * ZIP_AWAKE.find;
   const engine = buildEngine(scene, {
     guide: g, host: o.host, camera: o.camera, station: echoSt, zip: o.zip,
     carried: () => echo.carried, carry: w => echo.carry(w), target: () => skiff.at(), hear: k => skiff.hear(k),
-    onThought: id => story.thinkOnce(id),
+    onThought: id => story.thinkOnce(id), bonus,
     onComplete: () => { echo.showOrbit(true); later(.3, () => echoSt.finish(() => story.dialogue('awake-echo', { board: fly }))); },
   });
   const openEngine = () => {
@@ -208,7 +222,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
     freeTavi(); stop2.dialogue('thanks', { endStop: () => {
       // another piece of his voice is back: his net shows above him and more of it lights
       // (his thought while it lights, not after: run 27 heard "Another coil lit" with nothing lit on screen)
-      enter2('loom-done'); later(.4, () => voiceMoment.play(ZIP_AWAKE.skiff, ZIP_AWAKE.loom, () => later(4, () => stop2.thinkOnce('loom-pieces'))));
+      enter2('loom-done'); later(.4, () => voiceMoment.play(ZIP_AWAKE.skiff + bonus(), ZIP_AWAKE.loom + bonus(), () => later(4, () => stop2.thinkOnce('loom-pieces'))));
       later(2.2, () => story.thinkOnce('voice-back'));
     } });
   }) });
@@ -410,6 +424,8 @@ export function buildStory(scene: T.Scene, o: Opts) {
     get placeName() { return placeName; },
     /** the story beat, and whether a cutscene (the cold open or the attack) is playing: for the soundscape */
     get beat() { return beat; },
+    /** stray sparks found, of all (for the menu) */
+    get finds() { return [finds.count, finds.total] as const; },
     get inCutscene() { return cut >= 0 || opening >= 0; },
     debugTap: (w: string) => skiff.debugTap(w), debugFeed: () => skiff.debugFeed(),
     get debug() { return { script: S.id, beat, cut, opening, mech: ECHO ? 'echo' : 'classic', echo: echoSt.state, carried: echo.carried, engine: engine.active, loom: loomSt.state, hops, spark: sparkHome.toArray(), stones: skiff.debugStones(), core: skiff.debugCore() }; },
@@ -445,6 +461,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
     },
     start(from?: Checkpoint) {
       const b = from ?? new URLSearchParams(location.search).get('beat');
+      if (!b) finds.clear();   // a new run: the sparks are out there again
       if (b === 'gate-open') { if (mira) mira.visible = false; placeName = story.beat('isle').place ?? null; beat = 'isle'; o.enterIsland(isle.cameraBlockers); isle.restoreOpen(); setTimeout(() => o.teleport(0, 45.2, 0), 50); return; }
       if (b === 'attack') { talking = true; setTimeout(() => { o.teleport(ZIP_MARK.x, ZIP_MARK.z, ZIP_FACE); skiff.showLantern(); startAttack(); }, 50); return; }
       if (b === 'spark') { if (mira) mira.visible = false; skiff.showLantern(); toSpark(); return; }
@@ -463,7 +480,8 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (sky !== skyShown) { skyShown = sky; world.show('next', sky); world.show('route', sky); }
       if (sky) world.tick(z);
       for (let i = timers.length - 1; i >= 0; i--) if (timers[i].at <= t) { const f = timers[i].fn; timers.splice(i, 1); f(); }
-      skiff.tick(dt); flight.tick(dt); engine.tick(dt); voiceMoment.tick(dt); bells?.tick(dt, beat === 'fly' ? null : o.zip(), t); if (echo.enabled) echo.tick(dt);
+      skiff.tick(dt); flight.tick(dt); engine.tick(dt); voiceMoment.tick(dt);
+      finds.tick(dt, z, !(g.cardOpen || cut >= 0 || opening >= 0 || engine.active || flight.active || voiceMoment.active || isle.busy || loom.active || beat === 'fly')); bells?.tick(dt, beat === 'fly' ? null : o.zip(), t); if (echo.enabled) echo.tick(dt);
       if (beat === 'fly') { shown = '#'; return; }
       // Zip's commentary: suspicious townsfolk, and a nudge when the player idles
       const free = !g.cardOpen && cut < 0 && !skiff.active && !isle.busy && (beat === 'meet' || beat === 'spark' || beat === 'skiff' || beat === 'isle');
