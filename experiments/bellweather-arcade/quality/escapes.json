@@ -550,6 +550,35 @@
         "content"
       ],
       "status": "prevented"
+    },
+    {
+      "id": "qe-lens-in-wall",
+      "found": {
+        "date": "2026-10-27",
+        "by": "blind run 28 (explorer), steps 69-70 (\"aaand the camera is inside a wall. great.\"); Claude reproducing at the spot",
+        "where": "the town: backed against the conservatory, the view dragged round"
+      },
+      "symptom": "With a wall a quarter metre behind Zip, the follow camera kept its 0.9 m minimum distance and sat inside the building: the whole screen one dark blue for two steps.",
+      "why_missed": "Camera probes measured the lens pressed into Zip and the lens in a tree crown, never the lens beyond a surface as seen from Zip's head.",
+      "generalized_failure": "A minimum follow distance that is kept even when a wall is nearer puts the lens on the far side of the wall.",
+      "invariant": "Seen from the player's head, nothing stands between it and the lens.",
+      "prevention": [
+        {
+          "layer": "engine",
+          "what": "main.ts: a wall closer than 1.2 m on the centre line stops the lens just short of it (down to 0.3 m), looking ahead the way he faces"
+        },
+        {
+          "layer": "check",
+          "what": "camprobe L: town spots against something, eight headings each, the lens never behind a surface"
+        }
+      ],
+      "caught_by": [
+        "camprobe"
+      ],
+      "lanes": [
+        "feel"
+      ],
+      "status": "prevented"
     }
   ]
 }

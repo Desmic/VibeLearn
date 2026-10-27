@@ -277,7 +277,10 @@ function cameraUpdateInner(dt:number){if(camOverride){camera.position.copy(camOv
     for(const o of [-1,0,1]){
       camOrigin.copy(pivot).addScaledVector(camSide,o);cameraDelta.copy(camDir).multiplyScalar(full);
       const hit=firstCameraHit(camOrigin,cameraDelta,.15);
-      if(hit)clear=Math.min(clear,Math.max(.9,hit.distance-.3));
+      // never closer than .9 m (Zip pressed into the lens, run 17); but a wall right behind him on the
+      // centre line would leave the lens inside it, the whole screen one dark colour (run 28: "the camera
+      // is inside a wall"): then the lens stops just short of the wall, close over his shoulder
+      if(hit)clear=Math.min(clear,o===0&&hit.distance<1.2?Math.max(.3,hit.distance-.12):Math.max(.9,hit.distance-.3));
     }
     // A low thing behind Zip (a pedestal, a planter, a rail) shouldn't press the camera into his
     // back: if a line from a little higher up is much clearer, rise and look over it instead.
@@ -297,7 +300,7 @@ function cameraUpdateInner(dt:number){if(camOverride){camera.position.copy(camOv
     const squeeze=1-T.MathUtils.smoothstep(camDist,.9,1.8);
     // ...but never so far over him that the view looks straight down at the ground (runs 19 and 22:
     // "the camera diving into the ground", "a top-down view of my own head"): at most 55° above his head
-    if(tight>0){const flat=Math.max(.35,Math.hypot(desired.x-zip.position.x,desired.z-zip.position.z)),cap=pivot.y+Math.tan(MAX_LOOK_DOWN)*flat;camLift.set(0,Math.max(0,Math.min(tight*SQUEEZE_LIFT,cap-desired.y)),0).add(desired);cameraDelta.subVectors(camLift,pivot);const up=firstCameraHit(pivot,cameraDelta,.15);if(!up||up.distance>cameraDelta.length())desired.copy(camLift)}
+    if(tight>0){const flat=Math.max(.35,Math.hypot(desired.x-zip.position.x,desired.z-zip.position.z)),cap=pivot.y+Math.tan(MAX_LOOK_DOWN)*flat;camLift.set(0,Math.max(0,Math.min(tight*SQUEEZE_LIFT*T.MathUtils.smoothstep(camDist,.5,.9)/* no lift once the lens is right at his head, against a wall: it looks ahead instead */,cap-desired.y)),0).add(desired);cameraDelta.subVectors(camLift,pivot);const up=firstCameraHit(pivot,cameraDelta,.15);if(!up||up.distance>cameraDelta.length())desired.copy(camLift)}
     camera.position.lerp(desired,dt>=.5?1:Math.min(1,dt*12));
     const horizontalX=camera.position.x-zip.position.x,horizontalZ=camera.position.z-zip.position.z;
     if(Math.hypot(horizontalX,horizontalZ)>.5)facadeMoveYaw=Math.atan2(horizontalX,horizontalZ);
@@ -306,7 +309,9 @@ function cameraUpdateInner(dt:number){if(camOverride){camera.position.copy(camOv
     // (the lift fades as the camera comes close, so Zip never slips off the bottom of a phone screen)
     look.copy(pivot).add(new T.Vector3(0,(.5+framingLift())*T.MathUtils.smoothstep(camDist,1.8,5.5),0));
     // squeezed close: look past Zip's shoulder at where he is going, not down at his head
-    if(tight>0){const k=tight*(1-squeeze);look.x-=camDir.x*k*1.1;look.z-=camDir.z*k*1.1;look.y-=tight*.2}  // a little past his shoulder, never losing him
+    if(tight>0){const k=tight*(1-squeeze);look.x-=camDir.x*k*1.1;look.z-=camDir.z*k*1.1;look.y-=tight*.2}
+    // closer still (a wall right behind him): look ahead, the way he faces, not at the point the lens is in
+    {const ahead=1-T.MathUtils.smoothstep(camDist,.35,.9);if(ahead>0){look.x-=camDir.x*ahead*3;look.z-=camDir.z*ahead*3;look.y-=ahead*.15}}  // a little past his shoulder, never losing him
     camera.lookAt(look);fadeZipNear();
     cameraMetrics.updates++;cameraMetrics.updateMs+=performance.now()-started;return;
   }
@@ -544,7 +549,7 @@ window.addEventListener('resize',()=>{renderer.setPixelRatio(adaptRes?adaptRes.r
 // If the browser drops the GPU context (driver reset, memory pressure, too many
 // tabs), say so plainly instead of leaving a blank screen.
 renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();const l=get('loading');l.hidden=false;l.style.cursor='pointer';l.style.textAlign='center';l.style.padding='24px';l.textContent='The browser paused the graphics (GPU reset). Tap to reload the game.';l.onclick=()=>location.reload();console.warn('[vl] webgl context lost')});
-(window as any).__vlGuide=guide;(window as any).__vlDebug={get steer(){return {path:steerPath,t:steerT}},camHit:(a?:number)=>{const y=a??yaw;camOrigin.copy(zip.position).y+=1.5;cameraDelta.set(Math.sin(y)*Math.cos(pitch)*zoom,1.3+Math.sin(pitch)*zoom-1.5,Math.cos(y)*Math.cos(pitch)*zoom);const h=firstCameraHit(camOrigin,cameraDelta,.15) as any;return h?{d:+h.distance.toFixed(2),name:(()=>{const o=h.object;if(!o)return "?";const b=new T.Box3().setFromObject(o),sz=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3());const chain=[];for(let q=o;q&&chain.length<4;q=q.parent)chain.push(q.name||q.type);return chain.join("<")+" size "+[sz.x,sz.y,sz.z].map(v=>v.toFixed(2)).join("x")+" at "+[c.x,c.y,c.z].map(v=>v.toFixed(1)).join(",")})()}:null},get faders(){return faders},scene,renderer,camera,sun,walkable,tryPush,solidsNear:(facade as any).solidsNear,get zipRig(){return zipRig},
+(window as any).__vlGuide=guide;(window as any).__vlDebug={get steer(){return {path:steerPath,t:steerT}},get camState(){return {dist:+camDist.toFixed(2),over:+camOver.toFixed(2),zoom,pitch:+pitch.toFixed(2)}},/** the lens is behind a surface, seen from Zip's head: how far along the surface is (null: clear) */lensBehind(){/* from where the camera's own line starts: risen over a low hedge or planter (camOver), the lens looks down over it on purpose */camOrigin.copy(zip.position).y+=1.5+camOver;cameraDelta.subVectors(camera.position,camOrigin);const L=cameraDelta.length(),h=firstCameraHit(camOrigin,cameraDelta,.05) as any;if(!h||h.distance>=L-.08)return null;/* a hit on the voxel grid alone (no surface) within its one-cell margin is the margin, not the wall: the lens is behind the wall only once it is past where the surface can be */if(!h.object&&h.distance>L-.3){const g=cameraGrid;cameraGrid=null;const m=firstCameraHit(camOrigin,cameraDelta,.05);cameraGrid=g;if(!m||m.distance>=L-.08)return null}return +h.distance.toFixed(2)},camHit:(a?:number)=>{const y=a??yaw;camOrigin.copy(zip.position).y+=1.5;cameraDelta.set(Math.sin(y)*Math.cos(pitch)*zoom,1.3+Math.sin(pitch)*zoom-1.5,Math.cos(y)*Math.cos(pitch)*zoom);const h=firstCameraHit(camOrigin,cameraDelta,.15) as any;return h?{d:+h.distance.toFixed(2),name:(()=>{const o=h.object;if(!o)return "?";const b=new T.Box3().setFromObject(o),sz=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3());const chain=[];for(let q=o;q&&chain.length<4;q=q.parent)chain.push(q.name||q.type);return chain.join("<")+" size "+[sz.x,sz.y,sz.z].map(v=>v.toFixed(2)).join("x")+" at "+[c.x,c.y,c.z].map(v=>v.toFixed(1)).join(",")})()}:null},get faders(){return faders},scene,renderer,camera,sun,walkable,tryPush,solidsNear:(facade as any).solidsNear,get zipRig(){return zipRig},
   // for tests: what squeezes the follow camera (how far it sits, and what stands between Zip and where it wants to be)
   camSqueeze(){const pivot=zip.position.clone().add(new T.Vector3(0,1.5,0)),hits:string[]=[];ray.set(pivot,camDir);ray.far=zoom;for(const h of ray.intersectObjects(cameraSolids,true).slice(0,4)){let o:T.Object3D|null=h.object;const path:string[]=[];while(o&&path.length<4){if(o.name)path.push(o.name);o=o.parent}hits.push(`${h.distance.toFixed(2)} ${path.join('<')||h.object.type}`)}const g=cameraGrid?.hit(pivot,camDir,zoom);return {camDist:+camDist.toFixed(2),zoom:+zoom.toFixed(2),hits,grid:g&&g<zoom?+g.toFixed(2):null}}};
 Object.defineProperty(window,'__arcade',{value:{

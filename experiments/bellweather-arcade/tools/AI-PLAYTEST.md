@@ -1116,4 +1116,22 @@ second flight skipped, "most of the actual play is tapping choice buttons in pan
 - When the loop is repaired, unless the player already tried it: "Just “Blossom” on its own? I'd
   have said “petals”. It needs the whole line, not the last word." (runs 27 and 28 both guessed
   "Isle").
+- The camera no longer sits inside a wall that is right behind Zip (the whole screen one colour):
+  the lens stops just short of it, looking ahead the way he faces. Camprobe L checks town spots
+  against walls at eight headings.
 
+  (L runs in the page, as F and H do: 232 settled views in under 1.5 min. Two false alarms
+  explained and fixed in the measure, not the camera: risen over a low planter the lens looks down
+  over it on purpose, so the line is drawn from the risen point; and a hit on the camera's voxel
+  grid alone, within its one-cell margin, is the margin, not the wall.)
+- Wind rings in the flight now play a rising note for each one flown in a row (a clean line plays
+  a little tune, with a chime for all of them) and bloom outward as they're flown; "n in a row"
+  from the third. Run 27: the second hop felt "a little disappointing"; the flight was the most
+  passive stretch of the game.
+- **The flight is flown across a lane now, not by heading.** The wind carries the skiff along the
+  lane and the stick slides it left and right (up to 9 m either side); hands off it drifts back to
+  the middle. The rings sit off to alternate sides (the first and last on the line), so a ring is
+  something to steer for. Flightprobe, before → after: in pushes (as testers fly) 2 of 7 rings and
+  77 s of 30 m loops → 4 of 7, landed in 15 s; hands off 5 of 7 (the wind's pull caught them: nothing
+  to do) → 2 of 7; a new "steered" player, lining up each ring, 7 of 7. The flight's second star
+  (all rings but one) now takes steering.

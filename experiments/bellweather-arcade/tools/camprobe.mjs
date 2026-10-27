@@ -151,4 +151,22 @@ const top = await page.evaluate(() => { const A = window.__arcade; let n = 0, t 
       if (Math.atan2(C[1] - P[1] - 1.5, Math.hypot(C[0] - P[0], C[2] - P[2])) > Math.PI / 3) t++; } }
   return { n, t }; });
 h.check('H. the camera never looks straight down at Zip from above (no view over 60° in town, tilted fully down; was 10.1%)', top.t === 0, `${top.t} of ${top.n}`, 'fail', 'feel');
+// L: the lens never ends up behind a wall, seen from Zip's head (run 28: backed against the conservatory
+// and the view dragged round, the lens sat inside the building and the whole screen was one dark blue).
+// Town spots that stand against something, eight headings each.
+{
+  // (same page as F and H: already at the skiff beat in town)
+  const spots = await page.evaluate(() => { const W = window.__arcade.walkable, out = [];
+    for (let z = -11.5; z <= 9.5; z += 1.1) for (let x = -8.5; x <= 8.5; x += 1.1) {
+      if (!W(x, z)) continue; let near = false; for (let k = 0; k < 8 && !near; k++) { const a = k / 8 * Math.PI * 2; if (!W(x + Math.sin(a) * .45, z + Math.cos(a) * .45)) near = true; }
+      if (near) out.push([x, z]); }
+    return out; });
+  // in the page, as F and H do (one call per pose took a quarter of an hour); each pose settled (a
+  // teleport's glide can pass behind a roof on the way)
+  const { n, bad } = await page.evaluate(spots => { const A = window.__arcade; let n = 0; const bad = [];
+    for (const [x, z] of spots) for (let k = 0; k < 8; k++) { const y = k / 8 * Math.PI * 2; A.pose(x, z, y, .2, 6, y); A.simulate(2); n++;
+      if (window.__vlDebug.lensBehind() !== null) bad.push(`(${x.toFixed(1)}, ${z.toFixed(1)}) ${Math.round(y * 180 / Math.PI)}°`); }
+    return { n, bad }; }, spots);
+  h.check('L. the lens never sits behind a wall, seen from Zip (town spots against something, 8 headings)', bad.length === 0, `${bad.length} of ${n}${bad.length ? ': ' + bad.slice(0, 6).join('; ') : ''}`, 'fail', 'feel');
+}
 await h.finish();

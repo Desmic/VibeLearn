@@ -88,7 +88,7 @@
       "proves": "The camera and getting about, measured: no glance at a goal already on screen, no swing to a goal behind (the arrow pulses), one glance at a goal off to the side, the arrow's turn holds and faces the way round a wall, back from a dialogue the camera is clear, a tap on a raised isle walks to the tapped spot, and the camera seldom presses into Zip anywhere in town.",
       "affects": ["src/main.ts", "src/guide.ts", "src/kit/nav.ts", "src/facade.ts"] },
     { "id": "flightprobe", "scope": "game", "kind": "tool", "lanes": ["feel"], "run": "node tools/flightprobe.mjs --input touch", "cost": "~5 min", "needs": ["build", "browser"],
-      "proves": "The skiff flight flown four ways (hands off, full speed, in pushes, by the goal arrow): rings flown of seven, times spotted, seconds to land.",
+      "proves": "The skiff flight flown five ways (hands off, full speed, in pushes, by the goal arrow, steering for each ring): rings flown of seven, times spotted, seconds to land; hands off flies only the rings on the lane line, steering for them catches all, and pushes never loop the skiff off the lane.",
       "affects": ["src/flight.ts", "src/story.ts", "src/guide.ts"] },
     { "id": "arrowwalk", "scope": "game", "kind": "tool", "lanes": ["feel"], "run": "node tools/arrowwalk.mjs --input touch", "cost": "~20 min", "needs": ["build", "browser"],
       "proves": "From five spots in the town, tapping the goal arrow and holding forward 4 s at a time (as blind testers walk) reaches Mira; pushes, taps and metres walked, and with --compare 1 the same with the walk assist off.",
