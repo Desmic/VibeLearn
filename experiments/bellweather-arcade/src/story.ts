@@ -29,6 +29,8 @@ import { loadBodyKit, assembleLook } from './kit/body-kit';
 import { clearSight } from './canopy';
 import { tickHolo, beam as holoBeam, sparks as holoSparks, HOLO } from './kit/holo';
 import { ZIP_CLARITY } from './worlds/first-words-voice';
+import { buildFarNet } from './kit/far-net';
+import { SPIRE } from './worlds/first-words-spire';
 import { ECHO_SOURCES, ECHO_NEEDED, ECHO_SKIFF_RULES, ECHO_SKIFF_STATION } from './worlds/first-words-echo';
 
 // Level 1 story controller. One goal at a time, always with a beacon; the
@@ -74,13 +76,18 @@ export function buildStory(scene: T.Scene, o: Opts) {
   // along the flight, shown only once Zip is in the air or on the islands
   const world = createWorld(scene, loadKit('nature-meadow'), { density: o.density, props: BELLWEATHER_PROPS, adopt: o.adopt });
   world.show('next', false); world.show('route', false);
+  // the Warden's engine on the horizon, where the ship took Mira: a net like Zip's, but vast, its
+  // activations climbing it day and night. Seen from the town from the start; nearer each isle.
+  const dn = o.density ?? .8, spire = buildFarNet(scene, { ...SPIRE, layers: dn >= 1 ? 24 : dn >= .8 ? 20 : 14, perLayer: dn >= 1 ? 120 : dn >= .8 ? 84 : 48 });
+  (window as unknown as { __vlSpire?: typeof spire }).__vlSpire = spire;
+  let spireAt = 0;   // it thinks, now and then: a wave of light from the foot to the crown
   world.add(LOOM_ISLE, 'next');
   for (const spec of SKY_ROUTE) world.add(spec, 'route');
   let skyShown = false;
   // the wind rings remind Zip of a certain old superhero game; the Warden has played it too
   const flight = buildFlight(scene, { guide: g, input: o.input, ride: o.ride,
     onRing: n => { if (n === 1) story.thinkOnce('ring-1'); if (n === 3 && story.thinkOnce('ring-veteran')) later(4.5, () => story.thinkOnce('ring-reply')); },
-    onMiss: () => story.thinkOnce('ring-miss') });
+    onMiss: () => story.thinkOnce('ring-miss'), onLand: () => spire.surge() });
   g.setThinker(o.zip);
   // townsfolk (for Zip's NPC suspicions) and idle tracking
   const folk = (scene.getObjectByName('painted-life')?.children ?? []).filter(c => c.userData.fade && c.name !== 'Mira');
@@ -202,7 +209,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
     guide: g, host: o.host, camera: o.camera, station: echoSt, zip: o.zip,
     carried: () => echo.carried, carry: w => echo.carry(w), target: () => skiff.at(), hear: k => skiff.hear(k),
     onThought: id => story.thinkOnce(id), bonus,
-    onComplete: () => { echo.showOrbit(true); later(.3, () => echoSt.finish(() => story.dialogue('awake-echo', { board: () => { fly(); later(1.5, () => story.thinkOnce('voice-is-engine')); } }))); },
+    onComplete: () => { echo.showOrbit(true); later(.3, () => echoSt.finish(() => story.dialogue('awake-echo', { board: () => { fly(); later(1.5, () => story.thinkOnce('voice-is-engine')); later(13, () => { spire.surge(); story.thinkOnce('spire-first'); }); } }))); },
   });
   const openEngine = () => {
     action(null); enter('puzzle'); o.teleport(PILOT_STONE.x, PILOT_STONE.z + 1.2, 0); echo.showOrbit(false);
@@ -265,7 +272,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
     enter('fly'); isle.leave(); o.teleport(o.zip().x, o.zip().z, 0);
     const a = boat.position.clone(), b = LOOM_LAND.clone(), side = new T.Vector3(-(b.z - a.z), 0, b.x - a.x).normalize(), up = LOOM_ISLE.elevation ?? 0;
     const lane = [.2, .4, .6, .8].map(k => a.clone().lerp(b, k).addScaledVector(side, Math.sin(k * Math.PI * 2) * 7).setY(8 + up * k + Math.sin(k * Math.PI) * 3));
-    flight.start(boat, LOOM_LAND, () => { boat.position.set(LOOM_LAND.x - 3, boat.position.y, LOOM_LAND.z + 1); landOnLoom(); }, { lane, drones: false, arrive: 'Loom Isle!', goal: 'Fly to Loom Isle' });
+    flight.start(boat, LOOM_LAND, () => { boat.position.set(LOOM_LAND.x - 3, boat.position.y, LOOM_LAND.z + 1); landOnLoom(); }, { reveal: LOOM_AT, lane, drones: false, arrive: 'Loom Isle!', goal: 'Fly to Loom Isle' });
   };
   const board = () => { action(null); stop2.dialogue('hop', { board: () => readyLoom(flyLoom) }); };
   const talkLoom = () => { action(null); enter2('loom-puzzle'); loomSt.state.phase === 'guided' ? stop2.dialogue('tavi', { openLoom: () => loom.open() }) : loom.open(); };
@@ -319,7 +326,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
       story.stars('flight', [true, r.rings >= r.total - 1, r.spotted === 0], { ...r }, () => {
         isle.greet(() => { isle.arrive(); later(.6, () => story.thinkOnce('gate')); later(10, () => strayHint('blossom')); });
       });
-    });
+    }, { reveal: isle.heart });
   };
   // The Stream: Zip and the Warden are the only awake machines, and nobody
   // knows. Without its speech engine an ordinary bot goes dark; Zip keeps
@@ -338,7 +345,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
   skip.addEventListener('click', e => { e.stopPropagation(); if (opening >= 0) endOpening(); else endAttack(); });
   const far = miraAt.clone().add(new T.Vector3(4, 8, -18)), hover = miraAt.clone().add(new T.Vector3(1, 2.8, -2.7)), up = new T.Vector3(0, 1, 0);
   // it leaves over the town toward the Blossom Isle (where the player will follow)
-  const away1 = new T.Vector3(6, 13, -15), away2 = new T.Vector3(0, 24, 46);   // straight up out of the outlook, then south over the town
+  const away1 = new T.Vector3(2, 9, 3), away2 = new T.Vector3(-30, 40, 92);   // straight up out of the outlook, then away over the town, toward the Warden's engine on the horizon
   const hatFrom = new T.Vector3(), hatRest = new T.Vector3();
   // the directed sequence's current shot: a camera cut is a new `cut` number (main.ts snaps instead of gliding)
   let shot: { pos: T.Vector3; look: T.Vector3; shake?: number; cut?: number; rate?: number } | null = null;
@@ -378,6 +385,9 @@ export function buildStory(scene: T.Scene, o: Opts) {
   };
   // The cold open: Mira calls from the outlook; the camera shows where she is, then hands over.
   let opening = -1, cutHold = 0, shouted = false, marioAt = -1;
+  const SPIRE_MID = SPIRE.at.clone().add(new T.Vector3(0, SPIRE.height * .5, 0));
+  const OPEN_CRANE = 4.2, CRANE_FROM = miraAt.clone().add(new T.Vector3(3, 24, -42)), CRANE_TO = miraAt.clone().add(new T.Vector3(1.2, 2.6, -4.6));
+  const CRANE_LOOK_FROM = SPIRE.at.clone().add(new T.Vector3(0, SPIRE.height * .55, 0)).lerp(miraAt, .55), CRANE_LOOK_TO = miraAt.clone().add(new T.Vector3(-1, 2.2, 12));
   // beats the attack film may hold at while a voiced line finishes (beam, the Warden's lines, the bolt, the static, the end)
   const CUT_GATES = [4.45, 6.65, 7.35, 11.35, 13.35];
   const voiced = (sec: number) => { if (sec > 0) cutHold = Math.max(cutHold, t + sec - .25); };
@@ -483,7 +493,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (sky !== skyShown) { skyShown = sky; world.show('next', sky); world.show('route', sky); }
       if (sky) world.tick(z);
       for (let i = timers.length - 1; i >= 0; i--) if (timers[i].at <= t) { const f = timers[i].fn; timers.splice(i, 1); f(); }
-      skiff.tick(dt); flight.tick(dt); engine.tick(dt); voiceMoment.tick(dt);
+      skiff.tick(dt); flight.tick(dt); engine.tick(dt); voiceMoment.tick(dt); spire.view(innerHeight * Math.min(2, devicePixelRatio), (o.camera as T.PerspectiveCamera).fov); spire.tick(t, dt, o.camera); if (t - spireAt > 19) { spireAt = t; spire.surge(); }
       finds.tick(dt, z, !(g.cardOpen || cut >= 0 || opening >= 0 || engine.active || flight.active || voiceMoment.active || isle.busy || loom.active || beat === 'fly')); bells?.tick(dt, beat === 'fly' ? null : o.zip(), t); if (echo.enabled) echo.tick(dt);
       if (beat === 'fly') { shown = '#'; return; }
       // Zip's commentary: suspicious townsfolk, and a nudge when the player idles
@@ -517,9 +527,20 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (opening >= 0) {
         // cold open: Mira at the outlook, calling; then the camera swings back to Zip
         const c0 = opening; opening += dt; const c = opening;
-        if (c0 < .5 && c >= .5) voiced(story.bark('call', 'start', 2.6));
+        // first, the world: a slow crane from out over the cloud sea, past the outlook, the whole town
+        // ahead and the Warden's engine on the horizon, a wave of light climbing it. Then, at the
+        // outlook, Mira turns and calls (the cut to her).
+        if (c < OPEN_CRANE) {
+          if (c0 < .3 && c >= .3) spire.surge();
+          const k = T.MathUtils.smootherstep(c, 0, OPEN_CRANE);
+          sPos.lerpVectors(CRANE_FROM, CRANE_TO, k); sLook.lerpVectors(CRANE_LOOK_FROM, CRANE_LOOK_TO, T.MathUtils.smoothstep(c, OPEN_CRANE * .35, OPEN_CRANE));
+          shot = { pos: sPos, look: sLook, shake: 0, cut: 99, rate: 40 };
+          return;
+        }
+        const m = c - OPEN_CRANE, m0 = c0 - OPEN_CRANE;
+        if (m0 < .5 && m >= .5) voiced(story.bark('call', 'start', 2.6));
         frame(miraAt, [[-1.3, 1.45, 3.3], [.8, 1.45, 3.4], [-2.6, 1.5, 2.2]], tmp3.copy(miraAt).add(tmp2.set(-.6, 1.55, -1.2)), 100, 4, 3.2);
-        if (c >= 3.4 && t >= cutHold) endOpening();
+        if (m >= 3.4 && t >= cutHold) endOpening();
         return;
       }
       if (cut >= 0) {
@@ -535,7 +556,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
         const zH = zHead.copy(z).setY(z.y + 1.1);
         // the ship: down out of the clouds, hover, then up and away over the town
         if (c < 3.2) ship.position.lerpVectors(far, hover, T.MathUtils.smoothstep(c, 0, 3.2));
-        else if (c > 8.3) { const k = T.MathUtils.smoothstep(c, 8.3, 13.2); if (k < .45) ship.position.lerpVectors(hover, away1, k / .45); else ship.position.lerpVectors(away1, away2, (k - .45) / .55); }
+        else if (c > 8.3) { const k = T.MathUtils.smoothstep(c, 8.3, 12.4); if (k < .45) ship.position.lerpVectors(hover, away1, k / .45); else ship.position.lerpVectors(away1, away2, (k - .45) / .55); }
         else ship.position.copy(hover);
         ship.position.y += Math.sin(t * 1.7) * .06;
         const faceTo = c > 8.3 ? tmp3.copy(away2) : o.camera.position;
@@ -575,7 +596,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
         if (c0 < 7.4 && c >= 7.4) { sparkFrom.copy(zH); spark.visible = true; sfx.zap(); sfx.static(); sfx.rumble(1); shake = .55; bells?.nudge(1.3); skiff.gust(1.6); sparkFx.burst(zH, 26, 2.2, HOLO.made); }
         if (c > 7.4 && c < 9.4) { const k = (c - 7.4) / 2; spark.position.lerpVectors(sparkFrom, SPARK_AT, k); spark.position.y = T.MathUtils.lerp(1.2, .6, k) + Math.sin(k * Math.PI) * 4; }
         if (c0 < 9.4 && c >= 9.4) bells?.nudge(.8);   // the spark lands in the bell garden: every bell rings
-        if (c0 < 8.5 && c >= 8.5) voiced(story.bark('warden', 'leave', 2.6, 'warden'));
+        if (c0 < 8.5 && c >= 8.5) { voiced(story.bark('warden', 'leave', 2.6, 'warden')); spire.surge(); }
         // after the Warden's last word, not over it; and it gets a moment before Zip tries to shout
         // (the story order: she's gone → "Is this Mario?" → he shouts → no voice)
         if (c >= 9.6 && t >= cutHold && story.thinkOnce('mario')) { marioAt = t; voiced(2.8); }
@@ -590,7 +611,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
         else if (c < 4.5) frame(mid, [[-.6, .45, 3.9], [1.2, .5, 3.9], [-2.6, .5, 3.2]], sky.copy(ship.position).lerp(miraAt, .2), 2, 2.5, 3.6, ground);                                    // 2: low, under the ship
         else if (c < 7.0) frame(mid, [[-2.6, 1.5, 2.8], [-4.2, 1.4, 1.2], [.5, 1.2, 4.6]], sky.copy(mira?.position ?? miraAt).setY((mira?.position.y ?? 0) + 1.1), 3, 3, 3.6, ground);       // 3: over Zip's shoulder, the beam takes Mira
         else if (c < 8.3) frame(z, [[.7, 1.35, 2.7], [-1.4, 1.35, 2.4], [2.3, 1.3, -.4]], zH, 4, 5, 2.4);                                                                                  // 4: close on Zip
-        else if (c < 10.9) frame(z, [[1.6, .7, -1.7], [.4, .7, -2.4], [-1.2, .7, -2.2]], sky.lerpVectors(zH, ship.position, .8), 5, 2.2, 2.2, zH);                                         // 5: low in front of Zip: the ship climbs away
+        else if (c < 11.2) frame(z, [[.6, 2.1, -6.2], [-1.4, 2.1, -5.8], [1.8, 1.8, -4.4], [1.6, .7, -1.7]], sky.lerpVectors(zH, SPIRE_MID, .05), 5, 1.6, 3, zH);   // 5: wide, behind Zip: the ship climbs away over the town and off toward the Warden's engine on the horizon
         else frame(z, [[2.1, 1.25, -1.5], [2.4, 1.3, .4], [-.4, 1.3, 2.6]], zH, 6, 4, 2.3);                                                                                                // 6: Zip tries to shout
         if (shot) shot.shake = shake;
         if (c >= 13.4) { cut = -1; endAttack(); }

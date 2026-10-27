@@ -370,6 +370,8 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   let trap = 0, flicker = 0, ping = 0, melt = 0, t = 0; const trapAt = new T.Vector3(), look = new T.Vector3();
   return {
     landing: LANDING, cameraBlockers,
+    /** what the isle is about, for the arrival shot to look toward */
+    heart: GATE,
     get busy() { return relay.active || (newOrders.t >= 0 && newOrders.t < 3.4); },
     get shot() { return newOrders.shot; },
     get onIsland() { return phase !== 'off'; },

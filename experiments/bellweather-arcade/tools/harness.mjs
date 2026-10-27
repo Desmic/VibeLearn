@@ -48,12 +48,12 @@ export async function harness({ title, outDefault, tool, lane = 'flow' }) {
   // E to act, Space to read on, number keys to choose, WASD), or 'touch' (a phone: taps and the
   // thumb stick). Keyboard runs on a laptop-shaped screen; the others on a phone-shaped one.
   const desk = INPUT === 'keyboard';
-  const ctx = await browser.newContext({ viewport: desk ? { width: 1024, height: 640 } : { width: 393, height: 760 }, deviceScaleFactor: 1, hasTouch: !desk, isMobile: INPUT === 'touch' });
+  const ctx = await browser.newContext({ viewport: desk ? { width: 1024, height: 640 } : { width: 393, height: 760 }, deviceScaleFactor: +(process.env.VL_DPR || 1), hasTouch: !desk, isMobile: INPUT === 'touch' });
   const page = await ctx.newPage(); page.setDefaultTimeout(60000);
   page.on('pageerror', e => errors.push({ segment: state.current, msg: e.message, t: Date.now() }));
   page.on('console', m => { const t = m.text(); if (m.type() === 'error') errors.push({ segment: state.current, msg: t, t: Date.now(), at: page.url().split('?')[1]?.slice(-40) }); if (/^\[(kit|learning|prop|budget)\]/.test(t)) logs.push(t); });
 
-  const Q = GAME.testEntry;
+  const Q = process.env.VL_QUALITY ? GAME.testEntry.replace(/quality=\w+/, 'quality=' + process.env.VL_QUALITY) : GAME.testEntry;   // VL_QUALITY=medium|high: look at a richer tier
   let cdp = null;
   // In-page path planner (game-agnostic: needs only __arcade.walkable and snapshot). A* on a
   // 0.25 m grid over a box around the player and the target; the goal is the walkable cell nearest the

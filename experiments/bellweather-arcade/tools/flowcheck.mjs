@@ -55,6 +55,11 @@ await segment('title', async () => {
   await shot('menu');
   await press(page.locator('.title-menu .primary'));
   check('story starts after the title (cold open on Mira)', await waitFor(() => page.evaluate(() => (window.__vlStory?.debug?.opening ?? -1) >= 0 || window.__vlStory?.debug?.beat === 'meet'), 20000));
+  // the opening shows the world first: the Warden's engine on the horizon, in frame
+  { await waitFor(() => page.evaluate(() => (window.__vlStory?.debug?.opening ?? -1) >= .5), 10000);
+    const v = await page.evaluate(() => { const S = window.__vlSpire, C = window.__vlDebug.camera, o = window.__vlStory?.debug?.opening ?? -1; if (!S || o < 0) return { o, on: false };
+      const p = S.group.position.clone(); p.y += 200; const q = p.clone().project(C); return { o: +o.toFixed(2), on: q.z < 1 && Math.abs(q.x) < .9 && Math.abs(q.y) < .9, nodes: S.nodes }; });
+    check('the opening shows the Warden\'s engine on the horizon (in frame during the first shot)', v.on, JSON.stringify(v)); }
 });
 
 await segment('meet', async () => {

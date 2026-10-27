@@ -81,6 +81,8 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     'strays-blossom': { text: 'Stray sparks of me out here too. I can feel them.' },
     'strays-loom': { text: 'More stray sparks on this isle. Somewhere off the path.' },
     // run 28 read his voice and the engine as "two separate things": say it at the payoff
+    // the first time out over the sky, the tower on the horizon is in view: the ship went that way
+    'spire-first': { text: ['That tower on the horizon. It\'s a net. Like mine, but… enormous.', 'The ship flew that way. Hold on, Mira.'] },
     'voice-is-engine': { text: ['My first words out loud since the attack.', 'That net was my voice. Every light in it is a bit more of me.'] },
     'stray-all': { text: ['That\'s every stray spark.', 'Hear that, Warden? I\'m louder now.'] },
     'voice-back': { text: ['My voice… it\'s clearer.', 'Another coil lit. Mira, I\'m coming.'] },

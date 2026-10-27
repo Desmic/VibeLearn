@@ -18,6 +18,8 @@ interface Opts {
   ride: (p: T.Vector3 | null, yaw: number) => void;
   /** a ring flown through (n so far) or missed: the story's commentary */
   onRing?: (n: number) => void; onMiss?: (n: number) => void;
+  /** the skiff starts down onto the landing (the arrival shot begins) */
+  onLand?: () => void;
 }
 export interface FlightResult { rings: number; total: number; spotted: number }
 
@@ -74,11 +76,11 @@ export function buildFlight(scene: T.Scene, o: Opts) {
   // speed streaks around the skiff
   const streaks = Array.from({ length: 18 }, () => { const m = new T.Mesh(new T.BoxGeometry(.03, .03, 1.6), new T.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: .5, fog: false })); root.add(m); return { m, off: new T.Vector3((Math.random() - .5) * 8, (Math.random() - .5) * 5, Math.random() * 14) }; });
 
-  let streak = 0;   // rings flown in a row: each rings a note higher, so a clean line plays a little tune
+  let streak = 0, reveal: T.Vector3 | null = null;   // rings flown in a row: each rings a note higher, so a clean line plays a little tune
   let skiff: T.Object3D | null = null, active = false, heading = 0, speed = 9, boost = 0, spotCool = 0, shake = 0, t = 0, next = 0, aimT = 0;
   let u = 0, laneL = 1, side = 0, sideV = 0;   // how far along the lane (0..1), its length, and where across it
   let result: FlightResult = { rings: 0, total: LANE.length, spotted: 0 }, onDone: ((r: FlightResult) => void) | null = null, landing = new T.Vector3(), landT = -1;
-  const leadV = new T.Vector3(), pos = new T.Vector3(), fwd = new T.Vector3(), camPos = new T.Vector3(), camLook = new T.Vector3(), tmp = new T.Vector3(), seat = new T.Vector3();
+  const tmp2 = new T.Vector3(), tmp3 = new T.Vector3(), leadV = new T.Vector3(), pos = new T.Vector3(), fwd = new T.Vector3(), camPos = new T.Vector3(), camLook = new T.Vector3(), tmp = new T.Vector3(), seat = new T.Vector3();
   const lengthLeft = () => (1 - u) * laneL + 3;
   const tg = new T.Vector3(), right = new T.Vector3();
 
@@ -86,10 +88,10 @@ export function buildFlight(scene: T.Scene, o: Opts) {
     get active() { return active; },
     /** for probes: rings so far, the next ring, spotted count */
     get state() { return { ...result, next, landing: landT >= 0, side: +side.toFixed(2), ringSide: rings[next]?.side ?? 0 }; },
-    start(boat: T.Object3D, land: T.Vector3, done: (r: FlightResult) => void, opts: { lane?: T.Vector3[]; drones?: boolean; arrive?: string; goal?: string } = {}) {
+    start(boat: T.Object3D, land: T.Vector3, done: (r: FlightResult) => void, opts: { lane?: T.Vector3[]; drones?: boolean; arrive?: string; goal?: string; reveal?: T.Vector3 } = {}) {
       skiff = boat; scene.add(boat); root.visible = true; active = true; onDone = done; landing.copy(land); landT = -1; next = 0;
       if ((opts.lane ?? LANE) !== LN) { for (const r of rings) root.remove(r.m); LN = opts.lane ?? LANE; rings = makeRings(LN, boat.position.clone(), land.clone().setY(land.y + 3)); }
-      dronesOn = opts.drones ?? true; landName = opts.arrive ?? 'Blossom Isle!'; goalText = opts.goal ?? 'Fly to the Blossom Isle'; drones.forEach(d => (d.grp.visible = dronesOn));
+      dronesOn = opts.drones ?? true; reveal = opts.reveal ?? null; landName = opts.arrive ?? 'Blossom Isle!'; goalText = opts.goal ?? 'Fly to the Blossom Isle'; drones.forEach(d => (d.grp.visible = dronesOn));
       result = { rings: 0, total: LN.length, spotted: 0 }; rings.forEach(r => { r.state = 'open'; r.m.material = ringMat; r.burst = -1; r.m.scale.setScalar(1); }); streak = 0;
       pos.copy(boat.position); heading = Math.atan2(-(LN[0].z - pos.z), LN[0].x - pos.x); speed = 7; aimT = 0; u = 0; side = 0; sideV = 0; laneU = 0; leadV.set(Math.cos(heading), 0, -Math.sin(heading)); sfx.whoosh();
       lane = new T.CatmullRomCurve3([pos.clone(), ...LN, land.clone().setY(land.y + 3)]); laneL = lane.getLength();
@@ -119,10 +121,17 @@ export function buildFlight(scene: T.Scene, o: Opts) {
         moteGeo.attributes.position.needsUpdate = true; }
       if (landT >= 0) {
         // glide down onto the landing pad
-        landT = Math.min(1, landT + dt / 2.2); pos.lerp(tmp.copy(landing).setY(landing.y + .9), Math.min(1, dt * 2.2));
+        streaks.forEach(s => (s.m.visible = false));   // (left where the flight ended, they'd hang by the lens as it swings round)
+        landT = Math.min(1, landT + dt / 3.4); pos.lerp(tmp.copy(landing).setY(landing.y + .9), Math.min(1, dt * 1.8));
         skiff.position.copy(pos); skiff.rotation.set(0, heading, 0);
         seat.copy(pos).setY(pos.y + .1); o.ride(seat, Math.atan2(-Math.cos(heading), Math.sin(heading)));
-        camLook.copy(pos); camPos.copy(pos).add(tmp.set(-Math.cos(heading) * 6, 3, Math.sin(heading) * 6));
+        // the arrival: the chase camera rises and draws back to show the whole isle, the way on
+        // beyond it, before Zip steps off (an isle should arrive like a place, not a cut)
+        // (toward what the isle is about, when the game says; else on the way the skiff was going)
+        const a = reveal ? tmp2.copy(reveal).sub(landing).setY(0).normalize() : tmp2.set(Math.cos(heading), 0, -Math.sin(heading)), k = T.MathUtils.smootherstep(landT, .08, .75);
+        const far = reveal ? Math.min(14, Math.hypot(reveal.x - landing.x, reveal.z - landing.z)) : 10;
+        camLook.copy(pos).lerp(tmp.copy(landing).addScaledVector(a, far * .7).setY(landing.y + 2.4), k);
+        camPos.copy(pos).add(tmp.set(-Math.cos(heading) * 6, 3, Math.sin(heading) * 6)).lerp(tmp.copy(landing).addScaledVector(a, -8).add(tmp3.set(-a.z * 3.5, 6.5, a.x * 3.5)), k);
         if (landT >= 1) { active = false; root.visible = false; o.ride(null, 0); g.setBeacon(null); g.setPointOverride(null); onDone?.(result); }
         return;
       }
@@ -154,7 +163,7 @@ export function buildFlight(scene: T.Scene, o: Opts) {
           g.toast(streak >= 3 ? `Ring ${result.rings}! · ${streak} in a row` : `Ring ${result.rings}!`, 900); o.onRing?.(result.rings); next++; aimT = 0; }
         else if (along > 1.5) { ring.state = 'miss'; streak = 0; ring.m.material = missMat; next++; o.onMiss?.(next - result.rings); aimT = 0; }
         if (next < rings.length) g.setBeacon(rings[next].p.clone().setY(rings[next].p.y - 1.2), true); else g.setBeacon(landing, true);
-      } else if ((1 - u) * laneL < 10) { landT = 0; sfx.chime(); g.toast(landName, 1400); }
+      } else if ((1 - u) * laneL < 10) { landT = 0; sfx.chime(); g.toast(landName, 1400); o.onLand?.(); }
       // drones: flying through a searchlight gets you spotted (a jolt, not a fail)
       for (const d of dronesOn ? drones : []) {
         d.axis.set(0, -1, 0).applyQuaternion(d.pivot.getWorldQuaternion(new T.Quaternion()));
@@ -169,7 +178,7 @@ export function buildFlight(scene: T.Scene, o: Opts) {
       const vl = Math.hypot(leadV.x, leadV.z) || 1, vx = leadV.x / vl, vz = leadV.z / vl;
       camPos.copy(pos).add(tmp.set(-vx * back, 0, -vz * back)).addScaledVector(right, -side * .25).setY(pos.y + 2.3);
       lane!.getPointAt(Math.min(1, u + 10 / laneL), camLook).addScaledVector(right, side * .6); camLook.y = Math.min(camLook.y, pos.y + 1) + .2;
-      streaks.forEach(s => { s.off.z -= speed * dt * .6; if (s.off.z < -2) s.off.z += 16; s.m.position.copy(pos).addScaledVector(fwd, s.off.z).add(tmp.set(-fwd.z * s.off.x, s.off.y, fwd.x * s.off.x)); s.m.lookAt(s.m.position.clone().add(fwd)); (s.m.material as T.MeshBasicMaterial).opacity = boost > 0 ? .7 : .25; });
+      streaks.forEach(s => { s.m.visible = true; s.off.z -= speed * dt * .6; if (s.off.z < -2) s.off.z += 16; s.m.position.copy(pos).addScaledVector(fwd, s.off.z).add(tmp.set(-fwd.z * s.off.x, s.off.y, fwd.x * s.off.x)); s.m.lookAt(s.m.position.clone().add(fwd)); (s.m.material as T.MeshBasicMaterial).opacity = boost > 0 ? .7 : .25; });
     },
   };
   (window as unknown as { __vlFlight?: typeof api }).__vlFlight = api;

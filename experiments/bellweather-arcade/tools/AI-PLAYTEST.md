@@ -1135,3 +1135,31 @@ second flight skipped, "most of the actual play is tapping choice buttons in pan
   77 s of 30 m loops → 4 of 7, landed in 15 s; hands off 5 of 7 (the wind's pull caught them: nothing
   to do) → 2 of 7; a new "steered" player, lining up each ring, 7 of 7. The flight's second star
   (all rings but one) now takes steering.
+
+## Beauty and awe, first pass (27 Oct 2026)
+
+Desmic: beauty and awe are the big aspect now; the ceiling is set by good devices, and the F15 is
+the floor (a lower setting of the same moment, not a smaller design). The F15 holds ~89 fps on
+Medium, so there is headroom to spend.
+
+- **The Warden's engine on the horizon** (`src/kit/far-net.ts`, game-agnostic; placed by
+  `src/worlds/first-words-spire.ts`). A vast neural net stands beyond the isles, 470 m tall, its
+  foot in the cloud sea: thousands of nodes in layers, links between neighbouring layers, a dark
+  lattice that reads against a daylight sky, with activations climbing it in slow waves and, now and
+  then, a surge from foot to crown. All motion is in the shaders (one uniform per frame), so the tier
+  only sets how dense it is: 14×48 nodes on Low, 20×84 on Medium, 24×120 on High. It is where the
+  ship takes Mira: the goal on the horizon (BotW's castle), and the "billions of links" of the
+  engine card made visible next to Zip's few dozen.
+- **The opening shows the world first.** A 4.2 s crane from out over the cloud sea, past the
+  outlook, the town ahead and the engine on the horizon as a surge climbs it; then the cut to Mira
+  calling. No goal marker, arrow or place label in any cutscene now.
+- **The attack's departure shot** is wide, behind Zip, framed by the conservatory arch: the ship
+  climbs out over the town and dwindles toward the engine on the horizon (it was a low shot looking
+  straight up through tree crowns). The engine surges as the Warden says "come and get her".
+- **Arrivals.** Landing on an isle, the chase camera rises and draws back to show the place (the
+  Gate, the path, the isle above) before Zip steps off; the engine surges as you land.
+- First time out over the sky, 13 s in: "That tower on the horizon. It's a net. Like mine, but…
+  enormous. The ship flew that way. Hold on, Mira."
+- Cost, measured (renderer.info, one frame of the outlook view): +7 draw calls on every tier;
+  672 nodes / 1,248 links on Low, 1,680 / 3,192 on Medium, 2,880 / 5,520 on High, beside 220k-310k
+  scene triangles. Flowcheck now checks that the opening has the engine in frame.

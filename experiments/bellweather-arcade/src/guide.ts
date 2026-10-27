@@ -284,11 +284,12 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       gem.rotation.y += dt * 2; gem.position.y = 2.4 + Math.sin(t * 2.4) * .12;
       // close up, the column would fill the screen: fade it and keep the gem small
       const near = T.MathUtils.smoothstep(Math.hypot(camera.position.x - beacon.position.x, camera.position.z - beacon.position.z), 4.5, 10);
-      (beam.material as T.MeshBasicMaterial).opacity = (.2 + .1 * Math.sin(t * 2)) * near; beam.visible = near > .02 && !beaconArrowOnly; gem.visible = !beaconArrowOnly; gem.scale.setScalar(.6 + .4 * near);
+      (beam.material as T.MeshBasicMaterial).opacity = (.2 + .1 * Math.sin(t * 2)) * near; const film = host.classList.contains('cutscene');   // a cutscene is a film: no goal marker in it
+      beam.visible = near > .02 && !beaconArrowOnly && !film; gem.visible = !beaconArrowOnly && !film; gem.scale.setScalar(.6 + .4 * near);
       if (beacon.visible) {
         const v = beacon.position.clone(); if (!beaconArrowOnly) v.y = 1.2; v.project(camera);
         const off = v.z > 1 || Math.abs(v.x) > .92 || Math.abs(v.y) > .9;
-        const eh = !off || cardOpen; if (edge.hidden !== eh) edge.hidden = eh;
+        const eh = !off || cardOpen || film; if (edge.hidden !== eh) edge.hidden = eh;
         if (off) {
           // direction in the camera's own space: steady even when the target swings behind
           // (behind = the arrow points down, toward "turn around", on the target's side)
