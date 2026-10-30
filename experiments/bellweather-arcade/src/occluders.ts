@@ -68,14 +68,18 @@ export function fadeOccluders(list: Fader[], camera: T.Camera, zipFeet: T.Vector
       // opacity stuck for good. Run 26: the banner by the east wall never faded again, the lens sat
       // in its cloth: "ugh, camera is stuck in the flag thing")
       const share = (ox * oy) / zipArea;
-      if (ox > 0 && oy > 0 && Number.isFinite(share)) want = 1 - .84 * T.MathUtils.smoothstep(share, .05, .35);
+      // a small thing (a sign, a lamp) goes all the way: faded to a sixth it read as a grey ghost
+      // box in mid-air (30 Oct, the notice board seen through the Gate)
+      if (ox > 0 && oy > 0 && Number.isFinite(share)) want = 1 - (f.halfW < 1.2 && !f.dither ? 1 : .84) * T.MathUtils.smoothstep(share, .05, .35);
     }
-    if (fr.depth < 1.4) want = Math.min(want, .16);
+    // right at the lens, small things and characters go entirely: a dithered townsperson filling the view at
+    // a sixth read as TV static over the whole screen (run 30: "fuzzy and staticky" by the old lady)
+    if (fr.depth < 1.4) want = Math.min(want, f.halfW < 1.2 || f.dither ? 0 : .16);
     // the lens in (or brushing) the thing itself: a crown is wide, so its trunk can be metres off
     // while the camera sits in its leaves (run 23: "turn-toward-goal just shoved my camera into a tree",
     // the whole screen pink)
     const dh = Math.max(0, Math.hypot(camPos.x - P.x, camPos.z - P.z) - f.halfW), dv = Math.max(0, P.y + f.y0 - camPos.y, camPos.y - (P.y + f.y1));
-    if (Math.hypot(dh, dv) < .8) want = Math.min(want, .16);
+    if (Math.hypot(dh, dv) < .8) want = Math.min(want, f.dither || f.halfW < 1.2 ? 0 : .16);
     // something big between the camera and Zip that fills a lot of the screen
     // (a tree crown right by the lens) fades too, even if it misses Zip's outline
     if (fr.depth < zr.depth) {

@@ -73,10 +73,24 @@ export function buildChime(o: Opts) {
       });
     };
   };
+  // the dial is found: try it before any question (run 30 tapped Hot here and was dropped straight into
+  // the quiz: "let me play with the dials before quizzing me on them"). Turning it only reshapes the fan
+  // here; nothing is judged, so the notches carry no rules action.
+  const DIAL_SAYS: Record<Warmth, string> = {
+    cold: '<b>Cold</b>: the fan sharpens. Only the brightest guess is left lit.',
+    warm: '<b>Warm</b>: the fan as the engine learned it. Bright guesses come out most, dim ones sometimes.',
+    hot: '<b>Hot</b>: the fan flattens. Even the dim, odd guesses get a real chance.',
+  };
   const dialFound = () => {
-    show(`${head()}<p class="relay-read">Something new clicks into Zip's engine: a <b>warmth dial</b>. It reshapes the fan.</p>${dial('warm')}
+    let w: Warmth = 'warm';
+    const plain = (x: Warmth) => dial(x).replace(/ data-action="[^"]*"/g, '');
+    show(`${head()}<p class="relay-read chime-say">Something new clicks into Zip's engine: a <b>warmth dial</b>. Try it: it reshapes the fan.</p>${ring(c.tower)}${fan(c.tower, w)}${plain(w)}
       <p class="relay-notes">${c.honesty}</p><div class="story-choices"><button class="primary" data-act="next">Got it</button></div>`);
-    el.onclick = e => { if (!(e.target as HTMLElement).closest('button')) return; e.stopPropagation(); sfx.tap(); predict(); };
+    el.onclick = e => {
+      const b = (e.target as HTMLElement).closest('button'); if (!b) return; e.stopPropagation();
+      if (b.dataset.dial) { w = b.dataset.dial as Warmth; sfx.tap(); reshape(c.tower, w); el.querySelector('.chime-dial')!.outerHTML = plain(w); say(DIAL_SAYS[w]); return; }
+      sfx.tap(); predict();
+    };
   };
   const predict = () => {
     view = 'predict';
@@ -134,7 +148,7 @@ export function buildChime(o: Opts) {
         if (ev('lock-jams')) { o.onWorld?.('lock-jams'); sfx.zap(); done(`<b>“${word}”</b>?! The lock jams. Hot, even the dimmest guesses come out.`, () => machine('lock', 'Set the warmth for the lock, then cast.'), 'Try again'); return; }
         if (ev('heard-it')) { o.onWorld?.('heard-it'); sfx.boing(); done(`“${c.bard.verse} <b>${word}</b>”. The crowd groans: <b>“Heard it!”</b> Cold, the engine sings the same old line every time.`, () => machine('bard', 'Set the warmth for the verse, then cast.'), 'Try again'); return; }
         if (ev('word-salad')) { o.onWorld?.('word-salad'); sfx.boing(); done(`“${c.bard.verse} <b>${word}</b>”? The crowd laughs. Too hot: the oddest guesses come out.`, () => machine('bard', 'Set the warmth for the verse, then cast.'), 'Try again'); return; }
-        if (ev('crowd-cheers')) { o.onWorld?.('crowd-cheers'); sfx.chime(); g.toast('The crowd cheers!', 1300); say(`“${c.bard.verse} <b>${word}</b>”: a line nobody's heard, and it still makes sense. <b>Warm</b>.`); setTimeout(() => { close(); o.onDone(); }, 2600); }
+        if (ev('crowd-cheers')) { o.onWorld?.('crowd-cheers'); sfx.chime(); g.toast('The crowd cheers!', 1300); done(`Oriel sings: <b>“${c.bard.verse} ${word}”</b>. A line nobody's heard, and it still makes sense. <b>Warm</b>.`, () => { close(); o.onDone(); }, 'Bravo!'); }
       });
     };
   };

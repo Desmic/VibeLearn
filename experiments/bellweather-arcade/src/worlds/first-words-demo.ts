@@ -7,7 +7,11 @@ export const DEMO_END = {
   card: {
     title: 'End of the demo',
     lines: ['Mira is still out there, somewhere inside the Warden\'s engine.', 'The chase goes on in the full game.'],
-    sparks: (found: number, total: number) => `Stray sparks of Zip's voice found: ${found} of ${total}`,
+    // run 30: "the spark hunt went nowhere at the end with no hint": say where the rest are
+    sparks: (found: number, total: number, left: [string, number][]) => `Stray sparks of Zip's voice found: ${found} of ${total}` +
+      (left.length ? `. Still out there: ${left.map(([p, n]) => `${n} ${p}`).join(', ')}.` : '. Every one. Zip thanks you.'),
+    /** where a stray spark is, by its id */
+    place: (id: string) => id.startsWith('blossom') ? 'on Blossom Isle' : id.startsWith('loom') ? 'on Loom Isle' : id.startsWith('chime') ? 'on Chime Isle' : 'in the garden',
     stay: 'Keep exploring', title_: 'Back to the title',
   },
 };

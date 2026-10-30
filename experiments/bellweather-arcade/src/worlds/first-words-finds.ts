@@ -12,4 +12,7 @@ export const FIRST_WORDS_FINDS: FindSpec[] = [
   { id: 'loom-east', at: [-27.2, 97.2], y: 5.12 }, // Loom Isle's east rim
   { id: 'loom-south', at: [-31.8, 88.2], y: 5.12 },
   { id: 'loom-west', at: [-39.3, 97.4], y: 5.12 },
+  // Chime Isle at dusk: two fireflies that are not fireflies
+  { id: 'chime-west', at: [-68.0, 147.6], y: 9.12 },
+  { id: 'chime-east', at: [-48.6, 147.0], y: 9.12 },
 ];

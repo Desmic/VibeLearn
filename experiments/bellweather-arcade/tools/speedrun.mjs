@@ -178,6 +178,13 @@ const playStation = async (id) => {
     if (await follow(async () => { const m = await page.evaluate(() => document.querySelector('.context-act:not([hidden])')?.dataset.action ?? null); return (await actLabel()) === label && (!m || goodMoves(g, dist, await live()).moves.includes(m)); }, { maxSecs: 45, quiet: true }) !== null) continue;
     check(`station "${id}": found a control for one of ${moves.join(', ')}`, false, `goal "${await goal()}", action "${await actLabel()}"`, 'fail', 'learning'); return;
   }
+  // the last move's payoff may wait on a "read on" button in the puzzle UI (the relay's made word, the bard's line): press it
+  for (let k = 0; k < 6; k++) {
+    const nav = page.locator(['.loom-console', '.relay-console', '.chime-console'].map(c => `${c} button.primary:not([data-action]):visible:not([disabled])`).join(', ')).first();
+    // (it can appear after an animation that runs in real time, like the chime's spin: wait a few seconds for it)
+    if (!(await nav.count())) { let seen = false; for (let w = 0; w < 14 && !seen; w++) { await sim(.1); await page.waitForTimeout(400); seen = !!(await nav.count()); } if (!seen) break; }
+    await h.press(nav); await sim(.6);
+  }
   const end = goodMoves(g, dist, await live());
   if (!check(`station "${id}" played from its rules (every move from a tagged control)`, end.left === 0, end.left === 0 ? `${key.length} moves` : `${end.left} moves left; history ${JSON.stringify(await page.evaluate(id => window.__vlStations[id].history, id))}`, 'fail', 'learning')) return;
   await note('station ' + id);

@@ -128,7 +128,9 @@ export const ECHO_SKIFF_STATION: StationSpec & { content: EchoContent } = {
       again: '<b>“Blossom”</b> again! Same words in, same guess out.',
       petals: 'It read only <b>“Blossom”</b>, so it thought of <b>petals</b>.',
       partial: 'Something\'s missing. The engine wasn\'t sure what comes next.',
-      repaired: 'It said <b>“Isle”</b>! Loop repaired. Now it feeds itself…',
+      repaired: 'It said <b>“Isle”</b>! Loop repaired. <b>Watch</b>: “Isle” flows back into the ring on its own…',
+      // run 30: "'feeds itself' was something I was told rather than something I watched happen"
+      selfRun: '…and it reads the <b>whole line</b> again, <b>by itself</b>, for the next one:',
       done: 'The sentence is complete. <b>Listen…</b>',
       launch: '<b>“Skiff rise toward Blossom Isle.”</b> It listened!',
     },

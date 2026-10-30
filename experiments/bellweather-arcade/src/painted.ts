@@ -58,7 +58,8 @@ function strokeTexture() {
 }
 
 let installed = false;
-export function installPaintedShading(withStrokes = true) {
+/** `gradeHere`: grade inside each material (no post pass); false when the post stack grades the whole frame */
+export function installPaintedShading(withStrokes = true, gradeHere = true) {
   if (installed) return; installed = true;
   const C = T.ShaderChunk as unknown as Record<string, string>;
   const strokes = strokeTexture();
@@ -109,7 +110,7 @@ export function installPaintedShading(withStrokes = true) {
 
   // Split-tone grade and gentle value grouping, applied per material after
   // colour-space conversion. Replaces the former full-screen post passes.
-  C.colorspace_fragment = C.colorspace_fragment + /* glsl */`
+  if (gradeHere) C.colorspace_fragment = C.colorspace_fragment + /* glsl */`
   {
     vec3 vlc = gl_FragColor.rgb;
     float vll = dot(vlc, vec3(.2126,.7152,.0722));
@@ -168,17 +169,18 @@ const GradeShader = {
     // gentle S-curve for poster-like value grouping
     col=mix(col,col*col*(3.0-2.0*col),.18);
     // soft vignette
-    vec2 d=vUv-.5;d.x*=uRes.x/uRes.y;col*=1.0-.16*smoothstep(.35,.95,length(d));
+    // (no vignette here: the page draws one)
     gl_FragColor=vec4(col,c.a);
   }`,
 };
 
-export function createPaintedPost(renderer: T.WebGLRenderer, scene: T.Scene, camera: T.Camera) {
+export function createPaintedPost(renderer: T.WebGLRenderer, scene: T.Scene, camera: T.Camera, o: { samples?: number; strength?: number; radius?: number; threshold?: number } = {}) {
   const size = renderer.getSize(new T.Vector2());
-  const target = new T.WebGLRenderTarget(size.x * renderer.getPixelRatio(), size.y * renderer.getPixelRatio(), { type: T.HalfFloatType, samples: 4 });
+  const target = new T.WebGLRenderTarget(size.x * renderer.getPixelRatio(), size.y * renderer.getPixelRatio(), { type: T.HalfFloatType, samples: o.samples ?? 4 });
   const composer = new EffectComposer(renderer, target);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new T.Vector2(size.x, size.y), 0.32, 0.55, 0.92);
+  // only what is brighter than white blooms (lamps, the sun, the engine's light, halos), never a white cloud
+  const bloom = new UnrealBloomPass(new T.Vector2(size.x, size.y), o.strength ?? 0.32, o.radius ?? 0.55, o.threshold ?? 0.92);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
   const grade = new ShaderPass(GradeShader);
@@ -189,7 +191,7 @@ export function createPaintedPost(renderer: T.WebGLRenderer, scene: T.Scene, cam
     composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(s.x, s.y);
     grade.uniforms.uRes.value.set(s.x, s.y);
   };
-  return { composer, resize, render: () => composer.render() };
+  return { composer, bloom, resize, render: () => composer.render() };
 }
 
 // The painted look replaces physically based highlights with authored light

@@ -1253,3 +1253,43 @@ check → story script → island spec (`worlds/chime-isle.ts`) → console (`ch
   of the Board prompt (a softlock at the end of Stop 2); flowcheck now checks the mooring can be
   reached on foot, and it moved. The blind tester's text view had no loom or chime console text
   (pixels only); added.
+
+## Blind run 30: the demo, title to the end card, on v113 (31 Oct 2026; explorer, 21)
+
+First blind run through Stop 3 and the demo's ending, and the first with the dream layer (time of
+day, moon, aurora, air of letters, rivers of light). Played 243 steps to "End of the demo"; 7/10,
+yes to the next isle.
+
+- **Understood before the reveal, in their own words:** next word ("a next-word guesser… brightest
+  first; too little to go on, it says 'um'"), the loop ("whatever it says gets stuck on the end and
+  becomes part of the input"), context (the Gate "believes whatever it's handed"), pieces ("I've
+  stopped going by length… it's about how common the word is"; predicted Oriel splits like Ta-vi),
+  room, sampling and warmth ("Cold squashes everything onto the top word, Hot spreads the odds out
+  but doesn't flip them"). Teach-back covered all of them.
+- **The dream came across, unprompted:** "The art is lovely, especially Chime Isle at dusk with the
+  aurora and the festival lights"; "a pastel floating-island world"; "it looks great"; and the end
+  shot as "that tornado of letters" they want to reach. The net in Zip's engine as awe: unclear.
+- **Misread:** the relay, solved as a second Gate ("drop the Warden's word"); never saw the word it
+  made (it showed for 1.9 s). "Feeds itself" was told, not seen. Zip's voice coil by coil mixed up
+  with the sparks.
+- **Weakest stretch: Blossom Isle.** The camera jammed against Zip's back or into bushes, "big
+  see-through shapes" cut across the view; the satchel's prompt needed 1.4 m and they stood at ~2.
+  "That was the stretch where I was closest to putting it down."
+- **Also:** tapping Hot when the dial was found jumped straight to the question ("let me play with
+  the dials before quizzing me"); the warm bard line vanished after 2.6 s into the stars; the spark
+  hunt had "no hint" at the end; the old lady, dithered at a sixth while filling the view, read as
+  "fuzzy and staticky"; stars for being spotted by a drone and for being fooled at the Gate felt
+  unfair; "Hang the lantern" and "Shield Mira!" did nothing visible.
+
+**Changed after run 30 (v114):**
+- Occluders: a small thing (a sign) or a character right at the lens now fades away entirely
+  instead of to a sixth (the grey ghost box at the Gate; the static over the old lady).
+- The found warmth dial can be tried before the question (it reshapes the fan and says what it
+  did); the warm bard line stays on screen ("Oriel sings: …") until "Bravo!".
+- The relay's made word ("Zip.") is held until "Hear Mira".
+- "Feeds itself" is shown: "Watch: 'Isle' flows back into the ring on its own… and it reads the
+  whole line again, by itself, for the next one."
+- The satchel's prompt reaches 2.4 m. Two stray sparks on Chime Isle (ten in all); the end card says
+  how many are left and where.
+- The Loom's spark beam is warmer and softer (it read as a white wall of light).
+- Not yet: the Blossom camera, the unfair stars, the lantern and Shield choices.

@@ -44,7 +44,7 @@ export function buildFinds(scene: T.Scene, o: Opts) {
   const coreMat = new T.SpriteMaterial({ map: glow(), color, transparent: true, depthWrite: false, blending: T.AdditiveBlending, fog: false });
   const haloMat = new T.SpriteMaterial({ map: glow(), color, transparent: true, opacity: .35, depthWrite: false, blending: T.AdditiveBlending, fog: false });
   const bt = beamTex(), beamGeo = new T.PlaneGeometry(1, 9); beamGeo.translate(0, 4.5, 0);
-  const beamMat = new T.MeshBasicMaterial({ map: bt, color: color.clone().lerp(new T.Color('#fff4d0'), .3), transparent: true, opacity: .85, depthWrite: false, side: T.DoubleSide, fog: false });
+  const beamMat = new T.MeshBasicMaterial({ map: bt, color: color.clone().lerp(new T.Color('#ffe2a8'), .35), transparent: true, opacity: .6, depthWrite: false, side: T.DoubleSide, fog: false });
   const items = o.specs.map((s, i) => {
     const g = new T.Group(); g.position.set(s.at[0], s.y ?? .13, s.at[1]); root.add(g);
     const core = new T.Sprite(coreMat); core.scale.setScalar(.38); core.position.y = 1; g.add(core);

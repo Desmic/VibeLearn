@@ -5,7 +5,8 @@
 - **Beauty and awe are the big aspect now** (Desmic, 27 Oct). The awe should come from what the game
   teaches: the learning moment made visible (Zip's voice as a glowing neural net; the Warden's engine, a
   vast net, on the horizon where Mira was taken). Blind testers saying "whoa" unprompted is the measure.
-- **The ceiling is set by good devices; the Galaxy F15 is the floor** (Desmic, 27 Oct). A set piece is
+- **The ceiling is a ₹40k phone in India** (Desmic, 31 Oct: "forget about f15 ceiling"); High is designed for
+  it (full-screen glow, sharper, denser). Earlier (27 Oct): the Galaxy F15 is the floor. A set piece is
   designed at full ambition and scales down by quality tier (fewer particles, lower resolution), never
   a smaller design. The F15 holds ~89 fps on Medium: there is headroom to use.
 - **Puzzles test, not confirm; build, don't pick.** Blind run 29: "mostly picking from 3 or 4 buttons".
@@ -20,7 +21,7 @@
   `kit/light-streams.ts`). The F15 is set aside for now.
 - **Claude decides for now** (Desmic, 27 Oct: "you know my tastes"), measures before fixing, and runs
   blind AI play-tests; every run and change is logged in `experiments/bellweather-arcade/tools/AI-PLAYTEST.md`.
-  Hosted game: artifact `5767FASV8YrmnZSSh1Ug5y`, version 113 on 30 Oct (playable through Stop 3, Chime Isle, with the demo's ending and the dream layer).
+  Hosted game: artifact `5767FASV8YrmnZSSh1Ug5y`, version 114 on 31 Oct (playable through Stop 3, Chime Isle, with the demo's ending and the dream layer).
 - What the system gained since 4 Oct (kit modules, checks): `docs/GENERATOR-IMPLEMENTATION-MAP.md`,
   section "Added 25–30 Oct".
 

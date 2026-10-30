@@ -240,6 +240,7 @@ await segment('relay', async () => {
   await press(page.locator('.relay-console button', { hasText: 'Send' })); await page.waitForTimeout(600);
   // run 23: "I never saw what word the relay put in the … slot"; and the Warden's word looks like the others
   check('the relay makes its next word into the gap before Mira answers', await page.locator('.relay-console .chip.made', { hasText: 'Zip' }).isVisible().catch(() => false), await page.locator('.relay-read').textContent().catch(() => ''));
+  await press(page.locator('.relay-console button', { hasText: 'Hear Mira' }));
   await card('coming'); await page.waitForTimeout(1200);
   check('relay stars', await page.locator('.star-row').isVisible());
   await shot('relay-stars');
@@ -328,7 +329,11 @@ await segment('chime', async () => {
   await press(C('Cast again')); await settle(); const w2 = await page.locator('.chime-ring .made').textContent();
   check('same words in, two different words out (sampling shown)', !!w1 && !!w2 && w1 !== w2, `${w1} / ${w2}`);
   await shot('chime-twice');
-  await press(C('Next')); await press(C('Got it'));
+  await press(C('Next'));
+  // the dial is found: it can be tried before the question (run 30)
+  await press(C('Hot')); await page.waitForTimeout(700);
+  check('the found dial can be tried: Hot flattens the fan, no question yet', /flattens/.test(await page.locator('.chime-console').innerText()) && await page.evaluate(() => Number(document.querySelector('.chime-guess[data-word="noon"] .chime-pc')?.textContent?.replace('%', '')) < 40) && !(await C('different word each time').count()), '');
+  await press(C('Got it'));
   await press(C('different word each time')); await settle(7000);
   check('cold: five casts, the brightest every time', /five times out of five/.test(await page.locator('.chime-console').innerText()) && await page.evaluate(() => Number(document.querySelector('.chime-guess[data-word="noon"] .chime-pc')?.textContent?.replace('%', '')) >= 95));
   await shot('chime-cold');
@@ -344,7 +349,9 @@ await segment('chime', async () => {
   await press(page.locator('.chime-console button[data-action="cast.bard"]')); await settle();
   check('cold for the bard: the tired line, "Heard it!"', /Heard it/.test(await page.locator('.chime-console').innerText()));
   await press(C('Try again')); await press(C('Warm')); await page.waitForTimeout(900);
-  await press(page.locator('.chime-console button[data-action="cast.bard"]'));
+  await press(page.locator('.chime-console button[data-action="cast.bard"]')); await settle();
+  check('warm for the bard: the fresh line stays on screen (run 30 never saw it)', /Oriel sings/.test(await page.locator('.chime-console').innerText()), '');
+  await press(C('Bravo'));
   await page.locator('.star-row').first().waitFor({ timeout: 30000 });
   check('chime stars', await page.locator('.star-row').first().isVisible());
   await shot('chime-stars');
@@ -394,7 +401,7 @@ await segment('menu', async () => {
 // Stray sparks off the beaten path (25 Oct): each one can be walked to from where a player is, and
 // walking into it takes it (the count goes up and stays); a new run puts them back.
 await segment('finds', async () => {
-  for (const [extra, ids] of [['&title=0', ['west-plaza', 'east-nook', 'canopy-corner']], ['&title=0&beat=gate-open', ['blossom-west', 'blossom-south']], ['&title=0&beat=loom', ['loom-east', 'loom-south', 'loom-west']]]) {
+  for (const [extra, ids] of [['&title=0', ['west-plaza', 'east-nook', 'canopy-corner']], ['&title=0&beat=gate-open', ['blossom-west', 'blossom-south']], ['&title=0&beat=loom', ['loom-east', 'loom-south', 'loom-west']], ['&title=0&beat=chime', ['chime-west', 'chime-east']]]) {
     await open(extra); if (extra === '&title=0') await h.skipOpening(); await page.waitForTimeout(2500);
     for (const id of ids) {
       const f = (await page.evaluate(() => window.__vlFinds.open)).find(x => x.id === id);
@@ -407,7 +414,7 @@ await segment('finds', async () => {
       check(`stray spark "${id}" can be walked to and taken`, (await page.evaluate(() => window.__vlFinds.count)) > before, `${r.reason}, ${r.secs?.toFixed?.(1)} s`);
     }
   }
-  check('all eight found, and the count stays', await page.evaluate(() => window.__vlFinds.count === window.__vlFinds.total), String(await page.evaluate(() => window.__vlFinds.count)));
+  check('all ten found, and the count stays', await page.evaluate(() => window.__vlFinds.count === window.__vlFinds.total), String(await page.evaluate(() => window.__vlFinds.count)));
   await shot('all-found');
 });
 

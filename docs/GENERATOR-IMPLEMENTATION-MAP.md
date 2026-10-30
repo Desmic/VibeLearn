@@ -250,6 +250,20 @@ in `story.ts` to join the levels.
   - A CSS "veil" (screen blend: light pooling from the top, soft bright edges, tinted by the mood),
     far islands that bob, the cloud sea turning slowly. `?dream=0` turns the layer off.
 
+- **High tier's post stack** (Desmic, 31 Oct: the ceiling is now a ₹40k phone, not the F15):
+  High renders through `createPaintedPost` (an HDR target, bloom, ACES output, the painted grade
+  over the whole frame); `installPaintedShading(strokes, gradeHere=false)` then skips the per-
+  material grade (it clamped colour, so nothing could bloom). Only what is brighter than white
+  blooms (threshold 1.35): lamps, halos, fireflies, the engine's light, the moon's rim. The sky
+  dome is drawn through the inverse of three's ACES filmic curve when the frame is tone-mapped by
+  the post pass (`skyMood.untone`), so it reads as authored. Bloom strength follows the mood
+  (stronger at dusk). High also: shadow map 4096, 1,600 motes of air. `?post=0|1` overrides.
+  Auto picks High when the measured frame x1.8 fits 16 ms. **lib** (painted, sky-mood) + quality
+- **Occluders** (run 30): a small thing or a character right at the lens fades away entirely (a
+  sixth read as a grey ghost box, and as TV static over a dithered townsperson). **lib**
+- **speedrun**: after a station's last move it presses the puzzle UI's own read-on button (the
+  relay's made word, the bard's line), waiting for real-time animations. **check**
+
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).
 2. ~~Station archetype~~ (done 1 Oct: `first-words-stations.ts` + `kit/station.ts`).

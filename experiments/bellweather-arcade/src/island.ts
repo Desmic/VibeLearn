@@ -365,7 +365,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   } });
 
   const things = [
-    { at: CLASP, r: 1.7, label: 'Take the satchel', action: 'take-satchel', when: () => !hasBag() && phase !== 'off', use: () => { if (!gateSt.act('take-satchel').ok) return; satchelObj.visible = false; phase = 'bag'; renderBag(); sfx.catch(); g.say('A satchel for notes. The Gate reads only what\'s inside.', [{ label: 'Got it', kind: 'primary', act: () => { g.close(); goalNow(); } }]); } },
+    { at: CLASP, r: 2.4, label: 'Take the satchel', action: 'take-satchel', when: () => !hasBag() && phase !== 'off', use: () => { if (!gateSt.act('take-satchel').ok) return; satchelObj.visible = false; phase = 'bag'; renderBag(); sfx.catch(); g.say('A satchel for notes. The Gate reads only what\'s inside.', [{ label: 'Got it', kind: 'primary', act: () => { g.close(); goalNow(); } }]); } },
     gateSt.zone(anchors[gateSt.spec.place.anchor], () => phase === 'bag', () => gate.speak(), 'speak'),
     relaySt.zone(anchors[relaySt.spec.place.anchor], () => phase === 'open' && !relay.active && !newOrders.busy, () => relay.open()),
   ];

@@ -190,7 +190,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
     let k = 0; const step = () => { k += .035; m.position.copy(curve.getPointAt(Math.min(1, k))); if (k < 1) later(.03, step); else {
       holo.remove(m); st.act('loop-run'); sfx.place(); refresh(N - 1); o.carry('Isle');
       // the engine runs once more by itself: the sentence is done
-      later(.5, () => think(ring(), '.', finale));
+      later(.4, () => { if (L.selfRun) say(L.selfRun); later(1.3, () => think(ring(), '.', finale)); });
     } };
     later(.7, step);
   };

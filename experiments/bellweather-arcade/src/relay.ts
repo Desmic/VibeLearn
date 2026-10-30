@@ -60,10 +60,14 @@ export function buildRelay(o: Opts) {
     // the payoff, seen: the relay reads the words it was given and makes the next one into the gap
     // (run 23: "I never saw what word the relay put in the … slot; it cut to Mira")
     if (r.events.includes('mira-hears')) {
-      el.onclick = null; for (const b of el.querySelectorAll('button')) (b as HTMLButtonElement).disabled = true;
+      for (const b of el.querySelectorAll('button')) (b as HTMLButtonElement).disabled = true;
       const gap = el.querySelector('.chip.empty'); if (gap) { gap.textContent = 'Zip.'; gap.classList.add('made'); }
       el.querySelector('.relay-read')!.innerHTML = 'It read <b>“Channel 7. Mira, it\'s”</b> and made the next word: <b>“Zip.”</b>';
-      sfx.hum(1); setTimeout(finish, 1900); return;
+      // held until the player moves on (run 30 still missed it at 1.9 s: "I never saw what next word the relay produced")
+      sfx.hum(1);
+      const row = el.querySelector('.story-choices'); if (row) row.innerHTML = '<button class="primary" data-act="on">Hear Mira</button>';
+      el.onclick = e => { if (!(e.target as HTMLElement).closest('button')) return; e.stopPropagation(); sfx.tap(); finish(); };
+      return;
     }
     const kind = r.judged[0]?.choice;
     sfx.boing();

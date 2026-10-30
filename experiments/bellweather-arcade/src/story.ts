@@ -387,7 +387,8 @@ export function buildStory(scene: T.Scene, o: Opts) {
       endCard.innerHTML = `<div class="demo-end-card"><h2></h2>${C.lines.map(() => '<p></p>').join('')}<p class="demo-end-sparks"></p><div class="demo-end-row"><button type="button" data-act="stay" class="primary"></button><button type="button" data-act="title"></button></div></div>`;
       endCard.querySelector('h2')!.textContent = C.title;
       endCard.querySelectorAll('p:not(.demo-end-sparks)').forEach((p, i) => { p.textContent = C.lines[i]; });
-      endCard.querySelector('.demo-end-sparks')!.textContent = C.sparks(f, n);
+      const left = new Map<string, number>(); for (const sp of FIRST_WORDS_FINDS) if (!finds.has(sp.id)) { const pl = C.place(sp.id); left.set(pl, (left.get(pl) ?? 0) + 1); }
+      endCard.querySelector('.demo-end-sparks')!.textContent = C.sparks(f, n, [...left]);
       (endCard.querySelector('[data-act=stay]') as HTMLButtonElement).textContent = C.stay;
       (endCard.querySelector('[data-act=title]') as HTMLButtonElement).textContent = C.title_;
       endCard.hidden = false; (endCard.querySelector('[data-act=stay]') as HTMLButtonElement).focus();

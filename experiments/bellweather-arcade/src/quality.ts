@@ -23,6 +23,7 @@ export interface Quality {
   strokes: boolean;          // world-space brush grain on surfaces
   lobeTrees: 'all' | 'distant' | 'none'; // solid painted canopy puffs instead of leaf cards
   reflections: boolean;      // mirrored scene in the lily pool
+  post: boolean;             // full-screen glow (bloom) and grade: High only (31 Oct: the ceiling is a ₹40k phone)
 }
 
 const TIERS: Record<Tier, Omit<Quality, 'choice' | 'tier'>> = {
@@ -31,12 +32,12 @@ const TIERS: Record<Tier, Omit<Quality, 'choice' | 'tier'>> = {
   // on a phone, so Medium/High aim for that, start at full resolution and keep most of their
   // resolution (never below 0.8x on Medium, 1.25x on High: still far sharper than the old 0.6x);
   // only Low trades resolution for frame rate freely. Second F15 pass: 1.2/1.5 floors cost too much fps.
-  low:    { antialias: false, maxPixelRatio: .9,  minPixelRatio: .5,  targetMs: 16.7, shadowMap: 1024, leafFraction: .38, cloudRings: 1, islands: 4, cloudLobes: .45, canopyDetail: .5, birds: false, people: true, strokes: false, lobeTrees: 'all', reflections: false },
+  low:    { antialias: false, maxPixelRatio: .9,  minPixelRatio: .5,  targetMs: 16.7, shadowMap: 1024, leafFraction: .38, cloudRings: 1, islands: 4, cloudLobes: .45, canopyDetail: .5, birds: false, people: true, strokes: false, lobeTrees: 'all', reflections: false, post: false },
   // Medium floor 0.8 (4 Oct, measured): the F15 holds 90 fps up to 1.0x in every view, so it
   // never needs the floor; the laptop (Intel UHD, ~0.78 MP at 1x) halves to 24 fps in the heaviest
   // view at 1.0x and holds 48 at 0.8x. Desmic chose sharpness: 0.8 is the lowest it goes.
-  medium: { antialias: false, maxPixelRatio: 1.5, minPixelRatio: 0.8, targetMs: 22.2, shadowMap: 2048, leafFraction: .6,  cloudRings: 2, islands: 7, cloudLobes: .75, canopyDetail: .8, birds: true,  people: true, strokes: true, lobeTrees: 'distant', reflections: false },
-  high:   { antialias: true,  maxPixelRatio: 2,   minPixelRatio: 1.25, targetMs: 24, shadowMap: 2048, leafFraction: 1,   cloudRings: 3, islands: 9, cloudLobes: 1,   canopyDetail: 1,  birds: true,  people: true, strokes: true, lobeTrees: 'none', reflections: true },
+  medium: { antialias: false, maxPixelRatio: 1.5, minPixelRatio: 0.8, targetMs: 22.2, shadowMap: 2048, leafFraction: .6,  cloudRings: 2, islands: 7, cloudLobes: .75, canopyDetail: .8, birds: true,  people: true, strokes: true, lobeTrees: 'distant', reflections: false, post: false },
+  high:   { antialias: true,  maxPixelRatio: 2,   minPixelRatio: 1.25, targetMs: 24, shadowMap: 4096, leafFraction: 1,   cloudRings: 3, islands: 9, cloudLobes: 1,   canopyDetail: 1,  birds: true,  people: true, strokes: true, lobeTrees: 'none', reflections: true, post: true },
 };
 
 const KEY = 'bellweather.graphics';
@@ -81,6 +82,7 @@ export function quality(): Quality {
   const refl = search.get('refl'), trees = search.get('trees');
   if (refl !== null) cached.reflections = refl === '1';
   if (trees === 'all' || trees === 'distant' || trees === 'none') cached.lobeTrees = trees;
+  const post = search.get('post'); if (post !== null) cached.post = post === '1';
   return cached;
 }
 
@@ -109,7 +111,8 @@ export async function autoBenchmark(renderer: import('three').WebGLRenderer, sce
   if (times.length < 3) { via = 'finish'; times.length = 0; for (let i = 0; i < 7; i++) { const t = performance.now(); renderer.render(scene, camera); sync(); times.push(performance.now() - t); } }
   renderer.setPixelRatio(prev);
   times.sort((a, b) => a - b); const ms = times[times.length >> 1];
-  const tier: Tier = ms * 1.5 <= 16 ? 'high' : 'medium'; // High holds ~45 fps or better
+  // High: ~1.5x Medium, plus its post stack (glow and grade over the whole frame, 31 Oct): ~1.8x
+  const tier: Tier = ms * 1.8 <= 16 ? 'high' : 'medium'; // High holds ~45 fps or better
   try { localStorage.setItem(KEY + '.auto', tier); } catch { /* storage unavailable: the URL carries it */ }
   return { tier, ms: +ms.toFixed(1), via };
 }

@@ -50,6 +50,8 @@ export const GAME: GameManifest = {
       { id: 'feel-opening', draft: true, text: 'The first minute makes them curious: a strange, lovely world and a robot who is a bit self-aware.' },
       // Desmic, 25 Oct: "the whole game must have a sense of beauty and awe"
       { id: 'feel-awe', draft: false, text: 'Moments of beauty and awe: Zip\'s speech engine is a living neural net, light running through it as it reads, and the dark rest of his voice lights up node by node as it comes back.' },
+      // Desmic, 30 Oct: "a beautiful dream is what I'm thinking of"
+      { id: 'feel-dream', draft: false, text: 'The world feels like a beautiful dream: a ringed moon in the day sky, the air full of light and drifting letters, the day turning to dusk across the isles, and at dusk rivers of letters flowing into the Warden\'s engine on the horizon.' },
       { id: 'feel-humour', draft: true, text: 'Zip\'s dry thoughts and the engine\'s mistakes make them smile or laugh.' },
       { id: 'feel-agency', draft: true, text: 'Fixing the engine feels like working it out themselves, not following instructions.' },
       { id: 'feel-flow', draft: true, text: 'They get from story to puzzle without long, lost wandering.' },

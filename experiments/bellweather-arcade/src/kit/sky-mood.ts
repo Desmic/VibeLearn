@@ -56,7 +56,16 @@ const skyVert = /* glsl */`
 const skyFrag = /* glsl */`
   uniform vec3 uZenith, uMid, uHorizon, uBelow, uSunDir, uGlow; uniform float uGlowK, uStars, uTime;
   uniform vec3 uMoonDir, uMoonCol; uniform float uMoon, uMoonR, uRing, uTilt, uAurora;
+  uniform float uUnTone, uExposure; uniform mat3 uInvIn, uInvOut;
   varying vec3 vDir;
+  // the sky's colours are authored as seen; when a post pass tone-maps the whole frame (ACES filmic),
+  // the sky is sent through the inverse first so it still reads as authored
+  vec3 untone(vec3 y) {
+    vec3 o = clamp(uInvOut * clamp(y, 0., .9), 0., .9);
+    vec3 A = 1. - .983729 * o, B = .0245786 - .432951 * o, C = -(.000090537 + .238081 * o);
+    vec3 v = (-B + sqrt(max(B * B - 4. * A * C, 0.))) / (2. * A);
+    return max(uInvIn * v, 0.) * .6 / uExposure;
+  }
   float h21(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
   void main() {
     vec3 d = normalize(vDir); float h = d.y;
@@ -102,6 +111,7 @@ const skyFrag = /* glsl */`
         if (front) col += uMoonCol * ring * .35 * uMoon;
       } else col += uMoonCol * ring * .35 * uMoon;
     }
+    if (uUnTone > .5) col = untone(col);
     gl_FragColor = vec4(col, 1.);
     #include <colorspace_fragment>
   }`;
@@ -130,6 +140,10 @@ export function buildSkyMood(o: SkyMoodOpts) {
     uSunDir: { value: cur.sunDir }, uGlow: { value: cur.glow }, uGlowK: { value: cur.glowStrength }, uStars: { value: 0 }, uTime: { value: 0 },
     uMoonDir: { value: new T.Vector3(...(o.moon?.dir ?? [0, 1, 0])).normalize() }, uMoonCol: { value: C(o.moon?.color ?? '#fff4e6') }, uMoon: { value: 0 },
     uMoonR: { value: o.moon?.size ?? .09 }, uRing: { value: o.moon?.ring === false ? 0 : 1 }, uTilt: { value: o.moon?.tilt ?? .35 }, uAurora: { value: 0 },
+    uUnTone: { value: 0 }, uExposure: { value: 1 },
+    // three's ACES filmic matrices (columns as in tonemapping_pars_fragment), inverted
+    uInvIn: { value: new T.Matrix3().set(.59719, .35458, .04823, .07600, .90834, .01566, .02840, .13383, .83777).invert() },
+    uInvOut: { value: new T.Matrix3().set(1.60475, -.53108, -.07367, -.10208, 1.10813, -.00605, -.00327, -.07276, 1.07602).invert() },
   };
   const sky = new T.Mesh(new T.SphereGeometry(500, 32, 16), new T.ShaderMaterial({ uniforms: U, vertexShader: skyVert, fragmentShader: skyFrag, side: T.BackSide, depthWrite: false, depthTest: true, fog: false }));
   sky.name = 'sky-mood'; sky.frustumCulled = false; sky.renderOrder = -10;
@@ -172,7 +186,7 @@ export function buildSkyMood(o: SkyMoodOpts) {
     o.sun.position.copy(o.sun.target.position).addScaledVector(cur.sunDir, sunDist);
     o.hemi.color.copy(cur.hemiSky); o.hemi.groundColor.copy(cur.hemiGround); o.hemi.intensity = cur.hemiIntensity;
     const fog = o.scene.fog as T.FogExp2 | null; if (fog) { fog.color.copy(cur.fog); fog.density = cur.fogDensity; }
-    o.renderer.toneMappingExposure = cur.exposure;
+    o.renderer.toneMappingExposure = cur.exposure; U.uExposure.value = cur.exposure;
     U.uStars.value = cur.stars; U.uGlowK.value = cur.glowStrength; U.uMoon.value = o.moon ? cur.moon ?? 0 : 0; U.uAurora.value = cur.aurora ?? 0;
     (o.tint ?? []).forEach((m, i) => { const c = (m as T.MeshBasicMaterial).color; if (c) c.copy(baseTint[i]).multiply(cur.clouds); });
     haloMat.opacity = cur.lamps; if (halos) halos.visible = cur.lamps > .02;
@@ -183,6 +197,8 @@ export function buildSkyMood(o: SkyMoodOpts) {
     /** move the sun's shadow frustum to a new centre; true when the shadow map needs a redraw */
     centre(p: T.Vector3) { o.sun.target.position.set(p.x, 0, p.z); o.sun.target.updateMatrixWorld(); },
     setLamps,
+    /** the frame is tone-mapped by a post pass: draw the sky through the inverse so it reads as authored */
+    untone(on: boolean) { U.uUnTone.value = on ? 1 : 0; },
     /** hold a named mood over the place's own by k (0 … 1), e.g. for a cutscene; null releases */
     force(name: string | null, k = 1) { forced = name && moods[name] ? { name, k } : null; },
     tick(t: number, at: T.Vector3, camera: T.Camera) {
