@@ -1197,3 +1197,28 @@ step 141 (the end of Loom Isle); run 26 (same persona, v99) quit at step 49, bef
 - The Gate's violet seal fades when the lens is right at it (the view swung "inside the portal").
 - Open: "Turn toward the goal" felt unreliable; bubbles stacking (board labels over Zip's thoughts,
   the static bark under "Is this Mario?"); puzzles as button-picking; the voice-coil thread.
+
+## The loom becomes a call you build (30 Oct 2026)
+
+Run 29's main complaint (puzzles "mostly picking from 3 or 4 buttons… a bit guessable"; wanted "a
+puzzle where I had to think harder or build something myself") and Desmic's "puzzles test, not
+confirm". The Word Loom's last step was a choice between two given calls; now the player weaves
+their own from word tiles in three rows: **do what** (Free, Release, Unhex, Disenchant), **who**
+(Tavi, the weaver, the weaver Tavi), **from what** (from the loom, from the enchanted loom).
+
+- The tiles go onto the call as whole words; only when it **weaves** does the loom split them, the
+  pieces dropping onto the rail one by one. So the call has to be reasoned from the rule shown
+  earlier, not read off a counter. Exactly four calls fit (Free/Release + Tavi/the weaver + from the
+  loom = 6). The tempting verbs are short in letters and long in pieces (Unhex 2, Disenchant 3);
+  "Tavi" (4 letters) costs what "the weaver" (9 letters) costs.
+- A call that spills shows what the loom actually wove ("Un hex Ta vi from the…") and which words
+  broke into parts; a new tile swaps that part and keeps the rest.
+- The loom in the world echoes the rail: its six slots light gold as pieces land, flash violet-red
+  when the call spills, glow when it fits. A shot during the puzzle keeps the loom in the top half
+  of a phone, above the console.
+- Rules (`loom.word-loom` v2): parts are enums, the piece count an integer kept by the place/take-off
+  actions; `weave` frees Tavi when pieces ≤ 6. Logged: `build-call` right (fits) or wrong
+  (short-in-letters / too-many-pieces), first weave apart from retries. Rulecheck: perfect run
+  lift ×3 → predict.pieces → verb.free → who.tavi → from.loom → weave; rules-parity agrees with the
+  server's engine. Content check: every tile's pieces spell it, some call fits, and a letter-short
+  verb is the one that doesn't.

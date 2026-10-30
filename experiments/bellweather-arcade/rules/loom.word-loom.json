@@ -1,14 +1,14 @@
 {
   "schemaVersion": "1",
   "id": "loom.word-loom",
-  "version": "1",
+  "version": "2",
   "state": {
     "phase": {
       "type": "enum",
       "values": [
         "guided",
         "predict",
-        "choose",
+        "build",
         "done"
       ],
       "initial": "guided"
@@ -18,6 +18,42 @@
       "initial": 0,
       "min": 0,
       "max": 3
+    },
+    "verb": {
+      "type": "enum",
+      "values": [
+        "none",
+        "free",
+        "release",
+        "unhex",
+        "disenchant"
+      ],
+      "initial": "none"
+    },
+    "who": {
+      "type": "enum",
+      "values": [
+        "none",
+        "tavi",
+        "weaver",
+        "both"
+      ],
+      "initial": "none"
+    },
+    "from": {
+      "type": "enum",
+      "values": [
+        "none",
+        "loom",
+        "enchanted"
+      ],
+      "initial": "none"
+    },
+    "pieces": {
+      "type": "integer",
+      "initial": 0,
+      "min": 0,
+      "max": 20
     }
   },
   "actions": {
@@ -81,7 +117,7 @@
         {
           "op": "set",
           "field": "phase",
-          "value": "choose"
+          "value": "build"
         }
       ],
       "emits": [
@@ -101,7 +137,7 @@
         {
           "op": "set",
           "field": "phase",
-          "value": "choose"
+          "value": "build"
         }
       ],
       "emits": [
@@ -121,7 +157,7 @@
         {
           "op": "set",
           "field": "phase",
-          "value": "choose"
+          "value": "build"
         }
       ],
       "emits": [
@@ -141,7 +177,7 @@
         {
           "op": "set",
           "field": "phase",
-          "value": "choose"
+          "value": "build"
         }
       ],
       "emits": [
@@ -149,38 +185,694 @@
         "loom-splits"
       ]
     },
-    "choose.short": {
+    "verb.free": {
       "when": {
-        "op": "eq",
-        "left": {
-          "field": "phase"
-        },
-        "right": "choose"
-      },
-      "effects": [],
-      "emits": [
-        "decide:choose-message:wrong:fewer-letters",
-        "name-falls-off"
-      ]
-    },
-    "choose.common": {
-      "when": {
-        "op": "eq",
-        "left": {
-          "field": "phase"
-        },
-        "right": "choose"
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "field": "verb"
+            },
+            "right": "none"
+          }
+        ]
       },
       "effects": [
         {
           "op": "set",
-          "field": "phase",
-          "value": "done"
+          "field": "verb",
+          "value": "free"
+        },
+        {
+          "op": "add",
+          "field": "pieces",
+          "value": 1
         }
       ],
       "emits": [
-        "decide:choose-message:right:common-words",
-        "tavi-free"
+        "part-placed"
+      ]
+    },
+    "verb.release": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "field": "verb"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "verb",
+          "value": "release"
+        },
+        {
+          "op": "add",
+          "field": "pieces",
+          "value": 1
+        }
+      ],
+      "emits": [
+        "part-placed"
+      ]
+    },
+    "verb.unhex": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "field": "verb"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "verb",
+          "value": "unhex"
+        },
+        {
+          "op": "add",
+          "field": "pieces",
+          "value": 2
+        }
+      ],
+      "emits": [
+        "part-placed"
+      ]
+    },
+    "verb.disenchant": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "field": "verb"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "verb",
+          "value": "disenchant"
+        },
+        {
+          "op": "add",
+          "field": "pieces",
+          "value": 3
+        }
+      ],
+      "emits": [
+        "part-placed"
+      ]
+    },
+    "verb.clear": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "ne",
+            "left": {
+              "field": "verb"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "verb"
+            },
+            "right": "free"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "verb",
+              "value": "none"
+            },
+            {
+              "op": "add",
+              "field": "pieces",
+              "value": -1
+            }
+          ],
+          "emits": [
+            "part-cleared"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "verb"
+            },
+            "right": "release"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "verb",
+              "value": "none"
+            },
+            {
+              "op": "add",
+              "field": "pieces",
+              "value": -1
+            }
+          ],
+          "emits": [
+            "part-cleared"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "verb"
+            },
+            "right": "unhex"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "verb",
+              "value": "none"
+            },
+            {
+              "op": "add",
+              "field": "pieces",
+              "value": -2
+            }
+          ],
+          "emits": [
+            "part-cleared"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "verb"
+            },
+            "right": "disenchant"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "verb",
+              "value": "none"
+            },
+            {
+              "op": "add",
+              "field": "pieces",
+              "value": -3
+            }
+          ],
+          "emits": [
+            "part-cleared"
+          ]
+        }
+      ]
+    },
+    "who.tavi": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "field": "who"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "who",
+          "value": "tavi"
+        },
+        {
+          "op": "add",
+          "field": "pieces",
+          "value": 2
+        }
+      ],
+      "emits": [
+        "part-placed"
+      ]
+    },
+    "who.weaver": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "field": "who"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "who",
+          "value": "weaver"
+        },
+        {
+          "op": "add",
+          "field": "pieces",
+          "value": 2
+        }
+      ],
+      "emits": [
+        "part-placed"
+      ]
+    },
+    "who.both": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "field": "who"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "who",
+          "value": "both"
+        },
+        {
+          "op": "add",
+          "field": "pieces",
+          "value": 4
+        }
+      ],
+      "emits": [
+        "part-placed"
+      ]
+    },
+    "who.clear": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "ne",
+            "left": {
+              "field": "who"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "who"
+            },
+            "right": "tavi"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "who",
+              "value": "none"
+            },
+            {
+              "op": "add",
+              "field": "pieces",
+              "value": -2
+            }
+          ],
+          "emits": [
+            "part-cleared"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "who"
+            },
+            "right": "weaver"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "who",
+              "value": "none"
+            },
+            {
+              "op": "add",
+              "field": "pieces",
+              "value": -2
+            }
+          ],
+          "emits": [
+            "part-cleared"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "who"
+            },
+            "right": "both"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "who",
+              "value": "none"
+            },
+            {
+              "op": "add",
+              "field": "pieces",
+              "value": -4
+            }
+          ],
+          "emits": [
+            "part-cleared"
+          ]
+        }
+      ]
+    },
+    "from.loom": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "field": "from"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "from",
+          "value": "loom"
+        },
+        {
+          "op": "add",
+          "field": "pieces",
+          "value": 3
+        }
+      ],
+      "emits": [
+        "part-placed"
+      ]
+    },
+    "from.enchanted": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "eq",
+            "left": {
+              "field": "from"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "from",
+          "value": "enchanted"
+        },
+        {
+          "op": "add",
+          "field": "pieces",
+          "value": 6
+        }
+      ],
+      "emits": [
+        "part-placed"
+      ]
+    },
+    "from.clear": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "ne",
+            "left": {
+              "field": "from"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "from"
+            },
+            "right": "loom"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "from",
+              "value": "none"
+            },
+            {
+              "op": "add",
+              "field": "pieces",
+              "value": -3
+            }
+          ],
+          "emits": [
+            "part-cleared"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "from"
+            },
+            "right": "enchanted"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "from",
+              "value": "none"
+            },
+            {
+              "op": "add",
+              "field": "pieces",
+              "value": -6
+            }
+          ],
+          "emits": [
+            "part-cleared"
+          ]
+        }
+      ]
+    },
+    "weave": {
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "left": {
+              "field": "phase"
+            },
+            "right": "build"
+          },
+          {
+            "op": "ne",
+            "left": {
+              "field": "verb"
+            },
+            "right": "none"
+          },
+          {
+            "op": "ne",
+            "left": {
+              "field": "who"
+            },
+            "right": "none"
+          },
+          {
+            "op": "ne",
+            "left": {
+              "field": "from"
+            },
+            "right": "none"
+          }
+        ]
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "lte",
+            "left": {
+              "field": "pieces"
+            },
+            "right": 6
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "done"
+            }
+          ],
+          "emits": [
+            "decide:build-call:right:fits",
+            "tavi-free"
+          ]
+        },
+        {
+          "when": {
+            "op": "in",
+            "left": {
+              "field": "verb"
+            },
+            "right": [
+              "unhex",
+              "disenchant"
+            ]
+          },
+          "effects": [],
+          "emits": [
+            "decide:build-call:wrong:short-in-letters",
+            "spills"
+          ]
+        },
+        {
+          "effects": [],
+          "emits": [
+            "decide:build-call:wrong:too-many-pieces",
+            "spills"
+          ]
+        }
       ]
     }
   },

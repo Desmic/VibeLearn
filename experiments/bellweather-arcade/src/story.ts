@@ -228,7 +228,44 @@ export function buildStory(scene: T.Scene, o: Opts) {
   for (const i of validateScript(STOP2_STORY)) (i.level === 'error' ? console.error : console.warn)(`[story] ${i.where}: ${i.msg}`);
   const enter2 = (b: Beat) => { beat = b; stop2.enter(b); };
   const loomSt = createStation(LOOM_STATION, { onEvent: o.onEvent, stars: (title, rows, then) => g.stars(title, rows, then) }, LOOM_RULES);
-  const loom = buildLoom({ guide: g, host: o.host, station: loomSt, onShake: () => later(.4, () => stop2.thinkOnce('loom-warden')), onDone: () => loomSt.finish(() => {
+  // the loom's own slots in the world light as the console's rail fills: gold for each piece that
+  // lands, violet-red for a call that spills, all bright when it weaves (the console covers the lower
+  // screen; the loom stands above it)
+  const loomGlow = (() => {
+    const cv = document.createElement('canvas'); cv.width = cv.height = 32; { const c = cv.getContext('2d')!, gr = c.createRadialGradient(16, 16, 0, 16, 16, 16); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.35, 'rgba(255,255,255,.6)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gr; c.fillRect(0, 0, 32, 32); }
+    const tex = new T.CanvasTexture(cv); tex.colorSpace = T.SRGBColorSpace;
+    const mats = Array.from({ length: LOOM_STATION.content.slots }, () => new T.SpriteMaterial({ map: tex, color: '#ffd36b', transparent: true, opacity: 0, depthWrite: false, blending: T.AdditiveBlending }));
+    const sprites = mats.map((m, i, all) => { const sp = new T.Sprite(m); sp.scale.setScalar(.55); sp.position.set(-.95 + i * 1.9 / (all.length - 1), 2.52, .08); return sp; });
+    let host: T.Object3D | null = null, t0 = -1, n = 0, ok = false, tt = 0;
+    const gold = new T.Color('#ffd36b'), bad = new T.Color('#ff6a9a');
+    return {
+      weave(pieces: number, good: boolean) {
+        if (!host) { scene.traverse(x => { if (!host && x.name === 'Prop_word_loom') host = x; }); if (host) sprites.forEach(sp => host!.add(sp)); }
+        t0 = 0; n = pieces; ok = good;
+      },
+      tick(dt: number) {
+        if (t0 < 0) return; t0 += dt; tt += dt;
+        mats.forEach((m, i) => {
+          const on = t0 > i * .11 + .08, spill = !ok && t0 > n * .11 + .3;
+          m.color.copy(spill ? bad : gold);
+          const done = ok && t0 > n * .11 + .5;
+          m.opacity = !on ? 0 : spill ? .55 + .35 * Math.abs(Math.sin(tt * 9)) : done ? .9 + .1 * Math.sin(tt * 4 + i) : .75;
+        });
+        if (!ok && t0 > n * .11 + 2.6) { t0 = -1; mats.forEach(m => (m.opacity = 0)); }
+      },
+      clear() { t0 = -1; mats.forEach(m => (m.opacity = 0)); },
+    };
+  })();
+  // at the loom, a shot that keeps the loom (its slots, its band) in the top half of a phone, above the console
+  const loomShotV = { pos: new T.Vector3(), look: new T.Vector3() }; let loomObj: T.Object3D | null = null;
+  const loomShot = () => {
+    if (!loom.active) return null;
+    if (!loomObj) scene.traverse(x => { if (!loomObj && x.name === 'Prop_word_loom') loomObj = x; }); if (!loomObj) return null;
+    const p = (loomObj as T.Object3D).getWorldPosition(loomShotV.look), portrait = o.aspect() < .8;
+    loomShotV.pos.set(p.x + 1.7, p.y + (portrait ? 2.4 : 2.0), p.z + (portrait ? 6.2 : 5.2));   // (a little to the side: Zip stands in front of the loom) loomShotV.look.set(p.x, p.y + (portrait ? .2 : 1.4), p.z);
+    return loomShotV;
+  };
+  const loom = buildLoom({ guide: g, host: o.host, station: loomSt, onWeave: (n, good) => loomGlow.weave(n, good), onShake: () => later(.4, () => stop2.thinkOnce('loom-warden')), onDone: () => loomSt.finish(() => {
     freeTavi(); stop2.dialogue('thanks', { endStop: () => {
       // another piece of his voice is back: his net shows above him and more of it lights
       // (his thought while it lights, not after: run 27 heard "Another coil lit" with nothing lit on screen)
@@ -458,7 +495,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
     get focus(): T.Vector3 | null { return cut >= 0 ? focusPt.copy(miraAt).lerp(ship.position, .5) : engine.active ? focusPt.set(PILOT_STONE.x - .4, 2.6, PILOT_STONE.z) : null; },
     get frozen() { return g.cardOpen || cut >= 0 || opening >= 0 || skiff.active || isle.busy || loom.active || engine.active || voiceMoment.active; },
     get shot() {
-      const s = voiceMoment.shot ?? engine.shot ?? skiff.shot ?? flight.shot ?? isle.shot; if (s) return s;
+      const s = voiceMoment.shot ?? engine.shot ?? skiff.shot ?? flight.shot ?? isle.shot ?? loomShot(); if (s) return s;
       if ((cut >= 0 || opening >= 0) && shot) return shot;
       if (cut < 0 && !talking) return null;
       // Frame Zip and Mira together on any screen: aim between them and step back until
@@ -493,7 +530,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (b === 'skiff') { if (mira) mira.visible = false; toSkiff(); dimTo = .35; return; }
       if (b === 'land') { if (mira) mira.visible = false; placeName = story.beat('isle').place ?? null; beat = 'isle'; o.enterIsland(isle.cameraBlockers); setTimeout(() => { o.teleport(isle.landing.x - 1.2, isle.landing.z - 1.4, 0); isle.greet(() => isle.arrive()); }, 50); return; }
       if (b === 'to-loom') { if (mira) mira.visible = false; placeName = story.beat('isle').place ?? null; beat = 'isle'; o.enterIsland(isle.cameraBlockers); isle.restoreOpen(); setTimeout(() => { o.teleport(isle.landing.x - 1.2, isle.landing.z - 1.4, 0); toLoom(); }, 50); return; }
-      if (b === 'loom-done') { if (mira) mira.visible = false; beat = 'loom'; world.show('next', true); world.show('route', true); skyShown = true; readyLoom(() => { landOnLoom(); loomSt.restore(['lift', 'lift', 'lift', 'predict.pieces', 'choose.common']); freeTavi(); enter2('loom-done'); }); return; }
+      if (b === 'loom-done') { if (mira) mira.visible = false; beat = 'loom'; world.show('next', true); world.show('route', true); skyShown = true; readyLoom(() => { landOnLoom(); loomSt.restore(['lift', 'lift', 'lift', 'predict.pieces', 'verb.free', 'who.tavi', 'from.loom', 'weave']); freeTavi(); enter2('loom-done'); }); return; }
       if (b === 'loom') { if (mira) mira.visible = false; beat = 'loom'; world.show('next', true); world.show('route', true); skyShown = true; readyLoom(() => { landOnLoom(); }); return; }
       if (b === 'isle') { if (mira) mira.visible = false; skiff.showLantern(); setTimeout(fly, 50); return; }
       startOpening();
@@ -505,7 +542,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (sky !== skyShown) { skyShown = sky; world.show('next', sky); world.show('route', sky); }
       if (sky) world.tick(z);
       for (let i = timers.length - 1; i >= 0; i--) if (timers[i].at <= t) { const f = timers[i].fn; timers.splice(i, 1); f(); }
-      skiff.tick(dt); flight.tick(dt); engine.tick(dt); voiceMoment.tick(dt); spire.view(innerHeight * Math.min(2, devicePixelRatio), (o.camera as T.PerspectiveCamera).fov); spire.tick(t, dt, o.camera); if (t - spireAt > 19) { spireAt = t; spire.surge(); }
+      skiff.tick(dt); flight.tick(dt); engine.tick(dt); voiceMoment.tick(dt); loomGlow.tick(dt); spire.view(innerHeight * Math.min(2, devicePixelRatio), (o.camera as T.PerspectiveCamera).fov); spire.tick(t, dt, o.camera); if (t - spireAt > 19) { spireAt = t; spire.surge(); }
       finds.tick(dt, z, !(g.cardOpen || cut >= 0 || opening >= 0 || engine.active || flight.active || voiceMoment.active || isle.busy || loom.active || beat === 'fly')); bells?.tick(dt, beat === 'fly' ? null : o.zip(), t); if (echo.enabled) echo.tick(dt);
       if (beat === 'fly') { shown = '#'; return; }
       // Zip's commentary: suspicious townsfolk, and a nudge when the player idles

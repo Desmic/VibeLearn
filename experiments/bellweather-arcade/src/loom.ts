@@ -1,6 +1,6 @@
 import type { Guide } from './guide';
 import type { Station } from './kit/station';
-import type { LoomContent, LoomMessage } from './worlds/stop2-loom';
+import { LOOM_PARTS, type LoomContent, type LoomMessage, type LoomPart } from './worlds/stop2-loom';
 import { sfx } from './sfx';
 
 // The Word Loom's console (Stop 2). It draws the six slots and the pieces and
@@ -8,19 +8,27 @@ import { sfx } from './sfx';
 // choice and the station logs it. Three tries, as the house rule says:
 //  1. guided: lift "Free | the | weaver" onto the rail (can't fail)
 //  2. predict: how many slots will the Warden's long message need? (can fail)
-//  3. choose: a call short in letters but long in pieces, or the other way (tricks you)
+//  3. build: weave your own call to free Tavi (do what, who, from what) from word tiles. The tiles go
+//     on the rail as whole words; only when it weaves does the loom split them, so the call has to be
+//     reasoned from the rule (run 29: the puzzles were "picking from 3 or 4 buttons… a bit guessable";
+//     wanted "something to build myself"). The tempting verbs are short in letters, long in pieces.
 
-interface Opts { guide: Guide; host: HTMLElement; station: Station; onDone: () => void; onShake?: () => void }
+interface Opts { guide: Guide; host: HTMLElement; station: Station; onDone: () => void; onShake?: () => void;
+  /** the call is weaving: its pieces, and whether it fits (the game can echo it on the loom in the world) */
+  onWeave?: (pieces: number, fits: boolean) => void }
 
 const COLORS = ['#ffb36b', '#9fe0d0', '#f6a9c0', '#cdb8ff', '#ffe08a', '#8fd3ff'];
 
 export function buildLoom(o: Opts) {
   const g = o.guide, st = o.station, c = st.spec.content as unknown as LoomContent;
   const el = document.createElement('div'); el.className = 'loom-console'; el.hidden = true; o.host.appendChild(el);
-  let active = false, view: 'guided' | 'predict' | 'choose' = 'guided';
+  let active = false, view: 'guided' | 'predict' | 'build' = 'guided';
   // the options in a shuffled order, so the right one can't be learnt by position
   const order = c.predict.map(p => ({ p, k: Math.random() })).sort((a, b) => a.k - b.k).map(x => x.p);
-  const choiceOrder = c.choices.map(x => ({ x, k: Math.random() })).sort((a, b) => a.k - b.k).map(y => y.x);
+  const PARTS: LoomPart[] = ['verb', 'who', 'from'];
+  const partOrder = Object.fromEntries(PARTS.map(p => [p, [...LOOM_PARTS[p]].map(o => ({ o, k: Math.random() })).sort((a, b) => a.k - b.k).map(x => x.o)])) as Record<LoomPart, (typeof LOOM_PARTS)[LoomPart][number][]>;
+  const PART_LABEL: Record<LoomPart, string> = { verb: 'Do what', who: 'Who', from: 'From what' };
+  const placed = (p: LoomPart) => LOOM_PARTS[p].find(o => o.id === st.state[p]) ?? null;
 
   // a message as coloured pieces; words keep their pieces together
   const pieceChips = (m: LoomMessage, upTo = Infinity) => {
@@ -65,34 +73,55 @@ export function buildLoom(o: Opts) {
       show(`${head('JAMMED')}<p class="relay-read">${right ? (first ? 'Right!' : 'Right this time.') : 'Not quite.'} The loom splits it into <b>${n} pieces</b>:</p>
         <div class="loom-pieces">${pieceChips(c.jammed, c.slots)}</div>${rail(c.jammed.pieces.flat().slice(0, c.slots), n - c.slots)}
         <p class="relay-read">${n} pieces, ${c.slots} slots. <b>Too many!</b> Rare words and names break into parts.</p>
-        <div class="story-choices"><button class="primary" data-act="next">Send a shorter call</button></div>`);
+        <div class="story-choices"><button class="primary" data-act="next">Weave your own call</button></div>`);
       if (!right) sfx.boing(); else sfx.chime();
-      el.onclick = ev => { const bb = (ev.target as HTMLElement).closest('button'); if (!bb) return; ev.stopPropagation(); sfx.tap(); choose(); };
+      el.onclick = ev => { const bb = (ev.target as HTMLElement).closest('button'); if (!bb) return; ev.stopPropagation(); sfx.tap(); build(); };
     };
   };
-  const choose = (msg = 'Pick the call that <b>fits six slots</b> and still says who to free.') => {
-    view = 'choose';
+  const build = (msg = 'Weave a call that frees Tavi: <b>do what</b>, <b>who</b>, <b>from what</b>. It must fit <b>six slots</b>.') => {
+    view = 'build';
+    const full = PARTS.every(p => placed(p));
     show(`${head()}<p class="relay-read">${msg}</p>
-      <div class="loom-choices">${choiceOrder.map(x => `<button class="loom-choice" data-c="${x.action}" data-action="${x.action}">“${x.message.text}”</button>`).join('')}</div>`);
+      ${PARTS.map(p => `<div class="loom-row"><span class="loom-row-label">${PART_LABEL[p]}</span>${partOrder[p].map(o => `<button class="chip loom-tile${st.state[p] === o.id ? ' picked' : ''}" data-part="${p}" data-o="${o.id}" data-action="${p}.${o.id}">${o.text}</button>`).join('')}</div>`).join('')}
+      <div class="loom-call" aria-label="Your call">${PARTS.map(p => { const o = placed(p); return o ? `<button class="loom-call-word" data-clear="${p}" data-action="${p}.clear">${o.text}</button>` : `<span class="loom-call-gap">${PART_LABEL[p].toLowerCase()}…</span>`; }).join('')}</div>
+      <div class="story-choices"><button class="primary" data-act="weave" data-action="weave" ${full ? '' : 'disabled'}>Weave</button></div>`);
     el.onclick = e => {
-      const b = (e.target as HTMLElement).closest('button'); if (!b?.dataset.c) return; e.stopPropagation(); sfx.tap();
-      const r = st.act(b.dataset.c); if (!r.ok) return;
-      const m = c.choices.find(x => x.action === b.dataset.c)!.message, n = m.pieces.flat().length;
-      el.onclick = null;
-      if (r.events.includes('tavi-free')) {
+      const b = (e.target as HTMLElement).closest('button'); if (!b || (b as HTMLButtonElement).disabled) return; e.stopPropagation(); sfx.tap();
+      if (b.dataset.clear) { st.act(`${b.dataset.clear}.clear`); build(); return; }
+      if (b.dataset.part) {
+        const p = b.dataset.part as LoomPart;
+        if (st.state[p] === b.dataset.o) { st.act(`${p}.clear`); build(); return; }   // tapped again: off the rail
+        if (st.state[p] !== 'none') st.act(`${p}.clear`);                                 // another choice: swap it
+        if (st.act(`${p}.${b.dataset.o}`).ok) sfx.place(); build(); return;
+      }
+      if (b.dataset.act === 'weave') weave();
+    };
+  };
+  // the loom splits the call, piece by piece onto the rail; what doesn't fit falls off the end
+  const weave = () => {
+    const words = PARTS.map(p => placed(p)!), m: LoomMessage = { id: 'built', text: words.map(o => o.text).join(' '), pieces: words.flatMap(o => o.pieces.map(x => [...x])) };
+    const r = st.act('weave'); if (!r.ok) return;
+    const flat = m.pieces.flat(), n = flat.length, kept = flat.slice(0, c.slots), ok = r.events.includes('tavi-free');
+    el.onclick = null; sfx.whoosh(); o.onWeave?.(n, ok);
+    show(`${head(ok ? 'WEAVING' : 'JAMMED')}<div class="loom-pieces weaving">${pieceChips(m, c.slots)}</div>${rail(kept, n - c.slots)}
+      <p class="relay-read loom-verdict" hidden></p><div class="story-choices" hidden></div>`);
+    // the pieces fly onto the rail one by one (the split is the reveal)
+    el.querySelectorAll<HTMLElement>('.loom-piece').forEach((x, i) => { x.style.animationDelay = `${i * 110}ms`; });
+    el.querySelectorAll<HTMLElement>('.loom-slot.full').forEach((x, i) => { x.style.animationDelay = `${i * 110 + 80}ms`; });
+    setTimeout(() => {
+      const v = el.querySelector<HTMLElement>('.loom-verdict')!, ch = el.querySelector<HTMLElement>('.story-choices')!; v.hidden = false;
+      if (ok) {
         sfx.chime(); g.toast('It fits!', 1200);
-        show(`${head('WEAVING')}<div class="loom-pieces">${pieceChips(m)}</div>${rail(m.pieces.flat())}
-          <p class="relay-read">${n} pieces, ${c.slots} slots. <b>It fits</b>, name and all.</p>`);
-        setTimeout(() => { close(); o.onDone(); }, 2200);
+        v.innerHTML = `<b>${n} pieces</b>, ${c.slots} slots. <b>It fits.</b> The band weaves: “${m.text}.”`;
+        setTimeout(() => { close(); o.onDone(); }, 2600);
         return;
       }
-      sfx.boing(); g.toast('Too many pieces!', 1200);
-      const kept = m.pieces.flat().slice(0, c.slots);
-      show(`${head('JAMMED')}<div class="loom-pieces">${pieceChips(m, c.slots)}</div>${rail(kept, n - c.slots)}
-        <p class="relay-read">Fewer letters, but <b>${n} pieces</b>. The last ones fell off: the loom wove “${kept.join('')}…” Free <b>who?</b></p>
-        <div class="story-choices"><button class="primary" data-act="again">Try the other call</button></div>`);
-      el.onclick = ev => { const bb = (ev.target as HTMLElement).closest('button'); if (!bb) return; ev.stopPropagation(); sfx.tap(); choose('Count <b>pieces</b>, not letters. Which call fits six slots?'); };
-    };
+      sfx.boing(); g.toast('Too many pieces!', 1200); o.onShake?.();
+      const split = words.filter(w => w.pieces.flat().length > w.pieces.length).map(w => `“${w.text}”`);
+      v.innerHTML = `<b>${n} pieces</b> for ${c.slots} slots. The end fell off: the loom wove “${kept.join(' ')}…”${split.length ? ` ${split.join(' and ')} broke into parts.` : ''}`;
+      ch.hidden = false; ch.innerHTML = '<button class="primary" data-act="again">Change the call</button>';
+      el.onclick = ev => { const bb = (ev.target as HTMLElement).closest('button'); if (!bb) return; ev.stopPropagation(); sfx.tap(); build('Count <b>pieces</b>, not letters. Change a word or two, then weave again.'); };
+    }, n * 110 + 700);
   };
 
   return {
@@ -101,7 +130,7 @@ export function buildLoom(o: Opts) {
     /** open at whatever step the rules are on */
     open() {
       const p = st.state.phase;
-      if (p === 'guided') guided(); else if (p === 'predict') predict(); else if (p === 'choose') choose();
+      if (p === 'guided') guided(); else if (p === 'predict') predict(); else if (p === 'build') build();
     },
     close,
   };

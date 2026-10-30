@@ -14,12 +14,47 @@ const f = (field: string): Expr => ({ field });
 const eq = (a: Expr, b: Expr): Expr => ({ op: 'eq', left: a, right: b });
 const set = (field: string, value: Expr) => ({ op: 'set' as const, field, value });
 
+// the call the player builds (step 3): a verb, who, and from what; each choice costs its pieces
+export const LOOM_PARTS = {
+  verb: [
+    { id: 'free', text: 'Free', pieces: [['Free']] },
+    { id: 'release', text: 'Release', pieces: [['Release']] },
+    { id: 'unhex', text: 'Unhex', pieces: [['Un', 'hex']] },
+    { id: 'disenchant', text: 'Disenchant', pieces: [['Dis', 'en', 'chant']] },
+  ],
+  who: [
+    { id: 'tavi', text: 'Tavi', pieces: [['Ta', 'vi']] },
+    { id: 'weaver', text: 'the weaver', pieces: [['the'], ['weaver']] },
+    { id: 'both', text: 'the weaver Tavi', pieces: [['the'], ['weaver'], ['Ta', 'vi']] },
+  ],
+  from: [
+    { id: 'loom', text: 'from the loom', pieces: [['from'], ['the'], ['loom']] },
+    { id: 'enchanted', text: 'from the enchanted loom', pieces: [['from'], ['the'], ['en', 'chant', 'ed'], ['loom']] },
+  ],
+} as const;
+export type LoomPart = keyof typeof LOOM_PARTS;
+const cost = (o: { pieces: readonly (readonly string[])[] }) => o.pieces.flat().length;
+
+// one part's actions: put a choice on the rail (when that part is empty, adding its pieces) or take it off
+// (taking off subtracts whatever is there)
+const partActions = (part: LoomPart) => {
+  const out: Record<string, any> = {};
+  for (const o of LOOM_PARTS[part]) out[`${part}.${o.id}`] = { when: { op: 'and', args: [eq(f('phase'), 'build'), eq(f(part), 'none')] }, effects: [set(part, o.id), { op: 'add', field: 'pieces', value: cost(o) }], emits: ['part-placed'] };
+  out[`${part}.clear`] = { when: { op: 'and', args: [eq(f('phase'), 'build'), { op: 'ne', left: f(part), right: 'none' }] },
+    branches: LOOM_PARTS[part].map(o => ({ when: eq(f(part), o.id), effects: [set(part, 'none'), { op: 'add', field: 'pieces', value: -cost(o) }], emits: ['part-cleared'] })) };
+  return out;
+};
+
 export const LOOM_RULES: GameRulesSpec = {
-  schemaVersion: '1', id: 'loom.word-loom', version: '1',
+  schemaVersion: '1', id: 'loom.word-loom', version: '2',
   state: {
-    // lift three pieces (guided) → predict the jammed message's pieces → choose a call that fits
-    phase: { type: 'enum', values: ['guided', 'predict', 'choose', 'done'], initial: 'guided' },
+    // lift three pieces (guided) → predict the jammed message's pieces → build a call that fits
+    phase: { type: 'enum', values: ['guided', 'predict', 'build', 'done'], initial: 'guided' },
     lifted: { type: 'integer', initial: 0, min: 0, max: 3 },
+    verb: { type: 'enum', values: ['none', ...LOOM_PARTS.verb.map(o => o.id)], initial: 'none' },
+    who: { type: 'enum', values: ['none', ...LOOM_PARTS.who.map(o => o.id)], initial: 'none' },
+    from: { type: 'enum', values: ['none', ...LOOM_PARTS.from.map(o => o.id)], initial: 'none' },
+    pieces: { type: 'integer', initial: 0, min: 0, max: 20 },
   },
   actions: {
     lift: {
@@ -30,12 +65,20 @@ export const LOOM_RULES: GameRulesSpec = {
       ],
     },
     // the first prediction counts; right or wrong, the loom then shows the split
-    'predict.words': { when: eq(f('phase'), 'predict'), effects: [set('phase', 'choose')], emits: ['decide:predict-pieces:wrong:one-per-word', 'loom-splits'] },
-    'predict.pieces': { when: eq(f('phase'), 'predict'), effects: [set('phase', 'choose')], emits: ['decide:predict-pieces:right:pieces', 'loom-splits'] },
-    'predict.near': { when: eq(f('phase'), 'predict'), effects: [set('phase', 'choose')], emits: ['decide:predict-pieces:wrong:near-miss', 'loom-splits'] },
-    'predict.letters': { when: eq(f('phase'), 'predict'), effects: [set('phase', 'choose')], emits: ['decide:predict-pieces:wrong:one-per-letter', 'loom-splits'] },
-    'choose.short': { when: eq(f('phase'), 'choose'), effects: [], emits: ['decide:choose-message:wrong:fewer-letters', 'name-falls-off'] },
-    'choose.common': { when: eq(f('phase'), 'choose'), effects: [set('phase', 'done')], emits: ['decide:choose-message:right:common-words', 'tavi-free'] },
+    'predict.words': { when: eq(f('phase'), 'predict'), effects: [set('phase', 'build')], emits: ['decide:predict-pieces:wrong:one-per-word', 'loom-splits'] },
+    'predict.pieces': { when: eq(f('phase'), 'predict'), effects: [set('phase', 'build')], emits: ['decide:predict-pieces:right:pieces', 'loom-splits'] },
+    'predict.near': { when: eq(f('phase'), 'predict'), effects: [set('phase', 'build')], emits: ['decide:predict-pieces:wrong:near-miss', 'loom-splits'] },
+    'predict.letters': { when: eq(f('phase'), 'predict'), effects: [set('phase', 'build')], emits: ['decide:predict-pieces:wrong:one-per-letter', 'loom-splits'] },
+    ...partActions('verb'), ...partActions('who'), ...partActions('from'),
+    // weave: the loom splits the call; it frees Tavi only if every piece fits on the rail
+    weave: {
+      when: { op: 'and', args: [eq(f('phase'), 'build'), { op: 'ne', left: f('verb'), right: 'none' }, { op: 'ne', left: f('who'), right: 'none' }, { op: 'ne', left: f('from'), right: 'none' }] },
+      branches: [
+        { when: { op: 'lte', left: f('pieces'), right: 6 }, effects: [set('phase', 'done')], emits: ['decide:build-call:right:fits', 'tavi-free'] },
+        { when: { op: 'in', left: f('verb'), right: ['unhex', 'disenchant'] }, effects: [], emits: ['decide:build-call:wrong:short-in-letters', 'spills'] },
+        { effects: [], emits: ['decide:build-call:wrong:too-many-pieces', 'spills'] },
+      ],
+    },
   },
   objectives: { free: { when: eq(f('phase'), 'done') } },
 };
@@ -47,7 +90,6 @@ export interface LoomContent {
   guided: LoomMessage;
   jammed: LoomMessage;
   predict: { action: string; label: string; n: number }[];   // shown in a shuffled order
-  choices: { action: string; message: LoomMessage }[];
   rule: string;
   realEngines: string;
 }
@@ -57,14 +99,14 @@ export const LOOM_STATION: StationSpec & { content: LoomContent } = {
   place: { anchor: 'word-loom', r: 3.8 }, action: 'Use the Word Loom', rules: 'loom.word-loom',
   decisions: [
     { id: 'predict-pieces', asks: 'How many slots will this message need?' },
-    { id: 'choose-message', asks: 'Which call fits the six slots and still names who to free?' },
+    { id: 'build-call', asks: 'Build a call (do what, who, from what) that fits the six slots.' },
   ],
   stars: {
     title: 'Tavi is free!',
     rows: [
       { done: 'Freed Tavi from the loom' },
       { firstTry: 'predict-pieces', text: 'Counted the pieces right, first try' },
-      { firstTry: 'choose-message', text: 'Picked the call that fits, first try' },
+      { firstTry: 'build-call', text: 'Wove a call that fits, first try' },
     ],
   },
   content: {
@@ -76,10 +118,6 @@ export const LOOM_STATION: StationSpec & { content: LoomContent } = {
       { action: 'predict.near', label: '8', n: 8 },
       { action: 'predict.pieces', label: '9', n: 9 },
       { action: 'predict.letters', label: '28', n: 28 },
-    ],
-    choices: [
-      { action: 'choose.short', message: { id: 'short', text: 'Unhex enspelled Tavi', pieces: [['un', 'hex'], ['en', 'spell', 'ed'], ['Ta', 'vi']] } },
-      { action: 'choose.common', message: { id: 'common', text: 'Please free the weaver Tavi', pieces: [['Please'], ['free'], ['the'], ['weaver'], ['Ta', 'vi']] } },
     ],
     rule: 'Common words are one piece. Rare words, odd spellings and names break into parts.',
     realEngines: 'Real engines learn their pieces from huge amounts of text, so their splits look odd. Spaces and capitals count too. Common words are usually one piece; rare words become several. Room is counted in those pieces.',
@@ -93,7 +131,7 @@ export function checkLoomContent(c: LoomContent) {
   const count = (m: LoomMessage) => m.pieces.flat().length;
   const letters = (m: LoomMessage) => m.text.replace(/[^A-Za-z]/g, '').length;
   const words = (m: LoomMessage) => m.text.split(/\s+/).length;
-  for (const m of [c.guided, c.jammed, ...c.choices.map(x => x.message)]) {
+  for (const m of [c.guided, c.jammed]) {
     if (m.pieces.map(p => p.join('')).join(' ').toLowerCase() !== m.text.toLowerCase()) issues.push(`"${m.text}": pieces don't spell the text`);
   }
   if (count(c.guided) > c.slots) issues.push('the guided message does not fit');
@@ -105,13 +143,20 @@ export function checkLoomContent(c: LoomContent) {
   const near = c.predict.find(p => p.action === 'predict.near');
   if (near && near.n === count(c.jammed)) issues.push('the near-miss option equals the answer');
   if (new Set(c.predict.map(p => p.n)).size !== c.predict.length) issues.push('two prediction options are the same number');
-  for (const m of [c.jammed, ...c.choices.map(x => x.message)]) if (m.pieces.flat().some(p => p.replace(/[^A-Za-z]/g, '').length < 2)) issues.push(`"${m.text}" has a one-letter piece (it would teach that odd words break into letters)`);
-  const short = c.choices.find(x => x.action === 'choose.short')!.message, common = c.choices.find(x => x.action === 'choose.common')!.message;
-  if (count(short) <= c.slots) issues.push('the short call fits, so the tempting answer is not wrong');
-  if (count(common) > c.slots) issues.push('the common-words call does not fit');
-  if (letters(short) >= letters(common)) issues.push('the tempting call should have fewer letters');
-  // overflow drops the last pieces: the tempting call must lose the name
-  if (short.pieces.flat().slice(0, c.slots).join('').includes('Tavi')) issues.push('the short call keeps the name even when cut');
+  if (c.jammed.pieces.flat().some(p => p.replace(/[^A-Za-z]/g, '').length < 2)) issues.push(`"${c.jammed.text}" has a one-letter piece (it would teach that odd words break into letters)`);
+  // the call the player builds: every choice spells its words; some call fits, and the tempting
+  // short-in-letters verb is the one that doesn't
+  const all = [...LOOM_PARTS.verb, ...LOOM_PARTS.who, ...LOOM_PARTS.from];
+  for (const o of all) {
+    if (o.pieces.map(p => p.join('')).join(' ').toLowerCase() !== o.text.toLowerCase()) issues.push(`"${o.text}": pieces don't spell the text`);
+    if (o.pieces.flat().some(p => p.replace(/[^A-Za-z]/g, '').length < 2)) issues.push(`"${o.text}" has a one-letter piece`);
+  }
+  let fits = 0;
+  for (const v of LOOM_PARTS.verb) for (const w of LOOM_PARTS.who) for (const fr of LOOM_PARTS.from) if (cost(v) + cost(w) + cost(fr) <= c.slots) fits++;
+  if (!fits) issues.push('no call the player can build fits the rail');
+  const cheapest = (xs: readonly { pieces: readonly (readonly string[])[] }[]) => Math.min(...xs.map(cost));
+  const fitVerbs = LOOM_PARTS.verb.filter(v => cost(v) + cheapest(LOOM_PARTS.who) + cheapest(LOOM_PARTS.from) <= c.slots), badVerbs = LOOM_PARTS.verb.filter(v => !fitVerbs.includes(v));
+  if (!badVerbs.some(b => fitVerbs.some(g => b.text.length < g.text.length))) issues.push('no verb is short in letters but too long in pieces (the trap the step is about)');
   return issues;
 }
 

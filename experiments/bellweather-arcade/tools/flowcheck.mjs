@@ -274,11 +274,22 @@ await segment('loom', async () => {
   await press(page.locator('.loom-console button', { hasText: /^6$/ })); await page.waitForTimeout(600);
   check('the loom shows the split and the overflow', await page.locator('.loom-spill').isVisible() && (await page.locator('.loom-piece').count()) === 9, await page.locator('.loom-piece').count());
   await shot('loom-split');
-  await press(page.locator('.loom-console button', { hasText: 'shorter' })); await page.waitForTimeout(500);
-  await press(page.locator('.loom-choice', { hasText: 'Unhex' })); await page.waitForTimeout(700);
-  check('the letter-short call loses the name', /Free <b>who\?<\/b>|Free who\?/.test(await page.locator('.loom-console').innerHTML()));
-  await press(page.locator('.loom-console button', { hasText: 'other call' })); await page.waitForTimeout(500);
-  await press(page.locator('.loom-choice', { hasText: 'Please' }));
+  await press(page.locator('.loom-console button', { hasText: 'own call' })); await page.waitForTimeout(500);
+  // build a call (run 29: "picking from 3 or 4 buttons"; now the player weaves their own): first the
+  // tempting one, short in letters and long in pieces
+  const tile = t => press(page.locator('.loom-console .loom-tile', { hasText: new RegExp('^' + t + '$') }));
+  check('weave waits until the call has all three parts', await page.locator('.loom-console button[data-action="weave"]').isDisabled());
+  await tile('Unhex'); await tile('Tavi'); await tile('from the loom'); await page.waitForTimeout(300);
+  check('the call shows as whole words before it weaves (the split is the reveal)', (await page.locator('.loom-call-word').count()) === 3 && !(await page.locator('.loom-console .loom-piece').count()));
+  await shot('loom-build');
+  await press(page.locator('.loom-console button[data-action="weave"]'));
+  await page.locator('.loom-verdict:not([hidden])').waitFor({ timeout: 15000 });
+  check('woven, the short-in-letters call spills: 7 pieces, "Unhex" broke into parts', await page.locator('.loom-spill').isVisible() && /7 pieces/.test(await page.locator('.loom-verdict').innerText()) && /Unhex/.test(await page.locator('.loom-verdict').innerText()), await page.locator('.loom-verdict').innerText());
+  await shot('loom-spill');
+  await press(page.locator('.loom-console button', { hasText: 'Change the call' })); await page.waitForTimeout(400);
+  await tile('Free');   // swaps the verb, keeps the rest
+  check('a new choice swaps that part and keeps the rest', /^Free Tavi from the loom$/.test((await page.locator('.loom-call-word').allInnerTexts()).join(' ')), (await page.locator('.loom-call-word').allInnerTexts()).join(' '));
+  await press(page.locator('.loom-console button[data-action="weave"]'));
   await page.locator('.star-row').first().waitFor({ timeout: 20000 });
   check('loom stars', await page.locator('.star-row').first().isVisible());
   await shot('loom-stars');
