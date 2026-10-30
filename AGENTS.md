@@ -15,9 +15,12 @@
 - **A demo first** (Desmic, 30 Oct): the title through Stop 3, polished, before Stops 4–7. The isles are
   one day (morning → golden afternoon → dusk, `kit/sky-mood.ts`), and the demo ends on the Warden's
   engine at dusk with an end card.
+- **A beautiful dream** (Desmic, 30 Oct): the world should feel like one. A ringed moon, aurora, air full of
+  pollen and drifting letters, rivers of words flowing into the Warden's engine (`kit/dream-air.ts`,
+  `kit/light-streams.ts`). The F15 is set aside for now.
 - **Claude decides for now** (Desmic, 27 Oct: "you know my tastes"), measures before fixing, and runs
   blind AI play-tests; every run and change is logged in `experiments/bellweather-arcade/tools/AI-PLAYTEST.md`.
-  Hosted game: artifact `5767FASV8YrmnZSSh1Ug5y`, version 112 on 30 Oct (playable through Stop 3, Chime Isle, with the demo's ending).
+  Hosted game: artifact `5767FASV8YrmnZSSh1Ug5y`, version 113 on 30 Oct (playable through Stop 3, Chime Isle, with the demo's ending and the dream layer).
 - What the system gained since 4 Oct (kit modules, checks): `docs/GENERATOR-IMPLEMENTATION-MAP.md`,
   section "Added 25–30 Oct".
 

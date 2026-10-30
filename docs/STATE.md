@@ -1,6 +1,13 @@
 # Current state — LLM learning-game proof track
 
-**30 October 2026, night — demo build (supersedes everything below).** Desmic is preparing a
+**30 October 2026, late — the dream layer (supersedes everything below).** Desmic: "focus on
+beauty and awe, a beautiful dream" (the F15 set aside for now: "I think it is fine"). Version 113:
+a ringed moon in the sky all day, aurora at dusk, the air full of pollen, petals and drifting
+letters (fireflies by dusk), rivers of glowing letters rising from the isles into the Warden's
+engine at dusk, light from Zip's steps, a luminous veil, bobbing far islands. Checks: flowcheck
+125/125. Kit: `kit/dream-air.ts`, `kit/light-streams.ts`, `kit/foot-glow.ts`.
+
+**30 October 2026, night — demo build.** Desmic is preparing a
 demo: the title through Stop 3 (Chime Isle), polished, rather than more stops. Version 112 adds
 time of day across the isles (morning on Blossom, golden afternoon at the Loom, dusk with stars,
 festival lights and the Warden's engine glowing at the Chime), wind in the grass and trees, the

@@ -21,8 +21,12 @@ import { buildGuide } from './guide';
 import { buildStory } from './story';
 import { buildSkyMood } from './kit/sky-mood';
 import { WIND } from './kit/wind';
+import { buildDreamAir } from './kit/dream-air';
+import { buildLightStreams } from './kit/light-streams';
+import { buildFootGlow } from './kit/foot-glow';
+import { DREAM_LETTERS, DREAM_STREAMS } from './worlds/first-words-dream';
 import { FALL_HAZE } from './painted-landmarks';
-import { FIRST_WORDS_MOODS, FIRST_WORDS_MOOD_ANCHORS } from './worlds/first-words-moods';
+import { FIRST_WORDS_MOODS, FIRST_WORDS_MOOD_ANCHORS, FIRST_WORDS_MOON } from './worlds/first-words-moods';
 import { runBench } from './kit/bench';
 const BENCH_BUILD='current';
 import { createJoystick, type Joystick } from './kit/joystick';
@@ -377,11 +381,31 @@ if(paintedStudy){
 const paintedParams=new URLSearchParams(location.search);
 // Time of day (kit/sky-mood): the sky, sun, haze and lamps follow where the camera is; one day
 // across the isles. ?mood=0 keeps the old fixed painted sky; ?mood=dusk (etc.) holds one mood.
-const skyMood=paintedStudy&&paintedParams.get('mood')!=='0'?buildSkyMood({moods:FIRST_WORDS_MOODS,anchors:FIRST_WORDS_MOOD_ANCHORS,sun,hemi:ambient,renderer,scene,
+const skyMood=paintedStudy&&paintedParams.get('mood')!=='0'?buildSkyMood({moods:FIRST_WORDS_MOODS,anchors:FIRST_WORDS_MOOD_ANCHORS,moon:FIRST_WORDS_MOON,sun,hemi:ambient,renderer,scene,
   tint:(()=>{const out:T.Material[]=[];for(const n of ['painted-backdrop','painted-landmarks'])scene.getObjectByName(n)?.traverse(o=>{const m=(o as T.Mesh).material as T.MeshBasicMaterial|undefined;if(m&&!Array.isArray(m)&&m.type==='MeshBasicMaterial'&&!out.includes(m))out.push(m)});return out})()}):null;
 if(skyMood&&paintedParams.get('mood')&&FIRST_WORDS_MOODS[paintedParams.get('mood')!])skyMood.force(paintedParams.get('mood'));
 (window as any).__vlMood=skyMood;
 let moodShadowAt=0,moodBeat='',dimK=0;const shadowCentre=new T.Vector3(Infinity,0,Infinity);
+// The dream layer (kit/dream-air, light-streams, foot-glow): the air full of pollen, petals and
+// letters, rivers of letters into the Warden's engine by dusk, light from Zip's steps. ?dream=0 off.
+const dreamOn=!!skyMood&&paintedParams.get('dream')!=='0';
+const dreamAir=dreamOn?buildDreamAir(scene,{count:{low:320,medium:700,high:1100}[gfx.tier],letters:DREAM_LETTERS}):null;
+const streams=dreamOn&&dreamAir?buildLightStreams(scene,{streams:DREAM_STREAMS,atlas:dreamAir.atlas}):null;
+const footGlow=dreamOn?buildFootGlow(scene):null;
+const feetAt=new T.Vector3(),dbSize=new T.Vector2();
+// a luminous veil over the view: light pooling from the top, soft bright edges (screen blend: it
+// only ever lightens), tinted by the time of day. CSS, no render pass.
+const veil=dreamOn?document.createElement('div'):null;let veilKey='';
+if(veil){veil.className='dream-veil';worldElement.appendChild(veil)}
+function tickDream(dt:number,speed:number){
+  if(!dreamAir||!skyMood)return;
+  const m=skyMood.state,h=renderer.getDrawingBufferSize(dbSize).y,fov=camera.fov;
+  dreamAir.view(h,fov);streams?.view(h,fov);footGlow?.view(h,fov);
+  dreamAir.mood(m.air,m.fireflies);streams?.strength(m.streams);
+  if(veil){const k=m.air.getHexString()+m.glow.getHexString();if(k!==veilKey){veilKey=k;veil.style.setProperty('--veil','#'+m.air.getHexString());veil.style.setProperty('--veil2','#'+m.glow.getHexString())}}
+  if(!reduced){dreamAir.tick(elapsed,camera);streams?.tick(elapsed)}else dreamAir.tick(0,camera);
+  feetAt.copy(zip.position);footGlow?.colour(m.air,.9);footGlow?.tick(dt,feetAt,reduced?0:speed);
+}
 function lampMarks(){const out:T.Vector3[]=[];scene.traverse(o=>{if(o.userData.lamp){out.push(o.getWorldPosition(new T.Vector3()))}});return out}
 function tickMood(){
   if(!skyMood)return;
@@ -559,7 +583,7 @@ function tick(now:number){raf=0;if(paused||document.hidden)return;const dt=Math.
   if(zipRig){if(waveBackAt>0&&elapsed>=waveBackAt){waveBackAt=-1;if(zipSpeed<.4)zipRig.wave()}if(greetUntil>0&&elapsed>greetUntil){greetUntil=-1;zipRig.lookAt(null)}}
   zipRig?.update(dt,zipSpeed,reduced);if(!townHidden)lifeTick?.(dt,reduced,{pos:zip.position,speed:zipSpeed});story?.tick(dt);utterLab?.tick(dt);guide?.tick(dt,zipSpeed,elapsed);
   if(scape){const bs=story?FIRST_WORDS_BEAT_SOUND[story.beat]:null;scape.setMood(title?.active||story?.inCutscene?null:story?bs?.mood??null:'town');scape.setPlace(title?.active?null:bs?.place??'town');scape.tick(dt)}
-  if(!reduced){if(!townHidden)promenade?.tick(dt);if(paintedStudy)tickLandmarks(dt);}tickTrail(dt);cameraUpdate(dt);tickMood();if(!reduced)WIND.value+=dt;render();updateStats(now);schedule()}
+  if(!reduced){if(!townHidden)promenade?.tick(dt);if(paintedStudy)tickLandmarks(dt);}tickTrail(dt);cameraUpdate(dt);tickMood();tickDream(dt,zipSpeed);if(!reduced)WIND.value+=dt;render();updateStats(now);schedule()}
 
 let greetUntil=-1,waveBackAt=-1;
 const captureMode=new URLSearchParams(location.search).get('capture')==='1';

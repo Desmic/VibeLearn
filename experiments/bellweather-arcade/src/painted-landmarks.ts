@@ -138,7 +138,16 @@ function fallMaterial() {
       }`,
   });
 }
-export function tickLandmarks(dt: number) { for (const m of falls) m.uniforms.uTime.value += dt; }
+// the far islands drift up and down, each on its own slow breath; the cloud sea turns very slowly
+const bobbers: { g: T.Object3D; y: number; ph: number; amp: number }[] = [];
+let landT = 0, backdrop: T.Object3D | null | undefined;
+export function tickLandmarks(dt: number) {
+  for (const m of falls) m.uniforms.uTime.value += dt;
+  landT += dt;
+  for (const b of bobbers) b.g.position.y = b.y + Math.sin(landT * .16 + b.ph) * b.amp;
+  if (backdrop === undefined) backdrop = bobbers[0]?.g.parent?.parent?.getObjectByName('painted-backdrop') ?? null;
+  backdrop?.children.forEach((c, i) => { c.rotation.y += dt * (.0016 + i * .0007) * (i % 2 ? -1 : 1); });
+}
 let lobeKeep = 1, canopyKeep = 1;
 export async function buildPaintedLandmarks(scene: T.Scene, opts: { islands?: number, cloudLobes?: number, canopyDetail?: number } = {}) {
   lobeKeep = opts.cloudLobes ?? 1; canopyKeep = opts.canopyDetail ?? 1;
@@ -191,6 +200,7 @@ export async function buildPaintedLandmarks(scene: T.Scene, opts: { islands?: nu
   const cloudClusters: { x: number, y: number, z: number, s: number }[] = [];
   sats.slice(0, opts.islands ?? sats.length).forEach(([a, d, y, rad], i) => {
     const g = new T.Group(); g.position.set(Math.sin(a) * d, y, -4 - Math.cos(a) * d); root.add(g);
+    bobbers.push({ g, y, ph: i * 1.7, amp: 1.2 + (i % 3) * .8 });
     g.add(new T.Mesh(rockGeometry(100 + i, rad, rad * 1.7), rockMat()));
     const t = new T.Mesh(new T.CylinderGeometry(rad * 1.02, rad * .96, rad * .1, 14), grassMat); t.position.y = rad * .04; g.add(t);
     const k = 1 + Math.floor(r() * 2);

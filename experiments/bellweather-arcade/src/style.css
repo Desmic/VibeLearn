@@ -357,3 +357,8 @@ html[data-input=desktop] .wr-chip.next.tied{width:142px}
 .demo-end-row button{min-height:44px;padding:0 18px;border-radius:22px;border:1px solid #ffd99a88;background:transparent;color:#fff4e2;font:inherit;font-size:15px;cursor:pointer}
 .demo-end-row button.primary{background:#ffb877;border-color:#ffb877;color:#2a1b3c;font-weight:600}
 @keyframes vl-fade-in{from{opacity:0}to{opacity:1}}
+/* the dream veil (main.ts tickDream): light pooling from the top and soft bright edges; screen blend only lightens */
+.dream-veil{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:.55;
+  background:radial-gradient(ellipse 120% 55% at 50% -8%,color-mix(in srgb,var(--veil2,#fff1d6) 55%,transparent) 0%,transparent 70%),
+  radial-gradient(ellipse 140% 120% at 50% 55%,transparent 62%,color-mix(in srgb,var(--veil,#fff3dc) 30%,transparent) 100%)}
+@media (prefers-reduced-transparency:reduce){.dream-veil{display:none}}

@@ -236,6 +236,20 @@ in `story.ts` to join the levels.
   so a bloom pass would catch every white cloud; an HDR multisampled target also costs too much on
   the F15. Glow is authored instead (halos, the engine's additive layers, scaled by the mood).
 
+- **The dream layer** (Desmic, 30 Oct: "a beautiful dream"):
+  - `src/kit/dream-air.ts`: the air round the camera full of glowing pollen, drifting petals and
+    small letters (a world made of words); fireflies by dusk; pollen by the lens stays as soft
+    out-of-focus discs. One Points draw, all motion in the vertex shader inside a box that travels
+    with the camera and wraps. Also exports `glyphAtlas` (dot, petal, 14 letters). **lib**
+  - `src/kit/light-streams.ts`: rivers of glowing letters along arcs across the sky (quadratic
+    arcs as uniforms; one draw). Data: `worlds/first-words-dream.ts`: the isles' words drawn up
+    into the Warden's engine, strongest at dusk. **lib + data**
+  - `src/kit/foot-glow.ts`: walking leaves motes of light rising from the footsteps. **lib**
+  - `kit/sky-mood.ts` gained a moon with a ring (lit from the sun's side; pale by day, bright at
+    dusk) and aurora curtains; moods carry `moon`, `aurora`, `air`, `fireflies`, `streams`.
+  - A CSS "veil" (screen blend: light pooling from the top, soft bright edges, tinted by the mood),
+    far islands that bob, the cloud sea turning slowly. `?dream=0` turns the layer off.
+
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).
 2. ~~Station archetype~~ (done 1 Oct: `first-words-stations.ts` + `kit/station.ts`).

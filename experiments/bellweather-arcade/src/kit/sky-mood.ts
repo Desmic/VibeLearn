@@ -24,7 +24,14 @@ export interface Mood {
   stars: number; lamps: number;
   /** how strongly a far glowing set piece reads (1 = as designed for daylight) */
   farGlow: number; farHaze: number;
+  /** the dream layer: how bright the moon reads (0 none), aurora ribbons (0 none) */
+  moon?: number; aurora?: number;
+  /** drifting motes in the air (kit/dream-air): colour, how many glow like fireflies (0 … 1), rivers of light (0 … 1) */
+  air?: string; fireflies?: number; streams?: number;
 }
+
+/** a moon (with a ring) fixed in the sky; its lit side follows the sun */
+export interface MoonOpts { dir: [number, number, number]; /** angular radius, radians */ size?: number; color?: string; ring?: boolean; tilt?: number }
 
 export interface MoodAnchor { at: [number, number]; mood: string; /** metres over which this place fully owns the mood */ r?: number }
 
@@ -39,6 +46,7 @@ export interface SkyMoodOpts {
   lamps?: T.Vector3[];
   /** distance from the light target to the light (keeps the shadow frustum) */
   sunDistance?: number;
+  moon?: MoonOpts;
 }
 
 const C = (s: string) => new T.Color(s);
@@ -47,6 +55,7 @@ const skyVert = /* glsl */`
   void main() { vDir = normalize((modelMatrix * vec4(position, 0.)).xyz); vec4 p = projectionMatrix * modelViewMatrix * vec4(position, 1.); gl_Position = p.xyww; }`;
 const skyFrag = /* glsl */`
   uniform vec3 uZenith, uMid, uHorizon, uBelow, uSunDir, uGlow; uniform float uGlowK, uStars, uTime;
+  uniform vec3 uMoonDir, uMoonCol; uniform float uMoon, uMoonR, uRing, uTilt, uAurora;
   varying vec3 vDir;
   float h21(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
   void main() {
@@ -63,6 +72,36 @@ const skyFrag = /* glsl */`
       star *= .55 + .45 * sin(uTime * (1. + r * 3.) + r * 40.);
       col += vec3(1., .96, .9) * star * uStars * smoothstep(.04, .35, h);
     }
+    // aurora: slow curtains of light high in the dusk sky
+    if (uAurora > 0. && h > .08) {
+      float az = atan(d.z, d.x);
+      float bend = sin(az * 2.3 + uTime * .04) * .1 + sin(az * 5.1 - uTime * .07) * .05;
+      float y = h - .22 - bend;
+      float band = smoothstep(-.02, .06, y) * exp(-max(y, 0.) * 7.);          // a lit lower hem, fading upward
+      float rays = .5 + .5 * sin(az * 23. + sin(az * 6. + uTime * .15) * 3. + uTime * .1);
+      float fold = .5 + .5 * sin(az * 4. - uTime * .06);
+      vec3 ac = mix(vec3(.3, 1., .72), vec3(.75, .45, 1.), smoothstep(.0, .25, y));
+      col += ac * band * (.45 + .35 * rays) * (.5 + .5 * fold) * uAurora * .8;
+    }
+    // the moon: a pale disc lit from the sun's side, a little mottled, with a tilted ring
+    if (uMoon > 0.) {
+      vec3 md = normalize(uMoonDir), U = normalize(cross(md, vec3(0., 1., 0.))), V = cross(U, md);
+      float m = dot(d, md);
+      vec2 q = vec2(dot(d, U), dot(d, V)) / uMoonR;
+      float r2 = dot(q, q);
+      col += uMoonCol * pow(max(m, 0.), 600.) * .25 * uMoon;   // halo
+      vec2 rq = mat2(cos(uTilt), -sin(uTilt), sin(uTilt), cos(uTilt)) * q; float e = length(rq * vec2(1., 3.6));
+      float ring = uRing * smoothstep(1.55, 1.7, e) * smoothstep(2.45, 2.3, e) * (.55 + .45 * sin(e * 22.)) * step(0., m);
+      bool front = rq.y < 0.;
+      if (r2 < 1. && m > 0.) {
+        vec3 n = q.x * U + q.y * V - sqrt(1. - r2) * md;
+        float lit = smoothstep(-.15, .35, dot(n, normalize(uSunDir)));
+        float mott = .9 + .07 * sin(q.x * 5. + 1.) * sin(q.y * 4.3 - .5) + .05 * sin((q.x + q.y) * 11.) - .08 * smoothstep(.35, .1, length(q - vec2(.3, .2))) - .06 * smoothstep(.25, .05, length(q + vec2(.35, .1)));
+        vec3 mc = mix(col * 1.08 + uMoonCol * .06, uMoonCol * mott, lit);
+        col = mix(col, mc, smoothstep(1., .96, r2) * uMoon);
+        if (front) col += uMoonCol * ring * .35 * uMoon;
+      } else col += uMoonCol * ring * .35 * uMoon;
+    }
     gl_FragColor = vec4(col, 1.);
     #include <colorspace_fragment>
   }`;
@@ -75,7 +114,7 @@ function haloTexture() {
   const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; return t;
 }
 
-type Live = { [K in keyof Mood]: Mood[K] extends string ? T.Color : Mood[K] extends number ? number : T.Vector3 };
+type Live = { [K in keyof Mood]-?: NonNullable<Mood[K]> extends string ? T.Color : NonNullable<Mood[K]> extends number ? number : T.Vector3 };
 const live = (m: Mood): Live => {
   const o: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(m)) o[k] = typeof v === 'string' ? C(v) : typeof v === 'number' ? v : new T.Vector3(...(v as [number, number, number])).normalize();
@@ -89,6 +128,8 @@ export function buildSkyMood(o: SkyMoodOpts) {
   const U = {
     uZenith: { value: cur.zenith }, uMid: { value: cur.mid }, uHorizon: { value: cur.horizon }, uBelow: { value: cur.below },
     uSunDir: { value: cur.sunDir }, uGlow: { value: cur.glow }, uGlowK: { value: cur.glowStrength }, uStars: { value: 0 }, uTime: { value: 0 },
+    uMoonDir: { value: new T.Vector3(...(o.moon?.dir ?? [0, 1, 0])).normalize() }, uMoonCol: { value: C(o.moon?.color ?? '#fff4e6') }, uMoon: { value: 0 },
+    uMoonR: { value: o.moon?.size ?? .09 }, uRing: { value: o.moon?.ring === false ? 0 : 1 }, uTilt: { value: o.moon?.tilt ?? .35 }, uAurora: { value: 0 },
   };
   const sky = new T.Mesh(new T.SphereGeometry(500, 32, 16), new T.ShaderMaterial({ uniforms: U, vertexShader: skyVert, fragmentShader: skyFrag, side: T.BackSide, depthWrite: false, depthTest: true, fog: false }));
   sky.name = 'sky-mood'; sky.frustumCulled = false; sky.renderOrder = -10;
@@ -132,7 +173,7 @@ export function buildSkyMood(o: SkyMoodOpts) {
     o.hemi.color.copy(cur.hemiSky); o.hemi.groundColor.copy(cur.hemiGround); o.hemi.intensity = cur.hemiIntensity;
     const fog = o.scene.fog as T.FogExp2 | null; if (fog) { fog.color.copy(cur.fog); fog.density = cur.fogDensity; }
     o.renderer.toneMappingExposure = cur.exposure;
-    U.uStars.value = cur.stars; U.uGlowK.value = cur.glowStrength;
+    U.uStars.value = cur.stars; U.uGlowK.value = cur.glowStrength; U.uMoon.value = o.moon ? cur.moon ?? 0 : 0; U.uAurora.value = cur.aurora ?? 0;
     (o.tint ?? []).forEach((m, i) => { const c = (m as T.MeshBasicMaterial).color; if (c) c.copy(baseTint[i]).multiply(cur.clouds); });
     haloMat.opacity = cur.lamps; if (halos) halos.visible = cur.lamps > .02;
   };
