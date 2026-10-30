@@ -204,6 +204,17 @@ in `story.ts` to join the levels.
   `VL_QUALITY` and `VL_DPR` to look at richer tiers and sharper shots. Escapes recorded in
   `quality/escapes.json`: wall wedge, fader NaN, walk past the turn, thought out of place, lens in wall.
 
+- **Stop 3, Chime Isle** (`worlds/stop3-chime.ts`, `worlds/chime-isle.ts`, `src/chime.ts`): the
+  third station follows the same shape as the first two — rules as GameRulesSpec data (phases, a
+  warmth enum, three logged decisions), a station spec with content tables, story beats and lines as
+  data, an island spec with entities, and a `chimeTower` prop. New pattern: **a chance outcome shown
+  on top of deterministic rules** — the judgement is made from the setting committed before the
+  cast, and the spin the player sees is drawn so it always agrees with it (the server can replay it).
+  The console (`chime.ts`, a fan of guesses whose bars widen with probability, a pointer, a dial) is
+  still game-specific UI. **data + game UI**
+- **Mooring reachability**: `reachprobe` and `flowcheck` now check that every boat mooring is
+  reachable on foot from where the player lands (the Loom mooring was not: a softlock). **check**
+
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).
 2. ~~Station archetype~~ (done 1 Oct: `first-words-stations.ts` + `kit/station.ts`).

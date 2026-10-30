@@ -10,9 +10,11 @@
   a smaller design. The F15 holds ~89 fps on Medium: there is headroom to use.
 - **Puzzles test, not confirm; build, don't pick.** Blind run 29: "mostly picking from 3 or 4 buttons".
   The Word Loom's last step is now a call the player builds (`kit/assemble-rules.ts`); the relay is next.
+  Stop 3 (Chime Isle, sampling and warmth) has the player predict before seeing and set the dial
+  before casting; outcomes shown always agree with the deterministic rules.
 - **Claude decides for now** (Desmic, 27 Oct: "you know my tastes"), measures before fixing, and runs
   blind AI play-tests; every run and change is logged in `experiments/bellweather-arcade/tools/AI-PLAYTEST.md`.
-  Hosted game: artifact `5767FASV8YrmnZSSh1Ug5y`, version 109 on 30 Oct.
+  Hosted game: artifact `5767FASV8YrmnZSSh1Ug5y`, version 111 on 30 Oct (playable through Stop 3, Chime Isle).
 - What the system gained since 4 Oct (kit modules, checks): `docs/GENERATOR-IMPLEMENTATION-MAP.md`,
   section "Added 25–30 Oct".
 

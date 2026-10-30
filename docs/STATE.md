@@ -1,6 +1,17 @@
 # Current state — LLM learning-game proof track
 
-**30 October 2026 — current state (supersedes everything below).** Hosted game: artifact
+**30 October 2026, evening — current state (supersedes everything below).** Hosted game: artifact
+`5767FASV8YrmnZSSh1Ug5y`, version 111. Playable from the title to the end of Stop 3 (Chime Isle).
+Stop 3 teaches sampling and temperature: the engine picks its next word by chance in proportion to
+brightness, and a warmth dial (cold / warm / hot) sharpens or flattens the spread. The player predicts
+five cold casts, then sets warmth before casting for an exact lock (cold) and a festival bard who needs
+a fresh line (warm). Design and sources: `experiments/bellweather-arcade/design/stop3-warmth-learning-design.json`.
+Also fixed: the Loom Isle mooring was unreachable on foot (a softlock); flowcheck and reachprobe now
+check every mooring. Checks at v111: flowcheck 122/122, reachprobe 12/12, speedrun through Stop 3.
+Open: a blind run on the loom build and Stop 3, the relay as a build step, "Turn toward the goal"
+reliability, speech bubbles stacking, stray sparks on Chime Isle, Stops 4–7.
+
+**30 October 2026 (morning).** Hosted game: artifact
 `5767FASV8YrmnZSSh1Ug5y`, version 109. Playable from the title to the end of Stop 2 (Loom Isle).
 Since 3 Oct: the Echo & Engine mechanic (Zip's voice as a neural net he sees inside), the Gate and
 relay as tests, stray sparks off the paths, voiced lines, a flown hop to Loom Isle, the flight flown
