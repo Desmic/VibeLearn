@@ -1,3 +1,4 @@
+import { buildTownsperson } from './townsfolk-rig';
 import * as T from 'three';
 
 import * as arcade from './world';
@@ -418,7 +419,7 @@ guide?.onTap(r=>{if(story?.frozen||title?.active||ridePos||paused)return false;c
 const sunBase=sun.intensity,ambBase=ambient.intensity;
 let ridePos:T.Vector3|null=null,rideYaw=0,townHidden=false;let title:ReturnType<typeof buildTitle>|null=null;
 const labId=paintedParams.get('lab');   // a test area off the story path (lab=utter)
-const story=guide&&!labId?buildStory(scene,{guide,camera,cameraClear:(a,b)=>{const d=b.clone().sub(a),h=firstCameraHit(a,d,.15);return h?h.distance:d.length()},host:appHost,zip:()=>zip.position,aspect:()=>camera.aspect,
+const story=guide&&!labId?buildStory(scene,{guide,camera,person:seed=>libraryClips.length?buildTownsperson(seed,libraryClips,bodyKit):null,cameraClear:(a,b)=>{const d=b.clone().sub(a),h=firstCameraHit(a,d,.15);return h?h.distance:d.length()},host:appHost,zip:()=>zip.position,aspect:()=>camera.aspect,
   addBox:facade.addSolidBox,removeBox:facade.removeSolidBox as any,solid:facade.addSolidCircle,addWalk:facade.addWalkRegion,
   onEvent:e=>{const seen=save.learning() as {activity:string,decision:string}[];if(save.decidedBefore(e.activity,e.decision)||seen.some(x=>x.activity===e.activity&&x.decision===e.decision))e.first=false;save.logEvent(e);console.info('[learning]',JSON.stringify(e))},walkable:(x,z)=>walkable(new T.Vector3(x,0,z)),enterIsland:blockers=>{for(const o of [townRoot,scene.getObjectByName('painted-promenade'),scene.getObjectByName('painted-life'),scene.getObjectByName('speech-puzzle')])if(o)o.visible=false;townHidden=true;cameraSolids.push(...blockers);invalidateCameraGeometry();},ride:(p,y)=>{ridePos=p?(ridePos??new T.Vector3()).copy(p):null;rideYaw=y},input:()=>({x:(Number(keys.has('KeyD')||keys.has('ArrowRight')||held.has('right'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')||held.has('left')))||(stick?.vector.x??0),y:(Number(keys.has('KeyW')||keys.has('ArrowUp')||held.has('forward'))-Number(keys.has('KeyS')||keys.has('ArrowDown')||held.has('back')))||(stick?.vector.y??0)}),
   dim:k=>{sun.intensity=sunBase*(1-.6*k);ambient.intensity=ambBase*(1-.35*k)},

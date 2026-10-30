@@ -131,8 +131,8 @@
 .menu .menu-mode[aria-current="true"]{background:#1c4972;border-color:#1c4972;color:#fff6e6}
 .menu .menu-mode[aria-current="true"] small{color:#d8e4ee}
 /* relay console: the relay's own dial and word slots */
-.relay-console,.loom-console{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:min(94vw,420px);padding:12px 16px 14px;border-radius:18px;background:#10263df2;border:2px solid #6fe0c9;color:#e6fff8;box-shadow:0 10px 30px #071c3688,0 0 24px #6fe0c944;z-index:6;animation:vl-pop .2s ease-out}
-.relay-console[hidden],.loom-console[hidden]{display:none}
+.relay-console,.loom-console,.chime-console{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:min(94vw,420px);padding:12px 16px 14px;border-radius:18px;background:#10263df2;border:2px solid #6fe0c9;color:#e6fff8;box-shadow:0 10px 30px #071c3688,0 0 24px #6fe0c944;z-index:6;animation:vl-pop .2s ease-out}
+.relay-console[hidden],.loom-console[hidden],.chime-console[hidden]{display:none}
 .relay-head{font:700 12px ui-monospace,Consolas,monospace;letter-spacing:.14em;color:#9fe0d0}.relay-head b{color:#fff;font-size:15px}
 .relay-head .live{color:#ff7a8a;animation:vl-blink 1s steps(2) infinite}
 .relay-dial{display:block;width:min(56vw,190px);margin:4px auto 2px;touch-action:manipulation}
@@ -140,7 +140,7 @@
 .relay-tick{cursor:pointer}.relay-tick circle{fill:#173a58;stroke:#6fe0c9;stroke-width:1.5}.relay-tick text{fill:#e6fff8;font:700 15px Trebuchet MS,Arial,sans-serif;pointer-events:none}
 .relay-tick.on circle{fill:#ffd36b;stroke:#fff}.relay-tick.on text{fill:#16324f}
 .relay-read{margin:6px 0 10px;font-size:15px;line-height:1.4;min-height:21px;text-align:center}.relay-read b{color:#ffd36b}
-.relay-console .rail-chips,.loom-console .rail-chips{justify-content:center;margin:10px 0 4px}
+.relay-console .rail-chips,.loom-console .rail-chips,.chime-console .chime-ring{justify-content:center;margin:10px 0 4px}
 .relay-console .story-choices button.quiet{color:#9fe0d0}
 .relay-notes{margin:6px 0 0;padding:6px 9px;border-radius:9px;background:#fbf4e3;color:#1b3a5a;font:600 12px/1.35 Trebuchet MS,Arial,sans-serif;text-align:center}
 /* frame-rate readout: bottom-left, clear of the goal line and the controls */
@@ -323,3 +323,26 @@ html[data-input=desktop] .wr-chip.next.tied{width:142px}
 @keyframes wr-bump{20%,60%{background:#ff7a8a;color:#fff;scale:1.25}40%{scale:1.1}}
 .wr-close{width:36px;height:36px;border-radius:50%;border:1.5px solid #6fe0c999;background:#071a28cc;color:#bffcef;font:700 20px system-ui;cursor:pointer}
 .menu-finds{margin:10px 0 0;font:600 14px Trebuchet MS,Arial,sans-serif;color:#b8862b}
+/* the chime tower (Stop 3): the guess fan (length and glow = chance), the warmth dial, the spin */
+.chime-ring{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:8px 0 6px}
+.chime-ring .chip{pointer-events:none}
+.chime-ring .chip.empty{border-style:dashed;min-width:54px;color:#9fe0d0}
+.chime-ring .chip.empty.made{border-style:solid;background:#ffd36b;color:#3a2a08;box-shadow:0 0 14px #ffd36b99}
+.chime-fan{display:flex;flex-direction:column;gap:4px;margin:6px 0 8px}
+.chime-guess{display:grid;grid-template-columns:76px 1fr 38px;align-items:center;gap:8px;padding:2px 6px;border-radius:8px;transition:background .12s}
+.chime-word{font:700 14px Trebuchet MS,Arial,sans-serif;color:#e6fff8;text-align:right}
+.chime-guess.odd .chime-word{color:#f6a9c0;font-style:italic}
+.chime-bar{height:12px;border-radius:6px;background:#ffffff14;overflow:hidden}
+.chime-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#6fe0c9,#ffd36b);box-shadow:0 0 10px #ffd36b88;transition:width .7s cubic-bezier(.3,.8,.3,1),opacity .7s}
+.chime-fan[data-w=cold] .chime-bar i{background:linear-gradient(90deg,#8fd3ff,#e6f6ff)}
+.chime-fan[data-w=hot] .chime-bar i{background:linear-gradient(90deg,#ff9a6b,#ff6a9a)}
+.chime-pc{font:600 12px Trebuchet MS,Arial,sans-serif;color:#9fe0d0;text-align:right}
+.chime-guess.lit{background:#ffd36b33}
+.chime-guess.landed{background:#ffd36b55;box-shadow:0 0 0 2px #ffd36b inset}
+.chime-w{font-weight:800}.chime-w.cold{color:#8fd3ff}.chime-w.warm{color:#ffd36b}.chime-w.hot{color:#ff6a9a}
+.chime-dial{display:flex;gap:6px;justify-content:center;margin:6px 0 4px}
+.chime-notch{flex:1;min-height:42px;border-radius:12px;border:2px solid #ffffff33;background:#173a58;color:#e6fff8;font:700 15px Trebuchet MS,Arial,sans-serif;cursor:pointer}
+.chime-notch.cold.on{background:#2a5d8a;border-color:#8fd3ff;box-shadow:0 0 12px #8fd3ff88}
+.chime-notch.warm.on{background:#7a5a1e;border-color:#ffd36b;box-shadow:0 0 12px #ffd36b88}
+.chime-notch.hot.on{background:#8a2a3e;border-color:#ff6a9a;box-shadow:0 0 12px #ff6a9a88}
+@media (prefers-reduced-motion:reduce){.chime-bar i{transition:none}}

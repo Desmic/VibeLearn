@@ -102,7 +102,7 @@ async function observe() {
       thought: txt('.thought')[0] ?? null,
       prompt: txt('.hud-prompt')[0] ?? null,
       labels: txt('.world-label'),
-      panels: txt('.relay-console, .sentence-strip, .satchel-bar, .star-list, .title-screen'),
+      panels: txt('.relay-console, .loom-console, .chime-console, .sentence-strip, .satchel-bar, .star-list, .title-screen'),   // (the loom's and the chime tower's consoles were missing: testers read them from pixels only)
       screen: [innerWidth, innerHeight],
       // where the player stands (for the play log and replays only; never sent to a blind tester)
       at: (() => { try { const p = window.__arcade?.snapshot?.().position; return p ? p.map(v => +v.toFixed(2)) : null; } catch { return null; } })(),

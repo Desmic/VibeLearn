@@ -1222,3 +1222,34 @@ their own from word tiles in three rows: **do what** (Free, Release, Unhex, Dise
   lift ×3 → predict.pieces → verb.free → who.tavi → from.loom → weave; rules-parity agrees with the
   server's engine. Content check: every tile's pieces spell it, some call fits, and a letter-short
   verb is the one that doesn't.
+
+## Stop 3: Chime Isle, sampling and warmth (30 Oct 2026)
+
+Run 29's tester ended on "make the next isle, I want to get Mira back"; chasing Mira is the big
+picture. Built data-first, as Stop 2 was: learning design (`design/stop3-warmth-learning-design.json`,
+sources free to read) → rules (`chime.warmth`) → station with what the engine knows and a content
+check → story script → island spec (`worlds/chime-isle.ts`) → console (`chime.ts`).
+
+- **The idea:** the engine doesn't always say its brightest guess; it picks by chance, weighted by
+  brightness. Warmth reshapes the spread (real temperature at three notches: each weight raised to
+  1/T). Cold to be sure, warm to surprise, never so hot it stops making sense.
+- **Shown, not told:** the guess fan's bars are the chances; turning the dial makes them glide
+  sharper or flatter; every cast spins a light down the fan that lands on a word.
+- **Tests, not confirms:** two casts of the same words land on different words (guided); then predict
+  five cold casts before seeing them; then set the warmth before casting at two machines with
+  opposite needs: the bell vault's lock (the town's exact saying: cold) and Oriel the bard, whose
+  crowd wants a line it hasn't heard (warm; cold gives "Heard it!", hot gives word salad). The dial
+  stays where the lock left it, so the bard needs a deliberate turn (rulecheck first found the bard
+  passable on the default).
+- **The isle:** a festival isle of silent bells past Loom Isle, nearer the Warden's engine; a new
+  chime tower prop (three tiers of bells that swing, a lock wheel that spins and judders, a vault
+  door that opens), Oriel and a small crowd (the town's people kit) who wave or groan. The flight
+  from Loom Isle is flown (five rings); the arrival shot looks at the tower.
+- **Checks:** rulecheck perfect run (cast ×2 → predict.same → dial.cold → cast.lock → dial.warm →
+  cast.bard); the content check (weights sum to 1, cold leaves the brightest ≥95%, hot flattens it
+  under 40%, the lock needs the brightest, the bard's tired line is the brightest); flowcheck plays
+  it with wrong first tries and checks the evidence; the speedrun plays it from its rules.
+- **Found on the way:** the mooring for the next hop sat where no walkable ground was within reach
+  of the Board prompt (a softlock at the end of Stop 2); flowcheck now checks the mooring can be
+  reached on foot, and it moved. The blind tester's text view had no loom or chime console text
+  (pixels only); added.

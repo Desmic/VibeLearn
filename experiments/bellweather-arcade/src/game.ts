@@ -6,6 +6,7 @@ import { ECHO_SKIFF_STATION, ECHO_SKIFF_RULES } from './worlds/first-words-echo'
 import { FIRST_WORDS_L1_STATIONS } from './worlds/first-words-stations';
 import { GATE_RULES, RELAY_RULES } from './worlds/first-words-rules';
 import { LOOM_STATION, LOOM_RULES, STOP2_STORY } from './worlds/stop2-loom';
+import { CHIME_STATION, CHIME_RULES, STOP3_STORY } from './worlds/stop3-chime';
 import { FIRST_WORDS_PROGRESS } from './worlds/first-words-progress';
 import { FIRST_WORDS_L1 } from './worlds/first-words-story';
 import { FIRST_WORDS_SOUND, FIRST_WORDS_BEAT_SOUND } from './worlds/first-words-sound';
@@ -30,13 +31,13 @@ export const GAME: GameManifest = {
   },
   // Stop 1 wakes the skiff with Echo (the in-world version; the older panel version in
   // first-words-stations.ts is kept for `mech=` comparisons only), then the Gate and the relay
-  stations: [ECHO_SKIFF_STATION, live('blossom-gate'), live('relay-contact'), LOOM_STATION],
-  rules: [ECHO_SKIFF_RULES, GATE_RULES, RELAY_RULES, LOOM_RULES],
+  stations: [ECHO_SKIFF_STATION, live('blossom-gate'), live('relay-contact'), LOOM_STATION, CHIME_STATION],
+  rules: [ECHO_SKIFF_RULES, GATE_RULES, RELAY_RULES, LOOM_RULES, CHIME_RULES],
   progress: FIRST_WORDS_PROGRESS,
-  stories: [FIRST_WORDS_L1, STOP2_STORY],
+  stories: [FIRST_WORDS_L1, STOP2_STORY, STOP3_STORY],
   sound: { spec: FIRST_WORDS_SOUND, beats: FIRST_WORDS_BEAT_SOUND },
   voice: { cast: FIRST_WORDS_CAST, spoken: FIRST_WORDS_SPOKEN, direction: FIRST_WORDS_DIRECTION },
-  learningDesign: ['design/stop1-learning-design.json', 'design/stop2-loom-learning-design.json'],
+  learningDesign: ['design/stop1-learning-design.json', 'design/stop2-loom-learning-design.json', 'design/stop3-warmth-learning-design.json'],
   // drafts (6 Oct) for Desmic to correct: what a newcomer should be able to tell back, and feel
   intent: {
     story: [
@@ -58,5 +59,5 @@ export const GAME: GameManifest = {
   input: ['touch', 'keyboard', 'mouse'],
   devices: { low: 'Galaxy F15 (phone, 720p, Mali-G57)', laptop: 'Desmic\'s laptop (Chrome)' },
   tests: 'tools/games/first-words.mjs',
-  nouns: ['Bellweather', 'First Words', 'first-words', 'Zip', 'Mira', 'Warden', 'Tavi', 'Blossom', 'Loom', 'skiff', 'Skiff', 'Echo & Engine'],
+  nouns: ['Bellweather', 'First Words', 'first-words', 'Zip', 'Mira', 'Warden', 'Tavi', 'Blossom', 'Loom', 'Oriel', 'Chime', 'skiff', 'Skiff', 'Echo & Engine'],
 };

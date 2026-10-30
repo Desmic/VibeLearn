@@ -1,7 +1,7 @@
 {
  "_about": "Voiced lines (tools/voice.mjs). key → clip file and seconds.",
  "model": "gemini-3.8-flash-tts",
- "made": "2026-10-26T14:51:08.904Z",
+ "made": "2026-10-30T12:58:19.564Z",
  "clips": {
   "14631539": {
    "file": "14631539.mp3",
@@ -253,6 +253,26 @@
    "dur": 4.25,
    "speaker": "Neighbour"
   },
+  "bc48e3da": {
+   "file": "bc48e3da.mp3",
+   "dur": 4.51,
+   "speaker": "Oriel"
+  },
+  "01ae6a44": {
+   "file": "01ae6a44.mp3",
+   "dur": 4.66,
+   "speaker": "Oriel"
+  },
+  "8be98265": {
+   "file": "8be98265.mp3",
+   "dur": 5.66,
+   "speaker": "Oriel"
+  },
+  "b798495d": {
+   "file": "b798495d.mp3",
+   "dur": 5.57,
+   "speaker": "Oriel"
+  },
   "37c1d4f1": {
    "file": "37c1d4f1.mp3",
    "dur": 5.57,
@@ -261,6 +281,11 @@
   "afe07781": {
    "file": "afe07781.mp3",
    "dur": 4.1,
+   "speaker": "Warden"
+  },
+  "343d8ee0": {
+   "file": "343d8ee0.mp3",
+   "dur": 3.5,
    "speaker": "Warden"
   },
   "eb796486": {
@@ -276,6 +301,11 @@
   "b9d1c562": {
    "file": "b9d1c562.mp3",
    "dur": 4.08,
+   "speaker": "Warden"
+  },
+  "4c6e0329": {
+   "file": "4c6e0329.mp3",
+   "dur": 4.87,
    "speaker": "Warden"
   },
   "3d3424dc": {

@@ -1,0 +1,134 @@
+{
+  "schema": "vibelearn.learning-design.v1",
+  "id": "llm-first-principles.stop3-warmth",
+  "version": "1-draft",
+  "author": "claude (30 Oct 2026; Desmic: \"you know my tastes\", decisions delegated)",
+  "stop": 3,
+  "place": "Chime Isle",
+  "learning_promise": "The engine doesn't just say its brightest guess: it picks one by chance, in proportion to how bright each guess is. Warmth reshapes the spread: cold sharpens it until only the brightest is left; hot flattens it until even dim guesses come out. A task that needs the exact word wants cold; one that needs a fresh answer wants warm, but not so hot that it stops making sense.",
+  "decisions": [
+    "Warmth is a three-notch dial (cold, warm, hot) on Zip's engine, not a number. Real temperature is continuous; the notches keep the true idea (it reshapes the spread; near zero it always takes the brightest) and fit a phone.",
+    "The mechanism is shown, not told: turning the dial visibly sharpens or flattens the guess fan (brightness is probability), and every cast spins a pointer of light across the fan that lands in proportion to brightness.",
+    "The rules stay deterministic (they are replayed by the server): a decision is judged by the warmth chosen for the task, committed before the cast. The spin the player sees is drawn from the same spread, and shown outcomes always agree with the judgement (a cold lock always opens; a warm lock is shown landing off the brightest guess).",
+    "Sampling tricks beyond temperature (top-k, top-p) are left to an honesty card, not taught as mechanics.",
+    "Sources are free to read; see sources."
+  ],
+  "warmth": {
+    "notches": [
+      "cold",
+      "warm",
+      "hot"
+    ],
+    "honesty_card": "Real engines have a temperature number. Near zero the engine nearly always takes its most likely next piece; around one it samples from its learned spread; higher, unlikely pieces come out more often and the text drifts into nonsense. Many engines also trim the spread first (top-k, top-p) so the oddest pieces can't be picked."
+  },
+  "outcomes": [
+    {
+      "id": "sampling",
+      "observable_capability": "Explain that the same input can give a different next word, because the engine picks by chance weighted by brightness (probability).",
+      "misconception": "The engine always picks its single most likely word; or, a different answer to the same input means it is broken.",
+      "success_evidence": "Commit a prediction of what five cold casts will give before seeing them; first choice recorded apart from retries.",
+      "prerequisites": [
+        "sequence"
+      ]
+    },
+    {
+      "id": "temperature",
+      "observable_capability": "Choose the warmth a task needs before casting: cold for an exact answer, warm for a fresh one, not hot.",
+      "misconception": "Hotter is more creative and so always better; or, randomness means there is no pattern at all.",
+      "success_evidence": "For two machines with opposite needs (an exact lock, a bard who needs a fresh line), the warmth set before each cast is logged; first choice per machine recorded apart from retries.",
+      "prerequisites": [
+        "sampling"
+      ]
+    }
+  ],
+  "sequence": [
+    {
+      "id": "chime-guided",
+      "role": "introduce",
+      "player_goal": "Ask the engine the same thing twice at the chime tower and hear two different answers.",
+      "decision": "None assessed: Zip casts the same ring twice; the pointer of light lands on 'noon' once and 'dusk' once.",
+      "feedback": "The fan shows why: 'noon' is brightest but 'dusk' glows too. The engine picks by brightness, not always the brightest.",
+      "outcomes": [
+        "sampling"
+      ],
+      "assistance": "Demonstration; first success guaranteed.",
+      "completion_evidence": "Action only; not mastery."
+    },
+    {
+      "id": "chime-predict",
+      "role": "practice",
+      "player_goal": "Zip finds the warmth dial. Predict what five casts will say with it turned to cold.",
+      "decision": "predict-cold: the brightest word every time (right) / a different word each time / the dimmest word / nonsense.",
+      "feedback": "Turned cold, the fan sharpens until only 'noon' is lit; five spins land on it five times.",
+      "outcomes": [
+        "sampling",
+        "temperature"
+      ],
+      "assistance": "A wrong prediction can happen; the five casts are shown and the next try is not first.",
+      "completion_evidence": "First prediction logged with correct/incorrect."
+    },
+    {
+      "id": "chime-lock",
+      "role": "changed-problem",
+      "player_goal": "The Warden locked the bell vault with the town's own saying. It opens only to the exact word. Set the warmth, then cast.",
+      "decision": "warmth-for-exact: cold (right) / warm / hot, set before the cast.",
+      "feedback": "Cold always opens it. Warm sometimes lands on a dim guess and the lock grinds; hot sprays oddities and the lock jams.",
+      "outcomes": [
+        "temperature"
+      ],
+      "assistance": "The wrong warmth plays out; retries are not first.",
+      "completion_evidence": "First choice logged."
+    },
+    {
+      "id": "chime-bard",
+      "role": "changed-problem",
+      "player_goal": "The festival bard has to sing a line the crowd hasn't heard before. Set the warmth for the engine's verse, then cast.",
+      "decision": "warmth-for-fresh: warm (right) / cold / hot, set before the cast.",
+      "feedback": "Cold gives the tired line everyone knows (\"Heard it!\"); hot gives word salad (the crowd laughs); warm gives a fresh line that still makes sense, and they cheer.",
+      "outcomes": [
+        "temperature"
+      ],
+      "assistance": "The wrong warmth plays out; retries are not first.",
+      "completion_evidence": "First choice logged; finishing alone is not mastery."
+    }
+  ],
+  "evidence": {
+    "activity": "chime-warmth",
+    "decisions": [
+      "predict-cold",
+      "warmth-for-exact",
+      "warmth-for-fresh"
+    ],
+    "event_shape": "{activity, decision, choice, correct, first, assisted, t}"
+  },
+  "sources": [
+    {
+      "id": "hf-how-to-generate",
+      "title": "Hugging Face blog: How to generate text: using different decoding methods for language generation with Transformers",
+      "url": "https://huggingface.co/blog/how-to-generate",
+      "licence": "free to read",
+      "used_for": "sampling from the next-word distribution; lower temperature sharpens it and near zero equals greedy decoding (with its repetition)"
+    },
+    {
+      "id": "hf-llm-tutorial",
+      "title": "Hugging Face Transformers docs: Text generation",
+      "url": "https://huggingface.co/docs/transformers/llm_tutorial",
+      "licence": "Apache-2.0 (docs source)",
+      "used_for": "greedy vs sampling; temperature, top-k and top-p as generation settings"
+    },
+    {
+      "id": "holtzman-2019",
+      "title": "Holtzman, Buys, Du, Forbes & Choi (2019), The Curious Case of Neural Text Degeneration",
+      "url": "https://arxiv.org/abs/1904.09751",
+      "licence": "free on arXiv",
+      "used_for": "why always taking the most likely word gives bland, repetitive text, and why sampling the far tail gives incoherence (nucleus sampling)"
+    },
+    {
+      "id": "slp3-ch7",
+      "title": "Jurafsky & Martin, Speech and Language Processing (3rd ed. draft), chapter 7: Transformers and Pretraining (decoding and sampling)",
+      "url": "https://web.stanford.edu/~jurafsky/slp3/7.pdf",
+      "licence": "free draft from the authors",
+      "used_for": "textbook account of sampling-based decoding and temperature"
+    }
+  ]
+}

@@ -13,6 +13,7 @@ const OUT = path.resolve('out/src'), SRC = path.resolve('src');
 const load = p => import(pathToFileURL(path.join(OUT, p)).href);
 const { FIRST_WORDS_L1 } = await load('worlds/first-words-story.js');
 const { STOP2_STORY } = await load('worlds/stop2-loom.js');
+const { STOP3_STORY } = await load('worlds/stop3-chime.js');
 const { FIRST_WORDS_CAST: CAST, FIRST_WORDS_SPOKEN: SPOKEN, FIRST_WORDS_DIRECTION: DIRECTION } = await load('worlds/first-words-voice.js');
 const { TOWN_LINES, TOWN_AFTER, TOWN_VOICES } = await load('worlds/bellweather-lines.js');
 const { clipKey, directionFor, cleanText } = await load('kit/voice.js');
@@ -24,7 +25,7 @@ const add = (speaker, text, from) => {
   const key = clipKey(c, spoken, note);
   if (!lines.has(key)) lines.set(key, { key, speaker, voice: c.voice, ...(c.model ? { model: c.model } : {}), ...(c.tempo ? { tempo: c.tempo } : {}), style: directionFor(c, note), text: spoken, shown, from });
 };
-for (const s of [FIRST_WORDS_L1, STOP2_STORY]) {
+for (const s of [FIRST_WORDS_L1, STOP2_STORY, STOP3_STORY]) {
   for (const [id, d] of Object.entries(s.dialogues)) for (const [lid, l] of Object.entries(d)) if (l.speaker) add(l.speaker, l.text, `${s.id}:${id}.${lid}`);
   for (const [id, t] of Object.entries(s.thoughts)) { const v = t.who && s.thoughtVoices?.[t.who]; if (v) for (const x of [t.text].flat()) add(v, x, `${s.id}:thought.${id}`); }
 }

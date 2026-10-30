@@ -35,7 +35,8 @@ export function buildRelay(o: Opts) {
     active = true; g.close(); el.hidden = false; o.host.classList.add('puzzle-mode');
     el.innerHTML = `<div class="relay-head">RELAY · CH <b>${ch()}</b></div><p class="relay-notes">Pinned notes: ${RELAY_NOTES}</p>${dialSvg()}<p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="call" data-action="call">Call on channel ${ch()}</button><button class="quiet" data-act="close">Step away</button></div>`;
   };
-  const words = (msg = 'The line crackles. The relay heard four words. <b>Tap the words it should read</b> to make the next one, then Send.') => {
+  // (run 29: "I already set the dial to 7?": once the line is live, the jam has knocked the dial loose, and it says so)
+  const words = (msg = 'The jam knocked the dial loose: now the relay goes <b>only by the words it reads</b>. It heard four. <b>Tap the ones it should read</b> to make the next word, then Send.') => {
     el.innerHTML = `<div class="relay-head">RELAY · <span class="live">LIVE</span></div><div class="rail-chips">${RELAY_WORDS.map((w, i) => `<button class="chip${pickedNow().has(i) ? ' picked' : ''}" data-w="${i}" data-action="word.${i}">${w}</button>`).join('')}<span class="chip empty">…</span></div><p class="relay-read">${msg}</p><div class="story-choices"><button class="primary" data-act="send" data-action="send">Send</button></div>`;
     el.onclick = e => {
       const b = (e.target as HTMLElement).closest('button'); if (!b) return; e.stopPropagation(); sfx.tap();

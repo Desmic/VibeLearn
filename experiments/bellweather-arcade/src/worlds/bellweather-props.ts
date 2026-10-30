@@ -236,6 +236,43 @@ export function wordLoom(p: { slots?: number }) {
   return g;
 }
 
+/** Chime Isle's tower (Stop 3): a stone plinth with the bell vault's round brass lock on its
+ *  face, an open frame of four posts rising to three tiers of bells, and a pointed cap. The bells,
+ *  the lock wheel and the vault door are left as their own named meshes (`chime-bell-<i>`,
+ *  `chime-lock`, `chime-door`) so the game can swing, turn and open them; the rest is merged. */
+export function chimeTower(p: { tiers?: number }) {
+  const tiers = (p.tiers as number) ?? 3, root = new T.Group(), still = new T.Group(); root.add(still);
+  const W = 1.9, H = 6.4;
+  // plinth in two steps, the vault's arch on its face
+  for (const [w, h, y, c] of [[2.6, .3, .15, '#d9c7a8'], [2.2, 1.9, 1.25, '#e6d6ba']] as const) { const b = new T.Mesh(new RoundedBoxGeometry(w, h, w, 2, .08), stone(c)); b.position.y = y; still.add(b); }
+  const arch = new T.Mesh(new T.TorusGeometry(.56, .1, 8, 20, Math.PI), stone('#f4ead6')); arch.position.set(0, 1.25, 1.11); still.add(arch);
+  const door = new T.Mesh(new T.BoxGeometry(1.0, 1.15, .08), flat(WOOD_DARK)); door.name = 'chime-door'; door.position.set(0, .77, 1.12); root.add(door);
+  const lock = new T.Group(); lock.name = 'chime-lock'; lock.position.set(0, 1.0, 1.18); root.add(lock);
+  const wheel = new T.Mesh(new T.TorusGeometry(.22, .045, 8, 24), flat(BRASS, '#ffd36b', .15)); lock.add(wheel);
+  for (let i = 0; i < 4; i++) { const spoke = new T.Mesh(new T.BoxGeometry(.4, .035, .035), flat(BRASS)); spoke.rotation.z = i * Math.PI / 4; lock.add(spoke); }
+  // four posts, braced at each tier
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const post = new T.Mesh(new T.CylinderGeometry(.09, .12, H - 2.2, 8), stone('#efe2c9')); post.position.set(sx * W / 2 * .8, 2.2 + (H - 2.2) / 2, sz * W / 2 * .8); still.add(post); }
+  const tierY = (i: number) => 3.0 + i * (H - 3.4) / tiers;
+  for (let i = 0; i <= tiers; i++) { const ring = new T.Mesh(new T.BoxGeometry(W * .9, .08, W * .9), flat(i === tiers ? BRASS : WOOD)); ring.position.y = i === tiers ? H : tierY(i) + .55; still.add(ring); }
+  // the cap: a pointed roof and a finial
+  const cap = new T.Mesh(new T.ConeGeometry(W * .78, 1.2, 4), flat('#7b6aa8')); cap.position.y = H + .64; cap.rotation.y = Math.PI / 4; still.add(cap);
+  const fin = new T.Mesh(new T.SphereGeometry(.12, 10, 8), flat(BRASS, '#ffd36b', .3)); fin.position.y = H + 1.32; still.add(fin);
+  // the bells: a big one low, smaller ones above, each hung from its tier
+  const bellMat = flat(BRASS, '#5a3f10', .08);
+  let bi = 0;
+  for (let i = 0; i < tiers; i++) {
+    const n = i === 0 ? 1 : i === 1 ? 2 : 3, size = .46 - i * .1;
+    for (let k = 0; k < n; k++) {
+      const pivot = new T.Group(); pivot.name = `chime-bell-${bi++}`; pivot.position.set((k - (n - 1) / 2) * W * .34, tierY(i) + .5, 0); root.add(pivot);
+      const bell = new T.Mesh(new T.CylinderGeometry(size * .45, size, size * 1.3, 16, 1, true), bellMat); bell.material.side = T.DoubleSide; bell.position.y = -size * .75; pivot.add(bell);
+      const top = new T.Mesh(new T.SphereGeometry(size * .45, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), bellMat); top.position.y = -size * .1; pivot.add(top);
+      const clap = new T.Mesh(new T.SphereGeometry(size * .16, 8, 6), flat(WOOD_DARK)); clap.position.y = -size * 1.25; pivot.add(clap);
+    }
+  }
+  root.userData.still = still;
+  return root;
+}
+
 /** An authored model (public/props/<name>.glb, from authoring/props/) in place of a
  *  code-built stand-in. Preloaded props swap in at once; otherwise the stand-in shows
  *  until the file arrives (and stays if it never does). */
@@ -259,4 +296,6 @@ export const BELLWEATHER_PROPS = {
   clothLine: merged(p => clothLine(p as { len?: number; seed?: number })),
   spoolStack: merged(p => spoolStack(p as { n?: number; seed?: number })),
   lanternPost: merged(p => lanternPost((p.height as number) ?? 1.8)),
+  // (only its still parts merge: the bells, lock and door move)
+  chimeTower: (p: Record<string, unknown>) => { const o = chimeTower(p as { tiers?: number }); mergeStatic(o.userData.still as T.Object3D); o.name = 'chime-tower'; return o; },
 };

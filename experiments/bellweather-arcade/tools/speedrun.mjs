@@ -144,7 +144,7 @@ const playStation = async (id) => {
     if (pressed) continue;
     // 2) a dialogue or a "got it" screen in the way: read on (navigation only, never a tagged choice)
     if (await cardOpen()) { await answer([], 1); continue; }
-    const nav = page.locator('.loom-console button.primary:not([data-action]):visible, .relay-console button.primary:not([data-action]):visible').first();
+    const nav = page.locator(['.loom-console', '.relay-console', '.chime-console'].map(c => `${c} button.primary:not([data-action]):visible`).join(', ')).first();
     if (await nav.count()) { await h.press(nav); await sim(.6); continue; }
     // a tagged control on screen is disabled: the puzzle UI is busy (an animation): wait for it, in game and real time
     if (await page.locator('[data-action]:visible:disabled').count()) {

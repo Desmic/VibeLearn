@@ -17,6 +17,7 @@ export const FIRST_WORDS_CAST: VoiceCast = {
   Zip:       { voice: 'Puck', style: 'a small, brave courier robot: eager, bright, clipped', fx: 'robot' },
   Gate:      { voice: 'Fenrir', style: 'a pompous talking stone gate who loves rules: theatrical, smug, posh British accent' },
   Tavi:      { voice: 'Achird', style: 'a kind young weaver, friendly and a bit flustered' },
+  Oriel:     { voice: 'Sulafat', style: 'a festival bard on a silenced isle of bells: warm, theatrical, a little dramatic, hopeful' },
   Neighbour: { voice: 'Sadaltager', model: LITE, style: 'a cheerful older townsman' },
   Gardener:  { voice: 'Gacrux', model: LITE, style: 'a warm, motherly gardener' },
   // townsfolk greeting Zip as he passes (worlds/bellweather-lines.ts gives each one a voice)

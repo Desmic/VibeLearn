@@ -9,7 +9,7 @@
 //
 // Writes <out>/report.json, <out>/report.md and screenshots. Exit code 1 when a
 // check fails. Segments: title, meet (Mira + attack), spark, skiff (catch game),
-// flight, isle (satchel, notes, gate), relay, loom (Stop 2), resume (save + Continue), menu (tabs, jumping between ways in), finds (stray sparks off the path), views.
+// flight, isle (satchel, notes, gate), relay, loom (Stop 2), chime (Stop 3), resume (save + Continue), menu (tabs, jumping between ways in), finds (stray sparks off the path), views.
 import { harness } from './harness.mjs';
 
 const h = await harness({ title: 'Flow check', outDefault: 'flowcheck', tool: 'flowcheck', lane: 'flow' });
@@ -297,16 +297,71 @@ await segment('loom', async () => {
   check('loom decisions logged, first tries kept apart', ev.length === 3 && ev[0].decision === 'predict-pieces' && ev[0].first && !ev[0].correct && ev[1].first && !ev[1].correct && !ev[2].first && ev[2].correct, JSON.stringify(ev.map(e => [e.decision, e.choice, e.correct, e.first])));
   await h.stars();
   await card('What is it'); await card('Thanks');
-  check('end of Stop 2 reached', /Stop 2 for now/.test(await goal() ?? ''), await goal());
+  check('end of Stop 2 reached: Tavi free, the way on shown', await waitFor(async () => { await page.evaluate(() => window.__arcade.simulate(1)); return /Chime Isle/.test(await goal() ?? ''); }, 60000, 300), await goal());
+});
+
+await segment('chime', async () => {
+  // Stop 3, sampling and warmth: board at Loom Isle's mooring, fly over, the chime tower
+  if (!/Chime Isle/.test(await goal() ?? '')) { await open('&title=0&beat=to-chime'); await page.waitForTimeout(3000); }
+  const moor = await page.evaluate(() => window.__vlGuide.beaconAt?.toArray());
+  // the nearest walkable spot to the mooring (the skiff sits at the isle's edge)
+  const stand = await page.evaluate(([x, z]) => { let best = null, bd = 1e9; for (let r = .4; r <= 2.2; r += .3) for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2, px = x + Math.sin(a) * r, pz = z + Math.cos(a) * r; if (window.__arcade.walkable(px, pz) && r < bd) { bd = r; best = [px, pz]; } } return best; }, [moor[0], moor[2]]);
+  check('the mooring can be reached on foot (a walkable spot within 2.2 m)', !!stand, JSON.stringify(moor));
+  await pose(stand[0], stand[1]); await act('Board');
+  await card('Onward'); await page.waitForTimeout(2500);
+  check('the hop to Chime Isle is flown', await page.evaluate(() => !!window.__vlFlight?.active), '');
+  await page.evaluate(() => window.__arcade.simulate(4)); await shot('chime-hop');
+  for (let i = 0; i < 120 && await page.evaluate(() => !!window.__vlFlight?.active); i++) await page.evaluate(() => window.__arcade.simulate(1));
+  await page.waitForTimeout(1500);
+  check('lands on Chime Isle', /Chime Isle/.test(await page.locator('#place').textContent()), await page.locator('#place').textContent());
+  check('saved at checkpoint "chime"', (await save()) === 'chime', await save());
+  const p = await zip(); check('stands on the raised island (ground lifted)', p[1] > 8.9 && p[1] < 9.5, p[1]);
+  check('goal: find out why the bells are silent', /bells are silent/.test(await goal() ?? ''), await goal());
+  await shot('chime-arrive');
+  const tw = await page.evaluate(() => window.__vlGuide.beaconAt?.toArray());
+  await pose(tw[0], tw[2] + 3.2); await act('chime tower');
+  await card('help'); await card('Let me ask');
+  const C = t => page.locator('.chime-console button', { hasText: t });
+  const settle = async (ms = 4500) => { await page.waitForTimeout(ms); };
+  check('the chime console opens with the guess fan', await page.locator('.chime-console .chime-guess').count() === 5, String(await page.locator('.chime-console .chime-guess').count()));
+  await press(C('Cast')); await settle(); const w1 = await page.locator('.chime-ring .made').textContent();
+  await press(C('Cast again')); await settle(); const w2 = await page.locator('.chime-ring .made').textContent();
+  check('same words in, two different words out (sampling shown)', !!w1 && !!w2 && w1 !== w2, `${w1} / ${w2}`);
+  await shot('chime-twice');
+  await press(C('Next')); await press(C('Got it'));
+  await press(C('different word each time')); await settle(7000);
+  check('cold: five casts, the brightest every time', /five times out of five/.test(await page.locator('.chime-console').innerText()) && await page.evaluate(() => Number(document.querySelector('.chime-guess[data-word="noon"] .chime-pc')?.textContent?.replace('%', '')) >= 95));
+  await shot('chime-cold');
+  await press(C('bell vault'));
+  check('the lock starts at warm (the dial has to be turned for it)', await page.locator('.chime-notch.warm.on').isVisible());
+  await press(page.locator('.chime-console button[data-action="cast.lock"]')); await settle();
+  check('warm at the exact lock: it lands off the brightest and the lock grinds', /grinds/.test(await page.locator('.chime-console').innerText()));
+  await press(C('Try again')); await press(C('Cold')); await page.waitForTimeout(900);
+  await press(page.locator('.chime-console button[data-action="cast.lock"]')); await settle();
+  check('cold at the lock: the vault opens', /vault swings open/.test(await page.locator('.chime-console').innerText()));
+  await shot('chime-vault');
+  await press(C('To the bard'));
+  await press(page.locator('.chime-console button[data-action="cast.bard"]')); await settle();
+  check('cold for the bard: the tired line, "Heard it!"', /Heard it/.test(await page.locator('.chime-console').innerText()));
+  await press(C('Try again')); await press(C('Warm')); await page.waitForTimeout(900);
+  await press(page.locator('.chime-console button[data-action="cast.bard"]'));
+  await page.locator('.star-row').first().waitFor({ timeout: 30000 });
+  check('chime stars', await page.locator('.star-row').first().isVisible());
+  await shot('chime-stars');
+  const ev = (await learning()).filter(e => e.activity === 'chime-warmth');
+  check('chime decisions logged, first tries kept apart', ev.length === 5 && ev[0].decision === 'predict-cold' && !ev[0].correct && ev[0].first && ev[1].decision === 'warmth-for-exact' && ev[1].first && !ev[1].correct && !ev[2].first && ev[2].correct && ev[3].decision === 'warmth-for-fresh' && ev[3].first && !ev[3].correct && !ev[4].first && ev[4].correct, JSON.stringify(ev.map(e => [e.decision, e.choice, e.correct, e.first])));
+  await h.stars();
+  await card('What is it'); await card('Thanks');
+  check('end of Stop 3 reached', await waitFor(async () => { await page.evaluate(() => window.__arcade.simulate(.5)); return /Stop 3 for now/.test(await goal() ?? ''); }, 20000, 300), await goal());
 });
 
 await segment('resume', async () => {
   await open('');
   const label = await page.locator('.title-menu .primary').textContent();
-  check('title offers Continue with the saved place', /Continue: Loom Isle/.test(label), label);
+  check('title offers Continue with the saved place', /Continue: Chime Isle/.test(label), label);
   check('title offers a new run', await page.locator('.title-menu button', { hasText: 'Start a new training run' }).isVisible());
   await press(page.locator('.title-menu .primary')); await page.waitForTimeout(3500);
-  check('continues on Loom Isle', /Loom Isle/.test(await page.locator('#place').textContent()), await page.locator('#place').textContent());
+  check('continues on Chime Isle', /Chime Isle/.test(await page.locator('#place').textContent()), await page.locator('#place').textContent());
 });
 
 // the menu: Game · Play · Settings; Play jumps between the story's chapters and the experiments

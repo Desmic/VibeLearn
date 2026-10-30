@@ -47,8 +47,14 @@ export const helpers = h => {
       await follow(/Board/); await answer([/Onward/]); await until(async () => /Loom Isle/.test(await page.locator('#place').textContent()), 120); await note();
       await playStation('loom-fit');
       await until(() => visible('.star-row'), 20); await note(); await h.stars();
-      await answer([/What is it/, /Thanks/]); await until(async () => /Stop 2 for now/.test(await goal() ?? ''), 10); await note();
-      check('reached the end of Stop 2', /Stop 2 for now/.test(await goal() ?? ''), await goal(), 'fail', 'flow');
+      await answer([/What is it/, /Thanks/]); await until(async () => /Chime Isle/.test(await goal() ?? ''), 40); await note();
+      check('reached the end of Stop 2, the way on to Chime Isle shown', /Chime Isle/.test(await goal() ?? ''), await goal(), 'fail', 'flow');
+      // Stop 3: board again, fly over, the chime tower: cold to be sure, warm to surprise
+      await follow(/Board/); await answer([/Onward/]); await until(async () => /Chime Isle/.test(await page.locator('#place').textContent()), 120); await note();
+      await playStation('chime-warmth');
+      await until(() => visible('.star-row'), 20); await note(); await h.stars();
+      await answer([/What is it/, /Thanks/]); await until(async () => /Stop 3 for now/.test(await goal() ?? ''), 10); await note();
+      check('reached the end of Stop 3', /Stop 3 for now/.test(await goal() ?? ''), await goal(), 'fail', 'flow');
       await shot('end');
     },
   };

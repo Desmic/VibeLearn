@@ -155,7 +155,7 @@ export const STOP2_STORY: StoryScript & { needs: { handlers: string[]; anchors: 
     { id: 'to-loom', goal: { text: 'Board the skiff to Loom Isle', at: 'skiffMoor' }, thoughts: [{ id: 'loom-next', delay: .8 }] },
     { id: 'loom', goal: { text: 'Find out why the loom is jammed', at: 'word-loom' }, place: 'Loom Isle', checkpoint: 'loom', thoughts: [{ id: 'loom-arrive', delay: 1 }] },
     { id: 'loom-puzzle', goal: null },
-    { id: 'loom-done', goal: { text: 'That\'s Stop 2 for now. More isles soon!' }, checkpoint: 'loom-done' },
+    { id: 'loom-done', goal: { text: 'Tavi is free. Mira\'s marks lead on.' }, checkpoint: 'loom-done' },
   ],
   dialogues: {
     hop: { start: { text: 'The skiff follows Mira\'s marks across the sky lanes.', choices: [{ label: 'Onward', kind: 'primary', on: 'board' }] } },

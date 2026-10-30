@@ -7,6 +7,10 @@ import { lambertize } from './painted';
 import { createWorld } from './kit/world';
 import { SKY_ROUTE } from './worlds/sky-route';
 import { LOOM_ISLE } from './worlds/loom-isle';
+import { CHIME_ISLE } from './worlds/chime-isle';
+import { STOP3_STORY, CHIME_STATION, CHIME_RULES } from './worlds/stop3-chime';
+import { buildChime } from './chime';
+import type { Townsperson } from './townsfolk-rig';
 import { BELLWEATHER_PROPS } from './worlds/bellweather-props';
 import { sfx } from './sfx';
 import { buildFlight } from './flight';
@@ -52,11 +56,13 @@ interface Opts {
   enterIsland: (cameraBlockers: T.Object3D[]) => void;
   adopt?: (root: T.Object3D, cameraBlockers: T.Object3D[]) => void; density?: number;
   setGround?: (y: number) => void;   // the height Zip stands at (islands can sit higher)
+  /** a person of the world (animated, seeded look), for isles with their own folk; null without the body kit */
+  person?: (seed: number) => Townsperson | null;
   camera: T.Camera;
   /** how far the camera can go from `from` toward `to` before something solid */
   cameraClear?: (from: T.Vector3, to: T.Vector3) => number;
 }
-type Beat = 'meet' | 'attack' | 'spark' | 'skiff' | 'puzzle' | 'fly' | 'isle' | 'to-loom' | 'loom' | 'loom-puzzle' | 'loom-done';
+type Beat = 'meet' | 'attack' | 'spark' | 'skiff' | 'puzzle' | 'fly' | 'isle' | 'to-loom' | 'loom' | 'loom-puzzle' | 'loom-done' | 'to-chime' | 'chime' | 'chime-puzzle' | 'chime-done';
 
 // Fixed staging at the outlook: Zip's mark facing Mira, and a camera that sees
 // both of them against the open sky (the outlook sits under a canopy).
@@ -75,7 +81,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
   // the sky beyond Bellweather: the next island and generated scenery islands
   // along the flight, shown only once Zip is in the air or on the islands
   const world = createWorld(scene, loadKit('nature-meadow'), { density: o.density, props: BELLWEATHER_PROPS, adopt: o.adopt });
-  world.show('next', false); world.show('route', false);
+  world.show('next', false); world.show('route', false); world.show('next2', false);
   // the Warden's engine on the horizon, where the ship took Mira: a net like Zip's, but vast, its
   // activations climbing it day and night. Seen from the town from the start; nearer each isle.
   const FLIGHT_THOUGHTS = ['seatbelt', 'ring-1', 'ring-veteran', 'ring-miss', 'ring-reply', 'rude', 'warden-flight', 'spire-first', 'voice-is-engine'];
@@ -83,6 +89,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
   (window as unknown as { __vlSpire?: typeof spire }).__vlSpire = spire;
   let spireAt = 0;   // it thinks, now and then: a wave of light from the foot to the crown
   world.add(LOOM_ISLE, 'next');
+  world.add(CHIME_ISLE, 'next2');   // built once Zip is on Loom Isle (seen from there, the next isle on)
   for (const spec of SKY_ROUTE) world.add(spec, 'route');
   let skyShown = false;
   // the wind rings remind Zip of a certain old superhero game; the Warden has played it too
@@ -195,7 +202,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
   (window as unknown as { __vlVoice?: typeof voiceMoment }).__vlVoice = voiceMoment;   // tests
   // stray sparks of his voice, off the beaten path: each found lights a little more of his net, and a
   // glimpse of it shows over his head as it does
-  const awakeBase = () => beat === 'loom-done' ? ZIP_AWAKE.loom : (['meet', 'attack', 'spark', 'skiff', 'puzzle'] as Beat[]).includes(beat) ? ZIP_AWAKE.start : ZIP_AWAKE.skiff;
+  const awakeBase = () => beat === 'chime-done' ? ZIP_AWAKE.chime : beat === 'loom-done' || beat === 'to-chime' || beat.startsWith('chime') ? ZIP_AWAKE.loom : (['meet', 'attack', 'spark', 'skiff', 'puzzle'] as Beat[]).includes(beat) ? ZIP_AWAKE.start : ZIP_AWAKE.skiff;
   const finds = buildFinds(scene, { specs: FIRST_WORDS_FINDS, key: GAME.storage.finds ?? 'vibelearn.finds', color: HOLO.made, camera: o.camera, onFind: (_s, n, total) => {
     const b = awakeBase() + (n - 1) * ZIP_AWAKE.find; voiceMoment.play(b, b + ZIP_AWAKE.find, undefined, true); sfx.chime();
     // the count first, over the glimpse of his net; his thought once it has gone
@@ -262,14 +269,14 @@ export function buildStory(scene: T.Scene, o: Opts) {
     if (!loom.active) return null;
     if (!loomObj) scene.traverse(x => { if (!loomObj && x.name === 'Prop_word_loom') loomObj = x; }); if (!loomObj) return null;
     const p = (loomObj as T.Object3D).getWorldPosition(loomShotV.look), portrait = o.aspect() < .8;
-    loomShotV.pos.set(p.x + 1.7, p.y + (portrait ? 2.4 : 2.0), p.z + (portrait ? 6.2 : 5.2));   // (a little to the side: Zip stands in front of the loom) loomShotV.look.set(p.x, p.y + (portrait ? .2 : 1.4), p.z);
+    loomShotV.pos.set(p.x + 1.7, p.y + (portrait ? 2.4 : 2.0), p.z + (portrait ? 6.2 : 5.2)); loomShotV.look.set(p.x, p.y + (portrait ? .2 : 1.4), p.z);   // (a little to the side: Zip stands in front of the loom)
     return loomShotV;
   };
   const loom = buildLoom({ guide: g, host: o.host, station: loomSt, onWeave: (n, good) => loomGlow.weave(n, good), onShake: () => later(.4, () => stop2.thinkOnce('loom-warden')), onDone: () => loomSt.finish(() => {
     freeTavi(); stop2.dialogue('thanks', { endStop: () => {
       // another piece of his voice is back: his net shows above him and more of it lights
       // (his thought while it lights, not after: run 27 heard "Another coil lit" with nothing lit on screen)
-      enter2('loom-done'); later(.4, () => voiceMoment.play(ZIP_AWAKE.skiff + bonus(), ZIP_AWAKE.loom + bonus(), () => later(4, () => stop2.thinkOnce('loom-pieces'))));
+      enter2('loom-done'); later(.4, () => voiceMoment.play(ZIP_AWAKE.skiff + bonus(), ZIP_AWAKE.loom + bonus(), () => later(4, () => { stop2.thinkOnce('loom-pieces'); later(5, () => enter3('to-chime')); })));
       later(2.2, () => story.thinkOnce('voice-back'));
     } });
   }) });
@@ -310,10 +317,103 @@ export function buildStory(scene: T.Scene, o: Opts) {
     enter('fly'); isle.leave(); o.teleport(o.zip().x, o.zip().z, 0);
     const a = boat.position.clone(), b = LOOM_LAND.clone(), side = new T.Vector3(-(b.z - a.z), 0, b.x - a.x).normalize(), up = LOOM_ISLE.elevation ?? 0;
     const lane = [.2, .4, .6, .8].map(k => a.clone().lerp(b, k).addScaledVector(side, Math.sin(k * Math.PI * 2) * 7).setY(8 + up * k + Math.sin(k * Math.PI) * 3));
-    flight.start(boat, LOOM_LAND, () => { g.hush(FLIGHT_THOUGHTS); boat.position.set(LOOM_LAND.x - 3, boat.position.y, LOOM_LAND.z + 1); landOnLoom(); }, { reveal: LOOM_AT, lane, drones: false, arrive: 'Loom Isle!', goal: 'Fly to Loom Isle' });
+    flight.start(boat, LOOM_LAND, () => { g.hush(FLIGHT_THOUGHTS); boat.position.set(LOOM_LAND.x - 1.6, boat.position.y, LOOM_LAND.z + .2); landOnLoom(); }, { reveal: LOOM_AT, lane, drones: false, arrive: 'Loom Isle!', goal: 'Fly to Loom Isle' });
   };
   const board = () => { action(null); stop2.dialogue('hop', { board: () => readyLoom(flyLoom) }); };
   const talkLoom = () => { action(null); enter2('loom-puzzle'); loomSt.state.phase === 'guided' ? stop2.dialogue('tavi', { openLoom: () => loom.open() }) : loom.open(); };
+
+  // ── Stop 3: Chime Isle (sampling and warmth). Story, station, rules: worlds/stop3-chime.ts; the isle:
+  // worlds/chime-isle.ts; the console: chime.ts ──
+  const chimeXZ = (id: string) => { const [x, z] = entityAt(CHIME_ISLE, id); return new T.Vector3(x, (CHIME_ISLE.elevation ?? 0) + .13, z); };
+  const MOOR2 = LOOM_LAND.clone().add(new T.Vector3(-1.6, 0, .2)),   // (by the landing, in reach from walkable ground: flowcheck)
+    CHIME_LAND = chimeXZ('chime-landing'), CHIME_AT = chimeXZ('chime-tower'), ORIEL_AT = chimeXZ('bard-oriel'), CROWD_AT = chimeXZ('crowd');
+  const stop3 = createScriptRunner(STOP3_STORY, g, {
+    anchors: { chimeMoor: () => MOOR2, 'chime-tower': () => CHIME_AT },
+    onBeat: b => { if (b.checkpoint) save.set(b.checkpoint as Checkpoint); if (b.place) placeName = b.place; },
+    later,
+  });
+  for (const i of validateScript(STOP3_STORY)) (i.level === 'error' ? console.error : console.warn)(`[story] ${i.where}: ${i.msg}`);
+  const enter3 = (b: Beat) => { beat = b; stop3.enter(b); };
+  const chimeSt = createStation(CHIME_STATION, { onEvent: o.onEvent, stars: (title, rows, then) => g.stars(title, rows, then) }, CHIME_RULES);
+  // the tower's moving parts (bells, lock wheel, vault door), found once the isle is dressed
+  const tower = { root: null as T.Object3D | null, bells: [] as { p: T.Object3D; v: number; a: number }[], lock: null as T.Object3D | null, door: null as T.Object3D | null, spinT: 0, jamT: 0, doorK: 0, doorTo: 0 };
+  const findTower = () => {
+    if (tower.root) return true;
+    scene.traverse(x => { if (!tower.root && x.name === 'chime-tower') tower.root = x; }); if (!tower.root) return false;
+    (tower.root as T.Object3D).traverse(x => { if (/^chime-bell-/.test(x.name)) tower.bells.push({ p: x, v: 0, a: 0 }); if (x.name === 'chime-lock') tower.lock = x; if (x.name === 'chime-door') tower.door = x; });
+    return true;
+  };
+  const ringBells = (k = 1, chord = false) => { if (!findTower()) return; tower.bells.forEach((b, i) => { b.v += (chord ? 2.4 : 1.2) * k * (i % 2 ? 1 : -1); if (chord) setTimeout(() => sfx.bell([0, 2, 4, 7, 9, 12][i % 6], .6), i * 140); }); };
+  // Oriel the bard and a small crowd, from the game's people (main supplies them)
+  const people: { p: Townsperson; face: number }[] = [];
+  let oriel: (typeof people)[number] | null = null;
+  const placePeople = () => {
+    if (people.length || !o.person) return;
+    const face = (x: number, z: number) => Math.atan2(CHIME_AT.x - x, CHIME_AT.z - z);
+    const add = (seed: number, x: number, z: number) => { const p = o.person!(seed); if (!p) return null; p.root.position.set(x, CHIME_AT.y, z); p.root.rotation.y = face(x, z); scene.add(p.root); o.solid(x, z, .36); const e = { p, face: p.root.rotation.y }; people.push(e); return e; };
+    oriel = add(211, ORIEL_AT.x, ORIEL_AT.z);
+    for (const [dx, dz, seed] of [[-1.2, .4, 301], [0, 1.1, 302], [1.1, .5, 303], [-.4, -.7, 304]] as const) add(seed, CROWD_AT.x + dx, CROWD_AT.z + dz);
+  };
+  const orielAt = new T.Vector3(); g.anchor('Oriel', () => oriel ? oriel.p.headTop.getWorldPosition(orielAt) : null);
+  const crowd = (what: 'cheer' | 'groan' | 'laugh') => people.forEach((e, i) => { if (e === oriel) return; if (what === 'cheer') setTimeout(() => e.p.wave(), i * 120); else e.p.setBase('Talk'); setTimeout(() => e.p.setBase('Idle'), 2600); });
+  const chime = buildChime({ guide: g, host: o.host, station: chimeSt,
+    onWorld: (what) => {
+      if (what === 'cast') { ringBells(.5); tower.spinT = .8; }
+      if (what === 'vault-opens') { tower.doorTo = 1; ringBells(1.2, true); spire.surge(); }
+      if (what === 'lock-grinds') tower.jamT = .7;
+      if (what === 'lock-jams') { tower.jamT = 1.4; later(.4, () => stop3.thinkOnce('chime-warden')); }
+      if (what === 'crowd-cheers') { crowd('cheer'); ringBells(1.6, true); spire.surge(); }
+      if (what === 'heard-it') crowd('groan');
+      if (what === 'word-salad') crowd('laugh');
+    },
+    onDone: () => chimeSt.finish(() => stop3.dialogue('thanks', { endStop3: () => {
+      enter3('chime-done'); later(.4, () => voiceMoment.play(ZIP_AWAKE.loom + bonus(), ZIP_AWAKE.chime + bonus(), () => later(3, () => stop3.thinkOnce('chime-done'))));
+      later(2.2, () => story.thinkOnce('voice-back'));
+    } })) });
+  // at the tower, a shot that keeps the tower and its bells in the top half of a phone, above the console
+  const chimeShotV = { pos: new T.Vector3(), look: new T.Vector3() };
+  const chimeShot = () => {
+    if (!chime.active) return null;
+    const portrait = o.aspect() < .8, p = CHIME_AT;
+    chimeShotV.pos.set(p.x + 2.4, p.y + (portrait ? 3.4 : 2.6), p.z + (portrait ? 10.5 : 8.5)); chimeShotV.look.set(p.x, p.y + (portrait ? 1.6 : 3.2), p.z);
+    return chimeShotV;
+  };
+  let chimeReady = false;
+  const readyChime = (then: () => void) => {
+    world.show('next2', true);
+    const built = world.islands.find(i => i.spec.id === CHIME_ISLE.id);
+    if (!built) { setTimeout(() => readyChime(then), 200); return; }
+    if (!chimeReady) {
+      chimeReady = true;
+      o.addWalk(CHIME_ISLE.center[0], CHIME_ISLE.center[1], CHIME_ISLE.radius * .86);
+      for (const sld of built.d.solids) o.solid(sld.x, sld.z, sld.r);
+      o.solid(CHIME_AT.x, CHIME_AT.z, 1.45);
+      placePeople(); findTower();
+    }
+    o.enterIsland(built.d.cameraBlockers.filter(b => b.name !== 'island-rock'));
+    then();
+  };
+  const landOnChime = () => {
+    o.setGround?.((CHIME_ISLE.elevation ?? 0)); enter3('chime'); o.teleport(CHIME_LAND.x, CHIME_LAND.z - 1.2, 0);
+  };
+  // the hop to Chime Isle: flown, a lane of five rings, no drones yet
+  const flyChime = () => {
+    const boat = boatRef ?? (() => { const b = skiff.release(); b.position.set(MOOR2.x, b.position.y, MOOR2.z); return b; })(); boatRef = boat;
+    boat.position.set(MOOR2.x, (LOOM_ISLE.elevation ?? 0) + .6, MOOR2.z);
+    enter('fly'); o.teleport(o.zip().x, o.zip().z, 0);
+    const a = boat.position.clone(), b = CHIME_LAND.clone(), side = new T.Vector3(-(b.z - a.z), 0, b.x - a.x).normalize(), up0 = LOOM_ISLE.elevation ?? 0, up1 = CHIME_ISLE.elevation ?? 0;
+    const lane = [.17, .34, .5, .67, .84].map(k => a.clone().lerp(b, k).addScaledVector(side, Math.sin(k * Math.PI * 2) * 8).setY(9 + up0 + (up1 - up0) * k + Math.sin(k * Math.PI) * 4));
+    flight.start(boat, CHIME_LAND, () => { g.hush(FLIGHT_THOUGHTS); boat.position.set(CHIME_LAND.x - 3, boat.position.y, CHIME_LAND.z + 1); landOnChime(); }, { reveal: CHIME_AT, lane, drones: false, arrive: 'Chime Isle!', goal: 'Fly to Chime Isle' });
+  };
+  const board3 = () => { action(null); stop3.dialogue('hop3', { board3: () => readyChime(flyChime) }); };
+  const talkChime = () => { action(null); enter3('chime-puzzle'); chimeSt.state.phase === 'guided' ? stop3.dialogue('bard', { openChime: () => chime.open() }) : chime.open(); };
+  const tickChime = (dt: number) => {
+    for (const e of people) e.p.update(dt, 0, false);
+    if (!tower.root) return;
+    for (const b of tower.bells) { b.v += -b.a * 18 * dt - b.v * 2.2 * dt; b.a += b.v * dt; b.p.rotation.z = b.a * .35; }
+    if (tower.lock) { if (tower.spinT > 0) { tower.spinT -= dt; tower.lock.rotation.z += dt * 9 * tower.spinT; } if (tower.jamT > 0) { tower.jamT -= dt; tower.lock.rotation.z += Math.sin(t * 60) * .04; } }
+    if (tower.door) { tower.doorK += (tower.doorTo - tower.doorK) * Math.min(1, dt * 2); tower.door.position.y = .77 - tower.doorK * 1.2; tower.door.visible = tower.doorK < .98; }
+  };
   const focusPt = new T.Vector3(), tmpLabel = new T.Vector3(), tmp2 = new T.Vector3(), tmp3 = new T.Vector3();
   const sparkFrom = new T.Vector3(), shotPos = new T.Vector3(), shotLook = new T.Vector3(), tmp = new T.Vector3();
 
@@ -472,6 +572,8 @@ export function buildStory(scene: T.Scene, o: Opts) {
     if (beat === 'skiff') return [{ at: PILOT_STONE, r: ECHO ? ECHO_SKIFF_STATION.place.r : SKIFF_ST.place.r }];
     if (beat === 'to-loom') return [{ at: MOOR, r: 2.2 }];
     if ((beat === 'loom' || beat === 'loom-puzzle') && !loom.active) return [{ at: LOOM_AT, r: LOOM_STATION.place.r }];
+    if (beat === 'to-chime') return [{ at: MOOR2, r: 2.2 }];
+    if ((beat === 'chime' || beat === 'chime-puzzle') && !chime.active) return [{ at: CHIME_AT, r: CHIME_STATION.place.r }];
     return [];
   });
   const speakSkiff = () => { action(null); enter('puzzle'); o.teleport(4.0, -11.5, Math.PI / 2); skiff.start(fly); };
@@ -490,12 +592,12 @@ export function buildStory(scene: T.Scene, o: Opts) {
     get finds() { return [finds.count, finds.total] as const; },
     get inCutscene() { return cut >= 0 || opening >= 0; },
     debugTap: (w: string) => skiff.debugTap(w), debugFeed: () => skiff.debugFeed(),
-    get debug() { return { script: S.id, beat, cut, opening, mech: ECHO ? 'echo' : 'classic', echo: echoSt.state, carried: echo.carried, engine: engine.active, loom: loomSt.state, hops, spark: sparkHome.toArray(), stones: skiff.debugStones(), core: skiff.debugCore() }; },
+    get debug() { return { script: S.id, beat, cut, opening, mech: ECHO ? 'echo' : 'classic', echo: echoSt.state, carried: echo.carried, engine: engine.active, loom: loomSt.state, chime: chimeSt.state, hops, spark: sparkHome.toArray(), stones: skiff.debugStones(), core: skiff.debugCore() }; },
     /** what the camera should keep clear sight of (foliage on the way steps aside); null = Zip */
     get focus(): T.Vector3 | null { return cut >= 0 ? focusPt.copy(miraAt).lerp(ship.position, .5) : engine.active ? focusPt.set(PILOT_STONE.x - .4, 2.6, PILOT_STONE.z) : null; },
-    get frozen() { return g.cardOpen || cut >= 0 || opening >= 0 || skiff.active || isle.busy || loom.active || engine.active || voiceMoment.active; },
+    get frozen() { return g.cardOpen || cut >= 0 || opening >= 0 || skiff.active || isle.busy || loom.active || chime.active || engine.active || voiceMoment.active; },
     get shot() {
-      const s = voiceMoment.shot ?? engine.shot ?? skiff.shot ?? flight.shot ?? isle.shot ?? loomShot(); if (s) return s;
+      const s = voiceMoment.shot ?? engine.shot ?? skiff.shot ?? flight.shot ?? isle.shot ?? loomShot() ?? chimeShot(); if (s) return s;
       if ((cut >= 0 || opening >= 0) && shot) return shot;
       if (cut < 0 && !talking) return null;
       // Frame Zip and Mira together on any screen: aim between them and step back until
@@ -514,11 +616,12 @@ export function buildStory(scene: T.Scene, o: Opts) {
     /** where "restart" from the pause menu should put Zip right now:
      *  a point, 'stay' (mid-flight: nothing to restart), or null (town entrance) */
     /** the pause menu's Restart: leave any open puzzle console first */
-    interrupt() { if (loom.active) { loom.close(); if (beat === 'loom-puzzle') beat = 'loom'; } if (engine.active) engine.close(); },
+    interrupt() { if (loom.active) { loom.close(); if (beat === 'loom-puzzle') beat = 'loom'; } if (chime.active) { chime.close(); if (beat === 'chime-puzzle') beat = 'chime'; } if (engine.active) engine.close(); },
     safeSpot(): [number, number, number] | 'stay' | null {
       if (beat === 'fly') return 'stay';
       if (beat === 'isle' || beat === 'to-loom') return [isle.landing.x - 1.2, isle.landing.z - 1.4, 0];
-      if (beat.startsWith('loom')) return [LOOM_LAND.x, LOOM_LAND.z - 1.2, 0];
+      if (beat.startsWith('loom') || beat === 'to-chime') return [LOOM_LAND.x, LOOM_LAND.z - 1.2, 0];
+      if (beat.startsWith('chime')) return [CHIME_LAND.x, CHIME_LAND.z - 1.2, 0];
       return null;
     },
     start(from?: Checkpoint) {
@@ -532,18 +635,24 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (b === 'to-loom') { if (mira) mira.visible = false; placeName = story.beat('isle').place ?? null; beat = 'isle'; o.enterIsland(isle.cameraBlockers); isle.restoreOpen(); setTimeout(() => { o.teleport(isle.landing.x - 1.2, isle.landing.z - 1.4, 0); toLoom(); }, 50); return; }
       if (b === 'loom-done') { if (mira) mira.visible = false; beat = 'loom'; world.show('next', true); world.show('route', true); skyShown = true; readyLoom(() => { landOnLoom(); loomSt.restore(['lift', 'lift', 'lift', 'predict.pieces', 'verb.free', 'who.tavi', 'from.loom', 'weave']); freeTavi(); enter2('loom-done'); }); return; }
       if (b === 'loom') { if (mira) mira.visible = false; beat = 'loom'; world.show('next', true); world.show('route', true); skyShown = true; readyLoom(() => { landOnLoom(); }); return; }
+      // Stop 3: from Loom Isle's mooring (to-chime), or on Chime Isle (chime, chime-done)
+      const loomRules = ['lift', 'lift', 'lift', 'predict.pieces', 'verb.free', 'who.tavi', 'from.loom', 'weave'];
+      if (b === 'to-chime') { if (mira) mira.visible = false; beat = 'loom'; world.show('next', true); world.show('route', true); skyShown = true; readyLoom(() => { landOnLoom(); loomSt.restore(loomRules); taviFree = 1; enter3('to-chime'); }); return; }
+      if (b === 'chime' || b === 'chime-done') { if (mira) mira.visible = false; beat = 'chime'; world.show('next', true); world.show('route', true); skyShown = true; loomSt.restore(loomRules);
+        readyChime(() => { landOnChime(); if (b === 'chime-done') { chimeSt.restore(['cast', 'cast', 'predict.same', 'dial.cold', 'cast.lock', 'dial.warm', 'cast.bard']); tower.doorTo = 1; enter3('chime-done'); } }); return; }
       if (b === 'isle') { if (mira) mira.visible = false; skiff.showLantern(); setTimeout(fly, 50); return; }
       startOpening();
     },
     tick(dt: number) {
       t += dt; tickHolo(dt); sparkFx.tick(dt); const z = o.zip();
-      g.zipClarity = beat === 'loom-done' ? ZIP_CLARITY.loom : ZIP_CLARITY.skiff;   // his voice clears as engine pieces return
-      const sky = beat === 'fly' || beat === 'isle' || beat.startsWith('loom') || beat === 'to-loom';
+      g.zipClarity = beat === 'loom-done' || beat === 'to-chime' || beat.startsWith('chime') ? ZIP_CLARITY.loom : ZIP_CLARITY.skiff;   // his voice clears as engine pieces return
+      const sky = beat === 'fly' || beat === 'isle' || beat.startsWith('loom') || beat === 'to-loom' || beat === 'to-chime' || beat.startsWith('chime');
       if (sky !== skyShown) { skyShown = sky; world.show('next', sky); world.show('route', sky); }
+      if (beat.startsWith('loom') || beat === 'to-chime' || beat.startsWith('chime')) world.show('next2', true);
       if (sky) world.tick(z);
       for (let i = timers.length - 1; i >= 0; i--) if (timers[i].at <= t) { const f = timers[i].fn; timers.splice(i, 1); f(); }
-      skiff.tick(dt); flight.tick(dt); engine.tick(dt); voiceMoment.tick(dt); loomGlow.tick(dt); spire.view(innerHeight * Math.min(2, devicePixelRatio), (o.camera as T.PerspectiveCamera).fov); spire.tick(t, dt, o.camera); if (t - spireAt > 19) { spireAt = t; spire.surge(); }
-      finds.tick(dt, z, !(g.cardOpen || cut >= 0 || opening >= 0 || engine.active || flight.active || voiceMoment.active || isle.busy || loom.active || beat === 'fly')); bells?.tick(dt, beat === 'fly' ? null : o.zip(), t); if (echo.enabled) echo.tick(dt);
+      skiff.tick(dt); flight.tick(dt); engine.tick(dt); voiceMoment.tick(dt); loomGlow.tick(dt); tickChime(dt); spire.view(innerHeight * Math.min(2, devicePixelRatio), (o.camera as T.PerspectiveCamera).fov); spire.tick(t, dt, o.camera); if (t - spireAt > 19) { spireAt = t; spire.surge(); }
+      finds.tick(dt, z, !(g.cardOpen || cut >= 0 || opening >= 0 || engine.active || flight.active || voiceMoment.active || isle.busy || loom.active || chime.active || beat === 'fly')); bells?.tick(dt, beat === 'fly' ? null : o.zip(), t); if (echo.enabled) echo.tick(dt);
       if (beat === 'fly') { shown = '#'; return; }
       // Zip's commentary: suspicious townsfolk, and a nudge when the player idles
       const free = !g.cardOpen && cut < 0 && !skiff.active && !isle.busy && (beat === 'meet' || beat === 'spark' || beat === 'skiff' || beat === 'isle');
@@ -668,6 +777,12 @@ export function buildStory(scene: T.Scene, o: Opts) {
       }
       if (beat === 'isle') { o.camera.getWorldDirection(aimV); const a = isle.tick(dt, z, aimV); if (!g.cardOpen && a) action(a.label, a.use, undefined, a.action); else action(null); return; }
       if (beat === 'to-loom') { isle.tick(dt, z, null); if (!g.cardOpen && Math.hypot(z.x - MOOR.x, z.z - MOOR.z) < 2.2) action(stop2.label('board'), board, over(MOOR, 1.2)); else action(null); return; }
+      if (beat === 'to-chime') { if (!g.cardOpen && Math.hypot(z.x - MOOR2.x, z.z - MOOR2.z) < 2.2) action(stop3.label('board3'), board3, over(MOOR2, 1.2)); else action(null); return; }
+      if (beat.startsWith('chime')) {
+        if ((beat === 'chime' || beat === 'chime-puzzle') && !g.cardOpen && !chime.active && Math.hypot(z.x - CHIME_AT.x, z.z - CHIME_AT.z) < CHIME_STATION.place.r) action(CHIME_STATION.action, talkChime, over(CHIME_AT, 1.6));
+        else action(null);
+        return;
+      }
       if (beat.startsWith('loom')) {
         if (taviFree >= 0 && taviFree < 1) { taviFree = Math.min(1, taviFree + dt / 1.2); cloth.position.y = LOOM_AT.y + .95 - taviFree * 1.2; (cloth.material as T.MeshLambertMaterial).opacity = .92 * (1 - taviFree); tavi.position.z = LOOM_AT.z - .75 + taviFree * 1.9; if (taviFree >= 1) cloth.visible = false; }
         taviHead.position.y = 1.2 + Math.sin(t * 2) * .02;

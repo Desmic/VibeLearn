@@ -932,6 +932,42 @@
    "from": "town:view"
   },
   {
+   "key": "bc48e3da",
+   "speaker": "Oriel",
+   "voice": "Sulafat",
+   "style": "a festival bard on a silenced isle of bells: warm, theatrical, a little dramatic, hopeful",
+   "text": "A courier! The Warden locked our bells and stole my songbook.",
+   "shown": "A courier! The Warden locked our bells and stole my songbook.",
+   "from": "first-words.stop3:bard.start"
+  },
+  {
+   "key": "01ae6a44",
+   "speaker": "Oriel",
+   "voice": "Sulafat",
+   "style": "a festival bard on a silenced isle of bells: warm, theatrical, a little dramatic, hopeful",
+   "text": "A new verse! Mira sang here too. She left you this.",
+   "shown": "A new verse! Mira sang here too. She left you this.",
+   "from": "first-words.stop3:thanks.start"
+  },
+  {
+   "key": "8be98265",
+   "speaker": "Oriel",
+   "voice": "Sulafat",
+   "style": "a festival bard on a silenced isle of bells: warm, theatrical, a little dramatic, hopeful",
+   "text": "A warmth dial. Turn it cold to be sure, warm to surprise.",
+   "shown": "A warmth dial. Turn it cold to be sure, warm to surprise.",
+   "from": "first-words.stop3:thanks.gift"
+  },
+  {
+   "key": "b798495d",
+   "speaker": "Oriel",
+   "voice": "Sulafat",
+   "style": "a festival bard on a silenced isle of bells: warm, theatrical, a little dramatic, hopeful",
+   "text": "The tower answers anyone who asks. It's never said the same thing twice.",
+   "shown": "The tower answers anyone who asks. It's never said the same thing twice.",
+   "from": "first-words.stop3:bard.how"
+  },
+  {
    "key": "416b55b2",
    "speaker": "Tavi",
    "voice": "Achird",
@@ -998,6 +1034,16 @@
    "from": "first-words.l1:warden.shielded"
   },
   {
+   "key": "343d8ee0",
+   "speaker": "Warden",
+   "voice": "Algenib",
+   "tempo": 1.15,
+   "style": "a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts",
+   "text": "I can hear you thinking up there, courier.",
+   "shown": "I can hear you thinking up there, courier.",
+   "from": "first-words.l1:thought.warden-flight"
+  },
+  {
    "key": "eb796486",
    "speaker": "Warden",
    "voice": "Algenib",
@@ -1026,6 +1072,16 @@
    "text": "Thinking, I allow. Talking, I don't.",
    "shown": "Thinking, I allow. Talking, I don't.",
    "from": "first-words.l1:warden.take"
+  },
+  {
+   "key": "4c6e0329",
+   "speaker": "Warden",
+   "voice": "Algenib",
+   "tempo": 1.15,
+   "style": "a villain who hunts thinking machines: cold, unhurried, quietly amused; never shouts",
+   "text": "Turn it up all the way, little courier. See what happens.",
+   "shown": "Turn it up all the way, little courier. See what happens.",
+   "from": "first-words.stop3:thought.chime-warden"
   },
   {
    "key": "3d3424dc",

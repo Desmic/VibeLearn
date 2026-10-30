@@ -49,6 +49,15 @@ for (let i = 0; i < 90 && await page.evaluate(() => !!window.__vlFlight?.active)
 await page.waitForTimeout(1000);
 await probe('loom', 'Word Loom');
 
+// Stop 3: the mooring by Loom Isle's landing (it once sat out of reach of walkable ground: a softlock
+// at the end of Stop 2, found by flowcheck), then the chime tower on Chime Isle
+await h.open('&title=0&beat=to-chime'); await page.waitForTimeout(3000);
+await probe('loom mooring', 'Board', 4);
+{ const m = await beacon(); const stand = await page.evaluate(([x, z]) => { for (let r = .4; r <= 2.2; r += .3) for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; if (window.__arcade.walkable(x + Math.sin(a) * r, z + Math.cos(a) * r)) return [x + Math.sin(a) * r, z + Math.cos(a) * r]; } return null; }, m);
+  if (stand) { await h.pose(stand[0], stand[1]); await h.act('Board'); await card('Onward'); await page.waitForTimeout(2000);
+    for (let i = 0; i < 120 && await page.evaluate(() => !!window.__vlFlight?.active); i++) await sim(1);
+    await page.waitForTimeout(1500); await probe('chime tower', 'chime tower'); } }
+
 // body-wide strips (one step across, longer than 1.2 m): the camera pins in them and a push wedges
 // (run 17, and Claude stuck four minutes in one by Mira's tree). Scanned on a 0.2 m grid.
 const strips = async (name, extra, box) => {

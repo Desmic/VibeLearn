@@ -1,0 +1,355 @@
+{
+  "schemaVersion": "1",
+  "id": "chime.warmth",
+  "version": "1",
+  "state": {
+    "phase": {
+      "type": "enum",
+      "values": [
+        "guided",
+        "predict",
+        "lock",
+        "bard",
+        "done"
+      ],
+      "initial": "guided"
+    },
+    "casts": {
+      "type": "integer",
+      "initial": 0,
+      "min": 0,
+      "max": 2
+    },
+    "warmth": {
+      "type": "enum",
+      "values": [
+        "cold",
+        "warm",
+        "hot"
+      ],
+      "initial": "warm"
+    }
+  },
+  "actions": {
+    "cast": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "guided"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "casts"
+            },
+            "right": 1
+          },
+          "effects": [
+            {
+              "op": "add",
+              "field": "casts",
+              "value": 1
+            },
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "predict"
+            }
+          ],
+          "emits": [
+            "cast",
+            "dial-found"
+          ]
+        },
+        {
+          "effects": [
+            {
+              "op": "add",
+              "field": "casts",
+              "value": 1
+            }
+          ],
+          "emits": [
+            "cast"
+          ]
+        }
+      ]
+    },
+    "predict.same": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "predict"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "lock"
+        },
+        {
+          "op": "set",
+          "field": "warmth",
+          "value": "warm"
+        }
+      ],
+      "emits": [
+        "decide:predict-cold:right:brightest-every-time",
+        "cold-shown"
+      ]
+    },
+    "predict.varied": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "predict"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "lock"
+        },
+        {
+          "op": "set",
+          "field": "warmth",
+          "value": "warm"
+        }
+      ],
+      "emits": [
+        "decide:predict-cold:wrong:different-each-time",
+        "cold-shown"
+      ]
+    },
+    "predict.dimmest": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "predict"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "lock"
+        },
+        {
+          "op": "set",
+          "field": "warmth",
+          "value": "warm"
+        }
+      ],
+      "emits": [
+        "decide:predict-cold:wrong:dimmest",
+        "cold-shown"
+      ]
+    },
+    "predict.nonsense": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "predict"
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "phase",
+          "value": "lock"
+        },
+        {
+          "op": "set",
+          "field": "warmth",
+          "value": "warm"
+        }
+      ],
+      "emits": [
+        "decide:predict-cold:wrong:nonsense",
+        "cold-shown"
+      ]
+    },
+    "dial.cold": {
+      "when": {
+        "op": "in",
+        "left": {
+          "field": "phase"
+        },
+        "right": [
+          "lock",
+          "bard"
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "warmth",
+          "value": "cold"
+        }
+      ]
+    },
+    "dial.warm": {
+      "when": {
+        "op": "in",
+        "left": {
+          "field": "phase"
+        },
+        "right": [
+          "lock",
+          "bard"
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "warmth",
+          "value": "warm"
+        }
+      ]
+    },
+    "dial.hot": {
+      "when": {
+        "op": "in",
+        "left": {
+          "field": "phase"
+        },
+        "right": [
+          "lock",
+          "bard"
+        ]
+      },
+      "effects": [
+        {
+          "op": "set",
+          "field": "warmth",
+          "value": "hot"
+        }
+      ]
+    },
+    "cast.lock": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "lock"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "warmth"
+            },
+            "right": "cold"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "bard"
+            }
+          ],
+          "emits": [
+            "decide:warmth-for-exact:right:cold",
+            "vault-opens"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "warmth"
+            },
+            "right": "warm"
+          },
+          "effects": [],
+          "emits": [
+            "decide:warmth-for-exact:wrong:warm",
+            "lock-grinds"
+          ]
+        },
+        {
+          "effects": [],
+          "emits": [
+            "decide:warmth-for-exact:wrong:hot",
+            "lock-jams"
+          ]
+        }
+      ]
+    },
+    "cast.bard": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "bard"
+      },
+      "branches": [
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "warmth"
+            },
+            "right": "warm"
+          },
+          "effects": [
+            {
+              "op": "set",
+              "field": "phase",
+              "value": "done"
+            }
+          ],
+          "emits": [
+            "decide:warmth-for-fresh:right:warm",
+            "crowd-cheers"
+          ]
+        },
+        {
+          "when": {
+            "op": "eq",
+            "left": {
+              "field": "warmth"
+            },
+            "right": "cold"
+          },
+          "effects": [],
+          "emits": [
+            "decide:warmth-for-fresh:wrong:cold",
+            "heard-it"
+          ]
+        },
+        {
+          "effects": [],
+          "emits": [
+            "decide:warmth-for-fresh:wrong:hot",
+            "word-salad"
+          ]
+        }
+      ]
+    }
+  },
+  "objectives": {
+    "sung": {
+      "when": {
+        "op": "eq",
+        "left": {
+          "field": "phase"
+        },
+        "right": "done"
+      }
+    }
+  }
+}

@@ -297,4 +297,4 @@ export const zipNet = (N = 5) => buildNeuralNet({
   onWake: i => { if (i % 2 === 0) sfx.bell(i / 2, .5); },   // a rising bell scale as his voice lights
 });
 /** how much of Zip's voice is awake after each stop: the net wakes coil by coil */
-export const ZIP_AWAKE = { start: .14, loop: .24, skiff: .5, loom: .7, /** each stray spark found */ find: .025 } as const;
+export const ZIP_AWAKE = { start: .14, loop: .24, skiff: .5, loom: .7, chime: .82, /** each stray spark found */ find: .025 } as const;

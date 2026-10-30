@@ -16,6 +16,7 @@ export const PLAY_MODES: PlayGroup[] = [
       { id: 'ch-gate', label: 'Blossom Isle', set: { beat: 'land' } },
       { id: 'ch-relay', label: 'Blossom Isle, past the Gate', set: { beat: 'gate-open' } },
       { id: 'ch-loom', label: 'Loom Isle', set: { beat: 'loom' } },
+      { id: 'ch-chime', label: 'Chime Isle', set: { beat: 'chime' } },
     ],
   },
   {
