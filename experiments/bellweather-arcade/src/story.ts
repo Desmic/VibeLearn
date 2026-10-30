@@ -34,6 +34,7 @@ import { clearSight } from './canopy';
 import { tickHolo, beam as holoBeam, sparks as holoSparks, HOLO } from './kit/holo';
 import { ZIP_CLARITY } from './worlds/first-words-voice';
 import { buildFarNet } from './kit/far-net';
+import { DEMO_END } from './worlds/first-words-demo';
 import { SPIRE } from './worlds/first-words-spire';
 import { ECHO_SOURCES, ECHO_NEEDED, ECHO_SKIFF_RULES, ECHO_SKIFF_STATION } from './worlds/first-words-echo';
 
@@ -367,9 +368,43 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (what === 'word-salad') crowd('laugh');
     },
     onDone: () => chimeSt.finish(() => stop3.dialogue('thanks', { endStop3: () => {
-      enter3('chime-done'); later(.4, () => voiceMoment.play(ZIP_AWAKE.loom + bonus(), ZIP_AWAKE.chime + bonus(), () => later(3, () => stop3.thinkOnce('chime-done'))));
+      enter3('chime-done'); later(.4, () => voiceMoment.play(ZIP_AWAKE.loom + bonus(), ZIP_AWAKE.chime + bonus(), () => { later(3, () => stop3.thinkOnce('chime-done')); later(3 + DEMO_END.delay, () => startEnding()); }));
       later(2.2, () => story.thinkOnce('voice-back'));
     } })) });
+  // The demo's end: the camera rises behind Zip toward the Warden's engine at dusk, it surges, Zip
+  // says what he sees, and a card closes the demo (keep exploring, or back to the title).
+  let ending = -1; const endV = { pos: new T.Vector3(), look: new T.Vector3() }, endFrom = new T.Vector3();
+  const endCard = document.createElement('div'); endCard.className = 'demo-end'; endCard.hidden = true; o.host.appendChild(endCard);
+  const startEnding = () => {
+    if (ending >= 0 || beat !== 'chime-done' || chime.active) return;
+    // Zip steps to the landing, at the isle's edge facing the engine (from the tower the lens would be in it)
+    const d = SPIRE_MID.clone().sub(CHIME_LAND).setY(0).normalize();
+    o.teleport(CHIME_LAND.x, CHIME_LAND.z - 1.2, Math.atan2(-d.x, -d.z));
+    ending = 0; endFrom.copy(o.zip()); o.host.classList.add('cutscene');
+    later(1.6, () => spire.surge()); later(3.2, () => g.think(DEMO_END.thought.text as string[] | string)); later(5.5, () => spire.surge());
+    later(8.5, () => {
+      const f = finds.count, n = finds.total, C = DEMO_END.card;
+      endCard.innerHTML = `<div class="demo-end-card"><h2></h2>${C.lines.map(() => '<p></p>').join('')}<p class="demo-end-sparks"></p><div class="demo-end-row"><button type="button" data-act="stay" class="primary"></button><button type="button" data-act="title"></button></div></div>`;
+      endCard.querySelector('h2')!.textContent = C.title;
+      endCard.querySelectorAll('p:not(.demo-end-sparks)').forEach((p, i) => { p.textContent = C.lines[i]; });
+      endCard.querySelector('.demo-end-sparks')!.textContent = C.sparks(f, n);
+      (endCard.querySelector('[data-act=stay]') as HTMLButtonElement).textContent = C.stay;
+      (endCard.querySelector('[data-act=title]') as HTMLButtonElement).textContent = C.title_;
+      endCard.hidden = false; (endCard.querySelector('[data-act=stay]') as HTMLButtonElement).focus();
+    });
+  };
+  endCard.addEventListener('click', e => {
+    const act = (e.target as HTMLElement).closest('button')?.dataset.act; if (!act) return;
+    if (act === 'title') { location.reload(); return; }
+    endCard.hidden = true; ending = -1; o.host.classList.remove('cutscene');
+  });
+  const endShot = () => {
+    if (ending < 0) return null;
+    const k = T.MathUtils.smootherstep(Math.min(ending / 9, 1), 0, 1), dir = SPIRE_MID.clone().sub(endFrom).setY(0).normalize();
+    endV.pos.copy(endFrom).addScaledVector(dir, -(3.4 + 4.2 * k)).setY(endFrom.y + 1.7 + 2.6 * k);
+    endV.look.copy(endFrom).addScaledVector(dir, 12).setY(endFrom.y + 2.6).lerp(SPIRE_MID, .03 + .05 * k).y += 9 * k;
+    return endV;
+  };
   // at the tower, a shot that keeps the tower and its bells in the top half of a phone, above the console
   const chimeShotV = { pos: new T.Vector3(), look: new T.Vector3() };
   const chimeShot = () => {
@@ -591,13 +626,15 @@ export function buildStory(scene: T.Scene, o: Opts) {
     /** stray sparks found, of all (for the menu) */
     get finds() { return [finds.count, finds.total] as const; },
     get inCutscene() { return cut >= 0 || opening >= 0; },
+    /** the time of day (sky-mood): how brightly the Warden's engine glows against it */
+    mood(glow: number, haze: number, hazeColor: T.Color) { spire.mood(glow, haze, hazeColor); },
     debugTap: (w: string) => skiff.debugTap(w), debugFeed: () => skiff.debugFeed(),
     get debug() { return { script: S.id, beat, cut, opening, mech: ECHO ? 'echo' : 'classic', echo: echoSt.state, carried: echo.carried, engine: engine.active, loom: loomSt.state, chime: chimeSt.state, hops, spark: sparkHome.toArray(), stones: skiff.debugStones(), core: skiff.debugCore() }; },
     /** what the camera should keep clear sight of (foliage on the way steps aside); null = Zip */
     get focus(): T.Vector3 | null { return cut >= 0 ? focusPt.copy(miraAt).lerp(ship.position, .5) : engine.active ? focusPt.set(PILOT_STONE.x - .4, 2.6, PILOT_STONE.z) : null; },
-    get frozen() { return g.cardOpen || cut >= 0 || opening >= 0 || skiff.active || isle.busy || loom.active || chime.active || engine.active || voiceMoment.active; },
+    get frozen() { return g.cardOpen || ending >= 0 || cut >= 0 || opening >= 0 || skiff.active || isle.busy || loom.active || chime.active || engine.active || voiceMoment.active; },
     get shot() {
-      const s = voiceMoment.shot ?? engine.shot ?? skiff.shot ?? flight.shot ?? isle.shot ?? loomShot() ?? chimeShot(); if (s) return s;
+      const s = endShot() ?? voiceMoment.shot ?? engine.shot ?? skiff.shot ?? flight.shot ?? isle.shot ?? loomShot() ?? chimeShot(); if (s) return s;
       if ((cut >= 0 || opening >= 0) && shot) return shot;
       if (cut < 0 && !talking) return null;
       // Frame Zip and Mira together on any screen: aim between them and step back until
@@ -651,7 +688,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
       if (beat.startsWith('loom') || beat === 'to-chime' || beat.startsWith('chime')) world.show('next2', true);
       if (sky) world.tick(z);
       for (let i = timers.length - 1; i >= 0; i--) if (timers[i].at <= t) { const f = timers[i].fn; timers.splice(i, 1); f(); }
-      skiff.tick(dt); flight.tick(dt); engine.tick(dt); voiceMoment.tick(dt); loomGlow.tick(dt); tickChime(dt); spire.view(innerHeight * Math.min(2, devicePixelRatio), (o.camera as T.PerspectiveCamera).fov); spire.tick(t, dt, o.camera); if (t - spireAt > 19) { spireAt = t; spire.surge(); }
+      if (ending >= 0) ending += dt; skiff.tick(dt); flight.tick(dt); engine.tick(dt); voiceMoment.tick(dt); loomGlow.tick(dt); tickChime(dt); spire.view(innerHeight * Math.min(2, devicePixelRatio), (o.camera as T.PerspectiveCamera).fov); spire.tick(t, dt, o.camera); if (t - spireAt > 19) { spireAt = t; spire.surge(); }
       finds.tick(dt, z, !(g.cardOpen || cut >= 0 || opening >= 0 || engine.active || flight.active || voiceMoment.active || isle.busy || loom.active || chime.active || beat === 'fly')); bells?.tick(dt, beat === 'fly' ? null : o.zip(), t); if (echo.enabled) echo.tick(dt);
       if (beat === 'fly') { shown = '#'; return; }
       // Zip's commentary: suspicious townsfolk, and a nudge when the player idles

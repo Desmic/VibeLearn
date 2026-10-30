@@ -43,13 +43,13 @@ const vert = /* glsl */`
     gl_Position = projectionMatrix * mv;
   }`;
 const fragPts = /* glsl */`
-  uniform vec3 uLattice, uGlow, uSpark; uniform float uHaze; uniform vec3 uHazeColor; uniform float uAdd;
+  uniform vec3 uLattice, uGlow, uSpark; uniform float uHaze; uniform vec3 uHazeColor; uniform float uAdd, uGain;
   varying float vLit; varying float vSeed;
   void main() {
     vec2 c = gl_PointCoord - .5; float r = length(c); if (r > .5) discard;
     float core = smoothstep(.5, .0, r);
     vec3 hot = mix(uGlow, uSpark, step(.9, fract(vSeed * 7.3)));
-    if (uAdd > .5) { gl_FragColor = vec4(hot * core * core * core * vLit * 1.2 * (1. - uHaze * .6), 1.); return; }
+    if (uAdd > .5) { gl_FragColor = vec4(hot * core * core * core * vLit * 1.2 * uGain * (1. - uHaze * .6), 1.); return; }
     vec3 col = mix(uLattice, uHazeColor, uHaze);
     gl_FragColor = vec4(col, smoothstep(.5, .25, r) * .8 * (1. - uHaze * .55));
   }`;
@@ -67,10 +67,10 @@ const lineVert = /* glsl */`
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
   }`;
 const lineFrag = /* glsl */`
-  uniform vec3 uLattice, uGlow; uniform float uHaze, uAdd, uLineA; uniform vec3 uHazeColor;
+  uniform vec3 uLattice, uGlow; uniform float uHaze, uAdd, uLineA, uGain; uniform vec3 uHazeColor;
   varying float vLit;
   void main() {
-    if (uAdd > .5) { gl_FragColor = vec4(uGlow * vLit * .35 * (1. - uHaze * .6), 1.); return; }
+    if (uAdd > .5) { gl_FragColor = vec4(uGlow * vLit * .35 * uGain * (1. - uHaze * .6), 1.); return; }
     gl_FragColor = vec4(mix(uLattice, uHazeColor, uHaze), uLineA * (1. - uHaze * .5));
   }`;
 
@@ -105,7 +105,7 @@ export function buildFarNet(scene: T.Scene, o: FarNetOpts) {
     // a denser net draws each link fainter, so the lattice keeps the same weight at every tier
     uLineA: { value: .2 * Math.min(1, Math.sqrt(48 / per)) },
     uLattice: { value: new T.Color(o.lattice ?? '#3d3566') }, uGlow: { value: new T.Color(o.glow ?? '#d9c4ff') }, uSpark: { value: new T.Color(o.spark ?? '#ffe3a1') },
-    uHaze: { value: o.haze ?? .45 }, uHazeColor: { value: new T.Color(o.hazeColor ?? '#b9d4ea') },
+    uGain: { value: 1 }, uHaze: { value: o.haze ?? .45 }, uHazeColor: { value: new T.Color(o.hazeColor ?? '#b9d4ea') },
   };
   const mat = (add: boolean, v: string, f: string) => new T.ShaderMaterial({ uniforms: { ...shared, uAdd: { value: add ? 1 : 0 } }, vertexShader: v, fragmentShader: f, transparent: true, depthWrite: false, fog: false, blending: add ? T.AdditiveBlending : T.NormalBlending });
   const group = new T.Group(); group.name = 'far-net'; group.position.copy(o.at);
@@ -120,20 +120,22 @@ export function buildFarNet(scene: T.Scene, o: FarNetOpts) {
   const colMat = new T.MeshBasicMaterial({ map: colTex, color: shared.uGlow.value, transparent: true, opacity: .06, depthWrite: false, blending: T.AdditiveBlending, fog: false, side: T.DoubleSide });
   const column = new T.Mesh(new T.PlaneGeometry(radius(.4) * .9, H), colMat); column.position.y = H / 2; column.visible = CR > 0; group.add(column);
   scene.add(group);
-  let surgeT = -1; const camW = new T.Vector3();
+  let surgeT = -1; const camW = new T.Vector3(), colBase = colMat.opacity;
   return {
     group,
     nodes: layers * per, links: (layers - 1) * per * fan,
     tick(t: number, dt: number, camera?: T.Camera) {
       shared.uTime.value = t; group.rotation.y = t * .012;   // turning, very slowly
       if (surgeT >= 0) { surgeT += dt / 3.2; shared.uSurge.value = surgeT < 1 ? surgeT : 0; if (surgeT >= 1) surgeT = -1; }
-      crownMat.opacity = .32 + .08 * Math.sin(t * .7) + (surgeT > .7 ? (1 - Math.abs(surgeT - .85) / .15) * .5 : 0);
+      crownMat.opacity = (.32 + .08 * Math.sin(t * .7) + (surgeT > .7 ? (1 - Math.abs(surgeT - .85) / .15) * .5 : 0)) * Math.min(1.6, shared.uGain.value); colMat.opacity = colBase * Math.min(1.5, shared.uGain.value);
       if (camera) { camera.getWorldPosition(camW); column.rotation.y = Math.atan2(camW.x - group.position.x, camW.z - group.position.z) - group.rotation.y; }
     },
     /** the view, so a node keeps its world size on screen: drawing-buffer height and vertical fov */
     view(heightPx: number, fovDeg: number) { shared.uScale.value = heightPx / (2 * Math.tan(fovDeg * Math.PI / 360)); },
     /** one bright wave from the foot to the crown (a few seconds) */
     surge() { surgeT = 0; },
+    /** time of day: how brightly it glows (1 = daylight design) and how much haze softens it */
+    mood(gain: number, haze?: number, hazeColor?: T.Color) { shared.uGain.value = gain; if (haze !== undefined) shared.uHaze.value = haze; if (hazeColor) shared.uHazeColor.value.copy(hazeColor); },
     set haze(v: number) { shared.uHaze.value = v; },
     dispose() { scene.remove(group); geo.dispose(); lgeo.dispose(); objs.forEach(m => (m.material as T.Material).dispose()); crownMat.dispose(); colMat.dispose(); glowTex.dispose(); colTex.dispose(); column.geometry.dispose(); },
   };

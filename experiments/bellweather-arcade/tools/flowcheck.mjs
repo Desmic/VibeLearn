@@ -353,6 +353,14 @@ await segment('chime', async () => {
   await h.stars();
   await card('What is it'); await card('Thanks');
   check('end of Stop 3 reached', await waitFor(async () => { await page.evaluate(() => window.__arcade.simulate(.5)); return /Stop 3 for now/.test(await goal() ?? ''); }, 20000, 300), await goal());
+  // the day has gone to dusk here: stars out, lamps lit, the Warden's engine at its brightest
+  const mood = await page.evaluate(() => { const m = window.__vlMood?.state; return m ? { stars: m.stars, lamps: m.lamps, glow: m.farGlow } : null; });
+  check('Chime Isle is at dusk (stars, lamps lit, the engine bright)', !!mood && mood.stars > .6 && mood.lamps > .6 && mood.glow > 2, JSON.stringify(mood));
+  // the demo's end: the camera rises toward the engine and a card closes the demo
+  check('the demo ends with a card after Stop 3', await waitFor(async () => { await page.evaluate(() => window.__arcade.simulate(1)); return page.locator('.demo-end:not([hidden])').isVisible(); }, 40000, 400), '');
+  await shot('demo-end');
+  await press(page.locator('.demo-end button', { hasText: 'Keep exploring' }));
+  check('"Keep exploring" closes the card and gives control back', !(await page.locator('.demo-end:not([hidden])').count()) && !(await page.evaluate(() => window.__vlStory.frozen)), '');
 });
 
 await segment('resume', async () => {

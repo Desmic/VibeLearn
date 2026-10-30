@@ -19,6 +19,10 @@ import { buildPaintedLandmarks, tickLandmarks } from './painted-landmarks';
 import { buildPaintedLife } from './painted-life';
 import { buildGuide } from './guide';
 import { buildStory } from './story';
+import { buildSkyMood } from './kit/sky-mood';
+import { WIND } from './kit/wind';
+import { FALL_HAZE } from './painted-landmarks';
+import { FIRST_WORDS_MOODS, FIRST_WORDS_MOOD_ANCHORS } from './worlds/first-words-moods';
 import { runBench } from './kit/bench';
 const BENCH_BUILD='current';
 import { createJoystick, type Joystick } from './kit/joystick';
@@ -371,6 +375,26 @@ if(paintedStudy){
   const vignette=document.createElement('div');vignette.style.cssText='position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 55%,rgba(20,24,60,.22) 100%)';worldElement.appendChild(vignette);
 }
 const paintedParams=new URLSearchParams(location.search);
+// Time of day (kit/sky-mood): the sky, sun, haze and lamps follow where the camera is; one day
+// across the isles. ?mood=0 keeps the old fixed painted sky; ?mood=dusk (etc.) holds one mood.
+const skyMood=paintedStudy&&paintedParams.get('mood')!=='0'?buildSkyMood({moods:FIRST_WORDS_MOODS,anchors:FIRST_WORDS_MOOD_ANCHORS,sun,hemi:ambient,renderer,scene,
+  tint:(()=>{const out:T.Material[]=[];for(const n of ['painted-backdrop','painted-landmarks'])scene.getObjectByName(n)?.traverse(o=>{const m=(o as T.Mesh).material as T.MeshBasicMaterial|undefined;if(m&&!Array.isArray(m)&&m.type==='MeshBasicMaterial'&&!out.includes(m))out.push(m)});return out})()}):null;
+if(skyMood&&paintedParams.get('mood')&&FIRST_WORDS_MOODS[paintedParams.get('mood')!])skyMood.force(paintedParams.get('mood'));
+(window as any).__vlMood=skyMood;
+let moodShadowAt=0,moodBeat='',dimK=0;const shadowCentre=new T.Vector3(Infinity,0,Infinity);
+function lampMarks(){const out:T.Vector3[]=[];scene.traverse(o=>{if(o.userData.lamp){out.push(o.getWorldPosition(new T.Vector3()))}});return out}
+function tickMood(){
+  if(!skyMood)return;
+  const turned=skyMood.tick(elapsed,camera.position,camera);
+  if(dimK>0){sun.intensity*=1-.6*dimK;ambient.intensity*=1-.35*dimK}
+  {const b=story?.beat??'';if(b!==moodBeat){moodBeat=b;skyMood.setLamps(lampMarks())}}
+  story?.mood(skyMood.state.farGlow,skyMood.state.farHaze,skyMood.state.fog);FALL_HAZE.copy(skyMood.state.fog);
+  // the shadow map is drawn once and kept: redraw it when the player has moved to new ground or the sun has turned
+  // (not while flying: the ground is far below and a redraw every few metres would cost frames)
+  if((window as any).__vlFlight?.active)return;
+  const far=Math.hypot(zip.position.x-shadowCentre.x,zip.position.z-shadowCentre.z)>8;
+  if(far||(turned&&elapsed-moodShadowAt>.5)){if(far){shadowCentre.copy(zip.position);skyMood.centre(zip.position)}moodShadowAt=elapsed;renderer.shadowMap.needsUpdate=true}
+}
 const promenade=paintedStudy&&paintedParams.get('promenade')!=='0'?buildPromenade(scene,{box:facade.addSolidBox,circle:facade.addSolidCircle,walk:(x,z)=>walkable(new T.Vector3(x,0,z)),sunDir:sun.position.clone().sub(sun.target.position),renderer,camera,reflections:gfx.reflections}):null;
 let lifeOverlay:import('./kit/overlay').Overlay|null=null;   // the guide's overlay, once the guide exists (it is built after the townsfolk)
 const lifeTick=paintedStudy&&paintedParams.get('life')!=='0'?buildPaintedLife(scene,facade.addSolidCircle,gfx.birds,{clips:libraryClips,kit:bodyKit,camera,host:worldElement.parentElement!,onGreet:from=>{zipRig?.lookAt(from);greetUntil=elapsed+4;waveBackAt=elapsed+.75},speak:(v,t,at)=>guide?.speakAt(v,t,at)??0,overlay:()=>lifeOverlay}):null;
@@ -422,7 +446,7 @@ const labId=paintedParams.get('lab');   // a test area off the story path (lab=u
 const story=guide&&!labId?buildStory(scene,{guide,camera,person:seed=>libraryClips.length?buildTownsperson(seed,libraryClips,bodyKit):null,cameraClear:(a,b)=>{const d=b.clone().sub(a),h=firstCameraHit(a,d,.15);return h?h.distance:d.length()},host:appHost,zip:()=>zip.position,aspect:()=>camera.aspect,
   addBox:facade.addSolidBox,removeBox:facade.removeSolidBox as any,solid:facade.addSolidCircle,addWalk:facade.addWalkRegion,
   onEvent:e=>{const seen=save.learning() as {activity:string,decision:string}[];if(save.decidedBefore(e.activity,e.decision)||seen.some(x=>x.activity===e.activity&&x.decision===e.decision))e.first=false;save.logEvent(e);console.info('[learning]',JSON.stringify(e))},walkable:(x,z)=>walkable(new T.Vector3(x,0,z)),enterIsland:blockers=>{for(const o of [townRoot,scene.getObjectByName('painted-promenade'),scene.getObjectByName('painted-life'),scene.getObjectByName('speech-puzzle')])if(o)o.visible=false;townHidden=true;cameraSolids.push(...blockers);invalidateCameraGeometry();},ride:(p,y)=>{ridePos=p?(ridePos??new T.Vector3()).copy(p):null;rideYaw=y},input:()=>({x:(Number(keys.has('KeyD')||keys.has('ArrowRight')||held.has('right'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')||held.has('left')))||(stick?.vector.x??0),y:(Number(keys.has('KeyW')||keys.has('ArrowUp')||held.has('forward'))-Number(keys.has('KeyS')||keys.has('ArrowDown')||held.has('back')))||(stick?.vector.y??0)}),
-  dim:k=>{sun.intensity=sunBase*(1-.6*k);ambient.intensity=ambBase*(1-.35*k)},
+  dim:k=>{if(skyMood){dimK=k;return}sun.intensity=sunBase*(1-.6*k);ambient.intensity=ambBase*(1-.35*k)},
   density:{low:.5,medium:.8,high:1}[quality().tier],
   adopt:(root,blockers)=>{if(paintedStudy&&paintedParams.get('pbr')!=='1')lambertize(root);if(faders)faders.push(...collectFaders(root));if(townHidden&&blockers.length){cameraSolids.push(...blockers);invalidateCameraGeometry()}renderer.compileAsync(root,camera,scene).catch(()=>{})},
   setGround:(y:number)=>{groundLift=y;zip.position.y=standingY0+groundLift;contact.position.y=contactY0+groundLift},teleport:(x,z,y)=>{guideTargetT=null;zip.position.set(x,(standingY0+groundLift),z);contact.position.set(x,(contactY0+groundLift),z);zip.rotation.y=y;yaw=y;facadeMoveYaw=y;updateLocation();cameraUpdate(1)}}):null;
@@ -535,7 +559,7 @@ function tick(now:number){raf=0;if(paused||document.hidden)return;const dt=Math.
   if(zipRig){if(waveBackAt>0&&elapsed>=waveBackAt){waveBackAt=-1;if(zipSpeed<.4)zipRig.wave()}if(greetUntil>0&&elapsed>greetUntil){greetUntil=-1;zipRig.lookAt(null)}}
   zipRig?.update(dt,zipSpeed,reduced);if(!townHidden)lifeTick?.(dt,reduced,{pos:zip.position,speed:zipSpeed});story?.tick(dt);utterLab?.tick(dt);guide?.tick(dt,zipSpeed,elapsed);
   if(scape){const bs=story?FIRST_WORDS_BEAT_SOUND[story.beat]:null;scape.setMood(title?.active||story?.inCutscene?null:story?bs?.mood??null:'town');scape.setPlace(title?.active?null:bs?.place??'town');scape.tick(dt)}
-  if(!reduced){if(!townHidden)promenade?.tick(dt);if(paintedStudy)tickLandmarks(dt);}tickTrail(dt);cameraUpdate(dt);render();updateStats(now);schedule()}
+  if(!reduced){if(!townHidden)promenade?.tick(dt);if(paintedStudy)tickLandmarks(dt);}tickTrail(dt);cameraUpdate(dt);tickMood();if(!reduced)WIND.value+=dt;render();updateStats(now);schedule()}
 
 let greetUntil=-1,waveBackAt=-1;
 const captureMode=new URLSearchParams(location.search).get('capture')==='1';

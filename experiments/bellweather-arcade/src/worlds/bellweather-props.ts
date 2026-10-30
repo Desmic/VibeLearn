@@ -34,6 +34,8 @@ export function lanternPost(h = 1.7, glow = '#ffd48a') {
   const arm = new T.Mesh(new T.BoxGeometry(.36, .05, .05), flat(WOOD_DARK)); arm.position.set(.16, h - .08, 0); g.add(arm);
   const cage = new T.Mesh(new T.CylinderGeometry(.08, .1, .2, 6), flat('#2f3a4a')); cage.position.set(.3, h - .26, 0); g.add(cage);
   const light = new T.Mesh(new T.SphereGeometry(.07, 10, 8), new T.MeshBasicMaterial({ color: glow })); light.position.copy(cage.position); g.add(light);
+  // where its halo goes when the lamps are lit (kit/sky-mood); a marker survives mergeStatic
+  const mark = new T.Object3D(); mark.userData.lamp = glow; mark.position.copy(cage.position); g.add(mark);
   const cap = new T.Mesh(new T.ConeGeometry(.12, .1, 6), flat(WOOD_DARK)); cap.position.set(.3, h - .12, 0); g.add(cap);
   return g;
 }
@@ -289,6 +291,25 @@ const loomTune = (m: T.Object3D) => m.traverse(o => {
   if (/^Slots/.test(mesh.name)) { mat.emissive.set('#b07bff'); mat.emissiveIntensity = .35; }
 });
 
+/** Festival string lights: a sagging wire from this point (height h0) to `to` (local x, z; height
+ *  h1) with bulbs along it. Each bulb is a lamp (kit/sky-mood lights its halo at dusk). */
+export function festoon(p: { to?: [number, number]; h0?: number; h1?: number; sag?: number; n?: number; seed?: number }) {
+  const g = new T.Group(), [tx, tz] = p.to ?? [4, 0], h0 = p.h0 ?? 3, h1 = p.h1 ?? 1.7, sag = p.sag ?? .5, n = p.n ?? 9;
+  const at = (t: number) => new T.Vector3(tx * t, h0 + (h1 - h0) * t - sag * 4 * t * (1 - t), tz * t);
+  const pts = Array.from({ length: 13 }, (_, i) => at(i / 12));
+  g.add(new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts), 24, .012, 4), flat('#2b2630')));
+  const cols = ['#ffd99a', '#ffb877', '#ffe9c4', '#ff9fb0'];
+  let k = p.seed ?? 0;
+  for (let i = 1; i < n; i++) {
+    const q = at(i / n), c = cols[k++ % cols.length];
+    const bulb = new T.Mesh(new T.SphereGeometry(.05, 8, 6), bulbMat(c)); bulb.position.copy(q).y -= .06; g.add(bulb);
+    const mark = new T.Object3D(); mark.userData.lamp = c; mark.position.copy(bulb.position); g.add(mark);
+  }
+  return g;
+}
+const bulbMats = new Map<string, T.MeshBasicMaterial>();
+const bulbMat = (c: string) => { let m = bulbMats.get(c); if (!m) { m = new T.MeshBasicMaterial({ color: c }); bulbMats.set(c, m); } return m; };
+
 /** Builders a world spec can name in `props` (each merged to few draw calls). */
 const merged = (f: (p: Record<string, unknown>) => T.Object3D) => (p: Record<string, unknown>) => { const o = f(p); mergeStatic(o); return o; };
 export const BELLWEATHER_PROPS = {
@@ -296,6 +317,7 @@ export const BELLWEATHER_PROPS = {
   clothLine: merged(p => clothLine(p as { len?: number; seed?: number })),
   spoolStack: merged(p => spoolStack(p as { n?: number; seed?: number })),
   lanternPost: merged(p => lanternPost((p.height as number) ?? 1.8)),
+  festoon: merged(p => festoon(p as { to?: [number, number]; h0?: number; h1?: number; sag?: number; n?: number; seed?: number })),
   // (only its still parts merge: the bells, lock and door move)
   chimeTower: (p: Record<string, unknown>) => { const o = chimeTower(p as { tiers?: number }); mergeStatic(o.userData.still as T.Object3D); o.name = 'chime-tower'; return o; },
 };

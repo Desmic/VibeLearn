@@ -346,3 +346,14 @@ html[data-input=desktop] .wr-chip.next.tied{width:142px}
 .chime-notch.warm.on{background:#7a5a1e;border-color:#ffd36b;box-shadow:0 0 12px #ffd36b88}
 .chime-notch.hot.on{background:#8a2a3e;border-color:#ff6a9a;box-shadow:0 0 12px #ff6a9a88}
 @media (prefers-reduced-motion:reduce){.chime-bar i{transition:none}}
+/* the demo's end card (story.ts startEnding): over the dusk shot, centred, not a dialogue */
+.demo-end{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:16px 16px max(6vh,24px);z-index:9;background:linear-gradient(180deg,transparent 30%,#0f0d2c99 100%);animation:vl-fade-in 1.2s ease-out}
+.demo-end[hidden]{display:none}
+.demo-end-card{width:min(92vw,420px);padding:22px 20px 18px;border-radius:20px;background:#17183ce6;border:1px solid #ffd99a66;color:#fff4e2;text-align:center;box-shadow:0 18px 50px #05051a99;backdrop-filter:blur(6px)}
+.demo-end-card h2{margin:0 0 10px;font-size:22px;letter-spacing:.04em;color:#ffd99a}
+.demo-end-card p{margin:0 0 8px;font-size:15px;line-height:1.45}
+.demo-end-card .demo-end-sparks{margin:12px 0 16px;font-size:13px;opacity:.8}
+.demo-end-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.demo-end-row button{min-height:44px;padding:0 18px;border-radius:22px;border:1px solid #ffd99a88;background:transparent;color:#fff4e2;font:inherit;font-size:15px;cursor:pointer}
+.demo-end-row button.primary{background:#ffb877;border-color:#ffb877;color:#2a1b3c;font-weight:600}
+@keyframes vl-fade-in{from{opacity:0}to{opacity:1}}

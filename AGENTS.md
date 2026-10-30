@@ -12,9 +12,12 @@
   The Word Loom's last step is now a call the player builds (`kit/assemble-rules.ts`); the relay is next.
   Stop 3 (Chime Isle, sampling and warmth) has the player predict before seeing and set the dial
   before casting; outcomes shown always agree with the deterministic rules.
+- **A demo first** (Desmic, 30 Oct): the title through Stop 3, polished, before Stops 4–7. The isles are
+  one day (morning → golden afternoon → dusk, `kit/sky-mood.ts`), and the demo ends on the Warden's
+  engine at dusk with an end card.
 - **Claude decides for now** (Desmic, 27 Oct: "you know my tastes"), measures before fixing, and runs
   blind AI play-tests; every run and change is logged in `experiments/bellweather-arcade/tools/AI-PLAYTEST.md`.
-  Hosted game: artifact `5767FASV8YrmnZSSh1Ug5y`, version 111 on 30 Oct (playable through Stop 3, Chime Isle).
+  Hosted game: artifact `5767FASV8YrmnZSSh1Ug5y`, version 112 on 30 Oct (playable through Stop 3, Chime Isle, with the demo's ending).
 - What the system gained since 4 Oct (kit modules, checks): `docs/GENERATOR-IMPLEMENTATION-MAP.md`,
   section "Added 25–30 Oct".
 

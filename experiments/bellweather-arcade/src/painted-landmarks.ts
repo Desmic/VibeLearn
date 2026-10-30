@@ -117,12 +117,14 @@ function flushTrees(root: T.Object3D) {
 
 // Falling water: bright streaks scrolling down the ribbon, fading into mist.
 const falls: T.ShaderMaterial[] = [];
+/** the haze colour the far falls fade into (the time of day sets it) */
+export const FALL_HAZE = new T.Color('#b9cbeb');
 function fallMaterial() {
   return new T.ShaderMaterial({
     transparent: true, depthWrite: false, side: T.DoubleSide,
-    uniforms: { uTime: { value: 0 } },
+    uniforms: { uTime: { value: 0 }, uHaze: { value: FALL_HAZE } },
     vertexShader: 'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-    fragmentShader: `uniform float uTime;varying vec2 vUv;
+    fragmentShader: `uniform float uTime;uniform vec3 uHaze;varying vec2 vUv;
       float h(float x){return fract(sin(x*127.1)*43758.5);}
       void main(){
         float x=vUv.x, y=vUv.y;
@@ -131,7 +133,8 @@ function fallMaterial() {
         float body=smoothstep(0.,.18,x)*smoothstep(1.,.82,x);
         float fade=smoothstep(0.,.45,y);
         vec3 col=mix(vec3(.80,.90,1.),vec3(1.),streak);
-        gl_FragColor=vec4(col,(0.55+0.4*streak)*body*fade);
+        // far away: the haze takes most of it, as the fog does the rock (it read as a beam of light)
+        gl_FragColor=vec4(mix(col,uHaze,.62),(0.38+0.25*streak)*body*fade);
       }`,
   });
 }

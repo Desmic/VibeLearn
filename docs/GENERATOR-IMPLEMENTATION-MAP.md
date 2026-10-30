@@ -215,6 +215,27 @@ in `story.ts` to join the levels.
 - **Mooring reachability**: `reachprobe` and `flowcheck` now check that every boat mooring is
   reachable on foot from where the player lands (the Loom mooring was not: a softlock). **check**
 
+- **`src/kit/sky-mood.ts`**: time of day as data. A mood is a whole lighting state (sky
+  gradient with the sun's glow and stars, sun direction/colour, hemisphere fill, haze, exposure,
+  a tint for the painted cloud banks, lamps lit, how bright a far glowing set piece reads).
+  Places name their mood (anchors); moods blend by the camera's distance, so the journey across
+  the isles is a journey through the day. It also moves the sun's shadow frustum with the player
+  and redraws the (otherwise static) shadow map only on new ground. One sky draw and one draw for
+  every lamp halo; nothing scales with the tier. Data: `worlds/first-words-moods.ts` (morning in
+  the garden and on Blossom, golden afternoon at the Loom, dusk at the Chime festival).
+  `?mood=dusk` holds one mood, `?mood=0` turns it off. **lib + data**
+- **`src/kit/wind.ts`**: grass, flowers and leaves sway with sweeping gusts, in the vertex shader
+  (one shared time uniform). Rules match material names; applied to every kit as it loads. **lib**
+- **Lamps**: any prop can mark a lamp (`userData.lamp` on an empty Object3D, which survives
+  `mergeStatic`); the sky mood lights a halo there by time of day. New prop `festoon` (festival
+  string lights between two points). **lib** (marker) + **data** (prop)
+- **The demo's end** (`worlds/first-words-demo.ts`, `story.ts` startEnding): after Stop 3, the
+  camera rises behind Zip toward the Warden's engine at dusk, it surges, a thought, then a card
+  (keep exploring / back to the title). Words are data; the shot is still game code. **data + game**
+- **Why no full-screen bloom**: the painted look grades and clamps colour inside each material,
+  so a bloom pass would catch every white cloud; an HDR multisampled target also costs too much on
+  the F15. Glow is authored instead (halos, the engine's additive layers, scaled by the mood).
+
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).
 2. ~~Station archetype~~ (done 1 Oct: `first-words-stations.ts` + `kit/station.ts`).

@@ -1,6 +1,16 @@
 # Current state — LLM learning-game proof track
 
-**30 October 2026, evening — current state (supersedes everything below).** Hosted game: artifact
+**30 October 2026, night — demo build (supersedes everything below).** Desmic is preparing a
+demo: the title through Stop 3 (Chime Isle), polished, rather than more stops. Version 112 adds
+time of day across the isles (morning on Blossom, golden afternoon at the Loom, dusk with stars,
+festival lights and the Warden's engine glowing at the Chime), wind in the grass and trees, the
+far waterfall no longer reading as a beam of light, shadows that follow the player to every isle
+(before, only the garden had cast shadows), and a demo ending: the camera rises toward the
+engine at dusk, then an end card. Kit: `kit/sky-mood.ts`, `kit/wind.ts`. Next: a blind run on the
+loom build, Stop 3 and the ending (measure: unprompted awe), the F15 frame-rate test on the new
+build, then the relay as a build step.
+
+**30 October 2026, evening.** Hosted game: artifact
 `5767FASV8YrmnZSSh1Ug5y`, version 111. Playable from the title to the end of Stop 3 (Chime Isle).
 Stop 3 teaches sampling and temperature: the engine picks its next word by chance in proportion to
 brightness, and a warmth dial (cold / warm / hot) sharpens or flattens the spread. The player predicts

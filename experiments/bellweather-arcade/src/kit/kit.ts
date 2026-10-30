@@ -1,4 +1,5 @@
 import * as T from 'three';
+import { windifyTree } from './wind';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
@@ -51,6 +52,7 @@ export function loadKit(name: string, base = '/kits/'): Promise<Kit> {
     const loader = loaderFor();
     const url = base + index.glb;
     const doc = await loader.loadAsync(url);
+    windifyTree(doc.scene);   // grass, flowers and leaves sway (kit/wind.ts)
     const nodes = new Map<string, T.Object3D>();
     // three sanitises node names ('.' is dropped), so key by the role extras the kit builder wrote
     doc.scene.traverse(o => { const u = o.userData; if (u.role !== undefined) nodes.set(`${u.role}#${u.variantIndex}${u.lod ? '~' + u.lod : ''}`, o); });
