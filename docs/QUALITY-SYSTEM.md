@@ -119,6 +119,10 @@ The same loop serves a person, a co-creating agent, or a chat where a player mak
    - `tools/playserver.mjs`: a blind tester plays with only the fixed brief;
    - a separate interviewer questions it (recall, probe, moments, predict, ratings, then the reveal);
    - see `tools/AI-PLAYTEST.md`.
+   - Running it (learned in runs 26–29): the interviewer posts one question and **ends its turn**
+     (`ASKED`); the coordinator relays it to the tester, then resumes the interviewer. An
+     interviewer that polls inside one turn waits forever. A resumed tester can lose its
+     screenshots from memory ("they never loaded"): treat that as memory, check the files.
 6. **Person.** When the tool lanes pass, the build is "ready for a person's review".
    - Desmic plays it on the F15 and the laptop.
    - The pause menu shows the build id; his verdict is recorded with `verdict.mjs`.
@@ -153,6 +157,11 @@ The surface is files and commands, nothing hidden:
 - **`breaker` (mixed):** generic probes plus segments with this game's places.
 - **`timing` (mixed):** scenes named in code until cutscenes are data.
 - **`camwalk`:** the opening routes.
+- **`camprobe`, `arrowwalk`, `reachprobe` (mixed):** generic measures (lens behind a wall, Zip
+  pressed into the lens, pushes per metre, walkable pockets) run over this game's town and isle
+  coordinates. Generic once a world spec lists its walkable areas for probes to sample.
+- **`flightprobe`:** generic (it reads the kit flight's `__vlFlight` hook); it opens this game's
+  flight beat by name.
 - **`voice-lines` (mixed):** some lines are still written in game code.
 - **The speedrun's story route** between stations (in `tools/games/first-words.mjs`):
   generic once story beats declare their goal action as data.

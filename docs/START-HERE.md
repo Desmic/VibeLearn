@@ -1,6 +1,6 @@
 # Start here: contributing to VibeLearn without context mistakes
 
-Last checked: 3 October 2026. If something here disagrees with `AGENTS.md`'s dated
+Last checked: 30 October 2026. If something here disagrees with `AGENTS.md`'s dated
 "Current direction", `AGENTS.md` wins; then the newest dated doc. Fix this page when you
 find it wrong.
 
@@ -47,7 +47,8 @@ experiments/bellweather-arcade/      THE GAME
   src/story.ts                       Level 1 + Stop 2 choreography (cutscenes, beats)
   src/worlds/*.ts                    DATA: story scripts, stations, rules, island specs, voice cast, town lines
   src/kit/*.ts                       REUSABLE, game-agnostic: overlay, voice, joystick, input-mode,
-                                     bench, story-script runner, stations, world gen, swing, body kit…
+                                     bench, story-script runner, stations, world gen, swing, body kit,
+                                     neural net, far net (horizon), finds, lane flight, assembly rules…
   src/guide.ts                       goal line, beacon, bubbles, barks, prompts, action prompt, stars
   public/                            models (GLB), kits (CC0, with LICENSES/), voice clips (public/voice)
   authoring/                         Blender scripts that build the models (props/, characters/)
@@ -79,7 +80,7 @@ the checks use.
 
 Test URLs (add to the query, or after `#painted` on the hosted copy):
 `title=0` skip the title · `beat=attack|spark|skiff|isle|land|to-loom|loom` start later ·
-`story=0` free walk · `quality=low|medium|high` · `adaptive=0` fixed resolution ·
+`story=0` free walk · `quality=low|medium|high` · `adaptive=0` fixed resolution · `steer=0` no walk assist ·
 `bench=1` frame-rate test · `mech=classic` old catch game · `voices=0` silent.
 
 ## 5. Verify like this (lessons that cost us a day)
@@ -145,6 +146,8 @@ Network from sandboxes follows the org's allow-list (Claude admin settings). Nod
 - Lanes are never averaged and unresolved is not pass (`docs/QUALITY-SYSTEM.md`). Only Desmic's
   verdict on a build accepts it. Anything he finds that the checks passed becomes an entry in
   `quality/escapes.json`: a general rule and the check that now catches it.
+- Beauty and awe lead (30 Oct): design set pieces for good devices and scale them down by tier; the
+  F15 is the floor, not the ceiling. Puzzles make the player build or predict, never just pick.
 - The system is built for agents too: players will one day make games by chatting with it, and
   orchestrators will run its pipelines. Everything an agent needs is a file or a command
   (`tools/checks.json`, `src/game.ts`, `quality/<build>/quality.json`); keep it that way.

@@ -1,5 +1,16 @@
 # Current state — LLM learning-game proof track
 
+**30 October 2026 — current state (supersedes everything below).** Hosted game: artifact
+`5767FASV8YrmnZSSh1Ug5y`, version 109. Playable from the title to the end of Stop 2 (Loom Isle).
+Since 3 Oct: the Echo & Engine mechanic (Zip's voice as a neural net he sees inside), the Gate and
+relay as tests, stray sparks off the paths, voiced lines, a flown hop to Loom Isle, the flight flown
+across a lane, the Warden's engine on the horizon with an opening crane toward it, island arrivals,
+tap-a-thing-to-use-it, and the Word Loom as a call the player builds. Blind AI play-tests 1–29 and
+every change they led to: `experiments/bellweather-arcade/tools/AI-PLAYTEST.md` (run 29: all nine
+learning items understood unprompted, 7/10, would play on). Direction: `AGENTS.md` "Latest — 30
+October". Open: puzzles still mostly choose-from-buttons outside the loom (relay next), "Turn toward
+the goal" reliability, speech bubbles stacking, Zip's voice-coil thread unnoticed, Stops 3–7.
+
 **3 October 2026 — current state (supersedes everything below).** The official game is
 `experiments/bellweather-arcade` ("Bellweather: The First Words", three.js). Desmic confirmed it on
 3 Oct; PlayCanvas and the review gates below are historical. Built and hosted (claude.ai artifact,

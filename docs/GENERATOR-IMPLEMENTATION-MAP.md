@@ -1,4 +1,4 @@
-# What a generated game is made of — implementation map (1 Oct 2026)
+# What a generated game is made of — implementation map (1 Oct 2026; updated 30 Oct)
 
 `COURSE-GENERATION-GAME-SYSTEM.md` defines the generated package as eight specs. This page
 maps each one to what already runs in the Bellweather proof game
@@ -177,6 +177,33 @@ in `story.ts` to join the levels.
   the game; `fixtures/night-market` is a second game (data only) the data checks also run on.
   See `docs/QUALITY-SYSTEM.md`.
 
+## Added 25–30 Oct: awe, finds, flight, building, and the checks that keep them honest
+
+- **`src/kit/neural-net.ts`**: a small neural net drawn as lights and links (lit, dormant "unlit
+  bulbs", pulses), with `wakeTo`, `preview`, `fire`, `bloom`. Zip's engine uses it, so his voice
+  coming back is the net lighting up. **lib**
+- **`src/kit/far-net.ts`**: a vast net standing on the horizon (thousands of nodes in layers, a dark
+  lattice that reads in daylight, activations climbing it). All motion is in shaders; the tier only
+  sets density (672 / 1,680 / 2,880 nodes, +7 draw calls). Placed by `worlds/first-words-spire.ts`. **lib + data**
+- **`src/kit/finds.ts`**: optional things off the path (a mote with a beam that keeps a steady
+  width on screen, a chime when near, found ones saved). Data: `worlds/first-words-finds.ts`. **lib + data**
+- **`src/kit/lane-flight.ts`**: the flight between places, flown across a lane (the stick slides
+  the craft; rings sit to either side; drones; an arrival shot that shows the place). The game gives
+  its lanes, drones, words, sounds and a HUD host: `worlds/first-words-flight.ts`, `src/flight.ts`. **lib + data**
+- **`src/kit/assemble-rules.ts`**: "build it yourself" steps as GameRulesSpec data: slots with
+  choices that cost, a limit, a check that logs right/wrong with a reason; `assemblyAnswers` for
+  content checks. First use: the Word Loom's call (`worlds/stop2-loom.ts`). Proved in `kittest`. **lib**
+- **Tap to use** (`guide.addTapTargets` / `tapTargetFor`): any source of usable things registers
+  them; a tap on one walks the player up and uses it. Islands and the story register theirs. **lib** (guide)
+- **Walk assist** after the goal arrow (`main.ts`, `?steer=0` off) and the follow camera's wall
+  rules (the lens never behind a wall; fillets so town corners don't trap). **lib**, still in `main.ts`.
+- **Checks added**: `flightprobe` (five kinds of flyer, incl. one who steers for each ring),
+  `camprobe` L (lens behind a wall, in-page), `arrowwalk` (pushes and metres with the assist on
+  and off), `reachprobe` pockets, and in `flowcheck`: tap-to-use, the engine in frame in the
+  opening, the loom build (spill, swap, fit), the Gate's stars after its twist. The harness takes
+  `VL_QUALITY` and `VL_DPR` to look at richer tiers and sharper shots. Escapes recorded in
+  `quality/escapes.json`: wall wedge, fader NaN, walk past the turn, thought out of place, lens in wall.
+
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).
 2. ~~Station archetype~~ (done 1 Oct: `first-words-stations.ts` + `kit/station.ts`).
@@ -184,8 +211,11 @@ in `story.ts` to join the levels.
 4. ~~Interactive entities in WorldSpec~~ (done 1 Oct: `entities` in island specs).
 5. **Server records** (proposal: `docs/SAVE-AND-EVIDENCE.md`): the server replays each
    station's action log with the same rules and keeps the evidence.
-6. **Flight lanes as data**: the hop to Loom Isle is a cut for now; the flight's lane and
-   rings should come from a route spec so any two islands can be joined.
+6. ~~Flight lanes as data~~ (done 30 Oct: `kit/lane-flight.ts`; the Blossom lane, drones and
+   words in `worlds/first-words-flight.ts`). Left: the Loom hop's lane is still computed in
+   `story.ts`; a route spec joining any two islands would generate both.
 7. **A generic puzzle console**: the relay and loom consoles share a shape (head, rail,
    pieces, choices); one data-driven console would let a generator make new stations
    without new UI code.
+   Started 30 Oct: the build step's *rules* are generic (`kit/assemble-rules.ts`); its console is
+   still the loom's own (`loom.ts`). The relay's rebuild as a build step is the second user.

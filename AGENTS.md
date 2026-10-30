@@ -1,5 +1,21 @@
 # vibeLearn — agent instructions
 
+## Latest — 30 October 2026 (read with the 3 October direction below)
+
+- **Beauty and awe are the big aspect now** (Desmic, 27 Oct). The awe should come from what the game
+  teaches: the learning moment made visible (Zip's voice as a glowing neural net; the Warden's engine, a
+  vast net, on the horizon where Mira was taken). Blind testers saying "whoa" unprompted is the measure.
+- **The ceiling is set by good devices; the Galaxy F15 is the floor** (Desmic, 27 Oct). A set piece is
+  designed at full ambition and scales down by quality tier (fewer particles, lower resolution), never
+  a smaller design. The F15 holds ~89 fps on Medium: there is headroom to use.
+- **Puzzles test, not confirm; build, don't pick.** Blind run 29: "mostly picking from 3 or 4 buttons".
+  The Word Loom's last step is now a call the player builds (`kit/assemble-rules.ts`); the relay is next.
+- **Claude decides for now** (Desmic, 27 Oct: "you know my tastes"), measures before fixing, and runs
+  blind AI play-tests; every run and change is logged in `experiments/bellweather-arcade/tools/AI-PLAYTEST.md`.
+  Hosted game: artifact `5767FASV8YrmnZSSh1Ug5y`, version 109 on 30 Oct.
+- What the system gained since 4 Oct (kit modules, checks): `docs/GENERATOR-IMPLEMENTATION-MAP.md`,
+  section "Added 25–30 Oct".
+
 ## Current direction — 3 October 2026 (read this first)
 
 Desmic confirmed on 3 Oct 2026:
