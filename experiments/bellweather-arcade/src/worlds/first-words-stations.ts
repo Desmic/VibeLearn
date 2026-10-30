@@ -35,7 +35,7 @@ export const FIRST_WORDS_L1_STATIONS: StationSpec[] = [
       title: 'The gate is open!',
       rows: [
         { done: 'Opened the gate' },
-        { firstTry: 'context-selection', text: 'Opened it on your first try' },
+        { firstTry: 'context-selection', text: 'Picked notes it could trust, first try' },
         { firstTry: 'destination-prediction', text: 'Guessed where it would open, first try' },
       ],
     },

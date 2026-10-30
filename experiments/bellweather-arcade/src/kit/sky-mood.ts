@@ -61,7 +61,7 @@ const skyFrag = /* glsl */`
   // the sky's colours are authored as seen; when a post pass tone-maps the whole frame (ACES filmic),
   // the sky is sent through the inverse first so it still reads as authored
   vec3 untone(vec3 y) {
-    vec3 o = clamp(uInvOut * clamp(y, 0., .9), 0., .9);
+    vec3 o = clamp(uInvOut * clamp(y, 0., .8), 0., .8);   // (≤ .8: the sky stays under the glow threshold)
     vec3 A = 1. - .983729 * o, B = .0245786 - .432951 * o, C = -(.000090537 + .238081 * o);
     vec3 v = (-B + sqrt(max(B * B - 4. * A * C, 0.))) / (2. * A);
     return max(uInvIn * v, 0.) * .6 / uExposure;
@@ -73,7 +73,8 @@ const skyFrag = /* glsl */`
                       : mix(mix(uHorizon, uMid, smoothstep(0., .2, h)), uZenith, smoothstep(.18, .75, h));
     float s = max(dot(d, normalize(uSunDir)), 0.);
     // a broad warm wash along the horizon on the sun's side, a softer halo, a bright core
-    col += uGlow * uGlowK * (pow(s, 3.) * .35 * exp(-abs(h) * 5.) + pow(s, 24.) * .55 + pow(s, 900.) * 2.2);
+    col += uGlow * uGlowK * (pow(s, 3.) * .35 * exp(-abs(h) * 5.) + pow(s, 24.) * .55);
+    vec3 core = uGlow * uGlowK * pow(s, 900.) * 2.2;   // the sun's disc: kept apart so it alone stays brighter than white
     if (uStars > 0.) {
       vec2 g = vec2(atan(d.z, d.x) * 120., asin(clamp(h, -1., 1.)) * 120.);
       vec2 c = floor(g), f = fract(g) - .5; float r = h21(c);
@@ -111,7 +112,7 @@ const skyFrag = /* glsl */`
         if (front) col += uMoonCol * ring * .35 * uMoon;
       } else col += uMoonCol * ring * .35 * uMoon;
     }
-    if (uUnTone > .5) col = untone(col);
+    if (uUnTone > .5) col = untone(col) + core * 1.2; else col += core;
     gl_FragColor = vec4(col, 1.);
     #include <colorspace_fragment>
   }`;

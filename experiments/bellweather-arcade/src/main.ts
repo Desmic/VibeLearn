@@ -414,8 +414,9 @@ function tickMood(){
   const turned=skyMood.tick(elapsed,camera.position,camera);
   if(dimK>0){sun.intensity*=1-.6*dimK;ambient.intensity*=1-.35*dimK}
   {const b=story?.beat??'';if(b!==moodBeat){moodBeat=b;skyMood.setLamps(lampMarks())}}
-  if(post)post.bloom.strength=.32+.22*Math.min(1,skyMood.state.stars+skyMood.state.lamps*.4);
-  story?.mood(skyMood.state.farGlow,skyMood.state.farHaze,skyMood.state.fog);FALL_HAZE.copy(skyMood.state.fog);
+  if(post)post.bloom.strength=.26+.16*Math.min(1,skyMood.state.stars+skyMood.state.lamps*.4);
+  // (with the glow pass on, the engine's own additive light blooms on top: it needs less of its own)
+  story?.mood(skyMood.state.farGlow*(post?.65:1),skyMood.state.farHaze,skyMood.state.fog);FALL_HAZE.copy(skyMood.state.fog);
   // the shadow map is drawn once and kept: redraw it when the player has moved to new ground or the sun has turned
   // (not while flying: the ground is far below and a redraw every few metres would cost frames)
   if((window as any).__vlFlight?.active)return;
@@ -496,7 +497,7 @@ if(paintedStudy){try{await Promise.race([renderer.compileAsync(scene,camera),new
 // Painted mode: world shadows are rendered once; the moving character uses its
 // soft contact shadow instead of forcing a full shadow-map redraw every step.
 if(paintedStudy){zip.traverse(o=>{o.castShadow=false});renderer.shadowMap.needsUpdate=true;if(contact.material instanceof T.MeshBasicMaterial)contact.material.opacity=.42;}
-const post=usePost?createPaintedPost(renderer,scene,camera,{samples:gfx.antialias?4:0,strength:.45,radius:.6,threshold:1.35}):null;(window as any).__vlPost=post;skyMood?.untone(!!post);
+const post=usePost?createPaintedPost(renderer,scene,camera,{samples:gfx.antialias?4:0,strength:.4,radius:.42,threshold:1.35}):null;(window as any).__vlPost=post;skyMood?.untone(!!post);
 const governor=paintedStudy&&!paintedParams.get('capture')?frameGovernor(gfx.targetMs):null;(window as any).__vlBudget=budget;
 const adaptRes=paintedStudy&&paintedParams.get('adaptive')!=='0'&&!paintedParams.get('capture')?adaptiveResolution(renderer,()=>{renderer.setSize(innerWidth,innerHeight);post?.resize()},gfx.targetMs,gfx.minPixelRatio,gfx.maxPixelRatio,()=>{if(post)post.render();else renderer.render(scene,camera)}):null;
 function render(){

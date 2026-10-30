@@ -74,12 +74,14 @@ export function fadeOccluders(list: Fader[], camera: T.Camera, zipFeet: T.Vector
     }
     // right at the lens, small things and characters go entirely: a dithered townsperson filling the view at
     // a sixth read as TV static over the whole screen (run 30: "fuzzy and staticky" by the old lady)
-    if (fr.depth < 1.4) want = Math.min(want, f.halfW < 1.2 || f.dither ? 0 : .16);
+    if (fr.depth < 1.4) want = 0;
     // the lens in (or brushing) the thing itself: a crown is wide, so its trunk can be metres off
     // while the camera sits in its leaves (run 23: "turn-toward-goal just shoved my camera into a tree",
     // the whole screen pink)
     const dh = Math.max(0, Math.hypot(camPos.x - P.x, camPos.z - P.z) - f.halfW), dv = Math.max(0, P.y + f.y0 - camPos.y, camPos.y - (P.y + f.y1));
-    if (Math.hypot(dh, dv) < .8) want = Math.min(want, f.dither || f.halfW < 1.2 ? 0 : .16);
+    // (31 Oct: anything the lens is in or brushing goes entirely: the Gate's pillar beside the lens, faded
+    // to a sixth, was the "big see-through shapes cutting across the view" of run 30)
+    if (Math.hypot(dh, dv) < .8) want = 0;
     // something big between the camera and Zip that fills a lot of the screen
     // (a tree crown right by the lens) fades too, even if it misses Zip's outline
     if (fr.depth < zr.depth) {

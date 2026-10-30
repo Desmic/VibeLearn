@@ -6,7 +6,8 @@ the reveal; "The art is lovely, especially Chime Isle at dusk with the aurora an
 lights"; 7/10, yes to more; the weakest stretch is still Blossom Isle's camera. Version 114 fixes
 what it found (see `experiments/bellweather-arcade/tools/AI-PLAYTEST.md`, run 30) and adds High's
 glow (bloom) now that Desmic set the ceiling at a ₹40k phone (31 Oct). Checks: flowcheck 131/131,
-speedrun 29/29. Next: Blossom Isle's camera; the unfair stars (spotted, Gate first try).
+speedrun 29/29. v115: nothing at the lens is left as a see-through ghost; the Gate's first-try star
+reads "Picked notes it could trust"; High's glow tuned. Next: a blind run on High's look.
 
 **30 October 2026, late — the dream layer.** Desmic: "focus on
 beauty and awe, a beautiful dream" (the F15 set aside for now: "I think it is fine"). Version 113:

@@ -264,6 +264,15 @@ in `story.ts` to join the levels.
 - **speedrun**: after a station's last move it presses the puzzle UI's own read-on button (the
   relay's made word, the bard's line), waiting for real-time animations. **check**
 
+- **Occluders, again** (31 Oct): anything the lens is in, brushing (0.8 m) or within 1.4 m of
+  fades away entirely; only something between the camera and Zip keeps a see-through sixth. The
+  Gate's pillar beside the lens, faded to a sixth, was run 30's "big see-through shapes". Measured
+  on Blossom Isle: the camera never closer than 3 m after a short walk from 225 spots and headings
+  (the "jammed against Zip's back" of run 30 did not reproduce). camprobe 15/15. **lib**
+- **High's glow, tuned**: the sky never crosses the glow threshold (only the sun's disc does); the
+  engine's own light is scaled down under the glow pass. A screen-space light-shaft pass was tried
+  and dropped: it washed the dusk frame pale instead of drawing shafts.
+
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).
 2. ~~Station archetype~~ (done 1 Oct: `first-words-stations.ts` + `kit/station.ts`).
