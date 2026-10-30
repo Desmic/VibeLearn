@@ -74,6 +74,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
 
   // taps on things in the world: a short press that did not turn the camera
   const taps: TapHandler[] = [], ray = new T.Raycaster(), ndc = new T.Vector2();
+  const tapSources: (() => { at: T.Vector3; r: number }[])[] = [], tapC = new T.Vector3(), tapV = new T.Vector3();
   let tapFrom: { x: number; y: number; t: number } | null = null;
   canvas.addEventListener('pointerdown', e => { tapFrom = { x: e.clientX, y: e.clientY, t: performance.now() }; });
   canvas.addEventListener('pointerup', e => {
@@ -226,6 +227,18 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
     get thinking() { return thoughtT > 0 || thoughts.length > 0; },
     /** drop queued thoughts and hide the current one (a cutscene starts); `skip` ids will never play */
     hush(skip: string[] = []) { thoughts.length = 0; thoughtT = 0; thought.hidden = true; for (const id of skip) thoughtSeen.add(id); },
+    /** things that can be used, for a tap on one to walk Zip up to it (each source gives its ones in use now) */
+    addTapTargets(fn: () => { at: T.Vector3; r: number }[]) { tapSources.push(fn); },
+    /** the usable thing a tap's ray passes closest to (within about a metre of it, under 25 m away), if any */
+    tapTargetFor(r: T.Raycaster) {
+      let best: { at: T.Vector3; r: number } | null = null, bd = 1e9;
+      for (const src of tapSources) for (const th of src()) {
+        const c = tapC.copy(th.at); c.y += .8; const along = tapV.subVectors(c, r.ray.origin).dot(r.ray.direction);
+        if (along < 0 || along > 25) continue;
+        const d = r.ray.distanceToPoint(c); if (d < Math.max(.9, th.r * .55) && d < bd) { bd = d; best = th; }
+      }
+      return best;
+    },
     onTap(fn: TapHandler) { taps.push(fn); return () => { const i = taps.indexOf(fn); if (i >= 0) taps.splice(i, 1); }; },
     // little rewards and reactions pop up over Zip (in the world); with no Zip on screen, mid-screen
     toast(text: string, ms = 1800) {

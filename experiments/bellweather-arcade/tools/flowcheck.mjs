@@ -160,7 +160,16 @@ await segment('isle', async () => {
   await card('OK');
   check('island art dressed (kit loaded)', await waitFor(() => page.evaluate(() => !!window.__vlDebug.scene.getObjectByName('island-dressing:blossom-isle')), 60000));
   await shot('arrive');
-  await pose(2.3, 52.6); await act('satchel'); await card('Got it');
+  // a tap on the satchel from across the landing walks Zip up to it and takes it (run 29: a tap on it did
+  // nothing; 20 steps went on finding that you walk right up first)
+  { const B = [2.3, 53.4], Z = [B[0] - 5, B[1] + 3], y = Math.atan2(-(B[0] - Z[0]), -(B[1] - Z[1]));
+    await page.evaluate(([x, z, y]) => { window.__arcade.pose(x, z, y, .2, 6, y); window.__arcade.simulate(1.5); }, [...Z, y]);
+    const xy = await page.evaluate(([x, z]) => { const C = window.__vlDebug.camera, v = new C.position.constructor(x, .9, z).project(C); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; }, B);
+    await page.touchscreen.tap(xy[0], xy[1]);
+    const took = await waitFor(async () => { await page.evaluate(() => window.__arcade.simulate(.5)); return page.locator('.satchel-bar:not([hidden])').isVisible(); }, 15000, 300);
+    check('a tap on the satchel from across the landing walks Zip there and takes it', took); }
+  if (!(await page.locator('.satchel-bar:not([hidden])').isVisible())) { await pose(2.3, 52.6); await act('satchel'); }
+  await card('Got it');
   // take a note; if the press didn't take (seen once in ~5 laptop runs at software frame rates),
   // say what the prompt was (a real dropped press would be a bug) and press again
   const notes = () => page.locator('.satchel-bar .chip.rail').count();
@@ -189,9 +198,7 @@ await segment('isle', async () => {
   await card('Yes'); await page.waitForTimeout(1200);
   const gateEv = (await learning()).filter(e => e.activity === 'blossom-gate');
   check('gate: first tries kept apart (wrong pair first, right prediction first)', gateEv.some(e => e.decision === 'context-selection' && e.first && !e.correct) && gateEv.some(e => e.decision === 'destination-prediction' && e.first && e.correct), JSON.stringify(gateEv.map(e => [e.decision, e.first, e.correct])));
-  check('gate stars', await page.locator('.star-row').isVisible());
   await shot('gate-open');
-  await h.stars();
   // new orders: the Warden's drone plants his sign in the open Gate; predicted the misconception's
   // way (where Mira really is), the Gate still opens where the note says
   await page.evaluate(() => window.__arcade.simulate(4));   // the drone's flight is in game time (slow frames without a GPU)
@@ -202,6 +209,9 @@ await segment('isle', async () => {
     check('…it opens onto the East Falls, as the planted note says (the view shows in the arch)', await waitFor(() => page.evaluate(() => { const v = window.__vlDebug.scene.getObjectByName('gate-view'); return !!v?.visible && v.material.opacity > .8; }), 15000));
     await shot('gate-orders');
     await press(page.locator('.story-card button[data-action="orders.pull"]'), { timeout: 20000 }); await card('OK'); await page.waitForTimeout(800);
+    // the stars come after the Warden's orders (run 29: before them, "level complete… oh wait, not yet")
+    check('gate stars, after the new orders', await waitFor(() => page.locator('.star-row').isVisible(), 5000, 300));
+    await h.stars();
     const ord = (await learning()).filter(e => e.activity === 'blossom-gate' && e.decision === 'literal-prediction');
     check('the prediction is logged (wrong: "where Mira is")', ord.length === 1 && !ord[0].correct && ord[0].choice === 'gardens', JSON.stringify(ord));
   }

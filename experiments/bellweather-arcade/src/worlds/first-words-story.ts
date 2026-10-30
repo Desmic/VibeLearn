@@ -75,7 +75,8 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     // the net (25 Oct): the voice "coil by coil" went unseen in five runs; now the dark web shows it
     // run 27 took the engine and his voice for "two related things, not the same thing": say it's his voice
     'engine-open': { text: ['My voice… from the inside? I\'m basically a sci-fi movie.', 'One coil lit. The rest of me is still dark.'] },
-    'engine-petals': { text: ['Just “Blossom” on its own? I\'d have said “petals”.', 'It needs the whole line, not the last word.'] },
+    // run 29 read the old wording ("Just “Blossom” on its own?") as about their own cast, which was the whole line
+    'engine-petals': { text: ['“Isle.” Funny: “Blossom” on its own makes me think “petals”.', 'It took the whole line to get “Isle”.'] },
     'engine-wake': { text: 'More of me just lit up. I felt that.' },
     'stray-first': { text: ['A stray spark of my voice. Straight into my net.', 'There must be more. Off the paths, out at the edges.'] },
     'strays-blossom': { text: 'Stray sparks of me out here too. I can feel them.' },

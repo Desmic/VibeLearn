@@ -70,6 +70,8 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
   gateGrp.add(authored(archArt, 'gate-arch', m => m.traverse(o => { const g = o as T.Mesh; if (g.isMesh && /^(Ivy|Flowers)/.test(g.name)) (g.material as T.Material).side = T.DoubleSide; })));
   const sealMat = new T.MeshBasicMaterial({ color: '#7b4fd6', transparent: true, opacity: .6, side: T.DoubleSide, depthWrite: false });
   const seal = new T.Mesh(new T.CircleGeometry(1.62, 32, 0, Math.PI), sealMat); seal.position.set(GATE.x, 1.4, GATE.z); root.add(seal);
+  // the seal fades away when the lens is right at it (run 29: the view swung round "inside the Gate's purple portal")
+  const camW = new T.Vector3(), sealNear = () => { if (!opts.camera) return 1; opts.camera.getWorldPosition(camW); if (Math.abs(camW.x - GATE.x) > 2.4) return 1; return T.MathUtils.smoothstep(Math.abs(camW.z - GATE.z), .3, 1.6); };
   const sealLow = new T.Mesh(new T.PlaneGeometry(3.24, 1.4), sealMat); sealLow.position.set(GATE.x, .7, GATE.z); root.add(sealLow);
   let sealBox: object | null = null;
   // The Gate is a character: a literal-minded doorman with a face on its
@@ -240,7 +242,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       const swap = (then?: () => void) => [{ label: 'Swap my notes', kind: 'primary' as const, act: () => { retry(); then?.(); } }];
       if (o === 'open') {
         markGuess(false); opts.onOpen?.(); melt = 1.2; if (sealBox) opts.removeBox(sealBox); sealBox = null; path.forEach(d => (d.visible = true)); phase = 'open'; renderBag(); sfx.chime();
-        gateSays('Past the Lotus Terraces and up the stairs to the bell gardens! Mind the step.', [{ label: 'Yes!', kind: 'primary', act: () => gateSt.finish(() => { mood = 'idle'; newOrders.start(); }) }], 'happy');
+        gateSays('Past the Lotus Terraces and up the stairs to the bell gardens! Mind the step.', [{ label: 'Yes!', kind: 'primary', act: () => { mood = 'idle'; newOrders.start(); } }], 'happy');   // (the stars come after the Warden's orders: run 29's "level complete… oh wait, not yet", and the twist earned nothing)
       } else if (o === 'decoy') {
         g.close(); gateSays('East Falls! The sign said so. Rules are rules!', [], 'smug');
         setTimeout(() => { trap = 3.2; sfx.zap(); g.close(); markGuess(); }, 1600);
@@ -287,7 +289,6 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       { const mx = (newOrders.board.x + GATE.x) / 2, mz = (newOrders.board.z + GATE.z) / 2, dx = GATE.x - newOrders.board.x, dz = GATE.z - newOrders.board.z, l = Math.hypot(dx, dz) || 1;
         let px = -dz / l, pz = dx / l; if (pz < 0) { px = -px; pz = -pz; }   // the side toward the landing
         newOrders.shotPos.set(mx + px * 6, 3.2, mz + pz * 6); newOrders.shotLook.copy(newOrders.board).setY(1.6); }
-      g.thinkOnce('orders-drone', 'Uh oh. That drone has a very "Warden" look about it.');
     },
     tick(dt: number) {
       if (newOrders.t < 0) return;
@@ -296,6 +297,8 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       newOrders.shotLook.lerp(ordDrone.position, Math.min(1, dt * 2.5));
       if (newOrders.t < 1.6) ordDrone.position.lerpVectors(newOrders.from, tmpV.copy(newOrders.board).setY(newOrders.board.y + .55), k(0, 1.6));
       else if (newOrders.t < 3.2) ordDrone.position.lerpVectors(tmpV.copy(newOrders.board).setY(newOrders.board.y + .55), newOrders.arch, k(1.6, 3.2));
+      // once it's in the shot, by the board (run 29: said while it was still out of frame, "no drone on screen")
+      if (t0 < 1.1 && newOrders.t >= 1.1) g.thinkOnce('orders-drone', 'Uh oh. That drone has a very "Warden" look about it.');
       if (t0 < 1.6 && newOrders.t >= 1.6) {   // it plucks the sign off the board
         const w = boards.find(b => b.n.id === 'warden')!; w.board.visible = false;
         const c = w.board.clone(); c.position.set(0, -.7, 0); c.rotation.set(0, 0, 0); c.scale.setScalar(1.1); ordDrone.add(c); newOrders.carried = c; sfx.catch();
@@ -329,8 +332,8 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
     pull() {
       view.hide(); path.forEach(d => (d.visible = true)); sfx.place();
       gateSays('Ahh. Bell gardens again. Thanks, pal. Nobody ever hands me true things.', [{ label: 'OK', kind: 'primary', act: () => {
-        mood = 'idle'; g.close(); newOrders.busy = false; newOrders.t = -1; goalNow();
-        g.thinkOnce('orders-zip', 'Note to self: whoever writes the notes runs the Gate.');
+        mood = 'idle'; g.close(); newOrders.t = -1;
+        gateSt.finish(() => { newOrders.busy = false; goalNow(); g.thinkOnce('orders-zip', 'Note to self: whoever writes the notes runs the Gate.'); });
       } }], 'happy');
     },
   };
@@ -367,6 +370,8 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
     relaySt.zone(anchors[relaySt.spec.place.anchor], () => phase === 'open' && !relay.active && !newOrders.busy, () => relay.open()),
   ];
 
+  // a tap on one of them walks Zip up and uses it
+  g.addTapTargets(() => phase === 'off' || newOrders.busy || relay.active ? [] : things.filter(th => th.when()).map(th => ({ at: th.at, r: th.r })));
   let trap = 0, flicker = 0, ping = 0, melt = 0, t = 0; const trapAt = new T.Vector3(), look = new T.Vector3();
   return {
     landing: LANDING, cameraBlockers,
@@ -418,7 +423,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       face.rotation.z = mood === 'dizzy' ? Math.sin(t * 5) * .06 : 0;
       if (melt > 0) { melt = Math.max(0, melt - dt); seal.scale.setScalar(melt / 1.2 + .001); sealLow.scale.y = melt / 1.2 + .001; if (melt === 0) seal.visible = sealLow.visible = false; }
       satchelObj.rotation.y += dt; boards.forEach(b => { b.board.rotation.y = Math.sin(t + b.n.at.x) * .05; }); if (miraLantern) miraLantern.rotation.z = Math.sin(t * 1.3) * .12;
-      newOrders.tick(dt); view.tick(dt); sealMat.opacity = (.55 + .08 * Math.sin(t * 2) + (flicker > 0 ? .3 * Math.abs(Math.sin(t * 25)) : 0)) * (1 - view.shown); flicker = Math.max(0, flicker - dt);
+      newOrders.tick(dt); view.tick(dt); sealMat.opacity = (.55 + .08 * Math.sin(t * 2) + (flicker > 0 ? .3 * Math.abs(Math.sin(t * 25)) : 0)) * (1 - view.shown) * sealNear(); flicker = Math.max(0, flicker - dt);
       if (trap > 0) {
         if (trap === 3.2) trapAt.copy(zip);
         trap = Math.max(0, trap - dt); const k = trap > 2.6 ? (3.2 - trap) / .6 : trap < .6 ? trap / .6 : 1;

@@ -78,6 +78,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
   world.show('next', false); world.show('route', false);
   // the Warden's engine on the horizon, where the ship took Mira: a net like Zip's, but vast, its
   // activations climbing it day and night. Seen from the town from the start; nearer each isle.
+  const FLIGHT_THOUGHTS = ['seatbelt', 'ring-1', 'ring-veteran', 'ring-miss', 'ring-reply', 'rude', 'warden-flight', 'spire-first', 'voice-is-engine'];
   const dn = o.density ?? .8, spire = buildFarNet(scene, { ...SPIRE, layers: dn >= 1 ? 24 : dn >= .8 ? 20 : 14, perLayer: dn >= 1 ? 120 : dn >= .8 ? 84 : 48 });
   (window as unknown as { __vlSpire?: typeof spire }).__vlSpire = spire;
   let spireAt = 0;   // it thinks, now and then: a wave of light from the foot to the crown
@@ -272,7 +273,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
     enter('fly'); isle.leave(); o.teleport(o.zip().x, o.zip().z, 0);
     const a = boat.position.clone(), b = LOOM_LAND.clone(), side = new T.Vector3(-(b.z - a.z), 0, b.x - a.x).normalize(), up = LOOM_ISLE.elevation ?? 0;
     const lane = [.2, .4, .6, .8].map(k => a.clone().lerp(b, k).addScaledVector(side, Math.sin(k * Math.PI * 2) * 7).setY(8 + up * k + Math.sin(k * Math.PI) * 3));
-    flight.start(boat, LOOM_LAND, () => { boat.position.set(LOOM_LAND.x - 3, boat.position.y, LOOM_LAND.z + 1); landOnLoom(); }, { reveal: LOOM_AT, lane, drones: false, arrive: 'Loom Isle!', goal: 'Fly to Loom Isle' });
+    flight.start(boat, LOOM_LAND, () => { g.hush(FLIGHT_THOUGHTS); boat.position.set(LOOM_LAND.x - 3, boat.position.y, LOOM_LAND.z + 1); landOnLoom(); }, { reveal: LOOM_AT, lane, drones: false, arrive: 'Loom Isle!', goal: 'Fly to Loom Isle' });
   };
   const board = () => { action(null); stop2.dialogue('hop', { board: () => readyLoom(flyLoom) }); };
   const talkLoom = () => { action(null); enter2('loom-puzzle'); loomSt.state.phase === 'guided' ? stop2.dialogue('tavi', { openLoom: () => loom.open() }) : loom.open(); };
@@ -321,6 +322,8 @@ export function buildStory(scene: T.Scene, o: Opts) {
     enter('fly'); echo.enable(false); o.teleport(o.zip().x, o.zip().z, 0);
     const boat = skiff.release(); boatRef = boat;
     flight.start(boat, isle.landing, r => {
+      // what was said about the flight stays in the flight (run 29: "Flying through rings…" and "Missed one" played after landing)
+      g.hush(FLIGHT_THOUGHTS);
       if (r.rings === r.total) story.thinkOnce('ring-all');
       enter('isle'); o.enterIsland(isle.cameraBlockers); o.teleport(isle.landing.x - 1.2, isle.landing.z - 1.4, 0); boat.position.set(isle.landing.x - 3.2, boat.position.y, isle.landing.z + .8); dimTo = 0;
       story.stars('flight', [true, r.rings >= r.total - 1, r.spotted === 0], { ...r }, () => {
@@ -425,6 +428,15 @@ export function buildStory(scene: T.Scene, o: Opts) {
     later(.9, () => { talking = true; o.teleport(ZIP_MARK.x, ZIP_MARK.z, ZIP_FACE); story.dialogue('mira', miraTalk, 'beep'); });
   };
 
+  // things to use, for a tap on one to walk Zip there and use it (run 29: tapping a thing did nothing)
+  g.addTapTargets(() => {
+    if (g.cardOpen || cut >= 0 || opening >= 0) return [];
+    if (beat === 'meet') return [lanternTask ? { at: PILOT_STONE, r: 2.8 } : { at: miraAt, r: 2.4 }];
+    if (beat === 'skiff') return [{ at: PILOT_STONE, r: ECHO ? ECHO_SKIFF_STATION.place.r : SKIFF_ST.place.r }];
+    if (beat === 'to-loom') return [{ at: MOOR, r: 2.2 }];
+    if ((beat === 'loom' || beat === 'loom-puzzle') && !loom.active) return [{ at: LOOM_AT, r: LOOM_STATION.place.r }];
+    return [];
+  });
   const speakSkiff = () => { action(null); enter('puzzle'); o.teleport(4.0, -11.5, Math.PI / 2); skiff.start(fly); };
   // one context action for whatever is in reach
   let shown = '', shownFn: (() => void) | undefined;

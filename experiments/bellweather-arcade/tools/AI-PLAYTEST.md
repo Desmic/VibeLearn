@@ -1163,3 +1163,37 @@ Medium, so there is headroom to spend.
 - Cost, measured (renderer.info, one frame of the outlook view): +7 draw calls on every tier;
   672 nodes / 1,248 links on Low, 1,680 / 3,192 on Medium, 2,880 / 5,520 on High, beside 220k-310k
   scene triangles. Flowcheck now checks that the opening has the engine in frame.
+
+## Blind run 29: the main game on v107 (30 Oct 2026; student, 19)
+
+First run with the Warden's engine on the horizon, the opening crane and the lane flight. Stopped at
+step 141 (the end of Loom Isle); run 26 (same persona, v99) quit at step 49, before Mira.
+
+- **Understood, unprompted, before the reveal: all nine intent items.** Next word ("one word at a
+  time with each guess fed back in"; predicted that "Blossom" alone would not give "Isle", "the
+  guess comes from everything in the ring"); context ("whoever writes the notes controls the Gate…
+  AI trusting whatever's in its input"); pieces ("tokens"; split "Mira" as "Mi"+"ra" by the game's
+  rule). Teach-back strong.
+- **The engine on the horizon read as meant:** "the huge glowing tower or net… the big AI or the
+  final area" (no question pointed at it). Said at the end: "That was actually fun. Lowkey learned
+  how chatbots work. Would play the next isle."
+- **7/10, yes to the next part.** Not 8: the puzzles are "mostly picking from 3 or 4 buttons… a bit
+  guessable"; walking between them "the weakest part"; a lot of tapping through dialogue. Wants "a
+  puzzle where I had to think harder or build something myself".
+- **Missed:** Zip's voice coming back coil by coil ("I thought they were just flavour"); the stray
+  sparks (ignored).
+
+**Changed after run 29:**
+
+- A tap on a thing that can be used (the satchel, the relay, the Gate, Mira, the pilot stone, the
+  loom, the mooring) walks Zip up to it and uses it ("tapping the satchel does nothing; nothing says
+  you have to walk right up"; 20 steps lost finding it). Game-agnostic: `guide.addTapTargets`.
+- Thoughts about the flight are dropped on landing ("Flying through rings…" played on the isle).
+- The relay's channel-3 fallback says why the dial didn't count: "The dial says 7, but on a jammed
+  line the relay goes only by the words it reads" (it felt "a bit unfair… I already set the dial").
+- The Gate's stars come after the Warden's orders, not before (the twist "didn't seem to count").
+- "That drone has a very Warden look" waits until the drone is in the shot.
+- The repair's "petals" line reworded so it doesn't sound like a comment on the player's cast.
+- The Gate's violet seal fades when the lens is right at it (the view swung "inside the portal").
+- Open: "Turn toward the goal" felt unreliable; bubbles stacking (board labels over Zip's thoughts,
+  the static bark under "Is this Mario?"); puzzles as button-picking; the voice-coil thread.

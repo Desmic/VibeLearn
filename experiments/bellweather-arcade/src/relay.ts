@@ -68,7 +68,8 @@ export function buildRelay(o: Opts) {
     sfx.boing();
     const msg = kind === 'jammed' ? 'It read the Warden\'s word too, so it sent <b>“Channel 7. Surrender. Mira, surrender, surrender…”</b> Mira: “Zip?! Never!”'
       : kind === 'newest' ? 'It only read “it\'s”… so it sent <b>“it\'s it\'s it\'s it\'s”</b>. Mira: “…Zip, are you stuck?”'
-      : kind === 'no-card' ? 'No channel card, so it sent the call to channel 3. <b>Warden:</b> “Hello again.”'
+      // run 29: "I already set the dial to 7?… a bit unfair": say why the dial didn't count (that is the lesson)
+      : kind === 'no-card' ? 'The dial says 7, but on a jammed line the relay goes only by the words it reads. No “Channel 7.” among them, so it fell back to channel 3. <b>Warden:</b> “Hello again.”'
         : 'Words missing, so it sent <b>“Mira… um… it\'s”</b>. Static swallows the rest.';
     if (kind === 'no-card' || kind === 'jammed') sfx.whisper();
     words(msg + ' Try again.');
