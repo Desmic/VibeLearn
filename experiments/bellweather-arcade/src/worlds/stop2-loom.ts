@@ -1,4 +1,5 @@
 import type { Expr, GameRulesSpec } from '../kit/game-rules';
+import { assemblyRules, assemblyAnswers } from '../kit/assemble-rules';
 import type { StationSpec } from '../kit/station';
 import type { StoryScript } from '../kit/story-script';
 
@@ -35,15 +36,14 @@ export const LOOM_PARTS = {
 export type LoomPart = keyof typeof LOOM_PARTS;
 const cost = (o: { pieces: readonly (readonly string[])[] }) => o.pieces.flat().length;
 
-// one part's actions: put a choice on the rail (when that part is empty, adding its pieces) or take it off
-// (taking off subtracts whatever is there)
-const partActions = (part: LoomPart) => {
-  const out: Record<string, any> = {};
-  for (const o of LOOM_PARTS[part]) out[`${part}.${o.id}`] = { when: { op: 'and', args: [eq(f('phase'), 'build'), eq(f(part), 'none')] }, effects: [set(part, o.id), { op: 'add', field: 'pieces', value: cost(o) }], emits: ['part-placed'] };
-  out[`${part}.clear`] = { when: { op: 'and', args: [eq(f('phase'), 'build'), { op: 'ne', left: f(part), right: 'none' }] },
-    branches: LOOM_PARTS[part].map(o => ({ when: eq(f(part), o.id), effects: [set(part, 'none'), { op: 'add', field: 'pieces', value: -cost(o) }], emits: ['part-cleared'] })) };
-  return out;
-};
+// the build step's rules (kit/assemble-rules.ts): one slot per part, its cost in pieces, six at most
+const LOOM_BUILD = assemblyRules({
+  slots: Object.fromEntries((Object.keys(LOOM_PARTS) as LoomPart[]).map(p => [p, LOOM_PARTS[p].map(o => ({ id: o.id, cost: cost(o) }))])),
+  limit: 6, costField: 'pieces', when: eq(f('phase'), 'build'),
+  // weave: the loom splits the call; it frees Tavi only if every piece fits on the rail
+  check: { action: 'weave', decision: 'build-call', right: { choice: 'fits', effects: [set('phase', 'done')], emits: ['tavi-free'] },
+    wrong: [{ when: { op: 'in', left: f('verb'), right: ['unhex', 'disenchant'] }, choice: 'short-in-letters', emits: ['spills'] }, { choice: 'too-many-pieces', emits: ['spills'] }] },
+});
 
 export const LOOM_RULES: GameRulesSpec = {
   schemaVersion: '1', id: 'loom.word-loom', version: '2',
@@ -51,10 +51,7 @@ export const LOOM_RULES: GameRulesSpec = {
     // lift three pieces (guided) → predict the jammed message's pieces → build a call that fits
     phase: { type: 'enum', values: ['guided', 'predict', 'build', 'done'], initial: 'guided' },
     lifted: { type: 'integer', initial: 0, min: 0, max: 3 },
-    verb: { type: 'enum', values: ['none', ...LOOM_PARTS.verb.map(o => o.id)], initial: 'none' },
-    who: { type: 'enum', values: ['none', ...LOOM_PARTS.who.map(o => o.id)], initial: 'none' },
-    from: { type: 'enum', values: ['none', ...LOOM_PARTS.from.map(o => o.id)], initial: 'none' },
-    pieces: { type: 'integer', initial: 0, min: 0, max: 20 },
+    ...LOOM_BUILD.state,
   },
   actions: {
     lift: {
@@ -69,16 +66,7 @@ export const LOOM_RULES: GameRulesSpec = {
     'predict.pieces': { when: eq(f('phase'), 'predict'), effects: [set('phase', 'build')], emits: ['decide:predict-pieces:right:pieces', 'loom-splits'] },
     'predict.near': { when: eq(f('phase'), 'predict'), effects: [set('phase', 'build')], emits: ['decide:predict-pieces:wrong:near-miss', 'loom-splits'] },
     'predict.letters': { when: eq(f('phase'), 'predict'), effects: [set('phase', 'build')], emits: ['decide:predict-pieces:wrong:one-per-letter', 'loom-splits'] },
-    ...partActions('verb'), ...partActions('who'), ...partActions('from'),
-    // weave: the loom splits the call; it frees Tavi only if every piece fits on the rail
-    weave: {
-      when: { op: 'and', args: [eq(f('phase'), 'build'), { op: 'ne', left: f('verb'), right: 'none' }, { op: 'ne', left: f('who'), right: 'none' }, { op: 'ne', left: f('from'), right: 'none' }] },
-      branches: [
-        { when: { op: 'lte', left: f('pieces'), right: 6 }, effects: [set('phase', 'done')], emits: ['decide:build-call:right:fits', 'tavi-free'] },
-        { when: { op: 'in', left: f('verb'), right: ['unhex', 'disenchant'] }, effects: [], emits: ['decide:build-call:wrong:short-in-letters', 'spills'] },
-        { effects: [], emits: ['decide:build-call:wrong:too-many-pieces', 'spills'] },
-      ],
-    },
+    ...LOOM_BUILD.actions,
   },
   objectives: { free: { when: eq(f('phase'), 'done') } },
 };
@@ -151,8 +139,7 @@ export function checkLoomContent(c: LoomContent) {
     if (o.pieces.map(p => p.join('')).join(' ').toLowerCase() !== o.text.toLowerCase()) issues.push(`"${o.text}": pieces don't spell the text`);
     if (o.pieces.flat().some(p => p.replace(/[^A-Za-z]/g, '').length < 2)) issues.push(`"${o.text}" has a one-letter piece`);
   }
-  let fits = 0;
-  for (const v of LOOM_PARTS.verb) for (const w of LOOM_PARTS.who) for (const fr of LOOM_PARTS.from) if (cost(v) + cost(w) + cost(fr) <= c.slots) fits++;
+  const fits = assemblyAnswers({ slots: Object.fromEntries((Object.keys(LOOM_PARTS) as LoomPart[]).map(p => [p, LOOM_PARTS[p].map(o => ({ id: o.id, cost: cost(o) }))])), limit: c.slots }).length;
   if (!fits) issues.push('no call the player can build fits the rail');
   const cheapest = (xs: readonly { pieces: readonly (readonly string[])[] }[]) => Math.min(...xs.map(cost));
   const fitVerbs = LOOM_PARTS.verb.filter(v => cost(v) + cheapest(LOOM_PARTS.who) + cheapest(LOOM_PARTS.from) <= c.slots), badVerbs = LOOM_PARTS.verb.filter(v => !fitVerbs.includes(v));

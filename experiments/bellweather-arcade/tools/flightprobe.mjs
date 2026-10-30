@@ -47,7 +47,9 @@ for (const [name, r] of Object.entries(results)) check(`${name}: lands`, r.lande
 check('hands off flies the rings on the lane line, not the ones to the side (2 or 3)', results['hands off'].rings >= 2 && results['hands off'].rings <= 3, fmt(results['hands off']), 'warn', 'feel');
 check('steering for each ring catches every one', results['steered'].rings === results['steered'].total, fmt(results['steered']), 'fail', 'feel');
 check('flown in bursts, it still lands about as soon as any other way (no loops off the lane; was 77 s)', results['in bursts'].secs < 30, fmt(results['in bursts']), 'fail', 'feel');
-check('flown in bursts (as testers fly), most rings are still caught', results['in bursts'].rings >= 4, fmt(results['in bursts']), 'warn', 'feel');
+// (since the rings moved to the sides of the lane, 30 Oct, pushes that ignore them catch some, not
+// most: the ring is now something to steer for. The bar is "more than hands off")
+check('flown in bursts (as testers fly), the pushes still catch more rings than hands off', results['in bursts'].rings > results['hands off'].rings, fmt(results['in bursts']), 'warn', 'feel');
 // (with the rings on a lane ahead, the goal arrow seldom shows in the air: the ring is on screen; when
 // it does, a tap slides the skiff across to that ring)
 check('tapping the goal arrow when it shows in the air never loses rings (at least as many as hands off)', results['arrow'].rings >= results['hands off'].rings, fmt(results['arrow']), 'warn', 'feel');

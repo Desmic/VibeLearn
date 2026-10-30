@@ -94,6 +94,9 @@ export const FIRST_WORDS_L1: StoryScript & { needs: { handlers: string[]; anchor
     'ring-veteran': { who: 'warden', text: 'I played that one too. Nobody finishes the rings.' },
     'ring-miss': { text: 'Missed one. Very authentic Sups experience.' },
     'ring-all': { text: 'Every ring! Take that, Sups.' },
+    // caught in a drone's light on the flight
+    'rude': { text: 'Rude.' },
+    'warden-flight': { who: 'warden', text: 'I can hear you thinking up there, courier.' },
     'ring-reply': { text: 'Did the villain just bond with me over a bad game?' },
     // run 14: "Just rules. That's what I'd be, without it" made the Gate the dumb one and the engine the clever
     // one, the opposite of the lesson (both only know what they're handed)

@@ -105,6 +105,22 @@ t('nav: the way to face points at the gap, not at the goal through the wall', wp
 const shut = (x, z) => Math.abs(x) < 5 && Math.abs(z) < 5 && Math.abs(z) > .3;
 t('nav: an unreachable goal gives the nearest reachable spot', (p => !!p && Math.abs(p.at(-1)[1]) < 1.2 && p.at(-1)[1] < 0)(findPath(shut, [0, -3], [0, 3])));
 t('nav: standing nowhere gives no way', findPath(room, [20, 20], [0, 0]) === null);
+// kit/assemble-rules.ts: a build from parts with costs against a limit, as rules data
+{ const { assemblyRules, assemblyAnswers } = await kit('assemble-rules.js'); const { GameRulesEngine } = await kit('game-rules.js');
+  const spec = { slots: { a: [{ id: 'x', cost: 1 }, { id: 'y', cost: 3 }], b: [{ id: 'p', cost: 2 }, { id: 'q', cost: 1 }] }, limit: 3,
+    check: { action: 'go', decision: 'fit', right: { choice: 'ok', effects: [{ op: 'set', field: 'done', value: true }] }, wrong: [{ choice: 'over' }] } };
+  const r = assemblyRules(spec);
+  const rules = { schemaVersion: '1', id: 't.assemble', version: '1', state: { done: { type: 'boolean', initial: false }, ...r.state }, actions: r.actions, objectives: { done: { when: { field: 'done' } } } };
+  const E = new GameRulesEngine(rules); let st = E.initialState(), ev = [];
+  const act = a => { const tr = E.apply(st, a); st = tr.state; ev = tr.events.map(e => e.id); };
+  let refused = false; try { act('go'); } catch { refused = true; }
+  t('assemble: the build can\'t be checked until every slot is filled', refused);
+  act('a.y'); act('b.p');
+  t('assemble: the cost adds up as parts go in', st.cost === 5, JSON.stringify(st));
+  act('go'); t('assemble: over the limit is judged wrong, with its reason', ev.includes('decide:fit:wrong:over') && !st.done, JSON.stringify(ev));
+  act('a.clear'); act('a.x'); t('assemble: taking a part out subtracts what it cost', st.cost === 3, JSON.stringify(st));
+  act('go'); t('assemble: within the limit is right, and its effects apply', ev.includes('decide:fit:right:ok') && st.done === true, JSON.stringify(ev));
+  t('assemble: the answers are the builds within the limit', assemblyAnswers(spec).length === 2, JSON.stringify(assemblyAnswers(spec))); }
 R.write(null);
 console.log(`\n${fails} failures`);
 process.exit(fails ? 1 : 0);

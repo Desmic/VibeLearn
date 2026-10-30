@@ -88,7 +88,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
   // the wind rings remind Zip of a certain old superhero game; the Warden has played it too
   const flight = buildFlight(scene, { guide: g, input: o.input, ride: o.ride,
     onRing: n => { if (n === 1) story.thinkOnce('ring-1'); if (n === 3 && story.thinkOnce('ring-veteran')) later(4.5, () => story.thinkOnce('ring-reply')); },
-    onMiss: () => story.thinkOnce('ring-miss'), onLand: () => spire.surge() });
+    onMiss: () => story.thinkOnce('ring-miss'), onLand: () => spire.surge(), onSpotted: () => { story.thinkOnce('rude'); story.thinkOnce('warden-flight'); } });
   g.setThinker(o.zip);
   // townsfolk (for Zip's NPC suspicions) and idle tracking
   const folk = (scene.getObjectByName('painted-life')?.children ?? []).filter(c => c.userData.fade && c.name !== 'Mira');
