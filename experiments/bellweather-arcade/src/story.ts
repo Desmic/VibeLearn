@@ -35,6 +35,7 @@ import { tickHolo, beam as holoBeam, sparks as holoSparks, HOLO } from './kit/ho
 import { ZIP_CLARITY } from './worlds/first-words-voice';
 import { buildFarNet } from './kit/far-net';
 import { DEMO_END } from './worlds/first-words-demo';
+import { PROLOGUE } from './worlds/first-words-prologue';
 import { SPIRE } from './worlds/first-words-spire';
 import { ECHO_SOURCES, ECHO_NEEDED, ECHO_SKIFF_RULES, ECHO_SKIFF_STATION } from './worlds/first-words-echo';
 
@@ -57,6 +58,8 @@ interface Opts {
   enterIsland: (cameraBlockers: T.Object3D[]) => void;
   adopt?: (root: T.Object3D, cameraBlockers: T.Object3D[]) => void; density?: number;
   setGround?: (y: number) => void;   // the height Zip stands at (islands can sit higher)
+  /** hold a time of day over the place's own (kit/sky-mood force): name, how much (0 … 1); null releases */
+  moodForce?: (name: string | null, k?: number) => void;
   /** a person of the world (animated, seeded look), for isles with their own folk; null without the body kit */
   person?: (seed: number) => Townsperson | null;
   camera: T.Camera;
@@ -567,8 +570,14 @@ export function buildStory(scene: T.Scene, o: Opts) {
   // beats the attack film may hold at while a voiced line finishes (beam, the Warden's lines, the bolt, the static, the end)
   const CUT_GATES = [4.45, 6.65, 7.35, 11.35, 13.35];
   const voiced = (sec: number) => { if (sec > 0) cutHold = Math.max(cutHold, t + sec - .25); };
-  const startOpening = () => { chosen.clear(); cutHold = 0; opening = 0; o.host.classList.add('cutscene'); skip.hidden = false; enter('meet'); };
-  const endOpening = () => { if (opening < 0) return; opening = -1; g.quiet('Mira'); shot = null; o.host.classList.remove('cutscene'); skip.hidden = true; g.startControlHints(); };
+  // the prologue (worlds/first-words-prologue.ts): a glimpse of dusk and the engine, the sim-lab's log, a rewind
+  let prologue = -1, logShown = 0, released = -1;
+  const simLog = document.createElement('div'); simLog.className = 'sim-log'; simLog.hidden = true; o.host.appendChild(simLog);
+  // (the morning's beat, and its timed thoughts, start when the replay rewinds to it)
+  const endPrologue = () => { if (prologue < 0) return; prologue = -1; simLog.hidden = true; simLog.innerHTML = ''; o.host.classList.remove('rewind'); released = 0; enter('meet'); };
+  const startOpening = () => { chosen.clear(); cutHold = 0; opening = 0; o.host.classList.add('cutscene'); skip.hidden = false;
+    if (o.moodForce) { prologue = 0; logShown = 0; simLog.innerHTML = ''; simLog.hidden = false; o.moodForce(PROLOGUE.mood, 1); } else enter('meet'); };
+  const endOpening = () => { endPrologue(); o.moodForce?.(null); released = -1; if (opening < 0) return; opening = -1; g.quiet('Mira'); shot = null; o.host.classList.remove('cutscene'); skip.hidden = true; g.startControlHints(); };
   // A fixed shot shouldn't open on a post or trunk filling the edge of the frame. Feel along
   // both frame edges; if something solid stands close to the lens, step sideways away from
   // it (near things slide out of frame), never through a wall.
@@ -719,6 +728,19 @@ export function buildStory(scene: T.Scene, o: Opts) {
           if (d < CATCH_R) catchSpark();
           else if (!tired && d < 2.1 && rest <= 0 && !g.cardOpen) hop(z);
         }
+      }
+      // the time of day eases back from the prologue's dusk to the morning over the crane
+      if (released >= 0) { released += dt; const k = 1 - T.MathUtils.smoothstep(released, 0, 2.2); o.moodForce?.(k > 0 ? PROLOGUE.mood : null, k); if (k <= 0) released = -1; }
+      if (prologue >= 0) {
+        const p0 = prologue; prologue += dt; const p = prologue;
+        for (const at of PROLOGUE.surges) if (p0 < at && p >= at) spire.surge();
+        while (logShown < PROLOGUE.log.length && p >= PROLOGUE.log[logShown].at) { const line = document.createElement('p'); line.textContent = '> ' + PROLOGUE.log[logShown].text; simLog.appendChild(line); logShown++; }
+        if (p0 < PROLOGUE.rewindAt && p >= PROLOGUE.rewindAt) o.host.classList.add('rewind');
+        const k = T.MathUtils.smootherstep(Math.min(p / PROLOGUE.seconds, 1), 0, 1);
+        sPos.lerpVectors(PROLOGUE.from, PROLOGUE.to, k); sLook.copy(SPIRE_MID).add(tmp2.set(0, 40 * k, 0));
+        shot = { pos: sPos, look: sLook, shake: 0, cut: 98, rate: 40 };
+        if (p >= PROLOGUE.seconds) endPrologue();
+        return;
       }
       if (opening >= 0) {
         // cold open: Mira at the outlook, calling; then the camera swings back to Zip

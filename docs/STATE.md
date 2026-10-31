@@ -1,6 +1,13 @@
 # Current state — LLM learning-game proof track
 
-**31 October 2026, night — blind run 31 on High (supersedes everything below).** A commuter (22)
+**1 November 2026 — the first minute (supersedes everything below).** Blind runs 30 and 31 both had
+"no idea what the game was actually about" until the Warden took Zip's voice. Version 117 opens with a
+10-second prologue: dusk, the Warden's engine drinking rivers of letters from the isles, and the
+sim-lab's log (the title screen's voice) saying what this run is for ("objective: get her back"), then
+a rewind to the morning at the outlook (`worlds/first-words-prologue.ts`). The sim-lab frame is now
+used, not just shown. Checks: flowcheck 132/132 (with a prologue check), speedrun 29/29.
+
+**31 October 2026, night — blind run 31 on High.** A commuter (22)
 played the demo on the High tier to the end of Loom Isle: 7/10, yes to more; "this really pretty
 floating-islands world… a planet with rings in the sky", unprompted; next word, context and pieces
 understood unprompted, room when asked. Weakest: getting around ("I spun around a lot") and the

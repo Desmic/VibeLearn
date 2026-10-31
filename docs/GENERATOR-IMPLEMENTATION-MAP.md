@@ -273,6 +273,12 @@ in `story.ts` to join the levels.
   engine's own light is scaled down under the glow pass. A screen-space light-shaft pass was tried
   and dropped: it washed the dusk frame pale instead of drawing shafts.
 
+- **The prologue** (`worlds/first-words-prologue.ts`, story.ts): a flash-forward before the cold
+  open, shot from data (camera path, surges, log lines with times, the rewind). It holds a time of
+  day through `moodForce` (sky-mood `force`) and eases back to the place's own after. The morning's
+  beat (and its timed thoughts) starts at the rewind. A pattern any game can use: show where the
+  story goes, in the game's own frame, before the first minute. **data + game**
+
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).
 2. ~~Station archetype~~ (done 1 Oct: `first-words-stations.ts` + `kit/station.ts`).
