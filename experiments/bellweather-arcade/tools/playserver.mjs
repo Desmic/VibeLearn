@@ -142,7 +142,11 @@ async function act(a) {
       // labels are matched as a person reads them: line breaks and spacing don't matter ("✦ Speak" is "✦\nSpeak")
       const norm = x => String(x).replace(/\s+/g, ' ').trim().toLowerCase(), want = norm(a.label);
       const all = page.locator('button:visible:not([disabled]), .context-act:visible'), n = await all.count();
-      let b = null; for (let i = 0; i < n && !b; i++) { const el = all.nth(i); if (norm(await el.innerText().catch(() => '')).includes(want) || norm(await el.getAttribute('aria-label') ?? '').includes(want)) b = el; }
+      // an exact label first, then the first that contains it (runs 30 and 31: "Weave" tapped the chip
+      // "the weaver" in the loom's call, which took it out, and read as the game dropping a pick)
+      let b = null, part = null;
+      for (let i = 0; i < n && !b; i++) { const el = all.nth(i), t = norm(await el.innerText().catch(() => '')), l = norm(await el.getAttribute('aria-label') ?? ''); if (t === want || l === want) b = el; else if (!part && (t.includes(want) || l.includes(want))) part = el; }
+      b ??= part;
       if (!b) return { ok: false, why: `no visible button with "${a.label}"` };
       // as this session's player would. A finger lands where the button is now, even if it's pulsing
       // or still popping in (Playwright's own tap waits for it to hold still, and a pulsing "Shield

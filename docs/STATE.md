@@ -1,6 +1,14 @@
 # Current state — LLM learning-game proof track
 
-**31 October 2026 — blind run 30 and a higher ceiling (supersedes everything below).** Blind run 30
+**31 October 2026, night — blind run 31 on High (supersedes everything below).** A commuter (22)
+played the demo on the High tier to the end of Loom Isle: 7/10, yes to more; "this really pretty
+floating-islands world… a planet with rings in the sky", unprompted; next word, context and pieces
+understood unprompted, room when asked. Weakest: getting around ("I spun around a lot") and the
+first minute. Version 116: the goal gets a tall beam like the stray sparks' (both runs found those
+"really helpful"), a lower camera look-down limit, the engine's "No more words" fixed, the rivers of
+letters faint from the first morning. Checks: flowcheck 131/131, camprobe 15/15.
+
+**31 October 2026 — blind run 30 and a higher ceiling.** Blind run 30
 (explorer, the demo from the title to the end card, v113): every learning item understood before
 the reveal; "The art is lovely, especially Chime Isle at dusk with the aurora and the festival
 lights"; 7/10, yes to more; the weakest stretch is still Blossom Isle's camera. Version 114 fixes

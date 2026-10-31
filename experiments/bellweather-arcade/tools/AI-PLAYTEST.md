@@ -1293,3 +1293,31 @@ yes to the next isle.
   how many are left and where.
 - The Loom's spark beam is warmer and softer (it read as a white wall of light).
 - Not yet: the Blossom camera, the unfair stars, the lantern and Shield choices.
+
+## Blind run 31: the demo on High, v115 (31 Oct 2026; commuter, 22)
+
+First blind run on the High tier (glow, sharper, denser air). Stopped at the end of Loom Isle (step
+157: "cute game, the gate and loom bits were fun… good place to stop"); 7/10, yes to the next part.
+
+- **Understood unprompted:** next word ("showing you how a chatbot predicts the next word"; "Blossom
+  at 72%, then load that and get Isle, was the coolest moment"), context ("whoever writes the notes
+  controls the gate"; "the relay only goes by the words you let it read"), pieces as a rule. Room
+  came out when asked, and strongly ("Free (1) + the weaver (2) + from the loom (3) = 6"; ruled out
+  "from the enchanted loom" as five pieces). Sampling and warmth: not reached.
+- **The world, unprompted:** "this really pretty floating-islands world, pink trees, clouds, a planet
+  with rings in the sky"; "looks great". The light beams marking things "really helpful".
+- **Weakest:** getting around ("I spun around a lot looking for stuff… too much of my time went to
+  fiddling instead of playing"); the first minute ("no idea what the game was actually about" until
+  the Warden took the voice; the sim-lab framing "floated there unexplained", though by the end it
+  was their twist theory: Zip is the model being trained). Stars read as "a report card, not a goal";
+  first-try stars mark down the experimenting the engine invites.
+- **Found:** the tester's own drag tipped the camera to look down on Zip pressed against a wall
+  ("stuck staring down at my own head"); the engine said "No more words" with every word on the
+  ring; and, in the play server, a tap on "Weave" matched the chip "the weaver" first (also run 30's
+  "flipped" loom pick): not a game bug.
+
+**Changed after run 31 (v116):** the goal gets a tall beam of light like the stray sparks' (both
+runs found those beams "really helpful" and the arrow "less so"), a few pixels wide at any distance;
+the camera's look-down limit is lower (0.6 rad, was 0.75); the engine says "Every word you have is on
+the ring" instead of "No more words"; the faint rivers of letters into the Warden's engine now show
+from the first morning (they were dusk only); the play server taps an exact label before a partial one.

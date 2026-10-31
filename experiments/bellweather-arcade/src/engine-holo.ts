@@ -109,7 +109,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
   };
   const renderTray = () => {
     const inRing = new Set(ring()), words = o.carried().filter(w => !inRing.has(w));
-    tray.innerHTML = `<div class="engine-words">${words.length ? words.map(w => `<button class="holo-chip${MADE.has(w) ? ' made' : ''}" data-w="${w}" data-action="load.${w}" ${busy ? 'disabled' : ''}>${w}</button>`).join('') : '<span class="holo-none">No more words. Absorb some from the world!</span>'}</div>
+    tray.innerHTML = `<div class="engine-words">${words.length ? words.map(w => `<button class="holo-chip${MADE.has(w) ? ' made' : ''}" data-w="${w}" data-action="load.${w}" ${busy ? 'disabled' : ''}>${w}</button>`).join('') : (ring().length ? '<span class="holo-none">Every word you have is on the ring. Cast, or absorb more from the world.</span>' : '<span class="holo-none">No words yet. Absorb some from the world!</span>')}</div>
       <div class="engine-buttons"><button class="holo-cast" data-act="cast" data-action="cast" ${ring().length && !busy ? '' : 'disabled'}>Cast ✦</button>${ring().length ? `<button class="holo-quiet" data-act="clear" ${busy ? 'disabled' : ''} aria-label="Clear the ring">↺ Clear</button>` : ''}<button class="holo-quiet" data-act="close" ${busy ? 'disabled' : ''}>Step away</button></div>`;
   };
   // while the ring is being edited, the engine's guess for what's in it now, dim, so a word in or

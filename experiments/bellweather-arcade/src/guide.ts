@@ -29,8 +29,14 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
   const goal = document.createElement('div'); goal.className = 'goal-line'; goal.hidden = true; goal.setAttribute('aria-live', 'polite'); host.appendChild(goal);
   // beacon: a soft light column plus a floating marker
   const beacon = new T.Group(); beacon.visible = false; scene.add(beacon);
-  const beam = new T.Mesh(new T.CylinderGeometry(.18, .32, 7, 16, 1, true), new T.MeshBasicMaterial({ color: '#ffe3a1', transparent: true, opacity: .28, depthWrite: false, side: T.DoubleSide, blending: T.AdditiveBlending, fog: false }));
-  beam.position.y = 3.5; beacon.add(beam);
+  // (31 Oct: blind runs 30 and 31 found the stray sparks' tall beams "really helpful" and the goal arrow
+  // "less so": the goal gets a tall beam of its own, seen from across an isle, a few pixels wide at any distance)
+  const beamTex = (() => { const cv = document.createElement('canvas'); cv.width = 4; cv.height = 128; const c = cv.getContext('2d')!, g = c.createLinearGradient(0, 128, 0, 0);
+    g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.3, 'rgba(255,255,255,.55)'); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(0, 0, 4, 128);
+    const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; return t; })();
+  const beamGeo = new T.PlaneGeometry(1, 26); beamGeo.translate(0, 13, 0);
+  const beam = new T.Mesh(beamGeo, new T.MeshBasicMaterial({ map: beamTex, color: '#ffd98a', transparent: true, opacity: .55, depthWrite: false, side: T.DoubleSide, blending: T.AdditiveBlending, fog: false }));
+  beam.position.y = .1; beacon.add(beam);
   const gem = new T.Mesh(new T.OctahedronGeometry(.2), new T.MeshBasicMaterial({ color: '#ffd36b', fog: false })); gem.position.y = 2.4; beacon.add(gem);
   // drawn, so it points the same way in every font (it was never added to the page before 3 Oct: the comment swallowed the call)
   // the arrow to an off-screen goal; tapping it turns the camera there (testers kept tapping it, runs 12-13)
@@ -297,7 +303,8 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       gem.rotation.y += dt * 2; gem.position.y = 2.4 + Math.sin(t * 2.4) * .12;
       // close up, the column would fill the screen: fade it and keep the gem small
       const near = T.MathUtils.smoothstep(Math.hypot(camera.position.x - beacon.position.x, camera.position.z - beacon.position.z), 4.5, 10);
-      (beam.material as T.MeshBasicMaterial).opacity = (.2 + .1 * Math.sin(t * 2)) * near; const film = host.classList.contains('cutscene');   // a cutscene is a film: no goal marker in it
+      (beam.material as T.MeshBasicMaterial).opacity = (.45 + .15 * Math.sin(t * 2)) * near;
+      { const d = Math.hypot(camera.position.x - beacon.position.x, camera.position.z - beacon.position.z); beam.rotation.y = Math.atan2(camera.position.x - beacon.position.x, camera.position.z - beacon.position.z); beam.scale.x = Math.max(.14, d * .009); } const film = host.classList.contains('cutscene');   // a cutscene is a film: no goal marker in it
       beam.visible = near > .02 && !beaconArrowOnly && !film; gem.visible = !beaconArrowOnly && !film; gem.scale.setScalar(.6 + .4 * near);
       if (beacon.visible) {
         const v = beacon.position.clone(); if (!beaconArrowOnly) v.y = 1.2; v.project(camera);
