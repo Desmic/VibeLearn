@@ -19,16 +19,33 @@ export interface NaniteOpts {
   rim?: number;
   /** a key so materials with the same options share a program */
   key?: string;
+  /** false: no cell pattern (a light or glass part that should only dissolve and re-form) */
+  pattern?: boolean;
 }
 
 export interface NaniteSkin {
   /** time (s) and energy (0 calm … 1 busy) */
   tick(t: number, energy: number): void;
+  /** shape-shifting: the cells within `r` of a rest-pose point leave, cell by cell (r 0: none). Two at once. */
+  cut(i: 0 | 1, at: T.Vector3 | null, r: number): void;
+  /** the reverse, for a form being built: only the cells within `r` of a point are there yet (r < 0: all) */
+  grow(at: T.Vector3 | null, r: number): void;
 }
 
 const GLSL = /* glsl */`
   uniform float uNanoT, uNanoE, uNanoCell, uNanoSeam, uNanoSpark, uNanoRim; uniform vec3 uNanoGlow;
+  uniform vec3 uCutC[2], uGrowC; uniform float uCutR[2], uGrowR;
   varying vec3 vNanoP, vNanoN;
+  float nanoEdge = 0.;
+  // shape-shifting: where the body is coming apart or being built, cell by cell, its edge alight
+  void nanoShift() {
+    vec3 q = floor(vNanoP / (uNanoCell * 1.15)); float r = fract(sin(dot(q, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
+    float m = 1e3;
+    for (int i = 0; i < 2; i++) if (uCutR[i] > 0.) m = min(m, distance(vNanoP, uCutC[i]) + (r - .5) * uCutR[i] * .5 - uCutR[i]);
+    if (uGrowR >= 0.) m = min(m, uGrowR - distance(vNanoP, uGrowC) + (r - .5) * max(uGrowR, .05) * .5);
+    if (m < 0.) discard;
+    nanoEdge = 1. - smoothstep(0., uNanoCell * 1.2, m);
+  }
   float nanoHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
   // distance to the cell's edge (0 at the seam, .5 at the centre) and the cell's id
   vec3 nanoHex(vec2 uv) {
@@ -52,7 +69,9 @@ export function naniteSkin(mat: T.Material, o: NaniteOpts = {}): NaniteSkin {
   const U = {
     uNanoT: { value: 0 }, uNanoE: { value: 0 }, uNanoCell: { value: o.cell ?? .034 }, uNanoSeam: { value: o.seam ?? .22 },
     uNanoSpark: { value: o.spark ?? .9 }, uNanoRim: { value: o.rim ?? .3 }, uNanoGlow: { value: new T.Color(o.glow ?? '#6ee0d4') },
+    uCutC: { value: [new T.Vector3(), new T.Vector3()] }, uCutR: { value: [0, 0] }, uGrowC: { value: new T.Vector3() }, uGrowR: { value: -1 },
   };
+  const pattern = o.pattern !== false;
   const prev = mat.onBeforeCompile;
   mat.onBeforeCompile = (sh, r) => {
     prev?.call(mat, sh, r);
@@ -62,8 +81,10 @@ export function naniteSkin(mat: T.Material, o: NaniteOpts = {}): NaniteSkin {
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvNanoP = transformed; vNanoN = objectNormal;');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', '#include <common>\n' + GLSL)
+      .replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\nnanoShift();')
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
-      {
+      totalEmissiveRadiance += uNanoGlow * nanoEdge * 2.2;
+      if (${pattern ? 'true' : 'false'}) {
         vec3 p = vNanoP / uNanoCell, n = abs(normalize(vNanoN)); vec3 w = pow(n, vec3(4.)); w /= w.x + w.y + w.z;
         // cells smaller than about two pixels fade to a plain sheen
         float px = length(fwidth(vNanoP)) / uNanoCell, vis = 1. - smoothstep(.15, .45, px), aa = clamp(px * 1.6, .03, .35);
@@ -75,5 +96,9 @@ export function naniteSkin(mat: T.Material, o: NaniteOpts = {}): NaniteSkin {
       }`);
   };
   mat.customProgramCacheKey = () => 'vl-nanite-' + (o.key ?? 'a');
-  return { tick(t, e) { U.uNanoT.value = t; U.uNanoE.value += (Math.max(0, Math.min(1, e)) - U.uNanoE.value) * .15; } };
+  return {
+    tick(t, e) { U.uNanoT.value = t; U.uNanoE.value += (Math.max(0, Math.min(1, e)) - U.uNanoE.value) * .15; },
+    cut(i, at, r) { if (at) U.uCutC.value[i].copy(at); U.uCutR.value[i] = Math.max(0, r); },
+    grow(at, r) { if (at) U.uGrowC.value.copy(at); U.uGrowR.value = r; },
+  };
 }

@@ -158,6 +158,9 @@ await segment('flight', async () => {
   if (await beat() !== 'fly') { await open('&title=0&beat=isle'); }
   check('flight running', await waitFor(async () => (await beat()) === 'fly', 30000), await beat());
   await page.waitForTimeout(3000); await shot('flying');
+  // Zip is nanites (2 Nov): he grows wings to fly (zip-rig.ts shift)
+  { const f = await page.evaluate(async () => { window.__arcade.simulate(1); await new Promise(r => setTimeout(r, 300)); return window.__vlDebug.zipRig?.forms ?? null; });
+    check('Zip grows wings while he flies', !f || f.wings > .5, JSON.stringify(f)); }
   check('lands on the Blossom Isle', await waitFor(() => page.locator('.star-row').isVisible(), 300000, 1000));
   await h.stars();
   check('saved at checkpoint "land"', await save() === 'land', await save());

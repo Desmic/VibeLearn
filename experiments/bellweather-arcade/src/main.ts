@@ -417,7 +417,7 @@ if(veil){veil.className='dream-veil';worldElement.appendChild(veil)}
 function tickDream(dt:number,speed:number){
   if(!dreamAir||!skyMood)return;
   const m=skyMood.state,h=renderer.getDrawingBufferSize(dbSize).y,fov=camera.fov;
-  dreamAir.view(h,fov);streams?.view(h,fov);footGlow?.view(h,fov);
+  dreamAir.view(h,fov);streams?.view(h,fov);footGlow?.view(h,fov);zipRig?.view(h,fov);
   dreamAir.mood(m.air,m.fireflies);streams?.strength(m.streams);
   if(veil){const k=m.air.getHexString()+m.glow.getHexString();if(k!==veilKey){veilKey=k;veil.style.setProperty('--veil','#'+m.air.getHexString());veil.style.setProperty('--veil2','#'+m.glow.getHexString())}}
   if(!reduced){dreamAir.tick(elapsed,camera);streams?.tick(elapsed)}else dreamAir.tick(0,camera);
@@ -491,7 +491,7 @@ const labId=paintedParams.get('lab');   // a test area off the story path (lab=u
 const story=guide&&!labId?buildStory(scene,{guide,camera,person:(seed,look)=>libraryClips.length?buildTownsperson(seed,libraryClips,bodyKit,look):null,cameraClear:(a,b)=>{const d=b.clone().sub(a),h=firstCameraHit(a,d,.15);return h?h.distance:d.length()},host:appHost,zip:()=>zip.position,aspect:()=>camera.aspect,
   addBox:facade.addSolidBox,removeBox:facade.removeSolidBox as any,solid:facade.addSolidCircle,addWalk:facade.addWalkRegion,
   onEvent:e=>{const seen=save.learning() as {activity:string,decision:string}[];if(save.decidedBefore(e.activity,e.decision)||seen.some(x=>x.activity===e.activity&&x.decision===e.decision))e.first=false;save.logEvent(e);console.info('[learning]',JSON.stringify(e))},walkable:(x,z)=>walkable(new T.Vector3(x,0,z)),enterIsland:blockers=>{for(const o of [townRoot,scene.getObjectByName('painted-promenade'),scene.getObjectByName('painted-life'),scene.getObjectByName('speech-puzzle')])if(o)o.visible=false;townHidden=true;cameraSolids.push(...blockers);invalidateCameraGeometry();},ride:(p,y)=>{ridePos=p?(ridePos??new T.Vector3()).copy(p):null;rideYaw=y},input:()=>({x:(Number(keys.has('KeyD')||keys.has('ArrowRight')||held.has('right'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')||held.has('left')))||(stick?.vector.x??0),y:(Number(keys.has('KeyW')||keys.has('ArrowUp')||held.has('forward'))-Number(keys.has('KeyS')||keys.has('ArrowDown')||held.has('back')))||(stick?.vector.y??0)}),
-  moodForce:(n,k)=>skyMood?.force(n,k),zipFeel:n=>zipRig?.feel(n),
+  moodForce:(n,k)=>skyMood?.force(n,k),zipFeel:n=>zipRig?.feel(n),zipShift:(f,on)=>zipRig?.shift(f,on),
   dim:k=>{if(skyMood){dimK=k;return}sun.intensity=sunBase*(1-.6*k);ambient.intensity=ambBase*(1-.35*k)},
   density:{low:.5,medium:.8,high:1}[quality().tier],
   adopt:(root,blockers)=>{if(paintedStudy&&paintedParams.get('pbr')!=='1')lambertize(root);if(faders)faders.push(...collectFaders(root));if(townHidden&&blockers.length){cameraSolids.push(...blockers);invalidateCameraGeometry()}renderer.compileAsync(root,camera,scene).catch(()=>{})},

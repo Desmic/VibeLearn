@@ -1,6 +1,7 @@
 import * as T from 'three';
 import { faceCue } from './kit/face-rig';
 import { naniteSkin } from './kit/nanite-skin';
+import { buildNaniteSwarm } from './kit/nanite-swarm';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { poseBase } from './kit/pose-hold';
@@ -33,6 +34,8 @@ const JOINTS: Record<BoneName, [number, number, number, BoneName | null]> = {
 };
 const ORDER = Object.keys(JOINTS) as BoneName[];
 
+export type ZipForm = 'chest' | 'cage' | 'wings';
+
 export interface ZipRig {
   root: T.Group;
   skeleton: T.Skeleton;
@@ -45,6 +48,13 @@ export interface ZipRig {
   lookAt(world: T.Vector3 | null): void;
   /** what he feels (kit/face-rig.ts FEELINGS names), until told otherwise; null: his usual face */
   feel(name: string | null): void;
+  /** shape-shift (he is nanites): 'chest' opens onto his speech engine, 'cage' turns his right hand
+   *  into a cage of light, 'wings' grows wings from his back. Idempotent: call it every frame. */
+  shift(form: ZipForm, on: boolean): void;
+  /** how far each form has grown (0 … 1), for tests */
+  readonly forms: Record<ZipForm, number>;
+  /** the motes' size stays in metres: the drawing height and fov */
+  view(heightPx: number, fovDeg: number): void;
   useClips(clips: T.AnimationClip[]): void;
 }
 
@@ -121,6 +131,8 @@ export function buildZipRig(): ZipRig {
   }
   egg(.05, .05, .018, light, 'Chest', 0, 1.115, -.148);
   ring(.066, .007, graphite, 'Chest', 0, 1.115, -.146, 0);
+  egg(.065, .065, .035, light, 'Chest', 0, 1.11, -.105, 0, 0, 0, 20);   // the speech engine's core, inside: seen when his chest opens
+  egg(.17, .165, .122, graphite, 'Chest', 0, 1.075, 0);              // ...in a dark cavity (the shell is only a shell)
   part(new T.TorusGeometry(.158, .005, 8, 48).rotateX(Math.PI / 2).scale(1, 1, .78), light, 'Chest', 0, .975, 0);   // a seam of light where the shell closes
   // neck: a graphite stem inside a floating ring
   limb(v(0, 1.21, 0), v(0, 1.35, 0), .042, .042, graphite, 'Neck');
@@ -231,6 +243,77 @@ export function buildZipRig(): ZipRig {
   };
   const feelNow = [0, 0, 0, 0]; let feltZip: string | null = null;
 
+  // ---------------------------------------------------------------- shape-shifting (2 Nov: "a nanobot
+  // tech, which can shape shift according to needs"). A form grows out of him cell by cell while the
+  // part it replaces comes apart the same way, and a stream of motes carries the matter across.
+  const lightSkin = naniteSkin(light, { pattern: false, key: 'zip-light' });
+  skins.push(lightSkin);
+  const swarm = buildNaniteSwarm(root as unknown as T.Scene, { max: 360 });
+  swarm.points.matrixWorldAutoUpdate = false; swarm.points.matrixWorld.identity();   // its motes are placed in world space
+  const restOf = (bone: BoneName, p: T.Vector3) => { const [x, y, z] = JOINTS[bone]; return p.clone().sub(v(x, y, z)); };
+  const worldAt = (bone: BoneName, rest: T.Vector3) => { const local = restOf(bone, rest), out = new T.Vector3(); return () => bones[bone].localToWorld(out.copy(local)); };
+  const CHEST = v(0, 1.115, -.15), HAND = v(.28, .665, -.012), BACK = v(0, 1.15, .14);
+  // the cage his right hand becomes (to catch and hold the spark)
+  const formLight = new T.MeshStandardMaterial({ color: '#c6f6ee', emissive: '#6ee0d4', emissiveIntensity: 1.1, roughness: .3 });
+  const cageSkin = naniteSkin(formLight, { pattern: false, key: 'zip-form-light' });
+  const cage = new T.Group(); cage.position.copy(restOf('HandR', HAND)); cage.visible = false; bones.HandR.add(cage);
+  for (const [ax, ay] of [[0, 0], [Math.PI / 2, 0], [Math.PI / 2, Math.PI / 2], [Math.PI / 4, Math.PI / 4]]) { const r = new T.Mesh(new T.TorusGeometry(.09, .007, 8, 40), formLight); r.rotation.set(ax, ay, 0); cage.add(r); }
+  cage.add(new T.Mesh(new T.SphereGeometry(.03, 16, 12), formLight));
+  // wings from his back (to fly)
+  const wingMat = new T.MeshPhysicalMaterial({ color: '#f4f0e8', roughness: .3, metalness: .04, clearcoat: .85, clearcoatRoughness: .14, iridescence: .45, iridescenceIOR: 1.35, iridescenceThicknessRange: [180, 420] });
+  const wingSkin = naniteSkin(wingMat, { cell: .022, seam: .12, spark: .8, key: 'zip-wing' });
+  const wings = new T.Group(); wings.position.copy(restOf('Chest', BACK)); wings.visible = false; bones.Chest.add(wings);
+  // three long feathers a side, fanned up and swept back, each with a spine of light
+  const feather = (() => {
+    const sh = new T.Shape(); sh.moveTo(0, -.025); sh.quadraticCurveTo(.25, -.075, .56, -.006); sh.quadraticCurveTo(.3, .07, 0, .03); sh.closePath();
+    const g = new T.ExtrudeGeometry(sh, { depth: .012, bevelEnabled: true, bevelThickness: .005, bevelSize: .005, bevelSegments: 2, curveSegments: 16 }); g.translate(0, 0, -.006); return g;
+  })();
+  const spine = new T.BoxGeometry(.46, .007, .022).translate(.25, .002, 0);
+  const spineMat = new T.MeshStandardMaterial({ color: '#c6f6ee', emissive: '#6ee0d4', emissiveIntensity: 1.1, roughness: .3 });
+  const spineSkin = naniteSkin(spineMat, { pattern: false, key: 'zip-form-light' });
+  wingMat.side = T.DoubleSide;
+  const wingMeshes: T.Mesh[] = [];
+  for (const side of [1, -1]) {
+    const half = new T.Group(); half.scale.x = side; half.position.x = side * .05; half.rotation.y = -side * .4; wings.add(half);
+    [[-.05, 1], [.32, .92], [.66, .78]].forEach(([fan, len], i) => {
+      const f = new T.Mesh(feather, wingMat); f.castShadow = true; f.rotation.z = fan; f.scale.setScalar(len); f.position.z = i * .012; half.add(f); wingMeshes.push(f);
+      const sp = new T.Mesh(spine, spineMat); sp.rotation.z = fan; sp.scale.setScalar(len); sp.position.z = i * .012 + .012; half.add(sp);
+    });
+  }
+  const forms: Record<ZipForm, { k: number; on: boolean }> = { chest: { k: 0, on: false }, cage: { k: 0, on: false }, wings: { k: 0, on: false } };
+  const chestAt = worldAt('Chest', CHEST), handAt = worldAt('HandR', HAND), backAt = worldAt('Chest', BACK);
+  const tipAt = (side: number) => { const out = new T.Vector3(); return () => wingMeshes[side > 0 ? 1 : 4].localToWorld(out.set(.5, 0, 0)); };
+  const ss = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  function shift(form: ZipForm, on: boolean) {
+    const f = forms[form]; if (f.on === on) return; f.on = on;
+    root.updateMatrixWorld(true);
+    // the matter crosses: out of the body into the new form, or back
+    if (form === 'chest') { const ring = Array.from({ length: 6 }, (_, i) => { const p = new T.Vector3(); return () => chestAt().clone().add(p.set(Math.cos(i) * .22, Math.sin(i * 1.7) * .18, -.12)); }); for (const r of ring) on ? swarm.stream(chestAt, r, 8, .6, { spread: .05, curl: .15 }) : swarm.stream(r, chestAt, 8, .6, { spread: .05, curl: .15 }); }
+    if (form === 'cage') on ? swarm.stream(handAt, handAt, 36, .7, { spread: .03, curl: .18 }) : swarm.stream(handAt, chestAt, 40, .9, { spread: .07, curl: .3 });
+    if (form === 'wings') for (const sd of [1, -1]) on ? swarm.stream(backAt, tipAt(sd), 55, .9, { spread: .05, curl: .25, stagger: .45 }) : swarm.stream(tipAt(sd), backAt, 55, .8, { spread: .1, curl: .2, stagger: .3 });
+  }
+  // at rest, now and then a few motes lift off him and settle back (he is never quite still)
+  const restSpots = ([['Head', v(.12, 1.7, .05)], ['Head', v(-.15, 1.62, .08)], ['Chest', v(.2, 1.2, .02)], ['Chest', v(-.18, 1.12, .08)], ['UpperArmR', v(.27, 1.05, 0)], ['UpperArmL', v(-.27, 1.0, 0)], ['EarR', v(.19, 1.9, .02)], ['EarL', v(-.19, 1.88, .02)], ['Hips', v(.1, .76, .06)]] as [BoneName, T.Vector3][]).map(([b, p]) => worldAt(b, p));
+  let driftT = 1.5;
+  function tickDrift(dt: number, still: boolean) {
+    driftT -= dt; if (driftT > 0) return;
+    driftT = still ? 1.2 + Math.random() * 2.5 : 3 + Math.random() * 3;
+    const at = restSpots[Math.floor(Math.random() * restSpots.length)];
+    swarm.stream(at, at, still ? 5 : 3, 1.6, { spread: .03, curl: .16, stagger: .5 });
+  }
+  function tickForms(dt: number) {
+    for (const f of Object.values(forms)) f.k = Math.min(1, Math.max(0, f.k + (f.on ? 1 : -1) * dt / .6));
+    const c = forms.chest.k, h = forms.cage.k, w = forms.wings.k;
+    // the chest opens round the engine's lens; the right hand comes apart and the cage grows in its place
+    for (const sk of skins) { sk.cut(0, CHEST, ss(0, 1, c) * .1); sk.cut(1, HAND, ss(0, .55, h) * .092); }
+    cage.visible = h > .3; cageSkin.grow(v(0, 0, 0), cage.visible ? ss(.3, 1, h) * .14 : -1);
+    cage.rotation.y += dt * 1.6; cage.rotation.x += dt * .7;
+    wings.visible = w > .01; wingSkin.grow(v(0, 0, 0), wings.visible && w < 1 ? ss(0, 1, w) * .72 : -1); spineSkin.grow(v(0, 0, 0), wings.visible && w < 1 ? ss(.15, 1, w) * .6 : -1);
+    wings.children.forEach((half, i) => { half.rotation.z = Math.sin(t * 2.2 + i) * .06 * w; });
+    wingSkin.tick(t, .6); cageSkin.tick(t, 1); swarm.tick(dt);
+    return c;
+  }
+
   // ---------------------------------------------------------------- procedural clips
   const mixer = new T.AnimationMixer(root);
   const clips = proceduralClips(bones);
@@ -315,7 +398,8 @@ export function buildZipRig(): ZipRig {
     if (inf) { inf[0] = blink > 0 ? Math.sin(blink * Math.PI) : 0; inf[1] = feelNow[0]; inf[2] = feelNow[1]; inf[3] = feelNow[2]; inf[4] = Math.min(1, talkGlow * 1.5); }
     talkGlow += ((cue?.talk ?? 0) - talkGlow) * Math.min(1, dt * 20);
     for (const sk of skins) sk.tick(t, Math.max(talkGlow * 1.2, smoothSpeed / 3.2 * .6, feelNow[0] * .4));
-    light.emissiveIntensity = .8 + talkGlow * 1.1;
+    const open = tickForms(dt); if (!reduced) tickDrift(dt, s < .2);
+    light.emissiveIntensity = .8 + talkGlow * 1.1 + open * .9;
   }
   function play(name: string) {
     const a = actions[name]; if (!a) return;
@@ -327,6 +411,8 @@ export function buildZipRig(): ZipRig {
     lookAt: (w) => { lookTarget = w ? w.clone() : null; },
     /** what he feels, until told otherwise (kit/face-rig.ts names; null: his usual face) */
     feel: (n: string | null) => { feltZip = n; },
+    shift, view: (h: number, f: number) => swarm.view(h, f),
+    get forms() { return { chest: forms.chest.k, cage: forms.cage.k, wings: forms.wings.k }; },
     useClips(list) {
       // Library clips replace procedural ones with the same name.
       for (const c of list) { const old = actions[c.name]; if (old) { old.stop(); mixer.uncacheAction(old.getClip()); } }

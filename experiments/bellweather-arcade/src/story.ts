@@ -64,6 +64,8 @@ interface Opts {
   moodForce?: (name: string | null, k?: number) => void;
   /** what Zip feels (his visor eyes and ears: zip-rig.ts); null: his usual face */
   zipFeel?: (name: string | null) => void;
+  /** Zip shape-shifts (he is nanites, zip-rig.ts): his chest opens, his hand becomes a cage, he grows wings */
+  zipShift?: (form: 'chest' | 'cage' | 'wings', on: boolean) => void;
   /** a person of the world (animated, seeded look), for isles with their own folk; null without the body kit */
   person?: (seed: number, look?: Look) => Townsperson | null;
   camera: T.Camera;
@@ -167,6 +169,9 @@ export function buildStory(scene: T.Scene, o: Opts) {
     scene.add(m); hat = m;
   }).catch(() => { /* no kit: no hat */ });
   // Zip's face through the story: a feeling held for a while, then his usual face
+  // ...and his shape: the chest opens as a word goes into his speech engine (and while it is open),
+  // his hand becomes a cage to hold the spark, and he grows wings to fly
+  let chestUntil = -1, cageUntil = -1;
   let feltUntil = 0; const zipFeels = (name: string | null, sec = 0) => { o.zipFeel?.(name); feltUntil = sec ? t + sec : 0; };
   const afterAttack = () => { const l = life(); if (l) { l.after = true; l.alarm = null; } if (hat) hat.visible = true; };
 
@@ -202,7 +207,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
   };
   const echo = buildEcho(scene, {
     guide: g, camera: o.camera, zip: o.zip, sources: ECHO_SOURCES, follow: { skiff: () => skiff.at() },
-    absorb: w => echoSt.act('absorb.' + w).ok,
+    absorb: w => { const ok = echoSt.act('absorb.' + w).ok; if (ok) chestUntil = t + 1.8; return ok; },
     onAbsorbed: w => {
       story.thinkOnce('echo-first');
       if (!ECHO_NEEDED.includes(w)) later(1.2, () => story.thinkOnce('echo-decoy'));
@@ -506,7 +511,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
     if (hops === 1) { story.toast('sparkFlees', 1200); story.thinkOnce('chase'); } else if (hops === SPARK_HOPS) story.toast('sparkTiring', 1200);
   };
   const catchSpark = () => {
-    zipFeels('happy', 3);
+    zipFeels('happy', 3); cageUntil = t + 1.6;
     // no card: the coil's discovery is Zip's own thought, and the first word shows how to take it
     later(1.2, () => story.thinkOnce(ECHO ? 'coil-new' : 'beep'));
     if (ECHO) later(5, () => streamWakes());
@@ -747,7 +752,8 @@ export function buildStory(scene: T.Scene, o: Opts) {
       startOpening();
     },
     tick(dt: number) {
-      t += dt; if (feltUntil && t > feltUntil) zipFeels(null); tickHolo(dt); sparkFx.tick(dt); const z = o.zip();
+      t += dt; if (feltUntil && t > feltUntil) zipFeels(null); tickHolo(dt);
+      o.zipShift?.('chest', t < chestUntil || engine.active); o.zipShift?.('cage', t < cageUntil); o.zipShift?.('wings', flight.active); sparkFx.tick(dt); const z = o.zip();
       g.zipClarity = beat === 'loom-done' || beat === 'to-chime' || beat.startsWith('chime') ? ZIP_CLARITY.loom : ZIP_CLARITY.skiff;   // his voice clears as engine pieces return
       const sky = beat === 'fly' || beat === 'isle' || beat.startsWith('loom') || beat === 'to-loom' || beat === 'to-chime' || beat.startsWith('chime');
       if (sky !== skyShown) { skyShown = sky; world.show('next', sky); world.show('route', sky); }

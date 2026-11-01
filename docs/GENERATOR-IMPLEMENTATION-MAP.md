@@ -306,6 +306,13 @@ in `story.ts` to join the levels.
   body's rest pose (moves with the bones), triplanar, seams and per-cell tint, waves of active cells
   driven by an `energy` value, faded out below about two pixels a cell. **lib**
 
+- **Shape-shifting** (`kit/nanite-skin.ts` cut/grow, `kit/nanite-swarm.ts`, zip-rig.ts `shift`): a
+  part comes apart cell by cell (cells within a growing radius of a rest-pose point are discarded,
+  their edge alight) while a new form is built the same way in reverse, and a pooled stream of motes
+  carries the matter across. Forms: the chest opens onto the speech engine (absorbing a word, the
+  engine open), the right hand becomes a cage of light (catching the spark), feathered wings grow
+  from the back (flying). At rest, motes now and then lift off and settle. **lib + game**
+
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).
 2. ~~Station archetype~~ (done 1 Oct: `first-words-stations.ts` + `kit/station.ts`).

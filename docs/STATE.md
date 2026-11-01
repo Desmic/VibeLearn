@@ -1,6 +1,16 @@
 # Current state — LLM learning-game proof track
 
-**2 November 2026, evening — Zip is made of nanites (supersedes everything below).** Desmic: "ideally,
+**2 November 2026, night — Zip shape-shifts (supersedes everything below).** Steps 2 and 3 of the
+nanite Zip (v124). A part comes apart cell by cell, its edge alight, while the new form builds the same
+way, and a stream of motes carries the matter across (`kit/nanite-skin.ts` cut/grow,
+`kit/nanite-swarm.ts`, `zip-rig.ts` `shift`). His chest irises open onto the glowing core of his speech
+engine as a word goes in (and stays open while the engine is open); his right hand becomes a spinning
+cage of light that holds the spark, then melts back, its motes streaming into his chest; three long
+feathers a side, each with a spine of light, grow from his back for flight and sway as he flies. At
+rest, a few motes lift off him now and then and settle. Checks: flowcheck 134/134, title to flight
+40/40 with the new "Zip grows wings while he flies" check, speedrun 29/29.
+
+**2 November 2026, evening — Zip is made of nanites.** Desmic: "ideally,
 he'll be a nanobot tech, which can shape shift according to needs". Step 1 of 3 (v123): his shell is a
 nanite surface (`kit/nanite-skin.ts`): a fine lattice of 2 cm cells anchored to his body, each with its
 own faint tint, and waves of activity running through it that light the odd cell teal. It livens when he
