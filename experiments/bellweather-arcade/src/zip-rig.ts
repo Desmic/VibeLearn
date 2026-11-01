@@ -1,4 +1,5 @@
 import * as T from 'three';
+import { faceCue } from './kit/face-rig';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { poseBase } from './kit/pose-hold';
@@ -41,6 +42,8 @@ export interface ZipRig {
   wave(): void;
   cheer(): void;
   lookAt(world: T.Vector3 | null): void;
+  /** what he feels (kit/face-rig.ts FEELINGS names), until told otherwise; null: his usual face */
+  feel(name: string | null): void;
   useClips(clips: T.AnimationClip[]): void;
 }
 
@@ -185,20 +188,31 @@ export function buildZipRig(): ZipRig {
     if (material === light) eyeMeshes.push(mesh);
     for (const g of parts) g.dispose();
   }
-  // blink: collapse the two eye slits vertically (they share the light material
-  // with the ear discs, so we scale a dedicated eye bone-free trick: a tiny morph)
+  // the face: two light slits behind the visor. Morphs (relative) on the slits only: 0 blink (shut),
+  // 1 glad (short, raised and bowed: smiling eyes), 2 sad (heavy lids), 3 wide (taller).
   const eyeMesh = eyeMeshes[0];
   if (eyeMesh) {
     const P = eyeMesh.geometry.getAttribute('position') as T.BufferAttribute;
-    const closed = new Float32Array(P.array as Float32Array);
+    const D = [0, 1, 2, 3].map(() => new Float32Array(P.count * 3));
     for (let i = 0; i < P.count; i++) {
       const x = P.getX(i), y = P.getY(i), z = P.getZ(i);
-      if (z < -.2 && Math.abs(Math.abs(x) - .085) < .03 && Math.abs(y - 1.53) < .05) closed[i * 3 + 1] = 1.515 + (y - 1.53) * .12;
+      if (!(z < -.2 && Math.abs(Math.abs(x) - .085) < .03 && Math.abs(y - 1.53) < .05)) continue;
+      const dx = x - Math.sign(x) * .085, dy = y - 1.53, u = Math.min(1, Math.abs(dx) / .012);
+      D[0][i * 3 + 1] = (1.515 + dy * .12) - y;
+      D[1][i * 3] = dx * .7; D[1][i * 3 + 1] = -dy * .62 + .012 + (1 - u * u) * .012;   // short, wide, lifted, bowed up: ◠
+      D[2][i * 3 + 1] = -Math.max(0, dy) * .62 - .005;                    // heavy lids: the tops come down
+      D[3][i * 3 + 1] = dy * .32;
     }
-    eyeMesh.geometry.morphAttributes.position = [new T.Float32BufferAttribute(closed, 3)];
-    eyeMesh.geometry.morphTargetsRelative = false;
-    eyeMesh.updateMorphTargets(); eyeMesh.morphTargetInfluences = [0];
+    eyeMesh.geometry.morphAttributes.position = D.map(d => new T.Float32BufferAttribute(d, 3));
+    eyeMesh.geometry.morphTargetsRelative = true;
+    eyeMesh.updateMorphTargets(); eyeMesh.morphTargetInfluences = [0, 0, 0, 0];
   }
+  /** a feeling as slit shapes and ear set: [glad, sad, wide, ears (+ up, − down)] */
+  const ZIP_FEEL: Record<string, [number, number, number, number]> = {
+    warm: [.45, 0, 0, .1], happy: [1, 0, 0, .25], proud: [.8, 0, .1, .2], curious: [0, 0, .35, .25],
+    worried: [0, .7, .1, -.25], sad: [0, 1, 0, -.45], afraid: [0, .6, .6, -.35], shocked: [0, 0, 1, .3], determined: [.15, 0, -.2, 0],
+  };
+  const feelNow = [0, 0, 0, 0]; let feltZip: string | null = null;
 
   // ---------------------------------------------------------------- procedural clips
   const mixer = new T.AnimationMixer(root);
@@ -214,7 +228,7 @@ export function buildZipRig(): ZipRig {
   install(clips);
 
   // ---------------------------------------------------------------- runtime state
-  let t = 0, blinkAt = 2 + Math.random() * 3, blink = 0, gesture: T.AnimationAction | null = null;
+  let t = 0, blinkAt = 2 + Math.random() * 3, blink = 0, gesture: T.AnimationAction | null = null, talkGlow = 0;
   let lookTarget: T.Vector3 | null = null; const headLook = new T.Euler();
   const earVel = [0, 0], earAng = [0, 0], scarfLag = new T.Vector3(); let lastYaw = 0, smoothSpeed = 0;
   const q = new T.Quaternion(), e = new T.Euler(), tmp = new T.Vector3();
@@ -261,7 +275,7 @@ export function buildZipRig(): ZipRig {
     // ears: damped springs driven by turning and speed, with an occasional twitch
     const yawNow = root.rotation.y, turn = T.MathUtils.clamp((yawNow - lastYaw) / Math.max(dt, 1e-3), -6, 6); lastYaw = yawNow;
     for (let i = 0; i < 2; i++) {
-      const target = -s * .025 + (i ? -1 : 1) * turn * .035 + (Math.sin(t * 1.3 + i) > .985 ? .25 : 0);
+      const target = -s * .025 + (i ? -1 : 1) * turn * .035 + (Math.sin(t * 1.3 + i) > .985 ? .25 : 0) - feelNow[3] * .9;
       earVel[i] += ((target - earAng[i]) * 90 - earVel[i] * 9) * dt; earAng[i] += earVel[i] * dt;
     }
     if (!reduced) {
@@ -274,10 +288,16 @@ export function buildZipRig(): ZipRig {
       bones.Scarf2.quaternion.multiply(q.setFromEuler(e.set(scarfLag.x * .7 + flutter, 0, 0)));
       bones.Scarf3.quaternion.multiply(q.setFromEuler(e.set(scarfLag.x * .8 + flutter * 1.4, 0, 0)));
     }
-    // blink
+    // blink; the slits take the shape of what he feels (his line's, or what the story says), and his
+    // lights brighten with his voice (a robot's mouth: the eyes and ear lamps pulse as he talks)
     if (t > blinkAt) { blink = 1; blinkAt = t + 2.2 + Math.random() * 3.5; }
     blink = Math.max(0, blink - dt * 9);
-    if (eyeMesh?.morphTargetInfluences) eyeMesh.morphTargetInfluences[0] = blink > 0 ? Math.sin(blink * Math.PI) : 0;
+    const cue = faceCue('Zip'), f = ZIP_FEEL[cue?.feel ?? feltZip ?? ''] ?? [0, 0, 0, 0];
+    for (let k = 0; k < 4; k++) feelNow[k] += (f[k] - feelNow[k]) * Math.min(1, dt * 6);
+    const inf = eyeMesh?.morphTargetInfluences;
+    if (inf) { inf[0] = blink > 0 ? Math.sin(blink * Math.PI) : 0; inf[1] = feelNow[0]; inf[2] = feelNow[1]; inf[3] = feelNow[2]; }
+    talkGlow += ((cue?.talk ?? 0) - talkGlow) * Math.min(1, dt * 20);
+    light.emissiveIntensity = .8 + talkGlow * 1.1;
   }
   function play(name: string) {
     const a = actions[name]; if (!a) return;
@@ -287,6 +307,8 @@ export function buildZipRig(): ZipRig {
     root, skeleton, bones, mixer, actions, update,
     wave: () => play('Wave'), cheer: () => play('Cheer'),
     lookAt: (w) => { lookTarget = w ? w.clone() : null; },
+    /** what he feels, until told otherwise (kit/face-rig.ts names; null: his usual face) */
+    feel: (n: string | null) => { feltZip = n; },
     useClips(list) {
       // Library clips replace procedural ones with the same name.
       for (const c of list) { const old = actions[c.name]; if (old) { old.stop(); mixer.uncacheAction(old.getClip()); } }

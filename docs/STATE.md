@@ -1,6 +1,21 @@
 # Current state — LLM learning-game proof track
 
-**1 November 2026 — the first minute (supersedes everything below).** Blind runs 30 and 31 both had
+**1 November 2026, later — faces that live (supersedes everything below).** Desmic: "work on
+character models… character models are needed to inspire emotions/aliveness". Version 119: every
+person's face is alive (`kit/face-rig.ts`, morph targets built from the body kit's own face parts):
+they blink (sometimes twice, and as they look round), their eyes glance and lead the head, their
+mouths move with the voice actually playing (an analyser on the clip; a flap when a line is silent),
+the chest breathes, and they show feelings (warm, happy, worried, sad, shocked, afraid…) taken from the
+actor's direction for a line, or set by the story: the town is shocked when the ship comes, then
+worried; Mira is afraid; Tavi worries behind the cloth and lights up when freed; the crowd groans or
+cheers with the bells. Tavi, until now a capsule and a ball, is a person from the kit (a weaver in a
+sky-blue scarf); Oriel is a bard (plum beret, gold shawl). Zip's visor eyes change shape with what he
+feels (smiling arcs, heavy lids, wide) and his lights pulse as he talks; his ears droop when he is sad.
+While Mira speaks, the camera looks over Zip's shoulder at her face. People have a soft rim of light.
+Checks: flowcheck all segments pass (two new: Mira's mouth moves while she talks; Tavi is a person),
+speedrun 29/29.
+
+**1 November 2026 — the first minute.** Blind runs 30 and 31 both had
 "no idea what the game was actually about" until the Warden took Zip's voice. Version 117 opens with a
 10-second prologue: dusk, the Warden's engine drinking rivers of letters from the isles, and the
 sim-lab's log (the title screen's voice) saying what this run is for ("objective: get her back"), then

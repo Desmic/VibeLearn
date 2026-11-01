@@ -36,7 +36,7 @@ export function loadBodyKit(url = '/characters/body-kit.glb'): Promise<BodyKit> 
 
 /** merge a look's parts into one geometry skinned to `boneOrder` (bone names in skeleton order) */
 export function assembleLook(kit: BodyKit, look: Look, boneOrder: string[]): T.BufferGeometry {
-  const out: T.BufferGeometry[] = [];
+  const out: T.BufferGeometry[] = [], ranges: Record<string, [number, number]> = {}; let first = 0;
   const main = new T.Color(), accent = new T.Color(), c = new T.Color();
   for (const lp of look.parts) {
     const src = kit.parts.get(lp.part); if (!src) { console.warn('[body-kit] no part', lp.part); continue; }
@@ -61,10 +61,11 @@ export function assembleLook(kit: BodyKit, look: Look, boneOrder: string[]): T.B
     }
     g.setAttribute('skinIndex', new T.Uint16BufferAttribute(si, 4)); g.setAttribute('skinWeight', new T.Float32BufferAttribute(sw, 4));
     if (src.index) g.setIndex(src.index.clone());
-    out.push(g);
+    out.push(g); ranges[lp.part] = [first, P.count]; first += P.count;
   }
   if (!out.length) throw Error('[body-kit] none of the look\'s parts are in the kit');
   const merged = mergeGeometries(out, false)!; out.forEach(g => g.dispose());
+  merged.userData.parts = ranges;   // each part's [first vertex, count]: faces animate their parts (kit/face-rig.ts)
   return merged;
 }
 

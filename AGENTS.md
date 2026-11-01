@@ -21,7 +21,7 @@
   `kit/light-streams.ts`). The F15 is set aside for now.
 - **Claude decides for now** (Desmic, 27 Oct: "you know my tastes"), measures before fixing, and runs
   blind AI play-tests; every run and change is logged in `experiments/bellweather-arcade/tools/AI-PLAYTEST.md`.
-  Hosted game: artifact `5767FASV8YrmnZSSh1Ug5y`, version 118 on 1 Nov (playable through Stop 3, Chime Isle, with the demo's ending and the dream layer).
+  Hosted game: artifact `5767FASV8YrmnZSSh1Ug5y`, version 119 on 1 Nov (playable through Stop 3, Chime Isle, with the demo's ending, the dream layer and living faces).
 - What the system gained since 4 Oct (kit modules, checks): `docs/GENERATOR-IMPLEMENTATION-MAP.md`,
   section "Added 25–30 Oct".
 

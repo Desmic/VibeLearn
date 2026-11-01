@@ -73,6 +73,12 @@ await segment('meet', async () => {
   check('no card at the bottom in the cold open', !(await page.locator('.story-card:not([hidden])').count()));
   await pose(4.4, -9.4); await act('Talk');
   check('Mira talks in a bubble over her head', await waitFor(() => page.locator('.story-card.bubble').isVisible(), 15000, 300));
+  // faces (1 Nov, kit/face-rig.ts): Mira's mouth moves with her voice (or a flap when it's silent), and she blinks
+  { const f = await page.evaluate(async () => { let o; window.__vlDebug.scene.traverse(x => { if (x.name === 'Mira') o = x; }); let m; o?.traverse(b => { if (b.isSkinnedMesh) m = b; });
+      if (!m?.morphTargetInfluences) return { faced: false }; const d = m.morphTargetDictionary; let open = 0, blink = 0;
+      for (let i = 0; i < 30; i++) { await new Promise(r => setTimeout(r, 100)); open = Math.max(open, m.morphTargetInfluences[d.open]); blink = Math.max(blink, m.morphTargetInfluences[d.blink]); }
+      return { faced: true, open: +open.toFixed(2), blink: +blink.toFixed(2) }; });
+    check('Mira\'s face lives: her mouth moves while she talks', f.faced && f.open > .2, JSON.stringify(f)); }
   await shot('mira-bubble');
   await h.talkMira();
   check('attack cutscene starts', await h.until(async () => (await beat()) === 'attack', 20), await beat());
@@ -300,6 +306,8 @@ await segment('loom', async () => {
   check('loom decisions logged, first tries kept apart', ev.length === 3 && ev[0].decision === 'predict-pieces' && ev[0].first && !ev[0].correct && ev[1].first && !ev[1].correct && !ev[2].first && ev[2].correct, JSON.stringify(ev.map(e => [e.decision, e.choice, e.correct, e.first])));
   await h.stars();
   await card('What is it'); await card('Thanks');
+  { const tv = await page.evaluate(() => { let p = null; window.__vlDebug.scene.traverse(x => { if (x.userData.person?.speaker === 'Tavi') p = x; }); return p ? { person: true, visible: p.parent?.visible, faced: !!p.userData.person.face } : { person: false }; });
+    check('Tavi is a person from the body kit, with a living face', tv.person && tv.faced, JSON.stringify(tv)); }
   check('end of Stop 2 reached: Tavi free, the way on shown', await waitFor(async () => { await page.evaluate(() => window.__arcade.simulate(1)); return /Chime Isle/.test(await goal() ?? ''); }, 60000, 300), await goal());
 });
 

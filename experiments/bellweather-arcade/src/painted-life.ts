@@ -93,7 +93,7 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
   // Mira is built from the body kit (a person, with the shared clips) when it loaded; the old rig otherwise
   const miraP = opts.kit ? buildTownsperson(97, opts.clips, opts.kit, MIRA_LOOK) : null;
   const mira = miraP ? { root: miraP.root, animate: (_t: number, _s: number, _r: boolean) => {} } : buildMira(); mira.root.name = 'Mira'; mira.root.userData.fade = { halfW: .4, y0: 0, y1: 1.9, dither: !!miraP }; mira.root.position.set(5.3, .13, -10.95); mira.root.rotation.y = Math.PI - .5; root.add(mira.root); solid(5.3, -10.95, .38);
-  const miraHome = mira.root.rotation.y;
+  const miraHome = mira.root.rotation.y; if (miraP) { miraP.speaker = 'Mira'; miraP.face?.rest('warm'); }
   const miraTop = new T.Object3D(); miraTop.position.set(0, 2.05, 0); mira.root.add(miraTop);
   const miraG: Greeter = { who: miraP, pos: () => mira.root.position, lines: LINES.mira, voice: 'Mira', cool: 0, timer: -1, spoken: 0, wave: false,
     turn: (target, dt) => rotateToward(mira.root, Math.atan2(-(target.x - mira.root.position.x), -(target.z - mira.root.position.z)), dt * 2, miraHome, 1.6) };
@@ -105,7 +105,7 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
   const bubble = document.createElement('div'); bubble.className = 'speech'; bubble.hidden = true; bubble.setAttribute('aria-live', 'polite'); opts.host.appendChild(bubble);
   let bubbleFor: Greeter | null = null, bubbleT = 0;
   const voiceAt = new T.Vector3(), bubbleAt = new T.Vector3();
-  const say = (g: Greeter, text: string) => { bubble.textContent = text; bubble.hidden = false; bubbleFor = g; const dur = opts.speak?.(g.voice, text, voiceAt.copy(g.pos()).setY(g.pos().y + 1.7)) ?? 0; bubbleT = Math.max(3.6, dur + .8); };
+  const say = (g: Greeter, text: string) => { if (bubbleFor?.who) bubbleFor.who.saying = null; if (g.who) g.who.saying = g.voice; bubble.textContent = text; bubble.hidden = false; bubbleFor = g; const dur = opts.speak?.(g.voice, text, voiceAt.copy(g.pos()).setY(g.pos().y + 1.7)) ?? 0; bubbleT = Math.max(3.6, dur + .8); };
 
   let t = 0, wasAlarm = false; const zipHead = new T.Vector3(), tmp = new T.Vector3(), greetFrom = new T.Vector3();
   const tick = (dt: number, reduced: boolean, zip?: { pos: T.Vector3, speed: number }) => {
@@ -118,10 +118,10 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
     if (alarm) {
       // the first moment: the two nearest point up at it (an arm raised), the rest just stare
       if (!wasAlarm) [...folk].sort((a, b) => a.root.position.distanceToSquared(alarm) - b.root.position.distanceToSquared(alarm)).slice(0, 2).forEach((p, i) => setTimeout(() => p.wave(), 300 + i * 700));
-      for (const p of folk) { p.lookAt(alarm); rotateToward(p.root, Math.atan2(-(alarm.x - p.root.position.x), -(alarm.z - p.root.position.z)), dt * 2.2); }
-      miraP?.lookAt(alarm);
+      for (const p of folk) { p.feel('shocked'); p.lookAt(alarm); rotateToward(p.root, Math.atan2(-(alarm.x - p.root.position.x), -(alarm.z - p.root.position.z)), dt * 2.2); }
+      miraP?.lookAt(alarm); miraP?.feel('afraid');
       wasAlarm = true;
-    } else if (wasAlarm) { wasAlarm = false; for (const p of folk) p.lookAt(null); }
+    } else if (wasAlarm) { wasAlarm = false; for (const p of folk) { p.lookAt(null); p.feel(after ? 'worried' : null); } }
     // strollers advance unless greeting
     for (const s of strollers) {
       const greeting = s.g.timer >= 0 || !!alarm || after;
@@ -161,7 +161,7 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
       const show = bubbleT > 0 && !opts.host.matches('.card-open,.cutscene,.puzzle-mode');
       if (bubble.hidden !== !show) bubble.hidden = !show;
       if (!ov.has('folk-bubble')) ov.pin('folk-bubble', bubble, () => bubbleFor ? (bubbleFor.who ? bubbleFor.who.headTop : miraTop).getWorldPosition(bubbleAt) : null, { rank: 6, lift: 10 });
-      if (bubbleT <= 0) { bubbleFor = null; bubble.hidden = true; ov.unpin('folk-bubble'); }
+      if (bubbleT <= 0) { if (bubbleFor.who) bubbleFor.who.saying = null; bubbleFor = null; bubble.hidden = true; ov.unpin('folk-bubble'); }
     } else if (bubbleFor) {
       bubbleT -= dt;
       const anchor = bubbleFor.who ? bubbleFor.who.headTop : miraTop;
@@ -169,7 +169,7 @@ export function buildPaintedLife(scene: T.Scene, solid: Solid, withBirds = true,
       const visible = bubbleT > 0 && !opts.host.matches('.card-open,.cutscene,.puzzle-mode') && tmp.z < 1 && Math.abs(tmp.x) < 1.1 && Math.abs(tmp.y) < 1.1;
       if (bubble.hidden !== !visible) bubble.hidden = !visible;
       if (visible) { const w = opts.host.clientWidth, h = opts.host.clientHeight, bw = bubble.offsetWidth / 2 + 8, bh = bubble.offsetHeight; bubble.style.transform = `translate(${Math.min(w - bw, Math.max(bw, (tmp.x * .5 + .5) * w))}px, ${Math.max(118 + bh, (-tmp.y * .5 + .5) * h)}px) translate(-50%, -100%)`; }  // kept on screen, below the goal line
-      if (bubbleT <= 0) bubbleFor = null;
+      if (bubbleT <= 0) { if (bubbleFor.who) bubbleFor.who.saying = null; bubbleFor = null; }
     }
     if (miraP) {
       // in conversation (a story card is open nearby) she talks and looks at Zip

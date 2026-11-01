@@ -1,4 +1,7 @@
 import * as T from 'three';
+import { feelingFor } from './kit/face-rig';
+const NONE = { talk: 0, feel: null };
+const cleanLen = (t: string) => t.replace(/<[^>]+>/g, '').length;
 import { sfx } from './sfx';
 import { createOverlay } from './kit/overlay';
 import type { Voice } from './kit/voice';
@@ -64,6 +67,14 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
   let goalT = 0;
   // voiced lines (kit/voice.ts): a speaker's line plays from where they stand (panned, quieter far away)
   let voice: Voice | null = null, zipClarity = 1;
+  // each speaker's latest line: their face talks and feels it (kit/face-rig.ts via townsfolk-rig.ts)
+  const lines = new Map<string, { text: string; at: number; len: number; silent: boolean; feel: string | null }>();
+  let cardWho = '';
+  const said = (who: string, text: string) => {
+    const silent = !voice?.has(who, text), len = silent ? 1 + cleanLen(text) * .055 : voice!.duration(who, text);
+    lines.set(who, { text, at: performance.now() / 1000, len, silent, feel: feelingFor(voice?.direction(text) ?? '') ?? lineFeel?.(who, text) ?? null });
+  };
+  let lineFeel: ((who: string, text: string) => string | null) | null = null;
   const camPos = new T.Vector3();
   const placeVoice = (at: T.Vector3 | null | undefined) => {
     if (!at) return { pan: 0, gain: 1 };
@@ -128,6 +139,8 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
 
   const api = {
     get cardOpen() { return cardOpen; },
+    /** who is speaking on the open card ('' when none, or no speaker) */
+    get speaker() { return cardOpen ? cardWho : ''; },
     // a new goal reads in full for a few seconds, then settles into a small, quiet line
     setGoal(text: string | null) { const key = (x: string) => x.replace(/\d+/g, '#'), was = key(goal.textContent ?? ''); goal.hidden = !text; goal.textContent = text ?? ''; if (text && key(text) !== was) { goalT = 6; goal.classList.remove('quiet'); } },
     /** the shared world overlay (pins UI to things in the world) */
@@ -141,7 +154,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
       const b = barks.find(x => x.who === who) ?? barks.find(x => x.t <= 0) ?? barks.reduce((a, x) => x.t < a.t ? x : a);
       b.who = who; b.t = sec || 2.2 + text.length * .055; b.el.hidden = false; b.el.className = 'speech bark' + (opts.tone ? ' ' + opts.tone : '');
       b.el.innerHTML = ''; if (who !== 'Zip') { const n = document.createElement('b'); n.className = 'who'; n.textContent = who; b.el.appendChild(n); }
-      b.el.appendChild(document.createTextNode(text));
+      b.el.appendChild(document.createTextNode(text)); said(who, text);
       overlay.pin('bark-' + barks.indexOf(b), b.el, at, { rank: 9, edge: true, lift: 12 });
       if (voice?.has(who, text)) { void voice.play(who, text, { channel: 'bark', clarity: opts.tone === 'static' ? 0 : zipClarity, ...placeVoice(at()) }); b.t = Math.max(b.t, voice.duration(who, text) + .5); return voice.duration(who, text); }
       return 0;
@@ -149,12 +162,24 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
     get barking() { return barks.some(b => b.t > 0); },
     /** end passing lines at once (one speaker's, or everyone's): bubble and voice */
     quiet(who?: string) { for (const b of barks) if (b.t > 0 && (!who || b.who === who)) { if (b.who) voice?.stopSpeaker(b.who); b.t = 0; b.el.hidden = true; b.who = ''; } },
+    /** what a speaker's face does now: how much the mouth moves (the voice's loudness, or a flap
+     *  while an unvoiced line is on screen) and the feeling of their line (null: none) */
+    cue(who: string): { talk: number; feel: string | null } {
+      const L = lines.get(who); if (!L) return NONE;
+      const age = performance.now() / 1000 - L.at, onCard = cardOpen && cardWho === who;
+      let talk = voice?.level(who) ?? 0;
+      // no clip, or no sound to play it on (before the first tap, sound off): the mouth still moves for the line
+      if ((L.silent || !voice?.playing(who)) && age < L.len - .5) talk = .45 + .35 * Math.abs(Math.sin(age * 11.3) * Math.sin(age * 4.1 + 1));
+      return { talk, feel: onCard || age < L.len + 1.5 ? L.feel : null };
+    },
+    /** a feeling for lines the voice direction doesn't give one (the world's own table) */
+    set lineFeel(f: ((who: string, text: string) => string | null) | null) { lineFeel = f; },
     /** give the guide a voice: lines with a recorded clip are spoken */
     setVoice(v: Voice | null) { voice = v; },
     /** how clear Zip's (robot) voice is: 0 broken … 1 clean */
     set zipClarity(k: number) { zipClarity = k; },
     /** say a line aloud from a point in the world without a bubble (townsfolk greetings): seconds it lasts, 0 if unvoiced */
-    speakAt(speaker: string, text: string, at: T.Vector3) { if (!voice?.has(speaker, text)) return 0; void voice.play(speaker, text, { channel: 'bark', ...placeVoice(at) }); return voice.duration(speaker, text); },
+    speakAt(speaker: string, text: string, at: T.Vector3) { said(speaker, text); if (!voice?.has(speaker, text)) return 0; void voice.play(speaker, text, { channel: 'bark', ...placeVoice(at) }); return voice.duration(speaker, text); },
     /** a tutorial prompt on a thing in the world: a pulsing ring and one verb ("Tap"), no card */
     prompt(id: string, at: (() => T.Vector3 | null) | null, verb = 'Tap') {
       let el = prompts.get(id);
@@ -194,6 +219,7 @@ export function buildGuide(scene: T.Scene, host: HTMLElement, camera: T.Camera, 
     // `via`: the anchor the voice comes from when it isn't the speaker's own (Mira over the relay)
     say(text: string, choices: Choice[] = [], opts: { speaker?: string; chips?: ChipOpt; picked?: Set<number>; pictures?: boolean; at?: () => T.Vector3 | null; via?: string } = {}) {
       if (opts.speaker) api.quiet(opts.speaker);   // a speaker who starts talking ends their own passing line (no two bubbles for one person)
+      cardWho = opts.speaker ?? ''; if (opts.speaker) said(opts.speaker, text);
       cardOpen = true; host.classList.add('card-open'); act.hidden = true; brackets.hidden = true; card.hidden = false; card.innerHTML = '';
       // a speaker who is somewhere in the world talks in a bubble over their head
       let at = opts.at ?? (opts.via ? anchors.get(opts.via) : opts.speaker ? opts.speaker === 'Zip' ? (() => thinker ? head(thinker(), zipHead, 1.75) : null) : anchors.get(opts.speaker) : undefined);

@@ -4,6 +4,7 @@ import { mulberry32 } from './vendor/rng';
 import { proceduralClips } from './zip-rig';
 import { assembleLook, townsfolkLook, type BodyKit, type Look } from './kit/body-kit';
 import { poseBase } from './kit/pose-hold';
+import { addFaceMorphs, createFace, faceCue, type Face } from './kit/face-rig';
 
 // Townsfolk on the same humanoid skeleton (bone names) as Zip, so one library
 // of baked clips animates every inhabitant. Long coats are skinned to the hips
@@ -28,12 +29,22 @@ const coats = ['#2d4f7a', '#c8733f', '#6b4f8a', '#e6d7b8', '#3f6d6a', '#9b4a52']
 const cloth = new T.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: .95 });
 // Faces must read even with the sun behind someone (dialogue shots often face into
 // the light): a soft self-light lifts the shadow side, like a fill light on a set.
-cloth.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n totalEmissiveRadiance += diffuseColor.rgb * .26;'); };
-cloth.customProgramCacheKey = () => 'vl-people-fill';
+// A soft rim of light round the edge (people stand out from the painted world like figures in a
+// picture book, and a face turned toward the camera keeps its shape against a dark sky).
+cloth.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n totalEmissiveRadiance += diffuseColor.rgb * .26;\n { float rimK = 1. - clamp(dot(normalize(normal), normalize(vViewPosition)), 0., 1.); totalEmissiveRadiance += (diffuseColor.rgb * .5 + vec3(.5, .47, .42)) * pow(rimK, 3.) * .3; }'); };
+cloth.customProgramCacheKey = () => 'vl-people-fill-rim';
 const straw = new T.Color('#dcb978'), shoe = new T.Color('#22324a');
 
 export interface Townsperson {
   root: T.Group; head: T.Bone; headTop: T.Object3D;
+  /** the living face (blinks, glances, mouth, feelings); null on the code-built fallback body */
+  face: Face | null;
+  /** the voice this person speaks with: their mouth moves while it plays (null: silent) */
+  speaker: string | null;
+  /** a voice they are using just now (a greeting in a shared townsfolk voice), over `speaker` */
+  saying: string | null;
+  /** what they feel now (kit/face-rig.ts FEELINGS), until told otherwise; null: their resting face */
+  feel(name: string | null): void;
   update(dt: number, moving: number, reduced: boolean): void;
   setBase(name: 'Idle' | 'Talk' | 'Stroll'): void;
   wave(): void;
@@ -65,7 +76,7 @@ export function buildTownsperson(seed: number, library: T.AnimationClip[], kit?:
   const skeleton = new T.Skeleton(ORDER.map(n => bones[n]));
   const idx = (n: Bn) => ORDER.indexOf(n);
 
-  const parts: T.BufferGeometry[] = [];
+  const parts: T.BufferGeometry[] = []; let face: Face | null = null;
   if (kit && bodyLook) parts.push(assembleLook(kit, bodyLook, ORDER));
   else {
   const coat = new T.Color(coats[Math.floor(r() * coats.length)]);
@@ -100,8 +111,11 @@ export function buildTownsperson(seed: number, library: T.AnimationClip[], kit?:
   }
   {
     const g = parts.length === 1 ? parts[0] : mergeGeometries(parts, false)!; if (!(kit && bodyLook)) g.computeVertexNormals();
+    const faced = !!g.userData.parts && addFaceMorphs(g, g.userData.parts);
     const mesh = new T.SkinnedMesh(g, cloth); mesh.castShadow = true; mesh.receiveShadow = true; mesh.frustumCulled = false;
+    if (faced) mesh.updateMorphTargets();
     body.add(mesh); mesh.bind(skeleton, new T.Matrix4()); parts.forEach(p => { if (p !== g) p.dispose(); });
+    face = faced ? createFace(mesh, r()) : null; face?.rest(['warm', 'neutral', 'warm', 'curious'][Math.floor(r() * 4)]);
   }
   const headTop = new T.Object3D(); headTop.position.set(0, .45, 0); bones.Head.add(headTop);
 
@@ -117,8 +131,11 @@ export function buildTownsperson(seed: number, library: T.AnimationClip[], kit?:
   // (3 Oct F15 play-test: heads spun like tops while people stared at the sky).
   // (from the clips' last pose, not rest: kit/pose-hold.ts, the 11 Oct idle flicker)
   const look0 = poseBase([bones.Head, bones.Neck]);
-  return {
-    root, head: bones.Head, headTop,
+  // breathing: the chest rises a few millimetres (each person on their own rhythm)
+  const chestY = bones.Chest.position.y, breathRate = 1.45 + r() * .5; let breath = r() * 6, felt: string | null = null, eyeX = 0, eyeY = 0;
+  const me: Townsperson = {
+    root, head: bones.Head, headTop, face, speaker: null, saying: null,
+    feel(n) { felt = n; },
     setBase(n) { base = n; },
     wave() { const a = actions.Wave; if (!a) return; a.reset(); a.fadeIn(.2); a.play(); waving = a; },
     lookAt(p) { looking = !!p; if (p) look.copy(p); },
@@ -135,11 +152,24 @@ export function buildTownsperson(seed: number, library: T.AnimationClip[], kit?:
       if (looking && !reduced) {
         root.updateMatrixWorld(true); bones.Neck.getWorldPosition(tmp);
         root.worldToLocal(lp.copy(look)); root.worldToLocal(np.copy(tmp));
-        const d = lp.sub(np), yaw = T.MathUtils.clamp(Math.atan2(-d.x, -d.z), -1.1, 1.1), pitch = T.MathUtils.clamp(Math.atan2(d.y, Math.hypot(d.x, d.z)), -.4, .3);
+        const d = lp.sub(np); eyeX = T.MathUtils.clamp(Math.atan2(-d.x, -d.z), -1.6, 1.6); eyeY = T.MathUtils.clamp(Math.atan2(d.y, Math.hypot(d.x, d.z)), -.7, .6);
+        const yaw = T.MathUtils.clamp(eyeX, -1.1, 1.1), pitch = T.MathUtils.clamp(eyeY, -.4, .3);
         hl.x += (pitch - hl.x) * Math.min(1, dt * 4); hl.y += (yaw - hl.y) * Math.min(1, dt * 4);
       } else { hl.x *= 1 - Math.min(1, dt * 2.5); hl.y *= 1 - Math.min(1, dt * 2.5); }
       bones.Head.quaternion.multiply(q.setFromEuler(e.set(hl.x, hl.y * .65, 0)));
       bones.Neck.quaternion.multiply(q.setFromEuler(e.set(0, hl.y * .35, 0)));
+      breath += dt * breathRate; bones.Chest.position.y = chestY + Math.sin(breath) * .0035;
+      if (face) {
+        // the eyes lead the head (it turns slower) and take whatever turn the neck can't
+        if (looking) face.glance(-(eyeX - hl.y) / .45, (eyeY - hl.x) / .3 + .1);
+        const c = faceCue(me.saying ?? me.speaker);
+        face.talk(c?.talk ?? 0); face.feel(c?.feel ?? felt);
+        // a speaking head nods a little with the words
+        if (c && c.talk > .05 && !reduced) bones.Head.quaternion.multiply(q.setFromEuler(e.set(c.talk * .05 * Math.sin(breath * 4.2), 0, 0)));
+        face.tick(dt);
+      }
     },
   };
+  root.userData.person = me;   // the story finds people by their scene object
+  return me;
 }

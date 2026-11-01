@@ -63,6 +63,8 @@ export function createVoice(cast: VoiceCast, opts: { base: string; audio: AudioO
   };
   // one voice at a time per speaker (a new bark cuts that speaker's last one short)
   const bySpeaker = new Map<string, { stop: () => void }>();
+  // what each speaker is saying right now, and how loud (an analyser on the clip: mouths follow it)
+  const speaking = new Map<string, { an: AnalyserNode; buf: Float32Array<ArrayBuffer>; text: string }>();
   let line: { stop: () => void } | null = null, crushCurves = new Map<number, Float32Array<ArrayBuffer>>();
 
   const crush = (levels: number) => {
@@ -117,10 +119,12 @@ export function createVoice(cast: VoiceCast, opts: { base: string; audio: AudioO
       const ws = ctx.createWaveShaper(); ws.curve = crush(18); stage(ws);
     }
     src.connect(head);
+    const an = ctx.createAnalyser(); an.fftSize = 256; src.connect(an);
+    const talking = { an, buf: new Float32Array(new ArrayBuffer(256 * 4)), text: cleanText(text) }; speaking.set(speaker, talking);
     const stopAll = () => { try { src.stop(); } catch { /* already stopped */ } for (const x of extra) try { x.stop(); } catch { /* */ } };
     src.start(t0); for (const x of extra) x.start(t0);
     const handle = { stop: () => { out.gain.setTargetAtTime(0, ctx.currentTime, .03); setTimeout(stopAll, 120); }, duration: buf.duration / src.playbackRate.value };
-    src.onended = () => { for (const x of extra) try { x.stop(); } catch { /* */ } if (line === handle) line = null; };
+    src.onended = () => { if (speaking.get(speaker) === talking) speaking.delete(speaker); for (const x of extra) try { x.stop(); } catch { /* */ } if (line === handle) line = null; };
     if ((o.channel ?? 'line') === 'line') line = handle;
     bySpeaker.set(speaker, handle);
     return handle;
@@ -137,6 +141,16 @@ export function createVoice(cast: VoiceCast, opts: { base: string; audio: AudioO
     play,
     stopLine() { line?.stop(); line = null; },
     /** cut one speaker short (their bark or line) */
+    /** how loud a speaker's playing line is right now (0 … 1; 0 when silent) */
+    level(speaker: string) {
+      const s = speaking.get(speaker); if (!s) return 0;
+      s.an.getFloatTimeDomainData(s.buf); let e = 0; for (let i = 0; i < s.buf.length; i++) e += s.buf[i] * s.buf[i];
+      return Math.min(1, Math.sqrt(e / s.buf.length) * 5);
+    },
+    /** a line of this speaker's is playing now */
+    playing: (speaker: string) => speaking.has(speaker),
+    /** the actor's direction for a line (as shown), if it has one */
+    direction: (text: string) => opts.direction?.[cleanText(text)] ?? '',
     stopSpeaker(speaker: string) { bySpeaker.get(speaker)?.stop(); bySpeaker.delete(speaker); },
     get count() { return Object.keys(clips).length; },
   };

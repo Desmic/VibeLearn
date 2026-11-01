@@ -279,6 +279,19 @@ in `story.ts` to join the levels.
   beat (and its timed thoughts) starts at the rewind. A pattern any game can use: show where the
   story goes, in the game's own frame, before the first minute. **data + game**
 
+- **Living faces** (`kit/face-rig.ts`): morph targets built at load from a body kit's face parts
+  (eyes, glints, mouth, brows: `assembleLook` records each part's vertex range): blink, mouth open
+  (a round "D"), smile/frown, brow lift, worried brows, eye glance. A `Face` drives them: blinks, idle
+  glances (or eyes leading a head look), a mouth that follows the loudness of the voice playing
+  (`voice.level`, an analyser on the clip), feelings blended in (`FEELINGS`, and `feelingFor` reads one
+  from an actor's direction). The game sets one cue source (`setFaceCues`: the guide knows each
+  speaker's line, its feeling, and flaps a silent line); a person given a `speaker` name moves with it.
+  Zip's visor eyes take the same feelings as slit shapes; his lights pulse with his voice. **lib**
+- **Named characters from the kit** (`worlds/first-words-looks.ts`: Mira, Tavi, Oriel): a look is
+  data; `person(seed, look)` builds any of them. **data**
+- **Over-the-shoulder dialogue** (story.ts): while a character speaks to Zip, the camera looks past
+  him at their face (the clearer side, pulled in from walls); Zip's own lines keep the two-shot. **game**
+
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).
 2. ~~Station archetype~~ (done 1 Oct: `first-words-stations.ts` + `kit/station.ts`).
