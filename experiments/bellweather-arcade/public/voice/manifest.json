@@ -1,7 +1,7 @@
 {
  "_about": "Voiced lines (tools/voice.mjs). key → clip file and seconds.",
  "model": "gemini-3.8-flash-tts",
- "made": "2026-10-30T12:58:19.564Z",
+ "made": "2026-11-01T01:21:00.140Z",
  "clips": {
   "14631539": {
    "file": "14631539.mp3",
@@ -153,6 +153,11 @@
    "dur": 6.77,
    "speaker": "Gate"
   },
+  "0cef8d0e": {
+   "file": "0cef8d0e.mp3",
+   "dur": 4.73,
+   "speaker": "Lab"
+  },
   "485f5a7f": {
    "file": "485f5a7f.mp3",
    "dur": 4.61,
@@ -197,6 +202,26 @@
    "file": "be15bb15.mp3",
    "dur": 2.64,
    "speaker": "Mira"
+  },
+  "a6df9df4": {
+   "file": "a6df9df4.mp3",
+   "dur": 1.49,
+   "speaker": "Narrator"
+  },
+  "4ffa0829": {
+   "file": "4ffa0829.mp3",
+   "dur": 3.55,
+   "speaker": "Narrator"
+  },
+  "5a90fc82": {
+   "file": "5a90fc82.mp3",
+   "dur": 3.14,
+   "speaker": "Narrator"
+  },
+  "dcb4f6a3": {
+   "file": "dcb4f6a3.mp3",
+   "dur": 5.11,
+   "speaker": "Narrator"
   },
   "743f5f67": {
    "file": "743f5f67.mp3",

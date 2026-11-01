@@ -5,7 +5,11 @@
 10-second prologue: dusk, the Warden's engine drinking rivers of letters from the isles, and the
 sim-lab's log (the title screen's voice) saying what this run is for ("objective: get her back"), then
 a rewind to the morning at the outlook (`worlds/first-words-prologue.ts`). The sim-lab frame is now
-used, not just shown. Checks: flowcheck 132/132 (with a prologue check), speedrun 29/29.
+used, not just shown. Version 118 narrates it (Desmic: "usually visuals + narration does the trick"):
+a storyteller (Narrator, Gemini voice Charon) tells it over the dusk with subtitles ("Once, there was a
+world made of words. / Then the Warden built an engine, and it began to drink them. / It took Mira,
+too. / One small courier went after her."), and the lab (Iapetus, over a radio) says the rewind. Each
+line waits for the last to be said; about 20 s, skippable. Desmic is judging it. Checks: flowcheck 132/132 (with a prologue check), speedrun 29/29.
 
 **31 October 2026, night — blind run 31 on High.** A commuter (22)
 played the demo on the High tier to the end of Loom Isle: 7/10, yes to more; "this really pretty

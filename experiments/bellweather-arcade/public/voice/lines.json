@@ -741,6 +741,16 @@
    "from": "island.ts"
   },
   {
+   "key": "0cef8d0e",
+   "speaker": "Lab",
+   "voice": "Iapetus",
+   "tempo": 1.2,
+   "style": "a lab technician reading a replay log into a microphone: flat, dry, matter-of-fact, a little tired",
+   "text": "Rewinding. Six-forty, the outlook.",
+   "shown": "⏪ rewind to 06:40 · the outlook",
+   "from": "prologue"
+  },
+  {
    "key": "485f5a7f",
    "speaker": "Mira",
    "voice": "Leda",
@@ -820,6 +830,46 @@
    "text": "Zip! Up here! The skiff's ready!",
    "shown": "Zip! Up here! The skiff's ready!",
    "from": "first-words.l1:call.start"
+  },
+  {
+   "key": "a6df9df4",
+   "speaker": "Narrator",
+   "voice": "Charon",
+   "tempo": 1.08,
+   "style": "a storyteller opening a dream for grown-ups: low, warm, unhurried, a little wonder; soft, close to the microphone",
+   "text": "It took Mira, too.",
+   "shown": "It took Mira, too.",
+   "from": "prologue"
+  },
+  {
+   "key": "4ffa0829",
+   "speaker": "Narrator",
+   "voice": "Charon",
+   "tempo": 1.08,
+   "style": "a storyteller opening a dream for grown-ups: low, warm, unhurried, a little wonder; soft, close to the microphone",
+   "text": "Once, there was a world made of words.",
+   "shown": "Once, there was a world made of words.",
+   "from": "prologue"
+  },
+  {
+   "key": "5a90fc82",
+   "speaker": "Narrator",
+   "voice": "Charon",
+   "tempo": 1.08,
+   "style": "a storyteller opening a dream for grown-ups: low, warm, unhurried, a little wonder; soft, close to the microphone",
+   "text": "One small courier went after her.",
+   "shown": "One small courier went after her.",
+   "from": "prologue"
+  },
+  {
+   "key": "dcb4f6a3",
+   "speaker": "Narrator",
+   "voice": "Charon",
+   "tempo": 1.08,
+   "style": "a storyteller opening a dream for grown-ups: low, warm, unhurried, a little wonder; soft, close to the microphone",
+   "text": "Then the Warden built an engine, and it began to drink them.",
+   "shown": "Then the Warden built an engine, and it began to drink them.",
+   "from": "prologue"
   },
   {
    "key": "743f5f67",

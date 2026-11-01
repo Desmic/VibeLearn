@@ -14,6 +14,7 @@ const load = p => import(pathToFileURL(path.join(OUT, p)).href);
 const { FIRST_WORDS_L1 } = await load('worlds/first-words-story.js');
 const { STOP2_STORY } = await load('worlds/stop2-loom.js');
 const { STOP3_STORY } = await load('worlds/stop3-chime.js');
+const { PROLOGUE } = await load('worlds/first-words-prologue.js');
 const { FIRST_WORDS_CAST: CAST, FIRST_WORDS_SPOKEN: SPOKEN, FIRST_WORDS_DIRECTION: DIRECTION } = await load('worlds/first-words-voice.js');
 const { TOWN_LINES, TOWN_AFTER, TOWN_VOICES } = await load('worlds/bellweather-lines.js');
 const { clipKey, directionFor, cleanText } = await load('kit/voice.js');
@@ -29,6 +30,8 @@ for (const s of [FIRST_WORDS_L1, STOP2_STORY, STOP3_STORY]) {
   for (const [id, d] of Object.entries(s.dialogues)) for (const [lid, l] of Object.entries(d)) if (l.speaker) add(l.speaker, l.text, `${s.id}:${id}.${lid}`);
   for (const [id, t] of Object.entries(s.thoughts)) { const v = t.who && s.thoughtVoices?.[t.who]; if (v) for (const x of [t.text].flat()) add(v, x, `${s.id}:thought.${id}`); }
 }
+// the prologue: the lab's log and the narrator
+for (const l of [...PROLOGUE.narration, PROLOGUE.rewindLine]) add(l.speaker, l.text, 'prologue');
 for (const [k, ls] of Object.entries(TOWN_LINES)) for (const l of ls) add(TOWN_VOICES[k] ?? 'folk0', l, `town:${k}`);
 // after the attack, any townsperson may say any of these: one clip per townsfolk voice
 const townVoices = [...new Set(Object.entries(TOWN_VOICES).filter(([k]) => k !== 'mira').map(([, v]) => v))];

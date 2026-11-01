@@ -18,6 +18,9 @@ export const FIRST_WORDS_CAST: VoiceCast = {
   Gate:      { voice: 'Fenrir', style: 'a pompous talking stone gate who loves rules: theatrical, smug, posh British accent' },
   Tavi:      { voice: 'Achird', style: 'a kind young weaver, friendly and a bit flustered' },
   Oriel:     { voice: 'Sulafat', style: 'a festival bard on a silenced isle of bells: warm, theatrical, a little dramatic, hopeful' },
+  // the prologue (worlds/first-words-prologue.ts): a storyteller over the dusk, and the sim-lab replaying the run
+  Narrator:  { voice: 'Charon', style: 'a storyteller opening a dream for grown-ups: low, warm, unhurried, a little wonder; soft, close to the microphone', tempo: 1.08 },
+  Lab:       { voice: 'Iapetus', style: 'a lab technician reading a replay log into a microphone: flat, dry, matter-of-fact, a little tired', fx: 'radio', tempo: 1.2 },
   Neighbour: { voice: 'Sadaltager', model: LITE, style: 'a cheerful older townsman' },
   Gardener:  { voice: 'Gacrux', model: LITE, style: 'a warm, motherly gardener' },
   // townsfolk greeting Zip as he passes (worlds/bellweather-lines.ts gives each one a voice)
@@ -28,7 +31,9 @@ export const FIRST_WORDS_CAST: VoiceCast = {
 };
 
 /** lines whose bubble text isn't what is said aloud */
+import { PROLOGUE_SPOKEN } from './first-words-prologue';
 export const FIRST_WORDS_SPOKEN: Record<string, string> = {
+  ...PROLOGUE_SPOKEN,
   'MIR— kkzzht… krrsh…': 'Mira! Mira!',
 };
 

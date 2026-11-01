@@ -571,12 +571,26 @@ export function buildStory(scene: T.Scene, o: Opts) {
   const CUT_GATES = [4.45, 6.65, 7.35, 11.35, 13.35];
   const voiced = (sec: number) => { if (sec > 0) cutHold = Math.max(cutHold, t + sec - .25); };
   // the prologue (worlds/first-words-prologue.ts): a glimpse of dusk and the engine, the sim-lab's log, a rewind
-  let prologue = -1, logShown = 0, released = -1;
+  let prologue = -1, released = -1, proStep = 0, proNext = 0, proRewind = -1;
   const simLog = document.createElement('div'); simLog.className = 'sim-log'; simLog.hidden = true; o.host.appendChild(simLog);
+  const subtitle = document.createElement('p'); subtitle.className = 'narration'; subtitle.hidden = true; o.host.appendChild(subtitle);
+  const logLine = (text: string) => { const line = document.createElement('p'); line.textContent = '> ' + text; simLog.appendChild(line); simLog.hidden = false; };
+  const say = (who: string, text: string) => g.speakAt(who, text, o.camera.position);
+  // the next thing said: the lab's start, the narration, then the lab's objective and rewind
+  const proSay = () => {
+    const n = PROLOGUE.narration, i = proStep++;
+    if (i < n.length) {
+      if (i === 0) logLine(PROLOGUE.logStart.text);
+      if (i === n.length - 1) logLine(PROLOGUE.objective.text);
+      const l = n[i]; subtitle.textContent = l.text; subtitle.hidden = false; subtitle.style.animation = 'none'; void subtitle.offsetWidth; subtitle.style.animation = '';
+      proNext = prologue + Math.max(l.hold, say(l.speaker, l.text)) + PROLOGUE.gap; return;
+    }
+    if (i === n.length) { subtitle.hidden = true; const l = PROLOGUE.rewindLine; logLine(l.text); const d = Math.max(1.6, say(l.speaker, l.text)); proRewind = prologue + d + PROLOGUE.tail - PROLOGUE.rewind * .4; }
+  };
   // (the morning's beat, and its timed thoughts, start when the replay rewinds to it)
-  const endPrologue = () => { if (prologue < 0) return; prologue = -1; simLog.hidden = true; simLog.innerHTML = ''; o.host.classList.remove('rewind'); released = 0; enter('meet'); };
+  const endPrologue = () => { if (prologue < 0) return; prologue = -1; simLog.hidden = true; simLog.innerHTML = ''; subtitle.hidden = true; g.quiet(); o.host.classList.remove('rewind'); released = 0; enter('meet'); };
   const startOpening = () => { chosen.clear(); cutHold = 0; opening = 0; o.host.classList.add('cutscene'); skip.hidden = false;
-    if (o.moodForce) { prologue = 0; logShown = 0; simLog.innerHTML = ''; simLog.hidden = false; o.moodForce(PROLOGUE.mood, 1); } else enter('meet'); };
+    if (o.moodForce) { prologue = 0; proStep = 0; proNext = PROLOGUE.lead; proRewind = -1; simLog.innerHTML = ''; simLog.hidden = true; o.moodForce(PROLOGUE.mood, 1); } else enter('meet'); };
   const endOpening = () => { endPrologue(); o.moodForce?.(null); released = -1; if (opening < 0) return; opening = -1; g.quiet('Mira'); shot = null; o.host.classList.remove('cutscene'); skip.hidden = true; g.startControlHints(); };
   // A fixed shot shouldn't open on a post or trunk filling the edge of the frame. Feel along
   // both frame edges; if something solid stands close to the lens, step sideways away from
@@ -702,7 +716,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
       finds.tick(dt, z, !(g.cardOpen || cut >= 0 || opening >= 0 || engine.active || flight.active || voiceMoment.active || isle.busy || loom.active || chime.active || beat === 'fly')); bells?.tick(dt, beat === 'fly' ? null : o.zip(), t); if (echo.enabled) echo.tick(dt);
       if (beat === 'fly') { shown = '#'; return; }
       // Zip's commentary: suspicious townsfolk, and a nudge when the player idles
-      const free = !g.cardOpen && cut < 0 && !skiff.active && !isle.busy && (beat === 'meet' || beat === 'spark' || beat === 'skiff' || beat === 'isle');
+      const free = !g.cardOpen && cut < 0 && opening < 0 && prologue < 0 && !skiff.active && !isle.busy && (beat === 'meet' || beat === 'spark' || beat === 'skiff' || beat === 'isle');
       idleT = free && z.distanceTo(lastZip) < .005 ? idleT + dt : 0; lastZip.copy(z);
       if (idleT > 22) { idleT = 0; if (!story.thinkOnce('idle1')) story.thinkOnce('idle2'); }
       if (free && beat !== 'isle') for (const f of folk) {
@@ -732,14 +746,15 @@ export function buildStory(scene: T.Scene, o: Opts) {
       // the time of day eases back from the prologue's dusk to the morning over the crane
       if (released >= 0) { released += dt; const k = 1 - T.MathUtils.smoothstep(released, 0, 2.2); o.moodForce?.(k > 0 ? PROLOGUE.mood : null, k); if (k <= 0) released = -1; }
       if (prologue >= 0) {
+        // narrated: each line waits for the last to be said; the camera moves at its own pace, done by about 14 s
         const p0 = prologue; prologue += dt; const p = prologue;
         for (const at of PROLOGUE.surges) if (p0 < at && p >= at) spire.surge();
-        while (logShown < PROLOGUE.log.length && p >= PROLOGUE.log[logShown].at) { const line = document.createElement('p'); line.textContent = '> ' + PROLOGUE.log[logShown].text; simLog.appendChild(line); logShown++; }
-        if (p0 < PROLOGUE.rewindAt && p >= PROLOGUE.rewindAt) o.host.classList.add('rewind');
-        const k = T.MathUtils.smootherstep(Math.min(p / PROLOGUE.seconds, 1), 0, 1);
+        if (p >= proNext && proStep <= PROLOGUE.narration.length) proSay();
+        if (proRewind >= 0 && p >= proRewind && !o.host.classList.contains('rewind')) o.host.classList.add('rewind');
+        const k = T.MathUtils.smootherstep(Math.min(p / 14, 1), 0, 1);
         sPos.lerpVectors(PROLOGUE.from, PROLOGUE.to, k); sLook.copy(SPIRE_MID).add(tmp2.set(0, 40 * k, 0));
         shot = { pos: sPos, look: sLook, shake: 0, cut: 98, rate: 40 };
-        if (p >= PROLOGUE.seconds) endPrologue();
+        if (proRewind >= 0 && p >= proRewind + PROLOGUE.rewind) endPrologue();
         return;
       }
       if (opening >= 0) {
