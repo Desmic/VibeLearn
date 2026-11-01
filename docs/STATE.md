@@ -1,6 +1,16 @@
 # Current state — LLM learning-game proof track
 
-**2 November 2026, later — Zip from a thousand years on (supersedes everything below).** Desmic:
+**2 November 2026, evening — Zip is made of nanites (supersedes everything below).** Desmic: "ideally,
+he'll be a nanobot tech, which can shape shift according to needs". Step 1 of 3 (v123): his shell is a
+nanite surface (`kit/nanite-skin.ts`): a fine lattice of 2 cm cells anchored to his body, each with its
+own faint tint, and waves of activity running through it that light the odd cell teal. It livens when he
+talks, runs or is glad, and fades to a plain sheen with a rare twinkle where cells would be smaller than
+a pixel (no shimmer at play distance). Next: (2) shape-shifting at the game's moments: dissolving into
+a swirl of motes and re-forming (arms into tools to catch the spark and absorb words, a glider to fly,
+his chest opening into the speech engine); (3) small life at rest (motes lifting off and settling).
+Desmic will name the fast image-to-3D model he had in mind. Checks: flowcheck 134/134.
+
+**2 November 2026, later — Zip from a thousand years on.** Desmic:
 the stepped-down graphics after a reset could hurt the demo, and Zip "doesn't look like the pinnacle of
 technology/AI… imagine robots in 1000 years". Version 122: a GPU reset no longer lowers the graphics
 (the game recovers in place at the same quality; the start-up retries and plain message stay). Zip is

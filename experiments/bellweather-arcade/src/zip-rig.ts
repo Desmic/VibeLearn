@@ -1,5 +1,6 @@
 import * as T from 'three';
 import { faceCue } from './kit/face-rig';
+import { naniteSkin } from './kit/nanite-skin';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { poseBase } from './kit/pose-hold';
@@ -70,11 +71,10 @@ export function buildZipRig(): ZipRig {
   const pearl = new T.MeshPhysicalMaterial({ color: '#f4f0e8', roughness: .3, metalness: .04, clearcoat: .85, clearcoatRoughness: .14, iridescence: .32, iridescenceIOR: 1.35, iridescenceThicknessRange: [180, 420] });
   const graphite = new T.MeshPhysicalMaterial({ color: '#1d2838', roughness: .32, metalness: .65, clearcoat: .4, clearcoatRoughness: .3 });
   const faceGlass = new T.MeshPhysicalMaterial({ color: '#05080f', roughness: .05, metalness: .25, clearcoat: 1, clearcoatRoughness: .04 });
-  // a soft rim of light round his edges, as the people have (he stays the brightest thing on screen)
-  for (const m of [pearl, graphite]) {
-    m.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n { float rimK = 1. - clamp(dot(normalize(normal), normalize(vViewPosition)), 0., 1.); totalEmissiveRadiance += (diffuseColor.rgb * .35 + vec3(.42, .5, .52)) * pow(rimK, 3.) * .3; }'); };
-    m.customProgramCacheKey = () => 'vl-zip-rim';
-  }
+  // He is made of nanites (Desmic, 2 Nov: "a nanobot tech, which can shape shift"): the shell is a
+  // lattice of tiny cells with waves of activity running through it, busier when he talks or runs
+  // (kit/nanite-skin.ts), and a soft rim of light like the people's.
+  const skins = [naniteSkin(pearl, { cell: .02, seam: .11, spark: .55, key: 'zip-shell' }), naniteSkin(graphite, { cell: .014, seam: .2, spark: .4, rim: .22, key: 'zip-core' })];
   const light = new T.MeshStandardMaterial({ color: '#c6f6ee', emissive: '#6ee0d4', emissiveIntensity: .9, roughness: .3 });
   const cloth = new T.MeshStandardMaterial({ color: '#df742e', roughness: .95, side: T.DoubleSide });
   const buckets = new Map<T.Material, T.BufferGeometry[]>();
@@ -314,6 +314,7 @@ export function buildZipRig(): ZipRig {
     const inf = eyeMesh?.morphTargetInfluences;
     if (inf) { inf[0] = blink > 0 ? Math.sin(blink * Math.PI) : 0; inf[1] = feelNow[0]; inf[2] = feelNow[1]; inf[3] = feelNow[2]; inf[4] = Math.min(1, talkGlow * 1.5); }
     talkGlow += ((cue?.talk ?? 0) - talkGlow) * Math.min(1, dt * 20);
+    for (const sk of skins) sk.tick(t, Math.max(talkGlow * 1.2, smoothSpeed / 3.2 * .6, feelNow[0] * .4));
     light.emissiveIntensity = .8 + talkGlow * 1.1;
   }
   function play(name: string) {

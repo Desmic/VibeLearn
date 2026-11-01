@@ -302,6 +302,10 @@ in `story.ts` to join the levels.
   lathed torso, tapered capsules) in a lacquered iridescent physical material, a black-glass face with
   light features, joints as light; same skeleton and clips. **game**
 
+- **Nanite skin** (`kit/nanite-skin.ts`): a shader patch for any lit material: a hex lattice in the
+  body's rest pose (moves with the bones), triplanar, seams and per-cell tint, waves of active cells
+  driven by an `energy` value, faded out below about two pixels a cell. **lib**
+
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).
 2. ~~Station archetype~~ (done 1 Oct: `first-words-stations.ts` + `kit/station.ts`).
