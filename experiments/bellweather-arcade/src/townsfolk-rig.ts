@@ -132,7 +132,7 @@ export function buildTownsperson(seed: number, library: T.AnimationClip[], kit?:
   // (from the clips' last pose, not rest: kit/pose-hold.ts, the 11 Oct idle flicker)
   const look0 = poseBase([bones.Head, bones.Neck]);
   // breathing: the chest rises a few millimetres (each person on their own rhythm)
-  const chestY = bones.Chest.position.y, breathRate = 1.45 + r() * .5; let breath = r() * 6, felt: string | null = null, eyeX = 0, eyeY = 0;
+  const chestY = bones.Chest.position.y, breathRate = 1.45 + r() * .5; let breath = r() * 6, felt: string | null = null, eyeX = 0, eyeY = 0, idleT = 2 + r() * 5, idleY = 0, idleP = 0;
   const me: Townsperson = {
     root, head: bones.Head, headTop, face, speaker: null, saying: null,
     feel(n) { felt = n; },
@@ -155,7 +155,12 @@ export function buildTownsperson(seed: number, library: T.AnimationClip[], kit?:
         const d = lp.sub(np); eyeX = T.MathUtils.clamp(Math.atan2(-d.x, -d.z), -1.6, 1.6); eyeY = T.MathUtils.clamp(Math.atan2(d.y, Math.hypot(d.x, d.z)), -.7, .6);
         const yaw = T.MathUtils.clamp(eyeX, -1.1, 1.1), pitch = T.MathUtils.clamp(eyeY, -.4, .3);
         hl.x += (pitch - hl.x) * Math.min(1, dt * 4); hl.y += (yaw - hl.y) * Math.min(1, dt * 4);
-      } else { hl.x *= 1 - Math.min(1, dt * 2.5); hl.y *= 1 - Math.min(1, dt * 2.5); }
+      } else {
+        // left to themselves, people glance about now and then (a look aside, a look up), then back
+        idleT -= dt; if (idleT <= 0) { const away = r() < .55; idleY = away ? (r() * 2 - 1) * .75 : 0; idleP = away ? (r() * 2 - 1) * .14 + .04 : 0; idleT = away ? 1.4 + r() * 2.2 : 3 + r() * 6; }
+        const k = Math.min(1, dt * (reduced ? 0 : 2.2)); hl.x += (idleP - hl.x) * k; hl.y += (idleY - hl.y) * k;
+        if (face && (idleY || idleP)) face.glance(-idleY * .6, idleP * 1.5);
+      }
       bones.Head.quaternion.multiply(q.setFromEuler(e.set(hl.x, hl.y * .65, 0)));
       bones.Neck.quaternion.multiply(q.setFromEuler(e.set(0, hl.y * .35, 0)));
       breath += dt * breathRate; bones.Chest.position.y = chestY + Math.sin(breath) * .0035;

@@ -1,4 +1,5 @@
 import * as T from 'three';
+import { faceCue } from './kit/face-rig';
 import type { Guide } from './guide';
 import type { LearningEvent } from './speech-puzzle';
 import { pickTarget } from './kit/target';
@@ -419,7 +420,9 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
         e.brow.position.y = mood === 'smug' ? .4 : mood === 'oops' ? .3 : .34;
         e.brow.rotation.z = mood === 'smug' ? -e.side * .25 : mood === 'oops' ? e.side * .35 : mood === 'dizzy' ? Math.sin(t * 6) * .3 : 0;
       }
-      mouth.scale.set(1, talkT > 0 ? .5 + Math.abs(Math.sin(t * 16)) * 1.2 : mood === 'oops' ? -.6 : mood === 'happy' ? 1.3 : .8, 1);
+      // the mouth moves with its voice as it plays (kit/face-rig.ts cue); a timed flap when unvoiced
+      const cue = faceCue('Gate'), voiced = (cue?.talk ?? 0) > .02;
+      mouth.scale.set(1, voiced ? .55 + cue!.talk * 1.3 : talkT > 0 ? .5 + Math.abs(Math.sin(t * 16)) * 1.2 : mood === 'oops' ? -.6 : mood === 'happy' ? 1.3 : .8, 1);
       face.rotation.z = mood === 'dizzy' ? Math.sin(t * 5) * .06 : 0;
       if (melt > 0) { melt = Math.max(0, melt - dt); seal.scale.setScalar(melt / 1.2 + .001); sealLow.scale.y = melt / 1.2 + .001; if (melt === 0) seal.visible = sealLow.visible = false; }
       satchelObj.rotation.y += dt; boards.forEach(b => { b.board.rotation.y = Math.sin(t + b.n.at.x) * .05; }); if (miraLantern) miraLantern.rotation.z = Math.sin(t * 1.3) * .12;

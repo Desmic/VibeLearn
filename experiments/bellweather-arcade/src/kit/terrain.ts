@@ -93,6 +93,39 @@ export function paintGround(p: GroundPaint) {
   return tex;
 }
 
+// Up close, one painted texture over a whole island is soft (2–3 cm a pixel, and smooth paint).
+// A tiling detail of brush marks and patches, in world metres at two scales (6.5 m and 23 m, so it
+// never visibly repeats; finer marks average away to grey on a phone), is multiplied over it near the camera and fades with distance (no shimmer far off).
+let detailTex: T.Texture | null = null;
+function groundDetail() {
+  if (detailTex) return detailTex;
+  const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S; const c = cv.getContext('2d')!, r = mulberry32(911);
+  c.fillStyle = 'rgb(128,128,128)'; c.fillRect(0, 0, S, S);
+  const wrap = (f: (ox: number, oy: number) => void) => { for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) f(ox, oy); };
+  // soft blotches (dry and lush patches), then short brush strokes leaning one way, then grit
+  for (let i = 0; i < 46; i++) { const x = r() * S, y = r() * S, rr = 12 + r() * 40, v = r() < .5 ? 92 : 166;
+    wrap((ox, oy) => { const g = c.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, rr); g.addColorStop(0, `rgba(${v},${v},${v},.5)`); g.addColorStop(1, `rgba(${v},${v},${v},0)`); c.fillStyle = g; c.fillRect(x + ox - rr, y + oy - rr, rr * 2, rr * 2); }); }
+  c.lineCap = 'round';
+  for (let i = 0; i < 1500; i++) { const x = r() * S, y = r() * S, l = 4 + r() * 9, a = -1.25 + (r() - .5) * .8, v = r() < .55 ? 70 + r() * 40 : 170 + r() * 50, w = 1.4 + r() * 1.8;
+    wrap((ox, oy) => { c.strokeStyle = `rgba(${v | 0},${v | 0},${v | 0},${(.25 + r() * .3).toFixed(2)})`; c.lineWidth = w; c.beginPath(); c.moveTo(x + ox, y + oy); c.lineTo(x + ox + Math.cos(a) * l, y + oy + Math.sin(a) * l); c.stroke(); }); }
+  for (let i = 0; i < 1400; i++) { const x = r() * S, y = r() * S, v = r() < .5 ? 80 : 190; c.fillStyle = `rgba(${v},${v},${v},.35)`; c.fillRect(x, y, 1 + r() * 1.5, 1 + r() * 1.5); }
+  const t = new T.CanvasTexture(cv); t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = 4; t.colorSpace = T.NoColorSpace; return detailTex = t;
+}
+/** an island top's material: its painted texture, with brush detail near the camera */
+export function groundMaterial(map: T.Texture, detail = .45) {
+  const m = new T.MeshLambertMaterial({ map });
+  m.onBeforeCompile = sh => {
+    sh.uniforms.uDetail = { value: groundDetail() }; sh.uniforms.uDetailK = { value: detail };
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vGroundW;').replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvGroundW = (modelMatrix * vec4(transformed, 1.)).xyz;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vGroundW; uniform sampler2D uDetail; uniform float uDetailK;').replace('#include <map_fragment>', `#include <map_fragment>
+      { float near = 1. - smoothstep(10., 34., distance(vGroundW, cameraPosition));
+        float d = texture2D(uDetail, vGroundW.xz / 6.5).r * .55 + texture2D(uDetail, vGroundW.zx / 23. + .37).r * .45;
+        diffuseColor.rgb *= mix(1., d * 2., uDetailK * near); }`);
+  };
+  m.customProgramCacheKey = () => 'vl-ground-detail';
+  return m;
+}
+
 export interface IslandBaseSpec {
   radius: number; depth: number; seed: number; topY: number;
   ground: T.Texture; strata: StrataPalette;
@@ -124,7 +157,7 @@ export function islandBase(s: IslandBaseSpec) {
     idx.push(a, b, c, b, d, c);
   }
   const topG = new T.BufferGeometry(); topG.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); topG.setAttribute('uv', new T.Float32BufferAttribute(uv, 2)); topG.setIndex(idx); topG.computeVertexNormals();
-  const top = new T.Mesh(topG, new T.MeshLambertMaterial({ map: s.ground })); top.receiveShadow = true; top.name = 'island-top'; root.add(top);
+  const top = new T.Mesh(topG, groundMaterial(s.ground)); top.receiveShadow = true; top.name = 'island-top'; root.add(top);
 
   // --- underside: lathe with strata bands and a craggy, uneven outline
   const pts: T.Vector2[] = [], n = 16;

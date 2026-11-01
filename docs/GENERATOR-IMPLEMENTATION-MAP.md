@@ -291,6 +291,8 @@ in `story.ts` to join the levels.
   data; `person(seed, look)` builds any of them. **data**
 - **Over-the-shoulder dialogue** (story.ts): while a character speaks to Zip, the camera looks past
   him at their face (the clearer side, pulled in from walls); Zip's own lines keep the two-shot. **game**
+- **Ground detail** (`kit/terrain.ts` `groundMaterial`): an island top's painted texture with a tiling
+  brush detail multiplied over it in world metres at two scales, faded out with distance. **lib**
 
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).

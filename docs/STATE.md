@@ -12,8 +12,11 @@ cheers with the bells. Tavi, until now a capsule and a ball, is a person from th
 sky-blue scarf); Oriel is a bard (plum beret, gold shawl). Zip's visor eyes change shape with what he
 feels (smiling arcs, heavy lids, wide) and his lights pulse as he talks; his ears droop when he is sad.
 While Mira speaks, the camera looks over Zip's shoulder at her face. People have a soft rim of light.
-Checks: flowcheck all segments pass (two new: Mira's mouth moves while she talks; Tavi is a person),
-speedrun 29/29.
+Version 120: people left to themselves glance about now and then (head and eyes); the Gate's mouth
+moves with its voice; and the island grounds get a world-scale brush detail near the camera (patches
+and strokes at 6.5 m and 23 m, fading with distance), so Loom and Chime Isle's ground is no longer
+smooth paint up close. Checks: flowcheck 134/134 (two new: Mira's mouth moves while she talks; Tavi is
+a person), speedrun 29/29 (the relay flaked once and passed on the rerun).
 
 **1 November 2026 — the first minute.** Blind runs 30 and 31 both had
 "no idea what the game was actually about" until the Warden took Zip's voice. Version 117 opens with a
