@@ -52,7 +52,7 @@ import { collectFaders, fadeOccluders } from './occluders';
 import { frameGovernor, budget } from './kit/budget';
 import { buildCameraGrid, type CameraGrid } from './camera-grid';
 import { buildPromenade } from './painted-promenade';
-import { quality, saveChoice, autoBenchmark, autoWasMeasured, type Choice } from './quality';
+import { quality, saveChoice, autoBenchmark, autoWasMeasured, noteGpuReset, type Choice } from './quality';
 import { menuTabs, goTo } from './kit/menu-tabs';
 import { PLAY_MODES } from './worlds/play-modes';
 const gfx=quality();
@@ -68,7 +68,22 @@ const bump=createBumpFeedback(scene,{onBump:()=>sfx.bump()});
 
 const camera=new T.PerspectiveCamera(facadeStudy?56:52,innerWidth/innerHeight,.08,650);
 
-const renderer=new T.WebGLRenderer({antialias:new URLSearchParams(location.search).get('aa')==='0'?false:gfx.antialias,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.22;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFShadowMap;renderer.domElement.setAttribute('aria-label','Explore the Bellweather garden arcade');worldElement.appendChild(renderer.domElement);
+// The browser can refuse a graphics context for a while after it resets the GPU (and Chrome blocks 3D
+// for a page that just lost one): try lighter options, wait and try again, then say plainly what to do
+// (2 Nov: Desmic hit "Error creating WebGL context" reloading after a GPU reset).
+const renderer=await (async()=>{
+  const aa=new URLSearchParams(location.search).get('aa')==='0'?false:gfx.antialias;
+  const tries:T.WebGLRendererParameters[]=[{antialias:aa,powerPreference:'high-performance'},{antialias:false,powerPreference:'default'},{antialias:false,powerPreference:'low-power'}];
+  for(let round=0;round<3;round++){
+    for(const o of tries){try{return new T.WebGLRenderer(o)}catch{/* next */}}
+    await new Promise(r=>setTimeout(r,1200));
+  }
+  noteGpuReset();
+  const l=get('loading');l.hidden=false;l.dataset.held='1';l.style.textAlign='center';l.style.padding='24px';
+  l.innerHTML='<p>Your browser has switched off 3D graphics for this page for a moment, after a graphics reset.</p><p>Your progress is saved.</p><p><button type="button">Try again</button></p><p><small>If it keeps happening, close this tab and open the game again, or restart the browser.</small></p>';
+  l.querySelector('button')!.addEventListener('click',()=>location.reload());
+  throw new Error('no WebGL context (shown to the player)');
+})();renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.22;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFShadowMap;renderer.domElement.setAttribute('aria-label','Explore the Bellweather garden arcade');worldElement.appendChild(renderer.domElement);
 
 const reflectedSky=outdoorReflection(renderer);scene.environment=reflectedSky.texture;scene.environmentIntensity=.36;
 const ambient=new T.HemisphereLight('#9cbdff','#5e4d83',.72);scene.add(ambient);
@@ -609,12 +624,23 @@ window.addEventListener('keydown',e=>{if(e.code==='Escape'){e.preventDefault();p
 
 let dragging:{id:number,x:number,y:number}|null=null;renderer.domElement.addEventListener('pointerdown',e=>{if(paused)return;dragging={id:e.pointerId,x:e.clientX,y:e.clientY};renderer.domElement.setPointerCapture(e.pointerId)});renderer.domElement.addEventListener('pointermove',e=>{if(!dragging||e.pointerId!==dragging.id)return;yaw-=(e.clientX-dragging.x)*.004;pitch=T.MathUtils.clamp(pitch+(e.clientY-dragging.y)*.0035,-.13,.6);dragging.x=e.clientX;dragging.y=e.clientY;get('hint').style.opacity='0'});const stopDrag=()=>dragging=null;renderer.domElement.addEventListener('pointerup',stopDrag);renderer.domElement.addEventListener('pointercancel',stopDrag);renderer.domElement.addEventListener('wheel',e=>{if(paused)return;e.preventDefault();zoom=T.MathUtils.clamp(zoom+e.deltaY*.006,3.7,10.5)},{passive:false});for(const b of document.querySelectorAll<HTMLButtonElement>('[data-dir]')){const dir=b.dataset.dir!;b.addEventListener('pointerdown',e=>{if(paused)return;b.setPointerCapture(e.pointerId);held.add(dir);guideTargetT=null});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>held.delete(dir))}
 
-window.addEventListener('resize',()=>{renderer.setPixelRatio(adaptRes?adaptRes.ratio():Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);post?.resize();camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();applyLens();cameraUpdate(1);if(paused&&!document.hidden)render()});renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();pause(true);get('menu').querySelector('p')!.textContent='The view needs a reload.';announce('Graphics context lost. Reload this disposable study.')});
+window.addEventListener('resize',()=>{renderer.setPixelRatio(adaptRes?adaptRes.ratio():Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);post?.resize();camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();applyLens();cameraUpdate(1);if(paused&&!document.hidden)render()});
 
 // Diagnostics for performance profiling (scene graph access only).
 // If the browser drops the GPU context (driver reset, memory pressure, too many
 // tabs), say so plainly instead of leaving a blank screen.
-renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();const l=get('loading');l.hidden=false;l.style.cursor='pointer';l.style.textAlign='center';l.style.padding='24px';l.textContent='The browser paused the graphics (GPU reset). Tap to reload the game.';l.onclick=()=>location.reload();console.warn('[vl] webgl context lost')});
+// Lost, the context is usually given back in a moment (three rebuilds what it holds): pause, wait for
+// it, carry on. Only if it doesn't come back, offer a reload (progress is saved), and the next start
+// eases the graphics one step (quality.ts) in case the GPU was overloaded.
+let lostAt=0,lostTimer=0;
+renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();noteGpuReset();lostAt=performance.now();const wasPaused=paused;pause(true);
+  const l=get('loading');l.hidden=false;l.dataset.held='1';l.style.textAlign='center';l.style.padding='24px';l.onclick=null;l.textContent='The browser paused the graphics for a moment. Bringing them back…';
+  console.warn('[vl] webgl context lost');(l as any).__resume=!wasPaused;
+  lostTimer=window.setTimeout(()=>{l.style.cursor='pointer';l.innerHTML='<p>The graphics didn\'t come back by themselves.</p><p>Your progress is saved.</p><p><button type="button">Reload the game</button></p>';l.onclick=()=>location.reload()},6000)});
+renderer.domElement.addEventListener('webglcontextrestored',()=>{clearTimeout(lostTimer);const l=get('loading');l.hidden=true;delete l.dataset.held;l.onclick=null;
+  // three re-sends textures and buffers on its own; the sky's reflection was drawn on the GPU: draw it again
+  try{scene.environment=outdoorReflection(renderer).texture}catch{/* reflections stay dark */}
+  console.warn('[vl] webgl context restored after',Math.round(performance.now()-lostAt),'ms');if((l as any).__resume)pause(false);render()});
 (window as any).__vlGuide=guide;(window as any).__vlDebug={get steer(){return {path:steerPath,t:steerT}},get camState(){return {dist:+camDist.toFixed(2),over:+camOver.toFixed(2),zoom,pitch:+pitch.toFixed(2)}},/** the lens is behind a surface, seen from Zip's head: how far along the surface is (null: clear) */lensBehind(){/* from where the camera's own line starts: risen over a low hedge or planter (camOver), the lens looks down over it on purpose */camOrigin.copy(zip.position).y+=1.5+camOver;cameraDelta.subVectors(camera.position,camOrigin);const L=cameraDelta.length(),h=firstCameraHit(camOrigin,cameraDelta,.05) as any;if(!h||h.distance>=L-.08)return null;/* a hit on the voxel grid alone (no surface) within its one-cell margin is the margin, not the wall: the lens is behind the wall only once it is past where the surface can be */if(!h.object&&h.distance>L-.3){const g=cameraGrid;cameraGrid=null;const m=firstCameraHit(camOrigin,cameraDelta,.05);cameraGrid=g;if(!m||m.distance>=L-.08)return null}return +h.distance.toFixed(2)},camHit:(a?:number)=>{const y=a??yaw;camOrigin.copy(zip.position).y+=1.5;cameraDelta.set(Math.sin(y)*Math.cos(pitch)*zoom,1.3+Math.sin(pitch)*zoom-1.5,Math.cos(y)*Math.cos(pitch)*zoom);const h=firstCameraHit(camOrigin,cameraDelta,.15) as any;return h?{d:+h.distance.toFixed(2),name:(()=>{const o=h.object;if(!o)return "?";const b=new T.Box3().setFromObject(o),sz=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3());const chain=[];for(let q=o;q&&chain.length<4;q=q.parent)chain.push(q.name||q.type);return chain.join("<")+" size "+[sz.x,sz.y,sz.z].map(v=>v.toFixed(2)).join("x")+" at "+[c.x,c.y,c.z].map(v=>v.toFixed(1)).join(",")})()}:null},get faders(){return faders},scene,renderer,camera,sun,walkable,tryPush,solidsNear:(facade as any).solidsNear,get zipRig(){return zipRig},
   // for tests: what squeezes the follow camera (how far it sits, and what stands between Zip and where it wants to be)
   camSqueeze(){const pivot=zip.position.clone().add(new T.Vector3(0,1.5,0)),hits:string[]=[];ray.set(pivot,camDir);ray.far=zoom;for(const h of ray.intersectObjects(cameraSolids,true).slice(0,4)){let o:T.Object3D|null=h.object;const path:string[]=[];while(o&&path.length<4){if(o.name)path.push(o.name);o=o.parent}hits.push(`${h.distance.toFixed(2)} ${path.join('<')||h.object.type}`)}const g=cameraGrid?.hit(pivot,camDir,zoom);return {camDist:+camDist.toFixed(2),zoom:+zoom.toFixed(2),hits,grid:g&&g<zoom?+g.toFixed(2):null}}};

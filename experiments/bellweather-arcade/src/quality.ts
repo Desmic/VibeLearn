@@ -61,6 +61,10 @@ export function saveChoice(c: Choice) {
   try { localStorage.setItem(KEY, c); } catch { /* storage unavailable: choice lasts this visit */ }
 }
 
+/** the browser reset the GPU under us: the next starts (for half an hour) take one tier lighter */
+export function noteGpuReset() { try { localStorage.setItem(KEY + '.gpuReset', String(Date.now())); } catch { /* storage unavailable */ } }
+function recentGpuReset() { try { const t = +(localStorage.getItem(KEY + '.gpuReset') ?? 0); return Date.now() - t < 30 * 60e3; } catch { return false; } }
+
 let cached: Quality | null = null, autoMeasured = false;
 export const autoWasMeasured = () => autoMeasured;
 export function quality(): Quality {
@@ -75,7 +79,9 @@ export function quality(): Quality {
   // reload inside the claude.ai frame) and in storage where storage works.
   let measured = search.get('auto');
   if (measured !== 'high' && measured !== 'medium' && measured !== 'measure') { try { measured = localStorage.getItem(KEY + '.auto'); } catch { measured = null; } }
-  const tier: Tier = choice === 'auto' ? (measured === 'high' ? 'high' : 'medium') : choice;
+  let tier: Tier = choice === 'auto' ? (measured === 'high' ? 'high' : 'medium') : choice;
+  // after a GPU reset, Auto steps down a tier for a while (a chosen tier is the player's call)
+  if (choice === 'auto' && recentGpuReset()) tier = tier === 'high' ? 'medium' : 'low';
   autoMeasured = measured === 'high' || measured === 'medium';
   cached = { choice, tier, ...TIERS[tier] };
   // diagnostic overrides for profiling individual features

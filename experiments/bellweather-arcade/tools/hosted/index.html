@@ -21,7 +21,7 @@ body{background:var(--ground);color:var(--ink)}
   var keep=parts.slice(1).filter(function(p){return /^(quality|stats|auto|adaptive|beat|title|mech|bench|story|lab)=[a-z0-9-]+$/.test(p)});
   window.__vlSearch='?'+base+extra+(keep.length?'&'+keep.join('&'):''); window.__vlVariant=v;
   window.addEventListener('hashchange',function(){location.reload()});
-  function show(msg){var el=document.getElementById('loading');if(el){el.hidden=false;el.style.padding='24px';el.style.textAlign='center';el.textContent='The study could not start: '+msg}}
+  function show(msg){var el=document.getElementById('loading');if(el&&!el.dataset.held){el.hidden=false;el.style.padding='24px';el.style.textAlign='center';el.textContent='The study could not start: '+msg}}
   window.addEventListener('error',function(e){show((e.message||'script error')+(e.filename?' ('+e.filename.split('/').pop()+':'+e.lineno+')':''))});
   window.addEventListener('unhandledrejection',function(e){var r=e.reason;show(r&&r.message?r.message:String(r))});
   setTimeout(function(){var el=document.getElementById('loading');if(el&&!el.hidden&&/Opening/.test(el.textContent))show('still loading after 25 s; a file may be blocked.')},25000);

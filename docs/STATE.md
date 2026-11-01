@@ -1,6 +1,20 @@
 # Current state — LLM learning-game proof track
 
-**1 November 2026, later — faces that live (supersedes everything below).** Desmic: "work on
+**2 November 2026 — Zip, and surviving a GPU reset (supersedes everything below).** Desmic: "I
+think we can improve zip's model", and he hit "Error creating WebGL context" reloading after the
+browser paused the game. Version 121: Zip keeps his design (ivory, navy, mineral, gold, bunny ears,
+orange scarf) but reads warmer: a rounder, slightly bigger head; a deeper, glossy visor with a
+highlight; bigger rounded eyes that bend into smiling arcs; pink cheeks; a small mouth that opens
+as he talks; chunkier hands, boots and limbs; a soft rim of light; and a courier's satchel (a
+leather bag on his hip, the strap across his chest). The graphics now survive a GPU reset: when the
+browser takes the context away the game pauses, waits for it and carries on (the sky's reflection
+is drawn again); only if it doesn't return does it offer a reload. A start that can't get a context
+tries lighter settings and waits before saying plainly what to do ("close the tab and open it
+again; your progress is saved") instead of a raw error, and after a reset Auto starts one tier
+lighter for half an hour. Checks: flowcheck 134/134, speedrun 29/29; a lost-and-restored context
+was tested headless (the game carries on).
+
+**1 November 2026, later — faces that live.** Desmic: "work on
 character models… character models are needed to inspire emotions/aliveness". Version 119: every
 person's face is alive (`kit/face-rig.ts`, morph targets built from the body kit's own face parts):
 they blink (sometimes twice, and as they look round), their eyes glance and lead the head, their

@@ -294,6 +294,10 @@ in `story.ts` to join the levels.
 - **Ground detail** (`kit/terrain.ts` `groundMaterial`): an island top's painted texture with a tiling
   brush detail multiplied over it in world metres at two scales, faded out with distance. **lib**
 
+- **GPU reset recovery** (main.ts, quality.ts `noteGpuReset`): create the renderer with fallbacks and
+  retries, pause on context loss and carry on when it is restored (redraw GPU-made textures), offer a
+  reload only if it isn't, and step Auto down a tier for a while after a reset. **lib**
+
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).
 2. ~~Station archetype~~ (done 1 Oct: `first-words-stations.ts` + `kit/station.ts`).
