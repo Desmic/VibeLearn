@@ -243,7 +243,7 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
       const swap = (then?: () => void) => [{ label: 'Swap my notes', kind: 'primary' as const, act: () => { retry(); then?.(); } }];
       if (o === 'open') {
         markGuess(false); opts.onOpen?.(); melt = 1.2; if (sealBox) opts.removeBox(sealBox); sealBox = null; path.forEach(d => (d.visible = true)); phase = 'open'; renderBag(); sfx.chime();
-        gateSays('Past the Lotus Terraces and up the stairs to the bell gardens! Mind the step.', [{ label: 'Yes!', kind: 'primary', act: () => { mood = 'idle'; newOrders.start(); } }], 'happy');   // (the stars come after the Warden's orders: run 29's "level complete… oh wait, not yet", and the twist earned nothing)
+        gateSays('Past the Lotus Terraces and up the stairs to the bell gardens! Mind the step.', [{ label: 'Yes!', kind: 'primary', act: () => { mood = 'idle'; g.close(); newOrders.start(); } }], 'happy');   // (the stars come after the Warden's orders: run 29's "level complete… oh wait, not yet", and the twist earned nothing)
       } else if (o === 'decoy') {
         g.close(); gateSays('East Falls! The sign said so. Rules are rules!', [], 'smug');
         setTimeout(() => { trap = 3.2; sfx.zap(); g.close(); markGuess(); }, 1600);
@@ -283,6 +283,8 @@ export function buildIsland(scene: T.Scene, opts: Opts) {
     shotPos: new T.Vector3(), shotLook: new T.Vector3(),
     get shot() { return newOrders.t >= 0 && newOrders.t < 3.7 ? { pos: newOrders.shotPos, look: newOrders.shotLook } : null; },
     start() {
+      // once only: a second press of "Yes!" restarted the drone, and a quick player (or the speedrun) never saw it land
+      if (newOrders.busy || newOrders.t >= 0) return;
       const w = boards.find(b => b.n.id === 'warden'); if (!w) { goalNow(); return; }
       newOrders.busy = true; newOrders.t = 0; opts.setGoal(null, null);
       w.board.getWorldPosition(newOrders.board); newOrders.from.copy(newOrders.board).add(new T.Vector3(3, 7, 4));

@@ -63,22 +63,19 @@ export function buildZipRig(): ZipRig {
   const index = (n: BoneName) => ORDER.indexOf(n);
 
   // ---------------------------------------------------------------- materials (Zip's palette)
-  const ivory = new T.MeshStandardMaterial({ color: '#eee6ce', roughness: .38, metalness: .12 });
-  const mineral = new T.MeshStandardMaterial({ color: '#8daead', roughness: .48, metalness: .25 });
-  const dark = new T.MeshStandardMaterial({ color: '#192f46', roughness: .42, metalness: .45 });
-  const gold = new T.MeshStandardMaterial({ color: '#c29660', roughness: .37, metalness: .65 });
-  const glass = new T.MeshStandardMaterial({ color: '#0f3a4a', roughness: .12, metalness: .35 });
-  const leather = new T.MeshStandardMaterial({ color: '#9a6235', roughness: .72, metalness: .05 });
-  // a soft highlight across the visor glass, and warm cheeks under the eyes (his face is a screen,
-  // but it should read as a face)
-  const shine = new T.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: .32, depthWrite: false });
-  const blush = new T.MeshBasicMaterial({ color: '#ff9aa8', transparent: true, opacity: .58, depthWrite: false });
+  // 2 Nov redesign (Desmic: Zip "doesn't look like the pinnacle of technology"): a machine from far
+  // ahead is seamless, not bolted. A pearl shell with a faint sheen of colour (iridescent, lacquered),
+  // a face of deep black glass, a graphite core where the shell parts, and joints that are light: the
+  // pieces are held by fields, not axles. The orange scarf stays (somebody gave it to him).
+  const pearl = new T.MeshPhysicalMaterial({ color: '#f4f0e8', roughness: .3, metalness: .04, clearcoat: .85, clearcoatRoughness: .14, iridescence: .32, iridescenceIOR: 1.35, iridescenceThicknessRange: [180, 420] });
+  const graphite = new T.MeshPhysicalMaterial({ color: '#1d2838', roughness: .32, metalness: .65, clearcoat: .4, clearcoatRoughness: .3 });
+  const faceGlass = new T.MeshPhysicalMaterial({ color: '#05080f', roughness: .05, metalness: .25, clearcoat: 1, clearcoatRoughness: .04 });
   // a soft rim of light round his edges, as the people have (he stays the brightest thing on screen)
-  for (const m of [ivory, mineral, dark, leather]) {
-    m.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n { float rimK = 1. - clamp(dot(normalize(normal), normalize(vViewPosition)), 0., 1.); totalEmissiveRadiance += (diffuseColor.rgb * .4 + vec3(.45, .42, .38)) * pow(rimK, 3.) * .28; }'); };
+  for (const m of [pearl, graphite]) {
+    m.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n { float rimK = 1. - clamp(dot(normalize(normal), normalize(vViewPosition)), 0., 1.); totalEmissiveRadiance += (diffuseColor.rgb * .35 + vec3(.42, .5, .52)) * pow(rimK, 3.) * .3; }'); };
     m.customProgramCacheKey = () => 'vl-zip-rim';
   }
-  const light = new T.MeshStandardMaterial({ color: '#b5ece2', emissive: '#68d4ca', emissiveIntensity: .8, roughness: .3 });
+  const light = new T.MeshStandardMaterial({ color: '#c6f6ee', emissive: '#6ee0d4', emissiveIntensity: .9, roughness: .3 });
   const cloth = new T.MeshStandardMaterial({ color: '#df742e', roughness: .95, side: T.DoubleSide });
   const buckets = new Map<T.Material, T.BufferGeometry[]>();
   const v = (x: number, y: number, z: number) => new T.Vector3(x, y, z);
@@ -101,75 +98,66 @@ export function buildZipRig(): ZipRig {
   }
   const box = (w: number, h: number, d: number, r: number, m: T.Material, bone: BoneName, x: number, y: number, z: number, rz = 0) =>
     part(new RoundedBoxGeometry(w, h, d, 2, r), m, bone, x, y, z, 0, 0, rz);
-  function plate(pts: [number, number][], depth: number, bevel: number, m: T.Material, bone: BoneName, x: number, y: number, z: number, rz = 0) {
-    const g = new T.ExtrudeGeometry(new T.Shape(pts.map(([a, b]) => new T.Vector2(a, b))), { depth, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 3 });
-    g.translate(0, 0, -depth / 2); return part(g, m, bone, x, y, z, 0, 0, rz);
+  // ---------------------------------------------------------------- body (the far-future courier, 2 Nov)
+  const egg = (rx: number, ry: number, rz: number, m: T.Material, bone: BoneName, x: number, y: number, z: number, ax = 0, ay = 0, az = 0, seg = 32) =>
+    part(new T.SphereGeometry(1, seg, Math.round(seg * .75)).scale(rx, ry, rz), m, bone, x, y, z, ax, ay, az);
+  // a limb: a smooth capsule from a to b that tapers from r0 to r1
+  function limb(a: T.Vector3, b: T.Vector3, r0: number, r1: number, m: T.Material, bone: BoneName) {
+    const d = b.clone().sub(a), L = d.length(), g = new T.CapsuleGeometry(1, L, 8, 24), P = g.getAttribute('position');
+    for (let i = 0; i < P.count; i++) { const y = P.getY(i), k = T.MathUtils.lerp(r0, r1, T.MathUtils.clamp(.5 - y / (L + 2), 0, 1)); P.setXYZ(i, P.getX(i) * k, y > L / 2 ? L / 2 + (y - L / 2) * k : y < -L / 2 ? -L / 2 + (y + L / 2) * k : y, P.getZ(i) * k); }
+    g.computeVertexNormals(); g.applyQuaternion(new T.Quaternion().setFromUnitVectors(v(0, -1, 0), d.normalize()));
+    const mid = a.clone().lerp(b, .5); return part(g, m, bone, mid.x, mid.y, mid.z);
   }
-  function rod(a: T.Vector3, b: T.Vector3, r: number, m: T.Material, bone: BoneName) {
-    const d = b.clone().sub(a), mid = a.clone().lerp(b, .5);
-    const g = new T.CylinderGeometry(r, r * .88, d.length(), 12);
-    g.applyQuaternion(new T.Quaternion().setFromUnitVectors(v(0, 1, 0), d.normalize()));
-    return part(g, m, bone, mid.x, mid.y, mid.z);
+  const orb = (r: number, bone: BoneName, x: number, y: number, z: number) => part(new T.SphereGeometry(r, 16, 12), light, bone, x, y, z);
+  const ring = (r: number, tube: number, m: T.Material, bone: BoneName, x: number, y: number, z: number, ax = Math.PI / 2, ay = 0, az = 0) => part(new T.TorusGeometry(r, tube, 8, 40), m, bone, x, y, z, ax, ay, az);
+  // pelvis and the graphite core that rises from it; a ring of light where the shell parts
+  egg(.125, .07, .1, pearl, 'Hips', 0, .745, 0);
+  limb(v(0, .78, 0), v(0, .95, 0), .052, .06, graphite, 'Spine');
+  ring(.07, .006, light, 'Spine', 0, .855, 0);
+  // the torso: one seamless shell, and on it the lens of his speech engine (it lights as his voice does)
+  {   // sculpted, not a ball: broad at the chest, narrowing to the waist
+    const prof = [[0, .872], [.07, .878], [.11, .905], [.14, .95], [.17, 1.01], [.19, 1.07], [.198, 1.115], [.19, 1.165], [.16, 1.208], [.105, 1.242], [0, 1.254]].map(([r, y]) => new T.Vector2(r, y));
+    part(new T.LatheGeometry(prof, 48).scale(1, 1, .78), pearl, 'Chest', 0, 0, 0);
   }
-  function axle(bone: BoneName, x: number, y: number, z: number, r: number) {
-    part(new T.CylinderGeometry(r, r, .115, 16), dark, bone, x, y, z, 0, 0, Math.PI / 2);
-    part(new T.CylinderGeometry(r * .68, r * .68, .122, 16), gold, bone, x, y, z, 0, 0, Math.PI / 2);
-  }
-
-  // ---------------------------------------------------------------- body (Zip's established design)
-  box(.29, .15, .235, .035, dark, 'Hips', 0, .72, 0);
-  rod(v(0, .77, 0), v(0, .95, 0), .095, gold, 'Spine');
-  plate([[-.16, -.18], [.13, -.18], [.205, .08], [.13, .22], [-.16, .20], [-.21, .06]], .255, .04, ivory, 'Chest', 0, 1.06, 0);
-  box(.21, .25, .065, .025, dark, 'Chest', 0, 1.055, .162);
-  box(.11, .18, .032, .015, mineral, 'Chest', 0, 1.065, .205);
-  for (const y of [1.025, 1.08, 1.135]) box(.075, .012, .014, .004, gold, 'Chest', 0, y, .226);
-  box(.09, .09, .025, .022, dark, 'Chest', .085, 1.13, -.166);
-  box(.045, .045, .012, .014, light, 'Chest', .085, 1.13, -.182);
-  // the courier's satchel: a strap from the left shoulder (under the scarf behind) to the right hip, a leather bag on the hip
-  // with a gold buckle on its flap (what Zip is: he carries words)
-  part(new RoundedBoxGeometry(.52, .038, .014, 2, .006), leather, 'Chest', -.005, 1.045, -.178, 0, 0, -.82);
-  box(.07, .17, .21, .035, leather, 'Hips', .195, .80, .045);
-  box(.08, .085, .215, .03, leather, 'Hips', .199, .855, .045);
-  box(.008, .045, .06, .006, gold, 'Hips', .2385, .835, .045);
-  rod(v(0, 1.22, 0), v(0, 1.34, 0), .066, dark, 'Neck');
-  // head
-  box(.52, .45, .40, .15, ivory, 'Head', 0, 1.525, 0);
-  box(.45, .33, .04, .12, dark, 'Head', 0, 1.51, -.198);
-  box(.41, .29, .026, .11, glass, 'Head', 0, 1.513, -.222);
-  part(new RoundedBoxGeometry(.13, .016, .004, 2, .007), shine, 'Head', -.095, 1.618, -.2365, 0, 0, .1);
-  part(new RoundedBoxGeometry(.035, .016, .004, 2, .007), shine, 'Head', .015, 1.627, -.2365, 0, 0, .03);
-  for (const sd of [-1, 1]) part(new T.CircleGeometry(.032, 18).scale(1.35, .8, 1), blush, 'Head', sd * .148, 1.455, -.2372, 0, Math.PI, 0);
-  box(.044, .014, .012, .007, light, 'Head', 0, 1.432, -.240);
-  box(.32, .17, .035, .035, mineral, 'Head', 0, 1.52, .203);
-  box(.19, .022, .012, .006, dark, 'Head', 0, 1.48, .224);
+  egg(.05, .05, .018, light, 'Chest', 0, 1.115, -.148);
+  ring(.066, .007, graphite, 'Chest', 0, 1.115, -.146, 0);
+  part(new T.TorusGeometry(.158, .005, 8, 48).rotateX(Math.PI / 2).scale(1, 1, .78), light, 'Chest', 0, .975, 0);   // a seam of light where the shell closes
+  // neck: a graphite stem inside a floating ring
+  limb(v(0, 1.21, 0), v(0, 1.35, 0), .042, .042, graphite, 'Neck');
+  // head: a pearl shell around a domed face of black glass; eyes and mouth are light on the glass
+  egg(.25, .215, .222, pearl, 'Head', 0, 1.535, .01);
+  egg(.205, .165, .072, faceGlass, 'Head', 0, 1.515, -.168);
+  part(new T.TorusGeometry(1, .028, 8, 64).scale(.207, .167, .2), light, 'Head', 0, 1.515, -.174);   // the face's edge lit
+  box(.044, .014, .012, .007, light, 'Head', 0, 1.432, -.236);
   const eyes: T.BufferGeometry[] = [];
   for (const side of [-1, 1] as const) {
     const S = side > 0 ? 'R' : 'L';
     const ear = `Ear${S}` as BoneName;
-    plate([[-.035, -.07], [.045, -.04], [.065, .25], [-.035, .21]], .085, .012, ivory, ear, side * .18, 1.73, .025, -side * .28);
-    plate([[-.015, 0], [.022, 0], [.026, .15], [-.012, .13]], .012, .004, mineral, ear, side * .18, 1.76, -.033, -side * .28);
-    part(new T.CylinderGeometry(.088, .088, .042, 24), dark, 'Head', side * .267, 1.51, 0, 0, 0, Math.PI / 2);
-    part(new T.CylinderGeometry(.061, .061, .046, 24), light, 'Head', side * .274, 1.51, 0, 0, 0, Math.PI / 2);
-    part(new T.TorusGeometry(.070, .010, 6, 24), gold, 'Head', side * .294, 1.51, 0, 0, Math.PI / 2);
-    eyes.push(part(new RoundedBoxGeometry(.05, .09, .012, 5, .023), light, 'Head', side * .09, 1.525, -.241, 0, 0, -side * .04));   // (5 segments: enough points to bend into a smile)
-    // arm
+    // ears: long swept fins with a seam of light down the inside
+    egg(.042, .165, .024, pearl, ear, side * .175, 1.835, .02, 0, 0, -side * .2);
+    egg(.011, .12, .006, light, ear, side * .17, 1.84, -.004, 0, 0, -side * .2, 16);
+    // side sensors: a ring of light set flush into the shell
+    egg(.05, .05, .012, faceGlass, 'Head', side * .243, 1.52, 0, 0, Math.PI / 2, 0, 24);
+    ring(.052, .007, light, 'Head', side * .247, 1.52, 0, 0, Math.PI / 2, 0);
+    eyes.push(part(new RoundedBoxGeometry(.05, .09, .012, 5, .023), light, 'Head', side * .09, 1.525, -.239, 0, 0, -side * .04));   // (5 segments: enough points to bend into a smile)
+    // arm: shell segments with light at the joints (no axles: held by fields)
     const UA = `UpperArm${S}` as BoneName, LA = `LowerArm${S}` as BoneName, H = `Hand${S}` as BoneName;
-    axle('Chest', side * .229, 1.17, 0, .065);
-    rod(v(side * .255, 1.13, 0), v(side * .292, .93, .015), .039, dark, UA);
-    box(.108, .16, .145, .042, mineral, UA, side * .26, 1.08, 0, side * .16);
-    axle(LA, side * .29, .9, .015, .05);
-    box(.104, .195, .128, .042, ivory, LA, side * .29, .795, -.007, -side * .09);
-    box(.105, .12, .115, .04, dark, H, side * .275, .652, -.017);
+    egg(.072, .062, .068, pearl, 'Chest', side * .232, 1.18, 0);
+    orb(.026, UA, side * .238, 1.155, 0);
+    limb(v(side * .25, 1.12, 0), v(side * .285, .945, .012), .054, .044, pearl, UA);
+    orb(.024, LA, side * .29, .9, .015);
+    limb(v(side * .29, .865, .012), v(side * .283, .735, -.005), .043, .054, pearl, LA);
+    ring(.05, .006, light, LA, side * .283, .728, -.005);
+    egg(.04, .055, .048, graphite, H, side * .28, .665, -.012);
     // leg
     const UL = `UpperLeg${S}` as BoneName, LL = `LowerLeg${S}` as BoneName, F = `Foot${S}` as BoneName;
-    rod(v(side * .097, .67, 0), v(side * .12, .405, .01), .044, dark, UL);
-    box(.122, .21, .135, .04, mineral, UL, side * .11, .56, .01, -side * .06);
-    axle(LL, side * .12, .395, .005, .055);
-    box(.12, .225, .13, .04, ivory, LL, side * .132, .245, .01, -side * .04);
-    rod(v(side * .135, .2, 0), v(side * .14, .085, 0), .035, dark, LL);
-    box(.158, .105, .27, .045, dark, F, side * .14, .066, -.06);
-    box(.14, .028, .25, .01, gold, F, side * .14, .024, -.06);
-    box(.12, .032, .115, .013, ivory, F, side * .14, .118, -.098);
+    orb(.026, UL, side * .1, .675, 0);
+    limb(v(side * .102, .65, 0), v(side * .12, .435, .006), .07, .052, pearl, UL);
+    orb(.026, LL, side * .12, .4, .005);
+    limb(v(side * .122, .365, .006), v(side * .138, .15, 0), .053, .043, pearl, LL);
+    ring(.047, .006, light, LL, side * .138, .135, 0);
+    egg(.062, .048, .13, pearl, F, side * .14, .062, -.05);
+    egg(.064, .016, .136, graphite, F, side * .14, .018, -.05);
   }
   // collar + ribbon scarf (spread across the scarf chain so it can flutter)
   part(new T.TorusGeometry(.12, .041, 8, 24), cloth, 'Neck', 0, 1.285, 0, Math.PI / 2);

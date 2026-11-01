@@ -1,6 +1,19 @@
 # Current state — LLM learning-game proof track
 
-**2 November 2026 — Zip, and surviving a GPU reset (supersedes everything below).** Desmic: "I
+**2 November 2026, later — Zip from a thousand years on (supersedes everything below).** Desmic:
+the stepped-down graphics after a reset could hurt the demo, and Zip "doesn't look like the pinnacle of
+technology/AI… imagine robots in 1000 years". Version 122: a GPU reset no longer lowers the graphics
+(the game recovers in place at the same quality; the start-up retries and plain message stay). Zip is
+rebuilt as a machine from far ahead: no boxes, bolts or axles. A seamless pearl shell with a lacquered,
+faintly iridescent sheen; a domed face of black glass with a lit edge, where his eyes and mouth are
+light (the feelings and talking from v119 carry over); a sculpted torso narrowing to a graphite core;
+the lens of his speech engine on his chest; limbs as smooth tapered shells held together by joints of
+light (no axles); swept ear fins with a seam of light; flush light rings for sensors. The orange scarf
+stays (somebody gave it to him); the leather satchel went. Also fixed: pressing the Gate's "Yes!" twice
+restarted the Warden's drone, so it never landed (it made speedrun's relay step fail now and then).
+Checks: flowcheck 134/134 (Zip build) and 63/63 through the relay after the Gate fix, speedrun 29/29.
+
+**2 November 2026 — Zip, and surviving a GPU reset.** Desmic: "I
 think we can improve zip's model", and he hit "Error creating WebGL context" reloading after the
 browser paused the game. Version 121: Zip keeps his design (ivory, navy, mineral, gold, bunny ears,
 orange scarf) but reads warmer: a rounder, slightly bigger head; a deeper, glossy visor with a

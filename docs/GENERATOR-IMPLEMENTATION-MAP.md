@@ -296,7 +296,11 @@ in `story.ts` to join the levels.
 
 - **GPU reset recovery** (main.ts, quality.ts `noteGpuReset`): create the renderer with fallbacks and
   retries, pause on context loss and carry on when it is restored (redraw GPU-made textures), offer a
-  reload only if it isn't, and step Auto down a tier for a while after a reset. **lib**
+  reload only if it isn't. (A step down a tier after a reset was tried and dropped: the demo's look
+  comes first.) **lib**
+- **Hero character from primitives, far-future style** (zip-rig.ts): smooth shells (ellipsoids, a
+  lathed torso, tapered capsules) in a lacquered iridescent physical material, a black-glass face with
+  light features, joints as light; same skeleton and clips. **game**
 
 ## Suggested next extractions (in order)
 1. ~~Beat list as data~~ (done 1 Oct: `first-words-story.ts` + `kit/story-script.ts`).

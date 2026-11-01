@@ -52,7 +52,7 @@ import { collectFaders, fadeOccluders } from './occluders';
 import { frameGovernor, budget } from './kit/budget';
 import { buildCameraGrid, type CameraGrid } from './camera-grid';
 import { buildPromenade } from './painted-promenade';
-import { quality, saveChoice, autoBenchmark, autoWasMeasured, noteGpuReset, type Choice } from './quality';
+import { quality, saveChoice, autoBenchmark, autoWasMeasured, type Choice } from './quality';
 import { menuTabs, goTo } from './kit/menu-tabs';
 import { PLAY_MODES } from './worlds/play-modes';
 const gfx=quality();
@@ -78,7 +78,6 @@ const renderer=await (async()=>{
     for(const o of tries){try{return new T.WebGLRenderer(o)}catch{/* next */}}
     await new Promise(r=>setTimeout(r,1200));
   }
-  noteGpuReset();
   const l=get('loading');l.hidden=false;l.dataset.held='1';l.style.textAlign='center';l.style.padding='24px';
   l.innerHTML='<p>Your browser has switched off 3D graphics for this page for a moment, after a graphics reset.</p><p>Your progress is saved.</p><p><button type="button">Try again</button></p><p><small>If it keeps happening, close this tab and open the game again, or restart the browser.</small></p>';
   l.querySelector('button')!.addEventListener('click',()=>location.reload());
@@ -630,10 +629,9 @@ window.addEventListener('resize',()=>{renderer.setPixelRatio(adaptRes?adaptRes.r
 // If the browser drops the GPU context (driver reset, memory pressure, too many
 // tabs), say so plainly instead of leaving a blank screen.
 // Lost, the context is usually given back in a moment (three rebuilds what it holds): pause, wait for
-// it, carry on. Only if it doesn't come back, offer a reload (progress is saved), and the next start
-// eases the graphics one step (quality.ts) in case the GPU was overloaded.
+// it, carry on at the same quality. Only if it doesn't come back, offer a reload (progress is saved).
 let lostAt=0,lostTimer=0;
-renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();noteGpuReset();lostAt=performance.now();const wasPaused=paused;pause(true);
+renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();lostAt=performance.now();const wasPaused=paused;pause(true);
   const l=get('loading');l.hidden=false;l.dataset.held='1';l.style.textAlign='center';l.style.padding='24px';l.onclick=null;l.textContent='The browser paused the graphics for a moment. Bringing them back…';
   console.warn('[vl] webgl context lost');(l as any).__resume=!wasPaused;
   lostTimer=window.setTimeout(()=>{l.style.cursor='pointer';l.innerHTML='<p>The graphics didn\'t come back by themselves.</p><p>Your progress is saved.</p><p><button type="button">Reload the game</button></p>';l.onclick=()=>location.reload()},6000)});
