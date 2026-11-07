@@ -88,6 +88,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
   const promptEl = document.createElement('div'); promptEl.className = 'engine-prompt'; promptEl.hidden = true; o.host.appendChild(promptEl);
   const say = (html: string) => { promptEl.innerHTML = html; promptEl.hidden = false; };
 
+  let leaving = false;
   let open = false, busy = false, t = 0, wrongLoads = 0, triedNewest = false;
   const timers: { at: number; fn: () => void }[] = [];
   const later = (s: number, fn: () => void) => timers.push({ at: t + s, fn });
@@ -110,7 +111,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
   const renderTray = () => {
     const inRing = new Set(ring()), words = o.carried().filter(w => !inRing.has(w));
     tray.innerHTML = `<div class="engine-words">${words.length ? words.map(w => `<button class="holo-chip${MADE.has(w) ? ' made' : ''}" data-w="${w}" data-action="load.${w}" ${busy ? 'disabled' : ''}>${w}</button>`).join('') : (ring().length ? '<span class="holo-none">Every word you have is on the ring. Cast, or absorb more from the world.</span>' : '<span class="holo-none">No words yet. Absorb some from the world!</span>')}</div>
-      <div class="engine-buttons"><button class="holo-cast" data-act="cast" data-action="cast" ${ring().length && !busy ? '' : 'disabled'}>Cast ✦</button>${ring().length ? `<button class="holo-quiet" data-act="clear" ${busy ? 'disabled' : ''} aria-label="Clear the ring">↺ Clear</button>` : ''}<button class="holo-quiet" data-act="close" ${busy ? 'disabled' : ''}>Step away</button></div>`;
+      <div class="engine-buttons"><button class="holo-cast" data-act="cast" data-action="cast" ${ring().length && !busy ? '' : 'disabled'}>Cast ✦</button>${ring().length ? `<button class="holo-quiet" data-act="clear" ${busy ? 'disabled' : ''} aria-label="Clear the ring">↺ Clear</button>` : ''}<button class="holo-quiet" data-act="close">Step away</button></div>`;
   };
   // while the ring is being edited, the engine's guess for what's in it now, dim, so a word in or
   // out visibly changes what it would say (run 14: "make the guess change when the ring changes")
@@ -160,7 +161,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
     clearFan(); net.rest(); sfx.speak(4); sfx.whoosh();
     flyer = { m, from: m.position.clone(), to: o.target, t: 0, dur: .8, arc: 1.2, done: () => { world.remove(m); fx.burst(o.target(), 14, 2, HOLO.made); then(); } };
   };
-  const back = (html: string, wait = 2.8) => { say(html); promptEl.classList.remove('quiet'); later(wait, () => { busy = false; renderTray(); preview(); }); };
+  const back = (html: string, wait = 2.8) => { say(html); promptEl.classList.remove('quiet'); later(wait, () => { busy = false; if (leaving) { leaving = false; close(true); return; } renderTray(); preview(); }); };
   const react = (events: string[], said: string) => {
     if (events.includes('skiff-hears:sink')) { o.hear('sink'); wrongLoads++; back(L.sink, 3.2); o.onThought?.('engine-sink'); return; }
     if (events.includes('loop-breaks')) { o.hear('lift'); breakLoop(); return; }
@@ -220,7 +221,9 @@ export function buildEngine(scene: T.Scene, o: Opts) {
     const b = (e.target as HTMLElement).closest('button'); if (!b || b.disabled) return; e.stopPropagation();
     if (b.dataset.w) load(b.dataset.w);
     else if (b.dataset.act === 'cast') cast();
-    else if (b.dataset.act === 'close') close(true);
+    // (always pressable: blind run 32 tried to step away while the engine was reading and nothing happened;
+    // mid-cast, it steps away the moment the engine has said its word)
+    else if (b.dataset.act === 'close') { if (busy) { leaving = true; b.textContent = 'Stepping away…'; } else close(true); }
     else if (b.dataset.act === 'clear' && !busy) { while (ring().length && st.act('unload.0').ok); sfx.whoosh(); fx.burst(toWorld(CORE), 10, 1); refresh(); }
   });
   const untap = g.onTap(ray => {
@@ -245,7 +248,7 @@ export function buildEngine(scene: T.Scene, o: Opts) {
     /** open in front of Zip; the camera frames Zip from behind with the hologram and the machine beyond */
     open(center: T.Vector3, closed?: () => void) {
       onClose = closed ?? null;
-      holo.position.copy(center); holo.visible = cone.visible = true; open = true; busy = false;
+      holo.position.copy(center); holo.visible = cone.visible = true; open = true; busy = false; leaving = false;
       const aspect = innerWidth / innerHeight, d = Math.max(4.2, 2.75 / (2 * Math.tan(26 * Math.PI / 180) * aspect));
       // frame the hologram left of centre so the listening machine stays in view on the right
       shotPos.set(center.x - .2, center.y - .45, center.z + d); shotLook.set(center.x + .1, center.y + .1, center.z - 1);

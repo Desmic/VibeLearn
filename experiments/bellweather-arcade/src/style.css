@@ -35,6 +35,8 @@
 .rail-chips .chip.picked,.loom-row .chip.picked{background:#9fe0d0;box-shadow:0 0 0 3px #2f9c86 inset}
 .story-mode #route,.story-mode #hint{display:none}
 .card-open #controls{visibility:hidden}
+/* a speech bubble up top would sit under the satchel (blind run 32, step 114: Mira's line hidden at the relay) */
+.satchel-bar{transition:opacity .2s}.card-open:has(.story-card.bubble) .satchel-bar{opacity:0;pointer-events:none}
 .story-fade{position:absolute;inset:0;z-index:7;background:#0f2742;color:#fff3db;display:flex;align-items:center;justify-content:center;font:600 20px Trebuchet MS,Arial,sans-serif;opacity:0;pointer-events:none;transition:opacity .7s}
 .story-fade.on{opacity:1;pointer-events:auto}
 .story-skip{position:absolute;right:16px;bottom:24px;z-index:6}

@@ -1321,3 +1321,32 @@ runs found those beams "really helpful" and the arrow "less so"), a few pixels w
 the camera's look-down limit is lower (0.6 rad, was 0.75); the engine says "Every word you have is on
 the ring" instead of "No more words"; the faint rivers of letters into the Warden's engine now show
 from the first morning (they were dusk only); the play server taps an exact label before a partial one.
+
+## Blind run 32: the demo on High, v124 (7 Nov 2026; rarely plays games, 20)
+
+The first run since the living faces, the far-future nanite Zip and his shape-shifting. Played the
+whole demo, title to the end card (159 steps); 7/10, yes to the next part ("I want to know what
+happens with Mira and the Warden, and I'm curious what the next isle teaches you").
+
+- **Understood unprompted, every item but one:** next word ("oh it is like autocomplete. kinda cute",
+  step 70; "one word at a time, and each guess becomes part of what it reads next"), context ("the
+  gate just does what the note says", step 96; "like a chatbot only knowing what's in front of it"),
+  pieces and room (the loom: "avoid the name, avoid the weird long words"), warmth (Warm over Hot:
+  "'Lanterns over the spoons'… new, sure, but it's nonsense"). Sampling came out when probed, then
+  strongly: "every cast is a new roll. Same words in doesn't mean the same word out." The story,
+  unprompted; the voice coming back "coil by coil" read as flavour.
+- **Best:** the puzzles where they got caught out (the relay: "it's the bit that stuck, because I
+  actually made the mistake myself"; the Gate: "like I'd figured out the trick"); Zip's jokes and the
+  cabbage. **Weakest:** the first few minutes ("mostly watching and tapping Next. I probably would've
+  stopped there if a friend hadn't handed it to me"; the sim / training run / rewind framing "muddied"
+  the story); walking "fiddly and kind of pointless"; puzzles "hard to fail… a guided tour".
+- **Found:** "Shield Mira!" then losing her anyway "made me feel like the button was fake"; Mira's
+  line at the relay sat under the satchel panel (step 114); "Step away" did nothing while the engine
+  was reading (it was disabled, step 43). The interviewer took the star cards and a Warden whisper for
+  inventions: both are real (the play log misses some short-lived screens), so trust is higher.
+
+**Changed after run 32 (v125):** the shield now works, for a moment: Zip throws his nanites over Mira
+as a dome of light, the film holds while it holds, then the Warden's beam cracks it from the top and
+it shatters (and he is knocked back); a speech bubble hides the satchel panel while it is up; "Step
+away" is always pressable (mid-cast it steps away once the engine has said its word). The opening is
+Desmic's call (he is judging it); this run's evidence is passed on to him.

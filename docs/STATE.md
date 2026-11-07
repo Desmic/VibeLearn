@@ -1,6 +1,21 @@
 # Current state — LLM learning-game proof track
 
-**2 November 2026, night — Zip shape-shifts (supersedes everything below).** Steps 2 and 3 of the
+**7 November 2026 — blind run 32, and a web home on Render (supersedes everything below).** A
+player who rarely plays games went from the title to the end card on v124 (High): 7/10, yes to more;
+every learning item understood unprompted except sampling, which came out when probed and then
+strongly ("every cast is a new roll"). Best: being caught out at the relay and the Gate. Weakest: the
+first few minutes ("mostly watching and tapping Next"; the sim / training run / rewind framing
+"muddied" the story: for Desmic, who is judging the opening), fiddly walking, puzzles "hard to fail".
+Version 125 fixes what it found: "Shield Mira!" now visibly works for a moment (Zip's nanites form a
+dome of light over her, the film holds, then the beam cracks it from the top and it shatters); a
+speech bubble hides the satchel panel; "Step away" is always pressable. The demo can now be deployed
+as a free Render static site: `render.yaml` at the repo root runs
+`experiments/bellweather-arcade/tools/build-web.sh` (npm ci, the build, the hosted copy: the same page
+as the artifact) and publishes `dist/web`; it builds from a clean checkout. It goes live once main is
+pushed to GitHub and Desmic adds the Blueprint in Render (his account). Checks: flowcheck 135/135,
+speedrun 29/29.
+
+**2 November 2026, night — Zip shape-shifts.** Steps 2 and 3 of the
 nanite Zip (v124). A part comes apart cell by cell, its edge alight, while the new form builds the same
 way, and a stream of motes carries the matter across (`kit/nanite-skin.ts` cut/grow,
 `kit/nanite-swarm.ts`, `zip-rig.ts` `shift`). His chest irises open onto the glowing core of his speech

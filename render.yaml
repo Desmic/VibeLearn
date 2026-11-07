@@ -1,22 +1,23 @@
+# Render Blueprint: the Bellweather demo ("The First Words") as a free static site.
+# Render: New > Blueprint > pick this repo. Every push to main that touches the game rebuilds it.
 services:
   - type: web
-    name: vibelearn
-    runtime: python
-    plan: free
-    region: singapore
-    buildCommand: pip install -r requirements.lock && python manage.py vendor
-    startCommand: gunicorn 'app.hosted:create_app()' --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 60
-    healthCheckPath: /api/health
+    name: bellweather-first-words
+    runtime: static
+    # (from the repo root: the game lives in experiments/bellweather-arcade)
+    buildCommand: bash experiments/bellweather-arcade/tools/build-web.sh
+    staticPublishPath: ./experiments/bellweather-arcade/dist/web
+    buildFilter:
+      paths:
+        - experiments/bellweather-arcade/**
+    autoDeployTrigger: commit
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.12.10
-      - key: DATABASE_URL
-        sync: false
-      - key: APP_ORIGIN
-        sync: false
-      - key: SUPABASE_URL
-        value: https://pwipqbhkxekyglxkacey.supabase.co
-      - key: SUPABASE_PUBLISHABLE_KEY
-        sync: false
-      - key: ALLOWED_EMAILS
-        sync: false
+      - key: NODE_VERSION
+        value: "22"
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /voice/*
+        name: Cache-Control
+        value: public, max-age=604800

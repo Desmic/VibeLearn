@@ -15,6 +15,8 @@ import type { Look } from './kit/body-kit';
 import { TAVI_LOOK, ORIEL_LOOK } from './worlds/first-words-looks';
 import { BELLWEATHER_PROPS } from './worlds/bellweather-props';
 import { sfx } from './sfx';
+import { naniteSkin } from './kit/nanite-skin';
+import { buildNaniteSwarm } from './kit/nanite-swarm';
 import { buildFlight } from './flight';
 import { save, type Checkpoint } from './save';
 import { createScriptRunner, validateScript } from './kit/story-script';
@@ -542,7 +544,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
     if (story.thinkOnce('stream-warden')) story.think('stream-zip');
   };
   const endAttack = () => {
-    zipFeels('sad');
+    zipFeels('sad'); dome.visible = false; domeT = -1; kb = -1;
     if (beat !== 'attack') return;
     shot = null; shake = 0; g.close();
     if (hat) { hat.position.copy(miraAt).add(new T.Vector3(.35, .015, .25)); hat.rotation.set(.18, 1.1, -.12); }
@@ -583,8 +585,17 @@ export function buildStory(scene: T.Scene, o: Opts) {
     clearForeground(pos, look, Math.atan(Math.tan(26 * Math.PI / 180) * Math.max(.45, o.aspect())));
     shot = { pos, look: sLook.copy(look), shake, cut: id, rate }; return shot;
   };
-  // Shield Mira: one brave, doomed button. Zip dashes in and is knocked back.
-  let shielded = false, dash = -1; const dashFrom = new T.Vector3(), dashTo = new T.Vector3();
+  // Shield Mira: one brave, doomed button. Zip dashes in and throws his nanites over her as a dome of
+  // light; it holds (the film holds with it), then the Warden's beam cracks it from the top and it
+  // shatters, and Zip is knocked back. (Blind run 32: the old dash-and-zap "made me feel like the
+  // button was fake"; now it visibly works, for a moment.)
+  let shielded = false, dash = -1, domeT = -1, kb = -1; const dashFrom = new T.Vector3(), dashTo = new T.Vector3();
+  const domeMat = new T.MeshStandardMaterial({ color: '#c6f6ee', emissive: '#6ee0d4', emissiveIntensity: 1, roughness: .3, transparent: true, opacity: .62, side: T.DoubleSide, depthWrite: false });
+  const domeSkin = naniteSkin(domeMat, { cell: .09, seam: .65, spark: 1.4, rim: .7, key: 'zip-shield' });
+  const dome = new T.Mesh(new T.SphereGeometry(1.05, 48, 24, 0, Math.PI * 2, 0, Math.PI * .56), domeMat); dome.visible = false; dome.renderOrder = 9; scene.add(dome);
+  const domeFx = buildNaniteSwarm(scene, { max: 260 });
+  const domeFrom = new T.Vector3(), domeTop = new T.Vector3(0, 1.05, 0);
+  const domeAt = (lx: number, ly: number, lz: number) => { const p = new T.Vector3(lx, ly, lz); return () => dome.localToWorld(p.clone()); };
   const shield = () => { if (shielded) return; shielded = true; dash = 0; dashFrom.copy(o.zip()); dashTo.copy(miraAt).lerp(dashFrom, .45); sfx.whoosh(); action(null); };
   const startAttack = () => {
     zipFeels('afraid');
@@ -832,6 +843,7 @@ export function buildStory(scene: T.Scene, o: Opts) {
         const slow = !shielded && cut > 4.6 && cut < 6.0;
         // a voiced line holds the film at the next beat until it has been said
         const c0 = cut; let next = cut + dt * (slow ? .35 : 1);
+        if (domeT >= 0 && domeT < 1.9) next = cut;   // the dome holds: so does everything
         if (t < cutHold) for (const gate of CUT_GATES) if (c0 < gate && next >= gate) { next = gate - 1e-4; break; }
         cut = next; const c = cut;
         const zH = zHead.copy(z).setY(z.y + 1.1);
@@ -862,9 +874,36 @@ export function buildStory(scene: T.Scene, o: Opts) {
         if (dash >= 0) {
           dash += dt;
           if (dash < .3) { tmp.lerpVectors(dashFrom, dashTo, dash / .3); o.teleport(tmp.x, tmp.z, ZIP_FACE); }
-          else if (dash < .75) { if (dash - dt < .3) { sfx.zap(); sfx.thud(); story.toast('zap', 700); shake = Math.max(shake, .3); } tmp.lerpVectors(dashTo, dashFrom.clone().addScaledVector(dashFrom.clone().sub(miraAt).setY(0).normalize(), .6), T.MathUtils.smoothstep(dash, .3, .75)); o.teleport(tmp.x, tmp.z, ZIP_FACE); }
-          else dash = -1;
+          else if (domeT < 0 && kb < 0) {
+            // the dome: his nanites stream from him over her and build it from his side
+            domeT = 0; dome.position.copy(miraAt); dome.visible = true; zipFeels('determined'); sfx.chime(); sfx.whoosh();
+            domeFrom.copy(dashTo).sub(miraAt).setY(.4).normalize().multiplyScalar(1.05);
+            const zc = () => tmp2.copy(o.zip()).setY(o.zip().y + 1.1);
+            for (const [lx, ly, lz] of [[domeFrom.x, .4, domeFrom.z], [0, 1.05, 0], [-domeFrom.z, .5, domeFrom.x], [domeFrom.z, .5, -domeFrom.x]]) domeFx.stream(zc, domeAt(lx, ly, lz), 40, .55, { spread: .06, curl: .35, stagger: .25 });
+          }
         }
+        if (domeT >= 0) {
+          domeT += dt; const ss = (a: number, b: number) => T.MathUtils.smoothstep(domeT, a, b);
+          domeSkin.grow(domeFrom, domeT < .6 ? ss(0, .6) * 2.3 : -1);
+          domeSkin.tick(t, 1); domeMat.emissiveIntensity = 1 + .6 * Math.sin(t * 9) * (domeT > 1.1 ? 1 : .3);
+          if (domeT > .7 && domeT < 1.9) shake = Math.max(shake, .05 + .1 * ss(1.1, 1.8));
+          // the beam bears down; the dome cracks from the top and shatters
+          if (domeT >= 1.9) {
+            if (domeT - dt < 1.9) {
+              sfx.zap(); sfx.thud(); story.toast('zap', 700); shake = Math.max(shake, .35); kb = 0; zipFeels('afraid');
+              voiced(story.bark('warden', 'shielded', 1.8, 'warden'));
+              for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2, from = domeAt(Math.cos(a) * .9, .5, Math.sin(a) * .9), to = domeAt(Math.cos(a) * 2.2, -.2, Math.sin(a) * 2.2); domeFx.stream(from, to, 22, .8, { spread: .25, curl: .4, stagger: .2 }); }
+            }
+            domeSkin.cut(0, domeTop, ss(1.9, 2.4) * 2.4);
+            if (domeT > 2.45) { dome.visible = false; domeT = -1; domeSkin.cut(0, null, 0); }
+          }
+        }
+        if (kb >= 0) {
+          kb += dt; const k = T.MathUtils.smoothstep(kb, 0, .45);
+          tmp.lerpVectors(dashTo, dashFrom.clone().addScaledVector(dashFrom.clone().sub(miraAt).setY(0).normalize(), .6), k); o.teleport(tmp.x, tmp.z, ZIP_FACE);
+          if (kb > .45) { kb = -1; dash = -1; }
+        }
+        domeFx.tick(dt);
         // sound and the town's reaction
         if (c0 < .4 && c >= .4) { sfx.rumble(.6); const l = life(); if (l) l.alarm = ship.position; }
         if (c0 < 1.1 && c >= 1.1) story.bark('alarm', 'start', 2);
@@ -872,7 +911,6 @@ export function buildStory(scene: T.Scene, o: Opts) {
         if (c0 < 2.6 && c >= 2.6) { sfx.hum(2); shake = Math.max(shake, .12); voiced(story.bark('warden', 'start', 2.4, 'warden')); }
         if (c0 < 4.5 && c >= 4.5) { sfx.whoosh(); sfx.rumble(.7); }
         if (c0 < 5.0 && c >= 5.0) story.bark('mira_cry', 'start', 1.6);
-        if (shielded && c0 < 6.1 && c >= 6.1) voiced(story.bark('warden', 'shielded', 1.8, 'warden'));
         if (c0 < 6.7 && c >= 6.7) voiced(story.bark('warden', 'take', 1.9, 'warden'));
         if (c0 < 7.4 && c >= 7.4) { sparkFrom.copy(zH); spark.visible = true; sfx.zap(); sfx.static(); sfx.rumble(1); shake = .55; bells?.nudge(1.3); skiff.gust(1.6); sparkFx.burst(zH, 26, 2.2, HOLO.made); }
         if (c > 7.4 && c < 9.4) { const k = (c - 7.4) / 2; spark.position.lerpVectors(sparkFrom, SPARK_AT, k); spark.position.y = T.MathUtils.lerp(1.2, .6, k) + Math.sin(k * Math.PI) * 4; }
